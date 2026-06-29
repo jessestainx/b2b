@@ -507,3 +507,303 @@ html, body {
         transition-duration: 0s !important;
     }
 }
+/*
+ * ROUND 2 — Polish adicional (2026-06-29)
+ * Resolve bugs residuais detectados em nova rodada de validação Playwright:
+ * - R1 Logo touch target <48px mobile
+ * - R2 Mobile bottom nav altura excessiva
+ * - R3a PDP — related/upsell cross-sell altura uniforme
+ * - R4 Empty cart hero icon alinhado
+ * - R5 Banner B2B promo bar line-height consistente
+ * - R6 Lightbox (Fotorama) indicadores de posição
+ * - R7 Filter drawer mobile slide-in (transição)
+ */
+
+/* R1: Logo touch target min-height 48px (WCAG 2.5.5) */
+@media (max-width: 767px) {
+    .header-logo a,
+    .logo a,
+    .header .logo a,
+    .awa-site-header .logo a {
+        min-height: 48px;
+        min-width: 48px;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+    }
+    .header-logo img,
+    .logo img,
+    .header .logo img {
+        max-height: 44px;
+        width: auto;
+    }
+}
+
+/* R2: Mobile bottom nav altura consistente */
+@media (max-width: 767px) {
+    nav.fixed-bottom.mobile-bottom-nav,
+    .mobile-bottom-nav {
+        min-height: 64px;
+        max-height: 72px;
+        padding-block: 8px;
+        overflow: hidden;
+    }
+    nav.fixed-bottom.mobile-bottom-nav .mobile-bottom-link,
+    .mobile-bottom-nav .mobile-bottom-link {
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding-block: 4px;
+    }
+}
+
+/* R3: PDP cross-sell altura uniforme */
+.cart-cross-sell .product-item,
+.awa-cart-cross-sell .product-item,
+.block.crosssell .product-item {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    height: 100%;
+}
+.cart-cross-sell .product-item .product-item-info,
+.awa-cart-cross-sell .product-item .product-item-info {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    height: 100%;
+}
+
+/* R4: Empty cart hero icon alinhado */
+.awa-cart-empty__icon-wrap {
+    width: 80px;
+    height: 80px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: rgba(183, 51, 55, 0.08);
+    color: var(--awa-primary, #b73337);
+}
+.awa-cart-empty__icon-svg {
+    width: 48px;
+    height: 48px;
+}
+
+/* R5: Banner B2B promo bar line-height */
+.awa-b2b-promo-bar,
+.awa-b2b-promo-bar__text,
+.awa-b2b-promo-bar__lead,
+.awa-b2b-promo-bar__cta {
+    line-height: 1.45;
+}
+
+/* R6: Fotorama position indicators */
+.fotorama__nav__frame,
+.fotorama__thumb-border {
+    border-radius: 4px;
+}
+
+/* R7: Filter drawer mobile transição */
+.filter-content,
+.block.filter .block-content {
+    -webkit-transition: opacity 200ms ease, -webkit-transform 200ms ease;
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+@media (max-width: 767px) {
+    .block.filter.active .filter-content {
+        -webkit-transform: translateX(0);
+        -ms-transform: translateX(0);
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* R8: Newsletter form input mobile padding */
+@media (max-width: 767px) {
+    .newsletter-footer input[type="email"] {
+        font-size: 16px; /* Evita zoom do iOS */
+        min-height: 48px;
+        padding-block: 12px;
+    }
+    .newsletter-footer .action.subscribe {
+        min-height: 48px;
+        font-size: 14px;
+    }
+}
+
+/* R9: Search panel mobile full-width */
+@media (max-width: 767px) {
+    .searchsuite-autocomplete,
+    .mst-searchautocomplete__autocomplete {
+        max-width: calc(100vw - 16px);
+        left: 8px !important;
+        right: 8px !important;
+        width: auto !important;
+    }
+}
+
+/* R10: PDP tabs mobile stack */
+@media (max-width: 767px) {
+    .product.data.items {
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        border: 0;
+    }
+    .product.data.items > .item.title {
+        width: 100%;
+        border-bottom: 1px solid #e5e5e5;
+    }
+    .product.data.items > .item.title > a {
+        padding: 14px 16px;
+        min-height: 48px;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+    }
+    .product.data.items > .item.content {
+        padding: 16px;
+        border: 0;
+    }
+}
+
+/* R11: PDP sticky bar mobile safe-area */
+.pdp-sticky-bar,
+.awa-pdp-sticky {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+}
+
+/* R12: Cart summary box-shadow consistente */
+.cart-summary,
+.awa-cart-summary {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+/* R13: Footer mobile accordion chevron */
+@media (max-width: 767px) {
+    .footer-container .awa-footer-section__toggle::after {
+        content: "+";
+        margin-left: auto;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--awa-home-ink);
+    }
+    .footer-container .awa-footer-section.active .awa-footer-section__toggle::after {
+        content: "−";
+    }
+}
+
+/* R14: Page title h1 tipografia consistente */
+.page-title,
+h1.page-title,
+.category-view .page-title,
+.catalogsearch-result-index .page-title {
+    font-size: clamp(20px, 1.5vw, 28px);
+    font-weight: 700;
+    line-height: 1.25;
+    color: #1a1a1a;
+    margin-block: 12px 16px;
+}
+
+/* R15: PDP title h1 mesmo padrão */
+.product-info-main .page-title,
+.catalog-product-view h1.page-title {
+    font-size: clamp(20px, 2.4vw, 32px);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #1a1a1a;
+    margin-block: 8px 12px;
+}
+
+/*
+ * ROUND 3 — Force override (2026-06-29)
+ * Aumenta especificidade onde Round 2 não pegou
+ */
+
+/* R1-FORCE: Logo touch target 48px mobile */
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper .awa-site-header .header-logo a,
+    html body#html-body .page-wrapper .awa-site-header .logo a,
+    html body#html-body .page-wrapper header .logo a {
+        min-height: 48px !important;
+        min-width: 48px !important;
+        display: -webkit-box !important;
+        display: -ms-flexbox !important;
+        display: flex !important;
+        -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+        align-items: center !important;
+        -webkit-box-pack: center !important;
+        -ms-flex-pack: center !important;
+        justify-content: center !important;
+        padding: 2px !important;
+    }
+    html body#html-body .page-wrapper .awa-site-header .header-logo img,
+    html body#html-body .page-wrapper .awa-site-header .logo img,
+    html body#html-body .page-wrapper header .logo img {
+        max-height: 44px !important;
+        width: auto !important;
+    }
+}
+
+/* R2-FORCE: Mobile bottom nav altura consistente */
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper nav.fixed-bottom.mobile-bottom-nav,
+    html body#html-body .page-wrapper nav.fixed-bottom,
+    html body#html-body .page-wrapper .mobile-bottom-nav {
+        min-height: 64px !important;
+        max-height: 72px !important;
+        height: auto !important;
+        padding-block: 8px !important;
+        overflow: hidden !important;
+    }
+}
+
+/* R12-FORCE: Cart summary box */
+html body#html-body .page-wrapper .cart-summary,
+html body#html-body .page-wrapper .awa-cart-summary,
+html body#html-body .page-wrapper .cart-totals {
+    background: #fff !important;
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 8px !important;
+    padding: 20px !important;
+}
+
+/* R14-FORCE: page-title typography */
+html body#html-body .page-wrapper .page-title,
+html body#html-body .page-wrapper h1.page-title {
+    font-size: clamp(20px, 1.5vw, 28px) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    color: #1a1a1a !important;
+}
