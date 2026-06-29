@@ -2416,3 +2416,71 @@ html body#html-body#html-body#html-body input.input-text#search {
         transition: color 180ms ease, background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease !important;
     }
 }
+
+/*
+ * ROUND 24 — Acessibilidade: aria-required, focus indicators (2026-06-29)
+ */
+
+@layer awa-visual-priority {
+    /* Newsletter email: marcar como required (visual) */
+    html body#html-body .page-wrapper .newsletter-footer input[type="email"] {
+        border-left: 3px solid var(--awa-primary, #b73337) !important;
+    }
+    html body#html-body .page-wrapper .newsletter-footer input[type="email"]::after {
+        content: '*' !important;
+        color: var(--awa-primary, #b73337) !important;
+    }
+    html body#html-body .page-wrapper .newsletter-footer label::after {
+        content: ' *' !important;
+        color: var(--awa-primary, #b73337) !important;
+    }
+    
+    /* Focus indicator visivel em todos os elementos focaveis */
+    html body#html-body .page-wrapper *:focus-visible {
+        outline: 2.5px solid var(--awa-primary, #b73337) !important;
+        outline-offset: 2px !important;
+    }
+    
+    /* Foco mais discreto em inputs */
+    html body#html-body .page-wrapper input:focus-visible,
+    html body#html-body .page-wrapper textarea:focus-visible,
+    html body#html-body .page-wrapper select:focus-visible {
+        outline: 2.5px solid var(--awa-primary, #b73337) !important;
+        outline-offset: 1px !important;
+        border-color: var(--awa-primary, #b73337) !important;
+    }
+    
+    /* Section titles - garantir max-width legivel */
+    html body#html-body .page-wrapper .awa-section-header__title,
+    html body#html-body .page-wrapper .awa-home-section-title {
+        max-width: 70ch !important;
+    }
+    
+    /* Hero CTA - max-width para legibilidade */
+    html body#html-body .page-wrapper .awa-hero-b2b-cta {
+        max-width: 800px !important;
+    }
+    
+    /* Product card image alt + lazy loading indicator */
+    html body#html-body .page-wrapper img[loading="lazy"] {
+        background: linear-gradient(90deg, #f5f5f5 0%, #fafafa 50%, #f5f5f5 100%) !important;
+        background-size: 200% 100% !important;
+        animation: awa-skeleton 1.5s ease-in-out infinite !important;
+    }
+    @keyframes awa-skeleton {
+        0% { background-position: 100% 0; }
+        100% { background-position: -100% 0; }
+    }
+    
+    /* Form labels visiveis */
+    html body#html-body .page-wrapper label {
+        cursor: pointer !important;
+    }
+    
+    /* Hover focus consistente em cards */
+    html body#html-body .page-wrapper .item-product a:focus-visible,
+    html body#html-body .page-wrapper .product-card a:focus-visible {
+        outline: 2.5px solid var(--awa-primary, #b73337) !important;
+        outline-offset: -2px !important;
+    }
+}
