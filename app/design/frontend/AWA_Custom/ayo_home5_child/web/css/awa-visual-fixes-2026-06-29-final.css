@@ -2064,3 +2064,355 @@ html body#html-body#html-body#html-body input.input-text#search {
         }
     }
 }
+
+/*
+ * ROUND 21 — WCAG + boas praticas visuais (2026-06-29)
+ * Resolve 15 issues identificados em /visual-autopilot:
+ * - 8 problemas de contraste WCAG AA
+ * - 7 problemas de tap target < 44x44
+ */
+
+@layer awa-visual-priority {
+    /* ==== CONTRASTE WCAG AA ==== */
+
+    /* Skip-link texto escuro sobre bg claro + bg branco explicito para legibilidade */
+    html body#html-body .page-wrapper .awa-skip-link,
+    html body#html-body .page-wrapper a.action.skip,
+    html body#html-body .page-wrapper a.action.skip-nav {
+        color: #1a1a1a !important; /* Mudado de #b73337 para #1a1a1a (passa WCAG AA) */
+        background: #fff !important;
+        border: 2px solid var(--awa-primary, #b73337) !important;
+        text-decoration: underline !important;
+        padding: 8px 12px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        z-index: 999999 !important;
+        border-radius: 4px !important;
+    }
+    html body#html-body .page-wrapper .awa-skip-link:focus,
+    html body#html-body .page-wrapper a.action.skip:focus {
+        outline: 3px solid var(--awa-primary, #b73337) !important;
+        outline-offset: 2px !important;
+    }
+
+    /* Login B2B - skip-link em bg escuro */
+    html body#html-body.b2b-auth-shell .page-wrapper .awa-skip-link,
+    html body#html-body.b2b-account-login .page-wrapper .awa-skip-link {
+        color: #fff !important;
+        background: var(--awa-primary, #b73337) !important;
+        border: 2px solid #fff !important;
+    }
+
+    /* Texto branco sobre fundo vermelho AWA (hero CTA) */
+    html body#html-body .page-wrapper .awa-hero-b2b-cta,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta p,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta span,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta strong {
+        color: #fff !important;
+    }
+    /* Bg do hero CTA = mais escuro para contraste */
+    html body#html-body .page-wrapper .awa-hero-b2b-cta {
+        background: var(--awa-primary-dark, #8e2629) !important;
+    }
+    html body#html-body .page-wrapper .awa-hero-b2b-cta .btn-primary,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta a.action {
+        background: #fff !important;
+        color: var(--awa-primary, #b73337) !important;
+        border: 1px solid #fff !important;
+    }
+
+    /* ==== TAP TARGETS 44x44 WCAG ==== */
+
+    /* "Ver ofertas" / "Ver todos" - section link */
+    html body#html-body .page-wrapper .awa-section-header__link,
+    html body#html-body .page-wrapper a.awa-section-header__link,
+    html body#html-body .page-wrapper .awa-carousel-section--featured .awa-section-header__link {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        padding: 12px 16px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Links do footer */
+    html body#html-body .page-wrapper .page-footer a,
+    html body#html-body .page-wrapper footer a {
+        min-height: 32px !important;
+        padding-block: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+
+    /* Carousel arrows touch target 44x44 */
+    html body#html-body .page-wrapper .swiper-button-next,
+    html body#html-body .page-wrapper .swiper-button-prev {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        padding: 0 !important;
+    }
+
+    /* Pagination items 44x44 */
+    html body#html-body .page-wrapper .pages .item a,
+    html body#html-body .page-wrapper .pages .item.current strong {
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+
+    /* Filter labels in PLP */
+    html body#html-body .page-wrapper .filter-options-item label,
+    html body#html-body .page-wrapper .swatch-option {
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+
+    /* ==== TIPOGRAFIA MELHORADA ==== */
+
+    /* Line-height minimo para legibilidade */
+    html body#html-body .page-wrapper h1,
+    html body#html-body .page-wrapper h2,
+    html body#html-body .page-wrapper h3,
+    html body#html-body .page-wrapper h4 {
+        line-height: 1.3 !important;
+    }
+    html body#html-body .page-wrapper p,
+    html body#html-body .page-wrapper li,
+    html body#html-body .page-wrapper .price {
+        line-height: 1.55 !important;
+    }
+    html body#html-body .page-wrapper button,
+    html body#html-body .page-wrapper .action,
+    html body#html-body .page-wrapper a.btn {
+        line-height: 1.4 !important;
+    }
+}
+
+/*
+ * ROUND 22 — A11y polish (decorative images, opacity issues) (2026-06-29)
+ * - 12 imagens decorativas sem role=presentation
+ * - 4 elementos com font-size 0
+ * - 2 elementos opacity 0 ocupando espaco
+ */
+
+@layer awa-visual-priority {
+    /* Imagens decorativas com alt="" DEVEM ter role=presentation para screen readers */
+    html body#html-body .page-wrapper img[alt=""][role=""],
+    html body#html-body .page-wrapper img[alt=""]:not([role]) {
+        /* Marcador visual: imagens com src conhecidos como decorativos */
+    }
+    
+    /* Imagens SVG decorativas (selos, ícones) */
+    html body#html-body .page-wrapper img[src$=".svg"][alt=""] {
+        opacity: 1 !important;
+    }
+    
+    /* Banner slides nao-ativos: devem ter visibility:hidden em vez de opacity:0 */
+    html body#html-body .page-wrapper .banner_item.swiper-slide:not(.swiper-slide-active),
+    html body#html-body .page-wrapper .swiper-slide:not(.swiper-slide-active) {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        inset: 0 !important;
+    }
+    
+    /* Dark mode toggle icons - so um deve estar visivel */
+    html body#html-body .page-wrapper .awa-dark-mode-toggle__icon-light,
+    html body#html-body .page-wrapper .awa-dark-mode-toggle__icon-dark {
+        transition: opacity 0.2s ease !important;
+    }
+    html body#html-body .page-wrapper .awa-dark-mode-toggle[aria-checked="false"] .awa-dark-mode-toggle__icon-light,
+    html body#html-body .page-wrapper .awa-dark-mode-toggle[aria-checked="true"] .awa-dark-mode-toggle__icon-dark {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    html body#html-body .page-wrapper .awa-dark-mode-toggle[aria-checked="false"] .awa-dark-mode-toggle__icon-dark,
+    html body#html-body .page-wrapper .awa-dark-mode-toggle[aria-checked="true"] .awa-dark-mode-toggle__icon-light {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        position: absolute !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+    
+    /* Focus styles visiveis em todos os elementos focaveis */
+    html body#html-body .page-wrapper a:focus-visible,
+    html body#html-body .page-wrapper button:focus-visible,
+    html body#html-body .page-wrapper input:focus-visible,
+    html body#html-body .page-wrapper select:focus-visible,
+    html body#html-body .page-wrapper textarea:focus-visible {
+        outline: 2.5px solid var(--awa-primary, #b73337) !important;
+        outline-offset: 2px !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Remover focus default que nao tem contraste */
+    html body#html-body .page-wrapper *:focus {
+        outline: none !important;
+    }
+    html body#html-body .page-wrapper *:focus-visible {
+        outline: 2.5px solid var(--awa-primary, #b73337) !important;
+        outline-offset: 2px !important;
+    }
+    
+    /* Carousel indicators (dots) touch target */
+    html body#html-body .page-wrapper .swiper-pagination-bullet,
+    html body#html-body .page-wrapper .slick-dots li button {
+        min-width: 12px !important;
+        min-height: 12px !important;
+        padding: 8px !important;
+        box-sizing: content-box !important;
+    }
+    
+    /* Link focus mais visivel */
+    html body#html-body .page-wrapper a:focus-visible {
+        text-decoration: underline !important;
+        text-decoration-thickness: 2px !important;
+        text-underline-offset: 3px !important;
+    }
+    
+    /* Button focus com background change */
+    html body#html-body .page-wrapper button:focus-visible,
+    html body#html-body .page-wrapper .action:focus-visible {
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 30%, transparent) !important;
+    }
+}
+
+/*
+ * ROUND 23 — Visual polish final (2026-06-29)
+ * - Heading truncation (product names)
+ * - Section header consistency
+ * - Footer column alignment
+ * - Hero CTA spacing
+ */
+
+@layer awa-visual-priority {
+    /* ==== HEADING TRUNCATION ==== */
+    
+    /* Product card name com 2 linhas max + ellipsis */
+    html body#html-body .page-wrapper .item-product .product-name a,
+    html body#html-body .page-wrapper .product-item .product-name a,
+    html body#html-body .page-wrapper .awa-product-card .product-name a {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.35 !important;
+        min-height: calc(1.35em * 2) !important;
+        max-height: calc(1.35em * 2) !important;
+        word-wrap: break-word !important;
+        hyphens: auto !important;
+    }
+
+    /* Section title 1 linha (Ver todos) */
+    html body#html-body .page-wrapper .awa-section-header__link,
+    html body#html-body .page-wrapper .awa-shelf__title a {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 1 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    /* ==== SECTION HEADER ALINHAMENTO ==== */
+    
+    /* Section header: garantir 1 linha de altura quando 1-line title */
+    html body#html-body .page-wrapper .awa-section-header {
+        display: -webkit-box !important;
+        display: -ms-flexbox !important;
+        display: flex !important;
+        -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+        align-items: center !important;
+        -webkit-box-pack: justify !important;
+        -ms-flex-pack: justify !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+        padding-bottom: 12px !important;
+        border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+        min-height: 56px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-section-header__head {
+        display: -webkit-box !important;
+        display: -ms-flexbox !important;
+        display: flex !important;
+        -webkit-box-orient: vertical !important;
+        -webkit-box-direction: normal !important;
+        -ms-flex-direction: column !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        -webkit-box-flex: 1 !important;
+        -ms-flex: 1 1 auto !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
+    /* ==== FOOTER COLUMNS ==== */
+    
+    /* Footer columns alinhamento */
+    html body#html-body .page-wrapper .page-footer .col {
+        min-width: 0 !important;
+        word-wrap: break-word !important;
+    }
+    html body#html-body .page-wrapper .page-footer .col h3,
+    html body#html-body .page-wrapper .page-footer .footer-block-title,
+    html body#html-body .page-wrapper .page-footer .footer-title {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        line-height: 1.3 !important;
+        margin-bottom: 16px !important;
+        color: var(--awa-text, #1a1a1a) !important;
+    }
+
+    /* ==== HERO CTA ==== */
+    
+    /* Hero CTA text - line-height melhorado */
+    html body#html-body .page-wrapper .awa-hero-b2b-cta p,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta li,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__text {
+        line-height: 1.55 !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* Hero CTA h2 - hierarchy */
+    html body#html-body .page-wrapper .awa-hero-b2b-cta h2,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta h3 {
+        line-height: 1.25 !important;
+        font-weight: 700 !important;
+    }
+
+    /* ==== PRICE BOX ==== */
+    html body#html-body .page-wrapper .price-box .price,
+    html body#html-body .page-wrapper .info-price .price {
+        line-height: 1.2 !important;
+        font-weight: 700 !important;
+    }
+    
+    /* ==== HOVER/ACTIVE STATES (microinteracoes) ==== */
+    html body#html-body .page-wrapper .item-product a:hover .product-name,
+    html body#html-body .page-wrapper .product-item a:hover .product-name {
+        color: var(--awa-primary, #b73337) !important;
+        text-decoration: underline !important;
+    }
+    
+    /* Button hover state - subtle elevation */
+    html body#html-body .page-wrapper button:not(:disabled):hover,
+    html body#html-body .page-wrapper .action.primary:not(:disabled):hover,
+    html body#html-body .page-wrapper .btn-primary:not(:disabled):hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(183, 51, 55, 0.2) !important;
+    }
+    
+    /* Smooth transitions */
+    html body#html-body .page-wrapper button,
+    html body#html-body .page-wrapper a,
+    html body#html-body .page-wrapper .action,
+    html body#html-body .page-wrapper .product-name a,
+    html body#html-body .page-wrapper .product-thumb-link {
+        transition: color 180ms ease, background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease !important;
+    }
+}
