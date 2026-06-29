@@ -2484,3 +2484,141 @@ html body#html-body#html-body#html-body input.input-text#search {
         outline-offset: -2px !important;
     }
 }
+
+/*
+ * ROUND 25 — Form autocomplete + polish final (2026-06-29)
+ */
+
+@layer awa-visual-priority {
+    /* Form newsletter - autocomplete on (email) */
+    html body#html-body .page-wrapper form.newsletter,
+    html body#html-body .page-wrapper .newsletter-footer form {
+        autocomplete: on !important;
+    }
+    html body#html-body .page-wrapper input[name="email"],
+    html body#html-body .page-wrapper .newsletter-footer input[type="email"] {
+        autocomplete: email !important;
+    }
+    
+    /* Form login - autocomplete credentials */
+    html body#html-body.b2b-auth-shell form#b2b-login-form input[name="login[username]"] {
+        autocomplete: username !important;
+    }
+    html body#html-body.b2b-auth-shell form#b2b-login-form input[name="login[password]"] {
+        autocomplete: current-password !important;
+    }
+    
+    /* Form contato - autocomplete */
+    html body#html-body.contact-index-index #contact-form input[name="name"] {
+        autocomplete: name !important;
+    }
+    html body#html-body.contact-index-index #contact-form input[name="email"] {
+        autocomplete: email !important;
+    }
+    html body#html-body.contact-index-index #contact-form input[name="telephone"] {
+        autocomplete: tel !important;
+    }
+    
+    /* Search input - autocomplete off (search-specific) */
+    html body#html-body .page-wrapper input#search {
+        autocomplete: off !important;
+        role: searchbox !important;
+        aria-label: "Buscar produtos" !important;
+    }
+    
+    /* Uppercase text: adicionar letter-spacing para legibilidade */
+    html body#html-body .page-wrapper [style*="text-transform: uppercase"],
+    html body#html-body .page-wrapper .awa-section-header__label,
+    html body#html-body .page-wrapper .awa-promo-bar__text,
+    html body#html-body .page-wrapper .awa-footer-pay-sec__label,
+    html body#html-body .page-wrapper .awa-newsletter-title,
+    html body#html-body .page-wrapper .awa-b2b-promo-bar__cta,
+    html body#html-body .page-wrapper .b2b-btn-entrar {
+        letter-spacing: 0.05em !important;
+    }
+    
+    /* Texto em uppercase em H1/H2 deve ter mais letter-spacing */
+    html body#html-body .page-wrapper h1[style*="text-transform: uppercase"],
+    html body#html-body .page-wrapper h2[style*="text-transform: uppercase"],
+    html body#html-body .page-wrapper h3[style*="text-transform: uppercase"] {
+        letter-spacing: 0.08em !important;
+    }
+    
+    /* Buttons - transitions consistentes */
+    html body#html-body .page-wrapper button,
+    html body#html-body .page-wrapper .action,
+    html body#html-body .page-wrapper .btn,
+    html body#html-body .page-wrapper .tocart {
+        transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease !important;
+    }
+    
+    /* Acessibilidade: aria-current em breadcrumb */
+    html body#html-body .page-wrapper .breadcrumbs a[href] {
+        text-decoration: none !important;
+    }
+    html body#html-body .page-wrapper .breadcrumbs li:last-child > a,
+    html body#html-body .page-wrapper .breadcrumbs li:last-child > span {
+        color: var(--awa-text, #1a1a1a) !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Skip-link mais visivel quando focado */
+    html body#html-body .page-wrapper .awa-skip-link:focus,
+    html body#html-body .page-wrapper a.action.skip:focus,
+    html body#html-body .page-wrapper a.action.skip-nav:focus {
+        left: 8px !important;
+        top: 8px !important;
+        z-index: 999999 !important;
+        width: auto !important;
+        height: auto !important;
+        clip: auto !important;
+        clip-path: none !important;
+        outline: 3px solid var(--awa-primary, #b73337) !important;
+        outline-offset: 2px !important;
+    }
+    
+    /* Empty state melhor alinhamento */
+    html body#html-body .page-wrapper .awa-cart-empty,
+    html body#html-body .page-wrapper .awa-search-empty {
+        max-width: 600px !important;
+        margin-inline: auto !important;
+        padding: 48px 24px !important;
+        text-align: center !important;
+    }
+    
+    /* Hero CTA buttons com mais peso visual */
+    html body#html-body .page-wrapper .awa-hero-b2b-cta .btn,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta a.action {
+        font-weight: 700 !important;
+        text-transform: none !important;
+    }
+    
+    /* Touch target enhancement para icones pequenos */
+    html body#html-body .page-wrapper .minicart-wrapper .action.showcart,
+    html body#html-body .page-wrapper .minicart-wrapper a.showcart {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    /* Footer links hover state */
+    html body#html-body .page-wrapper .page-footer a:hover {
+        color: var(--awa-primary, #b73337) !important;
+        text-decoration: underline !important;
+        text-underline-offset: 3px !important;
+    }
+    
+    /* Section header hover (melhorar discoverability) */
+    html body#html-body .page-wrapper .awa-section-header__link:hover {
+        background: rgba(183, 51, 55, 0.08) !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Sticky header smooth transition */
+    html body#html-body .page-wrapper .awa-header-sticky,
+    html body#html-body .page-wrapper .header-wrapper-sticky {
+        transition: transform 0.3s ease, opacity 0.3s ease !important;
+    }
+}
