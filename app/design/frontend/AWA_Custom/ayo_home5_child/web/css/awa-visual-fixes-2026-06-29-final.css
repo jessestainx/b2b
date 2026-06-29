@@ -807,3 +807,759 @@ html body#html-body .page-wrapper h1.page-title {
     line-height: 1.25 !important;
     color: #1a1a1a !important;
 }
+
+/*
+ * ROUND 4 — Refinamento de densidade (2026-06-29)
+ * Resolve bugs identificados em auditoria Playwright:
+ * - S1 Search input desktop 36px → 44px (WCAG)
+ * - S2 Section gaps inconsistentes no mobile (250px, 697px)
+ * - S3 CTA padding 0 → padrão 12px 24px
+ * - S4 Header desktop altura consistente
+ * - S5 Footer padding mobile
+ * - S6 Touch targets uniformidade
+ * - S7 Empty state hero typography
+ * - S8 Account dashboard typography
+ */
+
+/* S1: Search input min-height 44px */
+html body#html-body #search_mini_form input#search,
+html body#html-body .block-search input#search,
+html body#html-body input.input-text {
+    min-height: 44px !important;
+    line-height: 1.4 !important;
+}
+html body#html-body .awa-header-search-col form.minisearch {
+    min-height: 44px !important;
+}
+html body#html-body .block-search .actions button.action.search,
+html body#html-body .block-search .actions .action.search,
+html body#html-body .awa-search-action-wrapper .action.search {
+    min-height: 44px !important;
+    min-width: 44px !important;
+}
+
+/* S2: Section gaps mobile normalizados */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-home-section,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content {
+        margin-block: 16px !important;
+        padding-block: 24px !important;
+    }
+    /* Promo bar deve ter altura fixa */
+    html body#html-body.cms-index-index .awa-b2b-promo-bar,
+    html body#html-body .awa-b2b-promo-bar {
+        max-height: 44px !important;
+        min-height: 36px !important;
+        overflow: hidden !important;
+    }
+    /* Hero mobile: max-height restrito */
+    html body#html-body.cms-index-index .awa-hero-swiper,
+    html body#html-body.cms-index-index .hero-section {
+        max-height: 360px !important;
+    }
+    html body#html-body.cms-index-index .awa-hero-swiper .swiper-slide,
+    html body#html-body.cms-index-index .hero-section .hero-slide {
+        max-height: 360px !important;
+    }
+}
+
+/* S3: CTA buttons padding consistente */
+html body#html-body .page-wrapper .action.primary,
+html body#html-body .page-wrapper button[type="submit"].action.primary,
+html body#html-body .page-wrapper .awa-cta-primary,
+html body#html-body .page-wrapper .btn-primary {
+    padding: 12px 24px !important;
+    line-height: 1.4 !important;
+    min-height: 44px !important;
+    display: -webkit-inline-box !important;
+    display: -ms-inline-flexbox !important;
+    display: inline-flex !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
+    align-items: center !important;
+    -webkit-box-pack: center !important;
+    -ms-flex-pack: center !important;
+    justify-content: center !important;
+}
+
+/* S4: Header desktop altura consistente */
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar {
+        max-height: 40px !important;
+        min-height: 36px !important;
+    }
+    html body#html-body .page-wrapper .awa-site-header .awa-main-header {
+        max-height: 72px !important;
+        min-height: 64px !important;
+    }
+    html body#html-body .page-wrapper .awa-site-header .awa-nav-bar {
+        max-height: 48px !important;
+        min-height: 44px !important;
+    }
+}
+
+/* S5: Footer mobile padding */
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper footer.page-footer,
+    html body#html-body .page-wrapper .page-footer {
+        padding-block: 24px !important;
+    }
+    html body#html-body .page-wrapper footer.page-footer .footer-container,
+    html body#html-body .page-wrapper .page-footer .footer-container {
+        padding-block: 16px 0 !important;
+    }
+}
+
+/* S6: Touch targets uniformidade em toda loja */
+html body#html-body a.awa-cart-link,
+html body#html-body a.awa-account-link,
+html body#html-body .header .links a,
+html body#html-body .header .top-links a,
+html body#html-body .header .top-bar a {
+    min-height: 44px !important;
+    padding-block: 12px !important;
+    display: -webkit-inline-box !important;
+    display: -ms-inline-flexbox !important;
+    display: inline-flex !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
+    align-items: center !important;
+}
+
+/* S7: Empty state hero typography */
+html body#html-body .awa-cart-empty__title,
+html body#html-body .awa-search-empty__title {
+    font-size: clamp(22px, 4vw, 32px) !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    color: var(--awa-text, #1a1a1a) !important;
+    margin-block: 0 12px !important;
+}
+html body#html-body .awa-cart-empty__subtitle,
+html body#html-body .awa-search-empty__desc {
+    font-size: clamp(15px, 2vw, 17px) !important;
+    line-height: 1.55 !important;
+    color: var(--awa-text-muted, #666) !important;
+    margin-block: 0 24px !important;
+}
+
+/* S8: Account dashboard typography (paginas B2B) */
+html body#html-body.account .page-title,
+html body#html-body.customer-account .page-title {
+    font-size: clamp(20px, 3vw, 28px) !important;
+    font-weight: 700 !important;
+    margin-block: 12px 24px !important;
+}
+
+/* S9: PLP sidebar filtros desktop largura */
+@media (min-width: 992px) {
+    html body#html-body.catalog-category-view .block.filter {
+        max-width: 280px !important;
+        padding: 16px !important;
+        background: var(--awa-bg, #fff) !important;
+        border: 1px solid var(--awa-border, #e5e5e5) !important;
+        border-radius: var(--awa-radius-md, 8px) !important;
+    }
+}
+
+/* S10: Inputs/textarea consistency */
+html body#html-body input.input-text,
+html body#html-body input[type="email"],
+html body#html-body input[type="password"],
+html body#html-body input[type="text"],
+html body#html-body textarea {
+    min-height: 44px !important;
+    padding: 10px 12px !important;
+    border-radius: var(--awa-radius-sm, 4px) !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+}
+html body#html-body input.input-text:focus,
+html body#html-body input[type="email"]:focus,
+html body#html-body input[type="password"]:focus,
+html body#html-body input[type="text"]:focus,
+html body#html-body textarea:focus {
+    border-color: var(--awa-primary, #b73337) !important;
+    outline: 2px solid color-mix(in srgb, var(--awa-primary, #b73337) 20%, transparent) !important;
+    outline-offset: 1px !important;
+}
+
+/* S11: Modal/popup typography */
+html body#html-body .modal-popup .modal-title,
+html body#html-body .modals-popup .modal-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: var(--awa-text, #1a1a1a) !important;
+}
+
+/* S12: Lists spacing consistency */
+html body#html-body ul.breadcrumbs,
+html body#html-body .breadcrumbs ul.items {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+html body#html-body .breadcrumbs li {
+    display: -webkit-inline-box !important;
+    display: -ms-inline-flexbox !important;
+    display: inline-flex !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+}
+
+/* S13: Header logo desktop harmonização */
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper .awa-site-header .header-logo,
+    html body#html-body .page-wrapper .awa-site-header .logo {
+        max-width: 200px !important;
+        min-height: 56px !important;
+        display: -webkit-box !important;
+        display: -ms-flexbox !important;
+        display: flex !important;
+        -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+        align-items: center !important;
+    }
+}
+
+/* S14: Section padding padronizado */
+html body#html-body .awa-home-section,
+html body#html-body .top-home-content,
+html body#html-body .ayo-home5-section {
+    padding-block: clamp(32px, 4vw, 56px) !important;
+    padding-inline: var(--awa-home-pad, 16px) !important;
+}
+
+/*
+ * ROUND 5 — Refinamento de gaps (2026-06-29)
+ * Resolve gaps excessivos identificados em auditoria Playwright:
+ * - G1 Section gap 250px entre category-carousel e pricing-notice
+ * - G2 Section gap 697px entre última section e footer
+ * - G3 Pricing-notice altura excessiva (250px no mobile)
+ * - G4 Hero CTA section 415px no mobile (deveria ser 280-320)
+ * - G5 Footer altura 1319px no mobile (deveria ser <800px)
+ * - G6 Niche shelves altura consistente
+ */
+
+/* G1+G3: Reduzir gap entre sections no mobile */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .top-home-content--above-fold,
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta {
+        margin-block-end: 12px !important;
+        padding-block: 16px 12px !important;
+    }
+    html body#html-body.cms-index-index .page-wrapper .top-home-content--category-carousel,
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice,
+    html body#html-body.cms-index-index .page-wrapper .awa-carousel-section--featured,
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners,
+    html body#html-body.cms-index-index .page-wrapper .awa-grid-section--featured,
+    html body#html-body.cms-index-index .page-wrapper .awa-home-niche-shelves {
+        margin-block: 16px !important;
+        padding-block: 24px 24px !important;
+    }
+    /* Pricing notice compactado */
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice {
+        min-height: 0 !important;
+        padding: 12px 16px !important;
+    }
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__inner {
+        gap: 12px !important;
+        padding: 14px !important;
+    }
+}
+
+/* G2+G5: Footer mobile compactado */
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper footer.page-footer,
+    html body#html-body .page-wrapper .page-footer {
+        padding-block: 16px !important;
+    }
+    html body#html-body .page-wrapper .page-footer .footer-container,
+    html body#html-body .page-wrapper .page-footer .awa-footer-newsletter {
+        padding-block: 12px !important;
+        margin-block: 0 !important;
+    }
+    html body#html-body .page-wrapper .page-footer .footer-bottom,
+    html body#html-body .page-wrapper .page-footer .awa-footer-categories-expand,
+    html body#html-body .page-wrapper .page-footer .awa-footer-pay-sec {
+        padding-block: 12px !important;
+        margin-block: 0 !important;
+    }
+    html body#html-body .page-wrapper .page-footer .footer-bottom,
+    html body#html-body .page-wrapper .page-footer .awa-footer-copyright__disclaimer {
+        margin-top: 8px !important;
+    }
+}
+
+/* G4: Hero CTA section compactado no mobile */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta {
+        max-height: 320px !important;
+        min-height: 280px !important;
+        padding-block: 16px !important;
+    }
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta .awa-hero-cta {
+        margin-top: 8px !important;
+    }
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta .awa-hero-cta .btn {
+        min-height: 40px !important;
+        padding: 8px 14px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* G6: Niche shelves altura consistente */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-home-niche-shelves .niche-tabs,
+    html body#html-body.cms-index-index .page-wrapper .awa-home-niche-shelves .niche-shelves-content {
+        min-height: 0 !important;
+        max-height: 480px !important;
+    }
+}
+
+/* G7: Product promo banners compactado mobile */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners {
+        padding-block: 12px !important;
+        margin-block: 12px !important;
+    }
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners__item {
+        height: 100px !important;
+        max-height: 100px !important;
+    }
+}
+
+/* G8: Newsletter footer compactado */
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper .page-footer .awa-footer-newsletter {
+        padding-block: 12px 16px !important;
+    }
+    html body#html-body .page-wrapper .page-footer .awa-newsletter-info {
+        gap: 8px !important;
+    }
+    html body#html-body .page-wrapper .page-footer .awa-newsletter-title {
+        font-size: 16px !important;
+    }
+    html body#html-body .page-wrapper .page-footer .awa-newsletter-desc {
+        font-size: 13px !important;
+        line-height: 1.45 !important;
+    }
+}
+
+/* G9: Bestseller section compactado mobile */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-carousel-section--featured {
+        padding-block: 16px !important;
+        min-height: 0 !important;
+    }
+    html body#html-body.cms-index-index .page-wrapper .awa-carousel-section--featured .awa-section-header {
+        margin-bottom: 12px !important;
+        padding-bottom: 8px !important;
+    }
+}
+
+/* G10: Lançamentos section compactado */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-grid-section--featured {
+        padding-block: 16px !important;
+        min-height: 0 !important;
+    }
+}
+
+/* G11: Section title typography consistente */
+html body#html-body .awa-section-header__title,
+html body#html-body .awa-home-section-title,
+html body#html-body .awa-section-title {
+    font-size: clamp(18px, 4vw, 26px) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em !important;
+    color: var(--awa-text, #1a1a1a) !important;
+    margin: 0 !important;
+}
+html body#html-body .awa-section-header__subtitle,
+html body#html-body .awa-section-subtitle {
+    font-size: clamp(13px, 2.5vw, 15px) !important;
+    color: var(--awa-text-muted, #666) !important;
+    margin: 4px 0 0 !important;
+    line-height: 1.5 !important;
+}
+html body#html-body .awa-section-header__label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: var(--awa-primary, #b73337) !important;
+    margin-bottom: 4px !important;
+}
+
+/*
+ * ROUND 6 — Section header layout fix (2026-06-29)
+ * Resolve section headers com altura 79-172px inconsistentes
+ */
+
+/* Section header layout horizontal compacto */
+html body#html-body .page-wrapper .awa-section-header {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
+    align-items: center !important;
+    -webkit-box-pack: justify !important;
+    -ms-flex-pack: justify !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+    min-height: 56px !important;
+    max-height: 80px !important;
+}
+html body#html-body .page-wrapper .awa-section-header__head,
+html body#html-body .page-wrapper .awa-section-header__title-wrap {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-box-direction: normal !important;
+    -ms-flex-direction: column !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    -webkit-box-flex: 1 !important;
+    -ms-flex: 1 1 auto !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+html body#html-body .page-wrapper .awa-section-header__label {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    color: var(--awa-primary, #b73337) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+}
+html body#html-body .page-wrapper .awa-section-header__title {
+    font-size: clamp(18px, 4vw, 24px) !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    font-weight: 700 !important;
+    color: var(--awa-text, #1a1a1a) !important;
+    text-wrap: balance !important;
+}
+html body#html-body .page-wrapper .awa-section-header__link {
+    display: -webkit-inline-box !important;
+    display: -ms-inline-flexbox !important;
+    display: inline-flex !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--awa-primary, #b73337) !important;
+    white-space: nowrap !important;
+    padding: 8px 12px !important;
+    min-height: 32px !important;
+    border-radius: 4px !important;
+    -webkit-transition: background-color 0.18s ease !important;
+    -o-transition: background-color 0.18s ease !important;
+    transition: background-color 0.18s ease !important;
+    text-decoration: none !important;
+}
+html body#html-body .page-wrapper .awa-section-header__link:hover {
+    background: rgba(183, 51, 55, 0.08) !important;
+    color: var(--awa-primary, #b73337) !important;
+    text-decoration: none !important;
+}
+html body#html-body .page-wrapper .awa-section-header__subtitle {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    color: var(--awa-text-muted, #666) !important;
+    margin-top: 2px !important;
+}
+
+/*
+ * ROUND 7 — Refinamento gaps restantes (2026-06-29)
+ */
+
+/* Search desktop - remover padding que comprimia */
+@media (min-width: 992px) {
+    html body#html-body .awa-header-search-col input#search,
+    html body#html-body .awa-header-search-col input.input-text {
+        min-height: 44px !important;
+        padding: 8px 16px !important;
+    }
+    html body#html-body .awa-header-search-col form.minisearch {
+        min-height: 44px !important;
+    }
+}
+
+/* Pricing-notice gap reduzido */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice {
+        margin-block: 0 !important;
+        padding-block: 8px !important;
+    }
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__inner {
+        padding: 12px !important;
+    }
+}
+
+/* Gap entre última section e footer */
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-home-niche-shelves {
+        margin-block-end: 8px !important;
+        padding-block-end: 16px !important;
+    }
+    html body#html-body .page-wrapper footer.page-footer,
+    html body#html-body .page-wrapper .page-footer {
+        margin-top: 0 !important;
+    }
+}
+@media (min-width: 992px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-home-niche-shelves {
+        margin-block-end: 16px !important;
+        padding-block-end: 32px !important;
+    }
+}
+
+/* Footer desktop compactado */
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper footer.page-footer,
+    html body#html-body .page-wrapper .page-footer {
+        margin-top: 16px !important;
+    }
+    html body#html-body .page-wrapper .page-footer .footer-container {
+        padding-block: 24px !important;
+    }
+}
+
+/* Header desktop height */
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper .awa-site-header .header-content,
+    html body#html-body .page-wrapper #header.header-container {
+        max-height: 160px !important;
+    }
+}
+
+/*
+ * ROUND 8 — Force search input height (2026-06-29)
+ * Variáveis --awa-input-height e --awa-control-height definem 36px
+ * precisamos de 44px para WCAG touch target
+ */
+
+html body#html-body #search,
+html body#html-body input#search,
+html body#html-body input.input-text {
+    min-height: 44px !important;
+    -webkit-box-sizing: border-box !important;
+    box-sizing: border-box !important;
+}
+@media (min-width: 992px) {
+    html body#html-body .awa-header-search-col input#search,
+    html body#html-body .awa-header-search-col input.input-text,
+    html body#html-body #header .awa-header-search-col input#search {
+        min-height: 44px !important;
+        height: 44px !important;
+    }
+}
+
+/*
+ * ROUND 9 — Override final search height (2026-06-29)
+ * Variáveis --awa-input-height e --awa-control-height retornam string vazia
+ * mas o min-height resolve para 36px via fallback @layer
+ * Forçar height absoluto de 44px
+ */
+
+html body#html-body input#search,
+html body#html-body input.input-text#search {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    line-height: 1.4 !important;
+}
+@media (min-width: 992px) {
+    html body#html-body .awa-header-search-col input#search,
+    html body#html-body .awa-header-search-col .input-text#search {
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+    }
+}
+
+/*
+ * ROUND 10 — Override search com mesmo nível especificidade (2026-06-29)
+ * body .page-wrapper .block-search .search-content .field.search input#search
+ * é o seletor que está ganhando (5 classes + tag + id = 0,1,6,1)
+ */
+
+body .page-wrapper .block-search .search-content .field.search input#search,
+body .page-wrapper .awa-site-header .awa-header-search-col input#search,
+body .page-wrapper .awa-site-header .awa-professional-search input.input-text,
+body .page-wrapper .block-search input.input-text#search {
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+}
+
+/*
+ * ROUND 11 — Override via variáveis CSS (2026-06-29)
+ * Variáveis --awa-input-height e --awa-control-height estão em @layer
+ * mas @layer pode ser sobrescrita se declararmos as variáveis em :root
+ */
+
+:root,
+html,
+body {
+    --awa-input-height: 44px !important;
+    --awa-control-height: 44px !important;
+}
+html body#html-body #search,
+html body#html-body input#search {
+    min-height: 44px !important;
+    height: 44px !important;
+}
+/* Re-define vars in scope */
+@media (min-width: 992px) {
+    html body#html-body {
+        --awa-input-height: 44px;
+        --awa-control-height: 44px;
+    }
+}
+
+/*
+ * ROUND 12 — Override selector ultra-específico (2026-06-29)
+ * Super global usa: html body#html-body#html-body#html-body .page-wrapper ... input#search
+ * Precisamos igualar/ultrapassar especificidade
+ */
+
+html body#html-body#html-body#html-body .page-wrapper .awa-site-header:not(.awa-header-condensed) .awa-header-search-col form#search_mini_form input#search,
+html body#html-body#html-body#html-body .page-wrapper .awa-site-header:not(.awa-header-condensed) .awa-header-search-col form#search_mini_form input.input-text,
+html body#html-body#html-body .page-wrapper .awa-header-search-col input#search,
+html body#html-body#html-body#html-body .block-search input#search,
+html body#html-body#html-body#html-body input.input-text#search {
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 56px !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    -webkit-box-sizing: border-box !important;
+    box-sizing: border-box !important;
+}
+
+@layer awa-fixes, awa-visual-priority;
+@layer awa-visual-priority {
+/* Re-declarar como @layer superior com !important */
+@layer awa-fixes, awa-visual-priority;
+@layer awa-visual-priority {
+    /* Search input 44px override */
+    html body#html-body input#search,
+    html body#html-body .page-wrapper input.input-text#search,
+    html body#html-body .page-wrapper .awa-header-search-col input#search {
+        min-height: 44px !important;
+        height: 44px !important;
+        max-height: 44px !important;
+        padding: 8px 16px !important;
+        font-size: 14px !important;
+        box-sizing: border-box !important;
+    }
+}
+}
+
+/* Override section headers dentro do @layer awa-visual-priority */
+@layer awa-visual-priority {
+    html body#html-body .page-wrapper .awa-section-header {
+        display: -webkit-box !important;
+        display: -ms-flexbox !important;
+        display: flex !important;
+        -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+        align-items: center !important;
+        -webkit-box-pack: justify !important;
+        -ms-flex-pack: justify !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+        padding-bottom: 12px !important;
+        border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+        min-height: 56px !important;
+        max-height: 80px !important;
+    }
+    html body#html-body .page-wrapper .awa-section-header__title {
+        font-size: clamp(18px, 4vw, 24px) !important;
+        line-height: 1.2 !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+    html body#html-body .page-wrapper .awa-section-header__label {
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+        color: var(--awa-primary, #b73337) !important;
+        margin: 0 !important;
+    }
+    html body#html-body .page-wrapper .awa-section-header__link {
+        display: -webkit-inline-box !important;
+        display: -ms-inline-flexbox !important;
+        display: inline-flex !important;
+        -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+        align-items: center !important;
+        padding: 8px 12px !important;
+        min-height: 32px !important;
+        border-radius: 4px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: var(--awa-primary, #b73337) !important;
+        white-space: nowrap !important;
+    }
+
+    /* Footer mobile compactado */
+    @media (max-width: 767px) {
+        html body#html-body .page-wrapper footer.page-footer,
+        html body#html-body .page-wrapper .page-footer {
+            padding-block: 16px !important;
+        }
+        html body#html-body .page-wrapper .page-footer .footer-container,
+        html body#html-body .page-wrapper .page-footer .awa-footer-newsletter,
+        html body#html-body .page-wrapper .page-footer .awa-footer-bottom__row {
+            padding-block: 12px !important;
+            margin-block: 0 !important;
+        }
+        html body#html-body .page-wrapper .page-footer .awa-newsletter-title {
+            font-size: 18px !important;
+        }
+        html body#html-body .page-wrapper .page-footer .awa-newsletter-desc {
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+        }
+    }
+
+    /* Section gaps mobile controlados */
+    @media (max-width: 767px) {
+        html body#html-body.cms-index-index .page-wrapper .top-home-content--above-fold,
+        html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta {
+            margin-block-end: 12px !important;
+            padding-block: 16px 12px !important;
+        }
+        html body#html-body.cms-index-index .page-wrapper .awa-home-section,
+        html body#html-body.cms-index-index .page-wrapper .top-home-content {
+            margin-block: 16px !important;
+            padding-block: 24px !important;
+        }
+        html body#html-body.cms-index-index .awa-hero-swiper,
+        html body#html-body.cms-index-index .hero-section {
+            max-height: 360px !important;
+        }
+    }
+}
