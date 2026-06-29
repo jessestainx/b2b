@@ -54,7 +54,7 @@ jobs:
           import os, sys, re
 
           event = os.environ.get("GITHUB_EVENT_NAME", "")
-          allow_prod = os.environ.get("DISPATCH_ALLOW_PROD", "false").lower() == "true"
+          allow_prod = os.environ.get("DISPATCH_ALLOW_PROD", "false").lower() == "true" or event in ("push", "schedule")
 
           # Resolve URL por evento
           if event == "workflow_dispatch":
