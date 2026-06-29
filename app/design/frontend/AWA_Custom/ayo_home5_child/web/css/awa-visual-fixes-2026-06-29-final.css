@@ -1913,3 +1913,115 @@ html body#html-body#html-body#html-body input.input-text#search {
         line-height: 1.4 !important;
     }
 }
+
+/*
+ * ROUND 18 — Mobile bottom nav fixed bottom (2026-06-29)
+ * Bug: nav.fixed-bottom.mobile-bottom-nav estava position:static no mobile
+ * Causa: minhas regras Round 2 sobrescreviam height mas perdiam position:fixed
+ * Fix: forcar position:fixed com !important no @layer awa-visual-priority
+ */
+
+@layer awa-visual-priority {
+    @media (max-width: 991px) {
+        html body#html-body .page-wrapper nav.fixed-bottom.mobile-bottom-nav,
+        html body#html-body .page-wrapper nav.fixed-bottom,
+        html body#html-body .page-wrapper .mobile-bottom-nav {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 999 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            min-height: 64px !important;
+            max-height: 72px !important;
+            height: auto !important;
+            padding-block: 8px !important;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+            background: #fff !important;
+            border-top: 1px solid var(--awa-border, #e5e5e5) !important;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08) !important;
+            overflow: hidden !important;
+        }
+        /* Page padding to compensate fixed nav */
+        html body#html-body .page-wrapper {
+            padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+        }
+    }
+}
+
+/*
+ * ROUND 19 — Back to top + mobile polish (2026-06-29)
+ */
+
+@layer awa-visual-priority {
+    /* Back to top button fixed em mobile */
+    @media (max-width: 991px) {
+        html body#html-body .page-wrapper .awa-back-to-top,
+        html body#html-body .page-wrapper [class*="back-to-top"] {
+            position: fixed !important;
+            bottom: 90px !important;
+            right: 16px !important;
+            z-index: 998 !important;
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
+            border-radius: 50% !important;
+            background: var(--awa-primary, #b73337) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(183, 51, 55, 0.3) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+    }
+
+    /* Dark mode toggle posicionamento consistente */
+    html body#html-body .page-wrapper .awa-dark-mode-toggle {
+        min-width: 36px !important;
+        min-height: 36px !important;
+        padding: 6px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* WhatsApp FAB posicionamento consistente em mobile */
+    @media (max-width: 767px) {
+        html body#html-body .page-wrapper .awa-whatsapp-fab {
+            bottom: 90px !important;
+            right: 16px !important;
+            z-index: 997 !important;
+            width: 52px !important;
+            height: 52px !important;
+        }
+    }
+
+    /* Mobile bottom nav icon buttons 44px touch target */
+    html body#html-body .page-wrapper nav.fixed-bottom.mobile-bottom-nav .mobile-bottom-link a,
+    html body#html-body .page-wrapper nav.fixed-bottom.mobile-bottom-nav .mobile-bottom-link button {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 4px 2px !important;
+        flex: 1 !important;
+    }
+    
+    /* Section header refinements (line-height 1.4) */
+    html body#html-body .page-wrapper .awa-section-header {
+        flex-wrap: wrap !important;
+        gap: 8px 16px !important;
+    }
+    
+    /* Section link "Ver todos" alinhado verticalmente */
+    html body#html-body .page-wrapper .awa-section-header__link {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        white-space: nowrap !important;
+    }
+}
