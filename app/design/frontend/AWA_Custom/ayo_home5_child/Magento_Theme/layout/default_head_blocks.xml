@@ -12,6 +12,12 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <!--
+            Viewport: sobrescreve o meta do tema pai adicionando viewport-fit=cover.
+            Necessário para que env(safe-area-inset-*) funcione corretamente em iPhones
+            com notch/Dynamic Island. Magento deduplica meta por nome.
+        -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+        <!--
             Grid unificado legado removido: o source of truth atual é o pipeline
             LESS (_grid-system.less + bundles AWA). Manter este CSS causa conflito
             de layout na PDP.
@@ -69,6 +75,7 @@
         <remove src="css/font-awesome.min.css"/>
         <remove src="css/icomoon.css"/>
         <remove src="css/simple-line-icons.css"/>
+        <!-- owl.carousel.css removido: carrosséis AWA usam Swiper/scroll-snap, não Owl. -->
         <remove src="css/owl.carousel.css"/>
 
         <remove src="css/awa-grid-unified.css"/>
@@ -88,8 +95,6 @@
             o browser descarrega o mesmo URL duas vezes (blocking + async).
         -->
         <remove src="css/themes.css"/>
-
-        <!-- Mantém owl.carousel.css do tema pai para restaurar carrosséis padrão Ayo. -->
 
         <!--
             animation_theme.css (94KB) — CSS de animações puras, seguro para async.
@@ -129,6 +134,26 @@
             Agora carregam DEPOIS do super-global via PHTML, garantindo que "canonical" e
             "fixed" realmente ganhem (cascata correta). Ver awa-head-preload.phtml.
         -->
+        <!--
+            Patch CSS unificado (2026-06-29): corrige 17 bugs visuais/estruturais
+            identificados na auditoria (home, PLP, PDP, busca, login, carrinho).
+            - C1 Home mobile carousel overflow
+            - C2 Home desktop bestseller overflow
+            - C3 Hero mobile density
+            - C4/M4 PLP/PDP card heights
+            - C5 PLP breadcrumb spacing
+            - M1 sections bg consistency
+            - M2 PLP toolbar
+            - M3 PDP gallery placeholder
+            - M5 search empty state
+            - M6 login B2B mobile
+            - M7 cart empty state
+            + 5 minor fixes (focus, a11y, z-index, button height)
+            Carregado aqui (XML head) como último recurso. Os bundles AWA existentes
+            já estão resolvidos via _extend.less/head.additional; este CSS patch
+            carrega POR ÚLTIMO na cascata do head.
+        -->
+        <css src="css/awa-visual-fixes-2026-06-29-final.min.css"/>
     </head>
     <body>
         <referenceBlock name="head.additional">
