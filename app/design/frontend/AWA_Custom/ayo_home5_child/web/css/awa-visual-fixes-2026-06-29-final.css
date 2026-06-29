@@ -2848,3 +2848,127 @@ html body#html-body#html-body#html-body input.input-text#search {
         margin-bottom: 16px !important;
     }
 }
+
+/*
+ * ROUND 28 — Spacing/Density final polish (2026-06-29)
+ */
+
+@layer awa-visual-priority {
+    /* Section spacing consistente cross-page */
+    html body#html-body .page-wrapper .awa-home-section,
+    html body#html-body .page-wrapper .top-home-content,
+    html body#html-body .page-wrapper section.awa-home-section {
+        padding-block: clamp(32px, 4vw, 56px) !important;
+    }
+    
+    /* Sticky header shadow refined */
+    html body#html-body .page-wrapper .header-wrapper-sticky.awa-is-sticky,
+    html body#html-body .page-wrapper .header-wrapper-sticky.is-sticky {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+        backdrop-filter: saturate(1.6) blur(16px) !important;
+        -webkit-backdrop-filter: saturate(1.6) blur(16px) !important;
+    }
+    
+    /* Newsletter form (footer) - layout melhorado */
+    html body#html-body .page-wrapper .newsletter-footer form,
+    html body#html-body .page-wrapper .awa-newsletter form {
+        max-width: 480px !important;
+        margin: 0 auto !important;
+    }
+    html body#html-body .page-wrapper .newsletter-footer .action.subscribe,
+    html body#html-body .page-wrapper .awa-newsletter button {
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+    }
+    
+    /* Account dashboard - section padding consistente */
+    html body#html-body.customer-account .page-wrapper .block-dashboard-info,
+    html body#html-body.customer-account .page-wrapper .block-dashboard-addresses,
+    html body#html-body.customer-account .page-wrapper .block-dashboard-orders {
+        padding: 20px !important;
+        background: var(--awa-bg, #fff) !important;
+        border: 1px solid var(--awa-border, #e5e5e5) !important;
+        border-radius: var(--awa-radius-md, 8px) !important;
+        margin-bottom: 16px !important;
+    }
+    
+    /* Cart page - cart item border */
+    html body#html-body.checkout-cart-index .page-wrapper .cart.item {
+        padding: 16px !important;
+        border: 1px solid var(--awa-border, #e5e5e5) !important;
+        border-radius: var(--awa-radius-md, 8px) !important;
+        margin-bottom: 12px !important;
+    }
+    
+    /* Section headers - typography alignment */
+    html body#html-body .page-wrapper .awa-section-header {
+        margin-bottom: clamp(16px, 2.5vw, 24px) !important;
+    }
+    
+    /* Buttons - mais espaco entre icone e texto */
+    html body#html-body .page-wrapper button > svg + span,
+    html body#html-body .page-wrapper .action > svg + span,
+    html body#html-body .page-wrapper a > svg + span {
+        margin-left: 8px !important;
+    }
+    
+    /* Carousel - suavizar transicao entre slides */
+    html body#html-body .page-wrapper .swiper-slide {
+        transition: opacity 0.4s ease, transform 0.4s ease !important;
+    }
+    
+    /* Hero CTA - mais "respiro" entre texto e botao */
+    html body#html-body .page-wrapper .awa-hero-b2b-cta p + a.action,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta p + .btn {
+        margin-top: 20px !important;
+    }
+    
+    /* Form input - mais espaco entre label e input */
+    html body#html-body .page-wrapper .field > .label + .control,
+    html body#html-body .page-wrapper label + input,
+    html body#html-body .page-wrapper label + select,
+    html body#html-body .page-wrapper label + textarea {
+        margin-top: 8px !important;
+    }
+    
+    /* Back to top animation */
+    html body#html-body .page-wrapper .awa-back-to-top {
+        transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.2s ease !important;
+    }
+    html body#html-body .page-wrapper .awa-back-to-top:hover {
+        transform: translateY(-2px) !important;
+        background: var(--awa-primary-hover, #8e2629) !important;
+    }
+    
+    /* Newsletter form mobile */
+    @media (max-width: 767px) {
+        html body#html-body .page-wrapper .newsletter-footer form {
+            flex-direction: column !important;
+            gap: 12px !important;
+        }
+        html body#html-body .page-wrapper .newsletter-footer input[type="email"] {
+            width: 100% !important;
+        }
+    }
+    
+    /* Section header title - hierarchy visual */
+    html body#html-body .page-wrapper .awa-section-header__title {
+        font-weight: 700 !important;
+        letter-spacing: -0.01em !important;
+    }
+    
+    /* Cart link 'Continuar comprando' - mais visivel */
+    html body#html-body.checkout-cart-index .page-wrapper a.action.continue {
+        background: transparent !important;
+        color: var(--awa-primary, #b73337) !important;
+        border: 2px solid var(--awa-primary, #b73337) !important;
+        padding: 12px 24px !important;
+        min-height: 48px !important;
+        font-weight: 600 !important;
+    }
+    html body#html-body.checkout-cart-index .page-wrapper a.action.continue:hover {
+        background: var(--awa-primary, #b73337) !important;
+        color: #fff !important;
+    }
+}
