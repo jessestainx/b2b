@@ -1,0 +1,37 @@
+<?php
+declare(strict_types=1);
+/**
+ * AWA - H1 visível para páginas institucionais
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$request = \Magento\Framework\App\ObjectManager::getInstance()
+    ->get(\Magento\Framework\App\RequestInterface::class);
+$fullAction = $request->getFullActionName();
+$pageTitle = null;
+$pageHeading = null;
+
+// Tentar pegar título da página CMS
+if ($fullAction === 'cms_page_view') {
+    $page = $block->getLayout()->getBlock('cms_page');
+    if ($page && method_exists($page, 'getPage')) {
+        $cmsPage = $page->getPage();
+        if ($cmsPage && method_exists($cmsPage, 'getTitle')) {
+            $pageTitle = $cmsPage->getTitle();
+        }
+    }
+}
+
+// Fallback para action conhecida
+$titles = [
+    'contact_index_index' => 'Fale Conosco',
+];
+if (!$pageTitle && isset($titles[$fullAction])) {
+    $pageTitle = $titles[$fullAction];
+}
+
+if (empty($pageTitle)) {
+    return;
+}
+?>
+<h1 class="awa-institutional-h1"><?= $block->escapeHtml($pageTitle) ?></h1>

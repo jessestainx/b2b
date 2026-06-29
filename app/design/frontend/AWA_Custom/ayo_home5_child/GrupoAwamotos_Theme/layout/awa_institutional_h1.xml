@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+    AWA - Adiciona H1 visivel para paginas institucionais (contato, CMS pages)
+    Onde page.main.title nao e renderizado
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.institutional.h1"
+                   template="GrupoAwamotos_Theme::html/awa-institutional-h1.phtml"
+                   before="-"/>
+        </referenceContainer>
+    </body>
+</page>

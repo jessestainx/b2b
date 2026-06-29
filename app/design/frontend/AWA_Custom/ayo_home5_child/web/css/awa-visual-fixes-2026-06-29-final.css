@@ -1563,3 +1563,223 @@ html body#html-body#html-body#html-body input.input-text#search {
         }
     }
 }
+
+/*
+ * ROUND 13 — Header mobile grid fix (2026-06-29)
+ * Bug: grid-template-rows declarado com 5 rows (44 44 0 0 44) gera altura 152px
+ * Esperado: 116px (44+8+44+4+padding)
+ */
+
+@layer awa-visual-priority {
+    @media (max-width: 767px) {
+        html body#html-body .page-wrapper .awa-main-header__inner {
+            grid-template-rows: auto auto auto !important;
+            min-height: 64px !important;
+            max-height: 132px !important;
+            padding: 8px 12px !important;
+        }
+        html body#html-body .page-wrapper .awa-header-primary-row {
+            min-height: 44px !important;
+            max-height: 48px !important;
+        }
+        html body#html-body .page-wrapper .awa-main-header {
+            min-height: 0 !important;
+            max-height: 140px !important;
+        }
+        /* Header-content wrapper max */
+        html body#html-body .page-wrapper #header .header-content,
+        html body#html-body .page-wrapper .header-content {
+            min-height: 0 !important;
+            max-height: 200px !important;
+        }
+    }
+    
+    @media (min-width: 992px) {
+        html body#html-body .page-wrapper .awa-main-header__inner {
+            min-height: 64px !important;
+            max-height: 80px !important;
+        }
+        html body#html-body .page-wrapper .awa-main-header {
+            min-height: 64px !important;
+            max-height: 80px !important;
+        }
+    }
+}
+
+/* Override grid mobile via @layer com mesma especificidade */
+@layer awa-visual-priority {
+    @media (max-width: 767px) {
+        html body#html-body .page-wrapper .awa-main-header__inner.wp-header,
+        html body#html-body .page-wrapper .awa-main-header__inner[data-awa-header-row] {
+            grid-template-areas: "primary" "search" "actions" !important;
+            grid-template-rows: 44px 44px auto !important;
+            grid-template-columns: minmax(0,1fr) !important;
+            min-height: 0 !important;
+            max-height: 108px !important;
+            height: auto !important;
+            padding: 4px 12px 0 !important;
+            gap: 4px 8px !important;
+        }
+    }
+}
+
+/* Override super específico com @layer superior */
+@layer awa-visual-priority {
+    @media (max-width: 767px) {
+        html body#html-body .page-wrapper #header.header-container .awa-main-header__inner.wp-header,
+        html body#html-body .page-wrapper #header.header-container .awa-main-header__inner[data-awa-header-row],
+        html body#html-body .page-wrapper #header.header-container .awa-main-header .awa-main-header-inner-wrap .awa-main-header__inner,
+        html body#html-body .page-wrapper .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner,
+        html body#html-body .page-wrapper .header.awa-main-header-inner-wrap .awa-main-header__inner.wp-header,
+        html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode=default] .awa-main-header__inner.wp-header,
+        html body#html-body .page-wrapper .awa-site-header .header-wrapper-sticky .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner {
+            grid-template-rows: 44px 44px !important;
+            grid-template-columns: 44px minmax(0,1fr) 44px !important;
+            grid-template-areas: "toggle brand cart" "search search search" !important;
+            min-height: 96px !important;
+            max-height: 108px !important;
+            height: 96px !important;
+            padding: 4px 12px !important;
+            gap: 4px 8px !important;
+            row-gap: 4px !important;
+            overflow: hidden !important;
+        }
+        html body#html-body .page-wrapper .awa-header-primary-row {
+            min-height: 44px !important;
+            max-height: 44px !important;
+        }
+    }
+    @media (min-width: 992px) {
+        html body#html-body .page-wrapper #header.header-container .awa-main-header__inner.wp-header,
+        html body#html-body .page-wrapper #header.header-container .awa-main-header__inner[data-awa-header-row] {
+            grid-template-rows: 56px !important;
+            grid-template-areas: "brand search actions" !important;
+            grid-template-columns: clamp(112px,14vw,148px) minmax(0,1fr) minmax(220px,max-content) !important;
+            min-height: 56px !important;
+            max-height: 64px !important;
+            height: 56px !important;
+        }
+    }
+}
+
+/* Override com 5 IDs encadeados para vencer regras inline de 3-4 IDs */
+@layer awa-visual-priority {
+    @media (max-width: 767px) {
+        html body#html-body#html-body#html-body#html-body .page-wrapper .awa-main-header .awa-main-header-inner-wrap .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper #header.header-container .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner {
+            grid-template-rows: 44px 44px !important;
+            grid-template-columns: 44px minmax(0,1fr) 44px !important;
+            grid-template-areas: "toggle brand cart" "search search search" !important;
+            min-height: 96px !important;
+            max-height: 108px !important;
+            height: 96px !important;
+            padding: 4px 12px !important;
+            row-gap: 4px !important;
+            overflow: hidden !important;
+        }
+    }
+    @media (min-width: 992px) {
+        html body#html-body#html-body#html-body#html-body .page-wrapper .awa-main-header .awa-main-header-inner-wrap .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper #header.header-container .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner {
+            grid-template-rows: 56px !important;
+            grid-template-areas: "brand search actions" !important;
+            grid-template-columns: clamp(112px,14vw,148px) minmax(0,1fr) minmax(220px,max-content) !important;
+            min-height: 56px !important;
+            max-height: 64px !important;
+            height: 56px !important;
+            padding: 0 16px !important;
+        }
+    }
+}
+
+/* Override FINAL com grid-template shorthand e specificity absoluta */
+@layer awa-visual-priority {
+    @media (max-width: 767px) {
+        html body#html-body#html-body#html-body#html-body .page-wrapper .awa-main-header .awa-main-header-inner-wrap .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper #header.header-container .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode=default] .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .header-wrapper-sticky .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner {
+            grid-template: "toggle brand cart" 44px "search search search" 44px / 44px minmax(0px, 1fr) 44px !important;
+            grid-template-rows: 44px 44px !important;
+            grid-template-columns: 44px minmax(0px, 1fr) 44px !important;
+            grid-template-areas: "toggle brand cart" "search search search" !important;
+            height: 96px !important;
+            min-height: 96px !important;
+            max-height: 108px !important;
+            padding: 4px 12px !important;
+            row-gap: 4px !important;
+            overflow: hidden !important;
+        }
+    }
+    @media (min-width: 992px) {
+        html body#html-body#html-body#html-body#html-body .page-wrapper .awa-main-header .awa-main-header-inner-wrap .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper #header.header-container .awa-main-header__inner,
+        html body#html-body#html-body#html-body#html-body .page-wrapper .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner {
+            grid-template: "brand search actions" 56px / clamp(112px, 14vw, 148px) minmax(0px, 1fr) minmax(220px, max-content) !important;
+            height: 56px !important;
+            min-height: 56px !important;
+            max-height: 64px !important;
+        }
+    }
+}
+
+/*
+ * ROUND 14 — Login links color consistency (2026-06-29)
+ * Links em rgb(37, 99, 235) destoam do vermelho AWA #b73337
+ */
+
+@layer awa-visual-priority {
+    /* Skip link - mantém azul para a11y visibility */
+    html body#html-body .page-wrapper .awa-skip-link {
+        color: #2563eb !important;
+        background: #fff !important;
+    }
+    /* Login page links */
+    html body#html-body.b2b-auth-shell .b2b-login-card a,
+    html body#html-body.b2b-auth-shell .b2b-auth-back-link,
+    html body#html-body.b2b-auth-shell .b2b-login-forgot__link,
+    html body#html-body.b2b-account-login .b2b-login-card a,
+    html body#html-body.b2b-account-login .b2b-auth-back-link,
+    html body#html-body.b2b-account-login .b2b-login-forgot__link {
+        color: var(--awa-primary, #b73337) !important;
+        text-decoration: underline !important;
+        text-underline-offset: 3px !important;
+        transition: color 180ms ease !important;
+    }
+    html body#html-body.b2b-auth-shell .b2b-login-card a:hover,
+    html body#html-body.b2b-auth-shell .b2b-auth-back-link:hover,
+    html body#html-body.b2b-auth-shell .b2b-login-forgot__link:hover,
+    html body#html-body.b2b-account-login .b2b-login-card a:hover,
+    html body#html-body.b2b-account-login .b2b-auth-back-link:hover,
+    html body#html-body.b2b-account-login .b2b-login-forgot__link:hover {
+        color: var(--awa-primary-hover, #8e2629) !important;
+    }
+    /* Logo SVG fill: preservar mas se tiver text azul mudar */
+    html body#html-body.b2b-auth-shell img[src*=".svg"],
+    html body#html-body.b2b-account-login img[src*=".svg"] {
+        color: inherit !important;
+    }
+}
+
+/*
+ * ROUND 15 — Footer CNPJ badge color consistency (2026-06-29)
+ * Badge com rgb(146, 64, 14) destoa da paleta AWA vermelha
+ */
+
+@layer awa-visual-priority {
+    html body#html-body .page-wrapper .awa-footer-cnpj-badge,
+    html body#html-body .page-wrapper .awa-footer-cnpj-badge__text,
+    html body#html-body .page-wrapper .awa-footer-cnpj-badge__icon,
+    html body#html-body .page-wrapper .footer-bottom .awa-footer-cnpj-badge,
+    html body#html-body .page-wrapper footer.page-footer .awa-footer-cnpj-badge {
+        color: var(--awa-text, #333) !important;
+        background: rgba(183, 51, 55, 0.06) !important;
+        border: 1px solid rgba(183, 51, 55, 0.18) !important;
+    }
+    html body#html-body .page-wrapper .awa-footer-cnpj-badge__icon {
+        color: var(--awa-primary, #b73337) !important;
+    }
+}
