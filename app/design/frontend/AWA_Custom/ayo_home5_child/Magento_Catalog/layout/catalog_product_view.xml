@@ -50,10 +50,52 @@
         </referenceContainer>
 
         <!--
+            SPRINT 2 (2026-06-28): Bloco CEP / Shipping Estimator acima do add-to-cart.
+            Renderiza campo CEP + botao Calcular que faz AJAX para /awa/cep/estimate.
+            Posicionado apos product.info.price, antes de product.info.addtocart,
+            seguindo o padrao awa.product.info.compatibility.
+        -->
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View"
+                   name="awa.product.info.cep.estimator"
+                   template="Magento_Catalog::product/view/awa-pdp-cep-estimator.phtml"
+                   after="awa.product.info.compatibility"
+                   before="product.info.addtocart"/>
+        </referenceContainer>
+
+        <!--
             BUG-07: Carrega os CSS de conversão/polish de forma não-bloqueante.
             Os arquivos são servidos com media="print" onload="this.media='all'" para
             não bloquear o render. Lidos pelo browser antes do DOMContentLoaded.
         -->
+
+        <!--
+            R17-RESTAURATION: Breadcrumbs PDP renderizados server-side via template customizado.
+            Substitui widget JS que dependia do menu vertical (Rokanthemes_Themeoption).
+            Usa GrupoAwamotos\Theme\ViewModel\ProductStructuredData para gerar path.
+            Posicionado após page.main.title para hierarquia visual correta.
+        -->
+        <referenceBlock name="breadcrumbs">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">Magento_Catalog::product/breadcrumbs.phtml</argument>
+            </action>
+            <arguments>
+                <argument name="breadcrumb_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceContainer name="page.main">
+            <block class="Magento\Theme\Block\Html\Breadcrumbs"
+                   name="breadcrumbs.pdp"
+                   template="Magento_Catalog::product/breadcrumbs.phtml"
+                   as="breadcrumbs_pdp"
+                   before="-">
+                <arguments>
+                    <argument name="breadcrumb_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.pdp.conversion.async.css"
