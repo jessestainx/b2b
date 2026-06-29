@@ -1,0 +1,149 @@
+<?php
+/**
+ * GrupoAwamotos SchemaEnhancer - PDP enhanced JSON-LD
+ *
+ * Adiciona schemas que faltam no PDP (Sprint 4 SEO):
+ * - hasMerchantReturnPolicy (obrigatorio Google 2024)
+ * - shippingDetails (Local Shipping Optimization)
+ * - AggregateRating reviewCount (corrigir warning)
+ * - Organization (complemento do Product)
+ * - HowTo (opcional, quando aplicavel)
+ */
+declare(strict_types=1);
+
+/** @var \Magento\Catalog\Block\Product\View $block */
+$_product = $block->getProduct();
+if (!$_product || !$_product->getId()) {
+    return;
+}
+$_productId = (int) $_product->getId();
+$_sku = (string) $_product->getSku();
+$_name = (string) $_product->getName();
+$_price = (float) $_product->getFinalPrice();
+$_image = (string) $_product->getImage() ?: '';
+$_description = (string) ($_product->getShortDescription() ?: $_product->getDescription() ?: '');
+$_isInStock = $_product->isAvailable();
+$_brandName = '';
+try {
+    $_brandName = (string) ($_product->getAttributeText('manufacturer') ?: $_product->getAttributeText('marca') ?: '');
+} catch (\Throwable $e) {
+    // ignore
+}
+$_gtin = '';
+try {
+    $_gtin = (string) ($_product->getData('ean') ?: $_product->getData('gtin') ?: '');
+} catch (\Throwable $e) {
+    // ignore
+}
+
+$_url = (string) $_product->getProductUrl();
+$_currency = 'BRL';
+
+// Review (do Magento_Review nativo)
+$_ratingValue = 4.7; // fallback
+$_reviewCount = 0;
+try {
+    $_ratingValue = (float) ($_product->getRatingSummary()->getRatingSummary()->getSum() / max($_product->getRatingSummary()->getRatingSummary()->getCount(), 1));
+    $_reviewCount = (int) $_product->getRatingSummary()->getReviewsCount();
+} catch (\Throwable $e) {
+    // ignore
+}
+
+$_productSchema = [
+    '@context' => 'https://schema.org/',
+    '@type' => 'Product',
+    'name' => $_name,
+    'sku' => $_sku,
+    'description' => mb_substr($_description, 0, 1000),
+    'image' => $_image ? [$_image] : [],
+    'url' => $_url,
+    'brand' => [
+        '@type' => 'Brand',
+        'name' => $_brandName ?: 'AWA Motos',
+    ],
+    'manufacturer' => [
+        '@type' => 'Organization',
+        'name' => $_brandName ?: 'AWA Motos',
+    ],
+];
+
+// GTIN/EAN se existir
+if ($_gtin) {
+    $_productSchema['gtin13'] = $_gtin;
+}
+
+// MPN se existir
+$_mpn = (string) ($_product->getData('mpn') ?: $_product->getData('codigo_original') ?: '');
+if ($_mpn) {
+    $_productSchema['mpn'] = $_mpn;
+}
+
+// AggregateRating (corrige o warning de reviewCount)
+if ($_reviewCount > 0) {
+    $_productSchema['aggregateRating'] = [
+        '@type' => 'AggregateRating',
+        'ratingValue' => $_ratingValue,
+        'reviewCount' => $_reviewCount,
+        'bestRating' => 5,
+        'worstRating' => 1,
+    ];
+}
+
+// Offer com return policy + shipping (Sprint 4 SEO - critico!)
+$_productSchema['offers'] = [
+    '@type' => 'Offer',
+    'url' => $_url,
+    'priceCurrency' => $_currency,
+    'price' => number_format($_price, 2, '.', ''),
+    'priceValidUntil' => date('Y-12-31', strtotime('+1 year')),
+    'itemCondition' => 'https://schema.org/NewCondition',
+    'availability' => $_isInStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    'seller' => [
+        '@type' => 'Organization',
+        'name' => 'Grupo Awamotos',
+    ],
+    // Google 2024: obrigatorio para rich results
+    'hasMerchantReturnPolicy' => [
+        '@type' => 'MerchantReturnPolicy',
+        'merchantReturnDays' => 7,
+        'returnMethod' => 'https://schema.org/ReturnByMail',
+        'returnFees' => 'https://schema.org/FreeReturn',
+        'merchantReturnLink' => 'https://awamotos.com/trocas-e-devolucoes',
+        'category' => 'https://schema.org/MerchantReturnNotPermitted',
+        'description' => 'Garantia legal de 90 dias para defeitos. Trocas por arrependimento em 7 dias (CDC).',
+    ],
+    // LSO (Local Shipping Optimization)
+    'shippingDetails' => [
+        '@type' => 'OfferShippingDetails',
+        'shippingDestination' => [
+            '@type' => 'DefinedRegion',
+            'addressCountry' => 'BR',
+            'addressRegion' => ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'],
+        ],
+        'deliveryTime' => [
+            '@type' => 'ShippingDeliveryTime',
+            'handlingTime' => [
+                '@type' => 'QuantitativeValue',
+                'minValue' => 1,
+                'maxValue' => 2,
+                'unitCode' => 'DAY',
+            ],
+            'transitTime' => [
+                '@type' => 'QuantitativeValue',
+                'minValue' => 2,
+                'maxValue' => 12,
+                'unitCode' => 'DAY',
+            ],
+        ],
+        'shippingRate' => [
+            '@type' => 'MonetaryAmount',
+            'value' => '0.00',
+            'currency' => 'BRL',
+        ],
+    ],
+];
+
+$_schemaJson = json_encode($_productSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+?>
+<script type="application/ld+json"><?= /* @noEscape */ $_schemaJson ?></script>
+<?php
