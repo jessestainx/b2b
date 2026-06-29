@@ -2622,3 +2622,229 @@ html body#html-body#html-body#html-body input.input-text#search {
         transition: transform 0.3s ease, opacity 0.3s ease !important;
     }
 }
+
+/*
+ * ROUND 26 — Hover states + color consistency (2026-06-29)
+ * - Vermelho escuro #8e2629 deve aparecer em hover (não aparece atualmente)
+ * - CTAs devem ter transicao smooth em hover
+ * - Links devem ter text-decoration consistente
+ */
+
+@layer awa-visual-priority {
+    /* Primary CTA hover: branco sobre vermelho escuro */
+    html body#html-body .page-wrapper .action.primary:hover,
+    html body#html-body .page-wrapper button.tocart:hover,
+    html body#html-body .page-wrapper .btn-primary:hover,
+    html body#html-body .page-wrapper a.action.primary:hover {
+        background: var(--awa-primary-hover, #8e2629) !important;
+        border-color: var(--awa-primary-hover, #8e2629) !important;
+        color: #fff !important;
+    }
+    
+    /* Secondary button hover */
+    html body#html-body .page-wrapper .action.secondary:hover,
+    html body#html-body .page-wrapper button.secondary:hover {
+        background: rgba(183, 51, 55, 0.08) !important;
+        color: var(--awa-primary, #b73337) !important;
+    }
+    
+    /* Link default underline consistente */
+    html body#html-body .page-wrapper a:not(.action):not(.btn):not(.logo):not(.product-thumb-link) {
+        text-decoration-thickness: 1px !important;
+        text-underline-offset: 2px !important;
+    }
+    /* Remove underline em links com imagem (imagem e o conteudo principal) */
+    html body#html-body .page-wrapper a:has(> img:only-child) {
+        text-decoration: none !important;
+    }
+    
+    /* Card hover: elevation sutil */
+    html body#html-body .page-wrapper .item-product:hover,
+    html body#html-body .page-wrapper .product-item:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* Search button hover */
+    html body#html-body .page-wrapper .block-search button.action.search:hover,
+    html body#html-body .page-wrapper .action.search:hover {
+        background: var(--awa-primary-hover, #8e2629) !important;
+    }
+    
+    /* Footer link hover - underline + color */
+    html body#html-body .page-wrapper .page-footer a:hover,
+    html body#html-body .page-wrapper footer a:hover {
+        color: var(--awa-primary, #b73337) !important;
+        text-decoration: underline !important;
+        text-underline-offset: 3px !important;
+        text-decoration-thickness: 1.5px !important;
+    }
+    
+    /* Mobile bottom-nav icon hover */
+    @media (max-width: 991px) {
+        html body#html-body .page-wrapper nav.fixed-bottom.mobile-bottom-nav a:hover,
+        html body#html-body .page-wrapper nav.fixed-bottom.mobile-bottom-nav button:hover {
+            color: var(--awa-primary, #b73337) !important;
+        }
+    }
+    
+    /* Minicart count badge - pulse animation quando update */
+    @keyframes awa-cart-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    html body#html-body .page-wrapper .minicart-wrapper .counter.qty.updated,
+    html body#html-body .page-wrapper .minicart-wrapper .counter.qty.show-updated {
+        animation: awa-cart-pulse 0.4s ease !important;
+    }
+    
+    /* Loading state visual - spinner CSS */
+    @keyframes awa-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    html body#html-body .page-wrapper [data-loading="true"]::before,
+    html body#html-body .page-wrapper .awa-loading::before {
+        content: "" !important;
+        display: inline-block !important;
+        width: 16px !important;
+        height: 16px !important;
+        border: 2px solid rgba(183, 51, 55, 0.2) !important;
+        border-top-color: var(--awa-primary, #b73337) !important;
+        border-radius: 50% !important;
+        animation: awa-spin 0.6s linear infinite !important;
+        margin-right: 8px !important;
+        vertical-align: middle !important;
+    }
+    
+    /* Hover em imagens de produto - leve zoom */
+    html body#html-body .page-wrapper .item-product .product-thumb:hover img,
+    html body#html-body .page-wrapper .product-card .product-thumb:hover img {
+        transform: scale(1.05) !important;
+    }
+    html body#html-body .page-wrapper .item-product .product-thumb img,
+    html body#html-body .page-wrapper .product-card .product-thumb img {
+        transition: transform 0.3s ease !important;
+    }
+}
+
+/*
+ * ROUND 27 — PDP polish (related products, gallery, sticky) (2026-06-29)
+ */
+
+@layer awa-visual-priority {
+    /* PDP - Related products section melhorada */
+    html body#html-body.catalog-product-view .page-wrapper .awa-pdp-related {
+        margin-top: clamp(32px, 4vw, 56px) !important;
+        padding-top: clamp(24px, 3vw, 40px) !important;
+        border-top: 1px solid var(--awa-border, #e5e5e5) !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .awa-pdp-related__title {
+        font-size: clamp(18px, 2.4vw, 24px) !important;
+        font-weight: 700 !important;
+        margin-bottom: 24px !important;
+        line-height: 1.3 !important;
+    }
+    
+    /* PDP Gallery - placeholder enquanto carrega */
+    html body#html-body.catalog-product-view .page-wrapper .fotorama__stage,
+    html body#html-body.catalog-product-view .page-wrapper .gallery-placeholder {
+        background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 50%, #fafafa 100%) !important;
+        background-size: 200% 200% !important;
+        animation: awa-gallery-skeleton 2s ease infinite !important;
+    }
+    @keyframes awa-gallery-skeleton {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    /* Add to cart button - focus + active states */
+    html body#html-body.catalog-product-view .page-wrapper button#product-addtocart-button:focus-visible,
+    html body#html-body.catalog-product-view .page-wrapper button#product-addtocart-button:focus {
+        outline: 3px solid var(--awa-primary, #b73337) !important;
+        outline-offset: 2px !important;
+        box-shadow: 0 0 0 5px rgba(183, 51, 55, 0.2) !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper button#product-addtocart-button:active {
+        transform: scale(0.98) !important;
+    }
+    
+    /* PDP - price box destaquem */
+    html body#html-body.catalog-product-view .page-wrapper .price-box .price,
+    html body#html-body.catalog-product-view .page-wrapper .info-price .price {
+        color: var(--awa-primary, #b73337) !important;
+        font-size: clamp(24px, 3vw, 32px) !important;
+        font-weight: 800 !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* WhatsApp CTA on PDP - destaquem */
+    html body#html-body.catalog-product-view .page-wrapper a[href*="wa.me"] {
+        background: #25d366 !important;
+        color: #fff !important;
+        border-radius: var(--awa-radius-md, 8px) !important;
+        padding: 12px 20px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
+        transition: background-color 0.2s ease, transform 0.2s ease !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper a[href*="wa.me"]:hover {
+        background: #1da851 !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Cart page - melhor layout */
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary {
+        position: sticky !important;
+        top: 16px !important;
+    }
+    
+    /* PLP loading state (AjaxSuite) */
+    html body#html-body.catalog-category-view .page-wrapper .toolbar.toolbar-products.is-loading,
+    html body#html-body.catalog-category-view .page-wrapper .products-grid.is-loading {
+        opacity: 0.6 !important;
+        pointer-events: none !important;
+        position: relative !important;
+    }
+    html body#html-body.catalog-category-view .page-wrapper .products-grid.is-loading::after {
+        content: "" !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 32px !important;
+        height: 32px !important;
+        margin: -16px 0 0 -16px !important;
+        border: 3px solid rgba(183, 51, 55, 0.2) !important;
+        border-top-color: var(--awa-primary, #b73337) !important;
+        border-radius: 50% !important;
+        animation: awa-spin 0.6s linear infinite !important;
+        z-index: 10 !important;
+    }
+    
+    /* Search highlight (em resultados) */
+    html body#html-body .page-wrapper mark,
+    html body#html-body .page-wrapper .highlight {
+        background: rgba(183, 51, 55, 0.12) !important;
+        color: var(--awa-primary, #b73337) !important;
+        padding: 0 2px !important;
+        border-radius: 2px !important;
+    }
+    
+    /* 404 page - improve error state */
+    html body#html-body.cms-noroute-index .page-wrapper .page-not-found,
+    html body#html-body.cms-noroute-index .page-wrapper .awa-404-page {
+        text-align: center !important;
+        padding: 80px 24px !important;
+    }
+    html body#html-body.cms-noroute-index .page-wrapper .awa-404-page h1 {
+        font-size: clamp(48px, 8vw, 96px) !important;
+        font-weight: 800 !important;
+        color: var(--awa-primary, #b73337) !important;
+        line-height: 1.1 !important;
+        margin-bottom: 16px !important;
+    }
+}
