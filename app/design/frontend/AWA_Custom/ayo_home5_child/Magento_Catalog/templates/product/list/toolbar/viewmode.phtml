@@ -34,7 +34,7 @@ $modesLabelId = 'modes-label-' . $toolbarSlot;
                data-role="mode-switcher"
                data-value="<?= $block->escapeHtmlAttr(strtolower((string) $_code)) ?>"
                id="<?= $block->escapeHtmlAttr($modeId) ?>"
-               aria-labelledby="<?= $block->escapeHtmlAttr($modesLabelId . ' ' . $modeId) ?>">
+               aria-labelledby="<?= $block->escapeHtmlAttr($modesLabelId) ?> <?= $block->escapeHtmlAttr($modeId) ?>">
                 <span><?= $block->escapeHtml((string) $_label) ?></span>
             </a>
         <?php endif; ?>

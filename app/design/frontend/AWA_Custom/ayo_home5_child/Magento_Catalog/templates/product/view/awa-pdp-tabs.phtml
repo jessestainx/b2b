@@ -26,14 +26,9 @@ $sectionTitle = __('Descrição');
 // 1. Descrição completa
 if (trim(strip_tags((string) $description)) !== '') {
     $content = $description;
-// 2. Descrição curta
-} elseif (trim(strip_tags((string) $shortDescription)) !== '') {
-    $content = $shortDescription;
-// 3. Fallback: montar resumo com atributos do produto
+// short_description já aparece em product.info.overview (coluna mídia) — evitar duplicata
+// 2. Fallback: montar resumo com atributos do produto
 } else {
-    $name = $block->escapeHtml($_product->getName());
-    $sku  = $block->escapeHtml($_product->getSku());
-
     $attrs = [];
     foreach (['marca_moto', 'modelo_moto', 'ano_moto', 'material', 'cor'] as $code) {
         try {
@@ -49,18 +44,15 @@ if (trim(strip_tags((string) $description)) !== '') {
         }
     }
 
-    if (!empty($attrs) || $name) {
+    if (!empty($attrs)) {
         $sectionTitle = __('Sobre este produto');
-        $lines = ['<p><strong>' . $name . '</strong></p>'];
-        if ($sku) {
-            $lines[] = '<p>Código do produto: <strong>' . $sku . '</strong></p>';
-        }
+        $lines = [];
         $labelMap = [
-            'marca_moto'  => 'Marca',
-            'modelo_moto' => 'Modelo',
-            'ano_moto'    => 'Ano',
-            'material'    => 'Material',
-            'cor'         => 'Cor',
+            'marca_moto'  => (string) __('Marca'),
+            'modelo_moto' => (string) __('Modelo'),
+            'ano_moto'    => (string) __('Ano'),
+            'material'    => (string) __('Material'),
+            'cor'         => (string) __('Cor'),
         ];
         foreach ($attrs as $code => $val) {
             $label = $labelMap[$code] ?? $code;

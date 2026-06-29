@@ -1,0 +1,83 @@
+<?php
+/**
+ * AWA - PLP mobile filter button + drawer
+ */
+declare(strict_types=1);
+?>
+<button type="button"
+        class="awa-plp-filter-button"
+        data-action="toggle-filter"
+        aria-controls="awa-plp-filter-drawer"
+        aria-expanded="false"
+        aria-label="<?= $block->escapeHtmlAttr(__('Abrir filtros')) ?>">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="4" y1="6" x2="20" y2="6"/>
+        <line x1="4" y1="12" x2="14" y2="12"/>
+        <line x1="4" y1="18" x2="10" y2="18"/>
+    </svg>
+    <span><?= $block->escapeHtml(__('Filtros')) ?></span>
+</button>
+
+<aside id="awa-plp-filter-drawer"
+       class="awa-plp-filter-drawer"
+       role="dialog"
+       aria-modal="true"
+       aria-label="<?= $block->escapeHtmlAttr(__('Filtros')) ?>"
+       aria-hidden="true">
+    <div class="awa-plp-filter-drawer__backdrop" data-filter-close></div>
+    <div class="awa-plp-filter-drawer__panel">
+        <header class="awa-plp-filter-drawer__header">
+            <h2 class="awa-plp-filter-drawer__title">
+                <?= $block->escapeHtml(__('Filtros')) ?>
+            </h2>
+            <button type="button"
+                    class="awa-plp-filter-drawer__close"
+                    data-filter-close
+                    aria-label="<?= $block->escapeHtmlAttr(__('Fechar')) ?>">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                    <line x1="6" y1="18" x2="18" y2="6"/>
+                </svg>
+            </button>
+        </header>
+        <div class="awa-plp-filter-drawer__content">
+            <?= $block->getChildHtml('catalog.leftnav') ?>
+        </div>
+        <footer class="awa-plp-filter-drawer__footer">
+            <button type="button"
+                    class="awa-plp-filter-drawer__apply"
+                    data-filter-close>
+                <?= $block->escapeHtml(__('Aplicar filtros')) ?>
+            </button>
+        </footer>
+    </div>
+</aside>
+
+<script>
+require(['jquery'], function($) {
+    'use strict';
+    $(function() {
+        var $btn = $('.awa-plp-filter-button');
+        var $drawer = $('#awa-plp-filter-drawer');
+        var $body = $('body');
+        
+        $btn.on('click', function() {
+            $drawer.attr('aria-hidden', 'false').addClass('is-open');
+            $body.css('overflow', 'hidden');
+            $btn.attr('aria-expanded', 'true');
+        });
+        
+        $('[data-filter-close]', $drawer).on('click', function() {
+            $drawer.attr('aria-hidden', 'true').removeClass('is-open');
+            $body.css('overflow', '');
+            $btn.attr('aria-expanded', 'false').focus();
+        });
+        
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && $drawer.hasClass('is-open')) {
+                $('[data-filter-close]', $drawer).first().trigger('click');
+            }
+        });
+    });
+});
+</script>

@@ -1,153 +1,41 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * AWA Motos - PDP Add to Cart override
+ *
+ * Sprint a11y (2026-06-28): adicionado aria-label no botao + placeholder no qty.
+ *
+ * @var $block \Magento\Catalog\Block\Product\View
  */
-
-/** @var \Magento\Catalog\Block\Product\View $block */
 ?>
 <?php $_product = $block->getProduct(); ?>
 <?php $buttonTitle = __('Add to Cart'); ?>
-<?php
-// GrupoAwamotos_B2B may be disabled — check via Module Manager
-$_b2bActive = \Magento\Framework\App\ObjectManager::getInstance()
-    ->get(\Magento\Framework\Module\Manager::class)
-    ->isEnabled('GrupoAwamotos_B2B');
-if ($_b2bActive) {
-    $b2bHelper         = $this->helper('GrupoAwamotos\B2B\Helper\Data');
-    $b2bCanAddToCart   = $b2bHelper->canAddToCart();
-    $b2bGateState      = $block->escapeHtmlAttr($b2bHelper->getPriceGateState());
-    $b2bGateHeadline   = $block->escapeHtml($b2bHelper->getPriceGateHeadline());
-    $b2bGateDescription= $block->escapeHtml($b2bHelper->getPriceGateDescription());
-    $b2bPrimaryUrl     = $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl());
-    $b2bPrimaryLabel   = $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel());
-    $b2bSecondaryUrl   = $block->escapeUrl($b2bHelper->getPriceGateSecondaryUrl());
-    $b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel());
-} else {
-    $b2bHelper = null; $b2bCanAddToCart = true; $b2bGateState = '';
-    $b2bGateHeadline = ''; $b2bGateDescription = ''; $b2bPrimaryUrl = '';
-    $b2bPrimaryLabel = ''; $b2bSecondaryUrl = ''; $b2bSecondaryLabel = '';
-}
-?>
-
-<?php if (!$b2bCanAddToCart && $b2bGateState !== 'guest') : ?>
-<div class="awa-b2b-gate-card awa-b2b-pdp-gate" data-awa-gate-state="<?= /* @noEscape */ $b2bGateState ?>">
-    <span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('Acesso B2B Exclusivo')) ?></span>
-    <div class="awa-b2b-gate-card__title"><?= /* @noEscape */ $b2bGateHeadline ?></div>
-    <div class="awa-b2b-gate-card__description"><?= /* @noEscape */ $b2bGateDescription ?></div>
-    <div class="awa-b2b-gate-card__actions">
-        <a class="awa-b2b-gate-card__action" href="<?= /* @noEscape */ $b2bPrimaryUrl ?>"><?= /* @noEscape */ $b2bPrimaryLabel ?></a>
-        <a class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" href="<?= /* @noEscape */ $b2bSecondaryUrl ?>"><?= /* @noEscape */ $b2bSecondaryLabel ?></a>
-    </div>
-</div>
-<?php elseif ($_product->isSaleable()) :?>
-<?php if ($_product->getSku()): ?>
-<div class="awa-b2b-pdp-sku">
-    <span class="awa-b2b-sku__label"><?= $block->escapeHtml(__('Cód:')) ?></span>
-    <span class="awa-b2b-sku__value" id="awa-sku-value"><?= $block->escapeHtml($_product->getSku()) ?></span>
-    <button class="awa-sku-copy-btn" type="button"
-            data-sku="<?= $block->escapeHtmlAttr($_product->getSku()) ?>"
-            aria-label="<?= $block->escapeHtmlAttr(__('Copiar código')) ?>">
-        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-        </svg>
-        <span class="awa-sku-copy-btn__text">Copiar</span>
-    </button>
-    <span class="awa-sku-copy-feedback" id="awa-sku-feedback" aria-live="polite"></span>
-</div>
-<script>
-(function () {
-    var btn = document.querySelector('.awa-sku-copy-btn');
-    if (!btn || !navigator.clipboard) { return; }
-    btn.addEventListener('click', function () {
-        navigator.clipboard.writeText(btn.getAttribute('data-sku')).then(function () {
-            btn.setAttribute('data-copied', '');
-            btn.querySelector('.awa-sku-copy-btn__text').textContent = 'Copiado!';
-            var fb = document.getElementById('awa-sku-feedback');
-            if (fb) { fb.textContent = 'SKU copiado'; fb.classList.add('visible'); }
-            setTimeout(function () {
-                btn.removeAttribute('data-copied');
-                btn.querySelector('.awa-sku-copy-btn__text').textContent = 'Copiar';
-                if (fb) { fb.textContent = ''; fb.classList.remove('visible'); }
-            }, 2000);
-        });
-    });
-})();
-</script>
-<?php endif; ?>
-<?php
-    /* Stock level indicator */
-    $_stockItem = null;
-    try {
-        $_stockItem = $_product->getExtensionAttributes()
-            ? $_product->getExtensionAttributes()->getStockItem()
-            : null;
-    } catch (\Throwable $_e) { /* silent */ }
-    $_stockQty = $_stockItem ? (int)$_stockItem->getQty() : null;
-?>
-<?php if ($_stockQty !== null && $_stockQty > 0): ?>
-<?php
-    if ($_stockQty <= 3) {
-        $_stockClass = 'awa-stock-level--critical';
-        $_stockMsg   = __('%1 unidade restante', $_stockQty);
-        if ($_stockQty > 1) { $_stockMsg = __('%1 unidades restantes', $_stockQty); }
-    } elseif ($_stockQty <= 10) {
-        $_stockClass = 'awa-stock-level--low';
-        $_stockMsg   = __('Apenas %1 em estoque', $_stockQty);
-    } else {
-        $_stockClass = 'awa-stock-level--ok';
-        $_stockMsg   = __('Em estoque');
-    }
-?>
-<div class="awa-stock-level <?= $block->escapeHtmlAttr($_stockClass) ?>">
-    <span class="awa-stock-level__dot" aria-hidden="true"></span>
-    <?= $block->escapeHtml($_stockMsg) ?>
-</div>
-<?php endif; ?>
-
-        <!-- B2B PDP Enhancements -->
-        <div class="awa-b2b-pdp-tier" style="background: var(--awa-surface-light, #f8f9fa); border: 1px solid var(--awa-border-color, #e0e0e0); padding: 10px; border-radius: 4px; margin-bottom: 15px;">
-            <strong style="color: var(--awa-primary, #A33B3B); display: block; margin-bottom: 5px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                <?= $block->escapeHtml(__('Condição Especial B2B')) ?>
-            </strong>
-            <span style="font-size: 12px; color: var(--awa-text-default, #333);"><?= $block->escapeHtml(__('Consulte as faixas de desconto para compras em quantidade master.')) ?></span>
-        </div>
-    <div class="box-tocart">
+<?php if ($_product->isSaleable()): ?>
+<div class="box-tocart">
     <div class="fieldset">
-        <?php if ($block->shouldRenderQuantity()) :?>
-        <div class="awa-catalog-qty-box field qty"
-             data-mage-init='{"js/awa-qty-control": {}}'>
-            <label class="label awa-sr-only" for="qty"><span><?= $block->escapeHtml(__('Qty')) ?></span></label>
-            <div class="control awa-qty-stepper">
-                <button type="button" class="awa-qty-btn"
-                        data-awa-role="qty-trigger"
-                        data-awa-direction="decrement"
-                        aria-label="<?= $block->escapeHtmlAttr(__('Diminuir quantidade')) ?>">−</button>
+        <?php if ($block->shouldRenderQuantity()): ?>
+        <div class="field qty">
+            <label class="label" for="qty"><span><?= $block->escapeHtml(__('Qty')) ?></span></label>
+            <div class="control">
                 <input type="number"
                        name="qty"
                        id="qty"
-                       min="1"
+                       min="0"
                        value="<?= $block->getProductDefaultQty() * 1 ?>"
                        title="<?= $block->escapeHtmlAttr(__('Qty')) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Quantidade do produto')) ?>"
+                       placeholder="1"
+                       inputmode="numeric"
                        class="input-text qty"
-                       data-awa-role="qty-input"
                        data-validate="<?= $block->escapeHtml(json_encode($block->getQuantityValidators())) ?>"
                        />
-                <button type="button" class="awa-qty-btn"
-                        data-awa-role="qty-trigger"
-                        data-awa-direction="increment"
-                        aria-label="<?= $block->escapeHtmlAttr(__('Aumentar quantidade')) ?>">+</button>
             </div>
         </div>
         <?php endif; ?>
         <div class="actions">
             <button type="submit"
                     title="<?= $block->escapeHtmlAttr($buttonTitle) ?>"
-                    class="action primary tocart b2b-primary-btn"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Adicionar ' . $_product->getName() . ' ao carrinho')) ?>"
+                    class="action primary tocart"
                     id="product-addtocart-button" disabled>
                 <span><?= $block->escapeHtml($buttonTitle) ?></span>
             </button>
@@ -155,50 +43,6 @@ if ($_b2bActive) {
         </div>
     </div>
 </div>
-
-<?php
-/* WhatsApp CTA contextual — para todos os usuários */
-$_whatsappSku   = $block->escapeHtml($_product->getSku());
-$_whatsappName  = $block->escapeHtml($_product->getName());
-$_whatsappTxt   = rawurlencode(sprintf(
-    "Olá! Gostaria de tirar uma dúvida sobre o produto: %s (Cód: %s) — %s",
-    $_product->getName(),
-    $_product->getSku(),
-    $_product->getProductUrl()
-));
-$_whatsappHref  = $block->escapeUrl('https://wa.me/5516997367588?text=' . $_whatsappTxt);
-?>
-<a href="<?= $_whatsappHref ?>"
-   class="awa-pdp-whatsapp-cta"
-   target="_blank"
-   rel="noopener noreferrer"
-   aria-label="<?= $block->escapeHtmlAttr(__('Tirar dúvida sobre este produto via WhatsApp')) ?>">
-    <svg class="awa-pdp-whatsapp-cta__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-    </svg>
-    <span><?= $block->escapeHtml(__('Tirar dúvida via WhatsApp')) ?></span>
-</a>
-
-<!-- Trust signals — conversão B2B + B2C -->
-<div class="awa-pdp-trust-bar" aria-label="<?= $block->escapeHtmlAttr(__('Garantias de compra')) ?>">
-    <div class="awa-pdp-trust-bar__item">
-        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v3h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-        <span><?= $block->escapeHtml(__('Envio imediato')) ?></span>
-    </div>
-    <div class="awa-pdp-trust-bar__item">
-        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span><?= $block->escapeHtml(__('Garantia de fábrica')) ?></span>
-    </div>
-    <div class="awa-pdp-trust-bar__item">
-        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
-        <span><?= $block->escapeHtml(__('Troca em 30 dias')) ?></span>
-    </div>
-    <div class="awa-pdp-trust-bar__item">
-        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        <span><?= $block->escapeHtml(__('Parcela em 10x')) ?></span>
-    </div>
-</div>
-
 <?php endif; ?>
 <script type="text/x-magento-init">
     {

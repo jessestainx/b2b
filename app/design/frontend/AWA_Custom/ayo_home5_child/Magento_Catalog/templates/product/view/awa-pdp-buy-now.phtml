@@ -1,0 +1,49 @@
+<?php
+/**
+ * AWA Motos - PDP "Comprar Agora" button (1-clique)
+ * Sprint 2 (Quick win): B2B conversion.
+ */
+declare(strict_types=1);
+
+$_product = $block->getProduct();
+$_productId = (int) $_product->getId();
+$_isSaleable = $_product->isSaleable();
+$_hasRequiredOptions = $_product->getTypeInstance()->hasRequiredOptions($_product);
+$_checkoutUrl = $block->getUrl('awamotos_b2b/checkout/onepage', ['product_id' => $_productId]);
+$_isB2bEnabled = false;
+try {
+    $_b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
+    $_isB2bEnabled = $_b2bHelper->isEnabled();
+} catch (\Throwable $e) {
+    // B2B module not active
+}
+?>
+<?php if ($_isSaleable): ?>
+<div class="awa-pdp-buy-now"
+     data-awa-buy-now
+     data-product-id="<?= $block->escapeHtmlAttr($_productId) ?>"
+     data-has-required-options="<?= $_hasRequiredOptions ? '1' : '0' ?>"
+     data-checkout-url="<?= $block->escapeUrl($_checkoutUrl) ?>"
+     data-b2b="<?= $_isB2bEnabled ? '1' : '0' ?>"
+     aria-label="<?= $block->escapeHtmlAttr(__('Comprar agora diretamente')) ?>">
+
+    <button type="button"
+            class="awa-pdp-buy-now__button action primary"
+            data-awa-buy-now-button
+            <?= $_hasRequiredOptions ? 'disabled' : '' ?>>
+        <span class="awa-pdp-buy-now__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+        </span>
+        <span class="awa-pdp-buy-now__label"><?= $block->escapeHtml(__('Comprar Agora')) ?></span>
+        <span class="awa-pdp-buy-now__sublabel"><?= $block->escapeHtml(__('1-clique')) ?></span>
+    </button>
+
+    <noscript>
+        <p class="awa-pdp-buy-now__noscript">
+            <?= $block->escapeHtml(__('JavaScript necessario. Use "Adicionar ao Carrinho".')) ?>
+        </p>
+    </noscript>
+</div>
+<?php endif; ?>

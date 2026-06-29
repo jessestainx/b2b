@@ -1,0 +1,87 @@
+<?php
+/**
+ * AWA Motos - PDP CEP / Shipping Estimator
+ *
+ * Quick win #1 (Sprint 2 - Conversao B2B+B2C).
+ *
+ * Renderiza bloco com campo CEP + botao "Calcular" acima do "Adicionar ao Carrinho".
+ * Endpoint AJAX: /awa/cep/estimate (controlador GrupoAwamotos\Shipping\Ajax\CepEstimate)
+ *
+ * @var \Magento\Catalog\Block\Product\View $block
+ */
+declare(strict_types=1);
+
+$_product = $block->getProduct();
+$_productId = (int) $_product->getId();
+$_isLoggedIn = false;
+try {
+    $_isLoggedIn = $this->helper('Magento\Customer\Model\Session')->isLoggedIn();
+} catch (\Exception $e) {
+    // Ignore - show default state
+}
+?>
+<div class="awa-pdp-cep-estimator"
+     data-product-id="<?= $block->escapeHtmlAttr($_productId) ?>"
+     data-endpoint="<?= $block->escapeUrl($block->getUrl('awa/cep/estimate')) ?>"
+     aria-label="<?= $block->escapeHtmlAttr(__('Calcular frete e prazo de entrega')) ?>">
+
+    <div class="awa-pdp-cep-estimator__row">
+        <div class="awa-pdp-cep-estimator__input-wrap">
+            <label for="awa-pdp-cep-<?= $_productId ?>"
+                   class="awa-pdp-cep-estimator__label">
+                <?= $block->escapeHtml(__('Calcular frete e prazo')) ?>
+            </label>
+            <input type="text"
+                   id="awa-pdp-cep-<?= $_productId ?>"
+                   class="awa-pdp-cep-estimator__input"
+                   inputmode="numeric"
+                   pattern="\d{5}-?\d{3}"
+                   maxlength="9"
+                   placeholder="<?= $block->escapeHtmlAttr(__('00000-000')) ?>"
+                   autocomplete="postal-code"
+                   aria-describedby="awa-pdp-cep-help-<?= $_productId ?>"
+                   data-awa-cep-input />
+        </div>
+        <button type="button"
+                class="awa-pdp-cep-estimator__button action primary"
+                data-awa-cep-submit
+                aria-label="<?= $block->escapeHtmlAttr(__('Calcular')) ?>">
+            <span class="awa-pdp-cep-estimator__button-text"><?= $block->escapeHtml(__('Calcular')) ?></span>
+            <span class="awa-pdp-cep-estimator__spinner" aria-hidden="true" hidden></span>
+        </button>
+    </div>
+
+    <p id="awa-pdp-cep-help-<?= $_productId ?>" class="awa-pdp-cep-estimator__help">
+        <?= $block->escapeHtml(__('Informe seu CEP para ver opcoes de entrega.')) ?>
+        <?php if (!$_isLoggedIn): ?>
+            <a href="<?= $block->escapeUrl($block->getUrl('customer/account/login')) ?>"
+               class="awa-pdp-cep-estimator__login-link">
+                <?= $block->escapeHtml(__('Entrar para ver precos B2B')) ?>
+            </a>
+        <?php endif; ?>
+    </p>
+
+    <div class="awa-pdp-cep-estimator__results"
+         data-awa-cep-results
+         role="status"
+         aria-live="polite"
+         hidden></div>
+
+    <noscript>
+        <p class="awa-pdp-cep-estimator__noscript">
+            <?= $block->escapeHtml(__('Ative JavaScript para calcular o frete automaticamente, ou consulte nossa central de atendimento.')) ?>
+        </p>
+    </noscript>
+</div>
+
+<script type="text/x-magento-init">
+{
+    ".awa-pdp-cep-estimator": {
+        "awaPdpCepEstimator": {
+            "productId": "<?= (int) $_productId ?>",
+            "endpoint": "<?= $block->escapeJs($block->getUrl('awa/cep/estimate')) ?>",
+            "maskPattern": "99999-999"
+        }
+    }
+}
+</script>

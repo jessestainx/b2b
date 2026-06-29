@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+    AWA - PLP extras for /retrovisores.html
+    Adiciona filter button mobile, suggestions, drawer
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="main.content">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.plp.filter.button"
+                   template="Magento_Catalog::product/awa-plp-filter-button.phtml"
+                   before="category.products.list"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.plp.suggestions"
+                   template="Magento_Catalog::product/awa-plp-suggestions.phtml"
+                   after="category.products.list"/>
+        </referenceContainer>
+    </body>
+</page>

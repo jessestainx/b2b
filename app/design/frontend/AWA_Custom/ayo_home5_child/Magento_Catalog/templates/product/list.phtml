@@ -24,7 +24,7 @@ if ($_b2bActive) {
     $b2bCanAddToCart = $b2bHelper->canAddToCart();
     $b2bGateState = $block->escapeHtmlAttr($b2bHelper->getPriceGateState());
     $b2bGateHeadline = $block->escapeHtml($b2bHelper->getPriceGateHeadline());
-    $b2bGateDescription = $block->escapeHtml($b2bHelper->getPriceGateDescription());
+    $b2bGateDescription = $block->escapeHtml($b2bHelper->getPriceGateBannerDescription());
 	$b2bPrimaryUrl = $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl());
 	$b2bPrimaryLabel = $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel());
 	$b2bSecondaryUrl = $block->escapeUrl($b2bHelper->getPriceGateSecondaryUrl());
@@ -37,7 +37,14 @@ if ($_b2bActive) {
 }
 ?>
 <?php if (!$_productCollection->count()): ?>
-    <div class="awa-empty-plp">
+    <?php
+    $allProductsUrl = $block->getUrl('');
+    $currentCategory = $block->getLayer()->getCurrentCategory();
+    if ($currentCategory && (int) $currentCategory->getId() > 0) {
+        $allProductsUrl = $currentCategory->getUrl();
+    }
+    ?>
+    <div class="awa-empty-plp" role="status" aria-live="polite">
         <div class="awa-empty-plp__icon" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"/>
@@ -48,8 +55,8 @@ if ($_b2bActive) {
         <h2 class="awa-empty-plp__title"><?php echo $block->escapeHtml(__('Nenhum produto encontrado')); ?></h2>
         <p class="awa-empty-plp__desc"><?php echo $block->escapeHtml(__('Tente ajustar os filtros ou limpar a busca para ver mais resultados.')); ?></p>
         <div class="awa-empty-plp__actions">
-            <a href="<?php echo $block->escapeUrl($block->getUrl('catalog/category/view', ['id' => 2])); ?>" class="awa-empty-plp__btn awa-empty-plp__btn--primary">
-                <?php echo $block->escapeHtml(__('Ver Todos os Produtos')); ?>
+            <a href="<?php echo $block->escapeUrl($allProductsUrl); ?>" class="awa-empty-plp__btn awa-empty-plp__btn--primary">
+                <?php echo $block->escapeHtml(__('Ver catálogo completo')); ?>
             </a>
             <a href="<?php echo $block->escapeUrl($block->getUrl('')); ?>" class="awa-empty-plp__btn awa-empty-plp__btn--secondary">
                 <?php echo $block->escapeHtml(__('Voltar ao Início')); ?>
@@ -76,26 +83,35 @@ if ($_b2bActive) {
     $pos = $block->getPositioned();
     ?>
 		<div class="shop-tab-title">
-			<?php
-				$category = null;
-				try {
-					if (method_exists($block, 'getLayer')) {
-						$layer = $block->getLayer();
-						$category = $layer ? $layer->getCurrentCategory() : null;
-					}
-				} catch (\Throwable $e) {
-					$category = null;
-				}
-				if ($category) {
-					echo '<h2 class="hidden">' . $block->escapeHtml($category->getName()) . '</h2>';
-				}
-			?>
 		<div class="shop-tab-select toolbar-html-top check-view-mode-toolbar-<?php echo $block->escapeHtmlAttr($viewMode); ?>" data-mode="<?php echo $block->escapeHtmlAttr($viewMode); ?>">
-		<?php echo $block->getToolbarHtml() ?>
+		<?php
+			$toolbarBlock = $block->getChildBlock('toolbar');
+			if ($toolbarBlock) {
+				$toolbarBlock->setData('awa_toolbar_slot', 'top');
+			}
+			echo $block->getChildHtml('toolbar', false);
+		?>
 		<?php echo $block->getAdditionalHtml() ?>
 		</div>
 		<div class="clr"></div>
 	</div>
+    <?php if ($_b2bActive && !$b2bCanAddToCart): ?>
+        <div class="awa-plp-b2b-gate-banner" data-awa-gate-state="<?= /* @noEscape */ $b2bGateState ?>" role="region" aria-label="<?= $block->escapeHtmlAttr(__('Acesso B2B')) ?>">
+            <span class="awa-plp-b2b-gate-banner__badge"><?= $block->escapeHtml(__('B2B')) ?></span>
+            <p class="awa-plp-b2b-gate-banner__title"><?= /* @noEscape */ $b2bGateHeadline ?></p>
+            <?php if ($b2bGateDescription !== '' && mb_strtolower($b2bGateDescription) !== mb_strtolower($b2bPrimaryLabel)): ?>
+                <p class="awa-plp-b2b-gate-banner__desc"><?= /* @noEscape */ $b2bGateDescription ?></p>
+            <?php endif; ?>
+            <div class="awa-plp-b2b-gate-banner__actions">
+                <?php if ($b2bPrimaryUrl !== ''): ?>
+                <a class="awa-plp-b2b-gate-banner__action awa-plp-b2b-gate-banner__action--primary" href="<?= /* @noEscape */ $b2bPrimaryUrl ?>"><?= /* @noEscape */ ($b2bPrimaryLabel !== '' ? $b2bPrimaryLabel : $block->escapeHtml(__('Cadastrar para ver preços'))) ?></a>
+                <?php endif; ?>
+                <?php if ($b2bSecondaryUrl !== '' && $b2bSecondaryLabel !== ''): ?>
+                    <a class="awa-plp-b2b-gate-banner__action awa-plp-b2b-gate-banner__action--secondary" href="<?= /* @noEscape */ $b2bSecondaryUrl ?>"><?= /* @noEscape */ $b2bSecondaryLabel ?></a>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
     <div class="wrapper <?php echo $block->escapeHtmlAttr($viewMode); ?> products-<?php echo $block->escapeHtmlAttr($viewMode); ?>">
         <?php $iterator = 1; ?>
 		<?php if ($block->getMode() == 'grid') { ?>
@@ -162,20 +178,20 @@ if ($_b2bActive) {
 						</div>
                 	</div>
 						<div class="product-info">
-							<h3 class="product-name">
+							<h2 class="product-name">
 							<a href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>" class="product-item-link">
 								<?php echo $block->escapeHtml($_helper->productAttribute($_product, $_product->getName(), 'name')); ?>
 							</a>
-						</h3>
-							
+						</h2>
+
         <div class="awa-b2b-sku" title="<?php echo $block->escapeHtmlAttr(__('Código do produto')); ?>">
             <span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
             <span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
         </div>
         <?php if ($_b2bActive && $b2bCanAddToCart && $_product->isSaleable()): ?>
-            <div class="awa-b2b-logistics" style="margin-top: 4px; font-size: 11px; display: flex; gap: 4px; align-items: center;">
-                <span class="awa-b2b-badge awa-b2b-badge--success" style="background: var(--awa-green-light, #e6f4ea); color: var(--awa-green-dark, #137333); padding: 2px 6px; border-radius: 4px; font-weight: 600;">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px; vertical-align: text-top;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <div class="awa-b2b-logistics">
+                <span class="awa-b2b-badge awa-b2b-badge--success">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     <?= $block->escapeHtml(__('Pronta Entrega')) ?>
                 </span>
             </div>
@@ -188,15 +204,7 @@ if ($_b2bActive) {
 						</div>
 						<div class="product-info-cart">
 							<div class="actions-primary addcart-link">
-								<?php if (!$b2bCanAddToCart): ?>
-									<div class="awa-b2b-gate-card awa-b2b-gate-card--compact" data-awa-gate-state="<?= /* @noEscape */ $b2bGateState ?>" aria-hidden="true">
-										<span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('B2B')) ?></span>
-										<div class="awa-b2b-gate-card__title"><?= /* @noEscape */ $b2bGateHeadline ?></div>
-										<div class="awa-b2b-gate-card__actions">
-											<a class="awa-b2b-gate-card__action" href="<?= /* @noEscape */ $b2bPrimaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bPrimaryLabel ?></a>
-										</div>
-									</div>
-								<?php elseif ($_product->isSaleable()): ?>
+								<?php if ($b2bCanAddToCart && $_product->isSaleable()): ?>
 									<?php $postParams = $block->getAddToCartPostParams($_product); ?>
 									<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
 										<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
@@ -209,7 +217,7 @@ if ($_b2bActive) {
 											<span><?php echo $block->escapeHtml(__('Adicionar ao Carrinho')); ?></span>
 										</button>
 									</form>
-								<?php else: ?>
+								<?php elseif ($b2bCanAddToCart): ?>
 									<div class="stock <?php echo $_product->getIsSalable() ? 'available' : 'unavailable'; ?>">
 										<span><?php echo $block->escapeHtml($_product->getIsSalable() ? __('Em estoque') : __('Fora de estoque')); ?></span>
 									</div>
@@ -260,13 +268,13 @@ if ($_b2bActive) {
 						<?php endif; ?>
 					</div>
 					<div class="product-info">
-						<h3 class="product-name">
+						<h2 class="product-name">
 							<a title="<?php echo $block->escapeHtml($_helper->productAttribute($_product, $_product->getName(), 'name')); ?>"
 							   href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>"
 							   class="product-item-link">
 							<?php echo $block->escapeHtml($_helper->productAttribute($_product, $_product->getName(), 'name')); ?>
 							</a>
-						</h3>
+						</h2>
 						<div class="awa-b2b-sku" title="<?php echo $block->escapeHtmlAttr(__('Código do produto')); ?>">
 							<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
 							<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
@@ -281,16 +289,7 @@ if ($_b2bActive) {
 						</div>
 						<div class="product-info-cart">
 							<div class="actions-primary">
-								<?php if (!$b2bCanAddToCart): ?>
-									<div class="awa-b2b-gate-card awa-b2b-gate-card--compact" data-awa-gate-state="<?= /* @noEscape */ $b2bGateState ?>" aria-hidden="true">
-										<span class="awa-b2b-gate-card__badge"><?= $block->escapeHtml(__('B2B')) ?></span>
-										<div class="awa-b2b-gate-card__title"><?= /* @noEscape */ $b2bGateHeadline ?></div>
-										<div class="awa-b2b-gate-card__actions">
-											<a class="awa-b2b-gate-card__action" href="<?= /* @noEscape */ $b2bPrimaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bPrimaryLabel ?></a>
-											<a class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" href="<?= /* @noEscape */ $b2bSecondaryUrl ?>" tabindex="-1"><?= /* @noEscape */ $b2bSecondaryLabel ?></a>
-										</div>
-									</div>
-								<?php elseif ($_product->isSaleable()): ?>
+								<?php if ($b2bCanAddToCart && $_product->isSaleable()): ?>
 									<?php $postParams = $block->getAddToCartPostParams($_product); ?>
 									<form data-role="tocart-form" action="<?php echo $block->escapeUrl($postParams['action']); ?>" method="post">
 										<input type="hidden" name="product" value="<?php echo $block->escapeHtmlAttr($postParams['data']['product']); ?>">
@@ -309,7 +308,7 @@ if ($_b2bActive) {
 											 <span><?php echo $block->escapeHtml(__('Add to Cart')); ?></span>
 										</button>
 									</form>
-								<?php else: ?>
+								<?php elseif ($b2bCanAddToCart): ?>
 									<?php if ($_product->getIsSalable()): ?>
 										<div class="stock available"><span><?php echo $block->escapeHtml(__('In stock')); ?></span></div>
 									<?php else: ?>
@@ -330,19 +329,16 @@ if ($_b2bActive) {
     <div class="row">
 		<div class="col-md-12 col-sm-12 col-xs-12">
 			<div class="sort-pagi-bar sort-pagi-bar-bottom">
-			<?php echo $block->getToolbarHtml() ?>
+			<?php
+				$toolbarBlock = $block->getChildBlock('toolbar');
+				if ($toolbarBlock) {
+					$toolbarBlock->setData('awa_toolbar_slot', 'bottom');
+				}
+				echo $block->getChildHtml('toolbar', false);
+			?>
 			</div>
 		</div>
 	</div>
-    <?php if (!$block->isRedirectToCartEnabled()) : ?>
-        <script type="text/x-magento-init">
-        {
-            "[data-role=tocart-form]": {
-                "catalogAddToCart": {}
-            }
-        }
-        </script>
-    <?php endif; ?>
     <?php if ($_b2bActive && $b2bCanAddToCart): ?>
         <script type="text/x-magento-init">
         {

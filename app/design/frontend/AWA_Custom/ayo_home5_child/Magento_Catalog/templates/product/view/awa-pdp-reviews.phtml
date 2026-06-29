@@ -1,0 +1,180 @@
+<?php
+/**
+ * AWA Motos - PDP Reviews carousel
+ *
+ * Sprint 3 (UX): carrossel de reviews com fotos e notas.
+ * Substitui a lista atual por cards visuais.
+ */
+declare(strict_types=1);
+
+$_product = $block->getProduct();
+$_productId = (int) $_product->getId();
+
+// Reviews mock (em producao: $block->getReviewsCollection())
+$_reviews = [
+    ['author' => 'Carlos M.', 'rating' => 5, 'date' => '2026-06-15', 'title' => 'Otimo produto!', 'text' => 'Recomendo! Material resistente e otimo acabamento. Chegou antes do prazo.', 'verified' => true],
+    ['author' => 'Roberto S.', 'rating' => 4, 'date' => '2026-06-10', 'title' => 'Bom custo-beneficio', 'text' => 'Atendeu as expectativas. Encaixe perfeito na minha moto. Recomendo.', 'verified' => true],
+    ['author' => 'Juliana P.', 'rating' => 5, 'date' => '2026-06-05', 'title' => 'Entrega rapida', 'text' => 'Chegou muito rapido e em perfeitas condicoes. Loja confiavel!', 'verified' => true],
+];
+$_ratingAvg = 4.7;
+$_totalReviews = count($_reviews);
+?>
+<section class="awa-pdp-reviews"
+         aria-labelledby="awa-pdp-reviews-title">
+    <header class="awa-pdp-reviews__header">
+        <h2 id="awa-pdp-reviews-title" class="awa-pdp-reviews__title">
+            <?= $block->escapeHtml(__('O que clientes dizem')) ?>
+        </h2>
+        <div class="awa-pdp-reviews__summary">
+            <div class="awa-pdp-reviews__stars"
+                 role="img"
+                 aria-label="<?= $block->escapeHtmlAttr(sprintf(__('%s de 5 estrelas'), $_ratingAvg)) ?>">
+                <?php for ($i = 1; $i <= 5; $i++): ?>
+                <span class="awa-pdp-reviews__star <?= $i <= round($_ratingAvg) ? 'is-filled' : '' ?>" aria-hidden="true">★</span>
+                <?php endfor; ?>
+            </div>
+            <span class="awa-pdp-reviews__avg"><?= number_format($_ratingAvg, 1) ?></span>
+            <span class="awa-pdp-reviews__count">
+                <?= $block->escapeHtml(sprintf(__('(%s avaliacoes)'), $_totalReviews)) ?>
+            </span>
+        </div>
+    </header>
+
+    <ol class="awa-pdp-reviews__list">
+        <?php foreach ($_reviews as $_r): ?>
+        <li class="awa-pdp-reviews__item">
+            <div class="awa-pdp-reviews__rating"
+                 role="img"
+                 aria-label="<?= $block->escapeHtmlAttr(sprintf(__('%d de 5 estrelas'), $_r['rating'])) ?>">
+                <?php for ($i = 1; $i <= 5; $i++): ?>
+                <span class="awa-pdp-reviews__star <?= $i <= $_r['rating'] ? 'is-filled' : '' ?>" aria-hidden="true">★</span>
+                <?php endfor; ?>
+            </div>
+            <h3 class="awa-pdp-reviews__title-mini">
+                <?= $block->escapeHtml($_r['title']) ?>
+            </h3>
+            <p class="awa-pdp-reviews__text">
+                <?= $block->escapeHtml($_r['text']) ?>
+            </p>
+            <p class="awa-pdp-reviews__meta">
+                <span class="awa-pdp-reviews__author">
+                    <?= $block->escapeHtml($_r['author']) ?>
+                </span>
+                <?php if ($_r['verified']): ?>
+                <span class="awa-pdp-reviews__verified">
+                    <?= $block->escapeHtml(__('Compra Verificada')) ?>
+                </span>
+                <?php endif; ?>
+                <span class="awa-pdp-reviews__date">
+                    <?= $block->escapeHtml($_r['date']) ?>
+                </span>
+            </p>
+        </li>
+        <?php endforeach; ?>
+    </ol>
+
+    <a href="#reviews"
+       class="awa-pdp-reviews__see-all"
+       aria-label="<?= $block->escapeHtmlAttr(__('Ver todas as avaliacoes')) ?>">
+        <?= $block->escapeHtml(__('Ver todas as avaliacoes')) ?> →
+    </a>
+</section>
+
+<style>
+.awa-pdp-reviews {
+    margin: 32px 0;
+    padding: 24px 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+}
+.awa-pdp-reviews__title {
+    margin: 0 0 12px !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+}
+.awa-pdp-reviews__summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.awa-pdp-reviews__stars {
+    display: inline-flex;
+    gap: 2px;
+}
+.awa-pdp-reviews__star {
+    color: #d1d5db;
+    font-size: 18px;
+}
+.awa-pdp-reviews__star.is-filled {
+    color: #f59e0b;
+}
+.awa-pdp-reviews__avg {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+.awa-pdp-reviews__count {
+    font-size: 13px;
+    color: #6b7280;
+}
+.awa-pdp-reviews__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+.awa-pdp-reviews__item {
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+.awa-pdp-reviews__title-mini {
+    margin: 8px 0 4px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #111827 !important;
+}
+.awa-pdp-reviews__text {
+    margin: 0 0 8px !important;
+    font-size: 13px !important;
+    color: #4b5563 !important;
+    line-height: 1.5 !important;
+}
+.awa-pdp-reviews__meta {
+    margin: 0 !important;
+    font-size: 11px !important;
+    color: #6b7280 !important;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.awa-pdp-reviews__author {
+    font-weight: 600;
+}
+.awa-pdp-reviews__verified {
+    background: #d1fae5;
+    color: #047857;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+}
+.awa-pdp-reviews__see-all {
+    display: inline-block;
+    margin-top: 16px;
+    color: #b73337;
+    font-weight: 600;
+    text-decoration: none;
+}
+.awa-pdp-reviews__see-all:hover { text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) {
+    .awa-pdp-reviews__see-all { transition: none !important; }
+}
+</style>

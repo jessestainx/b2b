@@ -1,0 +1,74 @@
+<?php
+/**
+ * AWA Motos - PDP Wishlist button
+ *
+ * Sprint 3 (UX): adicionar aos favoritos com feedback visual.
+ */
+declare(strict_types=1);
+
+$_product = $block->getProduct();
+$_productId = (int) $_product->getId();
+$_isLoggedIn = false;
+try {
+    $_httpContext = $this->helper('Magento\Framework\App\Http\Context');
+    $_isLoggedIn = $_httpContext->getValue(\Magento\Customer\Model\Context::CONTEXT_AUTH);
+} catch (\Throwable $e) {
+    // ignore
+}
+$_wishlistUrl = $block->getUrl('wishlist/index/add', ['product' => $_productId]);
+$_loginUrl = $block->getUrl('customer/account/login', ['referer' => base64_encode($block->getUrl('*/*/*', ['_current' => true]))]);
+?>
+<button type="button"
+        class="awa-pdp-wishlist action secondary"
+        data-awa-wishlist-toggle
+        data-product-id="<?= $block->escapeHtmlAttr($_productId) ?>"
+        data-wishlist-url="<?= $block->escapeUrl($_wishlistUrl) ?>"
+        data-login-url="<?= $block->escapeUrl($_loginUrl) ?>"
+        data-is-logged-in="<?= $_isLoggedIn ? '1' : '0' ?>"
+        aria-label="<?= $block->escapeHtmlAttr(__('Adicionar ' . $_product->getName() . ' aos favoritos')) ?>"
+        aria-pressed="false">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+    <span class="awa-pdp-wishlist__label" data-awa-wishlist-label>
+        <?= $block->escapeHtml(__('Favoritar')) ?>
+    </span>
+</button>
+
+<style>
+.awa-pdp-wishlist {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.awa-pdp-wishlist:hover {
+    background: #fef2f2;
+    border-color: #b91c1c;
+    color: #b91c1c;
+}
+.awa-pdp-wishlist[aria-pressed="true"] {
+    background: #fee2e2;
+    border-color: #b91c1c;
+    color: #b91c1c;
+}
+.awa-pdp-wishlist[aria-pressed="true"] svg {
+    fill: #b91c1c;
+    stroke: #b91c1c;
+}
+.awa-pdp-wishlist__label {
+    white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+    .awa-pdp-wishlist { transition: none !important; }
+}
+</style>

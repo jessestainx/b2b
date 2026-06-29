@@ -1,0 +1,51 @@
+<?php
+/**
+ * AWA - PLP suggestions: did you mean + popular categories
+ */
+declare(strict_types=1);
+
+$query = $block->getRequest()->getParam('q');
+$popularCategories = [
+    ['label' => 'Retrovisores', 'url' => '/retrovisores.html'],
+    ['label' => 'Bagageiros', 'url' => '/bagageiros.html'],
+    ['label' => 'Bauletos', 'url' => '/bauletos.html'],
+    ['label' => 'Guidões', 'url' => '/guidoes.html'],
+    ['label' => 'Manetes', 'url' => '/manoplas.html'],
+    ['label' => 'Protetores de Carter', 'url' => '/protetores-de-carter.html'],
+    ['label' => 'Pisca', 'url' => '/piscas.html'],
+    ['label' => 'Faróis', 'url' => '/farois.html'],
+    ['label' => 'Borrachas', 'url' => '/borrachas.html'],
+    ['label' => 'Capas de Corrente', 'url' => '/capas-de-corrente.html'],
+];
+?>
+<?php if ($query): ?>
+<aside class="awa-plp-suggestions" aria-label="<?= $block->escapeHtmlAttr(__('Sugestões de navegação')) ?>">
+    <div class="awa-plp-suggestions__container">
+        <h3 class="awa-plp-suggestions__title">
+            <?= $block->escapeHtml(__('Você quis dizer:')) ?>
+        </h3>
+        <p class="awa-plp-suggestions__query">
+            <?= $block->escapeHtml($query) ?>
+            <span class="awa-plp-suggestions__arrow">→</span>
+            <a href="/catalogsearch/result/?q=<?= $block->escapeHtmlAttr($query) ?>"
+               class="awa-plp-suggestions__retry">
+                <?= $block->escapeHtml(__('Tentar novamente')) ?>
+            </a>
+        </p>
+        <h3 class="awa-plp-suggestions__title">
+            <?= $block->escapeHtml(__('Categorias populares')) ?>
+        </h3>
+        <ul class="awa-plp-suggestions__list" role="list">
+            <?php foreach ($popularCategories as $cat): ?>
+                <li class="awa-plp-suggestions__item">
+                    <a href="<?= $block->escapeUrl($cat['url']) ?>"
+                       class="awa-plp-suggestions__link"
+                       title="<?= $block->escapeHtmlAttr($cat['label']) ?>">
+                        <?= $block->escapeHtml($cat['label']) ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+</aside>
+<?php endif; ?>

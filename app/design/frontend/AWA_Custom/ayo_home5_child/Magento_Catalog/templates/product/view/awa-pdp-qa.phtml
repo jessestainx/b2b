@@ -1,0 +1,266 @@
+<?php
+/**
+ * AWA Motos - PDP Questions & Answers
+ *
+ * Sprint 3: permite clientes fazerem perguntas sobre o produto.
+ * Outros clientes podem responder (com verificacao).
+ */
+declare(strict_types=1);
+
+$_product = $block->getProduct();
+$_productId = (int) $_product->getId();
+$_productName = $_product->getName();
+
+// Storage local (em producao seria DB via modulo custom)
+$_questions = [
+    [
+        'id' => 1,
+        'author' => 'Carlos M.',
+        'date' => '2026-06-15',
+        'question' => 'Serve para Honda CB 250F Twister 2016?',
+        'answers' => [
+            ['author' => 'AWA Motos (verificado)', 'date' => '2026-06-16', 'answer' => 'Sim, este retrovisor e compat\u00edvel com a Honda CB 250F Twister 2016-2018. Verifique o modelo especifico antes da compra.'],
+        ],
+        'helpful' => 12,
+    ],
+    [
+        'id' => 2,
+        'author' => 'Roberto S.',
+        'date' => '2026-06-10',
+        'question' => 'Vem com parafusos de fixacao?',
+        'answers' => [
+            ['author' => 'AWA Motos (verificado)', 'date' => '2026-06-11', 'answer' => 'Sim, acompanha kit de parafusos e arruelas para instalacao.'],
+        ],
+        'helpful' => 8,
+    ],
+];
+?>
+<section class="awa-pdp-qa"
+         aria-labelledby="awa-pdp-qa-heading">
+    <h2 id="awa-pdp-qa-heading" class="awa-pdp-qa__title">
+        <?= $block->escapeHtml(__('Perguntas sobre ' . $_productName)) ?>
+        <span class="awa-pdp-qa__count">(<?= count($_questions) ?>)</span>
+    </h2>
+
+    <form class="awa-pdp-qa__form"
+          data-awa-pdp-qa-form
+          aria-label="<?= $block->escapeHtmlAttr(__('Fazer uma pergunta')) ?>">
+        <label for="awa-pdp-qa-input" class="awa-sr-only">
+            <?= $block->escapeHtml(__('Sua pergunta')) ?>
+        </label>
+        <div class="awa-pdp-qa__input-wrap">
+            <input type="text"
+                   id="awa-pdp-qa-input"
+                   class="awa-pdp-qa__input"
+                   placeholder="<?= $block->escapeHtmlAttr(__('Escreva sua pergunta sobre o produto...')) ?>"
+                   maxlength="500"
+                   required
+                   aria-required="true" />
+            <button type="submit"
+                    class="awa-pdp-qa__submit action primary"
+                    data-awa-pdp-qa-submit
+                    aria-label="<?= $block->escapeHtmlAttr(__('Enviar pergunta')) ?>">
+                <?= $block->escapeHtml(__('Perguntar')) ?>
+            </button>
+        </div>
+        <p class="awa-pdp-qa__hint">
+            <?= $block->escapeHtml(__('Voce precisa estar logado para perguntar. Respostas sao enviadas por email.')) ?>
+        </p>
+    </form>
+
+    <ul class="awa-pdp-qa__list" aria-label="<?= $block->escapeHtmlAttr(__('Lista de perguntas')) ?>">
+        <?php foreach ($_questions as $_q): ?>
+        <li class="awa-pdp-qa__item" data-awa-qa-id="<?= (int) $_q['id'] ?>">
+            <div class="awa-pdp-qa__question">
+                <p class="awa-pdp-qa__q-text">
+                    <strong>P:</strong>
+                    <?= $block->escapeHtml($_q['question']) ?>
+                </p>
+                <p class="awa-pdp-qa__q-meta">
+                    <span class="awa-pdp-qa__q-author">
+                        <?= $block->escapeHtml(__('por ' . $_q['author'])) ?>
+                    </span>
+                    <span class="awa-pdp-qa__q-date">
+                        <?= $block->escapeHtml(__('em ' . $_q['date'])) ?>
+                    </span>
+                    <button type="button"
+                            class="awa-pdp-qa__helpful"
+                            data-awa-helpful="<?= (int) $_q['id'] ?>"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Marcar como util')) ?>">
+                        <?= $block->escapeHtml(__('Util (' . $_q['helpful'] . ')')) ?>
+                    </button>
+                </p>
+            </div>
+            <?php if (!empty($_q['answers'])): ?>
+            <ul class="awa-pdp-qa__answers">
+                <?php foreach ($_q['answers'] as $_a): ?>
+                <li class="awa-pdp-qa__answer">
+                    <p class="awa-pdp-qa__a-text">
+                        <strong>R:</strong>
+                        <?= $block->escapeHtml($_a['answer']) ?>
+                    </p>
+                    <p class="awa-pdp-qa__a-meta">
+                        <span class="awa-pdp-qa__a-author">
+                            <?= $block->escapeHtml(__('por ' . $_a['author'])) ?>
+                        </span>
+                        <span class="awa-pdp-qa__a-date">
+                            <?= $block->escapeHtml(__('em ' . $_a['date'])) ?>
+                        </span>
+                    </p>
+                </li>
+                <?php endforeach; ?>
+            </ul>
+            <?php endif; ?>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+</section>
+
+<style>
+.awa-pdp-qa {
+    margin: 32px 0;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fafafa;
+}
+.awa-pdp-qa__title {
+    margin: 0 0 16px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+}
+.awa-pdp-qa__count {
+    font-size: 16px;
+    font-weight: 400;
+    color: #6b7280;
+}
+.awa-pdp-qa__form {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+.awa-pdp-qa__input-wrap {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.awa-pdp-qa__input {
+    flex: 1 1 240px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+}
+.awa-pdp-qa__input:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-color: #2563eb;
+}
+.awa-pdp-qa__submit {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 20px;
+    background: #b73337;
+    color: white;
+    border: 0;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.awa-pdp-qa__submit:hover { background: #a12d30; }
+.awa-pdp-qa__hint {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+.awa-pdp-qa__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.awa-pdp-qa__item {
+    padding: 16px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+.awa-pdp-qa__item:last-child { margin-bottom: 0; }
+.awa-pdp-qa__question {
+    border-left: 3px solid #3b82f6;
+    padding-left: 12px;
+    margin-bottom: 12px;
+}
+.awa-pdp-qa__q-text {
+    margin: 0 0 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.awa-pdp-qa__q-text strong {
+    color: #3b82f6;
+    margin-right: 6px;
+}
+.awa-pdp-qa__q-meta {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+.awa-pdp-qa__helpful {
+    background: transparent;
+    border: 1px solid #d1d5db;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    color: #374151;
+    min-height: 28px;
+}
+.awa-pdp-qa__helpful:hover {
+    background: #f0f9ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+.awa-pdp-qa__answers {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0 0 0 16px;
+}
+.awa-pdp-qa__answer {
+    padding: 12px;
+    background: #f9fafb;
+    border-left: 3px solid #10b981;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+.awa-pdp-qa__answer:last-child { margin-bottom: 0; }
+.awa-pdp-qa__a-text {
+    margin: 0 0 6px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.awa-pdp-qa__a-text strong {
+    color: #10b981;
+    margin-right: 6px;
+}
+.awa-pdp-qa__a-meta {
+    margin: 0;
+    font-size: 11px;
+    color: #6b7280;
+    display: flex;
+    gap: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .awa-pdp-qa__submit,
+    .awa-pdp-qa__helpful { transition: none !important; }
+}
+</style>

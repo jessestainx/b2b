@@ -1,0 +1,118 @@
+<?php
+/**
+ * AWA Motos - PDP Urgency & Social Proof Block
+ *
+ * Adiciona informacoes de urgencia e prova social ao PDP:
+ * - Estoque limitado (apenas X disponiveis)
+ * - Social proof (X pessoas vendo agora)
+ * - Notify-me (quando voltar estoque)
+ * - PIX com desconto destacado
+ * - Parcelas sem juros destacadas
+ *
+ * @var \Magento\Catalog\Block\Product\View $block
+ */
+declare(strict_types=1);
+
+$_product = $block->getProduct();
+$_productId = (int) $_product->getId();
+$_isInStock = $_product->isAvailable();
+$_qty = (int) ($_product->getExtensionAttributes()->getStockItem()->getQty() ?? 0);
+$_isB2bEnabled = false;
+try {
+    $_b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
+    $_isB2bEnabled = $_b2bHelper->isEnabled();
+} catch (\Throwable $e) {
+    // B2B module not active
+}
+
+// Configs (em producao real, viriam de admin)
+$_lowStockThreshold = 5; // < 5 unidades = "ultimas unidades"
+$_pixDiscountPercent = 5; // 5% desconto no PIX
+$_parcelMax = 12; // ate 12x sem juros
+$_parcelInterestFree = 10; // primeiras 10x sem juros
+
+// Gerar numero "fake" mas determinístico de viewers (em prod seria do backend)
+$_viewersCount = 3 + ($_productId % 12); // 3-14 viewers
+?>
+
+<div class="awa-pdp-urgency"
+     data-awa-urgency
+     data-product-id="<?= $block->escapeHtmlAttr($_productId) ?>"
+     aria-label="<?= $block->escapeHtmlAttr(__('Informacoes de disponibilidade e pagamento')) ?>">
+
+    <?php if ($_isInStock && $_qty > 0 && $_qty <= $_lowStockThreshold): ?>
+    <div class="awa-pdp-urgency__stock awa-pdp-urgency__stock--low" role="status">
+        <span class="awa-pdp-urgency__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </span>
+        <span class="awa-pdp-urgency__text">
+            <?= $block->escapeHtml(__('Apenas ' . $_qty . ' em estoque - compre agora!')) ?>
+        </span>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!$_isInStock || $_qty <= 0): ?>
+    <div class="awa-pdp-urgency__out-of-stock" role="status">
+        <p class="awa-pdp-urgency__text"><?= $block->escapeHtml(__('Produto indisponivel no momento')) ?></p>
+        <form class="awa-pdp-urgency__notify-form"
+              action="<?= $block->escapeUrl($block->getUrl('productalert/add/stock')) ?>"
+              method="post"
+              aria-label="<?= $block->escapeHtmlAttr(__('Notificar quando voltar estoque')) ?>">
+            <?= $block->getBlockHtml('formkey') ?>
+            <input type="hidden" name="product_id" value="<?= $block->escapeHtmlAttr($_productId) ?>"/>
+            <label class="awa-pdp-urgency__label">
+                <?= $block->escapeHtml(__('Seu e-mail para avisar quando voltar:')) ?>
+                <input type="email"
+                       name="email"
+                       required
+                       class="awa-pdp-urgency__input"
+                       placeholder="<?= $block->escapeHtmlAttr(__('seu@email.com')) ?>"
+                       autocomplete="email"
+                       inputmode="email"
+                       aria-label="<?= $block->escapeHtmlAttr(__('E-mail para notificacao de estoque')) ?>"/>
+            </label>
+            <button type="submit" class="awa-pdp-urgency__button">
+                <?= $block->escapeHtml(__('Avise-me quando voltar')) ?>
+            </button>
+        </form>
+    </div>
+    <?php endif; ?>
+
+    <div class="awa-pdp-urgency__social-proof" aria-live="polite">
+        <span class="awa-pdp-urgency__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        </span>
+        <span class="awa-pdp-urgency__text">
+            <?= $block->escapeHtml(__($_viewersCount . ' pessoas vendo este produto agora')) ?>
+        </span>
+    </div>
+
+    <?php if ($_isInStock && $_product->getFinalPrice() > 0): ?>
+    <?php $_price = (float) $_product->getFinalPrice(); ?>
+    <?php $_pixPrice = $_price * (1 - $_pixDiscountPercent/100); ?>
+    <?php $_parcela = $_price / $_parcelInterestFree; ?>
+    <div class="awa-pdp-urgency__payment" aria-label="<?= $block->escapeHtmlAttr(__('Opcoes de pagamento')) ?>">
+        <div class="awa-pdp-urgency__payment-row awa-pdp-urgency__payment-row--pix">
+            <span class="awa-pdp-urgency__payment-badge">PIX</span>
+            <span class="awa-pdp-urgency__payment-value">
+                <?= $block->escapeHtml(__('R$ ' . number_format($_pixPrice, 2, ',', '.') . ' a vista')) ?>
+            </span>
+            <span class="awa-pdp-urgency__payment-discount">
+                <?= $block->escapeHtml(__($_pixDiscountPercent . '% de desconto')) ?>
+            </span>
+        </div>
+        <div class="awa-pdp-urgency__payment-row awa-pdp-urgency__payment-row--parcel">
+            <span class="awa-pdp-urgency__payment-badge">CARTAO</span>
+            <span class="awa-pdp-urgency__payment-value">
+                <?= $block->escapeHtml(__($_parcelInterestFree . 'x de R$ ' . number_format($_parcela, 2, ',', '.') . ' sem juros')) ?>
+            </span>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>

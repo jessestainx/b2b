@@ -161,27 +161,8 @@ $image = 'category_page_grid';
     </div>
 </section>
 
-<script type="text/x-magento-init">
-{
-    ".awa-pdp-mostviewed": {
-        "js/awa-carousel": {
-            "carouselSelector": ".products-swiper--mostviewed",
-            "owl": {
-                "items": 4,
-                "itemsDesktop": [1366, 4],
-                "itemsDesktopSmall": [980, 3],
-                "itemsTablet": [768, 2],
-                "itemsMobile": [479, 1],
-                "navigation": true,
-                "pagination": false,
-                "margin": 16,
-                "scrollPerPage": true
-            }
-        }
-    }
-}
-</script>
-
+<?php /* Carrossel normalizado pelo motor scroll-snap (awa-scroll-carousel.js) via .rokan-mostviewed.
+        O init Swiper (js/awa-carousel) foi removido em 2026-06-03 para evitar conflito de motor. */ ?>
 <script>
 (function () {
     var section = document.querySelector('.awa-pdp-mostviewed');

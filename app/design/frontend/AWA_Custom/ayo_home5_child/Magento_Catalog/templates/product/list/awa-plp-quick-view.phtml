@@ -1,0 +1,23 @@
+<?php
+/**
+ * AWA Motos - PLP Quick View container
+ * Sprint 2 (Quick win): converter visitantes em compradores.
+ */
+declare(strict_types=1);
+?>
+<div class="awa-quick-view-mount"
+     data-awa-quick-view
+     data-quick-view-url="<?= $block->escapeUrl($block->getUrl('awamotos_quickview/product/view')) ?>"
+     aria-live="polite"></div>
+
+<div class="awa-plp-infinite-scroll"
+     data-awa-infinite-scroll
+     data-current-page="<?= (int) $block->getToolbarBlock()->getCurrentPage() ?>"
+     data-last-page="<?= (int) $block->getToolbarBlock()->getLastPageNum() ?>"
+     aria-label="<?= $block->escapeHtmlAttr(__('Carregar mais produtos automaticamente')) ?>">
+    <div class="awa-plp-infinite-scroll__trigger" data-awa-infinite-trigger tabindex="-1"></div>
+    <div class="awa-plp-infinite-scroll__loader" data-awa-infinite-loader hidden aria-hidden="true">
+        <div class="awa-spinner" aria-label="<?= $block->escapeHtmlAttr(__('Carregando mais produtos')) ?>"></div>
+        <span><?= $block->escapeHtml(__('Carregando...')) ?></span>
+    </div>
+</div>

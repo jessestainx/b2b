@@ -6,10 +6,49 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <css src="css/awa-plp-final-polish.css" />
-        <css src="css/awa-visual-qa-category.css"/>
+        <remove src="css/awa-plp-final-polish.css"/>
+        <remove src="css/awa-visual-qa-category.css"/>
+        <!-- awa-plp-shell-final.css removido: referência órfã (404 em produção). -->
     </head>
     <body>
+        <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.impeccable.category.critical.fixes"
+                   template="Magento_Theme::html/awa-impeccable-category-critical-fixes-v4.phtml"
+                   before="-"/>
+        </referenceBlock>
+        <!-- Performance: stack PLP dedicado (plp-promax + §89/91/93) — omitir audit global -->
+        <referenceBlock name="awa.head.preload">
+            <arguments>
+                <argument name="awa_skip_audit_bundle" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="awa.impeccable.audit.uncached.global.v10" remove="true"/>
         <referenceBlock name="page.main.title" remove="true"/>
+        <referenceBlock name="category.image">
+            <arguments>
+                <argument name="visible_product_count_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\CategoryVisibleProductCount</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="awa.custom.global.js.loader">
+            <arguments>
+                <argument name="load_search_compat_js" xsi:type="boolean">true</argument>
+                <argument name="load_home_category_compat_js" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
+    
+        <!-- AWA - PLP extras: filter button mobile + suggestions -->
+        <referenceContainer name="main.content">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.plp.filter.button"
+                   template="Magento_Catalog::product/awa-plp-filter-button.phtml"
+                   before="category.products.list"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.plp.suggestions"
+                   template="Magento_Catalog::product/awa-plp-suggestions.phtml"
+                   after="category.products.list"/>
+        </referenceContainer>
+
     </body>
 </page>
