@@ -1980,9 +1980,9 @@ html body#html-body#html-body#html-body input.input-text#search {
 
     /* Dark mode toggle posicionamento consistente */
     html body#html-body .page-wrapper .awa-dark-mode-toggle {
-        min-width: 36px !important;
-        min-height: 36px !important;
-        padding: 6px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        padding: 0 !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -2110,6 +2110,16 @@ html body#html-body#html-body#html-body input.input-text#search {
     html body#html-body .page-wrapper .awa-hero-b2b-cta strong {
         color: #fff !important;
     }
+    /* Cards de benefícios ficam sobre superfície clara; não herdam o branco do CTA vermelho. */
+    html body#html-body .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__item,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__copy,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__title,
+    html body#html-body .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__link {
+        color: var(--awa-dark, CanvasText) !important;
+    }
+    html body#html-body .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__text {
+        color: var(--head-preload-footer-muted, var(--awa-dark, CanvasText)) !important;
+    }
     /* Bg do hero CTA = mais escuro para contraste */
     html body#html-body .page-wrapper .awa-hero-b2b-cta {
         background: var(--awa-primary-dark, #8e2629) !important;
@@ -2138,7 +2148,7 @@ html body#html-body#html-body#html-body input.input-text#search {
     /* Links do footer */
     html body#html-body .page-wrapper .page-footer a,
     html body#html-body .page-wrapper footer a {
-        min-height: 32px !important;
+        min-height: 44px !important;
         padding-block: 8px !important;
         display: inline-flex !important;
         align-items: center !important;
