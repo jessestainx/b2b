@@ -21,6 +21,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 class ScorePendingCustomersCommand extends Command
 {
@@ -376,14 +377,13 @@ class ScorePendingCustomersCommand extends Command
             return false;
         }
 
-        $output = [];
-        exec(
-            'cd ' . escapeshellarg($root)
-            . ' && git status --porcelain vendor/ lib/ setup/ pub/index.php 2>/dev/null',
-            $output
+        $process = new Process(
+            ['git', 'status', '--porcelain', 'vendor/', 'lib/', 'setup/', 'pub/index.php'],
+            $root
         );
+        $process->run();
 
-        return $output !== [];
+        return $process->isSuccessful() && $process->getOutput() !== '';
     }
 
     private function countObserverRegistrations(): int

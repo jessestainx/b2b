@@ -35,6 +35,7 @@
     },
     "version": "2.4.8-p3",
     "require": {
+        "creativestyle/magesuite-magepack": "^1.1",
         "cweagans/composer-patches": "^1.7",
         "laminas/laminas-http": "^2.22",
         "magento/composer-dependency-version-audit-plugin": "~0.1",

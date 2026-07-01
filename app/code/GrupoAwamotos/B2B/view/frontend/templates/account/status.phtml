@@ -1,0 +1,54 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Account\Status $block */
+/** @var \Magento\Framework\Escaper $escaper */
+// $escaper is auto-injected by Magento 2.4+ template engine
+
+$b2b        = $block->getB2bData();
+$statusClass = $block->getStatusClass();
+?>
+
+<div class="b2b-account-status <?= $escaper->escapeHtmlAttr($statusClass) ?>">
+
+    <?php if (!$block->isB2B()): ?>
+        <span class="b2b-status-label"><?= $escaper->escapeHtml(__('Conta B2B')) ?>:</span>
+        <?= $escaper->escapeHtml(__('Você não possui cadastro B2B.')) ?>
+        <a href="<?= $escaper->escapeUrl($block->getRegisterUrl()) ?>" class="b2b-status-cta">
+            <?= $escaper->escapeHtml(__('Solicitar acesso como revendedor')) ?> →
+        </a>
+
+    <?php elseif ($statusClass === 'pending'): ?>
+        <span class="b2b-status-label"><?= $escaper->escapeHtml(__('Status B2B')) ?>:</span>
+        <strong><?= $escaper->escapeHtml(__('Análise em andamento')) ?></strong>
+        <span class="b2b-status-hint">
+            <?= $escaper->escapeHtml(__(
+                'Seu cadastro de revendedor está sendo analisado. Você receberá uma resposta por e-mail em até 2 dias úteis.'
+            )) ?>
+        </span>
+
+    <?php elseif ($statusClass === 'approved'): ?>
+        <span class="b2b-status-label"><?= $escaper->escapeHtml(__('Conta B2B')) ?>:</span>
+        <strong class="b2b-status-success"><?= $escaper->escapeHtml(__('✓ Revendedor Aprovado')) ?></strong>
+        <?php if (!empty($b2b['razao_social'])): ?>
+        <span class="b2b-status-meta">
+            — <?= $escaper->escapeHtml($b2b['razao_social']) ?>
+            <?php if (!empty($b2b['cnpj'])): ?>
+                (<?= $escaper->escapeHtml($b2b['cnpj']) ?>)
+            <?php endif; ?>
+        </span>
+        <?php endif; ?>
+
+    <?php elseif ($statusClass === 'rejected'): ?>
+        <span class="b2b-status-label"><?= $escaper->escapeHtml(__('Cadastro B2B')) ?>:</span>
+        <strong class="b2b-status-danger"><?= $escaper->escapeHtml(__('Reprovado')) ?></strong>
+        <?php if (!empty($b2b['rejection_reason'])): ?>
+        <span class="b2b-status-hint">
+            <?= $escaper->escapeHtml(__('Motivo')) ?>: <?= $escaper->escapeHtml($b2b['rejection_reason']) ?>
+        </span>
+        <?php endif; ?>
+        <a href="<?= $escaper->escapeUrl($block->getRegisterUrl()) ?>" class="b2b-status-link">
+            <?= $escaper->escapeHtml(__('Refazer cadastro')) ?>
+        </a>
+
+    <?php endif; ?>
+
+</div>
