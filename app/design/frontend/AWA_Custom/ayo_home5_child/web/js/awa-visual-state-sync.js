@@ -1,1 +1,0 @@
-define([],function(){"use strict";if(window.__awaVSSInit)return{};window.__awaVSSInit=true;return{};});
