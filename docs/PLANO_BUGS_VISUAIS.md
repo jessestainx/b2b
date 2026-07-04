@@ -2113,3 +2113,47 @@ _awa-premium-effects.less, _awa-visual-audit-2026-05-05.less, etc.:
 - **Descrição:** CLS caiu de 1.9 para 1.3, porém ainda acima do aceitável para experiência premium.
 - **Fase sugerida:** PERF-004 — CLS reduction.
 - **Impacto premium:** bloqueia premium validado.
+
+---
+
+## 25. Fechamento PERF-002 + A11Y-001 (2026-07-04)
+
+> Relatório completo com evidências, tabelas antes/depois e diffs por arquivo: `var/perf002-a11y001-report.md`.
+
+### PERF-002 — Visibility gating dos carrosséis
+- **Título:** IntersectionObserver para pausar measure/apply de carrosséis fora da viewport
+- **Status:** Corrigido
+- **Severidade:** P2 performance
+- **Rota:** Home
+- **Componente:** `awa-scroll-carousel.js` (reaproveita scheduler global do PERF-001)
+- **Arquivos alterados:** `web/js/awa-scroll-carousel.js` (+ `.min.js`)
+- **Validação:** build + deploy + hash servido conferido, cache Magento/Redis limpo.
+- **Nota:** não resolve `PERF-HOME-CAROUSEL-COUNT-001` nem `PERF-CLS-HOME-001` (abertos acima) — trata apenas o custo de carrosséis fora da tela, não o volume total de carrosséis nem o CLS geral.
+
+### A11Y-001 — Auditoria e correção completa de acessibilidade (WCAG 2.1 AA)
+- **Título:** Zerar falhas de acessibilidade Lighthouse/axe-core em mobile e desktop
+- **Status:** Corrigido — **Lighthouse mobile e desktop: 100/100 acessibilidade** (era 92/100 no desktop antes da 2ª rodada; mobile já havia zerado na 1ª)
+- **Severidade:** P1 acessibilidade/compliance
+- **Rotas:** Home (auditada); demais rotas não cobertas — ver "Watch items" abaixo
+- **Regras corrigidas:** `aria-allowed-role`, `list`, `link-name`, `label-content-name-mismatch` (5 ocorrências), `image-redundant-alt`, `aria-hidden-focus` (2 ocorrências), `color-contrast` (4 ocorrências), `aria-required-children`
+- **Causas raiz notáveis:**
+  - Widget core `mage/tabs.js` aplica `role="tablist"` sem filhos `role="tab"` (fix via JS pós-init, não via markup, para não implementar um padrão ARIA de abas incompleto)
+  - `rgba(255,255,255,.82)` no rodapé media ~4.46:1 (abaixo de 4.5:1) — falha por margem mínima, corrigida para `.9` (~5.0:1)
+  - CTAs com texto responsivo alternado por CSS (`.cta-long`/`.cta-short`) exigem `aria-label` contendo **ambas** as variantes como substring, não apenas uma
+  - Classe `.is-active` aplicada via JS pós-viewport (PERF-002) + `transition: color` causava frame de baixo contraste capturado pelo Lighthouse — resolvido com `<style>` crítico síncrono no `<head>` (`transition:none` só no estado ativo)
+- **Arquivos alterados:** ver lista completa em `var/perf002-a11y001-report.md` §5 (14 arquivos: `header.phtml`, `top-home.phtml`, `b2b-hero-cta.phtml`, `awa-mobile-nav.phtml`, `awa-back-to-top.phtml`/`.js`, `slider_home5.phtml`, `awa-head-preload.phtml`, `awa-css-gate.js`, `awa-header-a11y-performance.js`, `subscribe.phtml`, `footer-static5.phtml`, `recent-orders.phtml`, `awa-scroll-carousel.js`)
+- **Achado de infra (não é bug de a11y):** `awa-header-a11y-performance.js` é referenciado sem sufixo `.min` no template; `setup:static-content:deploy -f` não substituiu a cópia obsoleta em `pub/static` (mesma classe de bug de deploy já vista para arquivos `.min.js` nesta mesma fase). Contornado manualmente; **recomenda-se guard-rail de deploy na Fase 4 abaixo**.
+- **Validação:** `php -l`/`node --check` em todos os arquivos, hash fonte×`pub/static` idêntico, sidecars `.br`/`.gz` regenerados, `curl` healthcheck 200, `exception.log`/`system.log` sem novas entradas, Lighthouse mobile+desktop (accessibility/best-practices/seo = 100/100/100 em ambos), varredura visual manual 390/768/1366/1920px sem regressões.
+- **Watch items (fora do escopo desta fase, mesmo padrão de bug, não auditados):**
+  - `newsletterpopup.phtml` (Rokanthemes_Themeoption) — `label-content-name-mismatch` no botão de inscrição, popup não renderiza no DOM inicial
+  - `no-route.phtml` (página 404) — `aria-label` sem relação com texto visível no link de categorias
+  - `.awa-footer-categories-expand__heading` — bug visual pré-existente (não é a11y): `width: 50.59px` computado causa quebra "Categor"/"ias", sobrepondo botão adjacente. Não corrigido (fora do escopo A11Y-001).
+
+### Roadmap proposto — Fases 3-6
+
+| Fase | Foco | Justificativa |
+|---|---|---|
+| **Fase 3 (PERF-003/004)** | CLS e TBT/main-thread — mobile 61s TBT / CLS 1.32, desktop 10.5s TBT / CLS 1.39, main-thread work 140.5s (throttle 4x) | Maior ROI do roadmap: performance score 31 (mobile) / 35 (desktop) apesar de acessibilidade/SEO/best-practices já em 100. Requer profiling dedicado (trace + coverage) antes de qualquer fix — fora do escopo cirúrgico de PERF-002 |
+| **Fase 4** | Guard-rail de deploy (hash-check fonte × `pub/static` para todo JS/CSS do tema, pré-commit ou pós-`setup:static-content:deploy`) | Classe de bug "arquivo estático obsoleto" já apareceu 2x nesta fase (min.js e plain .js) |
+| **Fase 5** | Bugs P2/P3 já catalogados (heading "Categorias" quebrado no rodapé, `PERF-HOME-CAROUSEL-COUNT-001`, `PERF-HEADER-MOBILE-GRID-GUARD-001`) | Backlog existente, não relacionado a A11Y |
+| **Fase 6** | Auditoria A11Y de rotas não cobertas (404, PDP, carrinho, checkout, B2B login) | Padrão "desktop expõe falhas que mobile não expõe" (§A11Y-001 acima) sugere achados adicionais em rotas/breakpoints ainda não auditados |

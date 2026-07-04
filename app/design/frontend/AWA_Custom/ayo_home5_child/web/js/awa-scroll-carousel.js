@@ -97,6 +97,63 @@
         }
     }
 
+    /* PERF-002: gating de visibilidade do measureUpdate(). Mesmo com o
+     * lote unico do R22 acima, o boot inicial + os listeners de
+     * resize/refresh disparam scheduleUpdate() nos ~48 carrosseis da
+     * home ao mesmo tempo, inclusive nos que estao muito abaixo da
+     * dobra — confirmado pelo audit "bootup-time" do Lighthouse
+     * atribuindo ~75s de Style & Layout a este arquivo. Um unico
+     * IntersectionObserver compartilhado marca cada viewport como
+     * "relevante" (dentro de uma margem generosa da tela, para nao
+     * haver "pop" visual ao rolar rapido); scheduleUpdate() pula o
+     * measure/apply para carrosseis fora dessa margem, e o proprio
+     * observer forca um scheduleUpdate() de catch-up assim que o
+     * carrossel entra nela. Nao muda contagem, arquitetura ou CSS dos
+     * carrosseis — apenas adia o calculo de geometria dos que ainda
+     * nao importam visualmente. */
+    var carouselVisibilityState = typeof WeakMap === 'function' ? new WeakMap() : null;
+    var carouselVisibilityCallbacks = typeof WeakMap === 'function' ? new WeakMap() : null;
+    var sharedCarouselVisibilityObserver = null;
+
+    function isCarouselViewportRelevant(viewport) {
+        if (!carouselVisibilityState) {
+            return true;
+        }
+        return carouselVisibilityState.get(viewport) !== false;
+    }
+
+    function observeCarouselVisibility(viewport, onBecomeRelevant) {
+        if (typeof IntersectionObserver === 'undefined' || !carouselVisibilityState) {
+            return;
+        }
+
+        if (!sharedCarouselVisibilityObserver) {
+            sharedCarouselVisibilityObserver = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    var wasRelevant = carouselVisibilityState.get(entry.target) !== false;
+                    var isRelevant = entry.isIntersecting;
+
+                    carouselVisibilityState.set(entry.target, isRelevant);
+
+                    if (isRelevant && !wasRelevant) {
+                        var callback = carouselVisibilityCallbacks
+                            ? carouselVisibilityCallbacks.get(entry.target)
+                            : null;
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
+                    }
+                });
+            }, { rootMargin: '600px 0px', threshold: 0 });
+        }
+
+        carouselVisibilityState.set(viewport, false);
+        if (carouselVisibilityCallbacks) {
+            carouselVisibilityCallbacks.set(viewport, onBecomeRelevant);
+        }
+        sharedCarouselVisibilityObserver.observe(viewport);
+    }
+
     function shelfI18n(key, fallback) {
         var i18n = window.AWA_SHELF_I18N || {};
         return i18n[key] || fallback;
@@ -1438,7 +1495,12 @@
             plan.forEach(function (entry) {
                 var slide = entry.slide;
 
-                slide.setAttribute('role', 'group');
+                /* A11Y-001: role="group" nao e permitido em <li> (aria-allowed-role) e
+                 * quebra o parentesco <ul>/<li> exigido pelo audit "list" (axe-core).
+                 * O <li> ja carrega semantica de item de lista via role implicito
+                 * "listitem"; aria-roledescription/aria-label continuam funcionando
+                 * normalmente sobre esse role implicito, entao a remocao do role
+                 * explicito nao reduz a informacao exposta ao leitor de tela. */
                 slide.setAttribute('aria-roledescription', shelfI18n('slide', 'slide'));
                 slide.setAttribute('aria-label', (entry.index + 1) + ' ' + shelfI18n('of', 'de') + ' ' + entry.total);
                 slide.setAttribute('aria-hidden', entry.visible ? 'false' : 'true');
@@ -1596,6 +1658,9 @@
         }
 
         function scheduleUpdate() {
+            if (!isCarouselViewportRelevant(viewport)) {
+                return;
+            }
             if (!rafPending) {
                 rafPending = true;
                 queueCarouselFrame(function () {
@@ -1735,6 +1800,8 @@
                 viewport.dataset.awaCarouselImpression = '1';
                 emitViewportAnalytics('impression', { source: 'fallback' });
             }
+
+            observeCarouselVisibility(viewport, scheduleUpdate);
         }
 
         bindAutoMotion(viewport, chrome, function () {

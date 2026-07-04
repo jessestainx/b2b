@@ -17,21 +17,24 @@ $enableMenu = $viewModel ? $viewModel->isMobileMenuEnabled() : false;
 if (!$enableMenu) {
     return;
 }
+
 ?>
-<nav class="fixed-bottom hidden-sm hidden-md hidden-lg" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação Móvel')) ?>">
+<nav class="fixed-bottom hidden-sm hidden-md hidden-lg" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação Móvel')) ?>" data-awa-mobile-nav="v4-deptos">
     <div class="link-on-bottom">
         <ul class="mobile-bottom-link flex-layout space-between list-unstyled">
             <?php $currentUrl = $block->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]); ?>
             <li class="<?= (strpos($currentUrl, $block->getUrl('')) !== false && $currentUrl == $block->getUrl('')) ? 'active' : '' ?>">
                 <a href="<?= $escaper->escapeUrl($block->getUrl('')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Início')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Início')) ?>">
-                    <span class="icon icon-chrome" aria-hidden="true"></span>
+                    <span class="icon icon-home" aria-hidden="true"></span>
                     <?= $escaper->escapeHtml(__('Home')) ?>
                 </a>
             </li>
             <li>
-                <button type="button" class="toggle-nav-footer" aria-haspopup="true" aria-expanded="false" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Abrir menu')) ?>">
+                <?php /* A11Y-001: aria-label precisa conter o texto visivel ("Deptos.")
+                   para nao falhar label-content-name-mismatch (WCAG 2.5.3). */ ?>
+                <button type="button" class="toggle-nav-footer" aria-haspopup="true" aria-expanded="false" aria-label="<?= $escaper->escapeHtmlAttr(__('Deptos. — abrir departamentos e menu')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Departamentos')) ?>">
                     <span class="icon icon-menu" aria-hidden="true"></span>
-                    <?= $escaper->escapeHtml(__('Menu')) ?>
+                    <?= $escaper->escapeHtml(__('Deptos.')) ?>
                 </button>
             </li>
             <li class="<?= (strpos($currentUrl, 'customer/account') !== false) ? 'active' : '' ?>">

@@ -2,17 +2,13 @@
 declare(strict_types=1);
 /**
  * Newsletter Subscribe Form — AWA_Custom override
- * Fix: form_key CSRF token ausente (bug audit 2026-04-27).
  *
  * @var \Magento\Newsletter\Block\Subscribe $block
  * @var \Magento\Framework\Escaper $escaper
  */
-$escaper = $block->getData('escaper')
-    ?? \Magento\Framework\App\ObjectManager::getInstance()
-        ->get(\Magento\Framework\Escaper::class);
 ?>
 <div class="newsletter-footer">
-    <label class="visually-hidden" for="newsletter"><?= $escaper->escapeHtml(__('Receba nossas novidades')) ?></label>
+    <label class="visually-hidden" for="newsletter"><?= $escaper->escapeHtml(__('E-mail para novidades')) ?></label>
     <form class="form subscribe"
           novalidate
           action="<?= $escaper->escapeUrl($block->getFormActionUrl()) ?>"
@@ -25,18 +21,37 @@ $escaper = $block->getData('escaper')
                 <input name="email"
                        type="email"
                        id="newsletter"
-                       placeholder="<?= $escaper->escapeHtmlAttr(__('Seu endereço de e-mail...')) ?>"
+                       maxlength="254"
+                       placeholder="<?= $escaper->escapeHtmlAttr(__('seu@email.com')) ?>"
                        data-validate="{required:true, 'validate-email':true}"
-                       aria-label="<?= $escaper->escapeHtmlAttr(__('Endereço de e-mail para newsletter')) ?>"
-                       autocomplete="email"/>
+                       aria-label="<?= $escaper->escapeHtmlAttr(__('Seu e-mail')) ?>"
+                       autocomplete="email"
+                       inputmode="email"
+                       spellcheck="false"/>
             </div>
             <div class="actions">
+                <?php /* A11Y-001 (2026-07-04): sem aria-label aqui — o texto visivel
+                   "Receber novidades" ja e um nome acessivel claro e suficiente;
+                   o aria-label anterior ("Cadastrar e-mail na newsletter") nao
+                   compartilhava nenhuma substring com o texto visivel
+                   (label-content-name-mismatch, axe-core/Lighthouse). O title
+                   permanece como dica visual complementar (nao define o nome
+                   acessivel quando ha conteudo de texto no elemento). */ ?>
                 <button class="action subscribe primary"
-                        title="<?= $escaper->escapeHtmlAttr(__('Assinar newsletter')) ?>"
+                        title="<?= $escaper->escapeHtmlAttr(__('Cadastrar e-mail na newsletter')) ?>"
                         type="submit">
-                    <?= $escaper->escapeHtml(__('Assinar')) ?>
+                    <?= $escaper->escapeHtml(__('Receber novidades')) ?>
                 </button>
             </div>
         </div>
     </form>
 </div>
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_Customer/js/block-submit-on-send": {
+            "formId": "newsletter-validate-detail"
+        }
+    }
+}
+</script>

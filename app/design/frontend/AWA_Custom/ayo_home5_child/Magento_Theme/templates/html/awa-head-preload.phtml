@@ -151,7 +151,7 @@ text-wrap: balance;
 <?php
     $__l2cCssUrl = $block->getViewFileUrl('GrupoAwamotos_B2B::css/product/login-to-cart.css');
     // P4b: crítico home em arquivo externo (cacheável) — antes ~43KB inline no HTML/FPC
-    $__criticalHomeCssUrl = $block->getViewFileUrl('css/awa-head-preload-critical-home.min.css') . '?v=20260618-corp-grid';
+    $__criticalHomeCssUrl = $block->getViewFileUrl('css/awa-head-preload-critical-home.min.css') . '?v=20260702-cart-icon-fix';
     /* first-paint + header critical: awa-home-critical-stack.phtml (cms_index_index) */
 ?>
 <!-- awa-head-preload-critical-home: async stagger abaixo (anti-FOUC inline cobre 1º paint) -->
@@ -281,7 +281,7 @@ body .page-wrapper .page_footer .footer-container,body .page-wrapper .page_foote
 .wrapper_slider.hidden-xs .awa-hero-swiper .swiper-slide,.wrapper_slider:not(.visible-xs) .awa-hero-swiper .swiper-slide{display:block!important;flex-direction:unset!important}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .wrapper_slider:not(.visible-xs){min-height:0!important;padding-inline:0!important;overflow:hidden!important;background:transparent!important}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:0!important;padding:clamp(8px,1.2vw,14px)!important;box-sizing:border-box!important;overflow:hidden!important;background:transparent!important}
-html body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer):not(.awa-footer--dark) .footer-container :is(p.awa-footer-atendimento__label,p.awa-footer-atendimento__label--social){color:var(--head-preload-footer-muted,#666)!important}
+html body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer):not(.awa-footer--dark) .footer-container :is(p.awa-footer-atendimento__label,p.awa-footer-atendimento__label--social){color:color-mix(in srgb,var(--awa-text-inverse,white) 76%,transparent)!important}
 /* Homepage: swiper pre-init (previne h=1260px antes do IntersectionObserver) */
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized){max-height:320px;overflow:hidden}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized)>.swiper-wrapper{display:flex;flex-wrap:nowrap;gap:16px}
@@ -969,6 +969,12 @@ html body#html-body.catalog-product-view .page-main .product.media .gallery-plac
 }
 </style>
 <?php endif; ?>
+<?php /* Visual Autopilot 2026-07-02: script de compensação --awa-scrollbar-w movido
+         para awa-scripts.phtml (before.body.end) — GrupoAwamotos\Theme\Plugin\Response\
+         OptimizeHeadStylesPlugin reescreve/descarta <style>/<script> ad-hoc injetados
+         aqui no <head> (confirmado ao vivo: nem um <!-- comentário --> de teste
+         sobreviveu na resposta HTML final). Ver awa-scripts.phtml para a implementação
+         real e awa-home-standardize-terminal-wins-2026-06-09.css para o consumo da var. */ ?>
 <?php /* P9: hero preload único em awa-hero-preload.phtml (cms_index_index) — evita 4× link duplicado */ ?>
 <!-- AWA Head Preload — Preconnect (precedência sobre dns-prefetch) -->
 <?php foreach ($preconnect as $origin): ?>
@@ -1340,7 +1346,7 @@ endif; ?>
     $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.min.css');
     /* Home: carousel CSS async imediato — gate escondia visual Swiper até interação */
     ($__emitDeferredCss)($__carouselBundleUrl, false, false, false);
-    $__shelfCarouselUrl = $block->getViewFileUrl('css/awa-shelf-carousel.min.css') . '?v=20260622-carousel-css-pro-v4';
+    $__shelfCarouselUrl = $block->getViewFileUrl('css/awa-shelf-carousel.min.css') . '?v=20260703-flexbasis-gap-fix';
     ?>
     <?php /* Scroll-snap + audit polish critical (merged 2026-06-10 — −1 style tag) */ ?>
     <style id="awa-home-shelf-audit-critical">
@@ -1348,7 +1354,7 @@ endif; ?>
     .awa-shelf--carousel .awa-carousel__viewport::-webkit-scrollbar{display:none}
     .awa-shelf--carousel .awa-carousel__viewport>:is(ul.owl.awa-carousel__track,.awa-carousel__track){max-block-size:none!important;overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important}
     html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.rokan-bestseller,.rokan-newproduct,.rokan-featuredproduct,.rokan-onsaleproduct,.rokan-toprate,.rokan-mostviewed).awa-shelf.awa-shelf--carousel{overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important}
-    .awa-shelf--carousel .awa-carousel__track{display:flex!important;flex-wrap:nowrap!important;width:auto;max-width:none;align-items:stretch}
+    .awa-shelf--carousel .awa-carousel__track{display:flex!important;flex-wrap:nowrap!important;position:static!important;inset:auto!important;z-index:auto!important;width:auto;max-width:none;margin:0!important;padding:0!important;align-items:stretch;background:transparent!important;background-color:transparent!important;color:inherit!important;border-radius:0!important;box-shadow:none!important;font-size:inherit!important}
     .awa-shelf--carousel .awa-carousel__track>.awa-carousel__slide,.awa-shelf--carousel .awa-carousel__track>.swiper-slide,.awa-shelf--carousel .awa-carousel__track>li.item{flex:0 0 87%!important;max-width:87%!important;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column}
     @media(min-width:480px){.awa-shelf--carousel .awa-carousel__track>.awa-carousel__slide,.awa-shelf--carousel .awa-carousel__track>.swiper-slide,.awa-shelf--carousel .awa-carousel__track>li.item{flex-basis:50%!important;max-width:50%!important}}
     @media(min-width:768px){.awa-shelf--carousel .awa-carousel__track>.awa-carousel__slide,.awa-shelf--carousel .awa-carousel__track>.swiper-slide,.awa-shelf--carousel .awa-carousel__track>li.item{flex-basis:33.333%!important;max-width:33.333%!important}}
@@ -1359,6 +1365,21 @@ endif; ?>
     #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-header-brand .logo a,
     #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-header-brand a.logo{align-items:center!important;display:inline-flex!important;justify-content:center!important;min-height:44px!important;min-width:44px!important;line-height:1!important}
     #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .footer-tags a{align-items:center!important;display:inline-flex!important;height:auto!important;justify-content:center!important;line-height:1.2!important;min-height:44px!important;min-width:44px!important;padding:12px 14px!important;text-align:center!important;text-decoration:none!important}
+    </style>
+    <?php /* A11Y-001 (2026-07-04): a cor branca da aba ativa das prateleiras
+       (.awa-home-niche-shelves__tab.is-active) só existia via awa-css-gate.js
+       (setProperty inline) ou via <style> injetado pelo mesmo script — ambos
+       dependem de JS já ter executado. As folhas CSS reais desta página são
+       carregadas assíncronas (media="print" → "all" no onload, ver
+       $__emitDeferredCss acima), então no primeiro paint (e em qualquer
+       auditoria que capture o DOM antes desse JS/CSS assíncrono assentar,
+       caso confirmado com Lighthouse + axe-core 4.12.1) o botão fica sem
+       nenhuma regra de cor aplicada, herdando o preto padrão do UA sobre o
+       fundo vermelho já pintado — falha de contraste (axe-core
+       "color-contrast"). Preto/branco fixos aqui, no <style> crítico síncrono
+       do <head>, elimina essa corrida por completo. */ ?>
+    <style id="awa-home-niche-tab-contrast-critical">
+    #html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-home-niche-shelves__tab.is-active{color:#ffffff!important}
     </style>
     <script id="awa-shelf-nav-slot-init">
     (function(d){'use strict';function mount(){d.querySelectorAll('.awa-carousel-section > .container').forEach(function(c){var h=c.querySelector(':scope > .awa-section-header, :scope > header.awa-section-header');if(!h||h.querySelector('.awa-owl-nav')){return;}var n=d.createElement('div');n.className='awa-owl-nav awa-owl-nav--header-slot';n.setAttribute('aria-hidden','true');n.innerHTML='<span class="awa-owl-nav__btn awa-owl-nav__btn--prev" aria-hidden="true"></span><span class="awa-owl-nav__btn awa-owl-nav__btn--next" aria-hidden="true"></span>';h.appendChild(n);});}if(d.readyState==='loading'){d.addEventListener('DOMContentLoaded',mount,{once:true});}else{mount();}})(document);
@@ -1379,7 +1400,7 @@ endif; ?>
         ($__emitDeferredCss)($__modernOptimizationsUrl, false, false, $isHomePage && !$__awaSkipHomeModernOptimizations);
     }
     /* Phase 3D.2.6 — Home visual bugfixes: BUG-MOB-HERO-003, BUG-B2B-BAR-004, BUG-MOB-TOP-002, BUG-MOB-SEARCH-001, BUG-BP-360-009 */
-    $__homeVisualBugfixesUrl = $block->getViewFileUrl('css/awa-home-visual-bugfixes-2026-06-28.css');
+    $__homeVisualBugfixesUrl = $block->getViewFileUrl('css/awa-home-visual-bugfixes-2026-06-28.min.css');
     ($__emitDeferredCss)($__homeVisualBugfixesUrl, false, false, false);
 endif; ?>
 <?php /* awa-vertical-menu-modern.css — substituído por awa-vertical-menu-stack (default.xml 2026-05-28).
@@ -1451,7 +1472,7 @@ endif; ?>
     /* standardize terminal wins: migrado → _awa-visual-consolidation (2026-06-12) */
     $__awaSkipHomeStandardizeTerminal = true;
     if (!$__awaSkipHomeStandardizeTerminal) {
-        $__homeStandardizeTerminalUrl = $block->getViewFileUrl('css/awa-home-standardize-terminal-wins-2026-06-09.min.css') . '?v=20260618-postaudit';
+        $__homeStandardizeTerminalUrl = $block->getViewFileUrl('css/awa-home-standardize-terminal-wins-2026-06-09.min.css') . '?v=20260702-hero-vw-scrollbar-fix';
         ($__emitDeferredCss)($__homeStandardizeTerminalUrl, false, false, $__homeCssInteractionGate);
     }
     /* opt19: audit bundle removido da home; regras consolidadas em polish-type + body-end. */
@@ -1726,11 +1747,11 @@ if (!$__skipLegacyFlowCss):
     /* UI simplify — penúltima camada (PDP + non-home); home: body-end sync via plugin */
     $__awaSkipHomeUiSimplify = true;
     if (!$isCatalogCssGate && !$isHomePage) {
-        $__uiSimplifyUrl = $block->getViewFileUrl('css/awa-ui-simplify-terminal.min.css') . '?v=20260618-vqa-mobile-r7';
+        $__uiSimplifyUrl = $block->getViewFileUrl('css/awa-ui-simplify-terminal.min.css') . '?v=20260702-cart-icon-fix';
         ($__emitDeferredCss)($__uiSimplifyUrl, false, false, false);
     }
     if (!$isCatalogCssGate && $isHomePage && !$__awaSkipHomeUiSimplify) {
-        $__uiSimplifyUrl = $block->getViewFileUrl('css/awa-ui-simplify-terminal.min.css') . '?v=20260618-vqa-mobile-r7';
+        $__uiSimplifyUrl = $block->getViewFileUrl('css/awa-ui-simplify-terminal.min.css') . '?v=20260702-cart-icon-fix';
         ($__emitDeferredCss)($__uiSimplifyUrl, false, false, $__homeIdleCssGate);
     }
     /* PDP: distill-lock terminal após ui-simplify (cards 8px + título px) */
@@ -1745,6 +1766,20 @@ endif;
 <?php if (!$isB2bAuthShell && !$isB2bAccountOperational): ?>
 <style id="awa-header-account-hierarchy-terminal-inline">
 /* ui-ux-pro-max — sync final-wins após bundles async (todas as páginas) */
+html body#html-body#html-body#html-body#html-body .page-wrapper #header :is(#awa-b2b-promo-bar, .top-header.awa-b2b-promo-bar, .awa-b2b-promo-bar[data-awa-header-utility]) {
+  background: var(--awa-bg-surface, #ffffff) !important;
+  background-color: var(--awa-bg-surface, #ffffff) !important;
+  background-image: none !important;
+  color: var(--awa-text-primary, #111827) !important;
+  border: 0 !important;
+}
+html body#html-body#html-body#html-body#html-body .page-wrapper #header :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__lead-long, .awa-b2b-promo-bar__tail, .awa-b2b-promo-bar__separator, .awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta strong) {
+  color: var(--awa-text-primary, #111827) !important;
+}
+html body#html-body#html-body#html-body#html-body .page-wrapper #header :is(button.awa-b2b-promo-close, #awa-b2b-promo-close) {
+  background: transparent !important;
+  color: var(--awa-text-secondary, var(--awa-text, #111827)) !important;
+}
 @media (min-width: 992px) {
   #html-body .page-wrapper .awa-site-header .awa-header-contact-links.awa-header-account-prompt,
   #html-body .page-wrapper .awa-site-header .awa-header-account-prompt {
@@ -1796,10 +1831,10 @@ endif;
     cursor: pointer !important;
   }
   #html-body .page-wrapper #header :is(#awa-b2b-promo-bar, .top-header.awa-b2b-promo-bar, .awa-b2b-promo-bar[data-awa-header-utility]) {
-    background: var(--awa-primary, var(--awa-red, #b73337)) !important;
-    background-color: var(--awa-primary, var(--awa-red, #b73337)) !important;
+    background: var(--awa-bg-surface, #ffffff) !important;
+    background-color: var(--awa-bg-surface, #ffffff) !important;
     background-image: none !important;
-    color: var(--awa-text-on-primary, var(--awa-text-inverse, #ffffff)) !important;
+    color: var(--awa-text-primary, #111827) !important;
     border: 0 !important;
     min-height: 44px !important;
     max-height: 44px !important;
@@ -1936,6 +1971,8 @@ html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-
 html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-hero-b2b-cta .awa-hero-benefits{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important;min-height:114px!important;margin:0!important;padding:0!important}
 html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .top-home-content--category-carousel{min-height:272px!important;padding:8px 16px!important}
 html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) #awa-home-pricing-notice{min-height:153px!important;padding:8px 16px!important}}
+html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .footer-bottom{margin-left:0!important;margin-right:0!important;width:auto!important;max-width:100%!important;box-sizing:border-box!important}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper :is(.page_footer,.page-footer) .footer-bottom{margin-inline:0!important;margin-left:0!important;margin-right:0!important;width:auto!important;max-width:100%!important;box-sizing:border-box!important}
 </style>
 <script id="awa-css-gate-queue" type="application/json"><?= /* @noEscape */ json_encode(array_values($__gatedCssUrls), JSON_UNESCAPED_SLASHES) ?></script>
 <link rel="stylesheet" href="<?= $block->escapeUrl($__l2cCssUrl) ?>" media="print" onload="this.media='all'" data-awa-l2c-async="1"/>
@@ -2006,6 +2043,23 @@ html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) #awa-
     intentEvents.forEach(function (eventName) {
         w.addEventListener(eventName, onGateIntent, { capture: true, passive: eventName !== 'keydown' });
     });
+
+    if (typeof w.requestIdleCallback === 'function') {
+      w.requestIdleCallback(function () {
+        loadGate(true);
+      }, { timeout: 1500 });
+    } else {
+      w.setTimeout(function () {
+        loadGate(true);
+      }, 1500);
+    }
+
+    w.addEventListener('load', function () {
+      w.setTimeout(function () {
+        loadGate(true);
+      }, 350);
+    }, { once: true });
+
 }(window, document));
 </script>
 <noscript>
@@ -2100,6 +2154,9 @@ html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper 
 </style>
 <style id="awa-header-vtex-clean-critical-20260622">
 /* Header clean critical: primeira pintura alinhada ao lock final 2026-06-22. */
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header #awa-b2b-promo-bar{background:#ffffff!important;background-color:#ffffff!important;background-image:none!important;color:var(--awa-text-primary,#111827)!important;border:0!important}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__tail,.awa-b2b-promo-bar__separator,.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta strong){color:var(--awa-text-primary,#111827)!important}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-close{background:transparent!important;color:var(--awa-text-secondary,var(--awa-text,#111827))!important}
 @media (min-width:992px){
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header{height:168px!important;min-height:168px!important;max-height:168px!important;overflow:visible!important;background:var(--awa-bg,Canvas)!important;position:relative!important;z-index:100120!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header :is(#header.header-container,#header.header-container>.header-content,#awa-b2b-promo-bar){display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:100%!important;max-width:none!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;padding:0!important;overflow:visible!important;background:var(--awa-primary)!important;color:var(--awa-text-on-primary,var(--awa-white,white))!important}
@@ -2151,6 +2208,307 @@ html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper 
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header :is(#header.header-container,#header.header-container>.header-content,#awa-b2b-promo-bar){height:48px!important;min-height:48px!important;max-height:48px!important;overflow:hidden!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .header-wrapper-sticky{height:112px!important;min-height:112px!important;max-height:112px!important;overflow:visible!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header #search_mini_form .awa-search-clear-btn{background:transparent!important;border:0!important;box-shadow:none!important;color:var(--awa-text-muted,color-mix(in srgb,CanvasText 58%,Canvas))!important}
+}
+</style>
+<style id="awa-home-product-design-audit-polish-20260629">
+/* Product Design audit lock: vence regras críticas antigas que ainda chegam depois do bundle async da home. */
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-hero-b2b-cta :is(.awa-hero-benefits__item,.awa-hero-benefits__copy,.awa-hero-benefits__title,.awa-hero-benefits__text,.awa-hero-benefits__link){
+  color:var(--awa-dark,CanvasText)!important;
+  text-shadow:none!important;
+}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__item{
+  background:var(--awa-surface,Canvas)!important;
+  border-color:var(--awa-border,color-mix(in srgb,CanvasText 14%,Canvas))!important;
+}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__title{
+  font-weight:700!important;
+}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__text{
+  color:var(--head-preload-footer-muted,var(--awa-dark,CanvasText))!important;
+}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper :is(.page_footer,.page-footer) .awa-footer-categories-expand,
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper :is(.page_footer,.page-footer) .awa-footer-categories-expand :is(h2,h3,strong,span,p,li,a,button,.awa-footer-categories-expand__title,.awa-footer-categories-expand__toggle){
+  color:var(--awa-dark,CanvasText)!important;
+  -webkit-text-fill-color:var(--awa-dark,CanvasText)!important;
+  text-shadow:none!important;
+}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper :is(.page_footer,.page-footer) .awa-footer-categories-expand :is(a,button,.awa-footer-categories-expand__toggle){
+  align-items:center!important;
+  display:inline-flex!important;
+  min-height:44px!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper :is(.page_footer,.page-footer) .awa-footer-categories-expand__toggle{
+  background:var(--awa-surface,Canvas)!important;
+  border-color:var(--awa-border,color-mix(in srgb,CanvasText 14%,Canvas))!important;
+}
+@media (max-width:767px){
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel header.awa-category-carousel__header.awa-section-header{
+    align-items:start!important;
+    display:grid!important;
+    gap:4px 12px!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    height:auto!important;
+    justify-content:stretch!important;
+    min-height:0!important;
+    padding-block:4px 8px!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel header.awa-category-carousel__header.awa-section-header .awa-section-header__left{
+    display:block!important;
+    grid-column:1!important;
+    height:auto!important;
+    min-height:0!important;
+    min-width:0!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel header.awa-category-carousel__header.awa-section-header :is(.awa-category-carousel__title,.awa-section-title){
+    display:block!important;
+    line-height:1.15!important;
+    margin:0!important;
+    white-space:normal!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel header.awa-category-carousel__header.awa-section-header .awa-category-carousel__subtitle{
+    display:block!important;
+    line-height:1.35!important;
+    margin-block:3px 0!important;
+    white-space:normal!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel header.awa-category-carousel__header.awa-section-header .awa-category-carousel__cta-link{
+    display:none!important;
+    height:0!important;
+    max-height:0!important;
+    max-width:0!important;
+    min-height:0!important;
+    min-width:0!important;
+    opacity:0!important;
+    overflow:hidden!important;
+    pointer-events:none!important;
+    visibility:hidden!important;
+    width:0!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home :is(.awa-shelf__header,.awa-section-header,.awa-carousel-section__header){
+    align-items:start!important;
+    display:grid!important;
+    gap:4px!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    height:auto!important;
+    justify-content:start!important;
+    min-height:0!important;
+    text-align:left!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home :is(.awa-shelf__header,.awa-section-header,.awa-carousel-section__header) .awa-section-header__left{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:2px!important;
+    min-width:0!important;
+    width:100%!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home :is(.awa-shelf__header,.awa-section-header,.awa-carousel-section__header) .awa-section-header__left > *{
+    clear:both!important;
+    float:none!important;
+    flex:0 0 auto!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    max-width:100%!important;
+    position:static!important;
+    transform:none!important;
+    width:100%!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home :is(.awa-shelf__header,.awa-section-header,.awa-carousel-section__header) .awa-owl-nav--header-slot{
+    display:none!important;
+    height:0!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    visibility:hidden!important;
+    width:0!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home :is(.awa-shelf__title,.awa-section-header__title,.awa-section-title){
+    color:var(--awa-dark,CanvasText)!important;
+    font-size:22px!important;
+    font-weight:800!important;
+    letter-spacing:0!important;
+    line-height:1.2!important;
+    margin:0!important;
+    text-align:left!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home :is(.awa-shelf__subtitle,.awa-section-header__subtitle){
+    color:var(--head-preload-footer-muted,var(--awa-dark,CanvasText))!important;
+    font-size:13px!important;
+    line-height:1.35!important;
+    margin:2px 0 0!important;
+    max-width:28ch!important;
+    text-align:left!important;
+    white-space:normal!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home :is(.awa-shelf__view-all,.awa-section-header__link):not(.awa-home-niche-shelves__view-all){
+    justify-self:start!important;
+    margin-top:6px!important;
+    max-width:100%!important;
+    position:static!important;
+    transform:none!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel{
+    box-sizing:border-box!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    padding:24px 16px!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel :is(h2,h3,strong,.awa-category-carousel__title,.awa-section-title,.awa-section-header__title){
+    color:var(--awa-dark,CanvasText)!important;
+    font-size:22px!important;
+    font-weight:800!important;
+    letter-spacing:0!important;
+    line-height:1.2!important;
+    text-align:left!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel .awa-category-carousel__subtitle{
+    color:var(--head-preload-footer-muted,var(--awa-dark,CanvasText))!important;
+    font-size:13px!important;
+    line-height:1.35!important;
+    max-width:24ch!important;
+    text-align:left!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel :is(.awa-category-carousel__viewport,.awa-carousel__viewport){
+    margin-top:12px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:0!important;
+    scroll-snap-type:x mandatory!important;
+    width:100%!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel :is(.awa-category-carousel__track,.awa-carousel__track){
+    align-items:stretch!important;
+    display:flex!important;
+    gap:12px!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    width:max-content!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel .awa-category-carousel__item{
+    box-sizing:border-box!important;
+    flex:0 0 136px!important;
+    height:144px!important;
+    min-height:144px!important;
+    padding:12px 10px!important;
+    scroll-snap-align:start!important;
+    width:136px!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel .awa-category-carousel__icon{
+    height:56px!important;
+    margin:0 auto 8px!important;
+    width:56px!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel .awa-category-carousel__label{
+    color:var(--awa-dark,CanvasText)!important;
+    font-size:14px!important;
+    font-weight:700!important;
+    line-height:1.25!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel .awa-category-carousel__count{
+    color:var(--head-preload-footer-muted,var(--awa-dark,CanvasText))!important;
+    font-size:12px!important;
+    line-height:1.25!important;
+    margin-top:4px!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel :is(.awa-category-carousel__prev,.awa-category-carousel__next){
+    display:none!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel :is(.awa-category-carousel__name,.awa-category-carousel__item-title,.awa-category-carousel__item strong){
+    color:var(--awa-dark,CanvasText)!important;
+    font-size:16px!important;
+    font-weight:700!important;
+    line-height:1.2!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel :is(.awa-category-carousel__products,.awa-category-carousel__item-count,.awa-category-carousel__item small){
+    color:var(--head-preload-footer-muted,var(--awa-dark,CanvasText))!important;
+    font-size:12px!important;
+    line-height:1.25!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home #awa-home-pricing-notice{
+    box-sizing:border-box!important;
+    margin:24px 16px!important;
+    max-width:calc(100% - 32px)!important;
+    min-height:0!important;
+    padding:16px!important;
+    width:auto!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home #awa-home-pricing-notice :is(.container,.awa-home-pricing-notice__inner){
+    box-sizing:border-box!important;
+    display:grid!important;
+    gap:12px!important;
+    height:auto!important;
+    min-height:0!important;
+    padding:0!important;
+    width:100%!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home #awa-home-pricing-notice svg{
+    height:40px!important;
+    width:40px!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home #awa-home-pricing-notice :is(p,span,a,strong,.awa-home-pricing-notice__text){
+    font-size:15px!important;
+    line-height:1.45!important;
+    margin:0!important;
+  }
+  html body#html-body#html-body.nav-open.awa-menu-drawer-open .page-wrapper .category-dropdown-items.is-awa-mobile-open .navigation.verticalmenu.side-verticalmenu,
+  html body#html-body#html-body.nav-open.awa-menu-drawer-open .page-wrapper .category-dropdown-items.is-awa-mobile-open .navigation.verticalmenu.side-verticalmenu .section-item-content{
+    display:block!important;
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    opacity:1!important;
+    overflow:visible!important;
+    visibility:visible!important;
+    width:100%!important;
+  }
+  html body#html-body#html-body.nav-open.awa-menu-drawer-open .page-wrapper .category-dropdown-items.is-awa-mobile-open .navigation.verticalmenu.side-verticalmenu > :is(.title-category-dropdown,.block-title,h2){
+    display:none!important;
+  }
+  html body#html-body#html-body.nav-open.awa-menu-drawer-open .page-wrapper .category-dropdown-items.is-awa-mobile-open .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown{
+    background:transparent!important;
+    display:block!important;
+    height:auto!important;
+    margin:8px 0 0!important;
+    max-height:none!important;
+    min-height:0!important;
+    opacity:1!important;
+    overflow:visible!important;
+    padding:0!important;
+    position:static!important;
+    transform:none!important;
+    visibility:visible!important;
+    width:100%!important;
+  }
+  html body#html-body#html-body.nav-open.awa-menu-drawer-open .page-wrapper .category-dropdown-items.is-awa-mobile-open .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown > li{
+    display:block!important;
+    height:auto!important;
+    min-height:44px!important;
+    opacity:1!important;
+    position:static!important;
+    visibility:visible!important;
+    width:100%!important;
+  }
+  html body#html-body#html-body.nav-open.awa-menu-drawer-open .page-wrapper .category-dropdown-items.is-awa-mobile-open .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown > li > a{
+    align-items:center!important;
+    color:var(--awa-dark,CanvasText)!important;
+    display:flex!important;
+    min-height:44px!important;
+    opacity:1!important;
+    padding:10px 16px!important;
+    text-decoration:none!important;
+    visibility:visible!important;
+    width:100%!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper :is(.page_footer,.page-footer) .awa-footer-categories-expand{
+    background:var(--awa-surface,Canvas)!important;
+    color:var(--awa-dark,CanvasText)!important;
+    -webkit-text-fill-color:var(--awa-dark,CanvasText)!important;
+  }
+  html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper :is(.page_footer,.page-footer) .awa-footer-categories-expand :is(a,button,.awa-footer-categories-expand__toggle){
+    color:var(--awa-dark,CanvasText)!important;
+    -webkit-text-fill-color:var(--awa-dark,CanvasText)!important;
+  }
 }
 </style>
 <script id="awa-overflow-polish-postinit-v8-script">

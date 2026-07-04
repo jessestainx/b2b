@@ -67,11 +67,16 @@ $isPasswordAuthHeader = in_array($fullActionName, ['customer_account_forgotpassw
 $authLoginUrl = rtrim($block->getUrl(''), '/') . '/b2b/account/login/';
 $checkoutSupportHtml = $headerHotlineHtml !== '' ? $headerHotlineHtml : '';
 $checkoutCartUrl = $block->getUrl('checkout/cart');
+$headerMode = $isPasswordAuthHeader
+	? 'auth'
+	: ($isCheckoutMinimalHeader ? 'checkout' : 'default');
 ?>
 <header role="banner"
         class="awa-site-header awa-header-professional<?= $escaper->escapeHtmlAttr($headerExperimentStateClass . $headerExperimentVariantClass) ?>"
         data-awa-component="site-header"
+        data-awa-site-header="true"
         data-awa-variant="ayo-home5"
+        data-awa-header-mode="<?= $escaper->escapeHtmlAttr($headerMode) ?>"
         data-awa-header-exp-enabled="<?= $headerExperimentEnabled ? '1' : '0' ?>"
         data-awa-header-exp-rollout="<?= $escaper->escapeHtmlAttr((string) $headerExperimentRollout) ?>"
         data-awa-header-exp-bucket="<?= $escaper->escapeHtmlAttr((string) $headerExperimentBucket) ?>"
@@ -80,7 +85,7 @@ $checkoutCartUrl = $block->getUrl('checkout/cart');
         data-awa-header-exp-active="<?= $headerExperimentActive ? '1' : '0' ?>">
 <?php /* AWA: header shell CSS extracted to awa-header-shell.css (loaded via awa-bundle-core) — see default_head_blocks.xml */ ?>
 <?php if ($isPasswordAuthHeader): ?>
-<div id="header" class="header-container awa-auth-header-shell" data-awa-auth-header-shell="true">
+<div id="header" class="header-container awa-auth-header-shell" data-awa-auth-header-shell="true" data-awa-header-shell="true" data-awa-header-variant="auth">
 	<div class="header-content awa-auth-header-content" data-awa-auth-header-content="true">
 		<div class="awa-auth-header-bar" data-awa-auth-header="true">
 			<div class="awa-auth-header-brand" data-awa-auth-brand="true">
@@ -101,7 +106,7 @@ $checkoutCartUrl = $block->getUrl('checkout/cart');
 	</div>
 </div>
 <?php elseif ($isCheckoutMinimalHeader): ?>
-<div id="header" class="header-container awa-checkout-header-shell" data-awa-header-shell="true">
+<div id="header" class="header-container awa-checkout-header-shell" data-awa-header-shell="true" data-awa-header-variant="checkout">
 	<div class="header-content awa-checkout-header-content" data-awa-header-content="true">
 		<div class="awa-checkout-header-bar" data-awa-checkout-header="true">
 		<div class="awa-checkout-header-brand" data-awa-checkout-brand="true">
@@ -122,7 +127,7 @@ $checkoutCartUrl = $block->getUrl('checkout/cart');
 	</div>
 </div>
 <?php else: ?>
-<div id="header" class="header-container" data-awa-header-shell="true">
+<div id="header" class="header-container" data-awa-header-shell="true" data-awa-header-variant="default">
 	<div class="header-content" data-awa-header-content="true">
 		<!-- ═══ B2B PROMO BAR (scrolls away) ═══ -->
 		<div class="top-header awa-utility-bar awa-b2b-promo-bar"
@@ -131,7 +136,29 @@ $checkoutCartUrl = $block->getUrl('checkout/cart');
 			role="complementary"
 			aria-label="<?= $escaper->escapeHtmlAttr(__('Ambiente exclusivo para empresas')) ?>">
 			<div class="awa-b2b-promo-bar__inner awa-b2b-promo-bar__layout">
-				<p class="awa-b2b-promo-bar__text"><span class="awa-b2b-promo-bar__lead"><?= $escaper->escapeHtml(__('Portal B2B para empresas.')) ?></span> <a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta"><?= $escaper->escapeHtml(__('Cadastrar empresa')) ?></a><span class="awa-b2b-promo-bar__tail">&nbsp;<?= $escaper->escapeHtml(__('Preços exclusivos no seu CNPJ.')) ?></span></p>
+				<p class="awa-b2b-promo-bar__text">
+						<span class="awa-b2b-promo-bar__lead">
+							<span class="awa-b2b-promo-bar__lead-long"><?= $escaper->escapeHtml(__('Vendas corporativas B2B')) ?></span>
+							<span class="awa-b2b-promo-bar__lead-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Vendas B2B')) ?></span>
+						</span>
+						<?php /* A11Y-001: aria-label fixo no <a> — as variantes -long/-short trocam de
+						   visibilidade por breakpoint (uma delas some via display:none, a outra
+						   carrega aria-hidden="true"), deixando o link sem nome acessível em
+						   algum ponto do responsivo (link-name, Lighthouse). O aria-label no
+						   próprio <a> garante nome acessível estável independente do breakpoint. */ ?>
+						<?php /* A11Y-001 (2026-07-04, revisão Lighthouse desktop): o aria-label
+						   fixo precisa conter, como substring literal, QUALQUER um dos dois
+						   textos visiveis alternados por CSS (.cta-long "Cadastre agora" no
+						   desktop, .cta-short "Cadastre-se" no mobile) — senao o texto
+						   visivel diverge do nome acessivel (label-content-name-mismatch,
+						   axe-core/Lighthouse). "Cadastre-se — Cadastro B2B" so continha o
+						   texto curto; o texto longo ficava orfao. Rearranjado para conter
+						   ambos como substrings literais. */ ?>
+						<a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta" aria-label="<?= $escaper->escapeHtmlAttr(__('Cadastre agora — Cadastre-se no Cadastro B2B')) ?>">
+							<strong class="awa-b2b-promo-bar__cta-long" aria-hidden="true"><?= $escaper->escapeHtml(__('Cadastre agora')) ?></strong>
+							<strong class="awa-b2b-promo-bar__cta-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Cadastre-se')) ?></strong>
+						</a>
+					</p>
 				<button type="button" id="awa-b2b-promo-close" class="awa-b2b-promo-close" aria-label="<?= $escaper->escapeHtmlAttr(__('Fechar')) ?>">&times;</button>
 			</div>
 		</div>
@@ -162,7 +189,7 @@ $checkoutCartUrl = $block->getUrl('checkout/cart');
 							<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand awa-header-brand-cell" data-awa-header-brand="true">
 								<?= /* @noEscape — Logo: bloco PHP confiável */ $this->getChildHtml('logo') ?>
 							</div>
-							<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span class="awa-cart-link-badge awa-badge-hidden" aria-hidden="true"></span><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
+							<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span class="awa-cart-link-badge awa-badge-hidden" aria-hidden="true"></span><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
 						</div>
 						<div class="awa-header-search-col top-search awa-header-actions" data-awa-header-search-row="true">
 							<?= /* @noEscape — Busca: bloco confiável */ $this->getChildHtml('topSearch') ?>
@@ -180,17 +207,21 @@ $checkoutCartUrl = $block->getUrl('checkout/cart');
                                                                 data-awa-header-minicart-shell="true"
                                                                 data-awa-minicart-ready="0"
                                                                 data-awa-minicart-expanded="0">
-								<a class="awa-header-cart-fallback"
+							<a class="awa-header-cart-fallback"
                                                                         data-awa-header-minicart-fallback="true"
-                                                                        href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>">
-									<svg class="awa-header-cart-fallback__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="var(--awa-primary, #A33B3B)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                                                        href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>"
+                                                                        aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir carrinho')) ?>"
+                                                                        aria-expanded="false"
+                                                                        aria-controls="awa-minicart-panel"
+                                                                        role="button">
+									<svg class="awa-header-cart-fallback__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="var(--awa-primary, #b73337)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
 										<circle cx="9" cy="20" r="1"/>
 										<circle cx="18" cy="20" r="1"/>
 										<path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"/>
 									</svg>
 									<span class="awa-sr-only"><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span>
 								</a>
-								<div class="mini-carts" data-awa-header-minicart-content="true">
+								<div class="mini-carts" id="awa-minicart-panel" data-awa-header-minicart-content="true">
 									<?= /* @noEscape — Minicart: bloco do core */ $this->getChildHtml('minicart') ?>
 								</div>
 							</div>
@@ -283,3 +314,7 @@ $_hdrIsHomePage = in_array('cms_index_index', $_hdrLayoutHandles, true);
          O colapso do nav mobile na homepage agora é tratado por CSS puro no <head>, antes do primeiro paint,
          sem necessidade de manipulação de estilos inline via JavaScript. */ ?>
 </header>
+<?php /* AWA Phase 3: CLS placeholder — reserves sticky wrapper height during position:fixed transition.
+         JS (awa-header-sticky.js ResizeObserver) updates --awa-header-height and toggles display
+         via body.awa-header-is-sticky. aria-hidden prevents screen reader exposure. */ ?>
+<div id="awa-header-cls-placeholder" aria-hidden="true"></div>

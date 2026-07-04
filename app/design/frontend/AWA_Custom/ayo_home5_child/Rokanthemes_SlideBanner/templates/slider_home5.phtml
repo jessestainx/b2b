@@ -3,11 +3,10 @@
  * Copyright © 2015 Magento. All rights reserved.
  * See COPYING.txt for license details.
  *
- * AWA SlideBanner Fix - 2026-02-10
- * - singleItem:true for hero banners (always 1 slide)
- * - autoHeight:true for SVG/mixed aspect ratios
- * - afterInit callback to trigger text animations
- * - touchDrag/mouseDrag for mobile swipe
+ * AWA SlideBanner Fix - 2026-06-02
+ * - Swiper runtime no frontend, mantendo dados/admin Rokanthemes
+ * - LCP picture responsivo preservado para o primeiro slide
+ * - desktop/mobile separados conforme tema Ayo Home5
  *
  * @var \Rokanthemes\SlideBanner\Block\Slider $block
  */
@@ -17,17 +16,19 @@ if ($banners = $block->getBannerCollection()):
     /** @var \GrupoAwamotos\Theme\ViewModel\HeroResponsiveImage|null $heroResponsive */
     $heroResponsive = $block->getData('hero_responsive_view_model');
     $slider = $block->getSlider();
-    $sliderId = $block->getSliderId();
+    $sliderId = (int) $slider->getId();
     $settings = $slider->getSliderSetting();
-    $owlConfig = [
-        'singleItem' => true,
+    $swiperConfig = [
+        'slidesPerView' => 1,
         'autoHeight' => true,
-        'lazyLoad' => true,
-        'touchDrag' => true,
-        'mouseDrag' => true,
-        'transitionStyle' => 'fade',
+        'effect' => 'fade',
+        'loop' => true,
+        'speed' => 500,
+        'navigation' => true,
+        'pagination' => true,
+        'autoplay' => 12000,
     ];
-    $booleanKeys = ['autoPlay', 'navigation', 'stopOnHover', 'pagination', 'scrollPerPage'];
+    $booleanKeys = ['navigation', 'stopOnHover', 'pagination'];
 
     $legacyHosts = ['srv1113343.hstgr.cloud', 'www.srv1113343.hstgr.cloud'];
     $baseUrl = rtrim((string) $block->getBaseUrl(), '/');
@@ -62,8 +63,15 @@ if ($banners = $block->getBannerCollection()):
     };
 
     foreach ($settings as $key => $value) {
+        if ($key === 'autoPlay') {
+            // AWA 2026-06-17 (impeccable go): autoplay mais lento — balcão > promo rotativa.
+            $delay = is_numeric($value) ? (int) $value : 12000;
+            $swiperConfig['autoplay'] = max(10000, $delay);
+            continue;
+        }
+
         if (in_array($key, $booleanKeys, true)) {
-            $owlConfig[$key] = ((int) $value) === 1;
+            $swiperConfig[$key] = ((int) $value) === 1;
             continue;
         }
 
@@ -71,31 +79,54 @@ if ($banners = $block->getBannerCollection()):
             $trimmed = trim($value);
 
             if (is_numeric($trimmed)) {
-                $owlConfig[$key] = (strpos($trimmed, '.') !== false) ? (float) $trimmed : (int) $trimmed;
+                if ($key === 'slideSpeed') {
+                    $swiperConfig['speed'] = max(0, (int) $trimmed);
+                } else {
+                    $swiperConfig[$key] = (strpos($trimmed, '.') !== false) ? (float) $trimmed : (int) $trimmed;
+                }
                 continue;
             }
         }
 
-        $owlConfig[$key] = $value;
+        $swiperConfig[$key] = $value;
     }
+    // AWA 2026-06-17: autoplay 12s por padrão (reduce-promo); admin pode override.
+    if (!isset($swiperConfig['autoplay']) || $swiperConfig['autoplay'] === false) {
+        $swiperConfig['autoplay'] = 12000;
+    }
+    // AWA hardening (2026-06-03): blinda slide_text malformado/truncado contra quebra de DOM
+    $renderSafeSlideText = static function ($rawText) use ($block): string {
+        $rendered = (string) $block->getContentText($rawText);
+        $lower = strtolower($rendered);
+        $openA = substr_count($lower, '<a ') + substr_count($lower, '<a>');
+        $closeA = substr_count($lower, '</a>');
+        $ltCount = substr_count($rendered, '<');
+        $gtCount = substr_count($rendered, '>');
+        if ($openA !== $closeA || $ltCount !== $gtCount) {
+            return $block->escapeHtml(trim(strip_tags($rendered)));
+        }
+        return $rendered;
+    };
 ?>
-<div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>">
-    <div class="owl">
+<div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>" data-awa-hero-variant="desktop">
+    <div class="swiper awa-hero-swiper awa-hero-slider awa-hero__viewport" role="region" aria-roledescription="carrossel" aria-label="<?= $block->escapeHtmlAttr(__('Destaques principais')) ?>">
+        <div class="swiper-wrapper awa-hero__track">
         <?php $__deskIdx = 0; foreach ($banners as $banner) { if ($banner->getSlideStatus() == '2') { continue; } $__isFirst = ($__deskIdx === 0); $__deskIdx++; ?>
-            <div class="banner_item">
+            <div class="banner_item swiper-slide awa-hero__slide">
                 <div class="banner_item_bg">
                     <?php
-                    $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
-                    if ($__isFirst && $heroResponsive) {
+                    $_rawAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: 'AWA Motos');
+                    $slideAlt = trim(preg_replace('/\s+/', ' ', strip_tags(str_replace('<', ' <', (string) $_rawAlt)))) ?: 'AWA Motos';
+                    if ($heroResponsive) {
                         $html = $heroResponsive->buildLcpPictureHtml(
                             (string) $banner->getSlideImage(),
                             $slideAlt,
-                            false,
+                            $__isFirst,
                             false
                         );
                     } else {
                         $html = $block->getImageElement($banner->getSlideImage(), $slideAlt, $__isFirst);
-                        if ($__isFirst && preg_match('/src="([^"]+)"/', $html, $_wm)) {
+                        if (preg_match('/src="([^"]+)"/', $html, $_wm)) {
                             $_webp = $_wm[1] . '.webp';
                             $html = '<picture>'
                                 . '<source type="image/webp" srcset="' . $block->escapeUrl($_webp) . '">'
@@ -105,39 +136,59 @@ if ($banners = $block->getBannerCollection()):
                     }
                     $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
-                        $html = '<a href="' . $block->escapeUrl($link) . '">' . $html . '</a>';
+                        $slideLinkLabel = trim(strip_tags((string) $slideAlt)) ?: (string) __('Destaque AWA Motos');
+                        $html = '<a href="' . $block->escapeUrl($link) . '" aria-label="'
+                            . $block->escapeHtmlAttr(__('Abrir destaque: %1', $slideLinkLabel))
+                            . '">' . $html . '</a>';
                     }
                     echo $html;
                     ?>
                 </div>
+                <?php if ($text = $banner->getSlideText()): ?>
                 <div class="text-banner">
-                    <?php if ($text = $banner->getSlideText()) {
-                        echo $block->getContentText($text);
-                    }
-                    ?>
+                    <?= $renderSafeSlideText($text) ?>
                 </div>
+                <?php endif; ?>
             </div>
         <?php } ?>
+        </div>
+        <button class="awa-hero-swiper__nav awa-hero-swiper__nav--prev awa-hero__nav awa-hero__button awa-hero__button--prev swiper-button-prev" type="button" aria-label="<?= $block->escapeHtmlAttr(__('Slide anterior')) ?>">
+            <span aria-hidden="true">‹</span>
+        </button>
+        <button class="awa-hero-swiper__nav awa-hero-swiper__nav--next awa-hero__nav awa-hero__button awa-hero__button--next swiper-button-next" type="button" aria-label="<?= $block->escapeHtmlAttr(__('Próximo slide')) ?>">
+            <span aria-hidden="true">›</span>
+        </button>
+        <?php /* A11Y-001: sem aria-hidden aqui — o Swiper (clickable:true) popula esta div com <button> reais (um por slide, cada um com seu proprio aria-label "Ir para o slide N"); aria-hidden no container escondia esses botoes focaveis do leitor de tela (aria-hidden-focus, axe-core/Lighthouse). */ ?>
+        <div class="swiper-pagination awa-hero__pagination"></div>
+        <button class="awa-hero-pause-btn awa-hero__pause" type="button"
+                aria-label="<?= $block->escapeHtmlAttr(__('Pausar apresentação')) ?>"
+                aria-pressed="false"
+                data-pause-label="<?= $block->escapeHtmlAttr(__('Pausar apresentação')) ?>"
+                data-resume-label="<?= $block->escapeHtmlAttr(__('Retomar apresentação')) ?>">
+            <span class="awa-hero-pause-btn__icon" aria-hidden="true">&#9646;&#9646;</span>
+        </button>
     </div>
 </div>
-<div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
-    <div class="owl">
+<div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile" data-awa-hero-variant="mobile">
+    <div class="swiper awa-hero-swiper awa-hero-slider awa-hero__viewport" role="region" aria-roledescription="carrossel" aria-label="<?= $block->escapeHtmlAttr(__('Destaques principais mobile')) ?>">
+        <div class="swiper-wrapper awa-hero__track">
         <?php $__mobIdx = 0; foreach ($banners as $banner) { if ($banner->getSlideStatus() == '2') { continue; } $__isFirstMob = ($__mobIdx === 0); $__mobIdx++; ?>
-            <div class="banner_item">
+            <div class="banner_item swiper-slide awa-hero__slide">
                 <div class="banner_item_bg">
                     <?php
-                    $slideAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: '');
+                    $_rawAlt = $banner->getSlideText() ?: ($banner->getSlideTitle() ?: 'AWA Motos');
+                    $slideAlt = trim(preg_replace('/\s+/', ' ', strip_tags(str_replace('<', ' <', (string) $_rawAlt)))) ?: 'AWA Motos';
                     $_mobSrc = $banner->getSlideImageMobile() ?: $banner->getSlideImage();
-                    if ($__isFirstMob && $heroResponsive) {
+                    if ($heroResponsive) {
                         $html = $heroResponsive->buildLcpPictureHtml(
                             (string) $_mobSrc,
                             $slideAlt,
-                            true,
+                            $__isFirstMob,
                             true
                         );
                     } else {
                         $html = $block->getImageElementMobile($_mobSrc, $slideAlt, $__isFirstMob);
-                        if ($__isFirstMob && preg_match('/src="([^"]+)"/', $html, $_wmm)) {
+                        if (preg_match('/src="([^"]+)"/', $html, $_wmm)) {
                             $_webpm = $_wmm[1] . '.webp';
                             $html = '<picture>'
                                 . '<source type="image/webp" srcset="' . $block->escapeUrl($_webpm) . '">'
@@ -147,22 +198,115 @@ if ($banners = $block->getBannerCollection()):
                     }
                     $link = $resolveSlideLink($banner->getSlideLink());
                     if ($link !== '') {
-                        $html = '<a href="' . $block->escapeUrl($link) . '">' . $html . '</a>';
+                        $slideLinkLabel = trim(strip_tags((string) $slideAlt)) ?: (string) __('Destaque AWA Motos');
+                        $html = '<a href="' . $block->escapeUrl($link) . '" aria-label="'
+                            . $block->escapeHtmlAttr(__('Abrir destaque: %1', $slideLinkLabel))
+                            . '">' . $html . '</a>';
                     }
                     echo $html;
                     ?>
                 </div>
+                <?php if ($text = $banner->getSlideText()): ?>
                 <div class="text-banner">
-                    <?php if ($text = $banner->getSlideText()) {
-                        echo $block->getContentText($text);
-                    }
-                    ?>
+                    <?= $renderSafeSlideText($text) ?>
                 </div>
+                <?php endif; ?>
             </div>
         <?php } ?>
+        </div>
+        <button class="awa-hero-swiper__nav awa-hero-swiper__nav--prev awa-hero__nav awa-hero__button awa-hero__button--prev swiper-button-prev" type="button" aria-label="<?= $block->escapeHtmlAttr(__('Slide anterior')) ?>">
+            <span aria-hidden="true">‹</span>
+        </button>
+        <button class="awa-hero-swiper__nav awa-hero-swiper__nav--next awa-hero__nav awa-hero__button awa-hero__button--next swiper-button-next" type="button" aria-label="<?= $block->escapeHtmlAttr(__('Próximo slide')) ?>">
+            <span aria-hidden="true">›</span>
+        </button>
+        <?php /* A11Y-001: sem aria-hidden aqui — o Swiper (clickable:true) popula esta div com <button> reais (um por slide, cada um com seu proprio aria-label "Ir para o slide N"); aria-hidden no container escondia esses botoes focaveis do leitor de tela (aria-hidden-focus, axe-core/Lighthouse). */ ?>
+        <div class="swiper-pagination awa-hero__pagination"></div>
+        <button class="awa-hero-pause-btn awa-hero__pause" type="button"
+                aria-label="<?= $block->escapeHtmlAttr(__('Pausar apresentação')) ?>"
+                aria-pressed="false"
+                data-pause-label="<?= $block->escapeHtmlAttr(__('Pausar apresentação')) ?>"
+                data-resume-label="<?= $block->escapeHtmlAttr(__('Retomar apresentação')) ?>">
+            <span class="awa-hero-pause-btn__icon" aria-hidden="true">&#9646;&#9646;</span>
+        </button>
     </div>
 </div>
 <script type="application/json" id="awa-hero-slider-config-<?= (int) $sliderId ?>">
-<?= /* @noEscape */ json_encode(['sliderId' => (int) $sliderId, 'owlConfig' => $owlConfig], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+<?= /* @noEscape */ json_encode(['sliderId' => (int) $sliderId, 'swiperConfig' => $swiperConfig], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+</script>
+<script>
+(function (w, d) {
+    'use strict';
+
+    var configId = 'awa-hero-slider-config-<?= (int) $sliderId ?>';
+    var maxAttempts = 120;
+    var delayMs = 250;
+
+    function schedule(fn) {
+        if ('requestAnimationFrame' in w) {
+            w.requestAnimationFrame(fn);
+            return;
+        }
+
+        w.setTimeout(fn, 0);
+    }
+
+    function tryInit(attempt) {
+        var node = d.getElementById(configId);
+        var payload;
+
+        if (!node || node.getAttribute('data-awa-hero-inline-bootstrap') === '1') {
+            return;
+        }
+
+        if (typeof w.require !== 'function' || (w.require && w.require._awaStub)) {
+            if (attempt < maxAttempts) {
+                w.setTimeout(function () {
+                    tryInit(attempt + 1);
+                }, delayMs);
+            }
+            return;
+        }
+
+        try {
+            payload = JSON.parse(node.textContent || '{}');
+        } catch (e) {
+            return;
+        }
+
+        if (!payload || payload.sliderId === undefined || payload.sliderId === null) {
+            return;
+        }
+
+        node.setAttribute('data-awa-hero-inline-bootstrap', '1');
+        w.require(['awaHeroSlider'], function (initHero) {
+            try {
+                initHero(payload);
+            } catch (e) {
+                node.removeAttribute('data-awa-hero-inline-bootstrap');
+            }
+        }, function () {
+            node.removeAttribute('data-awa-hero-inline-bootstrap');
+            if (attempt < maxAttempts) {
+                w.setTimeout(function () {
+                    tryInit(attempt + 1);
+                }, delayMs);
+            }
+        });
+    }
+
+    function boot() {
+        schedule(function () {
+            tryInit(0);
+        });
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', boot, { once: true });
+        return;
+    }
+
+    boot();
+})(window, document);
 </script>
 <?php endif; ?>

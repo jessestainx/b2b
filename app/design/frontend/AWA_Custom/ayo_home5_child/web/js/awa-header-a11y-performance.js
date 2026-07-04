@@ -121,6 +121,27 @@
         }
     }
 
+    /**
+     * A11Y-001 (2026-07-04, revisão Lighthouse desktop): o widget core
+     * mage/tabs.js (acionado por data-mage-init='{"tabs":...}' em
+     * sections.phtml) aplica role="tablist" no container de navegação e
+     * role="presentation" nos .section-item-title filhos — combinação que
+     * viola aria-required-children (tablist exige filhos com role="tab").
+     * Esta navegação não implementa o padrão ARIA de abas completo (sem
+     * aria-selected, sem navegação por setas entre painéis), então a
+     * correção correta não é adicionar role="tab" (o que exigiria replicar
+     * todo o padrão de teclado), e sim remover o role="tablist" incompleto
+     * aplicado pelo widget — nenhuma funcionalidade é perdida, pois a
+     * expansão/recolhimento do conteúdo continua via classes CSS e os links
+     * reais dentro do menu continuam navegáveis normalmente.
+     */
+    function fixNavTablistRole() {
+        let navShell = resolveDrawerShell();
+        if (navShell && navShell.getAttribute('role') === 'tablist') {
+            navShell.removeAttribute('role');
+        }
+    }
+
     function resolveDrawerShell() {
         return document.querySelector('[data-awa-nav-shell="true"]')
             || document.getElementById('awa-category-navigation')
@@ -600,6 +621,7 @@
         root.setAttribute('data-awa-search-root', 'true');
 
         let input = root.querySelector('[data-awa-search-input="true"], #search, input[name="q"]');
+        let mirasvitPanel = root.querySelector('.mst-searchautocomplete__autocomplete');
         let panel = root.querySelector('[data-awa-search-panel="true"], #search_autocomplete, .searchsuite-autocomplete, .mst-searchautocomplete__autocomplete');
         let status = ensureSearchStatus(root, input);
 
@@ -625,21 +647,70 @@
 
         let debounceTimer;
         let busyTimer;
+        let form = root.querySelector('[data-awa-search-form="true"], #search_mini_form, form.minisearch');
+        let submitBtn = form ? form.querySelector('button[type="submit"], .actions .action.search') : null;
+
+        function getActivePanel() {
+            if (mirasvitPanel && (mirasvitPanel.classList.contains('_active') ||
+                mirasvitPanel.querySelectorAll('.mst-searchautocomplete__item, li').length > 0)) {
+                return mirasvitPanel;
+            }
+
+            return panel;
+        }
 
         function getSuggestionCount() {
-            return panel.querySelectorAll('li, [role="option"], a').length;
+            let activePanel = getActivePanel();
+            return activePanel.querySelectorAll('.mst-searchautocomplete__item, li, [role="option"]').length;
+        }
+
+        function isSearchFocused() {
+            return root.contains(document.activeElement);
+        }
+
+        function syncSearchSubmitState() {
+            let query = normalizeText(input.value || '');
+            let shouldEnable = query.length > 0;
+
+            if (!submitBtn) {
+                return;
+            }
+
+            submitBtn.disabled = !shouldEnable;
+            submitBtn.setAttribute('aria-disabled', shouldEnable ? 'false' : 'true');
+        }
+
+        function promotePanelIfNeeded() {
+            let activePanel = getActivePanel();
+
+            if (!isSearchFocused() || getSuggestionCount() <= 0) {
+                return false;
+            }
+
+            activePanel.classList.add('is-open', 'has-results');
+            activePanel.removeAttribute('hidden');
+            activePanel.setAttribute('aria-hidden', 'false');
+            if (form) {
+                form.classList.add('is-open', 'has-results');
+            }
+            if (input && activePanel.id) {
+                input.setAttribute('aria-controls', activePanel.id);
+            }
+            return true;
         }
 
         function syncExpanded() {
             // If Mirasvit has set _active, trust it as the source of truth for visibility.
             let isMirasvitActive = panel.classList.contains('_active');
-            let hidden = !isMirasvitActive && (panel.hasAttribute('hidden') || panel.getAttribute('aria-hidden') === 'true');
             let hasItems = isMirasvitActive || getSuggestionCount() > 0;
-            let expanded = !hidden && hasItems;
+            let focused = isSearchFocused();
+            let expanded = hasItems && focused && (promotePanelIfNeeded() || isMirasvitActive || panel.classList.contains('is-open'));
             let query = normalizeText(input.value || '');
             input.setAttribute('aria-expanded', expanded ? 'true' : 'false');
             panel.setAttribute('aria-hidden', expanded ? 'false' : 'true');
-            if (!expanded && !panel.hasAttribute('hidden')) {
+            if (expanded) {
+                panel.removeAttribute('hidden');
+            } else if (!panel.hasAttribute('hidden')) {
                 panel.setAttribute('hidden', '');
             }
             if (status) {
@@ -670,6 +741,7 @@
         }
 
         addListener(input, 'input', function () {
+            syncSearchSubmitState();
             markSearching();
             if (debounceTimer) {
                 window.clearTimeout(debounceTimer);
@@ -680,13 +752,13 @@
         }, { passive: true });
 
         addListener(input, 'focus', function () {
+            syncSearchSubmitState();
             pushDataLayer('awa_header_search_focus', {
                 experiment_name: 'header_progressive'
             });
             raf(syncExpanded);
         }, { passive: true });
 
-        let form = root.querySelector('[data-awa-search-form="true"]');
         if (form) {
             addListener(form, 'submit', function () {
                 pushDataLayer('awa_header_search_submit', {
@@ -699,6 +771,14 @@
             if (!root.contains(event.target)) {
                 input.setAttribute('aria-expanded', 'false');
                 panel.setAttribute('aria-hidden', 'true');
+                panel.setAttribute('hidden', '');
+                panel.classList.remove('is-open', 'has-results');
+                if (form) {
+                    form.classList.remove('is-open', 'has-results');
+                }
+                if (document.body) {
+                    document.body.classList.remove('searchautocomplete__active');
+                }
             }
         }, { capture: true });
 
@@ -707,6 +787,13 @@
                 input.setAttribute('aria-expanded', 'false');
                 panel.setAttribute('aria-hidden', 'true');
                 panel.setAttribute('hidden', '');
+                panel.classList.remove('is-open', 'has-results');
+                if (form) {
+                    form.classList.remove('is-open', 'has-results');
+                }
+                if (document.body) {
+                    document.body.classList.remove('searchautocomplete__active');
+                }
                 root.setAttribute('aria-busy', 'false');
                 root.classList.remove('is-searching');
             }
@@ -724,6 +811,7 @@
             });
         }
 
+        syncSearchSubmitState();
         syncExpanded();
     }
 
@@ -817,6 +905,19 @@
             return;
         }
 
+        /* Guarda de idempotência: evita escrever no atributo style quando o
+         * valor já é o esperado. Sem isso, funções chamadas repetidamente por
+         * um MutationObserver (ex.: normalizeDesktopHeaderVisualParity) geram
+         * uma nova mutação a cada execução e realimentam o próprio observer,
+         * criando um loop que nunca termina (visto no PageSpeed: TBT 11s+,
+         * "Style & Layout" dominando o main-thread work). */
+        if (
+            element.style.getPropertyValue(property) === value
+            && element.style.getPropertyPriority(property) === 'important'
+        ) {
+            return;
+        }
+
         element.style.setProperty(property, value, 'important');
     }
 
@@ -826,6 +927,9 @@
         }
 
         properties.forEach(function (property) {
+            if (!element.style.getPropertyValue(property)) {
+                return;
+            }
             element.style.removeProperty(property);
         });
     }
@@ -1106,7 +1210,7 @@
         list = nav ? nav.querySelector('.togge-menu.list-category-dropdown') : null;
         trigger = nav ? nav.querySelector('.title-category-dropdown.our_categories') : null;
 
-        if (nav && list) {
+        if (nav && list && !window.__AWA_MENU_V2) {
             let menuIsOpen = nav.classList.contains('menu-open')
                 || nav.classList.contains('vmm-open')
                 || list.classList.contains('menu-open')
@@ -1149,30 +1253,74 @@
         if (quickWrap) {
             setImportantStyle(quickWrap, 'display', 'flex');
             setImportantStyle(quickWrap, 'align-items', 'center');
+            setImportantStyle(quickWrap, 'position', 'static');
+            setImportantStyle(quickWrap, 'left', 'auto');
+            setImportantStyle(quickWrap, 'right', 'auto');
+            setImportantStyle(quickWrap, 'inset-inline-start', 'auto');
+            setImportantStyle(quickWrap, 'inset-inline-end', 'auto');
+            setImportantStyle(quickWrap, 'width', 'auto');
+            setImportantStyle(quickWrap, 'max-width', '100%');
+            setImportantStyle(quickWrap, 'min-width', '0');
+            setImportantStyle(quickWrap, 'overflow', 'hidden');
+            setImportantStyle(quickWrap, 'grid-column', '3');
+            setImportantStyle(quickWrap, 'justify-self', 'end');
+            setImportantStyle(quickWrap, 'margin', '0');
         }
 
         if (quickList) {
             setImportantStyle(quickList, 'display', 'flex');
             setImportantStyle(quickList, 'align-items', 'center');
+            setImportantStyle(quickList, 'justify-content', 'flex-end');
+            setImportantStyle(quickList, 'max-width', '100%');
+            setImportantStyle(quickList, 'min-width', '0');
+            setImportantStyle(quickList, 'overflow', 'hidden');
+            setImportantStyle(quickList, 'padding-left', '0');
+            setImportantStyle(quickList, 'padding-right', '0');
+        }
+
+        let accountIconLink = document.querySelector('.awa-header-account-prompt__icon');
+        let accountIconSvg = accountIconLink ? accountIconLink.querySelector('svg') : null;
+        if (accountIconLink) {
+            setImportantStyle(accountIconLink, 'display', 'inline-flex');
+            setImportantStyle(accountIconLink, 'align-items', 'center');
+            setImportantStyle(accountIconLink, 'justify-content', 'center');
+            setImportantStyle(accountIconLink, 'width', '44px');
+            setImportantStyle(accountIconLink, 'min-width', '44px');
+            setImportantStyle(accountIconLink, 'height', '44px');
+            setImportantStyle(accountIconLink, 'min-height', '44px');
+            setImportantStyle(accountIconLink, 'padding', '0');
+            setImportantStyle(accountIconLink, 'overflow', 'hidden');
+            setImportantStyle(accountIconLink, 'box-sizing', 'border-box');
+            setImportantStyle(accountIconLink, 'border-radius', '6px');
+        }
+        if (accountIconSvg) {
+            setImportantStyle(accountIconSvg, 'width', '24px');
+            setImportantStyle(accountIconSvg, 'height', '24px');
         }
 
         searchBtn = document.querySelector('#search_mini_form .actions .action.search');
         searchSvg = searchBtn ? searchBtn.querySelector('svg') : null;
 
-        if (searchBtn && window.innerWidth >= 992) {
+        if (searchBtn) {
             setImportantStyle(searchBtn, 'display', 'inline-flex');
             setImportantStyle(searchBtn, 'align-items', 'center');
             setImportantStyle(searchBtn, 'justify-content', 'center');
-            setImportantStyle(searchBtn, 'background', 'var(--awa-primary)');
-            setImportantStyle(searchBtn, 'background-color', 'var(--awa-primary)');
-            setImportantStyle(searchBtn, 'color', 'var(--awa-white, #fff)');
-            setImportantStyle(searchBtn, 'border-left', '1px solid var(--awa-border)');
+            setImportantStyle(searchBtn, 'width', '44px');
+            setImportantStyle(searchBtn, 'min-width', '44px');
+            setImportantStyle(searchBtn, 'height', '44px');
+            setImportantStyle(searchBtn, 'min-height', '44px');
+            setImportantStyle(searchBtn, 'background', 'transparent');
+            setImportantStyle(searchBtn, 'background-color', 'transparent');
+            setImportantStyle(searchBtn, 'color', 'var(--awa-primary)');
+            setImportantStyle(searchBtn, 'border', '0');
+            setImportantStyle(searchBtn, 'border-left', '0');
             setImportantStyle(searchBtn, 'border-radius', '0');
+            setImportantStyle(searchBtn, 'box-shadow', 'none');
         }
 
-        if (searchSvg && window.innerWidth >= 992) {
-            setImportantStyle(searchSvg, 'stroke', 'var(--awa-white, #fff)');
-            setImportantStyle(searchSvg, 'color', 'var(--awa-white, #fff)');
+        if (searchSvg) {
+            setImportantStyle(searchSvg, 'stroke', 'var(--awa-primary)');
+            setImportantStyle(searchSvg, 'color', 'var(--awa-primary)');
             setImportantStyle(searchSvg, 'fill', 'none');
         }
 
@@ -1197,6 +1345,9 @@
     }
 
     let desktopHeaderParityQueued = false;
+    let desktopHeaderParityObserver = null;
+    let desktopHeaderParityObserverTarget = null;
+    let desktopHeaderParityObserverOptions = null;
 
     function scheduleDesktopHeaderVisualParity() {
         if (desktopHeaderParityQueued) {
@@ -1206,26 +1357,57 @@
         desktopHeaderParityQueued = true;
         raf(function () {
             desktopHeaderParityQueued = false;
+
+            /* Desconecta o observer antes de escrever estilos e reconecta logo
+             * depois: assim as próprias mutações causadas por este bloco nunca
+             * chegam ao callback do observer (elimina o loop mutation -> write
+             * -> mutation -> write que travava a thread principal). */
+            if (desktopHeaderParityObserver) {
+                desktopHeaderParityObserver.disconnect();
+            }
+
             normalizeDesktopHeaderVisualParity();
+
+            if (desktopHeaderParityObserver && desktopHeaderParityObserverTarget) {
+                desktopHeaderParityObserver.observe(
+                    desktopHeaderParityObserverTarget,
+                    desktopHeaderParityObserverOptions
+                );
+            }
         });
     }
 
     onReady(function () {
         let experiment = getExperimentConfig();
+        let isCartPage = document.body && document.body.classList.contains('checkout-cart-index');
 
         wireNavA11y(experiment);
         wireSearchA11y();
         wireHeaderClickTelemetry(experiment);
         wireDeferredBadges();
-        scheduleDesktopHeaderVisualParity();
 
-        addListener(window, 'resize', function () {
+        /* Retries: mage/tabs.js (widget core, fora do nosso controle de timing)
+         * pode aplicar role="tablist" antes OU depois deste script rodar,
+         * dependendo da ordem de resolução do RequireJS. Reforça em alguns
+         * instantes seguintes para cobrir ambos os casos sem MutationObserver
+         * permanente (custo desnecessário para um atributo que so muda 1x). */
+        fixNavTablistRole();
+        window.setTimeout(fixNavTablistRole, 300);
+        window.setTimeout(fixNavTablistRole, 1500);
+
+        // Carrinho mobile: parity + observer em style/class no header entrava em loop
+        // com cart-simplified-header (setProperty intercept) → aba sem resposta.
+        if (!isCartPage) {
             scheduleDesktopHeaderVisualParity();
-        }, { passive: true });
 
-        window.setTimeout(scheduleDesktopHeaderVisualParity, 250);
-        window.setTimeout(scheduleDesktopHeaderVisualParity, 1200);
-        window.setTimeout(scheduleDesktopHeaderVisualParity, 2800);
+            addListener(window, 'resize', function () {
+                scheduleDesktopHeaderVisualParity();
+            }, { passive: true });
+
+            window.setTimeout(scheduleDesktopHeaderVisualParity, 250);
+            window.setTimeout(scheduleDesktopHeaderVisualParity, 1200);
+            window.setTimeout(scheduleDesktopHeaderVisualParity, 2800);
+        }
 
         if (ENABLE_HOME_HEADER_COLLAPSE_GUARD) {
             guardHomeMobileHeaderCollapse();
@@ -1291,20 +1473,23 @@
             pushHeaderTelemetry('awa_header_minicart_click', experiment);
         }, { capture: true });
 
-        if (window.MutationObserver) {
+        if (!isCartPage && window.MutationObserver) {
             let headerScope = document.querySelector(
                 '.awa-site-header, #header.header-container, .page-header, header.page-header'
             );
 
             if (headerScope) {
-                new MutationObserver(function () {
-                    scheduleDesktopHeaderVisualParity();
-                }).observe(headerScope, {
+                desktopHeaderParityObserverTarget = headerScope;
+                desktopHeaderParityObserverOptions = {
                     attributes: true,
                     attributeFilter: ['class', 'style', 'aria-expanded', 'aria-hidden'],
                     childList: true,
                     subtree: true
+                };
+                desktopHeaderParityObserver = new MutationObserver(function () {
+                    scheduleDesktopHeaderVisualParity();
                 });
+                desktopHeaderParityObserver.observe(headerScope, desktopHeaderParityObserverOptions);
             }
         }
     });

@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 $whatsappText = rawurlencode((string) __('Olá, quero saber sobre condições B2B na AWA Motos.'));
 $whatsappUrl = 'https://wa.me/5516997367588?text=' . $whatsappText;
+$registerUrl = $block->getUrl('b2b/register');
 
 /** @var list<array{title: string, text: string, href: string|null, external: bool, icon: string}> $benefits */
 $benefits = [
@@ -50,36 +51,49 @@ $renderBenefitIcon = static function (string $icon): string {
 };
 ?>
 
-<section class="awa-hero-b2b-cta" aria-label="<?= $block->escapeHtmlAttr(__('Cadastro e benefícios B2B')) ?>">
-    <div class="awa-hero-b2b-cta__inner container">
-        <ul class="awa-hero-benefits" aria-label="<?= $block->escapeHtmlAttr(__('Benefícios B2B AWA Motos')) ?>">
+<section class="awa-hero-b2b-cta awa-section" aria-label="<?= $block->escapeHtmlAttr(__('Cadastro e benefícios B2B')) ?>">
+    <div class="awa-hero-b2b-cta__inner container awa-benefits__container awa-section__container">
+        <ul class="awa-hero-benefits awa-benefits__grid" aria-label="<?= $block->escapeHtmlAttr(__('Benefícios B2B AWA Motos')) ?>">
             <?php foreach ($benefits as $benefit): ?>
                 <?php
                 $isLink = ($benefit['href'] ?? null) !== null && ($benefit['href'] ?? '') !== '';
-                $itemClass = 'awa-hero-benefits__item' . ($isLink ? ' awa-hero-benefits__item--interactive' : '');
+                $itemClass = 'awa-hero-benefits__item awa-benefits__item' . ($isLink ? ' awa-hero-benefits__item--interactive' : '');
                 ?>
                 <li class="<?= $block->escapeHtmlAttr($itemClass) ?>">
                     <?php if ($isLink): ?>
                         <a href="<?= $block->escapeUrl((string) $benefit['href']) ?>"
-                           class="awa-hero-benefits__link"
+                           class="awa-hero-benefits__link awa-benefits__link"
                            <?php if ($benefit['external']): ?>
                                target="_blank"
                                rel="noopener noreferrer"
-                               aria-label="<?= $block->escapeHtmlAttr(__('Falar com vendedor no WhatsApp (abre em nova aba)')) ?>"
                            <?php endif; ?>>
                     <?php endif; ?>
-                    <span class="awa-hero-benefits__icon" aria-hidden="true">
+                    <span class="awa-hero-benefits__icon awa-benefits__icon" aria-hidden="true">
                         <?= /* @noEscape */ $renderBenefitIcon((string) ($benefit['icon'] ?? 'price')) ?>
                     </span>
-                    <span class="awa-hero-benefits__copy">
-                        <strong class="awa-hero-benefits__title"><?= $block->escapeHtml($benefit['title']) ?></strong>
-                        <span class="awa-hero-benefits__text"><?= $block->escapeHtml($benefit['text']) ?></span>
+                    <span class="awa-hero-benefits__copy awa-benefits__copy">
+                        <strong class="awa-hero-benefits__title awa-benefits__title"><?= $block->escapeHtml($benefit['title']) ?></strong>
+                        <span class="awa-hero-benefits__text awa-benefits__text"><?= $block->escapeHtml($benefit['text']) ?></span>
                     </span>
+                    <?php if ($isLink && $benefit['external']): ?>
+                        <?php /* A11Y-001: aviso "abre em nova aba" como texto real (nao aria-label)
+                           — o aria-label anterior nao continha o texto visivel (title/text) do
+                           link e falhava label-content-name-mismatch. Com .sr-only o nome
+                           acessivel passa a ser formado pelo proprio conteudo visivel + este
+                           complemento, sem risco de divergencia. */ ?>
+                        <span class="sr-only"><?= $block->escapeHtml(__('(abre em nova aba)')) ?></span>
+                    <?php endif; ?>
                     <?php if ($isLink): ?>
                         </a>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>
         </ul>
+        <div class="awa-hero-b2b-cta__actions">
+            <a class="awa-hero-b2b-cta__button action primary"
+               href="<?= $block->escapeUrl($registerUrl) ?>">
+                <?= $block->escapeHtml(__('Quero ser revendedor B2B')) ?>
+            </a>
+        </div>
     </div>
 </section>

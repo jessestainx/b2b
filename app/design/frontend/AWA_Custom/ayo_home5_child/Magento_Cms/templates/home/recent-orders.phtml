@@ -34,9 +34,13 @@ $layoutAnchorClass = $layoutAnchor === 'end'
                 <p class="awa-section-header__subtitle"><?= $block->escapeHtml(__('Últimos itens comprados')) ?></p>
             </div>
             <?php if ($state === \GrupoAwamotos\Theme\ViewModel\HomeRecentOrders::STATE_HAS_ITEMS): ?>
+                <?php /* A11Y-001 (2026-07-04): aria-label precisa conter o texto visivel
+                   "Ver pedidos" como substring (label-content-name-mismatch); mesmo
+                   padrao de bug encontrado e corrigido no CTA "Ver todos" de
+                   top-home.phtml — corrigido aqui preventivamente. */ ?>
                 <a href="<?= $block->escapeUrl($ordersUrl) ?>"
                    class="awa-section-header__link awa-shelf__view-all"
-                   aria-label="<?= $block->escapeHtmlAttr(__('Ver todos os pedidos')) ?>">
+                   aria-label="<?= $block->escapeHtmlAttr(__('Ver pedidos anteriores')) ?>">
                     <?= $block->escapeHtml(__('Ver pedidos')) ?>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>

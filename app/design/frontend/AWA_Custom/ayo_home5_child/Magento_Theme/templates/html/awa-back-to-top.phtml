@@ -12,8 +12,14 @@ declare(strict_types=1);
         id="awa-back-to-top"
         data-awa-back-to-top="true"
         data-mage-init='{"js/awa-back-to-top": {"threshold": 600}}'
+<?php /* A11Y-001: sem aria-hidden aqui — o atributo nativo "hidden" ja remove
+           o botao da arvore de acessibilidade E da ordem de tab por conta
+           propria (padrao HTML). Combinar os dois fazia o axe-core acusar
+           "aria-hidden-focus" (elemento aria-hidden contendo conteudo
+           focavel) sempre que o JS (awa-back-to-top.js) removia soh o
+           "hidden" ao rolar a pagina, sem tambem sincronizar o aria-hidden
+           no mesmo instante. */ ?>
         aria-label="<?= $block->escapeHtmlAttr(__('Voltar ao topo')) ?>"
-        aria-hidden="true"
         title="<?= $block->escapeHtmlAttr(__('Voltar ao topo')) ?>"
         hidden>
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
