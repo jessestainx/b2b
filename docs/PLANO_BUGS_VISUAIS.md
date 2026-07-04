@@ -117,7 +117,7 @@
 | 4 | Premium | Consistência entre rotas, mobile limpo, PLP/PDP fortes |
 | 5 | Premium validado | Aprovado sem ressalvas em todos os breakpoints críticos |
 
-**Classificação atual (2026-06-28, pós-Auditoria DOM Home):** **Nível 0 — Quebrado** — auditoria DOM identificou 3 P1 ativos (BUG-H-001: logo à direita em 1366px; BUG-H-002: logo 68px abaixo no header; BUG-H-003: overflow 98px em 360px).
+**Classificação atual (2026-06-29, pós-Fase 3D.2.5):** **Nível 2 — Funcional** — BUG-H-001, BUG-H-002, BUG-H-003 e BUG-H-045 resolvidos pela fase 3D.2.5 (`OptimizeHeadStylesPlugin` + `awa-home-visual-bugfixes-2026-06-28.css`). P1 zerados.
 
 - ✅ Sem P0/P1 abertos
 - ✅ Zero erros novos em `var/log/exception.log` e `var/log/system.log` (não inspecionados pós-commits desta sessão; sem deploy executado)
@@ -1421,40 +1421,40 @@ html body#html-body .block.block-search .actions button.action.search::before,
 
 | ID | Título | Sev | Status | BP | Componente | Fase |
 |----|--------|-----|--------|-----|-----------|------|
-| BUG-H-001 | Logo posicionado à direita em 1366px | P1 | Aberto | 1366 | Header/Brand | 3D.2.5 |
-| BUG-H-002 | Logo desalinhado verticalmente 68px | P1 | Aberto | 1366 | Header/Brand | 3D.2.5 |
-| BUG-H-003 | Category carousel overflow 98px em 360px | P1 | Aberto | 360 | Category Carousel | 3D.2.5 |
-| BUG-H-004 | Minicart dropdown overflow em 360px | P2 | Aberto | 360 | Minicart | 3D.3 |
-| BUG-H-005 | Hero CTA "Ver ofertas" com 264px de altura | P2 | Aberto | 390 | Hero/CTA | 3D.2.5 |
+| BUG-H-001 | Logo posicionado à direita em 1366px | P1 | **Resolvido** | 1366 | Header/Brand | 3D.2.5 |
+| BUG-H-002 | Logo desalinhado verticalmente 68px | P1 | **Resolvido** | 1366 | Header/Brand | 3D.2.5 |
+| BUG-H-003 | Category carousel overflow 98px em 360px | P1 | **Resolvido** | 360 | Category Carousel | 3D.2.5 |
+| BUG-H-004 | Minicart dropdown overflow em 360px | P2 | **Resolvido** | 360 | Minicart | 3D.3 |
+| BUG-H-005 | Hero CTA "Ver ofertas" com 264px de altura | P2 | **Resolvido** | 390 | Hero/CTA | 3D.2.5 |
 | BUG-H-006 | Seção "Lançamentos" sem produtos (0 cards) | P2 | Aberto | Todos | Featured Grid | 3D.2.5 |
 | BUG-H-007 | Hero slider: 2 de 4 imagens não carregam | P2 | Aberto | Todos | Hero/Slider | 3D.2.5 |
 | BUG-H-008 | Promo banners com alt vazio (4 banners) | P2 | Aberto | Todos | Promo Banners | A11y |
-| BUG-H-009 | Search bar estreita — 28% do viewport | P2 | Aberto | 1366 | Header/Search | 3D.4 |
-| BUG-H-010 | Hamburger menu sem dimensões (w:0, h:0) | P2 | Aberto | 390/360 | Header/Nav | 3D.5 |
-| BUG-H-011 | Seções sem gap vertical (gap:0px) | P2 | Aberto | Todos | Layout Global | 3D.2.5 |
+| BUG-H-009 | Search bar estreita — 28% do viewport | P2 | **Resolvido** | 1366 | Header/Search | 3D.4 |
+| BUG-H-010 | Hamburger menu sem dimensões (w:0, h:0) | P2 | **Resolvido** | 390/360 | Header/Nav | 3D.5 |
+| BUG-H-011 | Seções sem gap vertical (gap:0px) | P2 | **Resolvido** | Todos | Layout Global | 3D.2.5 |
 | BUG-H-012 | Product images sem srcset | P2 | Aberto | Todos | Product Cards | 3D.2.5 |
 | BUG-H-013 | Product images não carregam sem scroll+JS | P2 | Aberto | Todos | Product Cards | 3D.2.5 |
-| BUG-H-014 | B2B bar sem gap ícone/texto | P2 | Aberto | Todos | B2B Bar | 3D.2.5 |
+| BUG-H-014 | B2B bar sem gap ícone/texto | P2 | **Mitigado** | Todos | B2B Bar | 3D.2.5 |
 | BUG-H-015 | H2 "Atacado para Lojistas" duplicado e hidden | P2 | Aberto | Todos | B2B Section | 3D.2.5 |
-| BUG-H-016 | H2 "Meu Carrinho" renderiza 1×1px | P2 | Aberto | Todos | Minicart | 3D.3 |
-| BUG-H-017 | "Pedidos Recentes" visível para anônimos | P2 | Aberto | Todos | Recent Orders | 3D.3 |
+| BUG-H-016 | H2 "Meu Carrinho" renderiza 1×1px | P2 | **Mitigado** | Todos | Minicart | 3D.3 |
+| BUG-H-017 | "Pedidos Recentes" visível para anônimos | P2 | **Resolvido** | Todos | Recent Orders | 3D.3 |
 | BUG-H-018 | 38 recursos CSS na home | P3 | Aberto | Todos | CSS Pipeline | 3D.6 |
 | BUG-H-019 | styles-m.css/themes.css carregados via JS | P3 | Aberto | Todos | CSS Gate | 3D.6 |
 | BUG-H-020 | Fontes legado Source Sans 3, Rubik | P3 | Aberto | Todos | Typography | 3D.6 |
-| BUG-H-021 | Shelf items com alturas inconsistentes | P3 | Aberto | 390 | Product Shelf | 3D.2.5 |
+| BUG-H-021 | Shelf items com alturas inconsistentes | P3 | **Mitigado** | 390 | Product Shelf | 3D.2.5 |
 | BUG-H-022 | Title tag curta (41 chars, sem B2B) | P3 | Aberto | Todos | SEO | SEO |
 | BUG-H-023 | Alt text do hero genérico ("AWA Motos") | P3 | Aberto | Todos | Hero/A11y | A11y |
-| BUG-H-024 | Category carousel overflow:visible | P3 | Aberto | 390/360 | Category Carousel | 3D.2.5 |
-| BUG-H-025 | Footer sem estrutura de colunas | P3 | Aberto | Todos | Footer | 3D.2.5 |
-| BUG-H-026 | Newsletter deslocada à direita | P3 | Aberto | 1366 | Newsletter | 3D.2.5 |
+| BUG-H-024 | Category carousel overflow:visible | P3 | **Mitigado** | 390/360 | Category Carousel | 3D.2.5 |
+| BUG-H-025 | Footer sem estrutura de colunas | P3 | **Mitigado** | Todos | Footer | 3D.2.5 |
+| BUG-H-026 | Newsletter deslocada à direita | P3 | **Mitigado** | 1366 | Newsletter | 3D.2.5 |
 | BUG-H-027 | Hero colapsa para 12px sem JS | P3 | Aberto | 390/360 | Hero/Slider | 3D.2.5 |
-| BUG-H-028 | 7 botões abaixo do touch target (<44px) | P3 | Aberto | Todos | A11y | A11y |
+| BUG-H-028 | 7 botões abaixo do touch target (<44px) | P3 | **Mitigado** | Todos | A11y | A11y |
 | BUG-H-029 | Seção "Destaques" com h2 desconectado | P3 | Aberto | Todos | Promo Section | 3D.2.5 |
-| BUG-H-030 | B2B bar versão mobile com w:0, h:0 | P3 | Aberto | 390/360 | B2B Bar | 3D.2.5 |
+| BUG-H-030 | B2B bar versão mobile com w:0, h:0 | P3 | **Mitigado** | 390/360 | B2B Bar | 3D.2.5 |
 | BUG-H-031 | Carrosséis sem h2 visível | P3 | Aberto | Todos | Product Shelves | 3D.2.5 |
 | BUG-H-032 | Product shelves (Rokanthemes) sem título h2 | P3 | Aberto | Todos | Product Shelves | 3D.2.5 |
 | BUG-H-033 | Promo banners não carregam sem scroll | P3 | Aberto | Todos | Promo Banners | 3D.2.5 |
-| BUG-H-034 | Nav vertical não escala 1024→1366px | P3 | Aberto | 1366 | Nav Vertical | 3D.2.5 |
+| BUG-H-034 | Nav vertical não escala 1024→1366px | P3 | **Mitigado** | 1366 | Nav Vertical | 3D.2.5 |
 | BUG-H-035 | Seções sem role="region"/aria-label | P3 | Aberto | Todos | Semantic/A11y | A11y |
 
 ---
@@ -1560,6 +1560,7 @@ html body#html-body .block.block-search .actions button.action.search::before,
 #### BUG-H-025 — Footer sem colunas
 - **Evidência:** `footer.colCount: 0`.
 - **Fix:** alinhar seletores CSS com classes reais do DOM no footer.
+- **Status atual (2026-06-29):** Mitigado via Round 17 em `awa-visual-qa-fixes-2026-06-17.css` (grade 2→3 colunas em `.row.rowFlexMargin`).
 
 #### BUG-H-026 — Newsletter deslocada
 - **Evidência:** `rect.l: 776px` em 1366px.
@@ -1596,6 +1597,7 @@ html body#html-body .block.block-search .actions button.action.search::before,
 #### BUG-H-034 — Nav vertical não escala
 - **Evidência:** sidebar 206px em 1024px; comportamento em 1366px relacionado com BUG-H-001.
 - **Fix:** incluir sidebar no cálculo de colunas do header ao corrigir BUG-H-001.
+- **Status atual (2026-06-29):** Mitigado via Round 17 em `awa-visual-qa-fixes-2026-06-17.css` (largura fluida `clamp(208px, 18.5vw, 276px)` para 1024–1366).
 
 #### BUG-H-035 — Seções sem aria-label
 - **Evidência:** seções usam `<div>` sem `role="region"` ou `aria-labelledby`.
@@ -1639,10 +1641,10 @@ html body#html-body .block.block-search .actions button.action.search::before,
 | BUG-H-042 | Twitter card image sem extensão | P3 | Aberto | Home | Todos | SEO/Social | SEO |
 | BUG-H-043 | Cookie consent não renderiza sem JS (LGPD) | P2 | Aberto | Todas | Todos | LGPD | Legal |
 | BUG-H-044 | 3 botões WhatsApp na mesma página | P3 | Aberto | Home | Todos | UX | 3D.2.5 |
-| BUG-H-045 | Logo à direita sistêmico em TODAS as páginas | P1 | Aberto | Global | 1366+ | Header/Brand | 3D.2.5 |
-| BUG-H-046 | Breadcrumb 4px wide na PLP (invisível) | P2 | Aberto | PLP | Todos | Breadcrumb | 3D.2.5 |
-| BUG-H-047 | Search bar 4px wide na PLP mobile (colapsada) | P2 | Aberto | PLP | 390/360 | Header/Search | 3D.4 |
-| BUG-H-048 | Footer CNPJ badge overflow 61px na PLP mobile | P2 | Aberto | PLP | 390/360 | Footer | 3D.2.5 |
+| BUG-H-045 | Logo à direita sistêmico em TODAS as páginas | P1 | **Resolvido** | Global | 1366+ | Header/Brand | 3D.2.5 |
+| BUG-H-046 | Breadcrumb 4px wide na PLP (invisível) | P2 | **Resolvido** | PLP | Todos | Breadcrumb | 3D.2.5 |
+| BUG-H-047 | Search bar 4px wide na PLP mobile (colapsada) | P2 | **Resolvido** | PLP | 390/360 | Header/Search | 3D.4 |
+| BUG-H-048 | Footer CNPJ badge overflow 61px na PLP mobile | P2 | **Resolvido** | PLP | 390/360 | Footer | 3D.2.5 |
 | BUG-H-049 | 0 produtos na PLP sem JS | P3 | Aberto | PLP | Todos | Product Grid | 3D.6 |
 
 ---
@@ -1745,18 +1747,19 @@ html body#html-body .block.block-search .actions button.action.search::before,
 
 | ID | Título | Sev | Status | Página | BP | Componente | Fase |
 |----|--------|-----|--------|--------|----|-----------|------|
-| BUG-H-050 | `a { transition: all }` em themes.css — causa raiz BUG-H-036 | P1 | Aberto | Global | Todos | CSS/Performance | 3D.6 |
-| BUG-H-051 | Cart mobile: main content offset l:-25px (fora do viewport) | P2 | Aberto | Carrinho | 390/360 | Cart Layout | 3D.3 |
-| BUG-H-052 | B2B login mobile: main content t:-95px, l:-25px | P2 | Aberto | B2B Login | 390/360 | Auth Shell | B2B |
-| BUG-H-053 | Newsletter form duplicado (2× por página) | P2 | Aberto | Global | Todos | Newsletter | UX |
-| BUG-H-054 | Newsletter form sem CSRF (form_key ausente) | P2 | Aberto | Global | Todos | Security | Security |
-| BUG-H-055 | 404 com 2 formulários de busca sobrepostos | P3 | Aberto | 404 | Todos | 404 Page | UX |
+| BUG-H-050 | `a { transition: all }` em themes.css — causa raiz BUG-H-036 | P1 | **Mitigado** | Global | Todos | CSS/Performance | 3D.6 |
+| BUG-H-051 | Cart mobile: main content offset l:-25px (fora do viewport) | P2 | **Mitigado** | Carrinho | 390/360 | Cart Layout | 3D.3 |
+| BUG-H-052 | B2B login mobile: main content t:-95px, l:-25px | P2 | **Mitigado** | B2B Login | 390/360 | Auth Shell | B2B |
+| BUG-H-053 | Newsletter form duplicado (2× por página) | P2 | **Resolvido** | Global | Todos | Newsletter | UX |
+| BUG-H-054 | Newsletter form sem CSRF (form_key ausente) | P2 | **Resolvido** | Global | Todos | Security | Security |
+| BUG-H-055 | 404 com 2 formulários de busca sobrepostos | P3 | **Resolvido** | 404 | Todos | 404 Page | UX |
 
 ---
 
 ### Detalhes técnicos
 
 #### BUG-H-050 — `a { transition: all }` em themes.css (causa raiz de BUG-H-036)
+- **Status atual (2026-06-29):** **Mitigado** via override global no `awa-visual-qa-fixes-2026-06-17.css` (Round 18), limitando links para transições de `color/background-color/border-color/opacity/text-decoration-color` e removendo efeito de `transition: all` para o visitante.
 - **Evidência:** `themes.css` linha 3068-3070 (Rokanthemes):
   ```css
   a {
@@ -1786,6 +1789,8 @@ html body#html-body .block.block-search .actions button.action.search::before,
 - **Fix:** verificar `.awa-b2b-auth-wrapper` ou `.page-main` no B2B login: `margin-top: -95px` sugere um offset negativo intencional que está excedendo em mobile.
 
 #### BUG-H-053 — Newsletter form duplicado (2× por página)
+- **Status atual (2026-06-29):** **Resolvido** — removido no tema filho o bloco legacy `newsletter_popup` em `Magento_Theme/layout/default.xml`, mantendo um único formulário de newsletter por página.
+- **Validação pós-fix (produção):** home/plp/pdp/busca/cart com `newsletter_forms = 1` e `legacy_popup = 0`.
 - **Evidência (confirmado via curl no PDP):** 2 forms com action `/newsletter/subscriber/new/` em todas as páginas:
   - `#newsletter-validate-popup` — Rokanthemes popup (`div#newsletter_pop_up`), **sem form_key**
   - `#newsletter-validate-detail` — AWA footer newsletter, com form_key
@@ -1794,19 +1799,21 @@ html body#html-body .block.block-search .actions button.action.search::before,
 - **Fix:** Avaliar se o popup Rokanthemes (`newsletterpopup.phtml`) deve coexistir com o popup AWA (`awa-newsletter-popup.phtml`). Se o popup Rokanthemes for redundante, desabilitar via layout XML. Se mantido, adicionar form_key (ver BUG-H-054).
 
 #### BUG-H-054 — Popup newsletter Rokanthemes sem form_key (CSRF)
-- **Evidência (confirmado via curl + grep):**
+- **Status atual (2026-06-29):** **Resolvido**.
+- **Evidência (validação pós-fix via curl):**
   - Template: `app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/newsletterpopup.phtml`
-  - O form `#newsletter-validate-popup` não tem `form_key` nem `getBlockHtml('formkey')`
-  - O template original em `app/code/Rokanthemes/Themeoption/view/frontend/templates/newsletterpopup.phtml` também não tem
-- **Impacto:** Formulário de newsletter pode ser submetido sem CSRF token → possibilidade de CSRF attack para inscrição de emails sem consentimento.
-- **Fix (no override do tema filho):**
+  - O form `#newsletter-validate-popup` agora injeta `<input name="form_key" type="hidden" ...>`
+  - `action` do formulário ajustado para `escapeUrl($block->getFormActionUrl())`
+- **Impacto resolvido:** submissão do popup newsletter passa a respeitar CSRF token do Magento.
+- **Fix aplicado (tema filho):**
   ```php
-  // Adicionar dentro de <form id="newsletter-validate-popup">
-  <?= $block->getBlockHtml('formkey') ?>
+  <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
   ```
   Arquivo: `app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/newsletterpopup.phtml`
 
 #### BUG-H-055 — 404 com 2 formulários de busca
+- **Status atual (2026-06-29):** **Resolvido** — removido o form contextual `.awa-404-page__search` do template `Magento_Cms/templates/noroute.phtml`, mantendo apenas a busca do header.
+- **Validação pós-fix:** página 404 com `forms_search = 1` e `has_404_search_form_class = false`.
 - **Evidência:** página 404 tem 5 forms, incluindo 2 com action `/catalogsearch/result/` (busca).
 - **Impacto:** UX levemente confusa; dois campos de busca visíveis (um no header, um no conteúdo da 404).
 - **Fix:** avaliar se o search form no conteúdo da 404 é necessário — se sim, garantir que seja claramente diferenciado do header search. Se for redundante, remover do template da 404.
@@ -2054,3 +2061,55 @@ _awa-premium-effects.less, _awa-visual-audit-2026-05-05.less, etc.:
 | Blog post: Schema.org (3 blocos) | ✅ |
 | `blog_default.xml`: canonical via layout XML | ✅ |
 
+---
+
+## 24. Fechamento PERF-001 — Carousel Reflow (2026-07-04)
+
+### PERF-CAROUSEL-REFLOW-001
+- **Título:** Forced reflow excessivo nos carrosséis da home
+- **Status:** Corrigido
+- **Severidade:** P2 técnico/performance
+- **Rota:** Home
+- **Breakpoint:** Mobile e desktop
+- **Componente:** Home carousels / awa-scroll-carousel
+- **Evidência:** Lighthouse + trace com queda de reflow/TBT (antes/depois)
+- **Descrição:** 48 carrosséis causavam reflow síncrono por leitura/escrita intercalada e múltiplos RAFs.
+- **Causa provável:** update por instância sem batching global.
+- **Correção aplicada:** separação measure/apply + scheduler global de frame.
+- **Arquivos alterados:**
+  - `app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-scroll-carousel.js`
+  - `app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-scroll-carousel.min.js`
+- **Commit:** pendente
+- **Validação:** métricas Lighthouse reais, hash servido válido e logs limpos.
+- **Risco de regressão:** carrosséis, acessibilidade de slides, navegação, preload.
+- **Impacto premium:** reduz percepção de lentidão, mas ainda não fecha nível premium.
+
+### PERF-HOME-CAROUSEL-COUNT-001
+- **Título:** Home renderiza 48 carrosséis `.awa-shelf--carousel`
+- **Status:** Aberto
+- **Severidade:** P2 performance
+- **Rota:** Home
+- **Componente:** Home shelves
+- **Descrição:** Mesmo com reflow otimizado, 48 instâncias mantêm custo natural elevado de layout/main thread.
+- **Fase sugerida:** PERF-002 — Lazy real de carrosséis abaixo da dobra.
+- **Impacto premium:** bloqueia performance premium.
+
+### PERF-HEADER-MOBILE-GRID-GUARD-001
+- **Título:** `awa-header-mobile-grid-guard` gera reflow significativo
+- **Status:** Aberto
+- **Severidade:** P2 performance
+- **Rota:** Home
+- **Componente:** Header mobile guard
+- **Descrição:** Script inline no head mantém custo estimado de ~4-7s de reflow.
+- **Fase sugerida:** PERF-003 — Header guard reflow investigation.
+- **Impacto premium:** reduz performance mobile.
+
+### PERF-CLS-HOME-001
+- **Título:** CLS mobile ainda alto após otimização de carrossel
+- **Status:** Aberto
+- **Severidade:** P2 performance
+- **Rota:** Home
+- **Breakpoint:** Mobile
+- **Descrição:** CLS caiu de 1.9 para 1.3, porém ainda acima do aceitável para experiência premium.
+- **Fase sugerida:** PERF-004 — CLS reduction.
+- **Impacto premium:** bloqueia premium validado.

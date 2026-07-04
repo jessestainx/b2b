@@ -54,6 +54,49 @@
         return Array.prototype.slice.call((root || document).querySelectorAll(sel));
     }
 
+    /* R22: agendador global de frame — a home tem dezenas de carrosseis
+     * (.awa-shelf--carousel), cada um com seu proprio scroll/resize
+     * listener. Um unico evento de resize dispara scheduleUpdate() em TODOS
+     * eles ao mesmo tempo; se cada carrossel chamasse requestAnimationFrame
+     * de forma independente, o browser executaria seus callbacks em
+     * sequencia dentro do MESMO frame — e mesmo com leitura/escrita já
+     * separadas DENTRO de cada update(), a escrita do carrossel N ainda
+     * suja o layout que a leitura do carrossel N+1 precisa, forcando um
+     * reflow sincrono por carrossel (confirmado pelo audit "Forced reflow"
+     * apontando para carouselMaxScroll — a 1a leitura de cada update — como
+     * a maior fonte isolada, ~16s de main-thread no mobile). Este
+     * agendador junta todos os "measure" pendentes de um frame, executa
+     * TODOS antes de qualquer "apply", e so entao executa todos os
+     * "apply" — window inteira faz NO MAXIMO um recalculo de layout por
+     * frame, nao um por carrossel. */
+    var pendingCarouselMeasures = [];
+    var carouselFrameScheduled = false;
+
+    function queueCarouselFrame(measureFn) {
+        pendingCarouselMeasures.push(measureFn);
+        if (!carouselFrameScheduled) {
+            carouselFrameScheduled = true;
+            window.requestAnimationFrame(runCarouselFrame);
+        }
+    }
+
+    function runCarouselFrame() {
+        carouselFrameScheduled = false;
+        var queue = pendingCarouselMeasures;
+        pendingCarouselMeasures = [];
+
+        var applies = [];
+        var i;
+        for (i = 0; i < queue.length; i += 1) {
+            applies.push(queue[i]());
+        }
+        for (i = 0; i < applies.length; i += 1) {
+            if (typeof applies[i] === 'function') {
+                applies[i]();
+            }
+        }
+    }
+
     function shelfI18n(key, fallback) {
         var i18n = window.AWA_SHELF_I18N || {};
         return i18n[key] || fallback;
@@ -96,16 +139,36 @@
         });
     }
 
-    function visibleBox(el) {
+    /* Retorna o rect quando o elemento está "em caixa visível" (dimensões reais e
+     * não display:none/visibility:hidden), ou null caso contrário. Usado nos pontos
+     * quentes (snapOffsets/updateSlideAccessibility) que precisam do rect E do
+     * booleano de visibilidade — assim o getBoundingClientRect é feito uma única vez
+     * em vez de uma para o filtro e outra para medir a posição do slide. */
+    function visibleBoxRect(el) {
         if (!el || !el.getBoundingClientRect) {
-            return false;
+            return null;
         }
         var rect = el.getBoundingClientRect();
-        var style = window.getComputedStyle ? window.getComputedStyle(el) : null;
 
-        return rect.width > 1 &&
-            rect.height > 1 &&
-            (!style || (style.display !== 'none' && style.visibility !== 'hidden'));
+        /* Curto-circuito: elementos com caixa vazia (display:none, desmontados,
+         * fora do fluxo) já falham aqui sem precisar de getComputedStyle — que é
+         * mais um forced reflow. Chamado para CADA slide de CADA carrossel em
+         * cada scroll/resize, então evitar essa segunda leitura quando o rect já
+         * decide o resultado reduz bastante o "Style & Layout" do main-thread. */
+        if (rect.width <= 1 || rect.height <= 1) {
+            return null;
+        }
+
+        var style = window.getComputedStyle ? window.getComputedStyle(el) : null;
+        if (style && (style.display === 'none' || style.visibility === 'hidden')) {
+            return null;
+        }
+
+        return rect;
+    }
+
+    function visibleBox(el) {
+        return !!visibleBoxRect(el);
     }
 
     function carouselMaxScroll(viewport) {
@@ -414,6 +477,34 @@
         return title && title.textContent ? title.textContent.trim() : 'Produtos';
     }
 
+    function applyCarouselModifiers(shelf, carousel) {
+        var hasContainer;
+
+        if (!shelf || !carousel) {
+            return;
+        }
+
+        carousel.classList.add('awa-carousel--common');
+        carousel.classList.remove(
+            'awa-carousel--hero',
+            'awa-carousel--product',
+            'awa-carousel--brand',
+            'awa-carousel--category'
+        );
+
+        if (shelf.matches('.rokan-brand, .rokanthemes-brand, .brand, [data-awa-shelf="brand"]')) {
+            carousel.classList.add('awa-carousel--brand');
+        } else if (shelf.matches('.categorytab-container, .category_tab_slider, .awa-category-carousel, [data-awa-shelf="category"]')) {
+            carousel.classList.add('awa-carousel--category');
+        } else {
+            carousel.classList.add('awa-carousel--product');
+        }
+
+        hasContainer = !!(shelf.closest && shelf.closest('.container'));
+        carousel.classList.toggle('awa-carousel--contained', hasContainer);
+        carousel.classList.toggle('awa-carousel--fullbleed', !hasContainer);
+    }
+
     function markPending(shelf) {
         var section = shelf && shelf.closest ? shelf.closest('.awa-carousel-section') : null;
         if (shelf && !shelf.classList.contains('awa-carousel-ready')) {
@@ -499,25 +590,233 @@
         }
     }
 
-    /** Ancora setas no header/host correto, mantendo "Ver todos" e nav na mesma linha. */
-    function mountNavInHeader(mount, nav) {
+    function resolveNavMountRoot(mount, nav) {
+        var carousel = null;
+
+        if (nav && nav.closest) {
+            carousel = nav.closest('.awa-carousel');
+        }
+
+        if (!carousel && mount && mount.querySelector) {
+            carousel = mount.querySelector('.awa-carousel');
+        }
+
+        if (!carousel && mount && mount.closest) {
+            carousel = mount.closest('.awa-carousel');
+        }
+
+        return carousel;
+    }
+
+    /* R22: leitura (measure) e escrita (apply) separadas explicitamente.
+     * syncAnchoredNavViewportBoxes precisa medir TODOS os navs antes de
+     * escrever em QUALQUER um deles — do contrario, cada nav processado
+     * invalida o layout que o proximo precisa ler, forcando um reflow
+     * sincrono por nav (confirmado pelo audit "Forced reflow" do Lighthouse
+     * apontando para esta funcao, ~8.8s de main-thread so aqui no mobile). */
+    function measureNavViewportBox(carousel, nav) {
+        var viewport;
+        var viewportRect;
+
+        if (!carousel || !nav || !nav.style) {
+            return null;
+        }
+
+        viewport = carousel.querySelector('.awa-carousel__viewport');
+        if (!viewport) {
+            return { nav: nav, empty: true };
+        }
+
+        viewportRect = viewport.getBoundingClientRect ? viewport.getBoundingClientRect() : null;
+
+        return {
+            nav: nav,
+            empty: false,
+            topOffset: Math.max(0, viewport.offsetTop || 0),
+            viewportHeight: Math.max(
+                0,
+                viewportRect && viewportRect.height ? viewportRect.height : (viewport.offsetHeight || 0)
+            )
+        };
+    }
+
+    function applyNavViewportBox(measurement) {
+        var nav = measurement.nav;
+
+        if (measurement.empty) {
+            nav.style.removeProperty('top');
+            nav.style.removeProperty('height');
+            nav.style.removeProperty('bottom');
+            nav.style.removeProperty('margin');
+            nav.style.removeProperty('padding');
+            nav.style.removeProperty('border');
+            nav.style.removeProperty('box-sizing');
+            nav.removeAttribute('data-awa-nav-box');
+            return;
+        }
+
+        nav.style.setProperty('top', measurement.topOffset + 'px', 'important');
+        nav.style.setProperty('height', measurement.viewportHeight + 'px', 'important');
+        nav.style.setProperty('bottom', 'auto', 'important');
+        nav.style.setProperty('margin', '0', 'important');
+        nav.style.setProperty('padding', '0', 'important');
+        nav.style.setProperty('border', '0', 'important');
+        nav.style.setProperty('box-sizing', 'border-box', 'important');
+        nav.setAttribute('data-awa-nav-box', 'viewport');
+    }
+
+    function syncNavViewportBox(carousel, nav) {
+        var measurement = measureNavViewportBox(carousel, nav);
+        if (measurement) {
+            applyNavViewportBox(measurement);
+        }
+    }
+
+    function bindNavViewportObserver(carousel, nav) {
+        var viewport;
+        var observer;
+
+        if (!carousel || !nav || typeof window.ResizeObserver !== 'function') {
+            return;
+        }
+
+        viewport = carousel.querySelector('.awa-carousel__viewport');
+        if (!viewport) {
+            return;
+        }
+
+        if (nav.__awaNavViewportObserver && nav.__awaNavViewportObserverTarget === viewport) {
+            return;
+        }
+
+        if (nav.__awaNavViewportObserver) {
+            nav.__awaNavViewportObserver.disconnect();
+        }
+
+        observer = new window.ResizeObserver(function () {
+            syncNavViewportBox(carousel, nav);
+        });
+        observer.observe(viewport);
+        nav.__awaNavViewportObserver = observer;
+        nav.__awaNavViewportObserverTarget = viewport;
+    }
+
+    function syncAnchoredNavViewportBoxes(scope) {
+        var root = scope && scope.nodeType === 1 ? scope : document;
+
+        /* Fase de leitura para TODOS os navs primeiro, depois fase de
+         * escrita para todos — evita o read/write intercalado entre navs. */
+        var measurements = qsa('.awa-carousel .awa-carousel__nav[data-awa-nav-anchor="viewport"]', root)
+            .map(function (nav) {
+                var carousel = nav.closest('.awa-carousel');
+                return carousel ? measureNavViewportBox(carousel, nav) : null;
+            })
+            .filter(function (measurement) {
+                return !!measurement;
+            });
+
+        measurements.forEach(applyNavViewportBox);
+    }
+
+    function queueAnchoredNavViewportResync(scope) {
+        var root = scope && scope.nodeType === 1 ? scope : document;
+        var delays = [120, 480, 1200, 2200, 3200];
+
+        delays.forEach(function (delay) {
+            window.setTimeout(function () {
+                syncAnchoredNavViewportBoxes(root);
+            }, delay);
+        });
+
+        bindFontsReadyResync();
+    }
+
+    /**
+     * Troca de fonte web (FOUT/FOIT) pode alterar a altura de titulos/cards
+     * DEPOIS da ultima resync agendada em queueAnchoredNavViewportResync,
+     * causando drift residual de poucos px entre nav e viewport. document.fonts.ready
+     * eh o sinal correto (nao arbitrario) para disparar uma resync final.
+     */
+    function bindFontsReadyResync() {
+        if (window.__awaFontsReadyResyncBound) {
+            return;
+        }
+        if (!document.fonts || typeof document.fonts.ready === 'undefined' || typeof document.fonts.ready.then !== 'function') {
+            return;
+        }
+        window.__awaFontsReadyResyncBound = true;
+        document.fonts.ready.then(function () {
+            syncAnchoredNavViewportBoxes(document);
+            window.setTimeout(function () {
+                syncAnchoredNavViewportBoxes(document);
+            }, 160);
+        });
+    }
+
+    /** Ancora setas no viewport real do carrossel, nunca no header. */
+    /* R22: skipBoxSync evita chamar syncNavViewportBox (leitura de geometria)
+     * logo apos as escritas acima (appendChild/classList/removeProperty) —
+     * essa leitura imediata era forcada pelas proprias escritas desta funcao
+     * (confirmado pelo audit "Forced reflow", ~10.4s de main-thread so
+     * aqui no mobile). mountAllShelfNavInHeaders roda este mount para TODOS
+     * os carrosseis da home a cada scan (boot, scroll debounce, ajax,
+     * troca de aba) e ja chama syncAnchoredNavViewportBoxes (leitura+escrita
+     * em lote) logo depois do loop — entao pedimos para pular aqui e deixar
+     * o lote de fora cuidar disso, sem nenhuma leitura forcada por item. */
+    function mountNavInHeader(mount, nav, skipBoxSync) {
+        var carousel;
         var header;
+        var prevBtn;
+        var nextBtn;
 
         if (!mount || !nav) {
             return;
         }
 
-        header = findHeaderForMount(mount);
-        if (header && nav.parentElement !== header) {
-            removeHeaderNavPlaceholders(header, nav);
-            header.appendChild(nav);
+        carousel = resolveNavMountRoot(mount, nav);
+        if (!carousel) {
+            return;
         }
+
+        header = findHeaderForMount(mount);
         if (header) {
             removeHeaderNavPlaceholders(header, nav);
-            clearInlineCarouselChrome(nav);
-            nav.classList.add('awa-carousel__nav', 'awa-owl-nav--header-mounted');
-            nav.setAttribute('aria-hidden', 'false');
-            nav.hidden = false;
+            header.classList.remove('awa-carousel-nav-host', 'has-carousel-autoplay-toggle', 'is-awa-not-scrollable');
+        }
+
+        if (nav.parentElement !== carousel) {
+            carousel.appendChild(nav);
+        }
+
+        clearInlineCarouselChrome(nav);
+        nav.classList.add('awa-carousel__nav');
+        nav.classList.remove('awa-owl-nav--header-mounted', 'awa-owl-nav--header-slot');
+        nav.setAttribute('aria-hidden', 'false');
+        nav.setAttribute('data-awa-nav-anchor', 'viewport');
+        nav.hidden = false;
+        if (!skipBoxSync) {
+            syncNavViewportBox(carousel, nav);
+        }
+        bindNavViewportObserver(carousel, nav);
+
+        qsa('.awa-owl-nav__btn, .awa-carousel__arrow', nav).forEach(function (button) {
+            button.classList.add('awa-carousel__button');
+            button.classList.remove('owl-prev', 'owl-next');
+            button.style.removeProperty('left');
+            button.style.removeProperty('right');
+            button.style.removeProperty('top');
+            button.style.removeProperty('transform');
+        });
+
+        prevBtn = nav.querySelector('.awa-owl-nav__btn--prev, .awa-carousel__arrow--prev');
+        nextBtn = nav.querySelector('.awa-owl-nav__btn--next, .awa-carousel__arrow--next');
+        if (prevBtn) {
+            prevBtn.classList.add('awa-carousel__button--prev');
+            prevBtn.setAttribute('aria-label', shelfI18n('prev_slide', 'Slide anterior'));
+        }
+        if (nextBtn) {
+            nextBtn.classList.add('awa-carousel__button--next');
+            nextBtn.setAttribute('aria-label', shelfI18n('next_slide', 'Próximo slide'));
         }
     }
 
@@ -533,12 +832,23 @@
                 nav = header ? header.querySelector('.awa-owl-nav.awa-carousel__nav:not(.awa-owl-nav--header-slot)') : null;
             }
             if (nav) {
-                mountNavInHeader(mount, nav);
+                /* skipBoxSync: syncAnchoredNavViewportBoxes(root), chamado
+                 * logo abaixo apos o loop inteiro, mede e escreve o box de
+                 * TODOS os navs em lote — nao precisamos (nem queremos)
+                 * fazer isso aqui dentro, um por um. */
+                mountNavInHeader(mount, nav, true);
             }
         });
+
+        syncAnchoredNavViewportBoxes(root);
+        queueAnchoredNavViewportResync(root);
     }
 
     window.__awaMountShelfNavInHeaders = mountAllShelfNavInHeaders;
+
+    window.addEventListener('resize', function () {
+        syncAnchoredNavViewportBoxes(document);
+    }, { passive: true });
 
     function buildProgress() {
         var frag = document.createElement('div');
@@ -551,6 +861,7 @@
 
     function prepareChrome(shelf, container) {
         var mount = shelf || container.closest('.awa-shelf') || container.parentElement;
+        var carouselRoot = resolveNavMountRoot(mount, null);
         var nav;
         var toggle;
         var progress;
@@ -561,16 +872,30 @@
         }
 
         mount.classList.add('awa-carousel-mounted');
-        nav = mount.querySelector('.awa-owl-nav');
+        nav = carouselRoot ? carouselRoot.querySelector('.awa-owl-nav') : null;
+        if (!nav) {
+            nav = mount.querySelector('.awa-owl-nav');
+        }
         if (!nav) {
             nav = buildNav();
-            mount.appendChild(nav);
+            if (carouselRoot) {
+                carouselRoot.appendChild(nav);
+            } else {
+                mount.appendChild(nav);
+            }
         } else {
             if (nav.getAttribute('data-awa-chrome') === 'ssr') {
                 mount.classList.add('awa-carousel-chrome-ssr');
             }
+            if (carouselRoot && nav.parentElement !== carouselRoot) {
+                carouselRoot.appendChild(nav);
+            }
             nav.classList.add('awa-carousel__nav');
             nav.setAttribute('aria-hidden', 'false');
+        }
+
+        if (!carouselRoot) {
+            carouselRoot = resolveNavMountRoot(mount, nav);
         }
 
         toggle = nav.querySelector('.awa-carousel__toggle');
@@ -581,21 +906,38 @@
 
         mountNavInHeader(mount, nav);
 
-        progress = mount.querySelector('.awa-owl-progress');
+        progress = carouselRoot ? carouselRoot.querySelector('.awa-owl-progress') : null;
+        if (!progress) {
+            progress = mount.querySelector('.awa-owl-progress');
+        }
         if (!progress) {
             progress = buildProgress();
-            mount.appendChild(progress);
+            if (carouselRoot) {
+                carouselRoot.appendChild(progress);
+            } else {
+                mount.appendChild(progress);
+            }
         } else if (progress.getAttribute('data-awa-chrome') === 'ssr') {
             mount.classList.add('awa-carousel-chrome-ssr');
+            if (carouselRoot && progress.parentElement !== carouselRoot) {
+                carouselRoot.appendChild(progress);
+            }
         }
 
-        live = mount.querySelector('.awa-carousel-live');
+        live = carouselRoot ? carouselRoot.querySelector('.awa-carousel-live') : null;
+        if (!live) {
+            live = mount.querySelector('.awa-carousel-live');
+        }
         if (!live) {
             live = document.createElement('div');
             live.className = 'awa-carousel-live visually-hidden';
             live.setAttribute('aria-live', 'polite');
             live.setAttribute('aria-atomic', 'true');
-            mount.appendChild(live);
+            if (carouselRoot) {
+                carouselRoot.appendChild(live);
+            } else {
+                mount.appendChild(live);
+            }
         }
 
         if (container && container.id) {
@@ -706,6 +1048,7 @@
         viewport.setAttribute('aria-roledescription', 'carrossel');
         viewport.setAttribute('aria-label', getSectionLabel(root));
         viewport.setAttribute('aria-keyshortcuts', 'ArrowLeft ArrowRight Home End');
+        applyCarouselModifiers(root, carousel);
 
         // Remove controles nativos do Swiper (Grupo C/PDP): o motor monta sua própria nav.
         qsa('.swiper-button-prev, .swiper-button-next, .swiper-pagination, .swiper-scrollbar', root).forEach(function (el) {
@@ -762,13 +1105,17 @@
         }, true);
     }
 
-    function updateLive(viewport, live) {
-        if (!viewport || !live) {
-            return;
+    /* R22: separado em compute (leitura de offsetLeft/scrollLeft) + apply
+     * (escrita de textContent), para poder ser chamado na fase de leitura
+     * de update() sem intercalar com as escritas (classList/hidden/etc.)
+     * que aconteciam antes dela na mesma execucao. */
+    function computeLiveLabel(viewport) {
+        if (!viewport) {
+            return null;
         }
         var slides = qsa('.awa-carousel__slide', viewport);
         if (!slides.length) {
-            return;
+            return null;
         }
         var vpLeft = viewport.scrollLeft;
         var active = slides[0];
@@ -780,8 +1127,12 @@
         }
         var nameEl = active ? active.querySelector('.product-name, .product-item-name, .product-name a, .product-item-link') : null;
         var label = nameEl && nameEl.textContent ? nameEl.textContent.trim().replace(/\s+/g, ' ') : '';
-        if (label) {
-            live.textContent = label.slice(0, 120);
+        return label ? label.slice(0, 120) : null;
+    }
+
+    function applyLiveLabel(live, label) {
+        if (live && label) {
+            live.textContent = label;
         }
     }
 
@@ -962,7 +1313,23 @@
         var dragStartScroll = 0;
         var dragTracking = false;
 
+        /* R21: cache por "tick" de measureUpdate(). snapOffsets() fazia um querySelectorAll +
+         * getBoundingClientRect/getComputedStyle por slide, e era chamado várias vezes
+         * (activeSlideMeta, targetSnap, updateSlideAccessibility) dentro de uma ÚNICA
+         * execução síncrona de measureUpdate() — nada muda no layout entre essas chamadas, então
+         * recalcular é puro desperdício. invalidateFrameCache() é chamado no início de
+         * measureUpdate() para nunca servir dados de um scroll/resize anterior. */
+        var snapOffsetsCache = null;
+
+        function invalidateFrameCache() {
+            snapOffsetsCache = null;
+        }
+
         function snapOffsets() {
+            if (snapOffsetsCache) {
+                return snapOffsetsCache;
+            }
+
             var track = viewport.querySelector('.awa-carousel__track');
             var base = track ? track.offsetLeft : 0;
             var offsets = qsa('.awa-carousel__slide', viewport)
@@ -978,6 +1345,7 @@
                 offsets.push(carouselMaxScroll(viewport));
             }
 
+            snapOffsetsCache = offsets;
             return offsets;
         }
 
@@ -1019,33 +1387,64 @@
             return chosen;
         }
 
-        function preloadForOffset(offset) {
+        function findImageAtSnap(offset) {
             var slide = slideAtSnap(offset);
-            var img = slide ? slide.querySelector('img.product-image-photo, .product-item-photo img, .product-thumb img, img') : null;
-
-            preloadImageOnce(img);
+            return slide ? slide.querySelector('img.product-image-photo, .product-item-photo img, .product-thumb img, img') : null;
         }
 
-        function updateSlideAccessibility() {
-            var slides = qsa('.awa-carousel__slide', viewport).filter(visibleBox);
+        function preloadForOffset(offset) {
+            preloadImageOnce(findImageAtSnap(offset));
+        }
+
+        /* R22: separado em compute (so leitura de geometria) + apply (so
+         * escrita no DOM). Antes, esta funcao lia getBoundingClientRect de
+         * cada slide e, na mesma passada, ja escrevia atributos/classes no
+         * slide anterior — cada escrita invalidava o layout que o proximo
+         * slide precisava ler, forcando reflow sincrono repetido dentro do
+         * proprio loop. Ver tambem update(), que agora chama compute() na
+         * fase de leitura e apply() na fase de escrita. */
+        function computeSlideAccessibilityPlan() {
+            var slideEntries = qsa('.awa-carousel__slide', viewport)
+                .map(function (slide) {
+                    return { slide: slide, rect: visibleBoxRect(slide) };
+                })
+                .filter(function (entry) {
+                    return !!entry.rect;
+                });
             var viewportRect = viewport.getBoundingClientRect();
             var active = activeSlideMeta();
-            var focusableSelector = 'a[href], button, input, select, textarea, [tabindex]';
+            var totalSlides = slideEntries.length;
 
-            slides.forEach(function (slide, index) {
-                var rect = slide.getBoundingClientRect();
+            return slideEntries.map(function (entry, index) {
+                var slide = entry.slide;
+                var rect = entry.rect;
                 var activeElementInside = document.activeElement && slide.contains(document.activeElement);
                 var visible = activeElementInside ||
                     (rect.right > viewportRect.left + 8 && rect.left < viewportRect.right - 8);
-                var isCurrent = index + 1 === active.index;
+
+                return {
+                    slide: slide,
+                    index: index,
+                    total: totalSlides,
+                    visible: visible,
+                    isCurrent: index + 1 === active.index
+                };
+            });
+        }
+
+        function applySlideAccessibilityPlan(plan) {
+            var focusableSelector = 'a[href], button, input, select, textarea, [tabindex]';
+
+            plan.forEach(function (entry) {
+                var slide = entry.slide;
 
                 slide.setAttribute('role', 'group');
                 slide.setAttribute('aria-roledescription', shelfI18n('slide', 'slide'));
-                slide.setAttribute('aria-label', (index + 1) + ' ' + shelfI18n('of', 'de') + ' ' + slides.length);
-                slide.setAttribute('aria-hidden', visible ? 'false' : 'true');
-                slide.classList.toggle('is-awa-visible-slide', visible);
-                slide.classList.toggle('is-awa-current-slide', isCurrent);
-                if (isCurrent) {
+                slide.setAttribute('aria-label', (entry.index + 1) + ' ' + shelfI18n('of', 'de') + ' ' + entry.total);
+                slide.setAttribute('aria-hidden', entry.visible ? 'false' : 'true');
+                slide.classList.toggle('is-awa-visible-slide', entry.visible);
+                slide.classList.toggle('is-awa-current-slide', entry.isCurrent);
+                if (entry.isCurrent) {
                     slide.setAttribute('aria-current', 'true');
                 } else {
                     slide.removeAttribute('aria-current');
@@ -1055,7 +1454,7 @@
                     if (focusable.closest('.awa-owl-nav, .awa-carousel__nav')) {
                         return;
                     }
-                    updateFocusableState(focusable, visible);
+                    updateFocusableState(focusable, entry.visible);
                 });
             });
         }
@@ -1113,73 +1512,96 @@
             });
         }
 
-        function update() {
-            rafPending = false;
+        /* R22: fase de leitura — TODO acesso a geometria/layout
+         * (scrollWidth/clientWidth, scrollLeft, offsetLeft,
+         * getBoundingClientRect, getComputedStyle) acontece aqui, e o
+         * resultado e retornado como uma funcao "apply" contendo APENAS
+         * escritas no DOM, para ser executada depois — por este carrossel
+         * E por todos os outros pendentes no mesmo frame (ver
+         * queueCarouselFrame/runCarouselFrame no topo do arquivo). Antes
+         * desta mudanca, cada carrossel lia e escrevia no DOM dentro da
+         * mesma chamada de update(), e com dezenas de carrosseis na home
+         * disparando update() no mesmo frame (resize, boot), a escrita do
+         * carrossel N sujava o layout que a leitura do carrossel N+1
+         * precisava, forcando reflow sincrono repetido — confirmado pelo
+         * audit "Forced reflow" do Lighthouse (~16s de main-thread so na
+         * leitura de scrollWidth/clientWidth no mobile). */
+        function measureUpdate() {
+            invalidateFrameCache();
+
             var max = carouselMaxScroll(viewport);
             var x = viewport.scrollLeft;
             var scrollable = max > 2;
-
             var carouselRoot = viewport.closest('.awa-carousel');
             var host = chrome.nav && chrome.nav.parentElement ? chrome.nav.parentElement : null;
-            if (carouselRoot) {
-                carouselRoot.classList.toggle('is-awa-scrollable', scrollable);
-            }
-            if (mount) {
-                mount.classList.toggle('is-awa-scrollable', scrollable);
-                mount.classList.toggle('is-awa-not-scrollable', !scrollable);
-            }
-            if (host) {
-                host.classList.toggle('has-carousel-overflow', scrollable);
-                host.classList.toggle('is-awa-not-scrollable', !scrollable);
-            }
-            if (chrome.nav) {
-                chrome.nav.hidden = !scrollable;
-                chrome.nav.setAttribute('aria-hidden', scrollable ? 'false' : 'true');
-            }
-            if (chrome.progress) {
-                chrome.progress.hidden = !scrollable;
-                chrome.progress.setAttribute('aria-hidden', scrollable ? 'false' : 'true');
-            }
-            syncAutoplayToggleAvailability(chrome, isHomePage() && !reducedMotion() && scrollable, !!(mount && mount.dataset.awaCarouselPaused === '1'));
-            if (prev) {
-                var atStart = x <= 2;
-                prev.classList.toggle('is-disabled', atStart);
-                prev.disabled = atStart;
-                prev.setAttribute('aria-disabled', atStart ? 'true' : 'false');
-            }
-            if (next) {
-                var atEnd = x >= max - 2;
-                next.classList.toggle('is-disabled', atEnd);
-                next.disabled = atEnd;
-                next.setAttribute('aria-disabled', atEnd ? 'true' : 'false');
-            }
-            if (progressBar) {
-                var rawPct = max <= 0 ? 1 : Math.min(1, Math.max(0, x / max));
-                var visualPct = scrollable ? Math.max(0.08, rawPct) : 1;
-                var meta = activeSlideMeta();
-                var valueText = shelfI18n('progressText', 'Item') + ' ' + meta.index + ' ' + shelfI18n('of', 'de') + ' ' + meta.total;
+            var meta = activeSlideMeta();
+            var accessibilityPlan = computeSlideAccessibilityPlan();
+            var liveLabel = computeLiveLabel(viewport);
+            var preloadImg = scrollable ? findImageAtSnap(targetSnap(1)) : null;
 
-                progressBar.style.setProperty('--awa-progress', String(visualPct));
-                viewport.dataset.awaCarouselIndex = String(meta.index);
+            return function applyUpdate() {
+                if (carouselRoot) {
+                    carouselRoot.classList.toggle('is-awa-scrollable', scrollable);
+                }
+                if (mount) {
+                    mount.classList.toggle('is-awa-scrollable', scrollable);
+                    mount.classList.toggle('is-awa-not-scrollable', !scrollable);
+                }
+                if (host) {
+                    host.classList.toggle('has-carousel-overflow', scrollable);
+                    host.classList.toggle('is-awa-not-scrollable', !scrollable);
+                }
+                if (chrome.nav) {
+                    chrome.nav.hidden = !scrollable;
+                    chrome.nav.setAttribute('aria-hidden', scrollable ? 'false' : 'true');
+                }
                 if (chrome.progress) {
-                    chrome.progress.setAttribute('aria-valuenow', String(Math.round(rawPct * 100)));
-                    chrome.progress.setAttribute('aria-valuetext', valueText);
+                    chrome.progress.hidden = !scrollable;
+                    chrome.progress.setAttribute('aria-hidden', scrollable ? 'false' : 'true');
                 }
-                if (progressText) {
-                    progressText.textContent = valueText;
+                syncAutoplayToggleAvailability(chrome, isHomePage() && !reducedMotion() && scrollable, !!(mount && mount.dataset.awaCarouselPaused === '1'));
+                if (prev) {
+                    var atStart = x <= 2;
+                    prev.classList.toggle('is-disabled', atStart);
+                    prev.disabled = atStart;
+                    prev.setAttribute('aria-disabled', atStart ? 'true' : 'false');
                 }
-            }
-            if (scrollable) {
-                preloadForOffset(targetSnap(1));
-            }
-            updateSlideAccessibility();
-            updateLive(viewport, chrome.live);
+                if (next) {
+                    var atEnd = x >= max - 2;
+                    next.classList.toggle('is-disabled', atEnd);
+                    next.disabled = atEnd;
+                    next.setAttribute('aria-disabled', atEnd ? 'true' : 'false');
+                }
+                if (progressBar) {
+                    var rawPct = max <= 0 ? 1 : Math.min(1, Math.max(0, x / max));
+                    var visualPct = scrollable ? Math.max(0.08, rawPct) : 1;
+                    var valueText = shelfI18n('progressText', 'Item') + ' ' + meta.index + ' ' + shelfI18n('of', 'de') + ' ' + meta.total;
+
+                    progressBar.style.setProperty('--awa-progress', String(visualPct));
+                    viewport.dataset.awaCarouselIndex = String(meta.index);
+                    if (chrome.progress) {
+                        chrome.progress.setAttribute('aria-valuenow', String(Math.round(rawPct * 100)));
+                        chrome.progress.setAttribute('aria-valuetext', valueText);
+                    }
+                    if (progressText) {
+                        progressText.textContent = valueText;
+                    }
+                }
+                if (preloadImg) {
+                    preloadImageOnce(preloadImg);
+                }
+                applySlideAccessibilityPlan(accessibilityPlan);
+                applyLiveLabel(chrome.live, liveLabel);
+            };
         }
 
         function scheduleUpdate() {
             if (!rafPending) {
                 rafPending = true;
-                window.requestAnimationFrame(update);
+                queueCarouselFrame(function () {
+                    rafPending = false;
+                    return measureUpdate();
+                });
             }
         }
 
@@ -1319,10 +1741,13 @@
             step(1, 'autoplay');
         });
         syncAutoplayToggleAvailability(chrome, isHomePage() && !reducedMotion(), !!(mount && mount.dataset.awaCarouselPaused === '1'));
-        update();
+        /* scheduleUpdate() (nao update() direto) para que o boot inicial de
+         * varios carrosseis eager entre no mesmo lote via
+         * queueCarouselFrame — ver comentario em measureUpdate(). */
+        scheduleUpdate();
         // Reavalia apos imagens/fonte assentarem (largura do track muda)
-        window.setTimeout(update, 400);
-        window.setTimeout(update, 1200);
+        window.setTimeout(scheduleUpdate, 400);
+        window.setTimeout(scheduleUpdate, 1200);
     }
 
     function initScrollShelf(shelf) {
@@ -1390,6 +1815,7 @@
             slider.classList.add('awa-shelf', 'awa-shelf--carousel');
         }
         viewport.setAttribute('aria-label', getSectionLabel(slider));
+        applyCarouselModifiers(slider, carousel);
 
         Array.prototype.slice.call(track.children).forEach(function (slide) {
             if (slide.nodeType === 1) {
@@ -1505,11 +1931,16 @@
 
     function guardOverflow() {
         var docW = document.documentElement.clientWidth;
-        qsa('.awa-carousel__viewport').forEach(function (el) {
-            var w = el.getBoundingClientRect().width;
-            if (w > docW + 2) {
-                el.classList.add('is-awa-viewport-width-guarded');
-            }
+
+        /* R22: mede a largura de TODOS os viewports antes de aplicar
+         * qualquer classList.add — caso contrario, a escrita no 1o viewport
+         * invalida o layout que o 2o precisa ler (forced reflow por item). */
+        var overflowing = qsa('.awa-carousel__viewport').filter(function (el) {
+            return el.getBoundingClientRect().width > docW + 2;
+        });
+
+        overflowing.forEach(function (el) {
+            el.classList.add('is-awa-viewport-width-guarded');
         });
     }
 
@@ -1770,45 +2201,9 @@
     };
 
     function scheduleAdaptTerminal() {
-        var reassertTimeline = [
-            0,
-            180,
-            520,
-            900,
-            1400,
-            2200,
-            3400,
-            5600,
-            9000
-        ];
-        var stopAfterMs = 14000;
-        var reassertTimer = null;
-
-        if (window.__awaCarouselAdaptPatrolRunning) {
-            return;
-        }
-
-        window.__awaCarouselAdaptPatrolRunning = true;
-
-        reassertTimeline.forEach(function (delay) {
-            window.setTimeout(injectImpeccableAdaptTerminal, delay);
-        });
-
-        reassertTimer = window.setInterval(function () {
-            injectImpeccableAdaptTerminal();
-        }, 1600);
-        window.setTimeout(function () {
-            if (reassertTimer) {
-                window.clearInterval(reassertTimer);
-            }
-            window.__awaCarouselAdaptPatrolRunning = false;
-        }, stopAfterMs);
-
-        if (!document.body) {
-            document.addEventListener('DOMContentLoaded', injectImpeccableAdaptTerminal, { once: true });
-        }
-
-        document.addEventListener('awa:css-gate-applied', injectImpeccableAdaptTerminal);
+        // Contrato global de carrossel agora vem de assets estáticos do tema.
+        // Mantemos o hook por retrocompatibilidade sem injetar CSS dinâmico.
+        return;
     }
 
     /* Harden: terminal antes do boot do carrossel (vence cascade-lock no body-end). */
