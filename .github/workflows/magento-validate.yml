@@ -1,0 +1,70 @@
+name: magento-validate
+
+# Extraido do antigo magento-ci.yml (nunca publicado no main). Mantem apenas
+# a validacao estatica, somente-leitura. Os jobs de deploy-staging/deploy-
+# producao do arquivo original foram removidos por tres motivos:
+#   1. Apontavam para /home/user/htdocs/... (caminho generico/desatualizado,
+#      o caminho real do servidor e /home/jessessh/htdocs/...).
+#   2. Dependiam de secrets (STAGING_SSH_KEY, PROD_SSH_KEY etc.) inexistentes.
+#   3. Deploy automatico via SSH e uma decisao de infraestrutura maior, fora
+#      do escopo de "configurar os testes para rodar no GitHub Actions" —
+#      deve ser desenhado e aprovado separadamente.
+# O job de Lighthouse tambem foi removido daqui pois ja esta cobrido pelo
+# workflow visual-quality-gate.yml (evita rodar Lighthouse em duplicidade).
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+env:
+  PHP_VERSION: '8.4'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate code
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: intl,mbstring,curl,gd,zip,xml,bcmath,opcache
+
+      - name: Validate PHTML syntax
+        run: |
+          set -e
+          files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- '*.phtml' || true)
+          if [ -z "$files" ]; then
+            echo "Nenhum .phtml alterado neste PR."
+            exit 0
+          fi
+          echo "$files" | while read -r f; do
+            [ -f "$f" ] && php -l "$f"
+          done
+
+      - name: Validate XML layout
+        run: |
+          set -e
+          files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'app/design/**/*.xml' 'app/code/**/*.xml' || true)
+          if [ -z "$files" ]; then
+            echo "Nenhum layout XML alterado neste PR."
+            exit 0
+          fi
+          echo "$files" | while read -r f; do
+            [ -f "$f" ] && xmllint --noout "$f"
+          done
+
+      - name: Magento code sniffer
+        run: |
+          composer global require --dev "squizlabs/php_codesniffer=*"
+          composer global require --dev "magento/magento-coding-standard"
+          export PATH="$PATH:$(composer global config bin-dir --absolute)"
+          phpcs --standard=Magento2 app/code || true

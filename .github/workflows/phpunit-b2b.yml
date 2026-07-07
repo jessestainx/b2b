@@ -1,0 +1,75 @@
+name: phpunit-b2b
+
+# Cobertura de PHPUnit para modulos customizados GrupoAwamotos.
+# Hoje so app/code/GrupoAwamotos/B2B/Test existe (240 testes unitarios,
+# sem dependencia de banco/app Magento bootstrapado) e nao tinha CI algum.
+
+on:
+  pull_request:
+    paths:
+      - 'app/code/GrupoAwamotos/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/workflows/phpunit-b2b.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/code/GrupoAwamotos/**'
+      - 'composer.json'
+      - 'composer.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phpunit-b2b-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PHP_VERSION: '8.4'
+
+jobs:
+  phpunit-b2b:
+    name: PHPUnit — GrupoAwamotos/B2B
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2.36.0
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: intl,mbstring,curl,gd,zip,xml,bcmath,opcache,soap,xsl,sockets,pdo_mysql
+          coverage: none
+          tools: composer:2
+
+      - name: Cache composer vendor
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-vendor-${{ runner.os }}-php${{ env.PHP_VERSION }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-vendor-${{ runner.os }}-php${{ env.PHP_VERSION }}-
+
+      - name: Composer install
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run PHPUnit — GrupoAwamotos_B2B_Unit
+        run: |
+          php -d memory_limit=512M vendor/bin/phpunit \
+            -c app/code/GrupoAwamotos/B2B/Test/phpunit.xml \
+            --testdox
+
+      - name: Upload PHPUnit cache artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpunit-b2b-cache-${{ github.run_id }}
+          if-no-files-found: ignore
+          path: app/code/GrupoAwamotos/B2B/Test/.phpunit.cache/**
+          retention-days: 5

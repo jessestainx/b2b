@@ -23,12 +23,13 @@ jobs:
       with:
         node-version: lts/*
 
-    - name: Install dependencies
+    - name: Install root dependencies (Lighthouse CI)
+      run: npm ci
+
+    - name: Install e2e dependencies (Playwright)
+      working-directory: tests/e2e
       run: npm ci
 
     - name: Install Playwright Browsers
+      working-directory: tests/e2e
       run: npx playwright install --with-deps
-
-    # Customize this step as needed
-    - name: Build application
-      run: npx run build

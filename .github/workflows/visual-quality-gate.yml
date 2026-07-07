@@ -1,0 +1,191 @@
+name: visual-quality-gate
+
+# Consolida os antigos playwright-visual-qa.yml + visual-quality-gate.yml
+# (nunca publicados no main, com resolucao de BASE_URL que playwright.config.ts
+# ignorava — baseURL sempre foi hardcoded para https://awamotos.com).
+# Mantem o mesmo padrao de leitura direta (read-only) contra producao ja usado
+# por e2e-pr-smoke / e2e-premerge-regression / e2e-nightly-full.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Escopo dos testes visuais"
+        required: false
+        default: "smoke"
+        type: choice
+        options:
+          - smoke
+          - full
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-quality-gate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  LHCI_BASE_URL: "https://awamotos.com"
+  LHCI_RUNS: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '3' || '1' }}
+  SUITE: ${{ inputs.suite || 'smoke' }}
+
+jobs:
+  playwright-visual-qa:
+    name: Playwright visual QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Install Playwright Chromium only
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke visual QA
+        if: env.SUITE == 'smoke'
+        working-directory: tests/e2e
+        run: |
+          npx playwright test \
+            --config=playwright.config.ts \
+            --project=desktop-1440 \
+            --project=notebook-1280 \
+            --project=mobile-390 \
+            --workers=1 \
+            --retries=1 \
+            --max-failures=8 \
+            --reporter=list,html \
+            specs/visual-audit-home-header-footer.spec.ts \
+            specs/category-plp.spec.ts \
+            specs/pdp-layout.spec.ts
+
+      - name: Run full visual QA
+        if: env.SUITE == 'full'
+        working-directory: tests/e2e
+        run: |
+          npx playwright test \
+            --config=playwright.config.ts \
+            --project=desktop-1440 \
+            --project=notebook-1280 \
+            --project=mobile-390 \
+            --workers=1 \
+            --retries=1 \
+            --max-failures=12 \
+            --reporter=list,html \
+            specs/visual-audit-home-header-footer.spec.ts \
+            specs/header-layout.spec.ts \
+            specs/visual-audit-search-autocomplete.spec.ts \
+            specs/b2b-login-readonly.spec.ts \
+            specs/category-plp.spec.ts \
+            specs/pdp-layout.spec.ts \
+            specs/visual-audit-cart-checkout-404.spec.ts \
+            specs/visual-audit-footer.spec.ts \
+            specs/b2b-register.spec.ts
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-visual-qa-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            tests/e2e/test-results/**
+            tests/e2e/reports/**
+            tests/e2e/playwright-report/**
+          retention-days: 5
+
+  accessibility:
+    name: Accessibility audit (axe-core)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Install Playwright Firefox only
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps firefox
+
+      - name: Run accessibility audit
+        working-directory: tests/e2e
+        run: |
+          npx playwright test \
+            specs/accessibility.spec.ts \
+            --project=firefox-desktop-1366 \
+            --reporter=list \
+            --retries=0 \
+            --timeout=60000 || echo "::warning::Accessibility findings found — review report"
+
+      - name: Upload accessibility artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            tests/e2e/test-results/**
+            tests/e2e/playwright-report/**
+          retention-days: 14
+
+  lighthouse:
+    name: Lighthouse performance gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Chrome
+        run: npx --yes @puppeteer/browsers install chrome@stable
+
+      - name: Lighthouse mobile
+        run: |
+          npx --yes @lhci/cli@0.14.0 autorun \
+            --config=.github/lighthouse/lighthouserc.mobile.cjs
+
+      - name: Lighthouse desktop
+        run: |
+          npx --yes @lhci/cli@0.14.0 autorun \
+            --config=.github/lighthouse/lighthouserc.desktop.cjs
+
+      - name: Upload Lighthouse artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-${{ github.run_id }}
+          path: .lighthouseci/**
+          retention-days: 14

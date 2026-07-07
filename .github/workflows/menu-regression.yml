@@ -1,0 +1,39 @@
+name: menu-regression
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-menu-controller.js'
+      - 'app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-menu-modern.less'
+      - 'app/code/GrupoAwamotos/Theme/view/frontend/templates/menu/**'
+      - 'tests/e2e/specs/menu-regression.mjs'
+  pull_request:
+    paths:
+      - 'app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-menu-controller.js'
+      - 'app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-menu-modern.less'
+      - 'app/code/GrupoAwamotos/Theme/view/frontend/templates/menu/**'
+      - 'tests/e2e/specs/menu-regression.mjs'
+  workflow_dispatch:
+
+jobs:
+  menu-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm install playwright@1.59.1 --no-save
+          npx playwright install chromium --with-deps
+
+      - name: Run menu regression spec
+        env:
+          AWA_BASE_URL: https://awamotos.com
+        run: node tests/e2e/specs/menu-regression.mjs
