@@ -74,7 +74,7 @@ jobs:
             --max-failures=8 \
             --reporter=list,html \
             specs/visual-audit-home-header-footer.spec.ts \
-            specs/category-plp.spec.ts \
+            specs/layout-container-grid.spec.ts \
             specs/pdp-layout.spec.ts
 
       - name: Run full visual QA
@@ -93,12 +93,11 @@ jobs:
             specs/visual-audit-home-header-footer.spec.ts \
             specs/header-layout.spec.ts \
             specs/visual-audit-search-autocomplete.spec.ts \
-            specs/b2b-login-readonly.spec.ts \
-            specs/category-plp.spec.ts \
+            specs/visual-audit-forms.spec.ts \
+            specs/layout-container-grid.spec.ts \
             specs/pdp-layout.spec.ts \
             specs/visual-audit-cart-checkout-404.spec.ts \
-            specs/visual-audit-footer.spec.ts \
-            specs/b2b-register.spec.ts
+            specs/visual-audit-footer.spec.ts
 
       - name: Upload Playwright artifacts
         if: always()
