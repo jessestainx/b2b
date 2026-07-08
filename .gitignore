@@ -96,6 +96,8 @@ docs/*
 !docs/smoke-checklist.md
 !docs/ownership-model.md
 !docs/b2b-adoption.md
+!docs/visual-qa/
+!docs/visual-qa/dead-css-manifest-2026-07-08.md
 relatorios/
 analise_visual/
 biblioteca/
