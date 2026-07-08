@@ -3410,6 +3410,20 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .pag
   min-height: 0 !important;
 }
 
+/* =============================================================================
+   §122b — Gate tablet/desktop: título e descrição sobrepostos (2026-07-08)
+   O container é display:flex sem flex-wrap fora do breakpoint mobile (<=767px),
+   então "flex: 1 1 auto" (título) + "flex: 1 1 100%" (descrição) ficam na mesma
+   linha e o título, espremido por min-width:0, estoura seu texto sobre a
+   descrição. Reaplica o mesmo flex-wrap já usado no mobile para tablet/desktop.
+   ============================================================================= */
+@media (min-width: 768px) {
+  html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .awa-plp-b2b-gate-banner {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+  }
+}
+
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .nav-breadcrumbs {
   min-height: 0 !important;
   height: auto !important;
