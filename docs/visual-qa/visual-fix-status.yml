@@ -1107,4 +1107,52 @@ items:
       - "Executar todas as rotas do spec (nao so home) em pelo menos desktop-1440 e mobile-390"
       - "Screenshots de menu-vertical-aberto e autocomplete-aberto gerados com sucesso (falha observada nesta sessao)"
     proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
-    note: "Pendente por definicao explicita do escopo desta fase (nao rodar matriz completa ainda)."
+    note: >
+      PD1 corrigiu o falso-negativo de menu-vertical-aberto (ver PD1-001). Screenshot
+      autocomplete-aberto segue pendente (fora de escopo do PD1). Demais rotas (bagageiros,
+      bauletos, search-bagageiro, b2b-login, b2b-register, cart, PDP) ainda nao executadas.
+
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # FASE: PD1 — Correcao P0 do Menu Vertical
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: PD1-001
+    title: "Menu vertical: falso-negativo do harness de teste corrigido (produto ja funcionava)"
+    phase: PD1
+    page_type: product-design
+    component: "Menu vertical (teste)"
+    route: "/"
+    status: TESTED_LOCAL
+    priority: critical
+    source_files: [tests/e2e/specs/product-design-qa.spec.ts]
+    tests: { playwright: [tests/e2e/specs/product-design-qa.spec.ts, tests/e2e/specs/header-core-interactions-p0.spec.ts] }
+    evidence_dir: tests/e2e/test-results/product-design-qa
+    acceptance:
+      - "verticalMenu.visible = true apos clique no trigger"
+      - "Screenshot menu-vertical-aberto gerado com sucesso"
+      - "header-core-interactions-p0.spec.ts (diagnostico home) permanece passando (sem regressao)"
+    proof: { before_screenshot: null, after_screenshot: "desktop-1440__menu-vertical-aberto.png", ci_run: null, playwright_report: null, commit: null, pr: null }
+    root_cause_confirmed: >
+      Investigado com 3 metodos independentes (script Playwright puro, spec no test runner real,
+      comparacao lado a lado no mesmo estado de pagina). O painel do menu vertical
+      (.togge-menu.list-category-dropdown) abre corretamente em producao: aria-expanded=true,
+      classes vmm-open/menu-open, aria-hidden=false, display:flex, bbox 304x560, sem erros de
+      console/rede. O helper isVisible()/getBBox() (tests/e2e/helpers/header.helpers.ts) usa
+      locator.waitFor({state:'visible'}), que estourou timeout mesmo com o elemento visivel —
+      provavelmente por causa do ajuste continuo de altura via requestAnimationFrame que
+      awa-menu-controller.js (DeptMenu.prototype.schedulePanelHeight) aplica por ate 5 quadros
+      apos abrir. locator.isVisible() (sem polling de estabilidade) retornou o estado correto.
+      NENHUM defeito foi encontrado no tema/JS/CSS/template do menu vertical.
+    fix_applied: >
+      Escopo limitado a tests/e2e/specs/product-design-qa.spec.ts: substituida a chamada
+      isVisible(page, awaSelectors.verticalMenu.list) / getBBox(...) por
+      page.locator(awaSelectors.verticalMenu.list).first().isVisible() / .boundingBox()
+      diretos. O helper compartilhado header.helpers.ts NAO foi alterado (fora de escopo desta
+      branch fix/pd1-vertical-menu-p0). Nenhum arquivo de tema/template/LESS/JS do Magento foi
+      tocado, pois nao havia defeito de produto a corrigir.
+    note: >
+      Validado localmente: product-design-qa.spec.ts (design QA - home) passou (1 passed,
+      exit code 0) com verticalMenu.visible=true e screenshot gerado.
+      header-core-interactions-p0.spec.ts (diagnostico - home) tambem passou (1 passed,
+      exit code 0), confirmando ausencia de regressao. Nao marcado CLOSED: falta execucao
+      real em GitHub Actions com artifact.

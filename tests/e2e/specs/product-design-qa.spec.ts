@@ -194,8 +194,17 @@ test.describe('Product Design QA (PD0) — diagnostico por rota', () => {
         if (await menuTrigger.isVisible().catch(() => false)) {
           await menuTrigger.click({ timeout: 5_000 }).catch(() => {});
           await page.waitForTimeout(300);
-          const listVisible = await isVisible(page, awaSelectors.verticalMenu.list);
-          const listBBox = await getBBox(page, awaSelectors.verticalMenu.list);
+          // PD1 fix: `isVisible()`/`getBBox()` (header.helpers.ts) usam
+          // `locator.waitFor({ state: 'visible' })`, que trava ate o timeout
+          // neste painel especifico (o JS reajusta altura via requestAnimationFrame
+          // por ~5 frames apos abrir — awa-menu-controller.js `schedulePanelHeight`).
+          // A API direta do Playwright (`locator.isVisible()` / `boundingBox()`)
+          // reflete o estado real corretamente. Causa raiz confirmada com
+          // evidencia lado a lado (DOM real aberto enquanto o helper reportava
+          // falso-negativo) — ver PRODUCT_DESIGN_AUDIT_REPORT.md, PD-BUG-003.
+          const listLocator = page.locator(awaSelectors.verticalMenu.list).first();
+          const listVisible = await listLocator.isVisible().catch(() => false);
+          const listBBox = listVisible ? await listLocator.boundingBox().catch(() => null) : null;
           const withinViewport = listBBox
             ? listBBox.x >= -2 && listBBox.y >= -2 && listBBox.x + listBBox.width <= viewportWidth + 2
             : null;

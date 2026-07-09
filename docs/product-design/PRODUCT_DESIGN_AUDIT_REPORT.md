@@ -77,33 +77,83 @@ Fase PD1 (Header): aplicar `border-radius: var(--awa-radius-md)` no input de bus
 
 ---
 
-## PD-BUG-003 — Menu vertical (Departamentos) não abriu visivelmente após clique
+## PD-BUG-003 — Menu vertical (Departamentos): FALSO POSITIVO do harness de teste (nao e bug de produto)
 
-Status: REPRODUCED
-Prioridade: P0
+Status: RESOLVED_TEST_HARNESS (nao era bug do tema/produto)
+Prioridade: P0 -> reclassificado apos investigacao PD1
 Página: Home (`/`)
-Componente: Menu vertical
+Componente: Menu vertical (teste, nao produto)
 Viewport: desktop-1440
 Estado: guest
 
-### Problema
-O trigger do menu vertical está visível e com bounding box válido, mas após o clique automatizado, `verticalMenu.visible` foi registrado como `false` (lista `.togge-menu.list-category-dropdown` não ficou visível/detectável).
+### Investigacao PD1 (causa raiz real)
 
-### Evidência
-- JSON attach: `pd0-home.json` (campo `verticalMenu = {"visible":false,"bbox":null,"withinViewport":null}`)
-- Screenshot de tentativa: não gerado nesta execução (arquivo `menu-vertical-aberto.png` não foi produzido — **achado adicional**: a captura de evidência para este componente falhou silenciosamente e precisa de investigação em fase de correção, não é apenas o menu que não abriu, mas a própria evidência).
+Reproduzido com 3 metodos independentes, na ordem:
 
-### Causa provável
-A avaliar em fase de correção: seletor da lista pode estar desatualizado, classe de estado "aberto" diferente da esperada, ou timing insuficiente após o clique.
+1. Script Playwright ad-hoc fora do test runner (`node` puro): clique no trigger
+   `[data-role="awa-vertical-menu-trigger"]` -> painel `.togge-menu.list-category-dropdown`
+   recebeu `aria-expanded="true"`, classes `vmm-open menu-open`, `aria-hidden="false"`,
+   `data-awa-menu-state="open"`, `display:flex`, `visibility:visible`, `opacity:1`,
+   bbox `304x560`. Sem erros de console/rede.
+2. Spec de diagnostico temporario dentro do test runner real (`--project=desktop-1440`):
+   mesmo resultado — painel abre corretamente (`RAW_STATE` via `page.evaluate` confirma
+   classes/estilos computados corretos).
+3. Comparacao lado a lado NA MESMA execucao: estado real do DOM (`page.evaluate`) mostrava
+   o painel aberto (`display:flex`, `304x560`) tanto antes quanto depois de chamar o helper
+   `isVisible()` de `tests/e2e/helpers/header.helpers.ts` — mas o helper retornou `false`.
+4. Isolamento final: `locator.isVisible()` (API nativa do Playwright) retornou `true`
+   corretamente; `locator.waitFor({ state: 'visible', timeout: 3000 })` (usado internamente
+   pelo helper `isVisible()`) **estourou o timeout** mesmo com o elemento genuinamente visivel.
 
-### Correção recomendada
-Fase PD1 (Header): confirmar seletor real do menu vertical em runtime (DevTools) antes de qualquer alteração de JS/CSS.
+### Causa raiz confirmada
+O helper `isVisible()`/`getBBox()` em `tests/e2e/helpers/header.helpers.ts` usa
+`locator.waitFor({ state: 'visible' })`, que se mostrou nao-confiavel para este painel
+especifico: apos abrir, `awa-menu-controller.js` (`DeptMenu.prototype.schedulePanelHeight`)
+reajusta `height`/`max-height` via `requestAnimationFrame` em ate 5 quadros consecutivos
+para calcular a altura final do painel. Essa mutacao continua de estilo inline no elemento
+parece impedir o `waitFor({state:'visible'})` do Playwright de resolver como visivel dentro
+do timeout, enquanto a checagem instantanea `locator.isVisible()` (sem polling de
+estabilidade) reflete o estado real corretamente.
+
+**Conclusao: o menu vertical do produto funciona corretamente em producao.** O bug estava
+no helper de teste criado na fase PD0, nao no tema/JS/CSS do Magento.
+
+### Correção aplicada
+Escopo: **apenas** `tests/e2e/specs/product-design-qa.spec.ts` (bloco de verificacao do
+menu vertical na rota `home`). Nenhum arquivo de tema (`app/design/...`), template, LESS
+ou JS do menu vertical foi alterado — nao havia defeito la.
+
+Troca pontual de `isVisible(page, awaSelectors.verticalMenu.list)` /
+`getBBox(page, awaSelectors.verticalMenu.list)` por chamada direta
+`page.locator(awaSelectors.verticalMenu.list).first().isVisible()` /
+`.boundingBox()`, que reflete o estado real sem depender do polling de estabilidade do
+`waitFor`. O helper compartilhado `tests/e2e/helpers/header.helpers.ts` **nao foi
+modificado** (fora de escopo desta branch — pode ter o mesmo efeito em outras verificacoes
+dinamicas, como autocomplete/PD-BUG-004, mas isso fica para validacao em fase futura,
+conforme instrucao explicita de nao corrigir autocomplete nesta branch).
+
+### Evidência — antes (PD0, com o bug do harness)
+- JSON: `verticalMenu = {"visible":false,"bbox":null,"withinViewport":null}` (execucao PD0,
+  `desktop-1440__home-fullpage.png`)
+- Screenshot dedicado do painel aberto: nao foi gerado no PD0 (evidencia do proprio bug de
+  harness).
+
+### Evidência — depois (PD1, apos a correção do spec)
+- JSON: `verticalMenu = {"visible":true,"bbox":{"x":103,"y":152,"width":304,"height":560},"withinViewport":true}`
+- Screenshot: `test-results/product-design-qa/desktop-1440__menu-vertical-aberto.png`
+  (gerado com sucesso, ~1MB, mostra o painel de departamentos aberto)
+- Playwright: `design QA — home` passou (`1 passed`, exit code 0, `--workers=1`,
+  `--project=desktop-1440`)
+- Regressao: `header-core-interactions-p0.spec.ts` (`diagnostico — home`) tambem passou
+  (`1 passed`, exit code 0) apos a mudanca — nao ha impacto no spec de header, que nao foi
+  alterado.
 
 ### Critério de aceite
-- [ ] Menu vertical abre e é detectado como visível pelo spec
-- [ ] Screenshot `menu-vertical-aberto` gerado com sucesso
-- [ ] Playwright
-- [ ] Sem erro console
+- [x] Menu vertical abre e é detectado como visível pelo spec (corrigido no harness)
+- [x] Screenshot `menu-vertical-aberto` gerado com sucesso
+- [x] Playwright local passou (`product-design-qa.spec.ts` e `header-core-interactions-p0.spec.ts`)
+- [x] Sem erro console/rede novo
+- [ ] Execução em GitHub Actions com artifact (pendente — não fechar como CLOSED sem isso)
 
 ---
 
