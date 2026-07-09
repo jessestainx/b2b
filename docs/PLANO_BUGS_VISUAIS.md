@@ -163,6 +163,14 @@
 - `BUG-CSS-AUTHORITY-011` ↔ `BUG-ROUTE-CONSISTENCY-006` — autoridade visual fragmentada é causa estrutural da inconsistência entre rotas
 - `BUG-RED-USAGE-012` ↔ `BUG-MOB-HERO-003` — vermelho em CTA/superfícies pode amplificar peso do hero mobile
 
+### 4.1. Bugs operacionais (não-visuais)
+
+> Bugs de higiene de código / operação de debug, sem impacto visual direto. Registrados aqui por falta de tracker dedicado.
+
+| ID | Título | Sev | Status | Módulo | Detectado em | Fonte | Commit |
+|-----|--------|:---:|--------|--------|---------------|-------|--------|
+| BUG-OPS-DEBUG-019 | Instrumentação de debug órfã (sessão `ad5a4e`/`712b44`) esquecida em `header-status-panel.js` e `b2b-panel-hydrate.js` — `fetch`/`console` de debug bloqueados por CSP, nunca commitados | P3 | **Resolvido** | GrupoAwamotos_B2B (painel de status B2B) | Sessão de debug do modal B2B mobile (2026-07-08/09) | Debug mode runtime evidence (`.cursor/debug-712b44.log`) | `dfc4095a8` |
+
 ---
 
 ## 5. Bugs detalhados (Fase 3D.2.5)
