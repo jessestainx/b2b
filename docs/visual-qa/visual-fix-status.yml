@@ -1,0 +1,993 @@
+version: 2
+document: docs/visual-qa/VISUAL_FIX_PLAN.md
+definition_of_done: docs/visual-qa/visual-fix-definition-of-done.md
+agent_instructions: docs/visual-qa/visual-fix-agent-instructions.md
+last_updated: "2026-07-09"
+migrated_from: docs/visual-qa/home-visual-fix-status.yml
+migration_note: >
+  v1 (home-visual-fix-status.yml) era exclusivo da Home. v2 generaliza para qualquer
+  pagina/componente global. HOME-P0-003 (header/minicart/conta) foi renomeado para
+  HEADER-P0-001; HOME-P0-004 (menu Departamentos) foi renomeado para HEADER-P0-002;
+  HOME-P0-005 (footer contraste) foi absorvido por FOOTER-P0-001 (mesmo componente
+  global, causa raiz unica). HOME-P0-006 (carrosseis) foi renumerado para HOME-P0-003.
+  Nenhum conteudo foi duplicado — apenas consolidado sob o componente global correto.
+
+rules:
+  source_of_truth:
+    - app/code
+    - app/design
+    - docs
+    - tests
+  forbidden_as_source:
+    - pub/static
+    - var/view_preprocessed
+    - vendor
+    - generated
+    - node_modules
+  design_tokens_file: app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_tokens.less
+
+statuses:
+  - TODO
+  - REPRODUCED
+  - IN_PROGRESS
+  - FIXED_SOURCE
+  - DEPLOYED_STAGING
+  - TESTED_LOCAL
+  - TESTED_CI
+  - VERIFIED_PROD
+  - BLOCKED
+  - WONTFIX
+  - CLOSED
+
+page_types:
+  - global-header
+  - global-footer
+  - home
+  - plp
+
+setup:
+  - id: VISUAL-SETUP-001
+    title: "Criar documento mestre (VISUAL_FIX_PLAN.md)"
+    status: CLOSED
+    proof: { commit: null, pr: null }
+  - id: VISUAL-SETUP-002
+    title: "Criar YAML de status (visual-fix-status.yml)"
+    status: CLOSED
+    proof: { commit: null, pr: null }
+  - id: VISUAL-SETUP-003
+    title: "Criar pasta de evidencias (evidence/<ID>/)"
+    status: CLOSED
+    proof: { commit: null, pr: null }
+  - id: VISUAL-SETUP-004
+    title: "Criar specs Playwright base (home-visual-regression.spec.ts + plp-visual-baseline.spec.ts)"
+    status: CLOSED
+    proof: { commit: null, pr: null }
+  - id: VISUAL-SETUP-005
+    title: "Configurar upload de artifacts no GitHub Actions"
+    status: TODO
+    proof: { commit: null, pr: null }
+  - id: VISUAL-SETUP-006
+    title: "Migrar doc/YAML de Home-only para multi-pagina (Header/Footer globais + PLP)"
+    status: CLOSED
+    proof: { commit: null, pr: null }
+
+items:
+  # ══════════════════════════════════════════════════════════════════════════
+  # GLOBAL — Header (afeta todas as paginas)
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: HEADER-P0-001
+    title: "Header/minicart/conta inconsistentes"
+    phase: P0
+    page_type: global-header
+    component: "Header global"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/html/header.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Theme/templates/html/awa-header-desktop-grid-critical-fragment.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_minicart.less
+    tests:
+      playwright:
+        - tests/e2e/specs/header-core-interactions-p0.spec.ts
+        - tests/e2e/specs/home-visual-regression.spec.ts
+        - tests/e2e/specs/plp-visual-baseline.spec.ts
+    evidence_dir: docs/visual-qa/evidence/HEADER-P0-001
+    acceptance:
+      - "Icone do minicart visivel em todas as larguras testadas"
+      - "Area de conta (Ola, Nome / status B2B) com altura minima 40-44px, sem aperto"
+      - "Grid claro: logo / busca / conta / minicart"
+      - "border-radius: var(--awa-radius-md) nos controles"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    superseded: "HOME-P0-003 (v1, home-visual-fix-status.yml)"
+
+  - id: HEADER-P0-002
+    title: "Menu Departamentos desalinhado/quebrado"
+    phase: P0
+    page_type: global-header
+    component: "Header / Menu vertical"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_VerticalMenu/templates/sidemenu.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_vertical-menu.less
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_z-index.less
+    tests:
+      playwright:
+        - tests/e2e/specs/home-visual-regression.spec.ts
+        - tests/e2e/specs/plp-visual-baseline.spec.ts
+    evidence_dir: docs/visual-qa/evidence/HEADER-P0-002
+    acceptance:
+      - "Botao Departamentos com proporcao fixa/controlada, nao domina a linha de nav"
+      - "Links Nossas Marcas / Lancamentos / Catalogo alinhados a mesma altura do botao"
+      - "Menu vertical aberto exibe todos os itens sem corte (z-index correto)"
+      - "Menu abre e fecha corretamente (click/ESC/click-fora)"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    superseded: "HOME-P0-004 (v1, home-visual-fix-status.yml)"
+
+  - id: HEADER-P1-001
+    title: "Topbar B2B com aparencia pesada"
+    phase: P1
+    page_type: global-header
+    component: "Header / Topbar B2B"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: high
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HEADER-P1-001
+    acceptance:
+      - "Sem borda escura excessiva na topbar"
+      - "Altura compacta"
+      - "Botao fechar (X) com area clicavel >= 32px"
+      - "Fechamento persistido (localStorage/cookie)"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # GLOBAL — Footer (afeta todas as paginas)
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: FOOTER-P0-001
+    title: "Footer principal quebrado em blocos vermelhos"
+    phase: P0
+    page_type: global-footer
+    component: "Footer global"
+    route: "/ (todas as rotas)"
+    status: REPRODUCED
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/html/footer.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/html/footer/footer-static5.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_footer.less
+    tests:
+      playwright:
+        - tests/e2e/specs/accessibility.spec.ts
+        - tests/e2e/specs/footer-contrast-probe.spec.ts
+        - tests/e2e/specs/plp-visual-baseline.spec.ts
+    evidence_dir: docs/visual-qa/evidence/FOOTER-P0-001
+    acceptance:
+      - "Colunas Quem somos / Suporte e Seguranca / Atendimento sem caixas vermelhas independentes"
+      - "Fundo consistente entre colunas"
+      - "Contraste >= 4.5:1 (WCAG) para texto normal do footer"
+      - "Links legiveis, headings com peso e contraste adequados"
+      - "Sem regressao em outras paginas que compartilham o footer global"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    note: "Absorve a preocupacao de contraste antes registrada em HOME-P0-005 (v1) — mesmo componente global, mesma causa raiz a investigar."
+
+  - id: FOOTER-P1-001
+    title: "Faixa de beneficios com contraste e densidade ruins"
+    phase: P1
+    page_type: global-footer
+    component: "Footer / Faixa de beneficios"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: high
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/footer-contrast-probe.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/FOOTER-P1-001
+    acceptance:
+      - "Contraste adequado em Envio para todo o Brasil / Conexao criptografada / Garantia / Precos de atacado"
+      - "Icones consistentes, 4 colunas desktop, empilhado em mobile"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: FOOTER-P1-002
+    title: "Newsletter desalinhada"
+    phase: P1
+    page_type: global-footer
+    component: "Footer / Newsletter"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/FOOTER-P1-002
+    acceptance:
+      - "Grid: coluna esquerda (icone/titulo/descricao), coluna direita (input+botao)"
+      - "Input e botao com mesma altura, border-radius: 8px"
+      - "Texto legal abaixo do input, nao flutuando"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: FOOTER-P1-003
+    title: "Bloco de atendimento/endereco parece campo quebrado"
+    phase: P1
+    page_type: global-footer
+    component: "Footer / Endereco"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/FOOTER-P1-003
+    acceptance:
+      - "Card de endereco real, com icone de localizacao e link Ver no mapa"
+      - "Sem aparencia de input/campo desabilitado"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: FOOTER-P1-004
+    title: "Icones sociais pequenos e pouco claros"
+    phase: P1
+    page_type: global-footer
+    component: "Footer / Redes sociais"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/accessibility.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/FOOTER-P1-004
+    acceptance:
+      - "Icones sociais com 32-36px, aria-label, contraste adequado"
+      - "Redes sem link real removidas"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: FOOTER-P1-005
+    title: "Linha de categorias no footer pesada e confusa"
+    phase: P1
+    page_type: global-footer
+    component: "Footer / Categorias populares"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/FOOTER-P1-005
+    acceptance:
+      - "Fundo neutro ou integrado ao footer (nao 2o menu solto)"
+      - "Chips com border-radius: 8px, quantidade reduzida"
+      - "Link Ver todas as categorias claro"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: FOOTER-P1-006
+    title: "Bloco de pagamento/certificacao muito fraco"
+    phase: P1
+    page_type: global-footer
+    component: "Footer / Pagamento e seguranca"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/FOOTER-P1-006
+    acceptance:
+      - "Icones de pagamento/seguranca com tamanho e contraste adequados"
+      - "Icones sem funcao removidos"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: FOOTER-P2-001
+    title: "Texto legal/CNPJ pequeno demais"
+    phase: P2
+    page_type: global-footer
+    component: "Footer / Legal"
+    route: "/ (todas as rotas)"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/FOOTER-P2-001
+    acceptance:
+      - "Tamanho minimo e contraste adequados no texto legal/CNPJ"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # PAGINA: Home (/)
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: HOME-P0-001
+    title: "Botao B2B duplicado/sobreposto"
+    phase: P0
+    page_type: home
+    component: "Home / Beneficios / CTA B2B"
+    route: "/"
+    status: TODO
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Cms/templates/home/b2b-hero-cta.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Cms/templates/top-home.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-hero-b2b-benefits-2026-06.less
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P0-001
+    acceptance:
+      - "Apenas um elemento com aparencia/semantica de botao CTA B2B na secao"
+      - "Sem sobreposicao com cards de beneficio"
+      - "border-radius: var(--awa-radius-md) no CTA"
+      - "Desktop 1440 e mobile 390 passam"
+      - "Sem console error novo / sem exception.log/system.log novo"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P0-002
+    title: "Product cards com imagem ausente ou placeholder vazio"
+    phase: P0
+    page_type: home
+    component: "Product card / Vitrines"
+    route: "/"
+    status: TODO
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/list.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/images/product/placeholder/image.jpg
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P0-002
+    acceptance:
+      - "Nenhum card vazio em Mais Vendidos, Lancamentos ou Linhas em destaque"
+      - "Nenhum placeholder rosa/quebrado"
+      - "Fallback visual neutro quando imagem ausente"
+      - "Produto sem imagem critica documentado por SKU"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P0-003
+    title: "Carrosseis com controles desalinhados ou quebrados"
+    phase: P0
+    page_type: home
+    component: "Home / Carrosseis"
+    route: "/"
+    status: TODO
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Cms/layout/cms_index_index.xml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-carousel-home-2026-06.less
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-fix-carousel-2026-06.less
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P0-003
+    acceptance:
+      - "Setas fora da area de imagem/conteudo do card"
+      - "Botao de pause do hero dentro da area do hero, com aria-label"
+      - "Nenhum controle sobrepoe conteudo clicavel"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    renumbered_from: "HOME-P0-006 (v1, home-visual-fix-status.yml)"
+
+  - id: HOME-P1-001
+    title: "Auditar e aplicar --awa-radius-* (8px como padrao)"
+    phase: P1
+    page_type: home
+    component: "Home (global)"
+    route: "/"
+    status: TODO
+    priority: high
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_tokens.less]
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P1-001
+    acceptance: ["Nenhum border-radius com valor literal fora dos tokens nos componentes tocados"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P1-002
+    title: "Padronizar cards de beneficios"
+    phase: P1
+    page_type: home
+    component: "Home / Beneficios"
+    route: "/"
+    status: TODO
+    priority: high
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Cms/templates/home/b2b-hero-cta.phtml]
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P1-002
+    acceptance: ["Cards de beneficio com altura computada igual (+-2px)"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P1-003
+    title: "Padronizar product card"
+    phase: P1
+    page_type: home
+    component: "Vitrines de produto"
+    route: "/"
+    status: TODO
+    priority: high
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/list.phtml]
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P1-003
+    acceptance: ["checkCardAlignment retorna aligned:true para .product-item nas 3 vitrines"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P1-004
+    title: "Padronizar cards de categoria"
+    phase: P1
+    page_type: home
+    component: "Home / Categorias"
+    route: "/"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P1-004
+    acceptance: ["Mesmo fundo/crop/escala/formato entre os cards de categoria"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P1-005
+    title: "Corrigir espacamentos verticais"
+    phase: P1
+    page_type: home
+    component: "Home (global)"
+    route: "/"
+    status: TODO
+    priority: medium
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_tokens.less]
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P1-005
+    acceptance: ["Escala de spacing consistente (@awa-space-*) entre secoes"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P1-006
+    title: "Ajustar tipografia e hierarquia visual"
+    phase: P1
+    page_type: home
+    component: "Home (global)"
+    route: "/"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P1-006
+    acceptance: ["Escala tipografica aplicada (title/card-title/meta/CTA)"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P1-007
+    title: "Tornar CTAs B2B mais claros"
+    phase: P1
+    page_type: home
+    component: "Vitrines de produto / CTA"
+    route: "/"
+    status: TODO
+    priority: high
+    source_files: [app/code/GrupoAwamotos/B2B, app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/list.phtml]
+    tests: { playwright: [tests/e2e/specs/home-visual-regression.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P1-007
+    acceptance:
+      - "CTA guest: Cadastre-se para ver preco"
+      - "CTA logado B2B: Ver produto"
+      - "CTA produto restrito: Solicitar cotacao"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P2-001
+    title: "Hero com CTA real em HTML"
+    phase: P2
+    page_type: home
+    component: "Hero"
+    route: "/"
+    status: TODO
+    priority: low
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Cms/layout/cms_index_index.xml]
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P2-001
+    acceptance: ["CTA principal do hero existe como HTML real, nao apenas rasterizado na imagem"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P2-002
+    title: "Reducao de carrosseis redundantes"
+    phase: P2
+    page_type: home
+    component: "Home (global)"
+    route: "/"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P2-002
+    acceptance: ["No maximo 2 vitrines em carrossel na Home"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P2-003
+    title: "Remover secao de pedidos recentes quando vazia"
+    phase: P2
+    page_type: home
+    component: "Home / Pedidos recentes"
+    route: "/"
+    status: TODO
+    priority: low
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Cms/templates/top-home.phtml]
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P2-003
+    acceptance: ["Secao oculta para guest (ja implementado via BUG-H-017) e para logado sem pedidos (validar)"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P2-004
+    title: "Footer reorganizado/moderno (aplicado a Home via footer global)"
+    phase: P2
+    page_type: home
+    component: "Footer global"
+    route: "/"
+    status: TODO
+    priority: low
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_footer.less]
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P2-004
+    acceptance: ["Ver FOOTER-P0-001/P1-* — item mantido apenas como checkpoint de regressao na Home"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P2-005
+    title: "Art direction consistente nas categorias"
+    phase: P2
+    page_type: home
+    component: "Home / Categorias"
+    route: "/"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P2-005
+    acceptance: ["Novo asset visual consistente para cards de categoria"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: HOME-P2-006
+    title: "Monitorar Lighthouse/CLS"
+    phase: P2
+    page_type: home
+    component: "Performance"
+    route: "/"
+    status: TODO
+    priority: low
+    source_files: [.github/lighthouse/lighthouserc.desktop.cjs, .github/lighthouse/lighthouserc.mobile.cjs]
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/HOME-P2-006
+    acceptance: ["CLS <= 0.1 na Home"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # PAGINA: Categoria / PLP — Bagageiros (/bagageiros.html)
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: PLP-P0-001
+    title: "Header de categoria com banner/placeholder vazio"
+    phase: P0
+    page_type: plp
+    component: "category-header"
+    route: "/bagageiros.html"
+    status: REPRODUCED
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-product-cards-modern.less#L84-L91
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_visual-bug-fixes.less#L102-L105
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/category/image.phtml
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-001
+    acceptance:
+      - "Sem banner fantasma ou placeholder vazio"
+      - "Titulo e contagem legiveis"
+      - "Espacamento entre header e toolbar <= 32px"
+      - "Altura do header de categoria entre 96-160px quando sem banner real"
+      - "Desktop e mobile validados"
+    proof: { before_screenshot: "image(32).png", after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    root_cause_confirmed: >
+      Medido via plp-visual-baseline.spec.ts contra producao (2026-07-09): getComputedStyle real de
+      .awa-category-hero__bg-image e opacity:0.32, position:relative, tamanho 1214x132px dentro de um hero
+      de 1216x160px — ou seja, a imagem PREENCHE corretamente a area (a hipotese inicial de que
+      position:relative!important em _visual-bug-fixes.less#L102-105 encolheria a imagem para o tamanho
+      intrinseco do HTML foi testada e descartada pelos dados reais). A causa da aparencia
+      "fantasma/quase invisivel" e simplesmente opacity:0.32 no elemento. O asset em si existe e e valido
+      (pub/media/catalog/category/cat-bagageiros.png, 1080x1080px, 502KB) — nao e imagem ausente.
+      Pendente: identificar a regra LESS exata que aplica opacity:0.32 — busca estatica por "opacity: 0.3"
+      em ~90 arquivos LESS do tema nao encontrou o valor exato ligado a este seletor (cascata complexa,
+      varios arquivos tocam .awa-category-hero__bg-image: _awa-product-cards-modern.less,
+      _visual-bug-fixes.less, _awa-plp-grid-mobile-2026-06.less, _awa-category-layout-fix.less,
+      _awa-impeccable-layout-2026-06-16.less, _awa-plp-consistency-pass2-2026-06.less,
+      _awa-plp-refine-terminal-2026-06.less, _awa-async-bundle-distill-2026-06.less). Antes de corrigir,
+      usar DevTools > Computed > rastrear a regra vencedora de "opacity" neste elemento (nao adivinhar).
+      Decisao de design tambem pendente: opacity baixa pode ter sido intencional (efeito de leitura sob o
+      titulo) — validar com o time se o requisito e "sem opacidade" ou "banner com imagem nitida + overlay
+      de leitura", antes de simplesmente remover a regra.
+
+  - id: PLP-P0-002
+    title: "Espaco vazio excessivo entre categoria e toolbar"
+    phase: P0
+    page_type: plp
+    component: "category-content"
+    route: "/bagageiros.html"
+    status: REPRODUCED
+    priority: critical
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-002
+    acceptance:
+      - "Toolbar aparece proxima ao header da categoria (<=32px de espacamento)"
+      - "Sem min-height/margin residual causando vazio"
+    proof: { before_screenshot: "image(32).png", after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P0-003
+    title: "Icone/loader solto na area vazia"
+    phase: P0
+    page_type: plp
+    component: "loading-state"
+    route: "/bagageiros.html"
+    status: REPRODUCED
+    priority: critical
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-003
+    acceptance: ["Nenhum icone solto/residual apos o carregamento completo da pagina"]
+    proof: { before_screenshot: "image(32).png", after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P0-004
+    title: "Filtros vazios ou quebrados"
+    phase: P0
+    page_type: plp
+    component: "layered-navigation"
+    route: "/bagageiros.html"
+    status: REPRODUCED
+    priority: critical
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-004
+    acceptance:
+      - "Sidebar so exibe filtros com opcoes reais (nunca filtro vazio como Valor sem controle)"
+      - "Sidebar oculta por completo se nao houver nenhum filtro utilizavel"
+    proof: { before_screenshot: "image(32).png", after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P0-005
+    title: "Widget de pedidos recentes indevido na PLP"
+    phase: P0
+    page_type: plp
+    component: "sidebar"
+    route: "/bagageiros.html"
+    status: TESTED_LOCAL
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/layout/catalog_category_view.xml#L15-L19
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-005
+    acceptance:
+      - "Widget nao aparece em PLP quando vazio"
+      - "Sem CTA duplicado"
+      - "Sidebar mostra apenas filtros uteis"
+    proof: { before_screenshot: "image(32).png", after_screenshot: "after-desktop-1440-logged-in.png", ci_run: null, playwright_report: null, commit: null, pr: null }
+    fix_applied: >
+      Adicionado <referenceBlock name="sale.reorder.sidebar" remove="true"/> em
+      Magento_Catalog/layout/catalog_category_view.xml (mesmo padrao ja usado em
+      Magento_Cms/layout/cms_index_index.xml para a Home). Validado em 2026-07-09 com login
+      real (customer_id 9068, conta de teste com 1 pedido, senha temporaria redefinida via
+      encryptor + revertida apos o teste) em /bagageiros.html: sidebar-additional renderiza vazia
+      (catalog-sidebar-adv, display:none), reorderBlockCount=0. cache:flush executado apos a
+      mudanca. Sem novas entradas em exception.log/system.log. Static-content-deploy nao aplicavel
+      (layout XML, nao CSS/JS estatico).
+    root_cause_hypothesis: >
+      sale.reorder.sidebar (bloco nativo Magento) foi explicitamente removido em
+      Magento_Cms/layout/cms_index_index.xml (linha 60, <referenceBlock name="sale.reorder.sidebar"
+      remove="true"/>) para a Home, mas NAO existe remocao equivalente em
+      Magento_Catalog/layout/catalog_category_view.xml nem em Magento_Theme/layout/catalog_category_view.xml.
+      E a causa mais provavel do widget "Pedidos feitos recentemente" aparecer na sidebar.additional
+      da categoria. Validado parcialmente via plp-visual-baseline.spec.ts em 2026-07-09: como guest
+      (nao autenticado), .block-reorder nao renderiza (count:0) — comportamento nativo esperado do Magento
+      (o bloco so mostra pedidos para cliente logado com historico), o que NAO contradiz a hipotese, apenas
+      significa que o baseline guest nao reproduz visualmente o bug. Falta validar com sessao B2B logada
+      com pedidos recentes (mesmo contexto da screenshot original) antes de aplicar a correcao.
+
+  - id: PLP-P0-006
+    title: "Botoes duplicados no widget lateral"
+    phase: P0
+    page_type: plp
+    component: "sidebar"
+    route: "/bagageiros.html"
+    status: TESTED_LOCAL
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/layout/catalog_category_view.xml#L15-L19
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-006
+    acceptance: ["Nenhum CTA Adicionar ao carrinho duplicado dentro do mesmo widget"]
+    proof: { before_screenshot: "image(32).png", after_screenshot: "after-desktop-1440-logged-in.png", ci_run: null, playwright_report: null, commit: null, pr: null }
+    fix_applied: "Mesma correcao de PLP-P0-005 (remocao do widget elimina os botoes duplicados por consequencia — nao havia botao para corrigir isoladamente)."
+
+  - id: PLP-P0-007
+    title: "Cards de produto sem hierarquia minima"
+    phase: P0
+    page_type: plp
+    component: "product-card"
+    route: "/bagageiros.html"
+    status: REPRODUCED
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/list.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_product-card.less
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-007
+    acceptance:
+      - "Imagem, titulo (2 linhas), SKU, status de estoque, preco/CTA legiveis e hierarquizados"
+      - "Titulo 14-15px, meta/SKU 12px"
+    proof: { before_screenshot: "image(32).png", after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P0-008
+    title: "Cards de produto sem CTA principal"
+    phase: P0
+    page_type: plp
+    component: "product-card"
+    route: "/bagageiros.html"
+    status: REPRODUCED
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/list.phtml
+      - app/code/GrupoAwamotos/B2B
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-008
+    acceptance:
+      - "Logado B2B: CTA Ver produto / Adicionar a cotacao/lista"
+      - "Guest: CTA Cadastre-se para ver preco"
+      - "Botao sempre no rodape do card"
+    proof: { before_screenshot: "image(32).png", after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P0-009
+    title: "Ausencia de preco/contexto B2B"
+    phase: P0
+    page_type: plp
+    component: "product-card / pricing"
+    route: "/bagageiros.html"
+    status: REPRODUCED
+    priority: critical
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-009
+    acceptance:
+      - "Guest: mensagem Preco B2B disponivel apos login/aprovacao"
+      - "Logado B2B aprovado: preco ou politica de cotacao exibidos"
+      - "Nenhuma lacuna visual onde o preco deveria estar"
+    proof: { before_screenshot: "image(32).png", after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P0-010
+    title: "Mobile/filtro sem comportamento definido"
+    phase: P0
+    page_type: plp
+    component: "responsive-plp"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: critical
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P0-010
+    acceptance:
+      - "Filtro como drawer em mobile"
+      - "Grid mobile 1-2 colunas sem overflow horizontal"
+      - "Testado em 430px e 360px"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    note: "Ainda nao testado visualmente em mobile — status TODO, nao REPRODUCED, ate captura real."
+
+  - id: PLP-P1-001
+    title: "Breadcrumb compacto"
+    phase: P1
+    page_type: plp
+    component: "breadcrumbs"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: medium
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/breadcrumbs.phtml]
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-001
+    acceptance: ["Padding 8-12px, alinhado ao container, sem caixa alta/borda pesada, removido se vazio"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-002
+    title: "Toolbar padronizada"
+    phase: P1
+    page_type: plp
+    component: "toolbar"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: high
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-002
+    acceptance:
+      - "Ordem: filtro (esq) -> view mode -> ordenacao/qtd por pagina (dir)"
+      - "Inputs/selects com altura 40px, border-radius 8px, labels legiveis"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-003
+    title: "Botao Mostrar/Ocultar filtros"
+    phase: P1
+    page_type: plp
+    component: "toolbar"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-003
+    acceptance:
+      - "Texto do botao reflete estado atual (Mostrar/Ocultar filtros)"
+      - "aria-expanded correto; mobile abre drawer"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-004
+    title: "Grid/list acessivel"
+    phase: P1
+    page_type: plp
+    component: "toolbar / view-mode"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/accessibility.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-004
+    acceptance: ["Botoes grid/list 40x40, estado ativo claro, aria-pressed, contraste suficiente"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-005
+    title: "Grid de produtos melhor aproveitado"
+    phase: P1
+    page_type: plp
+    component: "product-grid"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: high
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_grid-listing.less]
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-005
+    acceptance:
+      - "4 colunas desktop com filtro lateral (5 se cards permanecerem legiveis)"
+      - "Container maximo consistente, gaps reduzidos"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-006
+    title: "Imagens de produto padronizadas"
+    phase: P1
+    page_type: plp
+    component: "product-card / imagem"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: high
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/list.phtml]
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-006
+    acceptance:
+      - "object-fit: contain, aspect-ratio: 1/1, produto ocupando 75-85% da area"
+      - "Fundo neutro consistente entre cards"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-007
+    title: "Bordas/cards padronizados"
+    phase: P1
+    page_type: plp
+    component: "product-card"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: medium
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_product-card.less]
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-007
+    acceptance: ["Uma unica borda por card, border-radius 8px, sombra leve, sem caixas multiplas internas"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-008
+    title: "Badge Pronta entrega"
+    phase: P1
+    page_type: plp
+    component: "product-card / badge"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-008
+    acceptance:
+      - "Badge com 20-24px de altura, texto legivel"
+      - "Estados padronizados: pronta entrega / sob encomenda / indisponivel / cotacao"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-009
+    title: "Paginacao"
+    phase: P1
+    page_type: plp
+    component: "pagination"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-009
+    acceptance:
+      - "Paginacao proxima ao fim do grid, botoes 36-40px, estado ativo claro"
+      - "Contagem Itens 1-12 de 22 visivel proxima a paginacao/toolbar"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-010
+    title: "Espaco antes do footer"
+    phase: P1
+    page_type: plp
+    component: "category-content"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-010
+    acceptance: ["Spacing entre grid e footer controlado em 48-64px, sem min-height residual"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-011
+    title: "Grid/container global"
+    phase: P1
+    page_type: plp
+    component: "layout global da PLP"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: high
+    source_files: [app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_grid-system.less]
+    tests: { playwright: [tests/e2e/specs/layout-container-grid.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-011
+    acceptance: ["Container global consistente do header ao footer, max-width uniforme, escala de spacing unica"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P1-012
+    title: "Acessibilidade dos controles"
+    phase: P1
+    page_type: plp
+    component: "toolbar / filtros / paginacao / header / minicart"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: high
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/accessibility.spec.ts, tests/e2e/specs/plp-visual-baseline.spec.ts] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P1-012
+    acceptance:
+      - ":focus-visible padronizado, area clicavel minima 32-44px"
+      - "aria-expanded/aria-controls/aria-pressed corretos"
+      - "Dropdowns fecham com ESC/click-fora"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P2-001
+    title: "Header de categoria com descricao/SEO util"
+    phase: P2
+    page_type: plp
+    component: "category-header"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P2-001
+    acceptance: ["Descricao curta de SEO exibida de forma compacta no header da categoria"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P2-002
+    title: "Filtro moderno com chips ativos"
+    phase: P2
+    page_type: plp
+    component: "layered-navigation"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P2-002
+    acceptance: ["Filtros ativos exibidos como chips removiveis acima do grid"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P2-003
+    title: "Product card B2B avancado"
+    phase: P2
+    page_type: plp
+    component: "product-card"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P2-003
+    acceptance: ["Card com acoes secundarias (comparar, lista de compras) sem poluir hierarquia principal"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  - id: PLP-P2-004
+    title: "Quick actions: lista de compras/cotacao"
+    phase: P2
+    page_type: plp
+    component: "product-card / quick actions"
+    route: "/bagageiros.html"
+    status: TODO
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: docs/visual-qa/evidence/PLP-P2-004
+    acceptance: ["Acao rapida de adicionar a lista de compras/cotacao disponivel a partir do card"]
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }

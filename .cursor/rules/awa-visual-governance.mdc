@@ -1,0 +1,53 @@
+---
+description: Governança de status para correções visuais (Header/Footer globais, Home, PLP) — impede marcar itens como corrigidos/testados sem evidência
+globs: docs/visual-qa/**,tests/e2e/specs/home-visual-*.spec.ts,tests/e2e/specs/plp-visual-*.spec.ts
+alwaysApply: false
+---
+
+# Governança de Correção Visual — AWA Motos (multi-página)
+
+Documento mestre: `docs/visual-qa/VISUAL_FIX_PLAN.md`. Status estruturado:
+`docs/visual-qa/visual-fix-status.yml`. Critérios completos:
+`docs/visual-qa/visual-fix-definition-of-done.md`. Cobre componentes globais (`HEADER-*`, `FOOTER-*`),
+Home (`HOME-*`) e PLP (`PLP-*`).
+
+## Regra #1: Nunca marcar `FIXED_SOURCE` sem causa raiz registrada
+
+```
+❌ "Corrigido o CSS do botão duplicado" (sem arquivo/linha)
+✅ Causa raiz: app/design/.../b2b-hero-cta.phtml linha 92-96 + _awa-hero-b2b-benefits-2026-06.less
+```
+
+## Regra #2: Nunca marcar `CLOSED` sem os 10 itens de prova
+
+Screenshot antes, screenshot depois, causa raiz, arquivos alterados, teste Playwright, commit, PR,
+validação desktop+mobile, sem erro novo em console/rede/`exception.log`/`system.log`. Ver checklist
+completo em `visual-fix-definition-of-done.md`. Faltando qualquer um → status máximo permitido é
+`FIXED_SOURCE`.
+
+## Regra #3: `pub/static` e `var/view_preprocessed` nunca são fonte de edição
+
+Correção sempre em `app/code`, `app/design`, layout XML, `.phtml` ou LESS fonte
+(`web/css/source/`). `pub/static`/`var/view_preprocessed` são apenas destino de deploy.
+
+## Regra #4: Não recriar tokens de design
+
+`--awa-radius-*` e `@awa-space-*` já existem em `_tokens.less`. Tarefa é auditar/aplicar, não criar um
+terceiro sistema paralelo.
+
+## Regra #5: YAML e Markdown sempre sincronizados
+
+Toda mudança de status em `visual-fix-status.yml` deve ser refletida na tabela de histórico do item
+correspondente em `VISUAL_FIX_PLAN.md`, e vice-versa. Nunca atualizar só um dos dois arquivos.
+
+## Regra #6: Um item por vez, em ordem de fase
+
+Não avançar para itens `P1` enquanto houver `P0` não `CLOSED` (em qualquer prefixo), salvo `BLOCKED`
+explícito com motivo registrado. Dentro de `P0`, priorizar itens globais (`HEADER-P0-*`, `FOOTER-P0-*`)
+antes dos específicos de página.
+
+## Regra #7: Bug global tem um único ID
+
+Um bug em Header ou Footer (`HEADER-*`/`FOOTER-*`) é rastreado **uma única vez**, mesmo aparecendo em
+várias páginas (Home, PLP, etc.). Não recriar o mesmo bug com ID diferente por página onde for observado —
+referenciar o ID global existente e, se necessário, anotar a página no histórico do item.
