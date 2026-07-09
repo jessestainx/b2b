@@ -116,23 +116,25 @@ items:
     page_type: global-header
     component: "Header / Menu vertical"
     route: "/ (todas as rotas)"
-    status: TODO
+    status: TESTED_LOCAL
     priority: critical
     source_files:
-      - app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_VerticalMenu/templates/sidemenu.phtml
-      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_vertical-menu.less
-      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_z-index.less
+      - app/code/GrupoAwamotos/Theme/Model/HeaderImpeccableCascadeLockCss.php
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-align-grid-terminal-2026-06-11.css
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-commerce-impeccable-refine.css
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-header-contract-grid-20260626.css
     tests:
       playwright:
         - tests/e2e/specs/home-visual-regression.spec.ts
         - tests/e2e/specs/plp-visual-baseline.spec.ts
     evidence_dir: docs/visual-qa/evidence/HEADER-P0-002
+    notes: "2026-07-09: alinhamento vertical + border-radius flush na nav bar (PLP desktop 1440). Causa raiz: padding-block 8px + height 48px fixo; border-radius 14px vencia via inline lock 10x #html-body."
     acceptance:
       - "Botao Departamentos com proporcao fixa/controlada, nao domina a linha de nav"
       - "Links Nossas Marcas / Lancamentos / Catalogo alinhados a mesma altura do botao"
       - "Menu vertical aberto exibe todos os itens sem corte (z-index correto)"
       - "Menu abre e fecha corretamente (click/ESC/click-fora)"
-    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    proof: { before_screenshot: null, after_screenshot: docs/visual-qa/evidence/HEADER-P0-002/after-desktop-1440.png, ci_run: validate-dept-fix.spec.ts desktop-1440, playwright_report: null, commit: null, pr: null }
     superseded: "HOME-P0-004 (v1, home-visual-fix-status.yml)"
 
   - id: HEADER-P1-001

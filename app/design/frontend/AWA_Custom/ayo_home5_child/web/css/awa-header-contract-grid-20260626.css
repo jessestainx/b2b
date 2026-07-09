@@ -364,3 +364,84 @@ body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] .head
   }
 }
 
+/*
+ * HEADER-P0-002 (docs/visual-qa/VISUAL_FIX_PLAN.md): botão Departamentos desalinhado /
+ * transbordando a nav bar. Causa: awa-commerce-impeccable-refine.css aplica padding-block
+ * 6px em .awa-header-categories e height 48px fixo no trigger dentro de nav bar 48px
+ * (com padding no .container), gerando offset ~8px e bottom 201 vs nav 191.
+ */
+@media (min-width: 992px) {
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"] {
+    margin-top: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"] > .container {
+    padding-block: 0 !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"]
+    .awa-nav-bar__inner {
+    align-items: stretch !important;
+    height: var(--awa-header-nav-height, 48px) !important;
+    min-height: var(--awa-header-nav-height, 48px) !important;
+    max-height: var(--awa-header-nav-height, 48px) !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-categories.menu_left_home1 {
+    padding-block: 0 !important;
+    padding-inline: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    align-self: stretch !important;
+    display: flex !important;
+    align-items: stretch !important;
+    overflow: hidden !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-categories.menu_left_home1
+    :is(
+      nav.awa-nav-categories,
+      .sections.nav-sections.category-dropdown,
+      .section-items.category-dropdown-items,
+      .section-item-content.category-dropdown-item-content,
+      .navigation.verticalmenu.side-verticalmenu
+    ) {
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: stretch !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"]
+    :is(
+      button.our_categories.title-category-dropdown[data-role="awa-vertical-menu-trigger"],
+      button.our_categories.title-category-dropdown
+    ) {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding-block: 0 !important;
+    padding-inline: 16px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    align-self: stretch !important;
+    box-sizing: border-box !important;
+  }
+}

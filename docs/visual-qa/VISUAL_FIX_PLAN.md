@@ -168,7 +168,7 @@ não vazio · área de conta com altura mínima 40–44px · grid claro logo/bus
 
 #### HEADER-P0-002 — Menu Departamentos desalinhado/quebrado
 
-Status: `TODO` · Prioridade: P0 · Componente: Header / Menu vertical · Rota: todas
+Status: `TESTED_LOCAL` · Prioridade: P0 · Componente: Header / Menu vertical · Rota: todas
 Branch: `fix/header-footer-global-p0`
 
 **Problema:** botão "Departamentos" domina a linha de navegação sem proporção controlada; links "Nossas
@@ -183,7 +183,7 @@ menu aberto exibe todos os itens sem corte · abre/fecha corretamente (click/ESC
 
 | Data | Status | Autor | Observação |
 |---|---|---|---|
-| 2026-07-09 | TODO | agente | migrado de HOME-P0-004 (v1); observado também na PLP Bagageiros |
+| 2026-07-09 | TESTED_LOCAL | agente | PLP /bagageiros desktop 1440: trigger alinhado (t/b nav bar), border-radius 0, padding-block 0. Fix: CSS terminal + override inline HeaderImpeccableCascadeLockCss |
 
 ---
 

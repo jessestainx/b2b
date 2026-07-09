@@ -2752,8 +2752,7 @@ html body#html-body .page-wrapper :is(
     .header_main.awa-main-header-inner-wrap,
     .header-control.header-nav,
     .header-control.header-nav > .container,
-    .awa-nav-bar__inner,
-    .awa-header-categories.menu_left_home1
+    .awa-nav-bar__inner
 ) {
     padding-block: 6px !important;
 }
@@ -6485,15 +6484,18 @@ html body#html-body.b2b-reorder-history .page-wrapper .b2b-reorder-page .js-reor
     max-height: 48px !important;
   }
 
-  /* Dept button expandido: 48px */
+  /* Dept button expandido: preencher nav bar (HEADER-P0-002 — era 48px fixo + padding = overflow) */
   html body#html-body:not(#__awa-no-match):not(.onepagecheckout-index-index):not(.checkout-index-index)
     .page-wrapper
     .awa-site-header:not(.awa-header-condensed)
     .header-control.awa-nav-bar
     button.our_categories.title-category-dropdown {
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding-block: 0 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
   }
 
   /* Busca: SSOT em §SEARCH-DISTILL-2026-06 (44px ghost) */
@@ -9274,4 +9276,85 @@ html body#html-body .page-wrapper .page-footer .page_footer {
 html body#html-body .page-wrapper .page-footer .page_footer .awa-footer-devby {
   max-height: 64px !important;
   overflow: hidden !important;
+}
+
+/* =============================================================================
+   HEADER-P0-002 terminal (2026-07-09): Departamentos alinhado à nav bar
+   Causa: padding-block em categorias + height 48px fixo no trigger dentro de
+   nav bar 48px com padding no container → botão 8px abaixo e transbordando.
+   ============================================================================= */
+@media (min-width: 992px) {
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"] {
+    margin-top: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"] > .container {
+    padding-block: 0 !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"]
+    .awa-nav-bar__inner {
+    align-items: stretch !important;
+    height: var(--awa-header-nav-height, 48px) !important;
+    min-height: var(--awa-header-nav-height, 48px) !important;
+    max-height: var(--awa-header-nav-height, 48px) !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-categories.menu_left_home1 {
+    padding-block: 0 !important;
+    padding-inline: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    align-self: stretch !important;
+    display: flex !important;
+    align-items: stretch !important;
+    overflow: hidden !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-categories.menu_left_home1
+    :is(
+      nav.awa-nav-categories,
+      .sections.nav-sections.category-dropdown,
+      .section-items.category-dropdown-items,
+      .section-item-content.category-dropdown-item-content,
+      .navigation.verticalmenu.side-verticalmenu
+    ) {
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: stretch !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"]
+    :is(
+      button.our_categories.title-category-dropdown[data-role="awa-vertical-menu-trigger"],
+      button.our_categories.title-category-dropdown
+    ) {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding-block: 0 !important;
+    padding-inline: 16px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    align-self: stretch !important;
+    box-sizing: border-box !important;
+  }
 }

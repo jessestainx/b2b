@@ -3448,6 +3448,7 @@ final class HeaderImpeccableCascadeLockCss
             . $shell . ' .awa-nav-bar__inner{gap:16px!important}'
             . $shell . ' button.title-category-dropdown.our_categories{border-radius:var(--awa-radius-md,8px)!important;'
             . 'font-weight:600!important;box-shadow:none!important}'
+            . $shell . ' .header-control.awa-nav-bar[data-awa-header-nav="true"] button.title-category-dropdown.our_categories{border-radius:0!important}'
             . '}';
     }
 
