@@ -2,6 +2,11 @@
 <!--
   AWA Motos — Category Page Layout Overrides
   - Remove duplicate H1 (page.main.title) since category hero already has H1
+  - PLP-P0-005/006 (docs/visual-qa/VISUAL_FIX_PLAN.md): remove sale.reorder.sidebar —
+    mesmo padrao ja aplicado na Home (Magento_Cms/layout/cms_index_index.xml). O widget
+    nativo "Pedidos feitos recentemente" nao pertence a PLP: aparecia vazio para guest e,
+    para cliente logado com pedidos, exibia CTAs "Adicionar ao carrinho" duplicados/soltos
+    na sidebar.
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
@@ -26,6 +31,7 @@
         </referenceBlock>
         <referenceBlock name="awa.impeccable.audit.uncached.global.v10" remove="true"/>
         <referenceBlock name="page.main.title" remove="true"/>
+        <referenceBlock name="sale.reorder.sidebar" remove="true"/>
         <referenceBlock name="category.image">
             <arguments>
                 <argument name="visible_product_count_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\CategoryVisibleProductCount</argument>
