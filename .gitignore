@@ -95,6 +95,8 @@ docs/*
 !docs/smoke-checklist.md
 !docs/ownership-model.md
 !docs/b2b-adoption.md
+!docs/deploy/
+!docs/deploy/**
 relatorios/
 analise_visual/
 biblioteca/

@@ -143,19 +143,9 @@ Para novos estilos que precisam ter prioridade: adicionar no bundle de menor ní
 
 ### Deploy após edição
 
-```bash
-# CSS/LESS alterado
-sudo -u www-data php bin/magento setup:static-content:deploy pt_BR -f --theme AWA_Custom/ayo_home5_child
-sudo -u www-data php bin/magento cache:flush
-
-# Apenas PHTML alterado
-sudo -u www-data php bin/magento cache:clean block_html full_page
-
-# Se var/view_preprocessed estiver desatualizado
-sudo -u www-data cp app/design/frontend/AWA_Custom/ayo_home5_child/[Vendor_Module]/templates/[file].phtml \
-  var/view_preprocessed/pub/static/app/design/frontend/AWA_Custom/ayo_home5_child/[Vendor_Module]/templates/[file].phtml
-sudo -u www-data php bin/magento cache:clean block_html full_page
-```
+> **Playbook canônico:** [`docs/deploy/static-content-deploy-playbook.md`](docs/deploy/static-content-deploy-playbook.md)
+>
+> Em produção, `setup:static-content:deploy -f` **não sobrescreve** destinos que já existem em `pub/static` (estratégia `quick`). Também é obrigatório regenerar sidecars `.br`/`.gz` e limpar `var/view_preprocessed` quando LESS/CSS mudam. Não duplicar o procedimento aqui — seguir o playbook.
 
 ### Checklist pós-edição de layout
 
@@ -230,19 +220,22 @@ npx playwright show-report reports/html
 Após qualquer alteração de `web/secure/base_url` ou `web/unsecure/base_url`, execute **obrigatoriamente** nesta ordem:
 
 ```bash
-sudo -u www-data php bin/magento cache:flush
-redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 1 FLUSHDB  # Redis DB1: cache Magento
-redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB  # Redis DB2: FPC (Full Page Cache)
-sudo -u www-data php bin/magento indexer:reindex catalog_url
+sudo -u "${WEB_USER:-www-data}" php bin/magento cache:flush
+redis-cli -h "${REDIS_HOST:-::1}" -a "$REDIS_AUTH" -n "${REDIS_CACHE_DB:-1}" FLUSHDB  # cache Magento
+redis-cli -h "${REDIS_HOST:-::1}" -a "$REDIS_AUTH" -n "${REDIS_FPC_DB:-2}" FLUSHDB    # FPC
+sudo -u "${WEB_USER:-www-data}" php bin/magento indexer:reindex catalog_url
 ```
+
+> Credenciais Redis: use `$REDIS_AUTH` / env — ver [`docs/deploy/static-content-deploy-playbook.md`](docs/deploy/static-content-deploy-playbook.md).
 
 **Por quê:** O FPC armazena HTML completo incluindo URLs absolutas. Se o domínio mudou mas o FPC não foi limpo, o browser receberá HTML com URLs do domínio antigo. O CSP usa `'self'` = domínio atual, então todas as referências ao domínio antigo serão bloqueadas — incluindo `require.js`, que derruba toda a stack JavaScript do Magento.
 
 ### Redis AWA — Mapa de bancos
-| DB | Conteúdo | Comando flush |
-|----|----------|--------------|
-| 0 | Sessions | `redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 0 FLUSHDB` |
-| 1 | Cache Magento (config, block, layout) | `redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 1 FLUSHDB` |
-| 2 | FPC — Full Page Cache (HTML completo) | `redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB` |
+| DB | Conteúdo | Flush (placeholders) |
+|----|----------|----------------------|
+| 0 | Sessions | `redis-cli -h "$REDIS_HOST" -a "$REDIS_AUTH" -n 0 FLUSHDB` |
+| 1 | Cache Magento (config, block, layout) | `redis-cli -h "$REDIS_HOST" -a "$REDIS_AUTH" -n "${REDIS_CACHE_DB:-1}" FLUSHDB` |
+| 2 | FPC — Full Page Cache (HTML completo) | `redis-cli -h "$REDIS_HOST" -a "$REDIS_AUTH" -n "${REDIS_FPC_DB:-2}" FLUSHDB` |
 
 > `php bin/magento cache:flush` faz flush do DB1 via Magento. O DB2 (FPC) precisa ser limpo separadamente via redis-cli.
+> Não hardcodear `$REDIS_AUTH` em docs — ver playbook de estáticos.

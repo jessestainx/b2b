@@ -1,0 +1,24 @@
+---
+description: Governança CSS AWA — anti-acumulação de patches e ponteiro para o playbook de deploy de estáticos
+globs: app/design/frontend/AWA_Custom/ayo_home5_child/**/*.{css,less,xml},app/code/GrupoAwamotos/**/view/frontend/web/css/**/*
+alwaysApply: false
+---
+
+# AWA CSS — Governança
+
+## Deploy de estáticos (obrigatório)
+
+Após editar CSS/LESS/JS do tema filho ou CSS de módulo servido no frontend, **não** confiar só em `setup:static-content:deploy -f`.
+
+Procedimento canônico (apagar destinos em `pub/static`, limpar `var/view_preprocessed`, regenerar sidecars `.br`/`.gz`, flush Redis/cache, reload nginx):
+
+→ [`docs/deploy/static-content-deploy-playbook.md`](../../docs/deploy/static-content-deploy-playbook.md)
+
+Não duplicar o workaround neste arquivo. Não registrar senhas, tokens ou hosts sensíveis.
+
+## Anti-acumulação
+
+- Não criar CSS com data/sufixo de patch no nome (`*-2026-07-08.css`, `*-terminal-v3.css`).
+- Preferir editar o bundle/domínio existente do tema filho.
+- Novo CSS deve ter versão minificada quando o pipeline do projeto exigir `.min.css`.
+- Não editar `app/code/Rokanthemes/*` — override no tema filho.

@@ -58,6 +58,10 @@ sudo -u www-data php bin/magento indexer:reindex
 sudo -u www-data php bin/magento module:status
 ```
 
+> **Deploy de CSS/LESS/JS do tema filho:** não use só o comando acima. Siga o playbook canônico
+> [`docs/deploy/static-content-deploy-playbook.md`](docs/deploy/static-content-deploy-playbook.md)
+> (apagar destinos em `pub/static`, limpar `var/view_preprocessed`, regenerar `.br`/`.gz`).
+
 ### PHP Scripts
 
 ```bash
