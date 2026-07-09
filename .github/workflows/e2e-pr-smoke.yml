@@ -50,6 +50,18 @@ jobs:
             --reporter=line \
             --timeout=60000
 
+      - name: Dead CSS quarantine smoke (Fase 6A)
+        working-directory: tests/e2e
+        env:
+          PLAYWRIGHT_BASE_URL: https://awamotos.com
+          ALLOW_PRODUCTION_VALIDATION: "true"
+        run: |
+          npx playwright test \
+            specs/dead-css-quarantine.spec.ts \
+            --project=notebook-1366 \
+            --reporter=line \
+            --timeout=55000
+
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4

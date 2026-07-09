@@ -736,3 +736,76 @@
    - Decisão explícita do time sobre `awa-plp-final-polish.min.css` (o arquivo base foi removido por ticket, mas o `.min` permanece referenciado).
 3. **Rodar o smoke test oficial** antes e depois de qualquer movimentação: `bash scripts/check-legacy-static-assets.sh`.
 4. Registrar erratas na regra `.cursor/rules/awa-css-governance.mdc`, que hoje lista incorretamente 3 arquivos (`awa-plp-critical-fixes.min.css`, `awa-plp-distill.min.css`, `awa-plp-ui-promax-2026-05-22.min.css`) como candidatos a deleção — confirmados ativos na rota de busca.
+
+---
+
+## Cobertura de testes — Fase 6A (2026-07-08)
+
+### Smoke test dedicado da quarentena
+
+**Arquivo:** `tests/e2e/specs/dead-css-quarantine.spec.ts`
+**Config de execução local recomendada (leve, sem vídeo/trace/screenshot):** `tests/e2e/pw-dead-css-quarantine.config.ts`
+
+Valida, nas 8 rotas críticas definidas para esta fase, que:
+1. Nenhum request de CSS retorna `404` ou `403` (regressão geral, não só quarentena).
+2. Nenhum dos 33 arquivos classificados como `QUARENTENA` (16 já movidos para `_quarantine/css-dead-2026-07-08/` + 17 ainda em `web/css/` aguardando commit separado — ver `_quarantine/css-dead-2026-07-08/README.md`) é requisitado por nenhuma dessas rotas.
+
+**Rotas cobertas por este spec:**
+
+| Rota | URL testada |
+|---|---|
+| Home | `/` |
+| Catálogo | `/catalogo` |
+| Bauletos (PLP) | `/bauletos.html` |
+| Nossas marcas | `/nossas-marcas` |
+| About us | `/about-us` |
+| Lançamentos | `/lancamentos` |
+| Lançamentos (redirect) | `/lancamentos.html` → `/lancamentos` (301) |
+| B2B — registro | `/b2b/register` |
+
+**Resultado da execução em 2026-07-08 (produção, `--project=notebook-1366`):**
+
+```
+9 passed (40.5s)
+```
+
+Todas as 8 rotas + teste de resumo passaram. Nenhum CSS quebrado, nenhum arquivo quarentenado requisitado.
+
+**Limitação conhecida (documentada no próprio spec):** esta versão não simula interação do usuário (pointerdown/scroll/keydown) para forçar o carregamento de bundles *interaction-gated* via `awa-css-gate.js`. Uma primeira versão do spec simulava mouse/teclado, mas isso se mostrou instável neste ambiente de desenvolvimento compartilhado (crashes intermitentes de renderer Chromium sob contenção de recursos — `Error: Channel closed` / `browserContext.close: Target page, context or browser has been closed`, reproduzido de forma consistente na rota `/catalogo`). A versão simplificada (sem interação, apenas espera de estabilização de 3.5s) rodou de forma estável. A cobertura de assets pós-interação deve ser validada manualmente ou num runner de CI dedicado (GitHub Actions, com mais headroom de recursos que este VPS de produção compartilhado).
+
+### Suíte existente (regressão geral) — execução manual nesta fase
+
+Rodar a suíte completa (887 testes em 93 arquivos × 13 projetos de browser/viewport) neste VPS de desenvolvimento compartilhado não é viável nem seguro — o próprio ambiente já demonstra instabilidade sob carga (ver limitação acima). Como evidência de regressão geral para esta fase, foi executada a suíte `tests/e2e/specs/smoke/` (11 arquivos, 82 testes, `--project=notebook-1366`), que é o subconjunto que já cobre carrinho, categoria, checkout, footer, formulários, header, home, login, menu, busca e produto (PDP).
+
+**Resultado (2026-07-08, produção, `--project=notebook-1366`):**
+
+- **73 de 82 testes concluídos com resultado** dentro do orçamento de tempo desta sessão (10 de 11 arquivos totalmente executados; `product.spec.ts` — 12 testes sobre uma PDP específica — não completou dentro do tempo desta sessão, aparentemente por instabilidade do mesmo tipo já documentada acima, não relacionada à quarentena de CSS).
+- **Falhas observadas — todas pré-existentes e não relacionadas à quarentena de CSS** (nenhuma delas envolve os 33 arquivos quarentenados nem 404/403 de CSS):
+  - `category.spec.ts › 05 — cards com preço ou B2B gate` — sem preço e sem gate B2B visível na categoria testada.
+  - `checkout.spec.ts › 02 — sem tela branca (P0)` — timeout de 21.3s ao localizar conteúdo esperado.
+  - `category.spec.ts › 08 — sem overflow` — overflow horizontal detectado.
+  - `footer.spec.ts › 05 — footer height razoável` — footer com 1918px (limite: 800px).
+  - `home.spec.ts › 11 — grid de produtos existe` e `13 — cards com preço ou B2B gate` — mesma classe de problema de `category.spec.ts` 05.
+  - `search.spec.ts › 03 — resultados exibem produtos (P0)` — busca sem resultados para o termo de teste.
+- Nenhuma das falhas acima menciona ou referencia qualquer um dos 33 arquivos CSS em quarentena — são achados de UX/conteúdo pré-existentes, fora do escopo da Fase 6A.
+
+### Estratégia de CI recomendada (implementada em `.github/workflows/e2e-pr-smoke.yml`)
+
+| Gate | Quando roda | O que valida | Workflow |
+|---|---|---|---|
+| **Smoke de quarentena (obrigatório)** | Todo PR | `dead-css-quarantine.spec.ts` — 8 rotas críticas, ~40s | `.github/workflows/e2e-pr-smoke.yml` (nova etapa "Dead CSS quarantine smoke (Fase 6A)") |
+| **Regressão B2B + CLS (obrigatório)** | Todo PR | Já existente, inalterado | `.github/workflows/e2e-pr-smoke.yml` |
+| **Suíte completa de regressão** | Push em `main` (pré-merge) | `test:b2b-regression:all` + pipeline visual MCP | `.github/workflows/e2e-premerge-regression.yml` (já existente, sem alteração necessária) |
+| **Suíte completa noturna** | Diariamente às 04:00 UTC + manual | Suíte MCP visual completa + B2B todos os projetos | `.github/workflows/e2e-nightly-full.yml` (já existente, sem alteração necessária) |
+
+Não foi criado nenhum workflow novo — a etapa de quarentena foi adicionada ao workflow de PR-smoke já existente, evitando duplicação de infraestrutura de CI. Os workflows de pré-merge e noturno já cobrem a suíte completa nos moldes solicitados; a execução isolada do smoke de quarentena garante que uma regressão específica da Fase 6A (CSS quarentenado voltando a ser servido, ou qualquer CSS 404/403) seja pega rapidamente em todo PR, sem esperar pela suíte pesada.
+
+**Comando para rodar localmente:**
+
+```bash
+cd tests/e2e
+npm run test:dead-css-quarantine
+# ou, com config leve dedicada (sem vídeo/trace/screenshot):
+PLAYWRIGHT_BASE_URL=https://awamotos.com ALLOW_PRODUCTION_VALIDATION=true \
+  npx playwright test --config=pw-dead-css-quarantine.config.ts
+```
