@@ -10,7 +10,8 @@
  */
 define([
     'jquery',
-    'mage/translate'
+    'mage/translate',
+    'jquery-ui-modules/widget'
 ], function ($, $t) {
     'use strict';
 
@@ -21,7 +22,12 @@ define([
             focusableSelector: 'a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
             closeOnOutsideClick: true,
             closeOnEscape: true,
-            animationDuration: 250
+            animationDuration: 250,
+            fixedLayerBreakpoint: 768,
+            desktopMaxWidth: 420,
+            tabletMaxWidth: 360,
+            viewportMargin: 12,
+            layerZIndex: 100320
         },
 
         /**
@@ -33,6 +39,7 @@ define([
             this.dropdown = this.element.find(this.options.dropdownSelector);
             this.isOpen = false;
             this.focusableElements = [];
+            this._shadowOverlayState = null;
 
             this._bindEvents();
             this._initAccessibility();
@@ -83,6 +90,13 @@ define([
 
             // Handle window resize for mobile
             $(window).on('resize.b2bPanel', $.proxy(this._handleResize, this));
+
+            // Fecha ao rolar — evita painel flutuando sobre o hero/carrosséis
+            $(window).on('scroll.b2bPanel', function () {
+                if (self.isOpen) {
+                    self.close();
+                }
+            });
         },
 
         /**
@@ -185,12 +199,16 @@ define([
          * Open dropdown
          */
         open: function () {
-            if (this.isOpen) return;
+            if (this.isOpen) {
+                return;
+            }
 
             this.isOpen = true;
+            this._suppressLegacyShadowOverlay();
             this.trigger.attr('aria-expanded', 'true');
             this.dropdown.attr('aria-hidden', 'false');
             this.element.addClass('is-open');
+            this._positionDropdown();
 
             // Announce to screen readers
             this._announceState('aberto');
@@ -203,12 +221,16 @@ define([
          * Close dropdown
          */
         close: function () {
-            if (!this.isOpen) return;
+            if (!this.isOpen) {
+                return;
+            }
 
             this.isOpen = false;
             this.trigger.attr('aria-expanded', 'false');
             this.dropdown.attr('aria-hidden', 'true');
             this.element.removeClass('is-open');
+            this._resetDropdownPosition();
+            this._restoreLegacyShadowOverlay();
 
             // Announce to screen readers
             this._announceState('fechado');
@@ -230,10 +252,199 @@ define([
          * @private
          */
         _handleResize: function () {
-            // Close dropdown when resizing from mobile to desktop to prevent layout overlap
-            if (window.innerWidth > 767 && this.isOpen) {
-                this.close();
+            if (this.isOpen) {
+                this._positionDropdown();
             }
+        },
+
+        /**
+         * Resolve desktop fixed-layer top from the rendered header row.
+         *
+         * Account pages can lay out header children with display:contents, which
+         * makes the trigger rect drift below the visual header. In that case the
+         * dropdown must anchor to the row that actually paints the header.
+         *
+         * @private
+         */
+        _resolveDesktopTop: function (triggerRect, margin) {
+            let top = Math.round(triggerRect.bottom - 1);
+            let triggerNode = this.trigger[0];
+            let anchor = triggerNode
+                ? triggerNode.closest('.awa-main-header__inner, .header.awa-main-header, .header-wrapper-sticky')
+                : null;
+            let body = document.body;
+            let isB2bDashboard = body && (
+                body.classList.contains('b2b-account-dashboard') ||
+                body.classList.contains('b2b-account-index')
+            );
+
+            if (!anchor) {
+                anchor = document.querySelector(
+                    '.awa-site-header .awa-main-header__inner, ' +
+                    '.awa-site-header .header.awa-main-header, ' +
+                    '.awa-site-header .header-wrapper-sticky'
+                );
+            }
+
+            if (anchor) {
+                let anchorRect = anchor.getBoundingClientRect();
+
+                if (anchorRect && anchorRect.width > 0 && anchorRect.height > 0 && anchorRect.bottom > 0) {
+                    let anchorBottom = Math.round(anchorRect.bottom - 1);
+
+                    if (isB2bDashboard || top - anchorBottom > 12) {
+                        top = anchorBottom;
+                    }
+                }
+            }
+
+            return Math.max(margin, top);
+        },
+
+        /**
+         * Position the dropdown outside header overflow/z-index contexts.
+         * @private
+         */
+        _positionDropdown: function () {
+            if (!this.trigger.length || !this.dropdown.length) {
+                return;
+            }
+
+            let dropdown = this.dropdown[0];
+            let viewportWidth = document.documentElement.clientWidth || window.innerWidth || 0;
+            let viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+            let margin = this.options.viewportMargin;
+
+            dropdown.setAttribute('data-awa-fixed-layer', 'true');
+            dropdown.style.setProperty('position', 'fixed', 'important');
+            dropdown.style.setProperty('z-index', String(this.options.layerZIndex), 'important');
+            dropdown.style.setProperty('max-width', 'calc(100vw - 24px)', 'important');
+
+            if (viewportWidth < this.options.fixedLayerBreakpoint) {
+                dropdown.style.setProperty('top', 'auto', 'important');
+                dropdown.style.setProperty('right', '0', 'important');
+                dropdown.style.setProperty('bottom', '0', 'important');
+                dropdown.style.setProperty('left', '0', 'important');
+                dropdown.style.setProperty('width', '100%', 'important');
+                dropdown.style.setProperty('max-height', '82vh', 'important');
+                return;
+            }
+
+            let rect = this.trigger[0].getBoundingClientRect();
+            let maxConfiguredWidth = viewportWidth < 992
+                ? this.options.tabletMaxWidth
+                : this.options.desktopMaxWidth;
+            let width = Math.max(280, Math.min(maxConfiguredWidth, viewportWidth - (margin * 2)));
+            let left = Math.min(Math.max(margin, rect.right - width), viewportWidth - width - margin);
+            let top = this._resolveDesktopTop(rect, margin);
+            let maxHeight = Math.max(240, Math.min(520, viewportHeight - top - margin));
+
+            dropdown.style.setProperty('top', top + 'px', 'important');
+            dropdown.style.setProperty('right', 'auto', 'important');
+            dropdown.style.setProperty('bottom', 'auto', 'important');
+            dropdown.style.setProperty('left', Math.round(left) + 'px', 'important');
+            dropdown.style.setProperty('width', Math.round(width) + 'px', 'important');
+            dropdown.style.setProperty('max-height', Math.round(maxHeight) + 'px', 'important');
+        },
+
+        /**
+         * Remove fixed-layer inline positioning after close.
+         * @private
+         */
+        _resetDropdownPosition: function () {
+            if (!this.dropdown.length) {
+                return;
+            }
+
+            let dropdown = this.dropdown[0];
+            dropdown.removeAttribute('data-awa-fixed-layer');
+            [
+                'position',
+                'z-index',
+                'inset',
+                'top',
+                'right',
+                'bottom',
+                'left',
+                'width',
+                'max-width',
+                'max-height'
+            ].forEach(function (property) {
+                dropdown.style.removeProperty(property);
+            });
+        },
+
+        /**
+         * Keep legacy header overlay disabled while B2B panel is open.
+         * @private
+         */
+        _suppressLegacyShadowOverlay: function () {
+            let body = document.body;
+            let html = document.documentElement;
+            let shadow = document.querySelector('.shadow_bkg_show');
+            let properties = ['display', 'opacity', 'visibility', 'pointer-events', 'background-color'];
+
+            if (!shadow) {
+                return;
+            }
+
+            this._shadowOverlayState = {
+                styles: {},
+                ariaHidden: shadow.getAttribute('aria-hidden')
+            };
+
+            properties.forEach(function (property) {
+                this._shadowOverlayState.styles[property] = {
+                    value: shadow.style.getPropertyValue(property),
+                    priority: shadow.style.getPropertyPriority(property)
+                };
+            }, this);
+
+            if (body) {
+                body.classList.remove('nav-open', 'background_shadow_show');
+            }
+            if (html) {
+                html.classList.remove('nav-open', 'background_shadow_show');
+            }
+
+            shadow.style.setProperty('display', 'none', 'important');
+            shadow.style.setProperty('opacity', '0', 'important');
+            shadow.style.setProperty('visibility', 'hidden', 'important');
+            shadow.style.setProperty('pointer-events', 'none', 'important');
+            shadow.style.setProperty('background-color', 'transparent', 'important');
+            shadow.setAttribute('aria-hidden', 'true');
+        },
+
+        /**
+         * Restore legacy overlay inline styles captured before opening panel.
+         * @private
+         */
+        _restoreLegacyShadowOverlay: function () {
+            let shadow = document.querySelector('.shadow_bkg_show');
+            let state = this._shadowOverlayState;
+
+            if (!shadow || !state || !state.styles) {
+                return;
+            }
+
+            Object.keys(state.styles).forEach(function (property) {
+                let styleState = state.styles[property];
+
+                if (!styleState || !styleState.value) {
+                    shadow.style.removeProperty(property);
+                    return;
+                }
+
+                shadow.style.setProperty(property, styleState.value, styleState.priority || '');
+            });
+
+            if (state.ariaHidden === null || typeof state.ariaHidden === 'undefined') {
+                shadow.removeAttribute('aria-hidden');
+            } else {
+                shadow.setAttribute('aria-hidden', state.ariaHidden);
+            }
+
+            this._shadowOverlayState = null;
         },
 
         /**
@@ -259,6 +470,8 @@ define([
          * @private
          */
         _destroy: function () {
+            this._resetDropdownPosition();
+            this._restoreLegacyShadowOverlay();
             this.trigger.off('.b2bPanel');
             this.dropdown.off('.b2bPanel');
             $(document).off('.b2bPanel');
