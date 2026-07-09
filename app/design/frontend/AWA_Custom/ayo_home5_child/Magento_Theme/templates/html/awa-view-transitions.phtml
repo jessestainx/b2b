@@ -20,6 +20,33 @@
  * adicional. Removendo a interceptacao de clique, a transicao nativa
  * continua funcionando normalmente (progressive enhancement: navegadores
  * sem suporte simplesmente ignoram a regra @view-transition).
+ *
+ * Segunda causa raiz (2026-07-09, BUG-OPS-VIEWTRANSITION-020, confirmado
+ * via Playwright/CDP): mesmo sem nenhum JS interceptando cliques, o
+ * proprio navegador ainda pode abortar a transicao NATIVA cross-document
+ * quando a navegacao envolve um redirect do servidor (ex.: POST de login
+ * em /b2b/account/login/ -> redirect 302 -> /b2b/account/dashboard/). O
+ * Chromium rejeita a promise interna da View Transition API com
+ * "DOMException: AbortError: Transition was skipped" -- confirmado via
+ * CDP que isso dispara essencialmente no commit da navegacao, antes de
+ * qualquer <script> no fim do <body> (posicao deste bloco) ter chance de
+ * rodar.
+ *
+ * O listener que suprime esse erro especifico NAO foi colocado em um
+ * bloco de layout XML (head.additional): runtime evidence via curl (HTML
+ * bruto, byte a byte, comparando offset do listener com offset de
+ * "</head>") mostrou que blocos registrados em head.additional/default.xml
+ * — mesmo com before="-" — sao fisicamente reposicionados para dentro do
+ * <body> na resposta final (o pipeline de otimizacao de HTML deste tema,
+ * GrupoAwamotos\Theme\Plugin\Response\OptimizeHeadStylesPlugin, reescreve
+ * o HTML inteiro apos o layout renderizar; a causa exata da realocacao nao
+ * foi isolada, mas o efeito e reprodutivel). Por isso o listener foi
+ * implementado diretamente nesse plugin, via
+ * injectViewTransitionGuardScript(), que usa o mesmo padrao
+ * preg_replace('/<\/head>/i', ..., $html, 1) ja comprovado por
+ * injectGlobalFocusVisibleFallback()/injectGlobalWebVitalsRum() — a
+ * unica tecnica, neste projeto, com garantia empirica de aterrissar
+ * dentro do <head> real.
  */
 ?>
 <style>

@@ -453,6 +453,7 @@ class OptimizeHeadStylesPlugin
         $html = $this->stripStylePreloadDuplicates($html);
         $html = $this->injectGlobalFocusVisibleFallback($html);
         $html = $this->injectGlobalWebVitalsRum($html);
+        $html = $this->injectViewTransitionGuardScript($html);
           $html = $this->normalizeExcessiveHtmlBodySpecificity($html);
 
         /* Home: gate após body-terminal — folhas pesadas entram na fila idle (PSI/TBT). */
@@ -3105,6 +3106,45 @@ CSS;
             . '</style>';
 
         $injected = preg_replace('/<\/head>/i', $style . "\n</head>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * BUG-OPS-VIEWTRANSITION-020 (2026-07-09) — suprime o console error
+     * "DOMException: AbortError: Transition was skipped", disparado pela
+     * View Transitions API nativa do Chromium (@view-transition CSS, ver
+     * awa-view-transitions.phtml) quando a navegacao envolve um redirect
+     * do servidor (ex.: login B2B -> dashboard). Runtime evidence via CDP
+     * (Runtime.exceptionThrown) mostrou que a rejeicao dispara essencial-
+     * mente no commit da navegacao, antes de qualquer <script> no fim do
+     * <body> ter chance de registrar o listener a tempo.
+     *
+     * Injetado aqui (e nao via bloco de layout head.additional) porque
+     * runtime evidence via curl (offset do script vs. offset de "</head>"
+     * no HTML final) confirmou que blocos de head.additional sao fisica-
+     * mente realocados para o <body> nesta resposta — o preg_replace
+     * abaixo, na mesma tecnica de injectGlobalFocusVisibleFallback()/
+     * injectGlobalWebVitalsRum(), e a unica forma com garantia empirica
+     * de aterrissar dentro do <head> real.
+     */
+    private function injectViewTransitionGuardScript(string $html): string
+    {
+        if (str_contains($html, 'id="awa-view-transition-guard"')) {
+            return $html;
+        }
+
+        $script = '<script id="awa-view-transition-guard">'
+            . '(function(w){"use strict";w.addEventListener("unhandledrejection",function(event){'
+            . 'var reason=event.reason;'
+            . 'if(reason instanceof DOMException&&reason.name==="AbortError"&&reason.message==="Transition was skipped"){'
+            . 'event.preventDefault();'
+            . '}'
+            . '});'
+            . '})(window);'
+            . '</script>';
+
+        $injected = preg_replace('/<\/head>/i', $script . "\n</head>", $html, 1);
 
         return is_string($injected) ? $injected : $html;
     }

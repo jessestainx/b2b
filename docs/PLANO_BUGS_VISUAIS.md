@@ -170,6 +170,7 @@
 | ID | Título | Sev | Status | Módulo | Detectado em | Fonte | Commit |
 |-----|--------|:---:|--------|--------|---------------|-------|--------|
 | BUG-OPS-DEBUG-019 | Instrumentação de debug órfã (sessão `ad5a4e`/`712b44`) esquecida em `header-status-panel.js` e `b2b-panel-hydrate.js` — `fetch`/`console` de debug bloqueados por CSP, nunca commitados | P3 | **Resolvido** | GrupoAwamotos_B2B (painel de status B2B) | Sessão de debug do modal B2B mobile (2026-07-08/09) | Debug mode runtime evidence (`.cursor/debug-712b44.log`) | `dfc4095a8` |
+| BUG-OPS-VIEWTRANSITION-020 | `pageerror: DOMException: AbortError: Transition was skipped` no console — a View Transitions API nativa do Chromium (`@view-transition` CSS) aborta a transição cross-document quando a navegação envolve redirect do servidor (ex.: login B2B → dashboard); listener `unhandledrejection` registrado em bloco de layout `head.additional` era fisicamente realocado para o `<body>` na resposta final (causa não isolada), chegando tarde demais para suprimir o erro | P3 | **Resolvido** | GrupoAwamotos_Theme (`OptimizeHeadStylesPlugin`) | Investigação de `pageerror` durante QA do painel B2B (2026-07-09) | Runtime evidence via curl (offset do script vs. `</head>` no HTML final) + Playwright/CDP (`Runtime.exceptionThrown`) | — |
 
 ---
 
