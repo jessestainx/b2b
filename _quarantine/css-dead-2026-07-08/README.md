@@ -19,6 +19,13 @@ Cada um destes arquivos passou por:
 
 Nenhum destes 33 arquivos tem qualquer referência ativa conhecida.
 
+> **Status:** os 33 completos foram movidos em duas etapas — 16 no commit
+> `44a447756` (sem edições pendentes de outras sessões) e os 17 restantes
+> em commit separado, após as edições pendentes de outras sessões serem
+> consolidadas (ver `chore: checkpoint de trabalho em andamento` /
+> commit `e9ce8e9b6`). Revalidado antes do move: zero referência ativa a
+> qualquer um dos 33 arquivos em XML/PHTML/JS/LESS/CSS/PHP do repositório.
+
 ## O que NÃO está aqui
 
 Os outros 28 arquivos da auditoria original de 61 **não** foram movidos:
