@@ -125,35 +125,44 @@ console/`exception.log`/`system.log`, testado desktop **e** mobile, commit/PR vi
 
 #### HEADER-P0-001 — Header/minicart/conta inconsistentes
 
-Status: `TODO` · Prioridade: P0 · Componente: Header global · Rota: todas
-Branch: `fix/header-footer-global-p0`
+Status: `IN_PROGRESS` · Prioridade: P0 · Componente: Header global · Rota: todas
+Branch: `fix/plp-bagageiros-p0`
 
 **Problema:** ícone/controle do minicart aparece como bloco vermelho pouco informativo; área de conta
 ("Olá, Fernando / B2B Atacado") aparece apertada e pequena em relação ao restante do header.
 
-**Causa raiz:** a investigar. Ponto de partida — spec de diagnóstico já existente:
+**Sub-problema corrigido (2026-07-09) — rótulo B2B truncado no mobile:**
+No mobile logado (390px), `.b2b-status-trigger__text` recebia apenas ~8px de largura porque
+`.awa-header-right-col` compartilha ~150px com o minicart (44px fixo), e o ícone de usuário (32px) +
+chevron (14px) + gaps consumiam o espaço restante — "B2B Atacado" aparecia como "B" solto.
 
-```29:44:tests/e2e/specs/header-core-interactions-p0.spec.ts
-minicartShell: '.awa-header-minicart[data-awa-header-cart="true"]',
-minicartFallback: '.awa-header-cart-fallback',
-minicartShowcart: '.minicart-wrapper .showcart, .action.showcart.header-mini-cart',
-accountPrompt: '.awa-header-account-prompt',
-accountNav: '.top-account.awa-header-account-nav',
-```
+**Causa raiz confirmada (sub-problema conta/mobile):** conflito de largura no grid mobile +
+`max-width: 120px` em `.b2b-status-trigger__line2` dentro de container de ~102px.
 
-**Arquivos suspeitos:** `Rokanthemes_Themeoption/templates/html/header.phtml`,
-`Magento_Theme/templates/html/awa-header-desktop-grid-critical-fragment.phtml`, `web/css/source/_minicart.less`.
+**Correção aplicada (sub-problema conta/mobile):**
+- `_awa-b2b-status-panel.less` + `awa-b2b-status-panel.css`: em `max-width: 767px`, reduz ícone para 20px,
+  oculta chevron, `min-width: 44px` no texto, `flex: 1 1 auto` em `.b2b-status-trigger__text`.
+- `pub/sw.js`: `CACHE_VERSION` `awa-v7` → `awa-v8` (service worker fazia cache-first de CSS por 30 dias,
+  impedindo propagação do fix sem invalidar cache).
+
+**Validação (sub-problema conta/mobile):** Playwright com SW/cache limpos — `textRect.width` passou de 8px
+para 44px; screenshot `after-mobile-390-logged-in.png` mostra "B2B ..." legível. Desktop inalterado e OK.
+
+**Pendente:** minicart como bloco vermelho pouco informativo — ainda não investigado nesta branch.
+
+**Arquivos:** `web/css/source/_awa-b2b-status-panel.less`, `web/css/awa-b2b-status-panel.css`, `pub/sw.js`.
 
 **Critério de aceite:** ícone do minicart visível em todas as larguras · badge de contador quando carrinho
 não vazio · área de conta com altura mínima 40–44px · grid claro logo/busca/conta/minicart ·
 `border-radius: var(--awa-radius-md)`.
 
-**Evidência:** `docs/visual-qa/evidence/HEADER-P0-001/` · Playwright: `header-core-interactions-p0.spec.ts`,
-`home-visual-regression.spec.ts`, `plp-visual-baseline.spec.ts`.
+**Evidência:** `docs/visual-qa/evidence/HEADER-P0-001/after-mobile-390-logged-in.png`,
+`after-desktop-1440-logged-in.png`.
 
 | Data | Status | Autor | Observação |
 |---|---|---|---|
 | 2026-07-09 | TODO | agente | migrado de HOME-P0-003 (v1); observado também na PLP Bagageiros |
+| 2026-07-09 | IN_PROGRESS | agente | sub-fix mobile B2B label truncado; minicart pendente |
 
 ---
 

@@ -81,11 +81,13 @@ items:
     page_type: global-header
     component: "Header global"
     route: "/ (todas as rotas)"
-    status: TODO
+    status: IN_PROGRESS
     priority: critical
     source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-b2b-status-panel.less
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-b2b-status-panel.css
+      - pub/sw.js
       - app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/templates/html/header.phtml
-      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Theme/templates/html/awa-header-desktop-grid-critical-fragment.phtml
       - app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_minicart.less
     tests:
       playwright:
@@ -98,8 +100,15 @@ items:
       - "Area de conta (Ola, Nome / status B2B) com altura minima 40-44px, sem aperto"
       - "Grid claro: logo / busca / conta / minicart"
       - "border-radius: var(--awa-radius-md) nos controles"
-    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
-    superseded: "HOME-P0-003 (v1, home-visual-fix-status.yml)"
+    proof: { before_screenshot: null, after_screenshot: "after-mobile-390-logged-in.png", ci_run: null, playwright_report: null, commit: null, pr: null }
+    fix_applied: >
+      Mobile (<=767px): rotulo B2B truncado para "B" — causa: .awa-header-right-col ~150px compartilhada
+      com minicart 44px; icone 32px + chevron 14px deixavam ~8px para .b2b-status-trigger__text.
+      Fix em _awa-b2b-status-panel.less + awa-b2b-status-panel.css (icone 20px, chevron oculto,
+      min-width 44px no texto). pub/sw.js CACHE_VERSION awa-v7->awa-v8 para invalidar cache CSS
+      do service worker (cache-first 30d). Validado Playwright: textRect.width 8px->44px.
+      Pendente: minicart bloco vermelho.
+    superseded: "HOME-P0-003 (v1, home-visual-fix-status.yml)" 
 
   - id: HEADER-P0-002
     title: "Menu Departamentos desalinhado/quebrado"

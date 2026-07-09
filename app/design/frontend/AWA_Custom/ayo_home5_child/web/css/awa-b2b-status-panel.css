@@ -657,4 +657,35 @@ html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status
     }
 }
 
+/*
+ * HEADER-P0-001 (docs/visual-qa/VISUAL_FIX_PLAN.md): no mobile (<=767px), o
+ * .awa-header-right-col compartilha ~150px com o minicart (44px fixo). O ícone
+ * de usuário (32px) + chevron (14px) + gaps deixavam so ~8px para o texto,
+ * cortando "B2B Atacado" para uma unica letra ("B") sem elipse legivel.
+ * Reduz o ícone e garante largura minima real para o rotulo da conta.
+ */
+@media screen and (max-width: 767px) {
+    html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger__icon .awa-b2b-panel-icon--user {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger {
+        gap: 6px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger__text {
+        flex: 1 1 auto !important;
+        min-width: 44px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger__line2 {
+        max-width: 100% !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger__chevron {
+        display: none !important;
+    }
+}
+
 /* stylelint-enable color-no-hex */
