@@ -10,6 +10,7 @@
     $showCart = $block->getConfig('addtocart');
     $showWishlist = $block->getConfig('wishlist');
     $showCompare = $block->getConfig('compare');
+    $showPrice = (bool) $block->getConfig('show_price');
     $default = $block->getdefault();
     $desktop = $block->getdesktop();
     $desktop_small = $block->getdesktop_small();
@@ -25,8 +26,15 @@
     if ($identifyClass === '') {
         $identifyClass = 'default';
     }
+    $scopeSuffix = preg_replace('/[^a-zA-Z0-9_-]+/', '-', (string) $block->getNameInLayout());
+    if ($scopeSuffix === '') {
+        $scopeSuffix = 'widget';
+    }
+    $scopedIdentify = $identifyClass . '-' . $scopeSuffix;
     $categoryIds = $block->getCategoryIds();
     $categoryIds = explode(',', $categoryIds);
+    $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
+    $b2bPriceGate = $this->helper('GrupoAwamotos\B2B\Helper\Data');
 
     $productsOnRow = 2;
     if (!$productsOnRow) {
@@ -34,7 +42,7 @@
     }
 ?>
 
-<div class="categorytab-container awa-cat-tabs-<?php echo $block->escapeHtmlAttr($identifyClass); ?>">
+<div class="categorytab-container awa-cat-tabs-<?php echo $block->escapeHtmlAttr($scopedIdentify); ?>">
     <div class="rokan-product-heading rokan-featured-heading clearfix">
         <?php echo $title ? '<h2 class="pull-left">' . $title . ' <span class="sup-title">' . __('This Month') . '</span></h2>' : ''; ?>
     </div>
@@ -54,7 +62,7 @@
                                 $cateName = $cate_model->load($cate_id)->getName();
                                 if ($cateName) {
                         ?>
-                                    <li class="<?php if ($k == 0) { echo 'active'; }?>" rel="tab<?php echo trim($cate_id) . '-' . $identifyClass; ?>"><a><?php echo $cateName; ?></a></li>
+                                    <li class="<?php if ($k == 0) { echo 'active'; }?>" rel="tab<?php echo trim($cate_id) . '-' . $scopedIdentify; ?>"><a><?php echo $cateName; ?></a></li>
                         <?php }
                                 $k++;
                             }
@@ -74,12 +82,13 @@
                         ?>
                         <div class="tab_container">
                             <?php foreach ($categoryIds as $cate_id) { ?>
-                            <div id="tab<?php echo trim($cate_id) . '-' . $identifyClass; ?>" class="tab_content_<?php echo $identifyClass; ?>">
+                            <div id="tab<?php echo trim($cate_id) . '-' . $scopedIdentify; ?>" class="tab_content_<?php echo $identifyClass; ?>">
                                 <div class="owl-container">
                                     <div class="cat_home2 owl-carousel">
                                         <?php
                                             $newItems = $block->getProductCate($cate_id)->getItems();
                                             $i = 0;
+                                            $catTabImgRank = 0;
                                             foreach ($newItems as $_item) {
                                                 $productImage = $block->getImage($_item, $image);
                                         ?>
@@ -87,14 +96,34 @@
                                             <div class="item-product">
                                                 <div class="product-thumb">
                                                     <a href="<?php echo $_item->getProductUrl(); ?>" class="product-thumb-link">
-                                                        <?php $productImageThumb = $block->getImage($_item, 'category_image_second_small'); ?>
+                                                        <?php
+                                                        $productImageThumb = $block->getImage($_item, 'category_image_second_small');
+                                                        $catMainImgHtml = (string) $productImage->toHtml();
+                                                        $catThumbImgHtml = (string) $productImageThumb->toHtml();
+                                                        if ($isHomePage) {
+                                                            $catMainImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $catMainImgHtml);
+                                                            $catThumbImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $catThumbImgHtml);
+                                                        } elseif ($catTabImgRank < 2) {
+                                                            $catMainImgHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $catMainImgHtml);
+                                                            $catThumbImgHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $catThumbImgHtml);
+                                                        } else {
+                                                            $catMainImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $catMainImgHtml);
+                                                            $catThumbImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $catThumbImgHtml);
+                                                        }
+                                                        if (strpos($catMainImgHtml, 'decoding=') === false) {
+                                                            $catMainImgHtml = str_replace('<img ', '<img decoding="async" ', $catMainImgHtml);
+                                                        }
+                                                        if (strpos($catThumbImgHtml, 'decoding=') === false) {
+                                                            $catThumbImgHtml = str_replace('<img ', '<img decoding="async" ', $catThumbImgHtml);
+                                                        }
+                                                        ?>
                                                         <span class="first-thumb">
-                                                            <?php echo $productImage->toHtml(); ?>
+                                                            <?php echo /* @noEscape */ $catMainImgHtml; ?>
                                                         </span>
                                                         <?php $productType = $_item->getTypeID();
                                                         if ($productType == 'simple'): ?>
                                                             <span class="second-thumb">
-                                                                <?php echo $productImageThumb->toHtml(); ?>
+                                                                <?php echo /* @noEscape */ $catThumbImgHtml; ?>
                                                             </span>
                                                         <?php endif; ?>
                                                     </a>
@@ -193,13 +222,23 @@
                                                                 }
                                                             ?>
                                                         </div>
-                                                        <div class="info-price">
-                                                            <?php echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)); ?>
-                                                        </div>
+                                                        <?php if ($showPrice): ?>
+                                                            <div class="info-price">
+                                                                <?php if ($b2bPriceGate->canViewPrices()): ?>
+                                                                    <?php echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)); ?>
+                                                                <?php else: ?>
+                                                                    <div class="b2b-login-to-see-price">
+                                                                        <span class="b2b-login-to-see-price__title"><?php echo $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()); ?></span>
+                                                                        <span class="b2b-login-to-see-price__message"><?php echo $block->escapeHtml($b2bPriceGate->getPriceGateDescription()); ?></span>
+                                                                    </div>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </div>
                                         <?php if ($i % $rows == 0 || $i == count($newItems)) { ?> </div> <?php }
+                                            $catTabImgRank++;
                                             }
                                         ?>
                                     </div>
@@ -213,28 +252,17 @@
         </div>
     </div>
 </div>
+<?php
+$categoryTabMageInit = [
+    '.awa-cat-tabs-' . $scopedIdentify => [
+        'js/tab-carousel-init' => [
+            'tabsSelector' => 'ul.tabs-' . $identifyClass . ' li',
+            'contentSelector' => '.tab_content_' . $identifyClass,
+            'carouselSelector' => '.cat_home2',
+        ],
+    ],
+];
+?>
 <script type="text/x-magento-init">
-{
-    "[data-role=tocart-form]": {
-        "catalogAddToCart": {}
-    },
-    ".awa-cat-tabs-<?php echo $block->escapeJsQuote($identifyClass); ?>": {
-        "js/tab-carousel-init": {
-            "tabsSelector": "ul.tabs-<?php echo $block->escapeJsQuote($identifyClass); ?> li",
-            "contentSelector": ".tab_content_<?php echo $block->escapeJsQuote($identifyClass); ?>",
-            "carouselSelector": ".cat_home2",
-            "owl": {
-                "lazyLoad": true,
-                "items": <?php echo (int)$items ?: 6; ?>,
-                "itemsDesktop": [1366, 4],
-                "itemsDesktopSmall": [1199, 3],
-                "itemsTablet": [991, 3],
-                "itemsMobile": [680, 2],
-                "navigation": <?php echo ($show_navigation) ? 'true' : 'false'; ?>,
-                "pagination": <?php echo ($show_pagination) ? 'true' : 'false'; ?>,
-                "autoPlay": <?php echo ($auto) ? 'true' : 'false'; ?>
-            }
-        }
-    }
-}
+<?= /* @noEscape */ json_encode($categoryTabMageInit, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>

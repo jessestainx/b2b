@@ -253,11 +253,9 @@ $atRiskCustomers = $block->getAtRiskCustomers(5);
     <?php endif; ?>
 </div>
 
-<!-- ApexCharts Library -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+require(['apexcharts'], function (ApexCharts) {
+    document.addEventListener('DOMContentLoaded', function () {
     // Sales Trend Chart
     var salesData = <?= /* @noEscape */ $block->getSalesTrendData() ?>;
 
@@ -357,5 +355,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var rfmChart = new ApexCharts(document.querySelector("#rfm-segments-chart"), rfmOptions);
         rfmChart.render();
     }
+    });
 });
 </script>

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
@@ -28,7 +29,8 @@ class WhatsAppB2BQuote implements B2BQuoteInterface
         private readonly B2BWhatsAppService $b2bWhatsAppService,
         private readonly LoggerInterface $logger,
         private readonly ResourceConnection $resource,
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc

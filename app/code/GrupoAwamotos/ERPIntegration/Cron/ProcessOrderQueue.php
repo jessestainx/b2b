@@ -6,7 +6,10 @@ namespace GrupoAwamotos\ERPIntegration\Cron;
 
 use GrupoAwamotos\ERPIntegration\Model\Queue\OrderSyncConsumer;
 use GrupoAwamotos\ERPIntegration\Api\Data\OrderSyncMessageInterfaceFactory;
+use GrupoAwamotos\ERPIntegration\Model\CronFileLock;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
+use Magento\Framework\DB\Sql\Expression;
+use Magento\MysqlMq\Model\QueueManagement;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Serialize\SerializerInterface;
 use Psr\Log\LoggerInterface;
@@ -19,10 +22,17 @@ use Psr\Log\LoggerInterface;
  */
 class ProcessOrderQueue
 {
+    private const LOCK_NAME = 'grupoawamotos_erp_process_order_queue';
     private const MAX_MESSAGES_PER_RUN = 50;
     private const RETRY_MAX_MESSAGES = 20;
     private const QUEUE_NAME = 'erp.order.sync.queue';
     private const RETRY_QUEUE_NAME = 'erp.order.sync.retry.queue';
+    private const MESSAGE_STATUS_NEW = QueueManagement::MESSAGE_STATUS_NEW;
+    private const MESSAGE_STATUS_IN_PROGRESS = QueueManagement::MESSAGE_STATUS_IN_PROGRESS;
+    private const MESSAGE_STATUS_COMPLETE = QueueManagement::MESSAGE_STATUS_COMPLETE;
+    private const MESSAGE_STATUS_RETRY_REQUIRED = QueueManagement::MESSAGE_STATUS_RETRY_REQUIRED;
+    private const MESSAGE_STATUS_ERROR = QueueManagement::MESSAGE_STATUS_ERROR;
+    private const MAX_STATUS_TRIALS = 5;
 
     /**
      * @var OrderSyncConsumer
@@ -89,32 +99,42 @@ class ProcessOrderQueue
             return;
         }
 
+        $lockHandle = CronFileLock::acquire(self::LOCK_NAME);
+        if ($lockHandle === null) {
+            $this->logger->info('[ERP Cron] ProcessOrderQueue already running; skipping overlap.');
+            return;
+        }
+
         $processedMain = 0;
         $processedRetry = 0;
         $errors = 0;
 
         try {
-            // Process main queue
-            $processedMain = $this->processQueue(self::QUEUE_NAME, self::MAX_MESSAGES_PER_RUN, false);
-        } catch (\Exception $e) {
-            $this->logger->error('[ERP Cron] Error processing main queue: ' . $e->getMessage());
-            $errors++;
-        }
+            try {
+                // Process main queue
+                $processedMain = $this->processQueue(self::QUEUE_NAME, self::MAX_MESSAGES_PER_RUN, false);
+            } catch (\Exception $e) {
+                $this->logger->error('[ERP Cron] Error processing main queue: ' . $e->getMessage());
+                $errors++;
+            }
 
-        try {
-            // Process retry queue with lower priority
-            $processedRetry = $this->processQueue(self::RETRY_QUEUE_NAME, self::RETRY_MAX_MESSAGES, true);
-        } catch (\Exception $e) {
-            $this->logger->error('[ERP Cron] Error processing retry queue: ' . $e->getMessage());
-            $errors++;
-        }
+            try {
+                // Process retry queue with lower priority
+                $processedRetry = $this->processQueue(self::RETRY_QUEUE_NAME, self::RETRY_MAX_MESSAGES, true);
+            } catch (\Exception $e) {
+                $this->logger->error('[ERP Cron] Error processing retry queue: ' . $e->getMessage());
+                $errors++;
+            }
 
-        if ($processedMain > 0 || $processedRetry > 0 || $errors > 0) {
-            $this->logger->info('[ERP Cron] Order queue processing completed', [
-                'main_processed' => $processedMain,
-                'retry_processed' => $processedRetry,
-                'errors' => $errors,
-            ]);
+            if ($processedMain > 0 || $processedRetry > 0 || $errors > 0) {
+                $this->logger->info('[ERP Cron] Order queue processing completed', [
+                    'main_processed' => $processedMain,
+                    'retry_processed' => $processedRetry,
+                    'errors' => $errors,
+                ]);
+            }
+        } finally {
+            CronFileLock::release($lockHandle);
         }
     }
 
@@ -138,9 +158,13 @@ class ProcessOrderQueue
             ->join(
                 ['qms' => $queueStatusTable],
                 'qm.id = qms.message_id',
-                ['status_id' => 'id']
+                [
+                    'status_id' => 'id',
+                    'status' => 'status',
+                    'number_of_trials' => 'number_of_trials',
+                ]
             )
-            ->where('qms.status = ?', 2) // 2 = NEW
+            ->where('qms.status IN (?)', [self::MESSAGE_STATUS_NEW, self::MESSAGE_STATUS_RETRY_REQUIRED])
             ->where('qm.topic_name = ?', $isRetry ? 'erp.order.sync.retry' : 'erp.order.sync')
             ->order('qm.id ASC')
             ->limit($maxMessages);
@@ -149,6 +173,14 @@ class ProcessOrderQueue
         $processed = 0;
 
         foreach ($messages as $messageData) {
+            $statusId = (int) ($messageData['status_id'] ?? 0);
+            $expectedStatus = (int) ($messageData['status'] ?? 0);
+            $previousTrials = (int) ($messageData['number_of_trials'] ?? 0);
+
+            if ($statusId <= 0 || !$this->claimMessageInProgress($connection, $queueStatusTable, $statusId, $expectedStatus)) {
+                continue;
+            }
+
             try {
                 // Decode message - Magento uses JSON serialization for queue messages
                 $body = $messageData['body'];
@@ -165,7 +197,7 @@ class ProcessOrderQueue
                         'message_id' => $messageData['id'],
                         'body' => substr($body, 0, 200)
                     ]);
-                    $this->markMessageComplete($connection, $queueStatusTable, (int)$messageData['status_id']);
+                    $this->markMessageFailed($connection, $queueStatusTable, $statusId);
                     continue;
                 }
 
@@ -185,15 +217,22 @@ class ProcessOrderQueue
                 }
 
                 // Mark as complete
-                $this->markMessageComplete($connection, $queueStatusTable, (int)$messageData['status_id']);
+                $this->markMessageComplete($connection, $queueStatusTable, $statusId);
                 $processed++;
             } catch (\Exception $e) {
+                $currentTrials = $previousTrials + 1;
                 $this->logger->error('[ERP Cron] Error processing message', [
                     'message_id' => $messageData['id'],
                     'error' => $e->getMessage(),
+                    'trials' => $currentTrials,
                 ]);
-                // Mark as error (status 4)
-                $this->markMessageError($connection, $queueStatusTable, (int)$messageData['status_id']);
+
+                if ($currentTrials >= self::MAX_STATUS_TRIALS) {
+                    $this->markMessageFailed($connection, $queueStatusTable, $statusId);
+                    continue;
+                }
+
+                $this->markMessageRetryRequired($connection, $queueStatusTable, $statusId);
             }
         }
 
@@ -212,29 +251,82 @@ class ProcessOrderQueue
     {
         $connection->update(
             $table,
-            ['status' => 4, 'updated_at' => date('Y-m-d H:i:s')], // 4 = COMPLETE
-            ['id = ?' => $statusId]
+            ['status' => self::MESSAGE_STATUS_COMPLETE, 'updated_at' => date('Y-m-d H:i:s')],
+            [
+                'id = ?' => $statusId,
+                'status = ?' => self::MESSAGE_STATUS_IN_PROGRESS,
+            ]
         );
     }
 
     /**
-     * Mark message as error
+     * Mark message as retry required.
      *
      * @param \Magento\Framework\DB\Adapter\AdapterInterface $connection
      * @param string $table
      * @param int $statusId
      * @return void
      */
-    private function markMessageError($connection, string $table, int $statusId): void
+    private function markMessageRetryRequired($connection, string $table, int $statusId): void
     {
         $connection->update(
             $table,
             [
-                'status' => 3, // 3 = ERROR, will be retried
-                'number_of_trials' => new \Magento\Framework\DB\Sql\Expression('number_of_trials + 1'),
+                'status' => self::MESSAGE_STATUS_RETRY_REQUIRED,
                 'updated_at' => date('Y-m-d H:i:s')
             ],
-            ['id = ?' => $statusId]
+            [
+                'id = ?' => $statusId,
+                'status = ?' => self::MESSAGE_STATUS_IN_PROGRESS,
+            ]
         );
+    }
+
+    /**
+     * Mark message as failed after max retries or invalid payload.
+     *
+     * @param \Magento\Framework\DB\Adapter\AdapterInterface $connection
+     * @param string $table
+     * @param int $statusId
+     * @return void
+     */
+    private function markMessageFailed($connection, string $table, int $statusId): void
+    {
+        $connection->update(
+            $table,
+            [
+                'status' => self::MESSAGE_STATUS_ERROR,
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'id = ?' => $statusId,
+                'status = ?' => self::MESSAGE_STATUS_IN_PROGRESS,
+            ]
+        );
+    }
+
+    /**
+     * Atomically claims a queue message for processing.
+     */
+    private function claimMessageInProgress(
+        $connection,
+        string $table,
+        int $statusId,
+        int $expectedStatus
+    ): bool {
+        $updated = (int) $connection->update(
+            $table,
+            [
+                'status' => self::MESSAGE_STATUS_IN_PROGRESS,
+                'number_of_trials' => new Expression('number_of_trials + 1'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'id = ?' => $statusId,
+                'status = ?' => $expectedStatus,
+            ]
+        );
+
+        return $updated === 1;
     }
 }

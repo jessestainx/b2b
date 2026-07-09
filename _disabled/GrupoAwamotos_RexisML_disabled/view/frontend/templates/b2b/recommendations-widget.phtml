@@ -1,0 +1,206 @@
+<?php
+/**
+ * Widget de recomendacoes RexisML para o Dashboard B2B
+ * Exibe produtos recomendados com dados reais do pipeline IA
+ *
+ * @var $block \GrupoAwamotos\RexisML\Block\Recommendations
+ */
+declare(strict_types=1);
+
+$recommendations = $block->getRecommendedProducts();
+if (empty($recommendations)) {
+    return;
+}
+$rfm = $block->getCustomerRfm();
+$counts = $block->getRecommendationCounts();
+$churnItems = [];
+$crosssellItems = [];
+foreach ($recommendations as $item) {
+    if ($item['classificacao'] === 'churn') {
+        $churnItems[] = $item;
+    } else {
+        $crosssellItems[] = $item;
+    }
+}
+?>
+
+<div class="b2b-rexis-section">
+    <div class="b2b-rexis-header">
+        <div class="b2b-rexis-title-row">
+            <h3 class="b2b-section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                <?= $block->escapeHtml(__('Recomendações IA')) ?>
+                <span class="b2b-rexis-ai-badge">REXIS ML</span>
+            </h3>
+            <?php if ($rfm && isset($rfm['classificacao_cliente'])): ?>
+                <span class="b2b-rexis-rfm-tag">
+                    Seu perfil: <strong><?= $block->escapeHtml($rfm['classificacao_cliente']) ?></strong>
+                </span>
+            <?php endif; ?>
+        </div>
+        <div class="b2b-rexis-stats">
+            <div class="b2b-rexis-stat">
+                <span class="stat-value"><?= (int)$counts['total'] ?></span>
+                <span class="stat-label">Total</span>
+            </div>
+            <?php if ((int)$counts['churn'] > 0): ?>
+            <div class="b2b-rexis-stat stat-churn">
+                <span class="stat-value"><?= (int)$counts['churn'] ?></span>
+                <span class="stat-label"><?= $block->escapeHtml(__('Reativação')) ?></span>
+            </div>
+            <?php endif; ?>
+            <?php if ((int)$counts['crosssell'] > 0): ?>
+            <div class="b2b-rexis-stat stat-crosssell">
+                <span class="stat-value"><?= (int)$counts['crosssell'] ?></span>
+                <span class="stat-label">Cross-sell</span>
+            </div>
+            <?php endif; ?>
+            <?php if ($rfm && isset($rfm['monetary'])): ?>
+            <div class="b2b-rexis-stat stat-monetary">
+                <span class="stat-value">R$ <?= number_format((float)$rfm['monetary'], 0, ',', '.') ?></span>
+                <span class="stat-label">Valor Total</span>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <?php if (!empty($churnItems)): ?>
+    <div class="b2b-rexis-subsection">
+        <h4 class="b2b-rexis-subtitle">
+            <span class="subtitle-dot dot-churn"></span>
+            Hora de Reativar (<?= count($churnItems) ?>)
+        </h4>
+        <div class="b2b-rexis-grid">
+            <?php foreach ($churnItems as $item): ?>
+                <?php
+                $product = $item['product'];
+                $score = $item['score'] * 100;
+                $info = $block->getClassificationInfo($item['classificacao']);
+                ?>
+                <div class="b2b-rexis-card b2b-rexis-card-churn">
+                    <div class="b2b-rexis-card-top">
+                        <span class="b2b-card-badge" style="--b2b-badge-color:<?= $block->escapeHtmlAttr($info['color']) ?>">
+                            <?= $block->escapeHtml($info['label']) ?>
+                        </span>
+                        <?php if ($score >= 30): ?>
+                        <span class="b2b-card-score"><?= round($score) ?>%</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="b2b-rexis-card-img">
+                        <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>">
+                            <?php $imgUrl = $block->getProductImageUrl($product); ?>
+                            <?php if ($imgUrl): ?>
+                                <img src="<?= $block->escapeUrl($imgUrl) ?>"
+                                      alt="<?= $block->escapeHtmlAttr($product->getName()) ?>"
+                                      loading="lazy" decoding="async" width="120" height="120" />
+                            <?php endif; ?>
+                        </a>
+                    </div>
+                    <div class="b2b-rexis-card-info">
+                        <span class="b2b-card-sku"><?= $block->escapeHtml($product->getSku()) ?></span>
+                        <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>" class="b2b-card-name">
+                            <?= $block->escapeHtml($product->getName()) ?>
+                        </a>
+                        <div class="b2b-card-price">
+                            R$ <?= number_format((float)$product->getFinalPrice(), 2, ',', '.') ?>
+                        </div>
+                        <?php if ($item['recencia'] > 0): ?>
+                        <div class="b2b-card-recencia">
+                            <?= $block->escapeHtml(__('Há %1 dias sem comprar', (int)$item['recencia'])) ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="b2b-rexis-card-action">
+                        <?php $postParams = $block->getAddToCartPostParams($product); ?>
+                        <?php if ($postParams): ?>
+                        <form data-role="tocart-form"
+                              action="<?= $block->escapeUrl($postParams['action']) ?>"
+                              method="post">
+                            <?php foreach ($postParams['data'] as $key => $value): ?>
+                                <input type="hidden"
+                                       name="<?= $block->escapeHtmlAttr($key) ?>"
+                                       value="<?= $block->escapeHtmlAttr($value) ?>">
+                            <?php endforeach; ?>
+                            <button type="submit" class="b2b-rexis-btn b2b-rexis-btn-churn">
+                                <?= $block->escapeHtml(__('Comprar Novamente')) ?>
+                            </button>
+                        </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($crosssellItems)): ?>
+    <div class="b2b-rexis-subsection">
+        <h4 class="b2b-rexis-subtitle">
+            <span class="subtitle-dot dot-crosssell"></span>
+            <?= $block->escapeHtml(__('Você também pode precisar')) ?> (<?= count($crosssellItems) ?>)
+        </h4>
+        <div class="b2b-rexis-grid">
+            <?php foreach ($crosssellItems as $item): ?>
+                <?php
+                $product = $item['product'];
+                $score = $item['score'] * 100;
+                $info = $block->getClassificationInfo($item['classificacao']);
+                ?>
+                <div class="b2b-rexis-card b2b-rexis-card-crosssell">
+                    <div class="b2b-rexis-card-top">
+                        <span class="b2b-card-badge" style="--b2b-badge-color:<?= $block->escapeHtmlAttr($info['color']) ?>">
+                            <?= $block->escapeHtml($info['label']) ?>
+                        </span>
+                        <?php if ($score >= 30): ?>
+                        <span class="b2b-card-score"><?= round($score) ?>%</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="b2b-rexis-card-img">
+                        <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>">
+                            <?php $imgUrl = $block->getProductImageUrl($product); ?>
+                            <?php if ($imgUrl): ?>
+                                <img src="<?= $block->escapeUrl($imgUrl) ?>"
+                                      alt="<?= $block->escapeHtmlAttr($product->getName()) ?>"
+                                      loading="lazy" decoding="async" width="120" height="120" />
+                            <?php endif; ?>
+                        </a>
+                    </div>
+                    <div class="b2b-rexis-card-info">
+                        <span class="b2b-card-sku"><?= $block->escapeHtml($product->getSku()) ?></span>
+                        <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>" class="b2b-card-name">
+                            <?= $block->escapeHtml($product->getName()) ?>
+                        </a>
+                        <div class="b2b-card-price">
+                            R$ <?= number_format((float)$product->getFinalPrice(), 2, ',', '.') ?>
+                        </div>
+                        <?php if ($item['predicted_value'] > 0): ?>
+                        <div class="b2b-card-predicted">
+                            <?= $block->escapeHtml(__('Previsão: R$ %1', number_format((float)$item['predicted_value'], 2, ',', '.'))) ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="b2b-rexis-card-action">
+                        <?php $postParams = $block->getAddToCartPostParams($product); ?>
+                        <?php if ($postParams): ?>
+                        <form data-role="tocart-form"
+                              action="<?= $block->escapeUrl($postParams['action']) ?>"
+                              method="post">
+                            <?php foreach ($postParams['data'] as $key => $value): ?>
+                                <input type="hidden"
+                                       name="<?= $block->escapeHtmlAttr($key) ?>"
+                                       value="<?= $block->escapeHtmlAttr($value) ?>">
+                            <?php endforeach; ?>
+                            <button type="submit" class="b2b-rexis-btn b2b-rexis-btn-crosssell">
+                                <?= $block->escapeHtml(__('Adicionar ao Carrinho')) ?>
+                            </button>
+                        </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>

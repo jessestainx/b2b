@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Marketing;
@@ -33,7 +34,7 @@ class Landing implements HttpGetActionInterface
         $resultPage = $this->resultPageFactory->create();
         $resultPage->getConfig()->getTitle()->set(__('Seja um Revendedor - Grupo AWA Motos'));
         $resultPage->getConfig()->setDescription(__('Acesse preços exclusivos de atacado, crédito facilitado e entrega rápida para sua oficina ou loja de motos. Cadastre-se no B2B AWA.'));
-        
+
         return $resultPage;
     }
 }

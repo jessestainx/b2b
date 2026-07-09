@@ -34,6 +34,11 @@ switch ($type = $block->getType()) {
     case 'other':
         break;
 }
+
+$b2bPriceGate = $this->helper('GrupoAwamotos\B2B\Helper\Data');
+$b2bCanViewPrice = $b2bPriceGate->canViewPrices();
+$b2bPriceGateHeadline = $b2bPriceGate->getPriceGateHeadline();
+$b2bPriceGateDescription = $b2bPriceGate->getPriceGateDescription();
 ?>
 <?php if ($exist): ?>
 <?php if ($type == 'related' || $type == 'upsell'): ?>
@@ -118,7 +123,7 @@ switch ($type = $block->getType()) {
                                 </div>
                             </div>
                         </div>
-                        <div class="product-info">
+                            <div class="product-info">
                             <h3 class="product-name">
                                 <a class="product-item-link" title="<?php echo $block->escapeHtml($_item->getName()) ?>" href="<?php echo $block->getProductUrl($_item) ?>">
                                     <?php echo $block->escapeHtml($_item->getName()) ?>
@@ -129,7 +134,14 @@ switch ($type = $block->getType()) {
                                 <?php echo $block->getReviewsSummaryHtml($_item, $templateType, true); ?>
                             </div>
                             <div class="info-price">
-                                <?php /* @escapeNotVerified */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+                                <?php if ($b2bCanViewPrice): ?>
+                                    <?php /* @escapeNotVerified */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+                                <?php else: ?>
+                                    <div class="b2b-login-to-see-price">
+                                        <span class="b2b-login-to-see-price__title"><?php echo $block->escapeHtml($b2bPriceGateHeadline) ?></span>
+                                        <span class="b2b-login-to-see-price__message"><?php echo $block->escapeHtml($b2bPriceGateDescription) ?></span>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

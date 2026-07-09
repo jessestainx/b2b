@@ -22,16 +22,20 @@ $_b2bActive = \Magento\Framework\App\ObjectManager::getInstance()
 if ($_b2bActive) {
     $b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
     $b2bCanAddToCart = $b2bHelper->canAddToCart();
+    $b2bCanViewPrices = $b2bHelper->canViewPrices();
     $b2bGateState = $block->escapeHtmlAttr($b2bHelper->getPriceGateState());
     $b2bGateHeadline = $block->escapeHtml($b2bHelper->getPriceGateHeadline());
+    // Banner institucional (topo da PLP/busca): texto completo.
     $b2bGateDescription = $block->escapeHtml($b2bHelper->getPriceGateBannerDescription());
+    // Badge dentro do card do produto: mensagem curta (espaço reduzido, repetida N vezes na grade).
+    $b2bGateCardMessage = $block->escapeHtml($b2bHelper->getPriceGateCardMessage());
 	$b2bPrimaryUrl = $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl());
 	$b2bPrimaryLabel = $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel());
 	$b2bSecondaryUrl = $block->escapeUrl($b2bHelper->getPriceGateSecondaryUrl());
 	$b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel());
 } else {
-    $b2bHelper = null; $b2bCanAddToCart = true; $b2bGateState = '';
-    $b2bGateHeadline = ''; $b2bGateDescription = '';
+    $b2bHelper = null; $b2bCanAddToCart = true; $b2bCanViewPrices = true; $b2bGateState = '';
+    $b2bGateHeadline = ''; $b2bGateDescription = ''; $b2bGateCardMessage = '';
 	$b2bPrimaryUrl = ''; $b2bPrimaryLabel = '';
 	$b2bSecondaryUrl = ''; $b2bSecondaryLabel = '';
 }
@@ -118,6 +122,20 @@ if ($_b2bActive) {
         <ul class="row product-grid container-products-switch products <?php echo $block->escapeHtmlAttr($col_grid); ?>" data-view-mode="4" role="list">
             <?php /** @var $_product \Magento\Catalog\Model\Product */ ?>
 	            <?php foreach ($_productCollection as $_product): ?>
+                    <?php
+                    if (!$_product || !(int) $_product->getId()) {
+                        continue;
+                    }
+                    $productName = trim((string) $_helper->productAttribute($_product, $_product->getName(), 'name'));
+                    if ($productName === '') {
+                        continue;
+                    }
+                    ?>
+	                <?php
+	                if (!(int) $_product->getId() || trim((string) $_product->getName()) === '') {
+	                    continue;
+	                }
+	                ?>
 	                <li class="item-product" data-container="product-grid" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
 	                    <?php
 	                    $productImage = $block->getImage($_product, $image);
@@ -129,7 +147,9 @@ if ($_b2bActive) {
 	                            . $block->escapeUrl($productImageMd->getImageUrl()) . ' 600w, '
 	                            . $block->escapeUrl($productImage->getImageUrl()) . ' 1000w';
 	                    $sizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
-	                    $imgOnError = "this.onerror=null;this.removeAttribute('srcset');this.src=this.src.replace(/\\/cache\\/[^\\/]+\\//,'/');";
+	                    $imgOnError = "this.onerror=null;this.classList.add('awa-img-fallback','awa-loaded');this.removeAttribute('srcset');if(!this.dataset.fallbackApplied){this.dataset.fallbackApplied='1';this.src='"
+                        . $block->escapeJs($block->getViewFileUrl('images/product/placeholder/image.jpg'))
+                        . "';}else{this.closest('li.item-product')?.remove();}";
 	                    // Image HTML Processing
 	                    $mainImgHtml = $productImage->toHtml();
 	                    $mainImgHtml = str_replace('<img ', '<img srcset="' . $srcset . '" sizes="' . $sizes . '" onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $mainImgHtml);
@@ -200,7 +220,14 @@ if ($_b2bActive) {
 							<?php echo $block->getReviewsSummaryHtml($_product, $templateType, true); ?>
 						</div>
 						<div class="info-price" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
-						<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                        <?php if ($b2bCanViewPrices): ?>
+                            <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                        <?php else: ?>
+                            <div class="b2b-login-to-see-price price-box">
+                                <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bGateHeadline) ?></span>
+                                <span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bGateCardMessage) ?></span>
+                            </div>
+                        <?php endif; ?>
 						</div>
 						<div class="product-info-cart">
 							<div class="actions-primary addcart-link">
@@ -231,13 +258,20 @@ if ($_b2bActive) {
 		<?php }else{ ?>
 		<ul class="product-list" role="list">
 			<?php foreach ($_productCollection as $_product): ?>
+				<?php
+				if (!(int) $_product->getId() || trim((string) $_product->getName()) === '') {
+					continue;
+				}
+				?>
 				<li class="item-product" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
 						<div class="product-thumb" data-awa-thumb-stabilized="true">
 							<a href="<?php echo $block->escapeUrl($_product->getProductUrl()); ?>" class="product-thumb-link" aria-label="<?php echo $block->escapeHtml($_product->getName()); ?>">
 								<?php
 									$productImage = $block->getImage($_product, $image);
 									$productImageThumb = $block->getImage($_product, 'category_image_second_small');
-									$imgOnError = "this.onerror=null;this.removeAttribute('srcset');this.src=this.src.replace(/\\/cache\\/[^\\/]+\\//,'/');";
+									$imgOnError = "this.onerror=null;this.classList.add('awa-img-fallback','awa-loaded');this.removeAttribute('srcset');if(!this.dataset.fallbackApplied){this.dataset.fallbackApplied='1';this.src='"
+                                        . $block->escapeJs($block->getViewFileUrl('images/product/placeholder/image.jpg'))
+                                        . "';}else{this.closest('li.item-product')?.remove();}";
 									$productImageHtml = $productImage->toHtml();
 									$productImageHtml = str_replace('<img ', '<img onerror="' . $block->escapeHtmlAttr($imgOnError) . '" ', $productImageHtml);
 									$productImageThumbHtml = $productImageThumb->toHtml();
@@ -283,7 +317,14 @@ if ($_b2bActive) {
 							<?php echo $block->getReviewsSummaryHtml($_product, $templateType, true); ?>
 						</div>
 						<div class="info-price" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
-						<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                        <?php if ($b2bCanViewPrices): ?>
+                            <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                        <?php else: ?>
+                            <div class="b2b-login-to-see-price price-box">
+                                <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bGateHeadline) ?></span>
+                                <span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bGateCardMessage) ?></span>
+                            </div>
+                        <?php endif; ?>
 						</div>
 						<div class="product-desc"><?php echo $block->escapeHtml($_product->getShortDescription()); ?>
 						</div>

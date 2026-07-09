@@ -80,6 +80,11 @@ class MaintenancePlugin
             return $result;
         }
 
+        // Assets estáticos na raiz (favicon, robots) — não bloquear com 503
+        if ($this->isStaticAssetRequest($request)) {
+            return $proceed($request);
+        }
+
         // Verificar se é rota permitida (admin, newsletter, etc.)
         if ($this->isAllowedRoute($request)) {
             return $proceed($request);
@@ -164,6 +169,15 @@ class MaintenancePlugin
         }
         $whitelistArray = array_map('trim', explode("\n", $whitelist));
         return in_array($clientIp, array_filter($whitelistArray), true);
+    }
+
+    /**
+     * Pedidos de assets na raiz que o browser faz automaticamente (não devem receber 503).
+     */
+    private function isStaticAssetRequest(RequestInterface $request): bool
+    {
+        $pathInfo = trim((string) $request->getPathInfo(), '/');
+        return in_array($pathInfo, ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'], true);
     }
 
     private function isAllowedRoute(RequestInterface $request): bool

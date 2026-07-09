@@ -375,7 +375,7 @@ html body#html-body#html-body#html-body#html-body.catalog-product-view
   :is(h1.page-title, .page-title, .page-title .base) {
   font-size: clamp(22px, 1.25rem + 0.6vw, 30px) !important;
   font-weight: 700 !important;
-  line-height: 1.2 !important;
+  line-height: 1.3 !important;
 }
 
 html body#html-body#html-body#html-body.catalog-product-view
@@ -743,4 +743,389 @@ html body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page
   max-height: 44px !important;
   margin-block: -5px !important;
   overflow: visible !important;
+}
+
+/* Round 13 — BUG-H-051 / BUG-H-052: offsets negativos no mobile (cart + b2b login)
+   Motivo: alguns blocos herdados ficam com eixo deslocado em 390/360 (l:-25, t:-95).
+   Estratégia: reset explícito de inset/transform/margens na cadeia de containers críticos. */
+@media (max-width: 767px) {
+  html body#html-body.checkout-cart-index .page-main.container,
+  html body#html-body.checkout-cart-index .page-main > .columns,
+  html body#html-body.checkout-cart-index .page-main .columns,
+  html body#html-body.checkout-cart-index .page-main .column.main,
+  html body#html-body.checkout-cart-index .cart-container,
+  html body#html-body.checkout-cart-index .cart.table-wrapper,
+  html body#html-body.checkout-cart-index .cart-summary {
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body.checkout-cart-index .page-main.container {
+    padding-inline: var(--awa-page-pad, 16px) !important;
+    overflow-x: clip !important;
+  }
+
+  html body#html-body.b2b-auth-shell.b2b-account-login .page-main,
+  html body#html-body.b2b-auth-shell.b2b-account-login .page-main.container,
+  html body#html-body.b2b-auth-shell.b2b-account-login .page-main > .columns,
+  html body#html-body.b2b-auth-shell.b2b-account-login .page-main .columns,
+  html body#html-body.b2b-auth-shell.b2b-account-login .page-main .column.main,
+  html body#html-body.b2b-auth-shell.b2b-account-login .b2b-login-page,
+  html body#html-body.b2b-auth-shell.b2b-account-login #b2b-login-shell,
+  html body#html-body.b2b-auth-shell.b2b-account-login .b2b-login-card {
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body.b2b-auth-shell.b2b-account-login .page-main.container,
+  html body#html-body.b2b-auth-shell.b2b-account-login .b2b-login-page,
+  html body#html-body.b2b-auth-shell.b2b-account-login #b2b-login-shell,
+  html body#html-body.b2b-auth-shell.b2b-account-login .b2b-login-card {
+    margin-inline: auto !important;
+    padding-inline: var(--awa-page-pad, 16px) !important;
+    overflow-x: clip !important;
+  }
+}
+
+/* Round 14 — BUG-H-014 / BUG-H-016 */
+/* BUG-H-014: B2B promo bar sem gap entre blocos (gap: normal). */
+html body#html-body .page-wrapper .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__inner,
+html body#html-body .page-wrapper .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__layout,
+html body#html-body .page-wrapper .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__text,
+html body#html-body .page-wrapper .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__lead {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* BUG-H-016: H2 "Meu Carrinho" com rect 1x1 por clip legado.
+   Mantém acessibilidade (texto fora da tela), sem artefato visual 1x1. */
+html body#html-body .page-wrapper .minicart-wrapper h2#minicart-title.awa-sr-only {
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  white-space: nowrap !important;
+}
+
+/* Round 15 — BUG-H-021 / BUG-H-024 / BUG-H-026 */
+/* BUG-H-021: cards de shelf com alturas inconsistentes (mobile). */
+@media (max-width: 767px) {
+  html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    :is(.products-grid, .awa-shelf--carousel)
+    :is(.item-product, .product-item)
+    .product-item-info {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 100% !important;
+  }
+
+  html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    :is(.products-grid, .awa-shelf--carousel)
+    :is(.item-product, .product-item)
+    .product-item-details {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+  }
+}
+
+/* BUG-H-024: category carousel com overflow visível em 390/360. */
+@media (max-width: 767px) {
+  html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    :is(.awa-category-carousel__viewport, .categorytab .owl-stage-outer, .categorytab .owl-carousel) {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    max-width: 100% !important;
+  }
+}
+
+/* BUG-H-026: newsletter deslocada à direita no desktop (1366). */
+@media (min-width: 992px) {
+  html body#html-body .page-wrapper :is(.awa-footer-newsletter, .footer-newsletter) {
+    width: 100% !important;
+    max-width: var(--awa-grid-shell-max, min(100%, 1280px)) !important;
+    margin-inline: auto !important;
+    box-sizing: border-box !important;
+    padding-inline: var(--awa-page-pad, clamp(12px, 2vw, 24px)) !important;
+  }
+
+  html body#html-body .page-wrapper :is(.awa-footer-newsletter, .footer-newsletter) > .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* Round 16 — BUG-H-028 / BUG-H-030 */
+/* BUG-H-028: touch targets <44px em áreas de navegação/listagem */
+html body#html-body .page-wrapper :is(
+  .pages .item a,
+  .pages .item strong,
+  .owl-nav button,
+  .owl-prev,
+  .owl-next,
+  .categorytab .owl-nav button,
+  .awa-section-header__link,
+  .awa-shelf__view-all
+) {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+/* BUG-H-030: barra B2B mobile colapsa versão short (w:0/h:0) */
+@media (max-width: 767px) {
+  html body#html-body .page-wrapper .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__lead-short, .awa-b2b-promo-bar__cta-short) {
+    display: inline !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    visibility: visible !important;
+  }
+
+  html body#html-body .page-wrapper .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__lead-long, .awa-b2b-promo-bar__cta-long) {
+    display: none !important;
+  }
+}
+
+/* Round 17 — BUG-H-025 / BUG-H-034 */
+/* BUG-H-025: footer principal sem estrutura de colunas.
+   Força grade real no bloco .rowFlexMargin com as 3 colunas existentes do DOM. */
+@media (min-width: 768px) {
+  html body#html-body .page-wrapper .footer-container.layout2 .container > .row.rowFlexMargin {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: clamp(12px, 1.8vw, 24px) !important;
+    align-items: start !important;
+  }
+
+  html body#html-body .page-wrapper .footer-container.layout2 .container > .row.rowFlexMargin > [class*='col-'] {
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  html body#html-body .page-wrapper .footer-container.layout2 .container > .row.rowFlexMargin {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* BUG-H-034: nav vertical sem escala consistente entre 1024 e 1366.
+   Aplica largura fluida para manter hierarquia de coluna no desktop médio. */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  html body#html-body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu {
+    inline-size: clamp(208px, 18.5vw, 276px) !important;
+    width: clamp(208px, 18.5vw, 276px) !important;
+    max-width: min(100%, 276px) !important;
+    flex: 0 0 clamp(208px, 18.5vw, 276px) !important;
+  }
+
+  html body#html-body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > .title-category-dropdown,
+  html body#html-body .page-wrapper .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* Round 18 — BUG-H-050 (P1) / BUG-H-036 (mitigação de jank)
+   Escopo: neutraliza `transition: all` global em links para propriedades seguras.
+   Objetivo: reduzir repaints/reflows perceptíveis sem remover feedback visual. */
+html body#html-body .page-wrapper :is(a, a:visited, a:hover, a:focus, a:focus-visible) {
+  transition-property: color, background-color, border-color, opacity, text-decoration-color !important;
+  transition-duration: var(--awa-duration-fast, 150ms) !important;
+  transition-timing-function: var(--awa-ease, ease) !important;
+  transition-delay: 0s !important;
+}
+
+/* Mantém responsividade e evita animação de propriedades geométricas em links comuns. */
+html body#html-body .page-wrapper :is(.header-wrapper-sticky, .top-home-content, .page-footer, .footer-container, .nav-sections, .navigation) a {
+  will-change: auto !important;
+}
+
+/* Round 19 — BUG-H-036 (fase 2): reduz jank residual em header/home/footer.
+   Escopo: botões/ações/links em áreas críticas, evitando transições geométricas globais. */
+html body#html-body .page-wrapper :is(
+  .page-header,
+  .header,
+  .header.content,
+  .top-home-content,
+  .nav-sections,
+  .navigation,
+  .minicart-wrapper,
+  .block-search,
+  .page-footer,
+  .footer-container
+) :is(a, button, .action, .btn, [role="button"], input[type="submit"], input[type="button"]) {
+  transition-property: color, background-color, border-color, opacity, box-shadow, text-decoration-color !important;
+  transition-duration: var(--awa-duration-fast, 150ms) !important;
+  transition-timing-function: var(--awa-ease, ease) !important;
+  transition-delay: 0s !important;
+}
+
+/* Evita custo de composição contínua em áreas de navegação/rodapé. */
+html body#html-body .page-wrapper :is(
+  .page-header,
+  .header,
+  .top-home-content,
+  .nav-sections,
+  .navigation,
+  .page-footer,
+  .footer-container
+) :is(a, button, .action, .btn, [role="button"]) {
+  will-change: auto !important;
+}
+
+/* Respeita usuários com redução de movimento no topo/rodapé. */
+@media (prefers-reduced-motion: reduce) {
+  html body#html-body .page-wrapper :is(
+    .page-header,
+    .header,
+    .top-home-content,
+    .nav-sections,
+    .navigation,
+    .page-footer,
+    .footer-container
+  ) :is(a, button, .action, .btn, [role="button"], input[type="submit"], input[type="button"]) {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Round 20 — BUG-H-044: excesso de CTAs WhatsApp na home (ruído visual).
+   Mantém canais primários (botão flutuante + atendimento no rodapé)
+   e remove o CTA redundante no card de benefícios B2B da home. */
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper .awa-hero-b2b-cta
+  .awa-hero-benefits__item--interactive
+  > .awa-hero-benefits__link[href*="wa.me/"] {
+  display: none !important;
+}
+
+html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper .awa-hero-b2b-cta
+  .awa-hero-benefits__item--interactive:has(> .awa-hero-benefits__link[href*="wa.me/"]) {
+  display: none !important;
+}
+
+/* Round 21 — BUG-H-028 (follow-up): touch targets pequenos no header/footer mobile.
+   Eleva alvos interativos para mínimo WCAG de 44px sem alterar estrutura desktop. */
+@media (max-width: 767px) {
+  html body#html-body .page-wrapper :is(
+    .block-search .action.search,
+    .minicart-wrapper .action.showcart,
+    .header-control.header-nav,
+    .header-control.header-nav-global,
+    .header-control .header-nav-global
+  ) {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  html body#html-body .page-wrapper :is(
+    .footer-container .awa-footer-section__toggle,
+    .footer-container .awa-footer-categories-expand__toggle,
+    .footer-container .awa-footer-pro__social-link
+  ) {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  html body#html-body .page-wrapper .footer-container .awa-footer-atendimento__actions a {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+}
+
+/* Round 22 — BUG-H-028 (header search mobile): campo de busca com alvo <44px em páginas como carrinho.
+   O CSS crítico define 42px; este override padroniza para 44px no mobile. */
+@media (max-width: 767px) {
+  html body#html-body .page-wrapper :is(
+    .block-search #search,
+    .block-search .input-text,
+    .header-search .input-text,
+    #search_mini_form input#search
+  ) {
+    height: 44px !important;
+    min-height: 44px !important;
+    line-height: 44px !important;
+    font-size: 16px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+/* Round 23 — BUG-B2B-CTA-044: WhatsApp auth CTA abaixo do alvo mínimo.
+   Usa seletor final com html/body/page-wrapper para vencer overrides tardios
+   sem alterar cor, conteúdo ou fluxo visual do login/cadastro. */
+html body#html-body.b2b-auth-shell:is(
+  .b2b-account-login,
+  .b2b-account-forgotpassword,
+  .b2b-account-claim,
+  .b2b-register-index,
+  .b2b-register-success
+) .page-wrapper :is(a.b2b-login-whatsapp, button.b2b-login-whatsapp) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  min-block-size: 44px !important;
+  height: auto !important;
+  padding-block: var(--b2b-auth-gap-sm, 8px) !important;
+  box-sizing: border-box !important;
+  line-height: 1.3 !important;
 }

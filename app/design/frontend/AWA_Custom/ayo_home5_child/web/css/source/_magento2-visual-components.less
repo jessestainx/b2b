@@ -1,0 +1,857 @@
+// ============================================================================
+// AWA MOTOS — MAGENTO 2 VISUAL COMPONENTS
+// ----------------------------------------------------------------------------
+// Padroes visuais para componentes nativos Magento 2.4.x (tema Ayo Home5).
+// Cada secao aborda um componente ou template especifico, com:
+//   - Seletores Magento 2 reais (nao inventados)
+//   - Tokens AWA via var(--awa-*) com px fallback
+//   - Mobile-first quando aplicavel
+//   - Hard rules: gap > margin, logical props, 44px touch
+//
+// IMPORTANTE: este arquivo documenta CONVENCOES visuais. Cada regra
+// deve ser integrada ao bundle CSS ativo do projeto (ver INTEGRATION
+// em design-system/UTILITIES.md). Os tokens vem de _awa-variables.less.
+// ============================================================================
+
+
+// ============================================================================
+// 1. HEADER MAGENTO 2 — search, account, minicart
+// ============================================================================
+
+// --- 1.1 Search form (search_mini_form) ---
+.block-search {
+    display: flex;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+}
+
+.block-search form#search_mini_form {
+    display: flex;
+    align-items: stretch;
+    inline-size: 100%;
+    gap: 0;
+}
+
+.block-search .field.search {
+    display: flex;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+}
+
+.block-search .field.search .control {
+    display: flex;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+}
+
+.block-search input#search {
+    inline-size: 100%;
+    min-inline-size: 0;
+    block-size: var(--awa-touch-target, 44px);
+    padding-inline: var(--awa-space-4, 16px);
+    font-size: var(--awa-fs-base, 16px);  /* iOS safe (>=16px) */
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-white, #ffffff);
+}
+
+.block-search input#search:focus-visible {
+    border-color: var(--awa-color-primary, #b73337);
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: -2px;
+}
+
+.block-search .actions {
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.block-search .actions .action.search {
+    inline-size: var(--awa-touch-target, 44px);
+    block-size: var(--awa-touch-target, 44px);
+    display: inline-grid;
+    place-items: center;
+    background: var(--awa-color-primary, #b73337);
+    color: var(--awa-white, #ffffff);
+    border: 0;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+.block-search .actions .action.search:hover {
+    background: var(--awa-color-primary-dark, #8e2629);
+}
+
+
+// --- 1.2 Account dropdown / customer menu ---
+.header.links {
+    display: flex;
+    align-items: center;
+    gap: var(--awa-gap-sm, 8px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.header.links > li {
+    display: inline-flex;
+    align-items: center;
+}
+
+.header.links > li > a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--awa-touch-target, 44px);
+    padding-inline: var(--awa-space-3, 12px);
+    color: var(--awa-text-primary, #333333);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.header.links > li > a:hover {
+    color: var(--awa-color-primary, #b73337);
+}
+
+
+// --- 1.3 Minicart ---
+.minicart-wrapper {
+    position: relative;
+}
+
+.action.showcart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--awa-touch-target, 44px);
+    block-size: var(--awa-touch-target, 44px);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: var(--awa-text-primary, #333333);
+    position: relative;
+}
+
+.action.showcart .counter.qty {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    background: var(--awa-color-primary, #b73337);
+    color: var(--awa-white, #ffffff);
+    border-radius: 9999px;
+    min-inline-size: 1.25rem;
+    block-size: 1.25rem;
+    padding-inline: 0.25rem;
+    display: inline-grid;
+    place-items: center;
+    font-size: var(--awa-fs-xs, 11px);
+    font-weight: 700;
+    line-height: 1;
+}
+
+
+// ============================================================================
+// 2. FOOTER MAGENTO 2 — colunas, copyright, social
+// ============================================================================
+
+.footer.content {
+    background: var(--awa-color-bg-soft, #f7f7f7);
+    color: var(--awa-text-primary, #333333);
+    padding-block: var(--awa-space-9, 48px);
+}
+
+.footer.content .links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-space-2, 8px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.footer.content .links a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--awa-touch-target, 44px);
+    padding-block: var(--awa-space-2, 8px);
+    color: var(--awa-text-primary, #333333);
+    text-decoration: none;
+}
+
+.footer.content .links a:hover {
+    color: var(--awa-color-primary, #b73337);
+}
+
+.footer.content h4,
+.footer.content .footer-title {
+    font-size: var(--awa-fs-base, 16px);
+    font-weight: 700;
+    margin-block-end: var(--awa-space-3, 12px);
+    color: var(--awa-text-primary, #333333);
+}
+
+.copyright {
+    padding-block: var(--awa-space-4, 16px);
+    text-align: center;
+    color: var(--awa-text-muted, #666666);
+    font-size: var(--awa-fs-sm, 14px);
+}
+
+
+// ============================================================================
+// 3. BREADCRUMB
+// ============================================================================
+
+.breadcrumbs {
+    padding-block: var(--awa-space-3, 12px);
+    font-size: var(--awa-fs-sm, 14px);
+}
+
+.breadcrumbs .items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--awa-space-1, 4px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumbs .item {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--awa-touch-target, 44px);
+}
+
+.breadcrumbs .item:not(:last-child)::after {
+    content: "/";
+    margin-inline-start: var(--awa-space-2, 8px);
+    color: var(--awa-text-light, #999999);
+}
+
+.breadcrumbs a {
+    color: var(--awa-text-secondary, #666666);
+    text-decoration: none;
+    padding-inline: var(--awa-space-1, 4px);
+}
+
+.breadcrumbs a:hover {
+    color: var(--awa-color-primary, #b73337);
+}
+
+.breadcrumbs .itemstrong {
+    color: var(--awa-text-primary, #333333);
+    font-weight: 600;
+}
+
+
+// ============================================================================
+// 4. PLP TOOLBAR
+// ============================================================================
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--awa-space-4, 16px);
+    padding-block: var(--awa-space-3, 12px);
+    margin-block-end: var(--awa-space-4, 16px);
+    border-block: 1px solid var(--awa-border, #e5e5e5);
+}
+
+.toolbar .toolbar-amount {
+    color: var(--awa-text-muted, #666666);
+    font-size: var(--awa-fs-sm, 14px);
+}
+
+.toolbar .toolbar-sorter,
+.toolbar .limiter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--awa-space-2, 8px);
+}
+
+.toolbar .toolbar-sorter .sorter-label,
+.toolbar .limiter .limiter-label {
+    color: var(--awa-text-muted, #666666);
+    font-size: var(--awa-fs-sm, 14px);
+}
+
+.toolbar select {
+    block-size: var(--awa-touch-target, 44px);
+    padding-inline: var(--awa-space-3, 12px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-white, #ffffff);
+    font-size: var(--awa-fs-base, 16px);
+    color: var(--awa-text-primary, #333333);
+}
+
+.toolbar .modes {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--awa-gap-xs, 4px);
+}
+
+.toolbar .modes .modes-mode {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--awa-touch-target, 44px);
+    block-size: var(--awa-touch-target, 44px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-sm, 4px);
+    color: var(--awa-text-muted, #666666);
+    background: var(--awa-white, #ffffff);
+}
+
+.toolbar .modes .modes-mode.mode-active,
+.toolbar .modes .modes-mode:hover {
+    border-color: var(--awa-color-primary, #b73337);
+    color: var(--awa-color-primary, #b73337);
+}
+
+
+// ============================================================================
+// 5. PRODUCT CARD (item-product / product-item)
+// ============================================================================
+
+.products-grid .product-item,
+.product-items .product-item {
+    display: flex;
+    flex-direction: column;
+    background: var(--awa-white, #ffffff);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-lg, 12px);
+    overflow: hidden;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.products-grid .product-item:hover,
+.product-items .product-item:hover {
+    border-color: var(--awa-color-primary, #b73337);
+    box-shadow: var(--awa-shadow-md, 0 4px 12px rgba(0,0,0,0.10));
+}
+
+.product-item .product-item-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    gap: var(--awa-gap-sm, 8px);
+    padding: var(--awa-space-3, 12px);
+}
+
+.product-item .product-image-container {
+    aspect-ratio: 1 / 1;
+    background: var(--awa-color-bg-soft, #f7f7f7);
+    overflow: hidden;
+}
+
+.product-item .product-image-photo {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+}
+
+.product-item .product-item-name {
+    margin: 0;
+    font-size: var(--awa-fs-base, 16px);
+    font-weight: 500;
+    line-height: 1.4;
+    /* 2-line clamp */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-item .product-item-link {
+    color: var(--awa-text-primary, #333333);
+    text-decoration: none;
+}
+
+.product-item .product-item-link:hover {
+    color: var(--awa-color-primary, #b73337);
+}
+
+
+// ============================================================================
+// 6. PRICE BOX
+// ============================================================================
+
+.price-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--awa-gap-xs, 4px) var(--awa-gap-sm, 8px);
+    font-variant-numeric: tabular-nums;
+    margin-block-start: auto;  /* push to bottom */
+}
+
+.price-box .price {
+    font-size: var(--awa-fs-lg, 18px);
+    font-weight: 700;
+    color: var(--awa-color-primary, #b73337);
+    letter-spacing: -0.01em;
+}
+
+.price-box .old-price .price,
+.price-box .price-was .price {
+    color: var(--awa-text-light, #999999);
+    text-decoration: line-through;
+    font-size: var(--awa-fs-sm, 14px);
+    font-weight: 400;
+}
+
+.price-box .special-price .price {
+    color: var(--awa-color-primary, #b73337);
+    font-size: var(--awa-fs-xl, 20px);
+}
+
+
+// ============================================================================
+// 7. ADD TO CART BOX (PDP)
+// ============================================================================
+
+.box-tocart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-space-4, 16px);
+    margin-block: var(--awa-space-6, 24px);
+}
+
+.box-tocart .fieldset {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--awa-gap-sm, 8px);
+}
+
+#product_addtocart_form .qty-wrapper,
+.box-tocart .qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    overflow: hidden;
+}
+
+#product_addtocart_form input.qty,
+.box-tocart .qty input {
+    inline-size: 4rem;
+    block-size: var(--awa-touch-target, 44px);
+    border: 0;
+    text-align: center;
+    font-size: var(--awa-fs-base, 16px);
+    color: var(--awa-text-primary, #333333);
+}
+
+#qty.minus,
+#qty.plus {
+    inline-size: var(--awa-touch-target, 44px);
+    block-size: var(--awa-touch-target, 44px);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: var(--awa-text-muted, #666666);
+    display: inline-grid;
+    place-items: center;
+}
+
+#qty.minus:hover,
+#qty.plus:hover {
+    background: var(--awa-color-bg-soft, #f7f7f7);
+    color: var(--awa-color-primary, #b73337);
+}
+
+#product-addtocart-button,
+.box-tocart .action.tocart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--awa-gap-sm, 8px);
+    min-block-size: var(--awa-touch-target, 44px);
+    padding-inline: var(--awa-space-6, 24px);
+    background: var(--awa-color-primary, #b73337);
+    color: var(--awa-white, #ffffff);
+    border: 0;
+    border-radius: var(--awa-radius-md, 8px);
+    font-size: var(--awa-fs-base, 16px);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+#product-addtocart-button:hover,
+.box-tocart .action.tocart:hover {
+    background: var(--awa-color-primary-dark, #8e2629);
+}
+
+
+// ============================================================================
+// 8. FORM FIELDS
+// ============================================================================
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-gap-xs, 4px);
+    margin-block-end: var(--awa-space-4, 16px);
+}
+
+.field .label {
+    display: block;
+    font-weight: 500;
+    color: var(--awa-text-primary, #333333);
+    font-size: var(--awa-fs-base, 16px);
+}
+
+.field .control input[type="text"],
+.field .control input[type="email"],
+.field .control input[type="tel"],
+.field .control input[type="password"],
+.field .control select,
+.field .control textarea {
+    inline-size: 100%;
+    block-size: var(--awa-touch-target, 44px);
+    padding-inline: var(--awa-space-3, 12px);
+    padding-block: var(--awa-space-2, 8px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-white, #ffffff);
+    font-size: var(--awa-fs-base, 16px);
+    color: var(--awa-text-primary, #333333);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.field .control textarea {
+    block-size: auto;
+    min-block-size: 6rem;
+    resize: vertical;
+}
+
+.field .control input:focus-visible,
+.field .control select:focus-visible,
+.field .control textarea:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: -2px;
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+.field.required > .label::after {
+    content: " *";
+    color: var(--awa-color-error, #DC2626);
+}
+
+.field._error .control input,
+.field._error .control select,
+.field._error .control textarea {
+    border-color: var(--awa-color-error, #DC2626);
+}
+
+.field .messages,
+.field .mage-error {
+    color: var(--awa-color-error, #DC2626);
+    font-size: var(--awa-fs-sm, 14px);
+    min-block-size: 1.25rem;
+}
+
+.field .field-error {
+    color: var(--awa-color-error, #DC2626);
+    font-size: var(--awa-fs-sm, 14px);
+    display: flex;
+    align-items: center;
+    gap: var(--awa-gap-xs, 4px);
+}
+
+
+// ============================================================================
+// 9. MESSAGES / ALERTS
+// ============================================================================
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--awa-gap-sm, 8px);
+    padding: var(--awa-space-3, 12px) var(--awa-space-4, 16px);
+    border-radius: var(--awa-radius-md, 8px);
+    border: 1px solid transparent;
+    font-size: var(--awa-fs-base, 16px);
+    line-height: 1.5;
+    margin-block: var(--awa-space-3, 12px);
+}
+
+.message.success {
+    background: #ECFDF5;
+    border-color: var(--awa-color-success, #059669);
+    color: #065F46;
+}
+
+.message.error {
+    background: #FEF2F2;
+    border-color: var(--awa-color-error, #DC2626);
+    color: #991B1B;
+}
+
+.message.warning {
+    background: #FFFBEB;
+    border-color: var(--awa-color-warning, #D97706);
+    color: #92400E;
+}
+
+.message.notice,
+.message.info {
+    background: #EFF6FF;
+    border-color: var(--awa-color-cta, #0369A1);
+    color: #1E40AF;
+}
+
+
+// ============================================================================
+// 10. LOADER / SPINNER (padrão Magento 2)
+// ============================================================================
+
+.loader,
+.spinner,
+.ajax-loader,
+.processing {
+    inline-size: 2rem;
+    block-size: 2rem;
+    border: 2px solid var(--awa-border, #e5e5e5);
+    border-top-color: var(--awa-color-primary, #b73337);
+    border-radius: 50%;
+    animation: awa-spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes awa-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loader,
+    .spinner,
+    .ajax-loader,
+    .processing {
+        animation-duration: 1.6s;
+    }
+}
+
+
+// ============================================================================
+// 11. PAGINATION
+// ============================================================================
+
+.pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--awa-gap-xs, 4px);
+    margin-block: var(--awa-space-6, 24px);
+    list-style: none;
+    padding: 0;
+}
+
+.pages .item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--awa-touch-target, 44px);
+    min-block-size: var(--awa-touch-target, 44px);
+    padding: 0 var(--awa-space-3, 12px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-sm, 4px);
+    color: var(--awa-text-primary, #333333);
+    text-decoration: none;
+}
+
+.pages .item:hover {
+    border-color: var(--awa-color-primary, #b73337);
+    color: var(--awa-color-primary, #b73337);
+}
+
+.pages .item.current {
+    background: var(--awa-color-primary, #b73337);
+    border-color: var(--awa-color-primary, #b73337);
+    color: var(--awa-white, #ffffff);
+    font-weight: 700;
+}
+
+.pages .action.next,
+.pages .action.previous {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--awa-gap-xs, 4px);
+}
+
+
+// ============================================================================
+// 12. TABS (Magento 2 product detail)
+// ============================================================================
+
+.product.data.items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border-block-start: 1px solid var(--awa-border, #e5e5e5);
+    margin-block-start: var(--awa-space-7, 32px);
+    padding-block-start: var(--awa-space-4, 16px);
+}
+
+.product.data.items > .item.title {
+    margin: 0;
+}
+
+.product.data.items > .item.title > .switch {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--awa-touch-target, 44px);
+    padding-inline: var(--awa-space-4, 16px);
+    color: var(--awa-text-muted, #666666);
+    border-block-end: 2px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.product.data.items > .item.title.active > .switch,
+.product.data.items > .item.title > .switch:hover {
+    color: var(--awa-color-primary, #b73337);
+    border-block-end-color: var(--awa-color-primary, #b73337);
+}
+
+.product.data.items > .item.content {
+    inline-size: 100%;
+    padding-block: var(--awa-space-4, 16px);
+    line-height: 1.7;
+}
+
+
+// ============================================================================
+// 13. CART TABLE
+// ============================================================================
+
+.cart.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.cart.table-wrapper .cart.table {
+    inline-size: 100%;
+    border-collapse: collapse;
+}
+
+.cart.table-wrapper .cart.table thead th {
+    padding: var(--awa-space-3, 12px);
+    background: var(--awa-color-bg-soft, #f7f7f7);
+    text-align: start;
+    font-weight: 600;
+    color: var(--awa-text-primary, #333333);
+    border-block-end: 1px solid var(--awa-border, #e5e5e5);
+}
+
+.cart.table-wrapper .cart.table tbody td {
+    padding: var(--awa-space-4, 16px);
+    border-block-end: 1px solid var(--awa-border, #e5e5e5);
+    vertical-align: top;
+}
+
+.cart.table-wrapper .cart.table .item-image img {
+    inline-size: 80px;
+    block-size: 80px;
+    object-fit: contain;
+}
+
+.cart.table-wrapper .qty input {
+    inline-size: 4rem;
+    block-size: var(--awa-touch-target, 44px);
+    text-align: center;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-sm, 4px);
+}
+
+
+// ============================================================================
+// 14. ACCORDION (description, specs on PDP)
+// ============================================================================
+
+details.description {
+    border-block-start: 1px solid var(--awa-border, #e5e5e5);
+    padding-block: var(--awa-space-3, 12px);
+}
+
+details.description > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--awa-gap-sm, 8px);
+    min-block-size: var(--awa-touch-target, 44px);
+    padding-block: var(--awa-space-2, 8px);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--awa-text-primary, #333333);
+    list-style: none;
+}
+
+details.description > summary::-webkit-details-marker {
+    display: none;
+}
+
+details.description > summary::after {
+    content: "+";
+    font-size: var(--awa-fs-xl, 20px);
+    color: var(--awa-text-muted, #666666);
+    transition: transform 200ms ease;
+}
+
+details.description[open] > summary::after {
+    content: "−";
+    transform: rotate(180deg);
+}
+
+details.description > .content {
+    padding-block: var(--awa-space-3, 12px);
+    line-height: 1.7;
+    color: var(--awa-text-primary, #333333);
+}
+
+
+// ============================================================================
+// 15. CHIPS / TAGS (color swatches, etc)
+// ============================================================================
+
+.swatch-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--awa-touch-target, 44px);
+    min-block-size: var(--awa-touch-target, 44px);
+    padding: var(--awa-space-1, 4px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-sm, 4px);
+    background: var(--awa-white, #ffffff);
+    cursor: pointer;
+    transition: border-color 150ms ease;
+}
+
+.swatch-option.selected {
+    border-color: var(--awa-color-primary, #b73337);
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: -4px;
+}
+
+.swatch-option:hover:not(.selected) {
+    border-color: var(--awa-text-muted, #666666);
+}
+
+.swatch-option-tooltip,
+.swatch-option.image {
+    inline-size: var(--awa-touch-target, 44px);
+    block-size: var(--awa-touch-target, 44px);
+}
+
+.swatch-option-tooltip-label {
+    font-size: var(--awa-fs-xs, 11px);
+}

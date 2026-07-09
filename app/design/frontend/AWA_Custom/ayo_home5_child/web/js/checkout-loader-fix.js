@@ -1,20 +1,15 @@
 /**
- * Checkout Loader Fix + A11y Enhancements — AWA Motos
+ * Checkout A11y Enhancements — AWA Motos
  *
- * Problem 1: #checkout-loader stays permanently visible on OPC page.
- * Problem 2: select[name="billing_address_id"] has no accessible name
- *            (vendor template uses <label> without for/id association).
+ * Loader removal is handled by Magento_Checkout/js/checkout-loader (theme override).
+ *
+ * select[name="billing_address_id"] has no accessible name
+ * (vendor template uses <label> without for/id association).
  *
  * Only runs on OPC page (body.rokanthemes-onepagecheckout).
  */
-define(['rjsResolver'], function (resolver) {
+define([], function () {
     'use strict';
-
-    function removeLoader(loader) {
-        if (loader && loader.parentNode) {
-            loader.parentNode.removeChild(loader);
-        }
-    }
 
     /**
      * Add aria-label to billing address select once KO renders it.
@@ -36,21 +31,19 @@ define(['rjsResolver'], function (resolver) {
                 obs.disconnect();
             }
         });
-        observer.observe(document.body, { childList: true, subtree: true });
-        // Safety: disconnect after 30s to avoid memory leak
-        setTimeout(function () { observer.disconnect(); }, 30000);
+        var observeRoot = document.getElementById('checkout') ||
+            document.querySelector('.checkout-payment-method, .opc-wrapper') ||
+            document.body;
+
+        observer.observe(observeRoot, { childList: true, subtree: true });
+        window.setTimeout(function () {
+            observer.disconnect();
+        }, 15000);
     }
 
     return function () {
         if (!document.body.classList.contains('rokanthemes-onepagecheckout')) {
             return;
-        }
-
-        let loader = document.getElementById('checkout-loader');
-
-        if (loader) {
-            resolver(removeLoader.bind(null, loader));
-            setTimeout(function () { removeLoader(loader); }, 2000); // Reduzido 500021922000ms: CSS pe:none garante interação durante init
         }
 
         fixBillingAddressSelectA11y();

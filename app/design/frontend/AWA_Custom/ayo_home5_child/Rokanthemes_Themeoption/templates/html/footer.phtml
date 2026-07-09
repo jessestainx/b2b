@@ -50,28 +50,28 @@ $directUrl = static fn(string $path): string => $block->getUrl('', ['_direct' =>
         <div class="container">
             <div class="awa-footer-trust-grid">
                 <div class="awa-footer-trust-item">
-                    <span class="awa-footer-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><use href="#awa-icon-truck"/></svg></span>
+                    <span class="awa-footer-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><use href="#awa-icon-truck"/></svg></span>
                     <div class="awa-footer-trust-copy">
                         <strong><?= $escaper->escapeHtml(__('Envio para todo o Brasil')) ?></strong>
                         <span><?= $escaper->escapeHtml(__('Entrega para lojistas e consumidores finais')) ?></span>
                     </div>
                 </div>
                 <div class="awa-footer-trust-item">
-                    <span class="awa-footer-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><use href="#awa-icon-shield"/></svg></span>
+                    <span class="awa-footer-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><use href="#awa-icon-shield"/></svg></span>
                     <div class="awa-footer-trust-copy">
                         <strong><?= $escaper->escapeHtml(__('Conexão criptografada (SSL)')) ?></strong>
                         <span><?= $escaper->escapeHtml(__('Certificado digital no checkout e no cadastro')) ?></span>
                     </div>
                 </div>
                 <div class="awa-footer-trust-item">
-                    <span class="awa-footer-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><use href="#awa-icon-gear"/></svg></span>
+                    <span class="awa-footer-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><use href="#awa-icon-gear"/></svg></span>
                     <div class="awa-footer-trust-copy">
                         <strong><?= $escaper->escapeHtml(__('Garantia de fábrica')) ?></strong>
                         <span><?= $escaper->escapeHtml(__('Peças originais com nota fiscal')) ?></span>
                     </div>
                 </div>
                 <div class="awa-footer-trust-item">
-                    <span class="awa-footer-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><use href="#awa-icon-b2b"/></svg></span>
+                    <span class="awa-footer-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><use href="#awa-icon-b2b"/></svg></span>
                     <div class="awa-footer-trust-copy">
                         <strong><?= $escaper->escapeHtml(__('Preços de atacado')) ?></strong>
                         <span><?= $escaper->escapeHtml(__('Tabela progressiva para CNPJ cadastrado')) ?></span>
@@ -87,9 +87,9 @@ $directUrl = static fn(string $path): string => $block->getUrl('', ['_direct' =>
     <section class="awa-footer-categories-expand" aria-labelledby="awa-footer-categories-heading">
         <div class="container">
             <div class="awa-footer-categories-expand__inner">
-                <p class="awa-footer-categories-expand__heading" id="awa-footer-categories-heading">
+                <h3 class="awa-footer-categories-expand__heading" id="awa-footer-categories-heading">
                     <?= $escaper->escapeHtml(__('Categorias')) ?>
-                </p>
+                </h3>
                 <button type="button"
                         class="awa-footer-categories-expand__toggle"
                         aria-expanded="false"
@@ -152,7 +152,7 @@ $directUrl = static fn(string $path): string => $block->getUrl('', ['_direct' =>
                     <!-- Pague com -->
                     <div class="col-md-5 col-sm-12 col-xs-12">
                         <section class="awa-footer-pay-sec" aria-label="<?= $escaper->escapeHtmlAttr(__('Pagamentos')) ?>">
-                            <p class="awa-footer-pay-sec__label awa-footer-muted-label"><?= $escaper->escapeHtml(__('Pague com')) ?></p>
+                            <h3 class="awa-footer-pay-sec__label awa-footer-muted-label"><?= $escaper->escapeHtml(__('Pague com')) ?></h3>
                             <ul class="awa-footer-pay-logos" aria-label="<?= $escaper->escapeHtmlAttr(__('Formas de pagamento aceitas')) ?>">
                                 <li class="awa-pay-logo">
                                     <img src="<?= $escaper->escapeUrl($mediaUrl . '/img/visa.png') ?>"
@@ -190,7 +190,7 @@ $directUrl = static fn(string $path): string => $block->getUrl('', ['_direct' =>
                     <?php if ($showSecuritySeals): ?>
                     <div class="col-md-4 col-sm-12 col-xs-12">
                         <section class="awa-footer-sec" aria-label="<?= $escaper->escapeHtmlAttr(__('Certificados e Segurança')) ?>">
-                            <p class="awa-footer-pay-sec__label awa-footer-muted-label"><?= $escaper->escapeHtml(__('Certificados e Segurança')) ?></p>
+                            <h3 class="awa-footer-pay-sec__label awa-footer-muted-label"><?= $escaper->escapeHtml(__('Certificados e Segurança')) ?></h3>
                             <ul class="awa-footer-sec-seals" aria-label="<?= $escaper->escapeHtmlAttr(__('Selos de segurança')) ?>">
                                 <li>
                                 <a class="awa-seal"
@@ -235,8 +235,13 @@ $directUrl = static fn(string $path): string => $block->getUrl('', ['_direct' =>
                 <div class="awa-footer-bottom__copyright">
                     <p class="awa-footer-copyright__legal">
                         <?= $escaper->escapeHtml(
-                            __('Todos os direitos reservados © %1 - AWA Motos. CNPJ 06.093.812/0001-05', date('Y'))
+                            __('Todos os direitos reservados © %1 - AWA Motos.', date('Y'))
                         ) ?>
+                        <span class="awa-footer-cnpj-badge"
+                              aria-label="<?= $escaper->escapeHtmlAttr(__('CNPJ da empresa')) ?>">
+                            <span class="awa-footer-cnpj-badge__icon" aria-hidden="true">📋</span>
+                            <span class="awa-footer-cnpj-badge__text">CNPJ 06.093.812/0001-05</span>
+                        </span>
                     </p>
                     <p class="awa-footer-copyright__disclaimer">
                         <?= $escaper->escapeHtml(__(
@@ -253,7 +258,7 @@ $directUrl = static fn(string $path): string => $block->getUrl('', ['_direct' =>
     <div class="awa-footer-devby">
         <div class="container">
             <div class="awa-footer-devby__inner">
-                <span class="awa-footer-devby__label awa-footer-muted-label"><?= $escaper->escapeHtml(__('Desenvolvido por')) ?></span>
+                <h3 class="awa-footer-devby__label awa-footer-muted-label"><?= $escaper->escapeHtml(__('Desenvolvido por')) ?></h3>
                 <a href="https://bluuconsulting.com.br"
                    target="_blank"
                    rel="nofollow noopener noreferrer"
@@ -273,11 +278,9 @@ $directUrl = static fn(string $path): string => $block->getUrl('', ['_direct' =>
 <div class="fixed-right" role="complementary" aria-label="<?= $escaper->escapeHtmlAttr(__('Links Rápidos')) ?>">
     <?= $block->getChildHtml('fixed_right') ?>
 </div>
-<div class="shadow_bkg" role="presentation"></div>
-<div class="shadow_bkg_show" role="presentation"></div>
+<div class="shadow_bkg" role="none"></div>
+<div class="shadow_bkg_show" role="none"></div>
 <?php /* P0-01: Legacy back-to-top removido — o canônico é <button#awa-back-to-top> via layout XML (awa.back.to.top block) */ ?>
-
-
 <?php
 $awaFooterInteractionsConfig = [
     'mobileBreakpoint' => 768,
@@ -293,5 +296,5 @@ $awaFooterInteractionsConfigJson = json_encode(
 );
 ?>
 <script type="application/json" id="awa-footer-interactions-config-json"><?= /* @noEscape */ $awaFooterInteractionsConfigJson ?></script>
-<script defer src="<?= $escaper->escapeUrl($block->getViewFileUrl('js/awa-footer-boot.js')) ?>?v=20260622-footer-structural-v2"></script>
+<script defer src="<?= $escaper->escapeUrl($block->getViewFileUrl('js/awa-footer-boot.min.js')) ?>?v=20260706-categories-desktop-sync"></script>
 <?= $block->getChildHtml('organization_schema') ?>

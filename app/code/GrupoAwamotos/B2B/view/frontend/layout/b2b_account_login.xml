@@ -7,15 +7,27 @@
         <title>Acesse sua conta</title>
     </head>
     <body>
+        <referenceBlock name="messages" remove="true"/>
+        <referenceBlock name="customer.section.config"
+                        template="Magento_Theme::html/awa-customer-sections-defer.phtml">
+            <arguments>
+                <argument name="boot_immediate" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
         <referenceContainer name="main">
-            <block class="Magento\Framework\View\Element\Messages"
-                   name="b2b.login.messages"
-                   template="Magento_Theme::messages.phtml"
-                   before="-"/>
             <block class="GrupoAwamotos\B2B\Block\Account\Login"
                    name="b2b.account.login"
                    template="GrupoAwamotos_B2B::account/login.phtml"
-                   cacheable="false"/>
+                   cacheable="false">
+                <block class="GrupoAwamotos\B2B\Block\Account\AuthLogo"
+                       name="auth.logo"
+                       as="auth_logo"
+                       template="GrupoAwamotos_B2B::html/auth-logo.phtml"/>
+                <block class="Magento\Framework\View\Element\Messages"
+                       name="b2b_login_messages"
+                       as="b2b_login_messages"
+                       template="GrupoAwamotos_B2B::account/login-messages.phtml"/>
+            </block>
         </referenceContainer>
     </body>
 </page>

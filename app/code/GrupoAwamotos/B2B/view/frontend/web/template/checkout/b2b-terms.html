@@ -9,7 +9,11 @@
          data-awa-component="b2b-terms"
          aria-labelledby="b2b-terms-title">
     <div class="b2b-terms-heading">
-        <h3 id="b2b-terms-title" class="b2b-terms-title" data-bind="text: getSectionTitle()"></h3>
+        <div class="b2b-terms-heading__row">
+            <h2 id="b2b-terms-title" class="b2b-terms-title" data-bind="text: getSectionTitle()"></h2>
+            <span class="b2b-terms-badge b2b-terms-badge--required"
+                  data-bind="text: getRequiredLabel()"></span>
+        </div>
         <p class="b2b-terms-description"
            data-bind="text: getSectionDescription(), attr: { id: getFieldDescriptionId() }"></p>
     </div>
@@ -44,11 +48,15 @@
         </div>
 
         <div class="b2b-terms-status" data-bind="visible: isAccepted()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
             <span data-bind="text: getAcceptedLabel()"></span>
         </div>
+
+        <p class="b2b-terms-inline-error message message-error error"
+           role="alert"
+           data-bind="visible: inlineError, text: inlineError"></p>
     </div>
 
     <!-- ko if: isModalOpen() -->
@@ -59,7 +67,7 @@
              aria-labelledby="b2b-terms-modal-title"
              data-bind="click: function() {}, clickBubble: false">
             <div class="b2b-terms-modal-header">
-                <h3 id="b2b-terms-modal-title" data-bind="text: getModalTitle()"></h3>
+                <h2 id="b2b-terms-modal-title" class="b2b-terms-modal-title" data-bind="text: getModalTitle()"></h2>
                 <button type="button"
                         class="b2b-terms-modal-close"
                         data-bind="click: closeTermsModal, attr: { title: getCloseLabel(), 'aria-label': getCloseLabel() }">

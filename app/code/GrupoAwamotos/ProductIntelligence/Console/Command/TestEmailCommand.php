@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Comando CLI para testar envio de emails
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Console\Command;
 
@@ -33,7 +33,7 @@ class TestEmailCommand extends Command
     protected function configure()
     {
         $this->setName('rexis:test-email')
-            ->setDescription('Enviar email de teste de alerta REXIS ML')
+            ->setDescription('Enviar email de teste de alerta Product Intelligence')
             ->addOption('type', 't', InputOption::VALUE_OPTIONAL, 'Tipo: churn ou crosssell', 'churn')
             ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Quantidade de oportunidades', '5');
 
@@ -46,7 +46,7 @@ class TestEmailCommand extends Command
         $limit = (int)$input->getOption('limit');
 
         $output->writeln('');
-        $output->writeln('<fg=cyan;options=bold>REXIS ML - Teste de Email (' . ucfirst($type) . ')</>');
+        $output->writeln('<fg=cyan;options=bold>Product Intelligence - Teste de Email (' . ucfirst($type) . ')</>');
         $output->writeln('');
 
         $connection = $this->resource->getConnection();

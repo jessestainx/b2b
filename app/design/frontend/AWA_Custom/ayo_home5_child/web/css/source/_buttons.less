@@ -1,221 +1,329 @@
-// =============================================
-// AWA MOTOS — BOTÕES (MODERN DESIGN SYSTEM)
-// Padronizados com spring, estados, variantes
-// =============================================
+// ============================================================================
+// AWA MOTOS — BUTTON SYSTEM (CANÔNICO)
+// ----------------------------------------------------------------------------
+// Sistema de botões unificado. Substitui 10+ variantes documentadas no audit
+// 2026-05-06 (botões com alturas 10–56px → reduzido para 3 tamanhos: 32/40/54).
+//
+// CONVENÇÃO:
+//   .btn                  → base
+//   .btn--primary         → CTA principal (cor da marca)
+//   .btn--secondary       → ação secundária (outline)
+//   .btn--ghost           → ação terciária (sem fundo)
+//   .btn--danger          → destrutivo (vermelho)
+//   .btn--success         → positivo (verde)
+//   .btn--sm | .btn--lg   → tamanhos
+//   .btn--full            → largura 100%
+//   .btn--icon            → icone-only (quadrado)
+// ============================================================================
 
-// Mixin base
-.awa-btn-base() {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--awa-space-sm);  // 8px
-  min-height: @awa-control-height;
-  padding: 0 var(--awa-space-lg);
-  font-size: var(--awa-font-size-14); // 14px fixo
-  font-weight: var(--awa-weight-semi);
-  border-radius: var(--awa-radius-sm); // 8px
-  cursor: pointer;
-  text-decoration: none;
-  white-space: nowrap;
-  border: var(--awa-border-width) solid transparent;
-  line-height: 1;
-  position: relative;
-  overflow: hidden;
-  transition: background-color var(--awa-duration) var(--awa-ease),
-              border-color var(--awa-duration) var(--awa-ease),
-              color var(--awa-duration) var(--awa-ease),
-              box-shadow var(--awa-duration) var(--awa-ease),
-              transform var(--awa-duration-fast) var(--awa-ease);
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
 
-  &:disabled,
-  &[disabled] {
-    opacity: 0.45;
+// ============================================================================
+// 1. BASE
+// ============================================================================
+
+.btn {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--awa-gap-sm, 8px);
+    min-block-size: 40px;
+    padding-inline: var(--awa-space-5, 20px);
+    border: 1px solid transparent;
+    border-radius: var(--awa-radius-md, 8px);
+    font-family: inherit;
+    font-size: var(--awa-fs-base, 16px);
+    font-weight: var(--awa-weight-bold, 700);
+    line-height: 1.2;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"],
+.btn.disabled {
     cursor: not-allowed;
+    opacity: 0.5;
     pointer-events: none;
-    transform: none;
-  }
+}
 
-  // Active press
-  &:active:not(:disabled) {
-    transform: scale(0.97);
-  }
+.btn:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: 2px;
+}
 
-  // Focus ring
-  &:focus-visible {
-    outline: var(--awa-border-width-strong) solid var(--awa-primary);
-    outline-offset: @awa-focus-ring-offset;
-    box-shadow: @awa-focus-ring;
-  }
 
-  // Normaliza iconografia dentro de botões para leitura consistente.
-  svg,
-  i,
-  [class*="icon"] {
-    width: var(--awa-icon-size-sm);
-    height: var(--awa-icon-size-sm);
+// ============================================================================
+// 2. VARIANTS — cor
+// ============================================================================
+
+// --- Primary (CTA principal, cor da marca) ---
+.btn--primary {
+    background: var(--awa-color-primary, #b73337);
+    color: var(--awa-white, #ffffff);
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+.btn--primary:hover:not(:disabled) {
+    background: var(--awa-color-primary-dark, #8e2629);
+    border-color: var(--awa-color-primary-dark, #8e2629);
+}
+
+.btn--primary:active:not(:disabled) {
+    background: var(--awa-color-primary-dark, #8e2629);
+    transform: translateY(1px);
+}
+
+// --- Secondary (outline) ---
+.btn--secondary {
+    background: transparent;
+    color: var(--awa-color-primary, #b73337);
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+.btn--secondary:hover:not(:disabled) {
+    background: var(--awa-color-primary, #b73337);
+    color: var(--awa-white, #ffffff);
+}
+
+// --- Ghost (sem fundo, transparente) ---
+.btn--ghost {
+    background: transparent;
+    color: var(--awa-text-primary, #333333);
+    border-color: transparent;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.btn--ghost:hover:not(:disabled) {
+    background: var(--surface-hover, color-mix(in srgb, currentColor 8%, transparent));
+    color: var(--awa-color-primary, #b73337);
+}
+
+// --- Danger (destrutivo) ---
+.btn--danger {
+    background: var(--awa-color-error, #DC2626);
+    color: var(--awa-white, #ffffff);
+    border-color: var(--awa-color-error, #DC2626);
+}
+
+.btn--danger:hover:not(:disabled) {
+    background: #B91C1C;
+    border-color: #B91C1C;
+}
+
+// --- Success (positivo, confirmar) ---
+.btn--success {
+    background: var(--awa-color-success, #059669);
+    color: var(--awa-white, #ffffff);
+    border-color: var(--awa-color-success, #059669);
+}
+
+.btn--success:hover:not(:disabled) {
+    background: #047857;
+    border-color: #047857;
+}
+
+// --- Link (sem chrome, parece link) ---
+.btn--link {
+    background: transparent;
+    color: var(--awa-color-primary, #b73337);
+    border-color: transparent;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: var(--awa-weight-medium, 500);
+    padding-inline: var(--awa-space-2, 8px);
+    min-block-size: auto;
+}
+
+.btn--link:hover:not(:disabled) {
+    color: var(--awa-color-primary-dark, #8e2629);
+    text-decoration: underline;
+}
+
+
+// ============================================================================
+// 3. SIZES
+// ============================================================================
+
+.btn--sm {
+    min-block-size: 32px;
+    padding-inline: var(--awa-space-4, 16px);
+    font-size: var(--awa-fs-sm, 14px);
+}
+
+.btn--lg {
+    min-block-size: 54px;
+    padding-inline: var(--awa-space-7, 32px);
+    font-size: var(--awa-fs-lg, 18px);
+}
+
+
+// ============================================================================
+// 4. SHAPES
+// ============================================================================
+
+.btn--full {
+    inline-size: 100%;
+}
+
+.btn--block {
+    display: flex;
+    inline-size: 100%;
+}
+
+.btn--icon {
+    padding-inline: 0;
+    inline-size: 40px;
+}
+
+.btn--icon.btn--sm {
+    inline-size: 32px;
+}
+
+.btn--icon.btn--lg {
+    inline-size: 54px;
+}
+
+.btn--pill {
+    border-radius: 9999px;
+}
+
+
+// ============================================================================
+// 5. ICON BUTTON
+// ============================================================================
+
+.btn > .btn__icon {
     flex-shrink: 0;
-  }
+    display: inline-grid;
+    place-items: center;
+    aspect-ratio: 1;
+    inline-size: 1.25em;
+    block-size: 1.25em;
 }
 
-// ---- Primário (vermelho sólido) ----
+.btn--icon-only {
+    padding-inline: 0;
+}
+
+.btn--icon-only > .btn__label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+
+// ============================================================================
+// 6. LOADING STATE
+// ============================================================================
+
+.btn--loading {
+    color: transparent !important;
+    pointer-events: none;
+    position: relative;
+}
+
+.btn--loading::after {
+    content: "";
+    position: absolute;
+    inline-size: 1em;
+    block-size: 1em;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    color: var(--awa-white, #ffffff);
+    animation: awa-btn-spin 0.8s linear infinite;
+}
+
+.btn--secondary.btn--loading::after,
+.btn--ghost.btn--loading::after,
+.btn--link.btn--loading::after {
+    color: var(--awa-color-primary, #b73337);
+}
+
+@keyframes awa-btn-spin {
+    to { transform: rotate(360deg); }
+}
+
+
+// ============================================================================
+// 7. MAGENTO 2 SPECIFIC OVERRIDES
+// ============================================================================
+
+// Alinha com Magento 2 .action class
 .action.primary,
-.awa-btn-primary,
-button.action.primary {
-  .awa-btn-base();
-  background: var(--awa-primary);
-  color: var(--awa-text-inverse);
-  border-color: var(--awa-primary);
-
-  &:hover:not(:disabled) {
-    background: var(--awa-primary-hover);
-    border-color: var(--awa-primary-hover);
-    color: var(--awa-text-inverse);
-    box-shadow: 0 4px 12px fade(@awa-color-primary, 30%);
-    transform: translateY(var(--awa-hover-lift));
-  }
-}
-
-// ---- Secundário (outline) ----
 .action.secondary,
-.awa-btn-secondary {
-  .awa-btn-base();
-  background: transparent;
-  color: var(--awa-primary);
-  border-color: var(--awa-primary);
+button.action {
+    /* Aplicar estilos base de .btn quando necessário */
+    /* Mantém compatibilidade com templates Magento 2 */
 
-  &:hover:not(:disabled) {
-    background: var(--awa-primary);
-    color: var(--awa-text-inverse);
-    box-shadow: 0 4px 12px fade(@awa-color-primary, 20%);
-    transform: translateY(var(--awa-hover-lift));
-  }
+    &:extend(.btn);
 }
 
-// ---- Ghost (text only) ----
-.awa-btn-ghost {
-  .awa-btn-base();
-  background: transparent;
-  color: var(--awa-primary);
-  border-color: transparent;
-  padding: 0 var(--awa-space-md);
-
-  &:hover:not(:disabled) {
-    background: var(--awa-primary-subtle);
-    color: var(--awa-primary-hover);
-    transform: translateY(var(--awa-hover-lift));
-  }
+.action.primary {
+    &:extend(.btn--primary);
 }
 
-// ---- Dark (footer, dark sections) ----
-.awa-btn-dark {
-  .awa-btn-base();
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--awa-text-inverse);
-  border-color: rgba(255, 255, 255, 0.2);
-
-  &:hover:not(:disabled) {
-    background: var(--awa-bg);
-    color: var(--awa-text);
-    border-color: var(--awa-text-inverse);
-    transform: translateY(var(--awa-hover-lift));
-  }
+.action.secondary {
+    &:extend(.btn--secondary);
 }
 
-// ---- Sizes ----
-.awa-btn-sm {
-  min-height: @awa-control-height-sm;
-  padding: 0 var(--awa-space-md);
-  font-size: var(--awa-font-size-xs);
-  border-radius: var(--awa-radius-sm);
+// Touch target guarantee
+.action,
+button.action {
+    min-block-size: 44px;
 }
 
-.awa-btn-lg {
-  min-height: @awa-control-height-lg;
-  padding: 0 var(--awa-space-xl);
-  font-size: var(--awa-font-size-md);
-  border-radius: var(--awa-radius-md);
+
+// ============================================================================
+// 8. RESPONSIVE
+// ============================================================================
+
+@media (max-width: 480px) {
+    .btn--full-mobile {
+        inline-size: 100%;
+    }
 }
 
-// ---- Full width ----
-.awa-btn-full,
-.action.primary.full-width {
-  width: 100%;
-}
 
-// ---- Icon button (square) ----
-.awa-btn-icon {
-  .awa-btn-base();
-  width: @awa-control-height;
-  min-height: @awa-control-height;
-  padding: 0;
-  border-radius: var(--awa-radius-md);
-  background: var(--awa-bg-surface);
-  color: var(--awa-text-muted);
-  border-color: var(--awa-border);
-
-  &:hover:not(:disabled) {
-    background: var(--awa-primary-subtle);
-    color: var(--awa-primary);
-    border-color: var(--awa-primary);
-  }
-
-  &.awa-btn-icon-sm {
-    width: @awa-control-height-sm;  // 36px
-    min-height: @awa-control-height-sm;
-  }
-}
-
-// ---- Add to cart button (Magento context) ----
-.action.tocart,
-button.action.tocart {
-  .awa-btn-base();
-  background: var(--awa-primary);
-  color: var(--awa-text-inverse);
-  border-color: var(--awa-primary);
-  width: 100%;
-
-  &:hover:not(:disabled) {
-    background: var(--awa-primary-hover);
-    border-color: var(--awa-primary-hover);
-    box-shadow: 0 4px 12px fade(@awa-color-primary, 30%);
-    transform: translateY(var(--awa-hover-lift));
-  }
-}
-
-// ---- WhatsApp button ----
-.awa-btn-whatsapp {
-  .awa-btn-base();
-  background: var(--awa-whatsapp);
-  color: var(--awa-text-inverse);
-  border-color: var(--awa-whatsapp);
-
-  &:hover:not(:disabled) {
-    background: var(--awa-whatsapp-dark, #128C7E);
-    border-color: var(--awa-whatsapp-dark, #128C7E);
-    box-shadow: 0 4px 12px fade(@awa-color-whatsapp, 30%);
-    transform: translateY(var(--awa-hover-lift));
-  }
-}
-
-// ---- Button group ----
-.awa-btn-group {
-  display: flex;
-  gap: var(--awa-space-sm);
-  flex-wrap: wrap;
-}
+// ============================================================================
+// 9. REDUCED MOTION
+// ============================================================================
 
 @media (prefers-reduced-motion: reduce) {
-  .action.primary,
-  .awa-btn-primary,
-  .action.secondary,
-  .awa-btn-secondary,
-  .awa-btn-ghost,
-  .awa-btn-dark,
-  .action.tocart,
-  .awa-btn-whatsapp {
-    transition: none;
-    transform: none;
-  }
+    .btn {
+        transition: none;
+    }
+
+    .btn:active:not(:disabled) {
+        transform: none;
+    }
+
+    .btn--loading::after {
+        animation-duration: 1.6s;
+    }
+}
+
+
+// ============================================================================
+// 10. PRINT
+// ============================================================================
+
+@media print {
+    .btn {
+        border: 1px solid #000000 !important;
+        background: transparent !important;
+        color: #000000 !important;
+    }
 }

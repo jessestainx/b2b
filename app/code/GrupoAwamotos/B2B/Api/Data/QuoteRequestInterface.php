@@ -10,32 +10,32 @@ namespace GrupoAwamotos\B2B\Api\Data;
 
 interface QuoteRequestInterface
 {
-    const REQUEST_ID = 'request_id';
-    const CUSTOMER_ID = 'customer_id';
-    const CUSTOMER_EMAIL = 'customer_email';
-    const CUSTOMER_NAME = 'customer_name';
-    const COMPANY_NAME = 'company_name';
-    const CNPJ = 'cnpj';
-    const PHONE = 'phone';
-    const STATUS = 'status';
-    const ITEMS_JSON = 'items_json';
-    const MESSAGE = 'message';
-    const ADMIN_NOTES = 'admin_notes';
-    const QUOTED_TOTAL = 'quoted_total';
-    const QUOTE_ID = 'quote_id';
-    const ORDER_ID = 'order_id';
-    const EXPIRES_AT = 'expires_at';
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = 'updated_at';
+    public const REQUEST_ID = 'request_id';
+    public const CUSTOMER_ID = 'customer_id';
+    public const CUSTOMER_EMAIL = 'customer_email';
+    public const CUSTOMER_NAME = 'customer_name';
+    public const COMPANY_NAME = 'company_name';
+    public const CNPJ = 'cnpj';
+    public const PHONE = 'phone';
+    public const STATUS = 'status';
+    public const ITEMS_JSON = 'items_json';
+    public const MESSAGE = 'message';
+    public const ADMIN_NOTES = 'admin_notes';
+    public const QUOTED_TOTAL = 'quoted_total';
+    public const QUOTE_ID = 'quote_id';
+    public const ORDER_ID = 'order_id';
+    public const EXPIRES_AT = 'expires_at';
+    public const CREATED_AT = 'created_at';
+    public const UPDATED_AT = 'updated_at';
 
     // Status constants
-    const STATUS_PENDING = 'pending';
-    const STATUS_PROCESSING = 'processing';
-    const STATUS_QUOTED = 'quoted';
-    const STATUS_ACCEPTED = 'accepted';
-    const STATUS_REJECTED = 'rejected';
-    const STATUS_EXPIRED = 'expired';
-    const STATUS_CONVERTED = 'converted';
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_QUOTED = 'quoted';
+    public const STATUS_ACCEPTED = 'accepted';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_EXPIRED = 'expired';
+    public const STATUS_CONVERTED = 'converted';
 
     /**
      * Get request ID

@@ -1,7 +1,8 @@
 define(['jquery'], function ($) {
     'use strict';
 
-    function readStorage(storageKey) {
+    function readStorage(storageKey)
+    {
         try {
             return window.sessionStorage.getItem(storageKey) === '1';
         } catch (error) {
@@ -9,7 +10,8 @@ define(['jquery'], function ($) {
         }
     }
 
-    function writeStorage(storageKey) {
+    function writeStorage(storageKey)
+    {
         try {
             window.sessionStorage.setItem(storageKey, '1');
         } catch (error) {
@@ -29,11 +31,13 @@ define(['jquery'], function ($) {
             return;
         }
 
-        function closeModal() {
+        function closeModal()
+        {
             $modal.removeClass('active').attr('aria-hidden', 'true');
         }
 
-        function openModal() {
+        function openModal()
+        {
             $modal.addClass('active').attr('aria-hidden', 'false');
         }
 

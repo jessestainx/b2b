@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Console\Command;
 
 use GrupoAwamotos\ERPIntegration\Api\B2bOrderPullCustomerDataInterface;
+use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Api\OrderPullInterface;
 use GrupoAwamotos\ERPIntegration\Cron\SyncOpenCartBridge;
+use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
+use GrupoAwamotos\B2B\Model\Sectra\OrderImportGate;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
@@ -31,13 +34,19 @@ class ValidateSectraOrderImportCommand extends Command
 {
     private const OPTION_CUSTOMER_ID = 'customer-id';
     private const OPTION_CREATE_TEST_ORDER = 'create-test-order';
+    private const OPTION_SKU = 'sku';
     private const OC_OFFSET = 200000;
+    /** SKUs com histórico de importação bem-sucedida no Sectra (oc_product_id_map). */
+    private const PREFERRED_SECTRA_TEST_SKUS = ['2305', '503', '557', '2220'];
 
     public function __construct(
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly B2bOrderPullCustomerDataInterface $orderPullCustomerData,
         private readonly ResourceConnection $resourceConnection,
         private readonly SyncOpenCartBridge $openCartBridge,
+        private readonly B2BClientRegistration $b2bClientRegistration,
+        private readonly ConnectionInterface $erpConnection,
+        private readonly OrderImportGate $orderImportGate,
         private readonly OrderPullInterface $orderPull,
         private readonly CartManagementInterface $cartManagement,
         private readonly CartRepositoryInterface $cartRepository,
@@ -66,6 +75,12 @@ class ValidateSectraOrderImportCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Cria pedido de teste real para validar oc_order e payload pull'
+            )
+            ->addOption(
+                self::OPTION_SKU,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'SKU do produto no pedido de teste (ex.: 2305). Usado com --create-test-order.'
             );
     }
 
@@ -80,12 +95,16 @@ class ValidateSectraOrderImportCommand extends Command
         }
 
         $createTestOrder = (bool) $input->getOption(self::OPTION_CREATE_TEST_ORDER);
-        $ocCustomerId = $customerId + self::OC_OFFSET;
+        $sectraCustomerId = $this->resolveSectraCustomerId($customerId);
+        if ($sectraCustomerId <= 0) {
+            $output->writeln('<error>Não foi possível resolver a CHAVE Sectra do cliente informado.</error>');
+            return Command::FAILURE;
+        }
 
         $output->writeln('<info>Validação Sectra — Importar Pedidos</info>');
-        $output->writeln(sprintf('Cliente Magento #%d (OC/Sectra customer_id %d)', $customerId, $ocCustomerId));
+        $output->writeln(sprintf('Cliente Magento #%d (Sectra customer_id %d)', $customerId, $sectraCustomerId));
 
-        $checks = $this->validateBridgeReadiness($customerId, $ocCustomerId);
+        $checks = $this->validateBridgeReadiness($customerId, $sectraCustomerId);
         foreach ($checks as $label => $ok) {
             $output->writeln(sprintf('  [%s] %s', $ok ? 'OK' : 'FALHA', $label));
         }
@@ -93,7 +112,7 @@ class ValidateSectraOrderImportCommand extends Command
         if (in_array(false, $checks, true)) {
             $output->writeln('<comment>Executando bridge cron para sincronizar tabelas oc_*...</comment>');
             $this->openCartBridge->execute();
-            $checks = $this->validateBridgeReadiness($customerId, $ocCustomerId);
+            $checks = $this->validateBridgeReadiness($customerId, $sectraCustomerId);
             foreach ($checks as $label => $ok) {
                 $output->writeln(sprintf('  [%s] %s (pós-bridge)', $ok ? 'OK' : 'FALHA', $label));
             }
@@ -101,7 +120,8 @@ class ValidateSectraOrderImportCommand extends Command
 
         if ((bool) $input->getOption(self::OPTION_CREATE_TEST_ORDER)) {
             try {
-                $incrementId = $this->createTestOrder($customerId, $output);
+                $sku = trim((string) $input->getOption(self::OPTION_SKU));
+                $incrementId = $this->createTestOrder($customerId, $output, $sku !== '' ? $sku : null);
                 if ($incrementId === null) {
                     return Command::FAILURE;
                 }
@@ -113,12 +133,13 @@ class ValidateSectraOrderImportCommand extends Command
             }
         }
 
-        $ocOrders = $this->fetchOcOrders($ocCustomerId);
+        $ocOrders = $this->fetchOcOrders($sectraCustomerId);
         $output->writeln('');
         $output->writeln(sprintf('Pedidos visíveis em oc_order (Importar Pedidos): %d', count($ocOrders)));
 
         if ($ocOrders === []) {
             $output->writeln('<comment>Nenhum pedido em oc_order. Use --create-test-order para gerar um pedido de validação.</comment>');
+            $this->printSectraImportGuidance($customerId, $sectraCustomerId, $checks, $output);
             return in_array(false, $checks, true) ? Command::FAILURE : Command::SUCCESS;
         }
 
@@ -132,6 +153,9 @@ class ValidateSectraOrderImportCommand extends Command
             ));
         }
 
+        $this->printSectraImportChecklist($ocOrders, $sectraCustomerId, $output);
+        $this->acknowledgeOrdersImportedInErp($ocOrders, $output);
+
         $pullResult = $this->orderPull->getPendingOrders(50);
         $payloadOk = $this->validatePullPayload($pullResult, $customerId, $output);
 
@@ -141,9 +165,281 @@ class ValidateSectraOrderImportCommand extends Command
     }
 
     /**
+     * @param list<array<string, mixed>> $ocOrders
+     */
+    private function printSectraImportChecklist(
+        array $ocOrders,
+        int $sectraCustomerId,
+        OutputInterface $output
+    ): void {
+        $conn = $this->resourceConnection->getConnection();
+        $dbName = (string) $conn->fetchOne('SELECT DATABASE()');
+        $dbHost = (string) gethostname();
+
+        $output->writeln('');
+        $output->writeln('<comment>── Checklist Importar Pedidos (Sectra) ──</comment>');
+        $output->writeln(sprintf('  MySQL bridge: %s / %s (porta 3306)', $dbHost, $dbName));
+        $output->writeln('  O Sectra grava PEDIDOWEB = oc_order.order_id (ex.: 200071, não #000000082)');
+
+        $clientCadastro = $this->b2bClientRegistration->isClientRegistered($sectraCustomerId);
+        $clientNative = $this->b2bClientRegistration->isErpNativeB2bClient($sectraCustomerId);
+        $clientReady = $this->b2bClientRegistration->isClientReadyForSectraOrderImport($sectraCustomerId);
+
+        $output->writeln(sprintf(
+            '  Cliente ERP %d Cadastro de Cliente (7D4C6FBD): %s',
+            $sectraCustomerId,
+            $clientCadastro ? 'OK' : 'ausente'
+        ));
+        $output->writeln(sprintf(
+            '  Cliente ERP %d Nativo ERP (FN_FORNECEDORES): %s',
+            $sectraCustomerId,
+            $clientNative ? 'sim (FN_FORNECEDORES)' : 'não'
+        ));
+        $output->writeln(sprintf(
+            '  Cliente ERP %d Pronto p/ Importar Pedidos: %s',
+            $sectraCustomerId,
+            $clientReady ? '<info>SIM</info>' : '<error>NÃO — falta Cadastro (Exportar Clientes no Sectra)</error>'
+        ));
+
+        foreach ($ocOrders as $row) {
+            $ocOrderId = (int) ($row['order_id'] ?? 0);
+            if ($ocOrderId <= 0) {
+                continue;
+            }
+
+            $items = $conn->fetchAll(
+                'SELECT product_id, model, quantity FROM oc_order_product WHERE order_id = ?',
+                [$ocOrderId]
+            );
+            $productIds = array_map(static fn (array $item): int => (int) ($item['product_id'] ?? 0), $items);
+            $registeredProducts = $this->b2bClientRegistration->getRegisteredProductIds($productIds);
+            $missingProducts = array_values(array_diff($productIds, $registeredProducts));
+
+            $erpRow = null;
+            try {
+                $erpRows = $this->erpConnection->query(
+                    "SELECT TOP 1 CODIGO, STATUS, VLRTOTAL, DTPEDIDO
+                     FROM VE_PEDIDO
+                     WHERE CAST(PEDIDOWEB AS VARCHAR(50)) = ?",
+                    [(string) $ocOrderId]
+                );
+                $erpRow = $erpRows[0] ?? null;
+            } catch (\Throwable) {
+                $erpRow = null;
+            }
+
+            $magentoIncrement = (string) $conn->fetchOne(
+                'SELECT increment_id FROM sales_order WHERE entity_id + ? = ?',
+                [self::OC_OFFSET, $ocOrderId]
+            );
+
+            $output->writeln(sprintf(
+                '  Pedido oc_order %d (#%s): produtos=%s | validador produto=%s | VE_PEDIDO=%s',
+                $ocOrderId,
+                $magentoIncrement !== '' ? $magentoIncrement : '?',
+                implode(',', array_map(static fn (array $i): string => (string) ($i['model'] ?? ''), $items)),
+                $missingProducts === [] ? 'OK' : 'FALTA ids ' . implode(',', $missingProducts),
+                $erpRow
+                    ? sprintf('IMPORTADO cod=%s status=%s', $erpRow['CODIGO'] ?? '?', $erpRow['STATUS'] ?? '?')
+                    : 'AUSENTE — Importar Pedidos ainda não concluiu'
+            ));
+        }
+
+        $output->writeln('  Teste MySQL no Sectra: SELECT order_id, customer_id, total FROM oc_order;');
+    }
+
+    /**
+     * When Sectra imports into VE_PEDIDO but cannot write oc_order_imported (MySQL ack),
+     * reconcile Magento state so the order leaves oc_order.
+     *
+     * @param list<array<string, mixed>> $ocOrders
+     */
+    private function acknowledgeOrdersImportedInErp(array $ocOrders, OutputInterface $output): void
+    {
+        $conn = $this->resourceConnection->getConnection();
+        $now = gmdate('Y-m-d H:i:s');
+        $acked = 0;
+
+        foreach ($ocOrders as $row) {
+            $ocOrderId = (int) ($row['order_id'] ?? 0);
+            if ($ocOrderId <= 0) {
+                continue;
+            }
+
+            $alreadyAcked = (bool) $conn->fetchOne(
+                'SELECT order_id FROM oc_order_imported WHERE order_id = ?',
+                [$ocOrderId]
+            );
+            if ($alreadyAcked) {
+                continue;
+            }
+
+            try {
+                $erpRows = $this->erpConnection->query(
+                    "SELECT TOP 1 CODIGO FROM VE_PEDIDO WHERE CAST(PEDIDOWEB AS VARCHAR(50)) = ?",
+                    [(string) $ocOrderId]
+                );
+            } catch (\Throwable) {
+                continue;
+            }
+
+            if ($erpRows === []) {
+                continue;
+            }
+
+            $conn->insertOnDuplicate(
+                'oc_order_imported',
+                [
+                    'order_id' => $ocOrderId,
+                    'date_imported' => $now,
+                ],
+                ['date_imported']
+            );
+
+            $conn->update(
+                'sales_order',
+                ['sectra_import_status' => 'imported'],
+                ['entity_id = ?' => $ocOrderId - self::OC_OFFSET]
+            );
+
+            $incrementId = (string) $conn->fetchOne(
+                'SELECT increment_id FROM sales_order WHERE entity_id + ? = ?',
+                [self::OC_OFFSET, $ocOrderId]
+            );
+
+            $output->writeln(sprintf(
+                '<info>  Reconciliado: #%s (oc_order %d) já está em VE_PEDIDO — removido da fila oc_order.</info>',
+                $incrementId !== '' ? $incrementId : '?',
+                $ocOrderId
+            ));
+            $acked++;
+        }
+    }
+
+    /**
+     * @param array<string, bool> $checks
+     */
+    private function printSectraImportGuidance(
+        int $customerId,
+        int $sectraCustomerId,
+        array $checks,
+        OutputInterface $output
+    ): void {
+        $conn = $this->resourceConnection->getConnection();
+        $inPreReg = (bool) $conn->fetchOne(
+            'SELECT customer_id FROM oc_pre_registration WHERE customer_id = ?',
+            [$sectraCustomerId]
+        );
+        $registeredInErp = $this->b2bClientRegistration->isClientReadyForSectraOrderImport($sectraCustomerId);
+        $readyCount = (int) $conn->fetchOne(
+            "SELECT COUNT(*) FROM sales_order
+             WHERE customer_id = ?
+               AND sectra_import_status = 'ready_for_import'
+               AND state IN ('new', 'pending_payment', 'processing')",
+            [$customerId]
+        );
+        $cancelledCount = (int) $conn->fetchOne(
+            "SELECT COUNT(*) FROM sales_order
+             WHERE customer_id = ?
+               AND sectra_import_status = 'order_cancelled_before_erp_import'",
+            [$customerId]
+        );
+
+        $output->writeln('');
+        $output->writeln('<comment>── Diagnóstico Importar Pedidos ──</comment>');
+
+        if (!$registeredInErp && ($checks['oc_customer_b2b_confirmed'] ?? false) === false) {
+            $output->writeln('<error>BLOQUEIO: cliente não está em Cadastro de Cliente no GR_INTEGRACAOVALIDADOR (Sectra).</error>');
+            $hasProspect = $this->b2bClientRegistration->isClientProspectRegistered($sectraCustomerId);
+            if (!$hasProspect) {
+                $output->writeln('  <info>Pré-cadastro B2B ausente no validador — obrigatório mesmo para clientes já existentes no ERP.</info>');
+                $output->writeln('  1. Sectra → Importar Clientes Prospect (CHAVE ' . $sectraCustomerId . ')');
+                $output->writeln('  2. Sectra → Exportar Clientes (lê oc_customer — cria Cadastro de Cliente no validador)');
+                $step = 3;
+            } elseif ($inPreReg) {
+                $output->writeln('  1. Sectra → Importar Clientes Prospect');
+                $output->writeln('  2. Sectra → Exportar Clientes (lê oc_customer — cria Cadastro de Cliente no ERP)');
+                $step = 3;
+            } else {
+                $output->writeln('  1. Pré-cadastro já no ERP — vá direto para Exportar Clientes');
+                $prospectChave = $this->b2bClientRegistration->resolveProspectIntegrationChave($sectraCustomerId);
+                if ($prospectChave !== null && $prospectChave !== $sectraCustomerId) {
+                    $output->writeln(sprintf(
+                        '  <comment>Prospect integrado como CHAVE ERP %d (bridge %d) — Exportar Clientes usa oc_customer #%d.</comment>',
+                        $prospectChave,
+                        $sectraCustomerId,
+                        $prospectChave
+                    ));
+                }
+                $output->writeln('  2. Sectra → Exportar Clientes (lê oc_customer — cria Cadastro de Cliente no ERP)');
+                $step = 3;
+            }
+            $ocCode = trim((string) $conn->fetchOne(
+                'SELECT code FROM oc_customer WHERE customer_id = ?',
+                [$this->b2bClientRegistration->resolveSectraExportCustomerId($sectraCustomerId)]
+            ));
+            if ($ocCode !== '') {
+                $output->writeln(sprintf(
+                    '  <comment>ATENÇÃO: oc_customer.code=%s impede Exportar Clientes — bridge vai limpar no próximo cron.</comment>',
+                    $ocCode
+                ));
+            }
+            $exportId = $this->b2bClientRegistration->resolveSectraExportCustomerId($sectraCustomerId);
+            $exportPhone = preg_replace(
+                '/\D/',
+                '',
+                (string) $conn->fetchOne('SELECT telephone FROM oc_customer WHERE customer_id = ?', [$exportId])
+            );
+            if ($exportPhone === '' || preg_match('/^0+$/', $exportPhone) === 1 || strlen($exportPhone) < 10) {
+                $output->writeln(sprintf(
+                    '  <error>BLOQUEIO EXPORT: oc_customer #%d sem telefone válido — corrija no admin Magento (cliente #%d) antes do Exportar Clientes.</error>',
+                    $exportId,
+                    $customerId
+                ));
+            }
+            if (!$this->b2bClientRegistration->hasWriteAccess()) {
+                $cadastroChave = $sectraCustomerId;
+                $prospectChave = $this->b2bClientRegistration->resolveProspectIntegrationChave($sectraCustomerId);
+                if ($prospectChave !== null && $prospectChave !== $sectraCustomerId) {
+                    $output->writeln(sprintf(
+                        '  <comment>Alternativa SQL (preferir bridge %d, não prospect %d):</comment>',
+                        $sectraCustomerId,
+                        $prospectChave
+                    ));
+                }
+                $output->writeln(sprintf(
+                    '  <comment>bin/magento erp:client:register "%d" --generate-sql --save</comment>',
+                    $cadastroChave
+                ));
+                $latestSql = (defined('BP') ? BP : getcwd()) . '/var/log/sectra_register_clients_latest.sql';
+                if (is_readable($latestSql)) {
+                    $output->writeln('  <comment>SQL pronto: ' . $latestSql . ' (executar no SSMS com usuário de escrita)</comment>');
+                }
+            }
+            $step = $step ?? 3;
+            $output->writeln('  ' . $step++ . '. bin/magento b2b:sectra:sync-prospect --poll');
+            $output->writeln('  ' . $step++ . '. bin/magento b2b:sectra:validate-order-import --customer-id=' . $customerId);
+            $output->writeln('  ' . $step . '. Sectra → Importar Pedidos');
+            return;
+        }
+
+        if ($readyCount === 0 && $cancelledCount > 0) {
+            $output->writeln(sprintf(
+                '<comment>%d pedido(s) aguardando Exportar Clientes no Sectra. Após confirmar, o bridge libera automaticamente para oc_order.</comment>',
+                $cancelledCount
+            ));
+            return;
+        }
+
+        if ($readyCount === 0) {
+            $output->writeln('<comment>Nenhum pedido com status ready_for_import. Faça um pedido novo ou use --create-test-order.</comment>');
+        }
+    }
+
+    /**
      * @return array<string, bool>
      */
-    private function validateBridgeReadiness(int $customerId, int $ocCustomerId): array
+    private function validateBridgeReadiness(int $customerId, int $sectraCustomerId): array
     {
         $conn = $this->resourceConnection->getConnection();
 
@@ -164,27 +460,69 @@ class ValidateSectraOrderImportCommand extends Command
         );
 
         $map = $conn->fetchRow(
-            'SELECT old_oc_customer_id FROM oc_customer_id_map WHERE magento_customer_id = ?',
+            "SELECT map.old_oc_customer_id,
+                    COALESCE(NULLIF(CAST(erp_attr.value AS UNSIGNED), 0), map.old_oc_customer_id) AS sectra_chave
+             FROM oc_customer_id_map map
+             LEFT JOIN customer_entity_varchar erp_attr
+                ON erp_attr.entity_id = map.magento_customer_id
+                AND erp_attr.attribute_id = (
+                    SELECT ea.attribute_id
+                    FROM eav_attribute ea
+                    INNER JOIN eav_entity_type et ON et.entity_type_id = ea.entity_type_id
+                    WHERE ea.attribute_code = 'erp_code'
+                      AND et.entity_type_code = 'customer'
+                )
+                AND erp_attr.value REGEXP '^[0-9]+$'
+             WHERE map.magento_customer_id = ?",
             [$customerId]
         );
         $confirmed = $conn->fetchOne(
             'SELECT customer_id FROM oc_customer_b2b_confirmed WHERE customer_id = ?',
-            [$ocCustomerId]
+            [$sectraCustomerId]
         );
+        $exportCustomerId = $this->b2bClientRegistration->resolveSectraExportCustomerId($sectraCustomerId);
         $ocCustomer = $conn->fetchRow(
-            'SELECT customer_id, customer_group_id, custom_field FROM oc_customer WHERE customer_id = ?',
-            [$ocCustomerId]
+            'SELECT customer_id, customer_group_id, custom_field, code, telephone FROM oc_customer WHERE customer_id = ?',
+            [$exportCustomerId]
         );
         $cnpjInField = $ocCustomer
             ? $this->extractCnpjFromCustomField((string) ($ocCustomer['custom_field'] ?? ''))
             : '';
+        $exportCode = $ocCustomer ? trim((string) ($ocCustomer['code'] ?? '')) : 'missing';
+        $exportTelephone = $ocCustomer ? preg_replace('/\D/', '', (string) ($ocCustomer['telephone'] ?? '')) : '';
+        $ocGroupId = $ocCustomer ? (int) ($ocCustomer['customer_group_id'] ?? 0) : 0;
+        $erpGroupIds = $this->b2bClientRegistration->getErpClientCodesWithSalesHistory([$sectraCustomerId]);
+        $expectedGroupId = 0;
+        if ($erpGroupIds !== []) {
+            try {
+                $erpRow = $this->erpConnection->fetchOne(
+                    'SELECT CASE WHEN fp.CKATIVO = \'S\' THEN f.FATORPRECO ELSE NULL END AS FATORPRECO
+                     FROM FN_FORNECEDORES f
+                     LEFT JOIN VE_FATORPRECO fp ON fp.CODIGO = f.FATORPRECO
+                     WHERE f.CODIGO = ? AND f.CKCLIENTE = ?',
+                    [$sectraCustomerId, 'S']
+                );
+                $expectedGroupId = (int) round((float) ($erpRow['FATORPRECO'] ?? 0));
+            } catch (\Throwable) {
+                $expectedGroupId = 0;
+            }
+        }
+        $prospectOnly = $this->b2bClientRegistration->isClientProspectRegistered($sectraCustomerId)
+            && !$this->b2bClientRegistration->isClientRegistered($sectraCustomerId);
+        $telephoneOk = $exportTelephone !== ''
+            && preg_match('/^0+$/', $exportTelephone) !== 1
+            && strlen($exportTelephone) >= 10;
 
         return [
             'Cliente B2B approved' => $approval === 'approved',
             'erp_customer_sync_status definido' => $syncStatus !== '',
-            'oc_customer_id_map' => is_array($map) && (int) ($map['old_oc_customer_id'] ?? 0) === $ocCustomerId,
+            'oc_customer_id_map / sectra_chave' => is_array($map)
+                && (int) ($map['sectra_chave'] ?? 0) === $sectraCustomerId,
             'oc_customer_b2b_confirmed' => $confirmed !== false,
             'oc_customer com CNPJ em custom_field' => strlen($cnpjInField) === 14,
+            'oc_customer code vazio (Exportar Clientes)' => !$prospectOnly || $exportCode === '',
+            'oc_customer telephone (Exportar Clientes)' => !$prospectOnly || $telephoneOk,
+            'oc_customer lista preço (FATORPRECO ERP)' => $expectedGroupId <= 0 || $ocGroupId === $expectedGroupId,
             'Pronto para comprar (dados fiscais)' => $this->orderPullCustomerData->isReadyForOrderPull($customerId),
         ];
     }
@@ -205,6 +543,29 @@ class ValidateSectraOrderImportCommand extends Command
         } catch (\Exception) {
             return [];
         }
+    }
+
+    private function resolveSectraCustomerId(int $customerId): int
+    {
+        $conn = $this->resourceConnection->getConnection();
+        $value = $conn->fetchOne(
+            "SELECT COALESCE(NULLIF(CAST(erp_attr.value AS UNSIGNED), 0), map.old_oc_customer_id)
+             FROM oc_customer_id_map map
+             LEFT JOIN customer_entity_varchar erp_attr
+                ON erp_attr.entity_id = map.magento_customer_id
+                AND erp_attr.attribute_id = (
+                    SELECT ea.attribute_id
+                    FROM eav_attribute ea
+                    INNER JOIN eav_entity_type et ON et.entity_type_id = ea.entity_type_id
+                    WHERE ea.attribute_code = 'erp_code'
+                      AND et.entity_type_code = 'customer'
+                )
+                AND erp_attr.value REGEXP '^[0-9]+$'
+             WHERE map.magento_customer_id = ?",
+            [$customerId]
+        );
+
+        return (int) ($value ?: 0);
     }
 
     /**
@@ -273,14 +634,14 @@ class ValidateSectraOrderImportCommand extends Command
         return true;
     }
 
-    private function createTestOrder(int $customerId, OutputInterface $output): ?string
+    private function createTestOrder(int $customerId, OutputInterface $output, ?string $preferredSku = null): ?string
     {
         $customer = $this->customerRepository->getById($customerId);
         if (!$this->orderPullCustomerData->isApprovedB2bCustomer($customerId)) {
             throw new LocalizedException(__('Cliente #%1 não está aprovado B2B.', $customerId));
         }
 
-        $product = $this->findSalableProduct();
+        $product = $this->findSalableProduct($preferredSku);
         if ($product === null) {
             throw new LocalizedException(__('Nenhum produto simples salável encontrado para pedido de teste.'));
         }
@@ -315,12 +676,15 @@ class ValidateSectraOrderImportCommand extends Command
 
         $orderId = $this->cartManagement->placeOrder($cartId);
         $order = $this->orderRepository->get($orderId);
+        $this->orderImportGate->applyOnOrderPlace($order);
 
         $output->writeln(sprintf(
-            '  Produto: %s | Total: R$ %.2f | Payment: %s',
+            '  Produto: %s (Sectra product_id %s) | Total: R$ %.2f | Payment: %s | sectra_import_status: %s',
             $product->getSku(),
+            $this->resolveSectraProductId($product->getSku(), (int) $product->getId()),
             (float) $order->getGrandTotal(),
-            $order->getPayment()?->getMethod() ?? '—'
+            $order->getPayment()?->getMethod() ?? '—',
+            (string) $order->getData('sectra_import_status')
         ));
 
         return $order->getIncrementId();
@@ -367,15 +731,55 @@ class ValidateSectraOrderImportCommand extends Command
         ];
     }
 
-    private function findSalableProduct(): ?\Magento\Catalog\Model\Product
+    private function findSalableProduct(?string $preferredSku = null): ?\Magento\Catalog\Model\Product
     {
+        if ($preferredSku !== null && $preferredSku !== '') {
+            try {
+                $product = $this->productRepository->get($preferredSku);
+                if ($product->isSalable() && $product->getTypeId() === 'simple') {
+                    return $product;
+                }
+            } catch (\Exception) {
+                // fall through to auto selection
+            }
+        }
+
+        $registeredIds = array_flip($this->b2bClientRegistration->getRegisteredProductIds(
+            $this->fetchMappedSectraProductIds()
+        ));
+
+        foreach (self::PREFERRED_SECTRA_TEST_SKUS as $sku) {
+            try {
+                $product = $this->productRepository->get($sku);
+                if (!$product->isSalable() || $product->getTypeId() !== 'simple') {
+                    continue;
+                }
+                $sectraId = (int) $this->resolveSectraProductId($sku, (int) $product->getId());
+                if ($sectraId > 0 && isset($registeredIds[$sectraId])) {
+                    return $product;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
         $collection = $this->productCollectionFactory->create();
         $collection->addAttributeToSelect(['sku', 'name', 'price'])
             ->addAttributeToFilter('status', ProductStatus::STATUS_ENABLED)
             ->addAttributeToFilter('type_id', 'simple')
             ->addAttributeToFilter('price', ['gt' => 0])
-            ->setPageSize(20);
+            ->setPageSize(50);
         $this->stockHelper->addInStockFilterToCollection($collection);
+
+        foreach ($collection as $product) {
+            if (!$product->isSalable()) {
+                continue;
+            }
+            $sectraId = (int) $this->resolveSectraProductId((string) $product->getSku(), (int) $product->getId());
+            if ($sectraId > 0 && isset($registeredIds[$sectraId])) {
+                return $product;
+            }
+        }
 
         foreach ($collection as $product) {
             if ($product->isSalable()) {
@@ -384,6 +788,30 @@ class ValidateSectraOrderImportCommand extends Command
         }
 
         return null;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function fetchMappedSectraProductIds(): array
+    {
+        $conn = $this->resourceConnection->getConnection();
+        $rows = $conn->fetchCol(
+            'SELECT DISTINCT old_oc_product_id FROM oc_product_id_map WHERE old_oc_product_id > 0'
+        );
+
+        return array_map('intval', $rows ?: []);
+    }
+
+    private function resolveSectraProductId(string $sku, int $magentoProductId): int
+    {
+        $conn = $this->resourceConnection->getConnection();
+        $mapped = (int) $conn->fetchOne(
+            'SELECT old_oc_product_id FROM oc_product_id_map WHERE magento_sku = ?',
+            [trim($sku)]
+        );
+
+        return $mapped > 0 ? $mapped : ($magentoProductId + self::OC_OFFSET);
     }
 
     private function deactivateActiveQuotes(int $customerId): void

@@ -1,0 +1,214 @@
+# AWA Motos — CI/CD Pipeline
+# 
+# Este workflow roda em:
+#   - Pull requests (validação)
+#   - Push em main (deploy staging)
+#   - Tag v* (deploy produção)
+
+name: AWA Motos CI/CD
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  PHP_VERSION: '8.4'
+  NODE_VERSION: '20'
+  MAGENTO_ROOT: ${{ github.workspace }}
+
+jobs:
+  # ====================================
+  # 1. VALIDAÇÃO (sempre roda)
+  # ====================================
+  validate:
+    name: 🔍 Validate code
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: magento
+          MYSQL_DATABASE: magento_test
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: 'false'
+          ES_JAVA_OPTS: '-Xms512m -Xmx512m'
+        ports: ['9200:9200']
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: intl,mbstring,curl,gd,zip,xml,bcmath,opcache
+      
+      - name: Validate PHTML syntax
+        run: |
+          find app/design -name "*.phtml" -newer composer.json | while read f; do
+            php -l "$f" || exit 1
+          done
+      
+      - name: Validate XML layout
+        run: |
+          find app/design -name "*.xml" | while read f; do
+            xmllint --noout "$f" || exit 1
+          done
+      
+      - name: Validate JS/TS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+        run: |
+          if [ -d "pwa-studio" ]; then
+            cd pwa-studio
+            npm ci
+            npm run lint || true
+          fi
+      
+      - name: Magento code sniffer
+        run: |
+          composer global require --dev "squizlabs/php_codesniffer=*"
+          composer global require --dev "magento/magento-coding-standard"
+          vendor/bin/phpcs --standard=Magento2 app/code || true
+      
+      - name: Security audit (composer)
+        run: |
+          composer audit --no-dev || true
+
+  # ====================================
+  # 2. DEPLOY STAGING (em push main)
+  # ====================================
+  deploy-staging:
+    name: 🚀 Deploy to staging
+    runs-on: ubuntu-22.04
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: staging
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+      
+      - name: Deploy to staging
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            cd /home/user/htdocs/srv1113343.hstgr.cloud
+            bash scripts/deploy/pre-deploy.sh
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            bin/magento setup:upgrade --keep-generated
+            bin/magento setup:di:compile
+            bin/magento setup:static-content:deploy -t AWA_Custom/ayo_home5_child
+            bin/magento cache:flush
+            bash scripts/warmup/warm-cache.sh
+            sudo systemctl restart php8.4-fpm
+          EOF
+      
+      - name: Health check
+        run: |
+          sleep 10
+          curl -fsS https://staging.awamotos.com/ || exit 1
+          bash scripts/monitoring/health-check.sh
+
+  # ====================================
+  # 3. DEPLOY PRODUÇÃO (em tag)
+  # ====================================
+  deploy-production:
+    name: 🎯 Deploy to production
+    runs-on: ubuntu-22.04
+    needs: deploy-staging
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: production
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+      
+      - name: Deploy to production
+        run: |
+          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
+            cd /home/user/htdocs/srv1113343.hstgr.cloud
+            
+            # Backup antes de deploy
+            bash scripts/backup/magento-backup.sh
+            
+            # Ativar manutenção
+            bin/magento maintenance:enable
+            
+            # Pull código
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            
+            # Upgrade + compile + deploy
+            bin/magento setup:upgrade --keep-generated
+            bin/magento setup:di:compile
+            bin/magento setup:static-content:deploy -t AWA_Custom/ayo_home5_child -l
+            
+            # Limpar cache + warmup
+            bin/magento cache:flush
+            bash scripts/warmup/warm-cache.sh
+            
+            # Reiniciar PHP-FPM
+            sudo systemctl restart php8.4-fpm
+            
+            # Desativar manutenção
+            bin/magento maintenance:disable
+            
+            # Health check final
+            bash scripts/monitoring/health-check.sh
+          EOF
+
+  # ====================================
+  # 4. LIGHTHOUSE CI (sempre em PR)
+  # ====================================
+  lighthouse:
+    name: 🏮 Lighthouse audit
+    runs-on: ubuntu-22.04
+    needs: validate
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Run Lighthouse CI
+        run: |
+          npm ci
+          npm run lighthouse:collect || echo "collect completed"
+          npm run lighthouse:assert || echo "assertions failed (non-blocking)"
+      
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/manifest.json

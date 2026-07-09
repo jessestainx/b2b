@@ -45,11 +45,11 @@ class Breadcrumbs extends Template
                 'position' => $position++,
                 'name' => $crumb['label']
             ];
-            
+
             if (!empty($crumb['link'])) {
                 $item['item'] = $crumb['link'];
             }
-            
+
             $itemListElement[] = $item;
         }
 

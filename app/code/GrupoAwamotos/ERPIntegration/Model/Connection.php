@@ -183,11 +183,11 @@ class Connection implements ConnectionInterface
                 if ($connection !== null) {
                     $this->connection = $connection;
                     $this->circuitBreaker->recordSuccess();
+                    // Host/port intentionally omitted from INFO log to avoid exposing internal
+                    // network topology in application logs; use erp:connection:test for details.
                     $this->logger->info(sprintf(
-                        '[ERP] Connected to SQL Server using %s driver: %s:%d/%s (attempts: %d)',
+                        '[ERP] Connected to SQL Server using %s driver: database=%s (attempts: %d)',
                         $driver,
-                        $host,
-                        $port,
                         $database,
                         $this->connectionAttempts
                     ));
@@ -436,11 +436,13 @@ class Connection implements ConnectionInterface
         switch ($driver) {
             case self::DRIVER_SQLSRV:
                 // Microsoft SQL Server Driver for PHP
+                $trustServerCertificate = $this->helper->getTrustServerCertificate() ? '1' : '0';
                 $dsn = sprintf(
-                    'sqlsrv:Server=%s,%d;Database=%s;TrustServerCertificate=1;Encrypt=1',
+                    'sqlsrv:Server=%s,%d;Database=%s;TrustServerCertificate=%s;Encrypt=1',
                     $host,
                     $port,
-                    $database
+                    $database,
+                    $trustServerCertificate
                 );
                 break;
 
@@ -457,12 +459,14 @@ class Connection implements ConnectionInterface
             case self::DRIVER_ODBC:
                 // ODBC Driver 17/18 for SQL Server
                 $odbcDriver = $this->getOdbcDriverName();
+                $trustServerCertificate = $this->helper->getTrustServerCertificate() ? 'yes' : 'no';
                 $dsn = sprintf(
-                    'odbc:Driver={%s};Server=%s,%d;Database=%s;TrustServerCertificate=yes;Encrypt=yes;',
+                    'odbc:Driver={%s};Server=%s,%d;Database=%s;TrustServerCertificate=%s;Encrypt=yes;',
                     $odbcDriver,
                     $host,
                     $port,
-                    $database
+                    $database,
+                    $trustServerCertificate
                 );
                 break;
 

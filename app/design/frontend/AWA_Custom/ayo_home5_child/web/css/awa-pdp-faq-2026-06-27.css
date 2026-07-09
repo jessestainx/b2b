@@ -11,7 +11,7 @@
 .awa-pdp-faq {
   margin: clamp(20px, 3vw, 32px) 0;
   padding: clamp(16px, 2.4vw, 24px);
-  background: var(--awa-cc-surface-1, #fff);
+  background: var(--awa-cc-surface-1, var(--awa-bg));
   border: 1px solid var(--awa-cc-border, #e5e7eb);
   border-radius: var(--awa-radius-md, 10px);
   box-shadow: var(--awa-cc-shadow-subtle, 0 1px 3px rgba(15, 23, 42, .04));
@@ -39,6 +39,7 @@
 }
 
 .awa-pdp-faq__item {
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--awa-cc-border, #e5e7eb);
 }
 
@@ -71,7 +72,7 @@
 }
 
 .awa-pdp-faq__question:hover {
-  color: var(--awa-brand-primary, #b73337);
+  color: var(--awa-brand-primary, var(--awa-primary));
 }
 
 .awa-pdp-faq__question:focus-visible {
@@ -92,7 +93,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  color: var(--awa-brand-primary, #b73337);
+  color: var(--awa-brand-primary, var(--awa-primary));
   transition: transform 240ms cubic-bezier(.4, 0, .2, 1);
 }
 
@@ -109,6 +110,7 @@
 
 .awa-pdp-faq__answer p {
   margin: 0;
+  max-width: 75ch;
 }
 
 @media (prefers-reduced-motion: reduce) {

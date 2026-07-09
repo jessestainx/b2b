@@ -1,0 +1,17 @@
+<?php
+/**
+ * AWA - Home visual fixes (Phase 3D.2.6)
+ * Carrega awa-home-visual-fixes-2026-06-28.min.css async.
+ */
+declare(strict_types=1);
+$cssUrl = $block->getViewFileUrl('css/awa-home-visual-fixes-2026-06-28.min.css');
+?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($cssUrl) ?>?v=phase3d26-final-v2"
+      media="print"
+      onload="this.media='all'"
+      data-awa-home-visual-fixes="1" />
+<noscript>
+    <link rel="stylesheet"
+          href="<?= $block->escapeUrl($cssUrl) ?>?v=phase3d26-final-v2" />
+</noscript>

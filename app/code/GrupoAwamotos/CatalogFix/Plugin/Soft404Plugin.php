@@ -27,7 +27,8 @@ class Soft404Plugin
 {
     public function __construct(
         private readonly RequestInterface $request
-    ) {}
+    ) {
+    }
 
     public function beforeSendResponse(HttpInterface $response): void
     {

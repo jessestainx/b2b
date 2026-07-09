@@ -22,4 +22,5 @@ final class ProspectEvent
     public const CHECKOUT_BLOCKED_CUSTOMER_NOT_VALIDATED = 'checkout_blocked_customer_not_validated';
     public const ORDER_NOT_CREATED_CUSTOMER_PENDING_ERP = 'order_not_created_customer_pending_erp';
     public const CUSTOMER_CONFIRMED_BY_ERP_POLL = 'customer_confirmed_by_erp_poll';
+    public const CUSTOMER_VALIDATION_POLL_PENDING = 'customer_validation_poll_pending';
 }

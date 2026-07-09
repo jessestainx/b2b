@@ -335,9 +335,81 @@ class  EngineProvider extends InstantProvider
             if ($fieldName == 'price') {
                 $this->query['body']['aggregations'][$fieldName] = ['extended_stats' => ['field' => 'price_0_1']];
             } else {
-                $this->query['body']['aggregations'][$fieldName] = ['terms' => ['field' => $fieldName, 'size' => 500]];
+                $this->query['body']['aggregations'][$fieldName] = ['terms' => ['field' => $this->resolveAggregationField($fieldName), 'size' => 500]];
             }
         }
+    }
+
+    /**
+     * [AWA][SRCH-004] Analyzed "text" fields cannot be used directly in a terms
+     * aggregation (OpenSearch/Elasticsearch throws illegal_argument_exception:
+     * "fielddata=false"). Attributes such as marca_moto/modelo_moto/ano_moto are
+     * free-text and get indexed as "text" with a ".keyword" sub-field by the
+     * Mirasvit indexer, while select attributes (manufacturer, color) are
+     * already indexed as "integer" and do not have (nor need) a ".keyword"
+     * sub-field. Resolve the correct field name dynamically instead of
+     * assuming one convention for all bucket fields, so a single
+     * misconfigured field cannot break the whole product search query.
+     *
+     * Why this is a direct edit to a Mirasvit file (exception to the
+     * plugin-only policy used elsewhere in app/code/GrupoAwamotos/*): this
+     * class is never instantiated through Magento's ObjectManager. It is
+     * created with `new` inside
+     * Mirasvit\SearchAutocomplete\InstantProvider\InstantProvider, a
+     * standalone script required directly by
+     * Mirasvit/SearchAutocomplete/registration.php and executed during early
+     * bootstrap, before the DI container exists. Magento plugins/preferences
+     * only work through generated Interceptor classes that wrap objects
+     * created by the ObjectManager, so there is no way to intercept this code
+     * path with a plugin, preference, or virtual type. See SRCH-003 in
+     * app/code/GrupoAwamotos/CatalogFix/etc/di.xml for the equivalent fix
+     * applied as a real DI plugin on the native catalog/layered-navigation
+     * aggregation builder, where the DI container is available.
+     *
+     * @var array<string, string>
+     */
+    private static $aggregationFieldCache = [];
+
+    private function resolveAggregationField(string $fieldName): string
+    {
+        $indexName = $this->configProvider->getIndexName('magento_catalog_product');
+        $cacheKey  = $indexName . ':' . $fieldName;
+
+        if (array_key_exists($cacheKey, self::$aggregationFieldCache)) {
+            return self::$aggregationFieldCache[$cacheKey];
+        }
+
+        $resolved = $fieldName;
+
+        try {
+            $mapping = $this->getClient()->indices()->getFieldMapping([
+                'index'  => $indexName,
+                'fields' => $fieldName,
+            ]);
+            if (is_object($mapping) && method_exists($mapping, 'asArray')) {
+                $mapping = $mapping->asArray();
+            }
+
+            foreach ($mapping as $indexMapping) {
+                $fieldDef = $indexMapping['mappings'][$fieldName]['mapping'][$fieldName] ?? null;
+                if (
+                    is_array($fieldDef)
+                    && ($fieldDef['type'] ?? null) === 'text'
+                    && isset($fieldDef['fields']['keyword'])
+                ) {
+                    $resolved = $fieldName . '.keyword';
+                }
+                break;
+            }
+        } catch (\Exception $e) {
+            // Keep $resolved as the original field name; the aggregation may still
+            // fail for this bucket, but it will no longer take down the whole query
+            // since callers of getResults() already catch search exceptions.
+        }
+
+        self::$aggregationFieldCache[$cacheKey] = $resolved;
+
+        return $resolved;
     }
 
     private function prepareBuckets($buckets): array

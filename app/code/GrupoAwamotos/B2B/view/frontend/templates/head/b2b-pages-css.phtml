@@ -8,10 +8,24 @@ declare(strict_types=1);
 
 /** @var \Magento\Framework\View\Element\Template $block */
 $cssUrl = $block->getViewFileUrl('GrupoAwamotos_B2B::css/account/awa-b2b-pages-late.css');
-$assetVersion = '20260610-v59';
+$assetVersion = '20260707-v63-header-normalize';
 ?>
 <style id="awa-b2b-pages-critical">
 /* §148 critical — superfícies operacionais antes do late.css async */
+
+/* Auth KO shell — nunca inline no portal logado (modal-only em catálogo/checkout) */
+html body#html-body:is(.account, .b2b-account-dashboard, .b2b-account-shell) #authenticationPopup,
+html body#html-body:is(.account, .b2b-account-dashboard, .b2b-account-shell) #authenticationPopup .block-authentication,
+html body#html-body:is(.account, .b2b-account-dashboard, .b2b-account-shell) .page-wrapper > :is(#authenticationPopup, .block-authentication, .block.block-customer-login) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
 
 html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell {
     display: flex !important;
@@ -86,7 +100,39 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-quote-form-
     border-radius: 4px !important;
     box-shadow: none !important;
 }
+
+/* §152 critical — header/page-top spacing antes do late.css async */
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-top {
+    padding-block: clamp(8px, 1vw, 12px) 0 !important;
+    margin: 0 !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main {
+    padding-top: clamp(12px, 1.5vw, 16px) !important;
+}
+
+/* Header layout pertence à cascata global do tema; páginas B2B não compactam .awa-site-header. */
 </style>
+<script>
+(function () {
+    'use strict';
+    var body = document.body;
+    if (!body || !body.classList.contains('account')) {
+        return;
+    }
+    var popup = document.getElementById('authenticationPopup');
+    if (popup) {
+        popup.remove();
+    }
+    document.querySelectorAll(
+        '.page-wrapper > #authenticationPopup, .page-wrapper > .block-authentication, .page-wrapper > .block.block-customer-login'
+    ).forEach(function (node) {
+        if (!node.closest('.modal-popup._show')) {
+            node.remove();
+        }
+    });
+})();
+</script>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($cssUrl) ?>?v=<?= $block->escapeHtmlAttr($assetVersion) ?>"
       media="print"

@@ -1,6 +1,6 @@
 :root {
     /* ── awa-csh — design tokens ─── */
-    --awa-csh-c1: #fff;
+    --awa-csh-c1: var(--awa-bg);
 }
 
 /* ==========================================================
@@ -27,8 +27,11 @@ body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-shell {
 }
 
 body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-content {
-    max-width: min(1180px, calc(100% - 32px));
-    margin: 0 auto;
+    max-width: min(1440px, calc(100vw - (2 * clamp(12px, 3vw, 20px))));
+    margin-inline: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding-inline: 0;
 }
 
 body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-bar {
@@ -191,7 +194,8 @@ body.rokanthemes-onepagecheckout footer.page-footer {
 
 @media (width < 992px) {
     body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-content {
-        max-width: calc(100% - 24px);
+        max-width: 100%;
+        padding-inline: 0;
     }
 
     body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-bar {

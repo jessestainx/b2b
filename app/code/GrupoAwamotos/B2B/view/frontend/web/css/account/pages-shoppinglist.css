@@ -5,7 +5,7 @@
 .b2b-quote-history .block-title {
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--b2b-pg-border-main);
+    border-bottom: 1px solid var(--awa-border, #e5e7eb);
 }
 
 .b2b-shoppinglist-index .block-title strong,
@@ -34,14 +34,14 @@
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: var(--b2b-pg-c8);
+    color: var(--awa-text-primary, #333);
     margin-bottom: 4px;
 }
 
 .b2b-shoppinglist-index .shoppinglist-create-form input[type="text"],
 .b2b-shoppinglist-index .shoppinglist-create-form textarea {
     width: 100%;
-    border: 1px solid var(--b2b-pg-border-mid);
+    border: 1px solid var(--awa-border, #e5e7eb);
     border-radius: 4px;
     padding: 10px 12px;
     font-size: 14px;
@@ -55,12 +55,13 @@
 
 .b2b-shoppinglist-index .shoppinglist-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
+    /* min(280px, 100%) garante coluna única em viewports estreitos sem media query */
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--awa-shoppinglist-card-min, 280px), 100%), 1fr));
+    gap: var(--awa-s-2, 16px);
 }
 
 .b2b-shoppinglist-index .shoppinglist-card {
-    background: var(--b2b-pg-white);
+    background: var(--awa-bg-surface, #fff);
     border: 1px solid var(--awa-b2b-border);
     border-radius: 4px;
     padding: 20px;
@@ -69,7 +70,7 @@
 
 .b2b-shoppinglist-index .shoppinglist-card:hover {
     box-shadow: none;
-    border-color: var(--b2b-pg-border-mid, #d1d5db);
+    border-color: var(--awa-border, #d1d5db);
 }
 
 .b2b-shoppinglist-index .card-header {
@@ -117,8 +118,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-top: 1px solid var(--b2b-pg-c7);
-    border-bottom: 1px solid var(--b2b-pg-c7);
+    border-top: 1px solid var(--awa-bg-muted, #f3f4f6);
+    border-bottom: 1px solid var(--awa-bg-muted, #f3f4f6);
     margin-bottom: 12px;
 }
 
@@ -131,7 +132,7 @@
 .b2b-shoppinglist-view .total-value {
     font-size: 15px;
     font-weight: 700;
-    color: var(--b2b-pg-c26);
+    color: var(--awa-success, #16a34a);
 }
 
 .b2b-shoppinglist-index .card-actions {
@@ -150,20 +151,20 @@
     font-size: 13px;
     text-decoration: none;
     cursor: pointer;
-    border: 1px solid var(--b2b-pg-border-mid);
-    color: var(--b2b-pg-c8);
-    background: var(--b2b-pg-white);
+    border: 1px solid var(--awa-border, #e5e7eb);
+    color: var(--awa-text-primary, #333);
+    background: var(--awa-bg-surface, #fff);
     transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
     box-shadow: none;
 }
 
 .b2b-shoppinglist-index .card-actions .action:hover {
-    background: var(--b2b-pg-c7);
+    background: var(--awa-bg-muted, #f3f4f6);
 }
 
 .b2b-shoppinglist-index .card-actions .action.primary {
     background: var(--awa-b2b-primary);
-    color: var(--b2b-pg-white);
+    color: #fff;
     border-color: var(--awa-b2b-primary);
 }
 
@@ -173,12 +174,12 @@
 }
 
 .b2b-shoppinglist-index .card-actions .action.delete {
-    color: var(--b2b-pg-c12);
-    border-color: var(--b2b-pg-c20);
+    color: var(--awa-primary-hover, #8e2629);
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 18%, #fff);
 }
 
 .b2b-shoppinglist-index .card-actions .action.delete:hover {
-    background: var(--b2b-pg-c24);
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #fff);
 }
 
 /* Shopping List view */
@@ -207,7 +208,7 @@
 }
 
 .b2b-shoppinglist-view .shoppinglist-top-actions .action.back:hover {
-    color: var(--b2b-pg-c8);
+    color: var(--awa-text-primary, #333);
 }
 
 .b2b-shoppinglist-view .shoppinglist-top-actions .action.back::before {
@@ -224,7 +225,7 @@
 }
 
 .b2b-shoppinglist-view .shoppinglist-items-table thead th {
-    background: var(--b2b-pg-bg);
+    background: var(--awa-b2b-bg-soft, #f8fafc);
     padding: 10px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -232,12 +233,12 @@
     text-transform: none;
     letter-spacing: normal;
     text-align: left;
-    border-bottom: 1px solid var(--b2b-pg-border-main);
+    border-bottom: 1px solid var(--awa-border, #e5e7eb);
 }
 
 .b2b-shoppinglist-view .shoppinglist-items-table tbody td {
     padding: 12px;
-    border-bottom: 1px solid var(--b2b-pg-c7);
+    border-bottom: 1px solid var(--awa-bg-muted, #f3f4f6);
     vertical-align: middle;
 }
 
@@ -258,14 +259,14 @@
 
 .b2b-shoppinglist-view .shoppinglist-items-table .col-subtotal {
     font-weight: 600;
-    color: var(--b2b-pg-c26);
+    color: var(--awa-success, #16a34a);
     white-space: nowrap;
 }
 
 .b2b-shoppinglist-view .shoppinglist-items-table .qty-input {
     width: 60px;
     padding: 6px 8px;
-    border: 1px solid var(--b2b-pg-border-mid);
+    border: 1px solid var(--awa-border, #e5e7eb);
     border-radius: 4px;
     text-align: center;
     font-size: 14px;
@@ -284,38 +285,38 @@
     width: 32px;
     height: 32px;
     border-radius: 4px;
-    background: var(--b2b-pg-c19);
-    color: var(--b2b-pg-c12);
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, #fff);
+    color: var(--awa-primary-hover, #8e2629);
     text-decoration: none;
     font-size: 18px;
     font-weight: 700;
 }
 
 .b2b-shoppinglist-view .shoppinglist-items-table .action.delete:hover {
-    background: var(--b2b-pg-c20);
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 18%, #fff);
 }
 
 .b2b-shoppinglist-view .product-unavailable {
-    color: var(--b2b-pg-c10);
+    color: var(--awa-text-muted, #888);
     font-style: italic;
     font-size: 13px;
 }
 
 .b2b-shoppinglist-view .product-unavailable-img {
-    color: var(--b2b-pg-border-mid);
+    color: var(--awa-border, #e5e7eb);
     font-size: 24px;
 }
 
 .b2b-shoppinglist-view .shoppinglist-items-table tfoot td {
     padding: 14px 12px;
-    border-top: 2px solid var(--b2b-pg-border-main);
+    border-top: 2px solid var(--awa-border, #e5e7eb);
 }
 
 .b2b-shoppinglist-view .shoppinglist-items-table .total-label {
     text-align: right;
     font-weight: 600;
     font-size: 15px;
-    color: var(--b2b-pg-c8);
+    color: var(--awa-text-primary, #333);
 }
 
 .b2b-shoppinglist-view .shoppinglist-bottom-actions {
@@ -323,7 +324,7 @@
     gap: 12px;
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid var(--b2b-pg-border-main);
+    border-top: 1px solid var(--awa-border, #e5e7eb);
 }
 
 .b2b-shoppinglist-view .shoppinglist-bottom-actions .action {
@@ -341,7 +342,7 @@
 
 .b2b-shoppinglist-view .shoppinglist-bottom-actions .action.primary {
     background: var(--awa-b2b-primary);
-    color: var(--b2b-pg-white);
+    color: #fff;
 }
 
 .b2b-shoppinglist-view .shoppinglist-bottom-actions .action.primary:hover {
@@ -349,13 +350,13 @@
 }
 
 .b2b-shoppinglist-view .shoppinglist-bottom-actions .action.secondary {
-    background: var(--b2b-pg-white);
-    color: var(--b2b-pg-c8);
-    border: 1px solid var(--b2b-pg-border-mid);
+    background: var(--awa-bg-surface, #fff);
+    color: var(--awa-text-primary, #333);
+    border: 1px solid var(--awa-border, #e5e7eb);
 }
 
 .b2b-shoppinglist-view .shoppinglist-bottom-actions .action.secondary:hover {
-    background: var(--b2b-pg-c7);
+    background: var(--awa-bg-muted, #f3f4f6);
 }
 
 .b2b-shoppinglist-view .recurring-config-section {
@@ -375,11 +376,49 @@
     color: var(--awa-text-primary, #333);
 }
 
-@media (max-width: 767px) {
-    .b2b-shoppinglist-index .shoppinglist-grid {
-        grid-template-columns: 1fr;
+.b2b-shoppinglist-view .recurring-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 599px) {
+    /* Stack bottom actions em telas estreitas */
+    .b2b-shoppinglist-view .shoppinglist-bottom-actions {
+        flex-direction: column;
     }
 
+    .b2b-shoppinglist-view .shoppinglist-bottom-actions .action {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Stack form actions em telas estreitas */
+    .b2b-shoppinglist-index .shoppinglist-create-form .actions {
+        flex-direction: column;
+    }
+
+    .b2b-shoppinglist-index .shoppinglist-create-form .actions > * {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Top actions envolve ao invés de comprimir */
+    .b2b-shoppinglist-view .shoppinglist-top-actions {
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    /* recurring-form: empilha verticalmente */
+    .b2b-shoppinglist-view .recurring-form {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 767px) {
     .b2b-shoppinglist-view .shoppinglist-items-table thead {
         display: none;
     }
@@ -388,7 +427,7 @@
         display: block;
         margin-bottom: 16px;
         padding: 12px;
-        border: 1px solid var(--b2b-pg-border-main);
+        border: 1px solid var(--awa-border, #e5e7eb);
         border-radius: 4px;
     }
 
@@ -425,8 +464,136 @@
         padding: 12px 0;
     }
 
-    .b2b-shoppinglist-view .recurring-form {
-        flex-direction: column;
-        align-items: flex-start;
+}
+
+/* ── Delete confirmation dialog ──────────────────────────────────────── */
+#b2b-delete-list-dialog {
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    max-width: min(420px, calc(100vw - 32px));
+    width: 100%;
+    background: var(--awa-bg-surface, #ffffff);
+}
+
+#b2b-delete-list-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+.b2b-confirm-dialog__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 24px 24px;
+    text-align: center;
+}
+
+.b2b-confirm-dialog__icon {
+    color: var(--awa-primary, #b73337);
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.b2b-confirm-dialog__title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--awa-text-primary, #1a1a1a);
+    text-wrap: balance;
+}
+
+.b2b-confirm-dialog__desc {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--awa-text-muted, #666666);
+    max-width: 34ch;
+}
+
+.b2b-confirm-dialog__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.b2b-confirm-dialog__btn-confirm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    width: 100%;
+    padding: 0 20px;
+    background: var(--awa-primary, #b73337);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 150ms ease-out;
+}
+
+.b2b-confirm-dialog__btn-confirm:hover,
+.b2b-confirm-dialog__btn-confirm:focus {
+    background: var(--awa-primary-hover, #8e2629);
+    color: #ffffff !important;
+    text-decoration: none;
+}
+
+.b2b-confirm-dialog__btn-cancel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    width: 100%;
+    padding: 0 20px;
+    background: transparent;
+    color: var(--awa-text-primary, #333333);
+    border: 1px solid var(--awa-border, #e5e7eb);
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 150ms ease-out, border-color 150ms ease-out;
+}
+
+.b2b-confirm-dialog__btn-cancel:hover,
+.b2b-confirm-dialog__btn-cancel:focus {
+    background: var(--awa-bg-soft, #f8fafc);
+    border-color: var(--awa-text-muted, #666666);
+}
+
+/* Botão "Excluir" no card — alinhado com outros action buttons */
+.shoppinglist-card .action--trigger-delete-dialog {
+    background: transparent;
+    border: 1px solid var(--awa-border, #e5e7eb);
+    color: var(--awa-text-muted, #666666);
+    border-radius: 6px;
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: border-color 150ms ease-out, color 150ms ease-out;
+}
+
+.shoppinglist-card .action--trigger-delete-dialog:hover,
+.shoppinglist-card .action--trigger-delete-dialog:focus-visible {
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .b2b-confirm-dialog__btn-confirm,
+    .b2b-confirm-dialog__btn-cancel,
+    .shoppinglist-card .action--trigger-delete-dialog {
+        transition: none;
     }
 }

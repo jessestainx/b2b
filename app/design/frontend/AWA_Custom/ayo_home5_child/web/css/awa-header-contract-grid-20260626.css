@@ -245,7 +245,7 @@ body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] .head
   /* Fase 3D.2.5: barra B2B integrada ao header (sem aparência de remendo). */
   body:not(.b2b-auth-shell) .page-wrapper .top-header.awa-utility-bar.awa-b2b-promo-bar {
     min-height: 34px;
-    border-bottom: 1px solid color-mix(in srgb, var(--awa-border, #e5e5e5) 78%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--awa-border, var(--awa-border)) 78%, transparent);
   }
 
   body:not(.b2b-auth-shell) .page-wrapper .top-header.awa-utility-bar.awa-b2b-promo-bar .awa-b2b-promo-bar__inner {
@@ -363,3 +363,4 @@ body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] .head
     padding-top: 4px !important;
   }
 }
+

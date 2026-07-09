@@ -1,0 +1,392 @@
+// =============================================================================
+// AWA Visual Audit — Jul 2026 (13 itens UX/UI)
+// Carregado por último via _extend.less → final-wins
+// =============================================================================
+
+@import (once) '../_awa-variables';
+
+@va-scope: ~'html body#html-body';
+@va-plp: ~'@{va-scope}:is(.catalog-category-view, .catalogsearch-result-index)';
+@va-internals: ~'@{va-scope}:is(.catalog-category-view, .catalogsearch-result-index, .catalogo-index-index, .catalogo-revista-index, .cms-page-view, .b2b-register-index)';
+
+// ── 1. Menu Departamentos — largura, quebra de texto, z-index ─────────────────
+@media (min-width: 992px) {
+    @{va-scope} .page-wrapper {
+        .navigation.verticalmenu ul.togge-menu.list-category-dropdown,
+        .navigation.verticalmenu .list-category-dropdown {
+            min-width: 280px !important;
+            max-width: ~"min(92vw, 420px)" !important;
+            width: max-content !important;
+            z-index: 10020 !important;
+            overflow: visible !important;
+        }
+
+        .navigation.verticalmenu .ui-menu-item > a,
+        .navigation.verticalmenu .ui-menu-item.navigation__item > a {
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            word-break: normal !important;
+            line-height: 1.35 !important;
+            padding-block: 10px !important;
+            gap: 8px !important;
+        }
+
+        .awa-vmf-portal.navigation__submenu,
+        .navigation.verticalmenu .submenu,
+        .navigation.verticalmenu .level0.submenu {
+            min-width: 240px !important;
+            max-width: ~"min(88vw, 360px)" !important;
+            z-index: 10025 !important;
+            overflow: visible !important;
+        }
+    }
+}
+
+@media (max-width: 991px) {
+    @{va-scope} .page-wrapper {
+        .sections.nav-sections.nav-sections-animated,
+        #awa-primary-navigation,
+        #awa-category-navigation {
+            z-index: 10030 !important;
+        }
+
+        .navigation.verticalmenu .ui-menu-item > a {
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            line-height: 1.4 !important;
+            min-height: 44px !important;
+        }
+    }
+}
+
+// ── 4. Ícones sociais — contraste visível no footer escuro ───────────────────
+@{va-scope} .page-wrapper :is(.page_footer, .page-footer) {
+    .awa-footer-pro__social-link {
+        background: color-mix(in srgb, var(--awa-neutral-700, #374151) 88%, #fff) !important;
+        border: 1.5px solid color-mix(in srgb, #fff 22%, transparent) !important;
+        color: #fff !important;
+
+        svg,
+        svg path {
+            fill: currentColor !important;
+        }
+
+        &:hover,
+        &:focus-visible {
+            background: var(--awa-primary, @awa-color-primary) !important;
+            border-color: var(--awa-primary, @awa-color-primary) !important;
+            color: #fff !important;
+        }
+    }
+}
+
+// ── 6. Bloco de endereço — card claro, não parece input desabilitado ────────
+@{va-scope} .page-wrapper :is(.page_footer, .page-footer) {
+    .awa-footer-atendimento__store {
+        background: var(--awa-bg-soft, #f7f7f7) !important;
+        border: 1px solid var(--awa-border-color, #e5e5e5) !important;
+        border-radius: 10px !important;
+        padding: 12px 14px !important;
+        margin-top: 8px !important;
+    }
+
+    .awa-footer-atendimento__store-name,
+    .awa-footer-atendimento__store-address {
+        color: var(--awa-text-primary, #333) !important;
+        margin: 0 !important;
+        line-height: 1.45 !important;
+    }
+
+    .awa-footer-atendimento__store-link {
+        display: block !important;
+        text-decoration: none !important;
+        color: inherit !important;
+        border-radius: 6px !important;
+
+        &:hover,
+        &:focus-visible {
+            background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 8%, transparent) !important;
+            outline: 2px solid var(--awa-primary, @awa-color-primary) !important;
+            outline-offset: 2px !important;
+        }
+    }
+}
+
+// ── 5. PLP — cards vazios, skeleton, fallback de imagem ──────────────────────
+@{va-plp} .page-wrapper {
+    li.item-product:empty,
+    li.item-product:not(:has(.product-name, .product-item-link, .product-thumb)) {
+        display: none !important;
+    }
+
+    .item-product .product-thumb {
+        aspect-ratio: 1 / 1 !important;
+        background: var(--awa-gray-100, #f5f5f5) !important;
+        overflow: hidden !important;
+    }
+
+    .item-product .product-image-photo {
+        aspect-ratio: 1 / 1 !important;
+        object-fit: contain !important;
+        width: 100% !important;
+        height: auto !important;
+        background: var(--awa-gray-100, #f5f5f5) !important;
+    }
+
+    .item-product .product-image-photo[src*="placeholder"],
+    .item-product .product-image-photo.awa-img-fallback {
+        object-fit: contain !important;
+        padding: 12px !important;
+        opacity: 0.85 !important;
+    }
+
+    .item-product .product-image-photo:not(.awa-loaded):not([src*="placeholder"]) {
+        animation: awa-plp-img-shimmer 1.2s ease-in-out infinite !important;
+    }
+
+    .item-product .product-image-photo.awa-loaded,
+    .item-product .product-image-photo[src*="placeholder"],
+    .item-product .product-image-photo.awa-img-fallback {
+        animation: none !important;
+    }
+
+    :is(.products-grid, .wrapper.grid.products-grid) {
+        align-items: stretch !important;
+    }
+
+    :is(.products-grid, .wrapper.grid.products-grid) li.item-product {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+    }
+
+    li.item-product :is(.product-info, .product-item-details) {
+        display: flex !important;
+        flex: 1 1 auto !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+    }
+
+    li.item-product .info-price {
+        margin-top: auto !important;
+        min-height: 64px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-end !important;
+    }
+
+    .b2b-login-to-see-price {
+        min-height: 64px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 4px !important;
+        padding: 10px 12px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        border-radius: 8px !important;
+    }
+
+    .b2b-login-to-see-price__title {
+        margin: 0 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        line-height: 1.3 !important;
+    }
+
+    .b2b-login-to-see-price__message {
+        margin: 0 !important;
+        font-size: 11px !important;
+        line-height: 1.35 !important;
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical !important;
+        -webkit-line-clamp: 2 !important;
+        overflow: hidden !important;
+    }
+}
+
+@keyframes awa-plp-img-shimmer {
+    0% { opacity: 0.55; }
+    50% { opacity: 0.85; }
+    100% { opacity: 0.55; }
+}
+
+// ── 3. Catálogo — CTAs clicáveis com feedback ────────────────────────────────
+@{va-scope}:is(.catalogo-index-index, .catalogo-revista-index) .page-wrapper {
+    .awa-catalogo-page__cta,
+    .awa-catalog-nav__link {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+
+        &:hover {
+            transform: translateY(-1px);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, @awa-color-primary) !important;
+            outline-offset: 2px !important;
+        }
+    }
+
+    .awa-catalogo-page__cta.is-disabled,
+    .awa-catalogo-page__cta[aria-disabled="true"] {
+        opacity: 0.55 !important;
+        pointer-events: none !important;
+        cursor: not-allowed !important;
+    }
+}
+
+// ── 8. Barra B2B — botão fechar 44px e contraste ─────────────────────────────
+@{va-scope} .page-wrapper #awa-b2b-promo-bar {
+    .awa-b2b-promo-close,
+    #awa-b2b-promo-close {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        color: inherit !important;
+        opacity: 1 !important;
+        cursor: pointer !important;
+
+        &:hover,
+        &:focus-visible {
+            background: color-mix(in srgb, currentColor 12%, transparent) !important;
+            outline: 2px solid color-mix(in srgb, currentColor 40%, transparent) !important;
+            outline-offset: 1px !important;
+        }
+    }
+
+    &.is-dismissing {
+        transition: opacity 0.28s ease, max-height 0.28s ease !important;
+        opacity: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+    }
+}
+
+// ── 11. Busca — sem spinners nativos, alinhamento ────────────────────────────
+@{va-scope} .page-wrapper {
+    .awa-header-search-col input#search,
+    .block-search input[type="search"],
+    .block-search input[type="text"] {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+
+        &::-webkit-search-decoration,
+        &::-webkit-search-cancel-button,
+        &::-webkit-search-results-button,
+        &::-webkit-search-results-decoration {
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            display: none !important;
+        }
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+    }
+}
+
+// ── 12. Faixa de benefícios (trust bar) — contraste ──────────────────────────
+@{va-scope} .page-wrapper .awa-footer-trust-bar {
+    background: var(--awa-primary, @awa-color-primary) !important;
+
+    .awa-footer-trust-icon {
+        color: #fff !important;
+
+        svg,
+        svg use {
+            fill: currentColor !important;
+            color: inherit !important;
+        }
+    }
+
+    .awa-footer-trust-copy strong {
+        color: #fff !important;
+    }
+
+    .awa-footer-trust-copy span {
+        color: color-mix(in srgb, #fff 88%, transparent) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    @{va-scope} .page-wrapper .awa-footer-trust-bar .awa-footer-trust-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    @{va-scope} .page-wrapper .awa-footer-trust-bar .awa-footer-trust-item {
+        padding: 12px 8px !important;
+    }
+}
+
+// ── 13. Espaços verticais excessivos em páginas internas ────────────────────
+@{va-internals} .page-wrapper {
+    .page-main {
+        padding-top: 12px !important;
+        min-height: 0 !important;
+    }
+
+    .nav-breadcrumbs {
+        margin-bottom: 8px !important;
+        padding-top: 8px !important;
+    }
+
+    .page-title-wrapper,
+    .category-view .page-title-wrapper {
+        margin-bottom: 12px !important;
+        padding-top: 0 !important;
+    }
+
+    .column.main > .wrapper.grid.products-grid:first-of-type {
+        margin-top: 0 !important;
+    }
+}
+
+// ── 10. B2B register — validação inline visível ──────────────────────────────
+@{va-scope}.b2b-register-index .page-wrapper .b2b-register-page {
+    .field._error .label span {
+        color: var(--b2b-reg-c16, #dc2626) !important;
+    }
+
+    .field .mage-error,
+    .field .field-error {
+        display: block !important;
+        color: var(--b2b-reg-c16, #dc2626) !important;
+        font-size: 12px !important;
+        margin-top: 6px !important;
+        line-height: 1.35 !important;
+    }
+
+    .field._error .input-text,
+    .field._error input,
+    .field._error select,
+    .field._error textarea {
+        border-color: var(--b2b-reg-c16, #dc2626) !important;
+        box-shadow: 0 0 0 3px rgb(220 38 38 / 10%) !important;
+    }
+}
+
+// ── 7. Modal PWA — layout mobile e foco ──────────────────────────────────────
+@{va-scope} .awa-pwa-install-prompt:not([hidden]) {
+    .awa-pwa-install-prompt__card {
+        max-height: calc(100vh - 32px) !important;
+        overflow-y: auto !important;
+    }
+
+    .awa-pwa-install-prompt__close {
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+}
+
+body.awa-pwa-modal-open {
+    overflow: hidden !important;
+}

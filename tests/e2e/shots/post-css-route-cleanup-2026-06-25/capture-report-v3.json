@@ -1,0 +1,126 @@
+{
+  "generatedAt": "2026-06-25T08:45:51.378Z",
+  "strategy": "commit+node-sleep+no-js",
+  "results": [
+    {
+      "route": "home",
+      "viewport": "1440x900",
+      "file": "home__vp-1440x900.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/",
+      "bytes": 263851
+    },
+    {
+      "route": "home",
+      "viewport": "768x1024",
+      "file": "home__vp-768x1024.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/",
+      "bytes": 162714
+    },
+    {
+      "route": "home",
+      "viewport": "390x844",
+      "file": "home__vp-390x844.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/",
+      "bytes": 81293
+    },
+    {
+      "route": "plp",
+      "viewport": "1440x900",
+      "file": "plp__vp-1440x900.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "bytes": 84621
+    },
+    {
+      "route": "plp",
+      "viewport": "768x1024",
+      "file": "plp__vp-768x1024.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "bytes": 87155
+    },
+    {
+      "route": "plp",
+      "viewport": "390x844",
+      "file": "plp__vp-390x844.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "bytes": 40261
+    },
+    {
+      "route": "pdp",
+      "viewport": "1440x900",
+      "file": "pdp__vp-1440x900.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "bytes": 144147
+    },
+    {
+      "route": "pdp",
+      "viewport": "768x1024",
+      "file": "pdp__vp-768x1024.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "bytes": 158064
+    },
+    {
+      "route": "pdp",
+      "viewport": "390x844",
+      "file": "pdp__vp-390x844.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "bytes": 38116
+    },
+    {
+      "route": "search_real",
+      "viewport": "1440x900",
+      "file": "search_real__vp-1440x900.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/bagageiros.html",
+      "bytes": 94669
+    },
+    {
+      "route": "search_real",
+      "viewport": "768x1024",
+      "file": "search_real__vp-768x1024.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/bagageiros.html",
+      "bytes": 88997
+    },
+    {
+      "route": "search_real",
+      "viewport": "390x844",
+      "file": "search_real__vp-390x844.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/bagageiros.html",
+      "bytes": 40137
+    },
+    {
+      "route": "cart",
+      "viewport": "1440x900",
+      "file": "cart__vp-1440x900.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/checkout/cart/",
+      "bytes": 84805
+    },
+    {
+      "route": "cart",
+      "viewport": "768x1024",
+      "file": "cart__vp-768x1024.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/checkout/cart/",
+      "bytes": 82421
+    },
+    {
+      "route": "cart",
+      "viewport": "390x844",
+      "file": "cart__vp-390x844.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/checkout/cart/",
+      "bytes": 34284
+    }
+  ]
+}

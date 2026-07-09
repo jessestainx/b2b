@@ -11,6 +11,7 @@ namespace GrupoAwamotos\B2B\Plugin;
 
 use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use GrupoAwamotos\B2B\Helper\Config;
+use GrupoAwamotos\B2B\Helper\LoginRefererParams;
 use Magento\Checkout\Controller\Cart\Add;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Request\Http;
@@ -61,6 +62,11 @@ class BlockCartAddPlugin
      */
     private $request;
 
+    /**
+     * @var LoginRefererParams
+     */
+    private $loginRefererParams;
+
     public function __construct(
         PriceVisibilityInterface $priceVisibility,
         Config $config,
@@ -69,7 +75,8 @@ class BlockCartAddPlugin
         ManagerInterface $messageManager,
         UrlInterface $urlBuilder,
         CustomerSession $customerSession,
-        Http $request
+        Http $request,
+        LoginRefererParams $loginRefererParams
     ) {
         $this->priceVisibility = $priceVisibility;
         $this->config = $config;
@@ -79,6 +86,7 @@ class BlockCartAddPlugin
         $this->urlBuilder = $urlBuilder;
         $this->customerSession = $customerSession;
         $this->request = $request;
+        $this->loginRefererParams = $loginRefererParams;
     }
 
     /**
@@ -102,33 +110,31 @@ class BlockCartAddPlugin
 
             if (!$this->customerSession->isLoggedIn()) {
                 $message = (string) __('Faça login no portal B2B ou cadastre sua empresa para adicionar produtos ao carrinho.');
-                $url = $this->urlBuilder->getUrl('b2b/account/login', $this->getLoginRedirectParams());
+                $url = $this->urlBuilder->getUrl('b2b/account/login', $this->loginRefererParams->toLoginRedirectParams());
 
                 if ($isAjax) {
+                    $this->messageManager->addNoticeMessage($message);
                     return $this->jsonFactory->create()->setData([
                         'error' => $message,
                         'url' => $url,
-                        'success' => '',
+                        'backUrl' => $url,
                     ]);
                 }
 
                 $this->messageManager->addNoticeMessage($message);
-                return $this->redirectFactory->create()->setPath('b2b/account/login', $this->getLoginRedirectParams());
+                return $this->redirectFactory->create()->setPath('b2b/account/login', $this->loginRefererParams->toLoginRedirectParams());
             }
 
-            // Cliente logado mas bloqueado — distinguir motivo
-            if ($this->priceVisibility->isApprovedPendingErp()) {
-                $message = (string) __('Sua tabela de preços está sendo definida. Em breve você poderá realizar compras.');
-            } else {
-                $message = (string) __('Sua conta está pendente de aprovação. Você receberá um e-mail assim que for aprovada.');
-            }
+            // Cliente logado mas bloqueado
+            $message = (string) __('Sua conta está pendente de aprovação. Você receberá um e-mail assim que for aprovada.');
             $url = $this->urlBuilder->getUrl('b2b/account/dashboard');
 
             if ($isAjax) {
+                $this->messageManager->addWarningMessage($message);
                 return $this->jsonFactory->create()->setData([
                     'error' => $message,
                     'url' => $url,
-                    'success' => '',
+                    'backUrl' => $url,
                 ]);
             }
 
@@ -137,25 +143,5 @@ class BlockCartAddPlugin
         }
 
         return $proceed();
-    }
-
-    /**
-     * Preserve the current storefront page when redirecting guests to B2B login.
-     *
-     * @return array<string, string>
-     */
-    private function getLoginRedirectParams(): array
-    {
-        $referer = (string) $this->request->getServer('HTTP_REFERER');
-        if ($referer === '') {
-            return [];
-        }
-
-        $baseUrl = $this->urlBuilder->getBaseUrl();
-        if ($baseUrl === '' || !str_starts_with($referer, $baseUrl)) {
-            return [];
-        }
-
-        return ['referer' => base64_encode($referer)];
     }
 }

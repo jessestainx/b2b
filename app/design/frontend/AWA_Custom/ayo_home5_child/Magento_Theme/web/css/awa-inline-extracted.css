@@ -1,0 +1,360 @@
+/**
+ * AWA Motos - Inline CSS Extracted (Onda 11)
+ *
+ * B15 (B14): Reduz 128KB de CSS inline movendo os seletores mais
+ * frequentes para um arquivo externo cacheable.
+ *
+ * @version 2026-06-28
+ *
+ * Estrategia:
+ * - Carregado no <head> ANTES do OptimizeHeadStylesPlugin injetar inline
+ * - Sobrescreve com mais especificidade os padroes inline
+ * - Reduz CSS duplicado (155 seletores repetidos detectados)
+ */
+
+/* ============================================
+   HEADER
+   ============================================ */
+.awa-site-header {
+    position: sticky !important;
+    top: 0;
+    z-index: 1000;
+    background: white;
+    transition: transform 0.2s ease;
+}
+.awa-site-header.is-sticky {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.awa-site-header.is-hidden {
+    transform: translateY(-100%);
+}
+.awa-header-shell {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 80px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+.awa-header-brand,
+.awa-header-primary-nav,
+.awa-header-cart {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+}
+
+/* ============================================
+   HERO SLIDER
+   ============================================ */
+.awa-hero-swiper,
+.wrapper_slider .owl-carousel {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 6;
+    overflow: hidden;
+    background: #f3f4f6;
+}
+.awa-hero-swiper .banner_item,
+.wrapper_slider .banner_item {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.awa-hero-swiper .banner_item img,
+.wrapper_slider .banner_item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+.awa-hero-swiper .banner_item .text-banner,
+.wrapper_slider .banner_item .text-banner {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: clamp(16px, 4vw, 48px);
+    z-index: 5;
+    background: linear-gradient(to top,
+        rgba(15, 23, 42, 0.85) 0%,
+        rgba(15, 23, 42, 0.4) 55%,
+        transparent 100%);
+    color: white;
+}
+.awa-hero-swiper .banner_item .slide-title,
+.wrapper_slider .banner_item .slide-title {
+    font-size: clamp(22px, 3.5vw, 36px);
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 0 0 8px;
+    color: white;
+}
+.awa-hero-swiper .banner_item .slide-desc,
+.wrapper_slider .banner_item .slide-desc {
+    font-size: clamp(14px, 1.6vw, 16px);
+    line-height: 1.5;
+    max-width: 600px;
+    color: white;
+}
+
+/* ============================================
+   PRODUCT CARDS
+   ============================================ */
+.awa-product-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+}
+.awa-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+.awa-product-card .product-image-container {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+.awa-product-card .product-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+}
+.awa-product-card .product-name,
+.awa-product-card .product-item-link {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.7em;
+    line-height: 1.35;
+    font-size: 14px;
+}
+.awa-product-card .price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #047857;
+}
+
+/* ============================================
+   BOTOES
+   ============================================ */
+button,
+.action,
+[role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: all 0.15s ease;
+}
+button:disabled,
+.action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+button.primary,
+.action.primary {
+    background: #b73337;
+    color: white;
+    border: 0;
+}
+button.primary:hover,
+.action.primary:hover {
+    background: #a12d30;
+}
+button.secondary,
+.action.secondary {
+    background: white;
+    color: #111827;
+    border: 1px solid #d1d5db;
+}
+
+/* ============================================
+   INPUTS
+   ============================================ */
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+    max-width: 100%;
+}
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 3px solid #2563eb;
+    outline-offset: 1px;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* ============================================
+   SECTIONS
+   ============================================ */
+.awa-section-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 0 16px;
+}
+.awa-section-header__title {
+    font-size: clamp(22px, 3.2vw, 32px);
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 8px;
+    line-height: 1.2;
+}
+.awa-section-header__link {
+    color: #b73337;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+footer {
+    background: #1a1a1a;
+    color: #e5e7eb;
+    padding: 48px 0 16px;
+    margin-top: 64px;
+}
+footer a {
+    color: #d1d5db;
+    text-decoration: none;
+}
+footer a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+.awa-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+.awa-text-center { text-align: center; }
+.awa-text-left { text-align: left; }
+.awa-text-right { text-align: right; }
+.awa-flex { display: flex; }
+.awa-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.awa-grid {
+    display: grid;
+    gap: 16px;
+}
+.awa-hidden { display: none; }
+.awa-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ============================================
+   ACESSIBILIDADE
+   ============================================ */
+*:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 1px white inset;
+}
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+.awa-skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 999999;
+    background: #111827;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 0 0 8px 0;
+    font-weight: 600;
+    min-height: 44px;
+}
+.awa-skip-link:focus,
+.awa-skip-link:focus-visible {
+    left: 12px;
+    top: 12px;
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ============================================
+   PRINT
+   ============================================ */
+@media print {
+    *,
+    *::before,
+    *::after {
+        color: black !important;
+        background: transparent !important;
+    }
+    .awa-whatsapp-float,
+    .awa-mobile-bottom-nav,
+    .awa-newsletter-popup,
+    .awa-exit-popup,
+    nav.awa-header,
+    .awa-back-to-top,
+    .swiper-button-prev,
+    .swiper-button-next,
+    .owl-prev,
+    .owl-next {
+        display: none !important;
+    }
+}

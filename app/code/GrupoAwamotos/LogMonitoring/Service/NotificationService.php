@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Service;
@@ -65,7 +66,6 @@ class NotificationService
             if ($this->isWebhookEnabled()) {
                 $results['webhook'] = $this->sendWebhookAlert($alertData);
             }
-
         } catch (\Exception $e) {
             $this->logger->error('Error sending alert notifications: ' . $e->getMessage());
         }
@@ -152,7 +152,6 @@ class NotificationService
             $this->inlineTranslation->resume();
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('Error sending email alert: ' . $e->getMessage());
             $this->inlineTranslation->resume();
@@ -205,7 +204,6 @@ class NotificationService
 
             $httpCode = $this->slackClient->getStatus();
             return $httpCode >= 200 && $httpCode < 300;
-
         } catch (\Exception $e) {
             $this->logger->error('Error sending Slack alert: ' . $e->getMessage());
             return false;
@@ -236,7 +234,6 @@ class NotificationService
 
             $httpCode = $this->webhookClient->getStatus();
             return $httpCode >= 200 && $httpCode < 300;
-
         } catch (\Exception $e) {
             $this->logger->error('Error sending webhook alert: ' . $e->getMessage());
             return false;
@@ -366,6 +363,6 @@ class NotificationService
 
     private function getEnvironment(): string
     {
-        return $_ENV['MAGE_MODE'] ?? 'production';
+        return getenv('MAGE_MODE') ?: 'production';
     }
 }

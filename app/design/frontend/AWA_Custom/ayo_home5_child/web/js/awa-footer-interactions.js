@@ -1,33 +1,59 @@
 define([
     'jquery',
-    'swiper'
-], function ($, Swiper) {
+    'swiper',
+    'GrupoAwamotos_Theme/js/awa-swiper-shared'
+], function ($, Swiper, swiperShared) {
     'use strict';
 
     return function (config, element) {
         var $root = $(element);
-        let mobileBreakpoint = Number(config.mobileBreakpoint) || 768;
-        let titleSelector = config.titleSelector || '.footer-container .velaFooterTitle, .footer-container .footer-block-title';
-        let panelSelector = config.panelSelector || '.velaContent, .footer-block-content';
-        let sliderSelector = config.sliderSelector || '.footer_brand_list_slider';
-        let brandSliderInitialized = false;
-        let resizeDelay = Number(config.resizeDelay) || 120;
-        let resizeTimer = null;
+        var mobileBreakpoint = Number(config.mobileBreakpoint) || 768;
+        var titleSelector = config.titleSelector || '.awa-footer-section__toggle, .footer-container .footer-block-title';
+        var panelSelector = config.panelSelector || '.velaContent, .footer-block-content';
+        var sliderSelector = config.sliderSelector || '.footer_brand_list_slider';
+        var brandSliderInitialized = false;
+        var resizeDelay = Number(config.resizeDelay) || 120;
+        var resizeTimer = null;
 
-        if (!$root.length) {
+        if (!$root.length || $root.data('awaFooterInteractionsInit')) {
             return;
         }
+
+        $root.data('awaFooterInteractionsInit', 1);
+        window.__awaFooterInteractionsHomeInit = true;
 
         function isMobileViewport() {
             return window.matchMedia('(max-width:' + String(mobileBreakpoint - 1) + 'px)').matches;
         }
 
-        function prefersReducedMotion() {
-            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        function shouldAnimatePanels() {
+            return isMobileViewport() && !swiperShared.prefersReducedMotion();
         }
 
-        function getPanel($title) {
-            return $title.next(panelSelector).first();
+        function getPanel($trigger) {
+            var $directNext = $trigger.next(panelSelector).first();
+
+            if ($directNext.length) {
+                return $directNext;
+            }
+
+            if ($trigger.is('.awa-footer-section__toggle')) {
+                return $trigger.closest('.velaFooterTitle, .footer-block-title')
+                    .next(panelSelector)
+                    .first();
+            }
+
+            return $trigger.closest('.velaFooterMenu, .vela-content, .footer-block')
+                .find(panelSelector)
+                .first();
+        }
+
+        function getSectionHeading($trigger) {
+            if ($trigger.is('.awa-footer-section__toggle')) {
+                return $trigger.closest('.velaFooterTitle, .footer-block-title');
+            }
+
+            return $trigger;
         }
 
         function normalizeLabel(value) {
@@ -37,7 +63,7 @@ define([
         function ensureLabelAttributes($elements) {
             $elements.each(function () {
                 var $element = $(this);
-                let label = normalizeLabel($element.attr('aria-label') || $element.attr('title') || $element.text());
+                var label = normalizeLabel($element.attr('aria-label') || $element.attr('title') || $element.text());
 
                 if (!label) {
                     return;
@@ -53,40 +79,72 @@ define([
             });
         }
 
-        function setPanelState($title, shouldExpand) {
-            var $panel = getPanel($title);
-
-            $title.toggleClass('active', shouldExpand)
-                .attr('aria-expanded', shouldExpand ? 'true' : 'false');
-
+        function applyPanelVisibility($panel, shouldExpand, animate) {
             if (!$panel.length) {
                 return;
             }
 
-            $panel.attr('aria-hidden', shouldExpand ? 'false' : 'true')
-                .prop('hidden', !shouldExpand);
+            $panel.attr('aria-hidden', shouldExpand ? 'false' : 'true');
+            $panel.toggleClass('active', shouldExpand);
 
-            if (shouldExpand) {
-                $panel.stop(true, true).slideDown(180);
-                return;
+            var $menu = $panel.closest('.velaFooterMenu');
+
+            if ($menu.length) {
+                $menu.toggleClass('is-open', shouldExpand);
             }
 
-            $panel.stop(true, true).slideUp(180);
-        }
+            if (shouldExpand) {
+                $panel.removeAttr('inert').prop('hidden', false);
 
-        function syncFooterSections() {
-            let isMobile = isMobileViewport();
-
-            $root.find(titleSelector).each(function () {
-                var $title = $(this);
-                let isExpanded = $title.attr('aria-expanded') === 'true';
-
-                if (!isMobile) {
-                    setPanelState($title, true);
+                if (animate) {
+                    $panel.stop(true, true).slideDown(180);
                     return;
                 }
 
-                setPanelState($title, isExpanded);
+                $panel.stop(true, true).css('display', '');
+                return;
+            }
+
+            $panel.prop('hidden', true);
+
+            if (animate) {
+                $panel.stop(true, true).slideUp(180, function () {
+                    $panel.attr('inert', '');
+                });
+                return;
+            }
+
+            $panel.stop(true, true).hide().attr('inert', '');
+        }
+
+        function setPanelState($trigger, shouldExpand) {
+            var $panel = getPanel($trigger);
+            var $heading = getSectionHeading($trigger);
+            var animate = shouldAnimatePanels();
+
+            $trigger.toggleClass('active', shouldExpand)
+                .attr('aria-expanded', shouldExpand ? 'true' : 'false');
+
+            if ($heading.length) {
+                $heading.toggleClass('active', shouldExpand);
+            }
+
+            applyPanelVisibility($panel, shouldExpand, animate);
+        }
+
+        function syncFooterSections() {
+            var isMobile = isMobileViewport();
+
+            $root.find(titleSelector).each(function () {
+                var $trigger = $(this);
+                var isExpanded = $trigger.attr('aria-expanded') === 'true';
+
+                if (!isMobile) {
+                    setPanelState($trigger, true);
+                    return;
+                }
+
+                setPanelState($trigger, isExpanded);
             });
         }
 
@@ -102,16 +160,35 @@ define([
             $root.find(titleSelector)
                 .off('.awaFooter')
                 .on('click.awaFooter', function (event) {
-                    var $title = $(this);
+                    var $trigger = $(this);
 
                     if (!isMobileViewport()) {
                         return;
                     }
 
                     event.preventDefault();
-                    setPanelState($title, $title.attr('aria-expanded') !== 'true');
+
+                    var willExpand = $trigger.attr('aria-expanded') !== 'true';
+
+                    if (willExpand) {
+                        $root.find(titleSelector).each(function () {
+                            var $otherTrigger = $(this);
+
+                            if ($otherTrigger.is($trigger)) {
+                                return;
+                            }
+
+                            setPanelState($otherTrigger, false);
+                        });
+                    }
+
+                    setPanelState($trigger, willExpand);
                 })
                 .on('keydown.awaFooter', function (event) {
+                    if ($(this).is('button')) {
+                        return;
+                    }
+
                     if (event.key !== 'Enter' && event.key !== ' ') {
                         return;
                     }
@@ -123,29 +200,28 @@ define([
 
         function ensureFooterSectionAccessibility() {
             $root.find(titleSelector).each(function (index) {
-                var $title = $(this);
-                var $panel = getPanel($title);
-                let titleId = $title.attr('id') || 'awa-footer-title-' + String(index + 1);
+                var $trigger = $(this);
+                var $panel = getPanel($trigger);
+                var triggerId = $trigger.attr('id') || 'awa-footer-toggle-' + String(index + 1);
 
-                $title.attr({
-                    id: titleId,
-                    tabindex: '0'
-                });
-                // role="button" é inválido em h1-h6 (ARIA 1.2 §6.5).
-                // accordion funciona via aria-expanded + aria-controls + tabindex.
-                $title.removeAttr('role');
+                $trigger.attr('id', triggerId);
 
-                if (!$title.attr('aria-expanded')) {
-                    $title.attr('aria-expanded', isMobileViewport() ? 'false' : 'true');
-                }
+                $trigger.attr('aria-expanded', isMobileViewport() ? 'false' : 'true');
 
                 if (!$panel.length) {
                     return;
                 }
 
-                $panel.attr('id', $panel.attr('id') || 'awa-footer-panel-' + String(index + 1));
-                $panel.attr('aria-labelledby', titleId);
-                $title.attr('aria-controls', $panel.attr('id'));
+                var panelId = $panel.attr('id') || 'awa-footer-panel-' + String(index + 1);
+
+                $panel.attr('id', panelId);
+
+                if (!$panel.attr('role')) {
+                    $panel.attr('role', 'region');
+                }
+
+                $panel.attr('aria-labelledby', triggerId);
+                $trigger.attr('aria-controls', panelId);
             });
 
             ensureLabelAttributes($root.find('a, button'));
@@ -154,7 +230,6 @@ define([
             $('.fixed-right .fixed-right-ul .scroll-top').each(function () {
                 var $element = $(this);
 
-                // Only add role="button" if no <button> child exists (e.g. inserted via CMS block or awa-footer-ux.js)
                 if (!$element.find('button').length) {
                     $element.attr({
                         role: 'button',
@@ -174,9 +249,9 @@ define([
 
         function initBrandSlider() {
             var $slider = $root.find(sliderSelector);
-            let slidesCount;
-            let maxSlidesPerView;
-            let shouldLoop;
+            var slidesCount;
+            var maxSlidesPerView;
+            var shouldLoop;
 
             if (!$slider.length || brandSliderInitialized || $slider.data('awaSwiperInit')) {
                 return;
@@ -186,7 +261,6 @@ define([
             $slider.data('awaSwiperInit', 1);
             $slider.attr('data-awa-footer-slider-ready', '1');
 
-            // Wrap children in swiper markup if not already present
             if (!$slider.find('.swiper-wrapper').length) {
                 $slider.addClass('swiper');
                 $slider.children().wrap('<div class="swiper-slide"></div>');
@@ -208,11 +282,7 @@ define([
                     nextEl: $slider.find('.swiper-button-next')[0],
                     prevEl: $slider.find('.swiper-button-prev')[0]
                 },
-                autoplay: prefersReducedMotion() ? false : {
-                    delay: 3000,
-                    disableOnInteraction: false,
-                    pauseOnMouseEnter: true
-                },
+                autoplay: swiperShared.prefersReducedMotion() ? false : swiperShared.autoplayConfig(3000),
                 a11y: {
                     prevSlideMessage: 'Marca anterior',
                     nextSlideMessage: 'Próxima marca'
@@ -227,8 +297,12 @@ define([
         }
 
         function scheduleBrandSliderInit() {
+            if (config.enableBrandSlider === false) {
+                return;
+            }
+
             var $slider = $root.find(sliderSelector);
-            let sliderElement;
+            var sliderElement;
 
             if (!$slider.length || brandSliderInitialized) {
                 return;
@@ -266,8 +340,6 @@ define([
             window.setTimeout(initBrandSlider, 250);
         }
 
-
-        // === Categorias Expand Toggle ===
         function initCategoriesToggle() {
             var $toggleBtn = $root.closest('.page_footer, .page-footer')
                 .find('[data-awa-categories-toggle]');
@@ -278,18 +350,67 @@ define([
 
             $toggleBtn.each(function () {
                 var $btn = $(this);
-                let panelId = $btn.attr('aria-controls');
+
+                if ($btn.data('awaCategoriesToggleBound')) {
+                    return;
+                }
+
+                $btn.data('awaCategoriesToggleBound', 1);
+
+                var panelId = $btn.attr('aria-controls');
                 var $panel = panelId ? $('#' + panelId) : $btn.parent().find('.awa-footer-categories-expand__panel');
 
-                $btn.on('click.awaCategories', function () {
-                    let expanded = $btn.attr('aria-expanded') === 'true';
-                    $btn.attr('aria-expanded', String(!expanded));
-                    $panel.attr('aria-hidden', String(expanded));
-                    if (expanded) {
-                        $panel.slideUp(200);
-                    } else {
-                        $panel.slideDown(200);
+                if (!$panel.length) {
+                    return;
+                }
+
+                function syncDesktopCategories() {
+                    if (isMobileViewport()) {
+                        if (!$btn.data('awaCategoriesUserToggled')) {
+                            $btn.attr('aria-expanded', 'false').removeClass('is-expanded');
+                            applyPanelVisibility($panel, false, false);
+                        }
+
+                        return;
                     }
+
+                    $btn.attr('aria-expanded', 'true').addClass('is-expanded');
+                    applyPanelVisibility($panel, true, false);
+                }
+
+                syncDesktopCategories();
+
+                $(window).off('resize.awaCategoriesFooter').on('resize.awaCategoriesFooter', function () {
+                    window.clearTimeout(window.__awaFooterCategoriesResizeTimer);
+                    window.__awaFooterCategoriesResizeTimer = window.setTimeout(syncDesktopCategories, 120);
+                });
+
+                $btn.on('click.awaCategories keydown.awaCategories', function (event) {
+                    if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') {
+                        return;
+                    }
+
+                    if (!isMobileViewport()) {
+                        if (event.type === 'keydown') {
+                            event.preventDefault();
+                        }
+
+                        syncDesktopCategories();
+                        return;
+                    }
+
+                    if (event.type === 'keydown') {
+                        event.preventDefault();
+                    }
+
+                    var expanded = $btn.attr('aria-expanded') === 'true';
+                    var willExpand = !expanded;
+                    var animate = !swiperShared.prefersReducedMotion();
+
+                    $btn.data('awaCategoriesUserToggled', 1);
+                    $btn.attr('aria-expanded', String(willExpand));
+                    $btn.toggleClass('is-expanded', willExpand);
+                    applyPanelVisibility($panel, willExpand, animate);
                 });
             });
         }
@@ -298,6 +419,7 @@ define([
         ensureFooterSectionAccessibility();
         bindFooterSections();
         syncFooterSections();
+        $root.addClass('awa-footer-js-ready');
         scheduleBrandSliderInit();
 
         $(window)

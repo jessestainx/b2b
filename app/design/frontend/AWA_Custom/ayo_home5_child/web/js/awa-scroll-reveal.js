@@ -17,10 +17,11 @@ define([], function () {
     let REVEALED_CLASS = 'awa-revealed';
     let REVEAL_SELECTOR = '.awa-reveal, .awa-reveal-stagger';
     let THRESHOLD = 0.12;
-    let ROOT_MARGIN = '0px 0px -40px 0px';
+    let ROOT_MARGIN = '0px 0px 400px 0px';
 
     /* Sections auto-tagged for reveal (homepage, PLP, footer) */
     let AUTO_REVEAL_SELECTORS = [
+        '.awa-hero-b2b-cta',
         '.awa-home-section',
         '.awa-carousel-section',
         '.awa-footer-trust-bar',
@@ -50,6 +51,11 @@ define([], function () {
             elements = document.querySelectorAll(AUTO_REVEAL_SELECTORS[i]);
             for (let j = 0; j < elements.length; j++) {
                 el = elements[j];
+                /* Prateleiras AWA já têm shimmer/pending próprio — evita animação dupla */
+                if (el.classList.contains('awa-carousel-section') &&
+                    el.querySelector('.awa-shelf--carousel')) {
+                    continue;
+                }
                 if (!el.classList.contains('awa-reveal') &&
                     !el.classList.contains('awa-reveal-stagger') &&
                     !el.classList.contains(REVEALED_CLASS)) {
@@ -94,30 +100,51 @@ define([], function () {
 
         let targets = document.querySelectorAll(REVEAL_SELECTOR);
         for (let j = 0; j < targets.length; j++) {
-            /* Skip already-visible above-fold elements */
             let rect = targets[j].getBoundingClientRect();
-            if (rect.top < window.innerHeight * 0.85 && rect.top >= 0) {
+            if (rect.top < window.innerHeight + 400 && rect.bottom > -100) {
                 targets[j].classList.add(REVEALED_CLASS);
             } else {
                 observer.observe(targets[j]);
             }
         }
+
+        /* Fast scroll: revelar seções que entram no viewport antes do IO disparar */
+        var revealVisible = function () {
+            var pending = document.querySelectorAll(REVEAL_SELECTOR + ':not(.' + REVEALED_CLASS + ')');
+            for (var i = 0; i < pending.length; i++) {
+                var r = pending[i].getBoundingClientRect();
+                if (r.top < window.innerHeight + 400 && r.bottom > -100) {
+                    pending[i].classList.add(REVEALED_CLASS);
+                }
+            }
+        };
+        window.addEventListener('scroll', revealVisible, { passive: true });
+        window.addEventListener('wheel', revealVisible, { passive: true });
     }
 
     return function () {
+        if (document.body && (
+            document.body.classList.contains('catalog-category-view') ||
+            document.body.classList.contains('catalogsearch-result-index')
+        )) {
+            return;
+        }
+
         if (prefersReducedMotion()) {
             /* Show everything immediately, no animations */
             return;
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function () {
-                autoTag();
-                initObserver();
-            });
-        } else {
+        function run() {
+            document.body.classList.add('awa-scroll-ready');
             autoTag();
             initObserver();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', run);
+        } else {
+            run();
         }
     };
 });

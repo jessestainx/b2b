@@ -18,8 +18,8 @@ import {
   navigateTo, css, px, isVisible, hasNoOverflow,
   TOKENS, COMMON,
 } from '../helpers/visual-audit.helpers';
-
-const BASE = 'https://awamotos.com';
+import { targetUrl } from '../helpers/target-url';
+import { blockOptionalThirdParty } from '../helpers/third-party-block';
 
 /* Seletores do footer AWA */
 const FOOTER = {
@@ -49,12 +49,18 @@ async function scrollToFooter(page: Page): Promise<void> {
   await page.waitForTimeout(1_500).catch(() => {});
 }
 
+async function navigateToFooterHome(page: Page): Promise<boolean> {
+  await blockOptionalThirdParty(page.context());
+  return navigateTo(page, targetUrl('/', 'visual-audit-footer'));
+}
+
 let sharedPage: Page;
 
 test.beforeAll(async ({ browser }) => {
   const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
+  await blockOptionalThirdParty(ctx);
   sharedPage = await ctx.newPage();
-  const ok = await navigateTo(sharedPage, BASE);
+  const ok = await navigateTo(sharedPage, targetUrl('/', 'visual-audit-footer'));
   if (!ok) throw new Error('Homepage não carregou para testes de footer');
   await sharedPage.waitForTimeout(2_000);
   await scrollToFooter(sharedPage);
@@ -230,7 +236,7 @@ test.describe('Footer — Layout e responsividade', () => {
 test.describe('Footer — Screenshots baseline', () => {
   test('Screenshot desktop — footer completo', async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 768 });
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToFooterHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
     await scrollToFooter(page);
@@ -246,7 +252,7 @@ test.describe('Footer — Screenshots baseline', () => {
 
   test('Screenshot mobile — footer 375px', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToFooterHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
     await scrollToFooter(page);

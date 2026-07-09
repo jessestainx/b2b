@@ -1,0 +1,973 @@
+// _awa-home-visual-bugfixes-2026-06-28.less
+// =============================================================
+// AWA Motos — Home Visual Bugfixes (Phase 3D.2.6)
+//
+// FONTE CANÔNICA para o bundle `awa-home-visual-bugfixes-2026-06-28.min.css`.
+// Compilado manualmente (`npx clean-css-cli`); carregado async via
+// `Magento_Theme::html/awa-home-visual-bugfixes-css.phtml` apenas em
+// `cms_index_index`.
+//
+// Bugs resolvidos:
+//   P2: BUG-MOB-SEARCH-001, BUG-MOB-TOP-002, BUG-MOB-HERO-003,
+//       BUG-B2B-BAR-004, BUG-BP-360-009, BUG-ROUTE-CONSISTENCY-006,
+//       BUG-RED-USAGE-012
+//   P3: BUG-IMPORTANT-AUDIT-013
+//
+// Especificidade progressiva (sem !important global).
+// Touch targets ≥44px. prefers-reduced-motion respeitado.
+// Última atualização: 2026-06-28
+// =============================================================
+
+// ── §0  CONTAINER & GRID ─────────────────────────────────────
+.awa-home-shell-max: 1280px;
+.awa-home-pad: ~"clamp(16px, 3.5vw, 32px)";
+.awa-home-pad-sm: 16px;
+.awa-home-section-gap: ~"clamp(32px, 5vw, 56px)";
+.awa-radius-sm: 6px;
+.awa-radius-md: 12px;
+
+html body#html-body.cms-index-index .page-wrapper .ayo-home5-wrapper {
+    max-width: @awa-home-shell-max;
+    margin-inline: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-carousel-shell,
+html body#html-body.cms-index-index .page-wrapper .awa-home-section,
+html body#html-body.cms-index-index .page-wrapper [class*="home-products-section"],
+html body#html-body.cms-index-index .page-wrapper .awa-category-carousel {
+    max-width: @awa-home-shell-max;
+    margin-inline: auto;
+    padding-inline: @awa-home-pad;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+// Espaçamento entre seções via gap consistente
+html body#html-body.cms-index-index .page-wrapper .awa-carousel-shell + .awa-carousel-shell,
+html body#html-body.cms-index-index .page-wrapper .awa-home-section + .awa-home-section,
+html body#html-body.cms-index-index .page-wrapper [class*="home-products-section"] + [class*="home-products-section"] {
+    margin-top: @awa-home-section-gap;
+}
+
+// Zebra consistente
+html body#html-body.cms-index-index .page-wrapper .awa-home-section:nth-of-type(even) {
+    background-color: #fafafa;
+}
+
+// ── §1  BUG-MOB-SEARCH-001 ───────────────────────────────────
+// Mata pseudo-elementos redundantes do tema Ayo que injetam lupa extra
+html body#html-body .block.block-search .actions button.action.search::before,
+html body#html-body .block.block-search .actions button.action.search::after,
+html body#html-body .block.block-search .actions button.action.search i.icon::before,
+html body#html-body .awa-professional-search button.action.search::before,
+html body#html-body .awa-professional-search button.action.search::after {
+    content: none;
+    display: none;
+    width: 0;
+    height: 0;
+    background-image: none;
+}
+
+// Esconde clear button nativo do Safari/iOS
+html body#html-body .block.block-search input[type="search"]::-webkit-search-cancel-button,
+html body#html-body .block.block-search input[type="search"]::-webkit-search-decoration,
+html body#html-body .awa-professional-search input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0;
+    height: 0;
+    background-image: none;
+}
+
+html body#html-body .block.block-search button.action.search svg,
+html body#html-body .awa-professional-search button.action.search svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    margin-inline: auto;
+}
+
+html body#html-body .block.block-search .field.search .control::after,
+html body#html-body .block.block-search .field.search .control::before {
+    content: none;
+    display: none;
+}
+
+// ── §2  BUG-MOB-TOP-002 — topo mobile respirável ──────────────
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .header-wrapper-sticky {
+        padding-block: 0;
+        gap: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .awa-b2b-promo-bar {
+        min-height: 36px;
+        padding-block: 6px;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .awa-b2b-promo-bar .container {
+        padding-inline: @awa-home-pad-sm;
+        gap: 8px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .awa-main-header {
+        min-height: 64px;
+        height: 64px;
+        padding-block: 8px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .awa-header-search-col {
+        margin-top: 8px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .awa-header-search-col,
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form {
+        height: 44px;
+        min-height: 44px;
+        max-height: 44px;
+    }
+}
+
+// ── §3  BUG-B2B-BAR-004 — barra B2B "system message" ──────────
+html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar {
+    background: #f8f8f9;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5);
+    color: var(--awa-text, #333);
+    box-shadow: none;
+    background-image: none;
+}
+
+html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar a {
+    color: var(--awa-text, #333);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 180ms ease;
+}
+
+html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar a:hover,
+html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar a:focus-visible {
+    color: var(--awa-primary, #b73337);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-promo-bar-cta {
+    background-color: transparent;
+    color: var(--awa-primary, #b73337);
+    border: 1px solid var(--awa-primary, #b73337);
+    border-radius: @awa-radius-sm;
+    padding: 4px 10px;
+    font-weight: 600;
+    transition: background-color 180ms ease, color 180ms ease;
+}
+
+html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-promo-bar-cta:hover,
+html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar .awa-promo-bar-cta:focus-visible {
+    background-color: var(--awa-primary, #b73337);
+    color: #fff;
+}
+
+// ── §4  BUG-MOB-HERO-003 — hero mobile compacto ───────────────
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content .hero-section {
+        max-height: 320px;
+        min-height: 280px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .swiper-slide,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content .hero-section .hero-slide {
+        max-height: 320px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .swiper-button-next,
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .swiper-button-prev,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content .hero-section .owl-nav .owl-prev,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content .hero-section .owl-nav .owl-next {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+        opacity: 0.55;
+        transform: translateY(0);
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .swiper-button-next:hover,
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .swiper-button-prev:hover {
+        opacity: 1;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta .awa-hero-cta,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content .hero-section .hero-cta {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta .awa-hero-cta .btn,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content .hero-section .hero-cta .btn {
+        min-height: 40px;
+        padding-block: 8px;
+        padding-inline: 14px;
+        font-size: 13px;
+    }
+}
+
+// ── §4.1 BUG-HERO-PAUSE-010 — controle pause/play do hero ───
+html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .awa-hero-pause-btn {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.48);
+    color: #fff;
+    font-size: 11px;
+    line-height: 1;
+    z-index: 20;
+    cursor: pointer;
+    transition: background 180ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .awa-hero-pause-btn--visible {
+    display: inline-flex;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .awa-hero-pause-btn:hover,
+html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .awa-hero-pause-btn:active {
+    background: rgba(0, 0, 0, 0.78);
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .awa-hero-pause-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 2px;
+}
+
+// ── §5  BUG-BP-360-009 — sem overflow horizontal em 360px ────
+html,
+html body#html-body {
+    overflow-x: clip;
+}
+
+@media (max-width: 374px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-carousel-shell,
+    html body#html-body.cms-index-index .page-wrapper .awa-home-section,
+    html body#html-body.cms-index-index .page-wrapper .awa-category-carousel {
+        padding-inline: 12px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .awa-main-header__inner,
+    html body#html-body.cms-index-index .page-wrapper .awa-site-header .awa-header-inner {
+        padding-inline: 12px;
+    }
+}
+
+html body#html-body .page-wrapper .awa-carousel-shell,
+html body#html-body .page-wrapper .awa-shelf--carousel,
+html body#html-body .page-wrapper .swiper,
+html body#html-body .page-wrapper .owl-carousel {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+html body#html-body.cms-index-index .content-top-home .product-thumb img,
+html body#html-body.cms-index-index .content-top-home .item-product .product-image-photo,
+html body#html-body.cms-index-index .awa-category-carousel__icon img,
+html body#html-body.cms-index-index .awa-home-section img {
+    max-width: 100%;
+    height: auto;
+}
+
+// Home mobile: o CMS block `home_product_promo_banners` usa imagens 463x349.
+// Sem estes limites o reel herda a largura intrínseca da imagem e gera overflow horizontal.
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners {
+        overflow-x: clip;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners .container,
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners__grid {
+        max-inline-size: 100%;
+        min-inline-size: 0;
+        inline-size: 100%;
+        box-sizing: border-box;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners__grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners__grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners__item {
+        flex: 0 0 ~"min(82vw, 320px)";
+        inline-size: ~"min(82vw, 320px)";
+        max-inline-size: ~"min(82vw, 320px)";
+        min-inline-size: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners__item picture,
+    html body#html-body.cms-index-index .page-wrapper .awa-product-promo-banners__item img {
+        display: block;
+        inline-size: 100%;
+        max-inline-size: 100%;
+    }
+}
+
+// ── §6  BUG-RED-USAGE-012 — vermelho semântico ───────────────
+html body#html-body.cms-index-index .page-wrapper .awa-home-section-title,
+html body#html-body.cms-index-index .page-wrapper .awa-section-title,
+html body#html-body.cms-index-index .page-wrapper .awa-carousel-title,
+html body#html-body.cms-index-index .page-wrapper h2.awa-title,
+html body#html-body.cms-index-index .page-wrapper h3.awa-title {
+    color: #1a1a1a;
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+html body#html-body.cms-index-index .page-wrapper .product-label,
+html body#html-body.cms-index-index .page-wrapper .label-new,
+html body#html-body.cms-index-index .page-wrapper .label-sale,
+html body#html-body.cms-index-index .page-wrapper .product-badge {
+    background: #f4f4f5;
+    color: #333;
+    border: 1px solid #e5e5e5;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: @awa-radius-sm;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-home-section[data-section="best-sellers"],
+html body#html-body.cms-index-index .page-wrapper .bestseller-section,
+html body#html-body.cms-index-index .page-wrapper .best-sellers-section {
+    border-top: 2px solid var(--awa-primary, #b73337);
+    border-top-width: 2px;
+}
+
+html body#html-body.cms-index-index .page-wrapper .action.primary,
+html body#html-body.cms-index-index .page-wrapper .btn-primary,
+html body#html-body.cms-index-index .page-wrapper .awa-cta-primary,
+html body#html-body.cms-index-index .page-wrapper button[type="submit"].action.primary {
+    background: var(--awa-primary, #b73337);
+    color: #fff;
+    border: 1px solid var(--awa-primary, #b73337);
+    font-weight: 600;
+    transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+html body#html-body.cms-index-index .page-wrapper .action.primary:hover,
+html body#html-body.cms-index-index .page-wrapper .action.primary:focus-visible,
+html body#html-body.cms-index-index .page-wrapper .btn-primary:hover,
+html body#html-body.cms-index-index .page-wrapper .btn-primary:focus-visible {
+    background: #8e2629;
+    border-color: #8e2629;
+}
+
+html body#html-body :focus-visible {
+    outline: 2.5px solid var(--awa-primary, #b73337);
+    outline-offset: 2px;
+    border-radius: @awa-radius-sm;
+}
+
+// ── §7  CONSISTÊNCIA — Tipografia padronizada ─────────────────
+html body#html-body.cms-index-index .page-wrapper .awa-home-section-title {
+    font-family: 'Rubik', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.25rem, 1rem + 1.2vw, 1.75rem);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-home-section-subtitle,
+html body#html-body.cms-index-index .page-wrapper .awa-section-subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+html body#html-body.cms-index-index .content-top-home .item-product .product-item-actions,
+html body#html-body.cms-index-index .content-top-home .item-product .actions-primary {
+    margin-top: auto;
+    padding-top: 12px;
+}
+
+// ── §8  TOUCH TARGETS & A11Y ──────────────────────────────────
+html body#html-body.cms-index-index .page-wrapper .awa-category-carousel .awa-cat-item a,
+html body#html-body.cms-index-index .page-wrapper .awa-category-carousel__item a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: 6px;
+}
+
+// ── §9  PREFERS-REDUCED-MOTION ───────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body.cms-index-index .page-wrapper *,
+    html body#html-body.cms-index-index .page-wrapper *::before,
+    html body#html-body.cms-index-index .page-wrapper *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+// ── §10  HOVER STATES CONSISTENTES ───────────────────────────
+html body#html-body.cms-index-index .page-wrapper a,
+html body#html-body.cms-index-index .page-wrapper button,
+html body#html-body.cms-index-index .page-wrapper .action,
+html body#html-body.cms-index-index .page-wrapper .item-product {
+    transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+html body#html-body.cms-index-index .page-wrapper .item-product:hover {
+    transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body.cms-index-index .page-wrapper .item-product:hover {
+        transform: none;
+    }
+}
+
+// ── §11  IMPRESSÃO ───────────────────────────────────────────
+@media print {
+    html body#html-body.cms-index-index .page-wrapper .awa-b2b-promo-bar,
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .swiper-button-next,
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-swiper .swiper-button-prev,
+    html body#html-body.cms-index-index .page-wrapper .owl-nav,
+    html body#html-body.cms-index-index .page-wrapper .awa-whatsapp-float {
+        display: none !important;
+    }
+}
+// ── §12  BUG-H-005  Hero CTA altura excessiva em mobile ──────────────────────
+// Evidência: .awa-hero-inline-cta a height:264px em 390px sem JS
+// Fix: limitar altura do CTA e centralizar verticalmente
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-inline-cta a,
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-inline-cta .action.primary,
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta .action.primary,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content .hero-section .action.primary {
+        max-height: 56px !important;
+        height: auto !important;
+        min-height: 44px !important;
+        align-self: flex-start !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+    }
+}
+
+// ── §13  BUG-H-009  Search bar estreita em 1366px (28% viewport) ─────────────
+// Evidência: search bar max-width colapsado em 1366px (resultado do grid primary-row)
+// Fix: garantir que o search column tenha largura mínima razoável em desktop
+@media (min-width: 992px) {
+    html body#html-body .page-wrapper .awa-site-header .awa-header-search-col {
+        min-width: 280px !important;
+        flex: 1 1 0 !important;
+    }
+    html body#html-body .page-wrapper .awa-site-header .awa-header-search-col #search_mini_form {
+        width: 100% !important;
+        max-width: none !important;
+    }
+}
+
+// ── §14  BUG-H-011  Seções sem gap vertical na home ──────────────────────────
+// Evidência: gap:0px entre seções (top-home-content items)
+// Fix: gap mínimo entre seções na home
+html body#html-body.cms-index-index .page-wrapper .content-top-home .top-home-content + .top-home-content,
+html body#html-body.cms-index-index .page-wrapper .content-top-home .awa-home-section + .awa-home-section {
+    margin-top: clamp(12px, 2vw, 24px) !important;
+}
+
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .content-top-home .top-home-content + .top-home-content,
+    html body#html-body.cms-index-index .page-wrapper .content-top-home .awa-home-section + .awa-home-section {
+        margin-top: 12px !important;
+    }
+}
+
+// ── §15  HOME PREMIUM POLISH — footer, B2B notice, carousel edges ───────────
+html body#html-body.cms-index-index {
+    --awa-home-surface: var(--awa-bg, Canvas);
+    --awa-home-surface-soft: var(--awa-surface-subtle, color-mix(in srgb, CanvasText 3%, Canvas));
+    --awa-home-ink: var(--awa-text, CanvasText);
+    --awa-home-muted: var(--awa-muted, color-mix(in srgb, CanvasText 62%, Canvas));
+    --awa-home-line: var(--awa-border, color-mix(in srgb, CanvasText 12%, Canvas));
+    --awa-home-brand: var(--awa-primary, currentColor);
+    --awa-home-footer-bg: color-mix(in srgb, var(--awa-home-brand) 82%, black);
+    --awa-home-footer-ink: white;
+    --awa-home-footer-muted: color-mix(in srgb, white 78%, transparent);
+    --awa-home-footer-line: color-mix(in srgb, white 24%, transparent);
+}
+
+// Aviso B2B: o SVG herdado ocupava 292px no mobile e parecia bug de icone gigante.
+html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice {
+    margin-block: clamp(14px, 2.4vw, 28px);
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice .container {
+    max-width: @awa-home-shell-max;
+    padding-inline: @awa-home-pad;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__inner {
+    align-items: center;
+    background: var(--awa-home-surface);
+    border: 1px solid var(--awa-home-line);
+    border-radius: @awa-radius-md;
+    box-shadow: none;
+    box-sizing: border-box;
+    color: var(--awa-home-ink);
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 56px minmax(0, 1fr);
+    min-height: 0;
+    padding: clamp(16px, 2.2vw, 22px);
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__icon {
+    background: color-mix(in srgb, var(--awa-home-brand) 8%, var(--awa-home-surface));
+    border: 1px solid color-mix(in srgb, var(--awa-home-brand) 18%, var(--awa-home-line));
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--awa-home-brand);
+    display: block;
+    height: 52px;
+    padding: 12px;
+    width: 52px;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__text {
+    color: var(--awa-home-ink);
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 72ch;
+    text-wrap: pretty;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__link {
+    color: var(--awa-home-brand);
+    font-weight: 700;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__hint {
+    font-weight: 700;
+}
+
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice {
+        margin-block: 10px 18px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__inner {
+        gap: 12px;
+        grid-template-columns: 48px minmax(0, 1fr);
+        padding: 14px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__icon {
+        height: 44px;
+        padding: 10px;
+        width: 44px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-home-pricing-notice__text {
+        font-size: 14px;
+        line-height: 1.45;
+    }
+}
+
+// Carrosseis: manter comportamento horizontal com margem final e snap limpo.
+html body#html-body.cms-index-index .page-wrapper .awa-category-carousel__track,
+html body#html-body.cms-index-index .page-wrapper .awa-reel {
+    gap: clamp(10px, 2vw, 16px);
+    scroll-padding-inline: @awa-home-pad;
+    scroll-snap-type: x proximity;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-category-carousel__item,
+html body#html-body.cms-index-index .page-wrapper .awa-carousel-card-slot {
+    scroll-snap-align: start;
+}
+
+html body#html-body.cms-index-index .page-wrapper .awa-category-carousel__track::after,
+html body#html-body.cms-index-index .page-wrapper .awa-reel::after {
+    content: "";
+    display: block;
+    flex: 0 0 @awa-home-pad-sm;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.awa-carousel-shell, .awa-shelf--carousel, .swiper, .owl-carousel) {
+    border-radius: @awa-radius-sm;
+}
+
+// Footer home: contraste e densidade de plataforma B2B, sem trocar estrutura Magento.
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) {
+    background: var(--awa-home-surface);
+    color: var(--awa-home-ink);
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container {
+    background: var(--awa-home-footer-bg);
+    color: var(--awa-home-footer-ink);
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container > .container {
+    padding-block: clamp(22px, 3vw, 34px);
+}
+
+// Terminal contrast override: o tema pai define texto escuro sobre a superficie vermelha.
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container :is(h1, h2, h3, h4, h5, p, a, span, button, label, li),
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-title,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-desc,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-atendimento__label,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-atendimento__phone,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-atendimento__email,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-atendimento__store-name,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-atendimento__store-address {
+    color: var(--awa-home-footer-ink) !important;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container :is(p, li, .awa-newsletter-desc, .awa-footer-atendimento__label, .awa-footer-atendimento__store-address) {
+    color: var(--awa-home-footer-muted) !important;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container a {
+    text-decoration-color: color-mix(in srgb, white 46%, transparent);
+    text-underline-offset: 3px;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container a:hover,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container a:focus-visible {
+    color: var(--awa-home-footer-ink) !important;
+    text-decoration: underline;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-newsletter {
+    background: var(--awa-home-footer-bg);
+    border-block: 1px solid var(--awa-home-footer-line);
+    margin: 0;
+    padding-block: clamp(18px, 3vw, 28px);
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-newsletter > .container {
+    max-width: @awa-home-shell-max;
+    padding-inline: @awa-home-pad;
+}
+
+// Terminal layout override: grid herdado do CMS comprimia a coluna de texto.
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-wrapper {
+    align-items: center !important;
+    display: grid !important;
+    gap: clamp(18px, 4vw, 36px) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 480px) !important;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-info {
+    align-items: center !important;
+    display: grid !important;
+    gap: 16px !important;
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    min-width: 0;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-icon {
+    align-items: center;
+    color: var(--awa-home-footer-ink) !important;
+    display: inline-flex;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-content,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-form-container {
+    min-width: 0;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-title {
+    color: var(--awa-home-footer-ink) !important;
+    font-size: clamp(20px, 1.5vw, 24px);
+    line-height: 1.18;
+    margin: 0;
+    text-wrap: balance;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-desc {
+    line-height: 1.5;
+    margin: 6px 0 0;
+    max-width: 58ch;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .newsletter-footer .field.newsletter {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .newsletter-footer input[type="email"] {
+    background: color-mix(in srgb, white 8%, transparent);
+    border: 1px solid color-mix(in srgb, white 62%, transparent);
+    border-radius: @awa-radius-sm;
+    box-shadow: none;
+    color: var(--awa-home-footer-ink) !important;
+    min-height: 44px;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .newsletter-footer input[type="email"]::placeholder {
+    color: color-mix(in srgb, white 78%, transparent);
+    opacity: 1;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .newsletter-footer .action.subscribe {
+    background: var(--awa-home-footer-ink) !important;
+    border: 1px solid var(--awa-home-footer-ink) !important;
+    border-radius: @awa-radius-sm;
+    color: var(--awa-home-footer-bg) !important;
+    font-weight: 800;
+    min-height: 44px;
+    padding-inline: 18px;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container .row {
+    align-items: flex-start;
+    row-gap: 18px;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-section__toggle {
+    border-radius: @awa-radius-sm;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-bottom,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-categories-expand,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby {
+    background: var(--awa-home-surface);
+    color: var(--awa-home-ink);
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-bottom {
+    border-top: 1px solid var(--awa-home-line);
+    padding-block: clamp(22px, 3vw, 36px);
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-bottom-inner,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-bottom__row {
+    row-gap: 22px;
+}
+
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-pay-sec__label,
+html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-categories-expand__heading {
+    color: var(--awa-home-ink);
+    font-size: clamp(18px, 1.4vw, 22px);
+    letter-spacing: 0;
+}
+
+@media (max-width: 767px) {
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container > .container {
+        padding-block: 16px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-newsletter {
+        gap: 12px;
+        padding-block: 16px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-wrapper {
+        gap: 14px !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-info {
+        grid-template-columns: 44px minmax(0, 1fr) !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-title {
+        font-size: 18px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-newsletter-desc {
+        font-size: 14px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .newsletter-footer .field.newsletter {
+        grid-template-columns: 1fr;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container .row {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container .row > [class*="col-"] {
+        border-top: 1px solid var(--awa-home-footer-line);
+        min-height: 0;
+        padding: 0;
+    }
+
+    // Terminal spacing override: accordions colapsados herdavam 68px + gaps verticais.
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container .awa-footer-section__toggle {
+        color: var(--awa-home-ink) !important;
+        justify-content: space-between;
+        min-height: 48px !important;
+        padding: 0 4px;
+        text-align: left;
+        width: 100%;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container .velaContent[hidden],
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-container .footer-block-content[hidden] {
+        display: none !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-categories-expand,
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-bottom {
+        padding-block: 20px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-bottom {
+        min-height: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) :is(ul, ol),
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) :is(li) {
+        list-style: none;
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .footer-bottom-inner,
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-bottom__row {
+        gap: 16px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-bottom__row {
+        display: grid;
+        justify-items: center;
+        margin: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-bottom__row > [class*="col-"] {
+        padding-inline: 0;
+        width: 100%;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-bottom__logo-col {
+        display: flex;
+        justify-content: center;
+        min-height: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-pay-sec,
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-sec {
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        text-align: center;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-pay-sec__label {
+        margin: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-pay-logos,
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-sec-seals {
+        display: grid;
+        gap: 8px 12px;
+        justify-content: center;
+        margin: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-sec-seals {
+        grid-template-columns: repeat(2, auto);
+        min-height: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-seal {
+        align-items: center;
+        border: 1px solid var(--awa-home-line);
+        border-radius: @awa-radius-sm;
+        display: inline-flex;
+        justify-content: center;
+        min-height: 48px;
+        padding: 6px 10px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-bottom__copyright {
+        margin-top: 4px;
+        padding: 14px;
+        text-align: left;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-copyright__legal,
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-copyright__disclaimer {
+        margin: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-copyright__disclaimer {
+        margin-top: 8px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby {
+        padding-block: 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby__inner {
+        align-items: center;
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby__label {
+        font-size: 14px;
+        margin: 0;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby__link {
+        align-items: center;
+        display: inline-flex;
+        min-height: 44px;
+    }
+
+    html body#html-body.cms-index-index nav.fixed-bottom .mobile-bottom-link,
+    html body#html-body.cms-index-index nav.fixed-bottom .mobile-bottom-link > li {
+        list-style: none !important;
+        margin: 0 !important;
+        padding-left: 0 !important;
+    }
+}

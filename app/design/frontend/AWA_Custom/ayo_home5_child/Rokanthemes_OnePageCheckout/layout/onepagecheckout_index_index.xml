@@ -15,7 +15,10 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
+        <!-- SEO: página transacional — fora do índice -->
+        <meta name="robots" content="NOINDEX,NOFOLLOW"/>
         <css src="css/awa-checkout-layout-lock.css" order="200"/>
+        <css src="css/awa-checkout-shell-final.css" order="10000"/>
     </head>
     <body>
         <referenceBlock name="checkout.root">
@@ -70,6 +73,10 @@
                    name="awa.opc.checkout.critical"
                    template="Magento_Theme::html/awa-opc-checkout-critical.phtml"
                    after="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.checkout.shell.final"
+                   template="Magento_Theme::html/awa-checkout-shell-final-loader.phtml"
+                   after="awa.opc.checkout.critical"/>
         </referenceBlock>
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
@@ -83,6 +90,10 @@
                    name="awa.checkout.promax.loader"
                    template="Magento_Theme::html/awa-checkout-promax-loader.phtml"
                    after="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.align.grid.terminal.opc"
+                   template="Magento_Theme::html/awa-align-grid-terminal-loader.phtml"
+                   after="awa.checkout.promax.loader"/>
         </referenceContainer>
     </body>
 </page>

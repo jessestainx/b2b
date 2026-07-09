@@ -449,6 +449,14 @@ class PriceSync implements PriceSyncInterface
     }
 
     /**
+     * Backward-compatible alias for delta and external callers.
+     */
+    public function getPricesBySkus(array $skus, ?int $priceList = null): array
+    {
+        return $this->getPricesForSkus($skus, $priceList);
+    }
+
+    /**
      * Extract base SKU from variant SKU
      *
      * ERP SKUs may have color/variant suffixes:

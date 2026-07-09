@@ -80,6 +80,23 @@ foreach ($_brandCollection as $_brand) {
 	</div>
 </div>
 <?php } ?>
-<script type="text/javascript">
-	require(['jquery', 'rokanthemes/owl', 'Rokanthemes_Brand/js/brand'], function () {});
+<script type="text/x-magento-init">
+{
+	"#rokanthemes-carousel<?php echo $block->escapeJsQuote($blockId); ?>": {
+		"awaLegacySwiper": {
+			"items": <?php echo (int)$default_items; ?>,
+			"itemsDesktop": [1200, <?php echo (int)$default_items; ?>],
+			"itemsDesktopSmall": [992, <?php echo (int)$portrait_items; ?>],
+			"itemsTablet": [768, <?php echo (int)$tablet_items; ?>],
+			"itemsMobile": [480, <?php echo (int)$mobile_items; ?>],
+			"navigation": <?php echo $nav ? 'true' : 'false'; ?>,
+			"pagination": <?php echo $dots ? 'true' : 'false'; ?>,
+			"autoplay": <?php echo $autoplay ? (int)$autoplay_timeout : 'false'; ?>,
+			"loop": <?php echo $loop ? 'true' : 'false'; ?>,
+			"prevSelector": ".owl-left",
+			"nextSelector": ".owl-right",
+			"label": "<?php echo $block->escapeJs(__('Marcas')); ?>"
+		}
+	}
+}
 </script>

@@ -1,0 +1,75 @@
+<!--@subject {{trans "REXIS ML - oportunidades de venda cruzada detectadas"}} @-->
+<!--@vars {
+    "var alert_date":"Data do alerta",
+    "var total_value":"Valor total",
+    "var opportunities_html":"Tabela de oportunidades"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table class="message-info" style="width: 100%;">
+    <tr>
+        <td>
+            <h1 style="color: #10b981; font-size: 24px; margin: 0 0 20px;">
+                Venda cruzada com alto potencial
+            </h1>
+            <p style="font-size: 16px; line-height: 24px; margin: 0 0 20px;">
+                O REXIS ML encontrou <strong>novas oportunidades de venda cruzada</strong>
+                com alta afinidade de compra e potencial para aumentar o ticket médio.
+            </p>
+            <p style="font-size: 14px; color: #666; margin: 0 0 30px;">
+                <strong>Data do alerta:</strong> {{var alert_date}}<br>
+                <strong>Valor potencial total:</strong> R$ {{var total_value}}
+            </p>
+        </td>
+    </tr>
+</table>
+
+<table class="message-details" style="width: 100%; border-collapse: collapse; margin: 0 0 30px;">
+    <thead>
+        <tr style="background: #f3f4f6;">
+            <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb;">Cliente</th>
+            <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb;">Produto Sugerido</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #e5e7eb;">Score preditivo</th>
+            <th style="padding: 12px; text-align: right; border: 1px solid #e5e7eb;">Valor previsto</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{var opportunities_html}}
+    </tbody>
+</table>
+
+<table class="message-cta" style="width: 100%; margin: 0 0 30px;">
+    <tr>
+        <td style="text-align: center; padding: 20px; background: #d1fae5; border-radius: 8px;">
+            <p style="margin: 0 0 15px; font-size: 14px; font-weight: 600; color: #065f46;">
+                Ação recomendada
+            </p>
+            <p style="margin: 0 0 15px; font-size: 13px; color: #064e3b;">
+                Inclua estes itens em campanhas direcionadas, ofertas em conjunto<br>
+                ou abordagens comerciais orientadas ao histórico do cliente.
+            </p>
+            <a href="{{store url='admin/rexisml/dashboard/index'}}"
+               style="display: inline-block; padding: 12px 24px; background: #10b981; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                Acessar painel REXIS ML
+            </a>
+        </td>
+    </tr>
+</table>
+
+<table class="message-footer" style="width: 100%; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+    <tr>
+        <td style="font-size: 12px; color: #9ca3af; line-height: 18px;">
+            <p style="margin: 0 0 10px;">
+                Este é um alerta automático gerado pelo sistema REXIS ML.<br>
+                Os dados são baseados em análise de cesta de compras e associação entre produtos.
+            </p>
+            <p style="margin: 0;">
+                <strong>Score preditivo:</strong> chance estimada de conversão para o item sugerido (0-100%)<br>
+                <strong>Lift:</strong> força da associação entre produtos (>1 indica correlação positiva)
+            </p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}

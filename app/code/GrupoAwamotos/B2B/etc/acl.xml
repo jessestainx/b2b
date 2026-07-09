@@ -17,9 +17,7 @@
                     <resource id="GrupoAwamotos_B2B::platform_orders" title="Pedidos B2B (Menu)" sortOrder="20"/>
                     <resource id="GrupoAwamotos_B2B::platform_customers" title="Clientes B2B (Menu)" sortOrder="30"/>
                     <resource id="GrupoAwamotos_B2B::platform_pending" title="Pendências Comerciais (Menu)" sortOrder="40"/>
-                    <resource id="GrupoAwamotos_B2B::platform_sectra" title="Validação ERP/Sectra (Menu)" sortOrder="50">
-                        <resource id="GrupoAwamotos_B2B::sectra_queue" title="Fila Sectra — Pedidos ERP" sortOrder="10"/>
-                    </resource>
+                    <resource id="GrupoAwamotos_B2B::platform_sectra" title="Validação ERP/Sectra (Menu)" sortOrder="50"/>
                     <resource id="GrupoAwamotos_B2B::platform_attendants" title="Atendentes (Menu)" sortOrder="60"/>
                     <resource id="GrupoAwamotos_B2B::platform_reports" title="Relatórios (Menu)" sortOrder="70"/>
                     <resource id="GrupoAwamotos_B2B::platform_audit" title="Auditoria B2B" sortOrder="80"/>

@@ -1,0 +1,77 @@
+<?php
+/**
+ * AWA Motos - Scroll Reveal JS (2026-06-28)
+ *
+ * Ativa as animacoes de scroll-triggered (.awa-reveal, .awa-reveal-stagger)
+ * quando elementos entram no viewport.
+ *
+ * Usa IntersectionObserver (com fallback para scroll event).
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaScrollRevealInit) return;
+    w.__awaScrollRevealInit = true;
+
+    function init() {
+        // Pular se reduced motion
+        if (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            // Mostrar tudo imediatamente
+            var all = d.querySelectorAll('.awa-reveal, .awa-reveal-stagger');
+            for (var i = 0; i < all.length; i++) all[i].classList.add('awa-revealed');
+            return;
+        }
+
+        var reveals = d.querySelectorAll('.awa-reveal, .awa-reveal-stagger');
+        if (reveals.length === 0) return;
+
+        if ('IntersectionObserver' in w) {
+            var observer = new IntersectionObserver(function (entries) {
+                for (var i = 0; i < entries.length; i++) {
+                    var entry = entries[i];
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('awa-revealed');
+                        observer.unobserve(entry.target);
+                    }
+                }
+            }, {
+                rootMargin: '0px 0px -10% 0px',
+                threshold: 0.1
+            });
+            for (var j = 0; j < reveals.length; j++) {
+                observer.observe(reveals[j]);
+            }
+        } else {
+            // Fallback: scroll event
+            function checkReveals() {
+                var wh = w.innerHeight;
+                for (var i = 0; i < reveals.length; i++) {
+                    var r = reveals[i].getBoundingClientRect();
+                    if (r.top < wh * 0.9 && r.bottom > 0) {
+                        reveals[i].classList.add('awa-revealed');
+                    }
+                }
+            }
+            w.addEventListener('scroll', checkReveals, { passive: true });
+            w.addEventListener('resize', checkReveals);
+            checkReveals();
+        }
+
+        // Auto-aplicar a secoes da home
+        var homeSections = d.querySelectorAll(
+            '.awa-home-section, .awa-carousel-section, .awa-grid-section,' +
+            ' .awa-section-header, .awa-product-promo-banners'
+        );
+        for (var k = 0; k < homeSections.length; k++) {
+            homeSections[k].classList.add('awa-reveal');
+        }
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+})(window, document);
+</script>

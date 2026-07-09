@@ -64,7 +64,10 @@ class ManageUser implements HttpPostActionInterface
             return $result->setData(['success' => false, 'message' => __('Empresa não encontrada.')]);
         }
 
-        $role = $this->companyService->getUserRole($currentCustomerId);
+        // Passa companyId explicitamente: garante que o papel checado é o do
+        // ADMIN nesta empresa (a mesma que $company acima), mesmo se o cliente
+        // pertencer a múltiplas empresas (multi-empresa) com papéis diferentes.
+        $role = $this->companyService->getUserRole($currentCustomerId, (int) $company->getId());
         if ($role !== Company::ROLE_ADMIN) {
             return $result->setData(['success' => false, 'message' => __('Apenas administradores podem gerenciar usuários.')]);
         }

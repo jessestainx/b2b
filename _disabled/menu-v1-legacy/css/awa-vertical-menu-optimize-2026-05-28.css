@@ -1,0 +1,204 @@
+/**
+ * AWA Vertical Menu Optimize — 2026-05-28
+ * Performance final-wins: neutraliza legacy (modern/layout), contain, content-visibility.
+ */
+
+/* ─── Neutralizar awa-vertical-menu-modern (glass, side-stripes, badge pulse) ─ */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu,
+body .page-wrapper .navigation.verticalmenu .level0.submenu,
+body .awa-vmf-portal.submenu,
+body .awa-vmf-portal.navigation__submenu {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown
+    > li.ui-menu-item.level0 > a.level-top::before,
+body .page-wrapper .navigation.verticalmenu .togge-menu
+    > li.ui-menu-item.level0 > a.level-top.navigation__link::before {
+    display: none !important;
+    content: none !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .cat-label,
+body .page-wrapper .navigation.verticalmenu .cat-label.hot,
+body .page-wrapper .navigation.verticalmenu .cat-label.new {
+    animation: none !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 92%, transparent) !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .level0.submenu:not(.awa-vmf-portal) {
+    transform: none !important;
+}
+
+body .awa-vmf-portal.submenu {
+    transition: opacity 180ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 180ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-scroll-top::before,
+body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-scroll-bottom::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* ─── Token de tamanho ícone (global) ────────────────────────────────────── */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+    --awa-vmenu-icon-size: 20px;
+}
+
+@media (min-width: 992px) {
+    /* contain só no desktop — no mobile o painel é overflow:auto e contain quebraria o scroll */
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+        contain: layout style;
+    }
+}
+
+@media (max-width: 991px) {
+    /* Feedback de toque nos itens do menu mobile */
+    body .page-wrapper .navigation.verticalmenu .togge-menu
+        > li.ui-menu-item.level0 > a.level-top:active,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1 > a:active {
+        background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, transparent) !important;
+        transition: background 60ms linear !important;
+    }
+
+    /* "Ver mais/menos" button — toque */
+    body .page-wrapper .navigation.verticalmenu .vm-toggle-categories:active {
+        opacity: 0.72 !important;
+        transition: opacity 60ms linear !important;
+    }
+}
+
+@media (min-width: 992px) {
+    /* Ícones SVG (vertical-menu.js) — substitui awa-vertical-menu-modern removido */
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link
+        .awa-vmenu-icon {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 var(--awa-vmenu-icon-size) !important;
+        width: var(--awa-vmenu-icon-size) !important;
+        height: var(--awa-vmenu-icon-size) !important;
+        min-height: 0 !important;
+        max-width: var(--awa-vmenu-icon-size) !important;
+        max-height: var(--awa-vmenu-icon-size) !important;
+        overflow: hidden !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link
+        .awa-vmenu-icon svg {
+        display: block !important;
+        width: var(--awa-vmenu-icon-size) !important;
+        height: var(--awa-vmenu-icon-size) !important;
+        min-height: 0 !important;
+        max-width: var(--awa-vmenu-icon-size) !important;
+        max-height: var(--awa-vmenu-icon-size) !important;
+        flex: none !important;
+        fill: none !important;
+        stroke: currentColor !important;
+        stroke-width: 1.6 !important;
+        opacity: 0.72 !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top.navigation__link
+        .awa-vmenu-icon svg,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > a.level-top.navigation__link
+        .awa-vmenu-icon svg {
+        opacity: 1 !important;
+        stroke: var(--awa-primary, #b73337) !important;
+    }
+
+    /* Submenu inline na lista: oculto (flyout via portal) */
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0
+        > .level0.submenu:not(.awa-vmf-portal) {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        clip-path: inset(50%) !important;
+    }
+
+    /* Painel: scroll contido */
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown[aria-hidden="false"],
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown[data-awa-menu-state="open"],
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown.vmm-open,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown.menu-open {
+        max-height: min(70vh, 520px) !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 {
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+        content-visibility: auto;
+        contain-intrinsic-size: auto 44px;
+    }
+
+    /* Neutraliza grid 4-col / min-width do layout-bundle (legado) */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu.mega-columns,
+    body .awa-vmf-portal.submenu .subchildmenu.mega-columns {
+        min-width: 0 !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu.mega-columns.columns4,
+    body .awa-vmf-portal.submenu .subchildmenu.mega-columns.columns4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(100px, 140px) !important;
+    }
+}
+
+/* ─── Flyout em sidebar PLP (painel estreito < 260px) ─────────────────── */
+@supports (container-type: inline-size) {
+    body .awa-vmf-portal.submenu {
+        container-type: inline-size;
+        container-name: awa-vmf-flyout;
+    }
+
+    @container awa-vmf-flyout (max-width: 260px) {
+        .subchildmenu.mega-columns {
+            grid-template-columns: 1fr !important;
+        }
+
+        .navigation__inner-item--level1.imagem.img-subcategory {
+            display: none !important;
+        }
+
+        .navigation__inner-item--level1 > a {
+            font-size: 13px !important;
+            padding-block: 8px !important;
+        }
+    }
+}
+
+/* ─── Imagens flyout: decoding async ──────────────────────────────────── */
+body .page-wrapper .navigation.verticalmenu .level0.submenu img,
+body .awa-vmf-portal.submenu img {
+    decoding: async;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .navigation.verticalmenu .level0.submenu,
+    body .awa-vmf-portal.submenu,
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top {
+        transition: none !important;
+    }
+}

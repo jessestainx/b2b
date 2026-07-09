@@ -6,25 +6,191 @@
  * @var \Magento\Catalog\Model\Layer\Filter\Item[] $filterItems
  */
 declare(strict_types=1);
+
+$request = $block->getRequest();
+
+$normalizeCsvValue = static function ($value, ?string $key = null): string {
+    $chunks = is_array($value) ? $value : explode(',', (string) $value);
+    $normalizedChunks = [];
+    $unique = [];
+    $seen = [];
+    $isValidPriceRange = static function (string $segment): bool {
+        return (bool) preg_match('/^\d+(?:\.\d+)?-\d+(?:\.\d+)?$/', $segment);
+    };
+    $isValidCategoryId = static function (string $segment): bool {
+        return (bool) preg_match('/^\d+$/', $segment);
+    };
+
+    foreach ($chunks as $chunk) {
+        foreach (explode(',', (string) $chunk) as $part) {
+            $normalized = trim((string) $part);
+            if ($normalized === '') {
+                continue;
+            }
+            $normalizedChunks[] = $normalized;
+            if (isset($seen[$normalized])) {
+                continue;
+            }
+            $seen[$normalized] = true;
+            $unique[] = $normalized;
+        }
+    }
+
+    if ($key === 'price' && $normalizedChunks !== []) {
+        $validRanges = array_values(array_filter($normalizedChunks, $isValidPriceRange));
+        return $validRanges !== [] ? (string) end($validRanges) : '';
+    }
+
+    if ($key === 'cat' && $normalizedChunks !== []) {
+        $validCategoryIds = array_values(array_filter($normalizedChunks, $isValidCategoryId));
+        return $validCategoryIds !== [] ? (string) end($validCategoryIds) : '';
+    }
+
+    return implode(',', $unique);
+};
+
+$normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue): string {
+    if ($rawUrl === '') {
+        return $rawUrl;
+    }
+
+    $parts = parse_url($rawUrl);
+    if ($parts === false || !isset($parts['query'])) {
+        return $rawUrl;
+    }
+
+    $params = [];
+    parse_str((string) $parts['query'], $params);
+
+    foreach ($params as $key => $value) {
+        if (is_array($value)) {
+            $normalized = $normalizeCsvValue($value, (string) $key);
+            if ($normalized === '') {
+                unset($params[$key]);
+                continue;
+            }
+            $params[$key] = $normalized;
+            continue;
+        }
+
+        $normalized = $normalizeCsvValue((string) $value, (string) $key);
+        if ($normalized === '') {
+            unset($params[$key]);
+            continue;
+        }
+        $params[$key] = $normalized;
+    }
+
+    $query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+    $rebuilt = '';
+
+    if (isset($parts['scheme'])) {
+        $rebuilt .= $parts['scheme'] . '://';
+    }
+    if (isset($parts['user'])) {
+        $rebuilt .= $parts['user'];
+        if (isset($parts['pass'])) {
+            $rebuilt .= ':' . $parts['pass'];
+        }
+        $rebuilt .= '@';
+    }
+    if (isset($parts['host'])) {
+        $rebuilt .= $parts['host'];
+    }
+    if (isset($parts['port'])) {
+        $rebuilt .= ':' . $parts['port'];
+    }
+    $rebuilt .= $parts['path'] ?? '';
+    if ($query !== '') {
+        $rebuilt .= '?' . $query;
+    }
+    if (isset($parts['fragment'])) {
+        $rebuilt .= '#' . $parts['fragment'];
+    }
+
+    return $rebuilt !== '' ? $rebuilt : $rawUrl;
+};
+
 ?>
+<script>
+    (function () {
+        var pricePattern = /^\d+(?:\.\d+)?-\d+(?:\.\d+)?$/;
+        var categoryPattern = /^\d+$/;
+
+        function normalizeParam(urlObj, key, validator) {
+            var rawValues = urlObj.searchParams.getAll(key);
+            var chunks = [];
+            var selected = '';
+            var i;
+
+            rawValues.forEach(function (rawValue) {
+                String(rawValue || '').split(',').forEach(function (piece) {
+                    var trimmed = piece.trim();
+                    if (trimmed !== '') {
+                        chunks.push(trimmed);
+                    }
+                });
+            });
+
+            for (i = chunks.length - 1; i >= 0; i--) {
+                if (validator(chunks[i])) {
+                    selected = chunks[i];
+                    break;
+                }
+            }
+
+            urlObj.searchParams.delete(key);
+            if (selected !== '') {
+                urlObj.searchParams.set(key, selected);
+            }
+        }
+
+        try {
+            var currentUrl = new URL(window.location.href);
+            var normalizedUrl = new URL(window.location.href);
+            normalizeParam(normalizedUrl, 'price', function (value) {
+                return pricePattern.test(value);
+            });
+            normalizeParam(normalizedUrl, 'cat', function (value) {
+                return categoryPattern.test(value);
+            });
+
+            if (normalizedUrl.toString() !== currentUrl.toString() && window.history && typeof window.history.replaceState === 'function') {
+                window.history.replaceState(window.history.state || {}, document.title, normalizedUrl.toString());
+            }
+        } catch (e) {
+            // noop
+        }
+    })();
+</script>
 <ol class="items">
     <?php foreach ($filterItems as $filterItem): ?>
         <?php
         $filter = $filterItem->getFilter();
         $attributeModel = $filter->getData('attribute_model');
         $inputName = $filter->getRequestVar();
-        $requestValue = $block->getRequest()->getParam($inputName);
-        $requestArray = $requestValue ? explode(',', (string) $requestValue) : [];
-        $url = in_array($filterItem->getValue(), $requestArray) ? $filterItem->getRemoveUrl() : $filterItem->getUrl();
-        if ($inputName === 'cat') {
-            $exUrl = explode('cat=', (string) $url);
-            if (isset($exUrl[1])) {
-                $ex2Url = explode('%2C', $exUrl[1]);
-                if (isset($ex2Url[1])) {
-                    $url = $exUrl[0] . 'cat=' . $ex2Url[1];
-                }
-            }
+        $requestValue = $request ? $request->getParam($inputName) : null;
+        $requestArray = $requestValue
+            ? array_values(array_filter(array_unique(array_map('trim', explode(',', (string) $requestValue))), static function (string $item): bool {
+                return $item !== '';
+            }))
+            : [];
+        if ($inputName === 'price' && $requestArray !== []) {
+            $requestArray = array_values(array_filter($requestArray, static function (string $item): bool {
+                return (bool) preg_match('/^\d+(?:\.\d+)?-\d+(?:\.\d+)?$/', $item);
+            }));
+            $requestValue = $requestArray !== [] ? (string) end($requestArray) : null;
         }
+        if ($inputName === 'price' && count($requestArray) > 1) {
+            // Corrige estado legado com múltiplos ranges e mantém apenas o mais recente.
+            $requestValue = (string) end($requestArray);
+            $requestArray = [$requestValue];
+        }
+
+        $filterValue = (string) $filterItem->getValue();
+        $rawUrl = in_array($filterValue, $requestArray, true) ? $filterItem->getRemoveUrl() : $filterItem->getUrl();
+        $url = $rawUrl;
+        $url = $normalizeFilterUrl((string) $url);
         ?>
         <li class="item">
             <?php
@@ -41,9 +207,13 @@ declare(strict_types=1);
                 $productCollection = $filter->getLayer()->getProductCollection();
                 $collectionMin = (float) $productCollection->getMinPrice();
                 $collectionMax = (float) $productCollection->getMaxPrice();
-                [$from, $to] = $requestValue ? explode('-', (string) $requestValue) : [$collectionMin, $collectionMax];
-                [$min, $max] = $requestValue ? explode('-', (string) $requestValue) : [$collectionMin, $collectionMax];
+                $currentPriceRange = is_string($requestValue) && preg_match('/^\d+(?:\.\d+)?-\d+(?:\.\d+)?$/', $requestValue)
+                    ? $requestValue
+                    : '';
+                [$from, $to] = $currentPriceRange !== '' ? explode('-', $currentPriceRange, 2) : [$collectionMin, $collectionMax];
+                [$min, $max] = $currentPriceRange !== '' ? explode('-', $currentPriceRange, 2) : [$collectionMin, $collectionMax];
                 $priceFormat = $this->helper(\Magento\Tax\Helper\Data::class)->getPriceFormat($block->getStore());
+                $normalizedAjaxUrl = $normalizeFilterUrl((string) $filterItem->getUrl());
                 ?>
                 <div id="layered_ajax_price_attribute" class="awa-price-filter">
                     <p class="awa-price-filter__fallback" aria-live="polite">
@@ -63,7 +233,7 @@ declare(strict_types=1);
                                 "selectedTo": <?= /* @noEscape */ (float) $to ?>,
                                 "currency": <?= /* @noEscape */ $this->helper(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($currencySymbol) ?>,
                                 "priceFormat": <?= /* @noEscape */ $priceFormat ?>,
-                                "ajaxUrl": <?= /* @noEscape */ $this->helper(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($filterItem->getUrl()) ?>
+                                "ajaxUrl": <?= /* @noEscape */ $this->helper(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($normalizedAjaxUrl) ?>
                             }
                         }
                     }

@@ -142,6 +142,18 @@ class ProductSuggestion
      */
     public function getReorderSuggestions(int $customerCode, int $limit = 10): array
     {
+        // PERF-2026-07-04: self-join com subquery (prev) para calcular intervalo
+        // médio entre compras por item — pesado no ERP remoto. Chamado direto no
+        // render síncrono do dashboard B2B (dashboard.phtml) para todo cliente com
+        // código ERP. Sem cache, cada carregamento do dashboard pagava essa query
+        // inteira de novo. Mesmo padrão de cache de getSuggestions()/getTrendingProducts()
+        // nesta mesma classe.
+        $cacheKey = self::CACHE_PREFIX . 'reorder_' . $customerCode . '_' . $limit;
+        $cached = $this->cache->load($cacheKey);
+        if ($cached) {
+            return json_decode($cached, true) ?: [];
+        }
+
         try {
             // Get products with their purchase frequency
             $products = $this->connection->query("
@@ -173,7 +185,10 @@ class ProductSuggestion
                 ORDER BY DATEDIFF(day, MAX(p.DTPEDIDO), GETDATE()) DESC
             ", [$customerCode]);
 
-            return $this->enrichWithMagentoData($products);
+            $enriched = $this->enrichWithMagentoData($products);
+            $this->cache->save(json_encode($enriched), $cacheKey, [], self::CACHE_TTL);
+
+            return $enriched;
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting reorder suggestions: ' . $e->getMessage());
             return [];
@@ -225,7 +240,7 @@ class ProductSuggestion
      */
     public function getComplementaryProducts(string $materialCode, int $limit = 5): array
     {
-        $cacheKey = self::CACHE_PREFIX . 'complementary_' . md5($materialCode);
+        $cacheKey = self::CACHE_PREFIX . 'complementary_' . hash('xxh128', $materialCode);
         $cached = $this->cache->load($cacheKey);
 
         if ($cached) {
@@ -413,6 +428,9 @@ class ProductSuggestion
     public function clearCache(int $customerCode): void
     {
         $this->cache->remove(self::CACHE_PREFIX . $customerCode);
+        foreach ([5, 6, 10, 12, 20] as $limit) {
+            $this->cache->remove(self::CACHE_PREFIX . 'reorder_' . $customerCode . '_' . $limit);
+        }
     }
 
     /**

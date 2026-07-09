@@ -11,6 +11,7 @@ namespace GrupoAwamotos\B2B\Model;
 
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Checkout\Model\Cart;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -63,6 +64,11 @@ class ShoppingListService
     private $productRepository;
 
     /**
+     * @var SearchCriteriaBuilder
+     */
+    private $searchCriteriaBuilder;
+
+    /**
      * @param ShoppingListFactory $listFactory
      * @param ShoppingListItemFactory $itemFactory
      * @param ResourceModel\ShoppingList $listResource
@@ -72,6 +78,7 @@ class ShoppingListService
      * @param CustomerSession $customerSession
      * @param Cart $cart
      * @param ProductRepositoryInterface $productRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
         ShoppingListFactory $listFactory,
@@ -82,7 +89,8 @@ class ShoppingListService
         ResourceModel\ShoppingListItem\CollectionFactory $itemCollectionFactory,
         CustomerSession $customerSession,
         Cart $cart,
-        ProductRepositoryInterface $productRepository
+        ProductRepositoryInterface $productRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->listFactory = $listFactory;
         $this->itemFactory = $itemFactory;
@@ -93,6 +101,32 @@ class ShoppingListService
         $this->customerSession = $customerSession;
         $this->cart = $cart;
         $this->productRepository = $productRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+    }
+
+    /**
+     * Batch-load products by ID to avoid N+1 queries when iterating list items.
+     *
+     * @param int[] $productIds
+     * @return \Magento\Catalog\Api\Data\ProductInterface[] Indexed by product ID
+     */
+    private function getProductsByIds(array $productIds): array
+    {
+        $productIds = array_values(array_unique(array_filter($productIds)));
+        if ($productIds === []) {
+            return [];
+        }
+
+        $searchCriteria = $this->searchCriteriaBuilder
+            ->addFilter('entity_id', $productIds, 'in')
+            ->create();
+
+        $products = [];
+        foreach ($this->productRepository->getList($searchCriteria)->getItems() as $product) {
+            $products[(int)$product->getId()] = $product;
+        }
+
+        return $products;
     }
 
     /**
@@ -365,9 +399,19 @@ class ShoppingListService
         $added = 0;
         $failed = [];
 
+        $productIds = [];
+        foreach ($items as $item) {
+            $productIds[] = (int)$item->getProductId();
+        }
+        $products = $this->getProductsByIds($productIds);
+
         foreach ($items as $item) {
             try {
-                $product = $this->productRepository->getById($item->getProductId());
+                $productId = (int)$item->getProductId();
+                if (!isset($products[$productId])) {
+                    throw new NoSuchEntityException(__('Produto não encontrado.'));
+                }
+                $product = $products[$productId];
 
                 $options = $item->getOptions();
                 $request = new \Magento\Framework\DataObject([
@@ -551,13 +595,19 @@ class ShoppingListService
         $items = $this->getListItems($listId);
         $total = 0;
 
+        $productIds = [];
         foreach ($items as $item) {
-            try {
-                $product = $this->productRepository->getById($item->getProductId());
-                $total += $product->getFinalPrice() * $item->getQty();
-            } catch (\Exception $e) {
+            $productIds[] = (int)$item->getProductId();
+        }
+        $products = $this->getProductsByIds($productIds);
+
+        foreach ($items as $item) {
+            $product = $products[(int)$item->getProductId()] ?? null;
+            if ($product === null) {
                 // Product not found, skip
+                continue;
             }
+            $total += $product->getFinalPrice() * $item->getQty();
         }
 
         return $total;

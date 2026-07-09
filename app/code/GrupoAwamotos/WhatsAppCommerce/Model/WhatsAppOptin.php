@@ -9,6 +9,7 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -17,13 +18,23 @@ use Psr\Log\LoggerInterface;
  */
 class WhatsAppOptin implements OptinInterface
 {
+    /**
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param FilterBuilder $filterBuilder
+     * @param ResourceConnection $resourceConnection
+     * @param RemoteAddress $remoteAddress
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly FilterBuilder $filterBuilder,
         private readonly ResourceConnection $resourceConnection,
+        private readonly RemoteAddress $remoteAddress,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc
@@ -110,7 +121,11 @@ class WhatsAppOptin implements OptinInterface
 
     /**
      * Find customer ID by phone number (billing address or telephone attribute).
+     *
      * Uses same REGEXP_REPLACE approach as AttendantInterface for Brazilian phones.
+     *
+     * @param string $phone
+     * @return int|null
      */
     private function findCustomerByPhone(string $phone): ?int
     {
@@ -142,11 +157,26 @@ class WhatsAppOptin implements OptinInterface
         return $customerId ? (int) $customerId : null;
     }
 
+    /**
+     * Normaliza telefone mantendo apenas dígitos.
+     *
+     * @param string $phone
+     * @return string
+     */
     private function normalizePhone(string $phone): string
     {
         return preg_replace('/\D/', '', $phone);
     }
 
+    /**
+     * Persiste trilha de auditoria da mudança de consentimento.
+     *
+     * @param int $customerId
+     * @param string $phone
+     * @param int $optin
+     * @param string $source
+     * @return void
+     */
     private function logConsent(int $customerId, string $phone, int $optin, string $source): void
     {
         try {
@@ -158,7 +188,7 @@ class WhatsAppOptin implements OptinInterface
                 'phone' => $phone,
                 'optin' => $optin,
                 'source' => $source,
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+                'ip_address' => $this->remoteAddress->getRemoteAddress() ?? '0.0.0.0',
                 'user_agent' => 'WhatsApp Bot API',
             ]);
         } catch (\Exception $e) {

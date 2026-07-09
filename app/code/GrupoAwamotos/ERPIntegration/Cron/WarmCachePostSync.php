@@ -42,7 +42,8 @@ class WarmCachePostSync
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function execute(): void
     {

@@ -1,0 +1,102 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \GrupoAwamotos\B2B\Block\Cart\MinOrderProgress $block */
+
+if (!$block->isEnabled()) {
+    return;
+}
+
+$config = $block->getClientConfig();
+$layoutHandles = $block->getLayout()->getUpdate()->getHandles();
+$isHomePage = in_array('cms_index_index', $layoutHandles, true);
+$configJson = json_encode($config, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+?>
+<div class="awa-b2b-min-order-progress awa-b2b-min-order-progress--minicart"
+     data-awa-min-order-progress="dynamic"
+     data-min-amount="<?= $block->escapeHtmlAttr((string) $config['minAmount']) ?>"
+     hidden>
+    <div class="awa-b2b-min-order-progress__header">
+        <span class="awa-b2b-min-order-progress__label"><?= $block->escapeHtml(__('Pedido mínimo')) ?></span>
+        <span class="awa-b2b-min-order-progress__percent" data-role="percent">0%</span>
+    </div>
+    <div class="awa-b2b-min-order-progress__track"
+         role="progressbar"
+         aria-valuemin="0"
+         aria-valuemax="100"
+         aria-valuenow="0"
+         aria-describedby="awa-b2b-min-order-minicart-message">
+        <span class="awa-b2b-min-order-progress__fill" data-role="fill" style="width: 0%;"></span>
+    </div>
+    <p class="awa-b2b-min-order-progress__message"
+       id="awa-b2b-min-order-minicart-message"
+       data-role="message"></p>
+</div>
+<?php if ($isHomePage): ?>
+<script type="application/json" id="awa-min-order-progress-defer-json"><?= /* @noEscape */ $configJson ?></script>
+<script>
+/* Home: min-order-progress só após intent no minicart ou idle (fora do critical path) */
+(function (w, d) {
+    'use strict';
+    var done = false;
+    var intentSelector = '[data-block="minicart"] .showcart, .showcart, [data-awa-header-minicart-shell="true"], .awa-header-minicart';
+
+    function boot() {
+        var el, cfg, script;
+        if (done) {
+            return;
+        }
+        done = true;
+        el = d.getElementById('awa-min-order-progress-defer-json');
+        if (!el || !el.textContent) {
+            return;
+        }
+        if (typeof w.require !== 'function') {
+            done = false;
+            w.setTimeout(boot, 200);
+            return;
+        }
+        try {
+            cfg = JSON.parse(el.textContent);
+        } catch (e) {
+            return;
+        }
+        script = d.createElement('script');
+        script.type = 'text/x-magento-init';
+        script.textContent = JSON.stringify({
+            '[data-awa-min-order-progress="dynamic"]': {
+                'GrupoAwamotos_B2B/js/cart/min-order-progress': cfg
+            }
+        });
+        d.body.appendChild(script);
+        w.require(['mage/apply/main']);
+    }
+
+    function onIntent(ev) {
+        var t = ev && ev.target;
+        if (t && t.closest && t.closest(intentSelector)) {
+            boot();
+        }
+    }
+
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+        d.addEventListener(ev, onIntent, { capture: true, passive: ev !== 'keydown', once: true });
+    });
+
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(boot, { timeout: 8000 });
+    } else {
+        w.setTimeout(boot, 7000);
+    }
+}(window, document));
+</script>
+<?php else: ?>
+<script type="text/x-magento-init">
+{
+    "[data-awa-min-order-progress=\"dynamic\"]": {
+        "GrupoAwamotos_B2B/js/cart/min-order-progress": <?= /* @noEscape */ $configJson ?>
+    }
+}
+</script>
+<?php endif; ?>

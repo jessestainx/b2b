@@ -1,0 +1,23 @@
+{
+  "sheets": [
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_B2B/css/account/pages-core.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/layers/pages/account-b2b.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_B2B/css/account/dashboard.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_B2B/css/account/dashboard-distill.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/b2b/dashboard-grid.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/awa-b2b-account-shell-final.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_B2B/css/account/awa-b2b-dashboard-layout-reset.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/awa-ui-promax-bundle.min.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/awa-home-density-grid-20260611.min.css?v=20260612-home-audit",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/awa-b2b-status-panel.css?v=20260612-v4",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/awa-b2b-account-shell-final.css?v=20260612-v4",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_B2B/css/vendor/shepherd.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_B2B/css/account/dashboard-visual-upgrade.css?v=20260612-v62",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/awa-cookie-consent-fix.min.css",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_B2B/css/account/dashboard-impeccable-audit.css?v=20260612-v62",
+    "https://awamotos.com/static/version1781262064/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_Theme/css/awa-menu-v2-dept-open-fix.css"
+  ],
+  "bodyBg": "rgb(255, 255, 255)",
+  "bodyClass": "account b2b-account-shell-awa-account-operational b2b-account-dashboard page-layout-2columns-left awa-menu-v2-ready",
+  "htmlBg": "rgba(0, 0, 0, 0)"
+}

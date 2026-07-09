@@ -1,0 +1,82 @@
+.awa-b2b-min-order-progress {
+    margin: 0 0 var(--awa-space-4, 16px);
+    padding: var(--awa-space-4, 16px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-bg-subtle, #f7f7f7);
+}
+
+.awa-b2b-min-order-progress--near {
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e5e5e5));
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, var(--awa-color-white, #fff));
+}
+
+.awa-b2b-min-order-progress--minicart {
+    margin: var(--awa-space-3, 12px) var(--awa-space-4, 16px) 0;
+}
+
+.awa-b2b-min-order-progress[hidden] {
+    display: none !important;
+}
+
+.awa-b2b-min-order-progress__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--awa-space-2, 8px);
+    margin-bottom: var(--awa-space-2, 8px);
+}
+
+.awa-b2b-min-order-progress__label {
+    font-size: var(--awa-font-sm, 13px);
+    font-weight: var(--awa-weight-semibold, 600);
+    color: var(--awa-text, #333);
+}
+
+.awa-b2b-min-order-progress__percent {
+    font-size: var(--awa-font-xs, 12px);
+    font-weight: var(--awa-weight-bold, 700);
+    color: var(--awa-primary, #b73337);
+}
+
+.awa-b2b-min-order-progress__track {
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--awa-neutral-200, #e5e5e5);
+}
+
+.awa-b2b-min-order-progress__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--awa-primary, #b73337) 0%,
+        color-mix(in srgb, var(--awa-primary, #b73337) 75%, #fff) 100%
+    );
+    transition: width 0.25s ease;
+}
+
+.awa-b2b-min-order-progress__message {
+    margin: var(--awa-space-2, 8px) 0 0;
+    font-size: var(--awa-font-sm, 13px);
+    line-height: 1.45;
+    color: var(--awa-text-secondary, #666);
+}
+
+.checkout-cart-index .cart-summary .awa-b2b-min-order-progress {
+    margin-bottom: var(--awa-space-5, 20px);
+}
+
+@media (max-width: 991px) {
+    .awa-b2b-min-order-progress--minicart {
+        margin-bottom: var(--awa-space-2, 8px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-b2b-min-order-progress__fill {
+        transition: none;
+    }
+}

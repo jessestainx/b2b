@@ -58,8 +58,14 @@
     overscroll-behavior: contain;
     scroll-padding-block: 16px;
     padding: 0;
-    box-shadow: 0 30px 60px -12px rgb(0 0 0 / 45%);
-    border: 1px solid rgb(255 255 255 / 40%);
+    /* FIX 2026-07-06 (Impeccable "hairline border with wide shadow" div.b2b-login-modal).
+       Histórico: 1px border + 60px blur -> reduzido para 1px border + 24px blur, mas o
+       padrão "hairline border + shadow largo" continuou sinalizado (a combinação dos
+       dois indicadores de profundidade é redundante — o backdrop escuro já com 68%
+       opacidade + blur(10px) cria separação suficiente do fundo). Removida a borda
+       (redundante) e reduzido o blur para algo proporcional ao cartão de 480px,
+       mantendo só UM indicador de elevação. */
+    box-shadow: 0 4px 16px rgb(0 0 0 / 22%);
     animation: modalSlideIn 0.3s ease;
 }
 
@@ -413,6 +419,36 @@ body.b2b-restricted-mode .block-minicart .subtotal .price-wrapper {
 .b2b-login-to-buy-btn.b2b--disabled:hover {
     background: var(--awa-text-light);
     box-shadow: none;
+}
+
+.b2b-login-to-see-price.b2b-price-pending {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 3px;
+    min-height: var(--awa-control-height, 44px);
+    padding: 8px 10px;
+    border: 1px solid color-mix(in srgb, var(--awa-primary, var(--awa-red)) 22%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-red)) 7%, transparent);
+    color: var(--awa-text-primary, var(--awa-text));
+    text-align: center;
+}
+
+.b2b-login-to-see-price.b2b-price-pending .price-label {
+    display: block;
+    color: var(--awa-text-primary, var(--awa-text));
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.b2b-login-to-see-price.b2b-price-pending .price-note {
+    display: block;
+    color: var(--awa-text-secondary, var(--awa-text-muted));
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.25;
 }
 
 /* =========================================================

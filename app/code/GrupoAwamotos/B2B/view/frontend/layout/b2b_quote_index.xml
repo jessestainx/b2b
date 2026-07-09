@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      layout="1column"
+      layout="2columns-left"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <title>Solicitar Cotação</title>
-        <css src="GrupoAwamotos_B2B::css/account/pages.css"/>
+        <css src="GrupoAwamotos_B2B::css/account/pages-quote.css"/>
     </head>
+    <update handle="customer_account"/>
     <body>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Quote\Form"

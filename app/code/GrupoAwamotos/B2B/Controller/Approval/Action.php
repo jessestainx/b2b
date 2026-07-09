@@ -14,6 +14,7 @@ use GrupoAwamotos\B2B\Model\OrderApprovalService;
 use GrupoAwamotos\B2B\Model\CompanyService;
 use GrupoAwamotos\B2B\Model\Company;
 use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class Action implements HttpPostActionInterface
 {
@@ -23,6 +24,7 @@ class Action implements HttpPostActionInterface
     private Session $customerSession;
     private OrderApprovalService $approvalService;
     private CompanyService $companyService;
+    private LoggerInterface $logger;
 
     public function __construct(
         RequestInterface $request,
@@ -30,7 +32,8 @@ class Action implements HttpPostActionInterface
         FormKeyValidator $formKeyValidator,
         Session $customerSession,
         OrderApprovalService $approvalService,
-        CompanyService $companyService
+        CompanyService $companyService,
+        LoggerInterface $logger
     ) {
         $this->request = $request;
         $this->jsonFactory = $jsonFactory;
@@ -38,6 +41,7 @@ class Action implements HttpPostActionInterface
         $this->customerSession = $customerSession;
         $this->approvalService = $approvalService;
         $this->companyService = $companyService;
+        $this->logger = $logger;
     }
 
     public function execute()

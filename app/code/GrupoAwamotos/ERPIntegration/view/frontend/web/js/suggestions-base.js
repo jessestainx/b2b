@@ -13,18 +13,21 @@ define([
             return;
         }
 
-        function getFormKey() {
+        function getFormKey()
+        {
             return $.mage && $.mage.cookies ? $.mage.cookies.get('form_key') : '';
         }
 
-        function formatPrice(value) {
+        function formatPrice(value)
+        {
             return 'R$ ' + Number(value || 0).toLocaleString('pt-BR', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
 
-        function addToCart(sku, qty) {
+        function addToCart(sku, qty)
+        {
             return new Promise(function (resolve, reject) {
                 $.ajax({
                     url: addBySkuUrl,
@@ -47,7 +50,8 @@ define([
             });
         }
 
-        function updateTotals() {
+        function updateTotals()
+        {
             let subtotal = 0;
             let itemCount = 0;
 

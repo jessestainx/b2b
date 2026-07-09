@@ -1,0 +1,617 @@
+/* ============================================================================
+   AWA MOTOS — VISUAL BEST PRACTICES BUNDLE
+   ----------------------------------------------------------------------------
+   Quick wins de UX/a11y/performance documentados no projeto mas ainda nao
+   aplicados de forma centralizada. Carregar via <link> em default.xml ou via
+   head-preload (consultar design-system/UTILITIES.md → Deployment).
+
+   Issues enderecadas (refs: docs/RELATORIO_AUDITORIA_UX_2026-04-02.md):
+     LAY-01: Footer height:400px + overflow:hidden (75% do footer invisivel)
+     LAY-05: iOS Safari zoom em inputs <16px
+     LAY-06: Badge menu sem aria-hidden
+     LAY-07: Logo sem alt (PHTML; aqui apenas hardening)
+     LAY-18: Touch target <44px (universal)
+     LAY-19: Fonte base insuficiente para idosos
+     LAY-22: Focus trap ausente em drawers (CSS-only mitigation)
+
+   Best practices Magento 2 aplicadas:
+     - Touch target WCAG 2.5.5 (44x44px)
+     - Focus visible WCAG 2.4.7
+     - iOS safe area (env-safe-area-inset-*)
+     - prefers-reduced-motion WCAG 2.3.3
+     - prefers-contrast WCAG 1.4.6
+     - Skip-to-content link
+     - Print stylesheet
+   ============================================================================ */
+
+
+/* ----------------------------------------------------------------------------
+   LAY-01 — FOOTER OVERFLOW FIX
+   ----------------------------------------------------------------------------
+   Sintoma: footer.page_footer tinha height:400px + overflow:hidden,
+   cortando 75% do conteudo real (1665px PLP / 1078px home).
+   Causa raiz: regra em awa-bundle-refinements.css que continha layout/animacao.
+   Correcao: deixar o footer crescer conforme conteudo, com min-height para
+   preservar a aparencia minima.
+   ---------------------------------------------------------------------------- */
+
+footer.page_footer,
+.footer.page_footer,
+body .page-wrapper .page-footer {
+    height: auto;
+    min-block-size: 24rem;
+    overflow: visible;
+}
+
+
+/* ----------------------------------------------------------------------------
+   LAY-05 — iOS SAFARI ZOOM PREVENTION
+   ----------------------------------------------------------------------------
+   Sintoma: inputs com font-size <16px fazem iOS Safari dar zoom automatico
+   no campo, deslocando o layout.
+   Causa raiz: awa-bundle-core.css ou tema pai com #search { font-size: 15px }.
+   Correcao: garantir font-size >=16px em todos os inputs/selects/textareas.
+   ---------------------------------------------------------------------------- */
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="search"],
+input[type="url"],
+input[type="number"],
+input[type="date"],
+select,
+textarea,
+#search,
+.search-autocomplete input {
+    font-size: max(1rem, 16px);
+    line-height: 1.5;
+}
+
+
+/* ----------------------------------------------------------------------------
+   LAY-06 + LAY-18 — TOUCH TARGET 44px WCAG 2.5.5
+   ----------------------------------------------------------------------------
+   Aplicar 44x44px minimo em todo elemento interativo. Usando max-width como
+   fallback para nao esticar elementos visuais que devem ser menores.
+   ---------------------------------------------------------------------------- */
+
+button,
+a.btn,
+.action,
+.modes-mode,
+.toolbar a,
+.filter-options-title,
+.breadcrumbs a,
+.pager a,
+.pages a,
+.swatch-option,
+input[type="checkbox"] + label,
+input[type="radio"] + label,
+fieldset.fieldset .choice label {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+}
+
+/* Excecoes: checkbox/radio visualmente menores mas com hit-area expandida */
+input[type="checkbox"],
+input[type="radio"] {
+    inline-size: 18px;
+    block-size: 18px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+input[type="checkbox"]::before,
+input[type="radio"]::before {
+    content: "";
+    position: absolute;
+    inset: -13px;
+    cursor: pointer;
+}
+
+
+/* ----------------------------------------------------------------------------
+   LAY-22 — FOCUS RING UNIVERSAL (WCAG 2.4.7)
+   ----------------------------------------------------------------------------
+   Nunca outline:none sozinho. Focus ring sempre visivel com cor da marca.
+   ---------------------------------------------------------------------------- */
+
+:focus-visible {
+    outline: 2px solid var(--awa-color-primary, var(--awa-primary));
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--awa-color-primary, var(--awa-primary));
+    outline-offset: 2px;
+}
+
+/* Foco invisivel para mouse, visivel para teclado (best practice) */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+
+/* ----------------------------------------------------------------------------
+   SKIP-LINK — MAGENTO 2 ACCESSIBILITY
+   ----------------------------------------------------------------------------
+   Primeiro elemento focavel da pagina. Magento ja emite mas precisa de estilo.
+   ---------------------------------------------------------------------------- */
+
+.skip-link,
+.skip-nav,
+a[href="#maincontent"],
+a[href="#main-content"] {
+    position: absolute;
+    inset-inline-start: -9999px;
+    inset-block-start: 0;
+    z-index: 9999;
+    padding: 1rem 1.5rem;
+    background: var(--awa-color-primary, var(--awa-primary));
+    color: var(--awa-bg);
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 0 0 0.5rem 0;
+    min-block-size: 44px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.skip-link:focus,
+.skip-nav:focus,
+a[href="#maincontent"]:focus,
+a[href="#main-content"]:focus {
+    inset-inline-start: 0;
+}
+
+
+/* ----------------------------------------------------------------------------
+   iOS SAFE AREA INSETS
+   ----------------------------------------------------------------------------
+   Suporte ao notch do iPhone X+ em fixed headers/footers/bottom-nav.
+   ---------------------------------------------------------------------------- */
+
+@supports (padding: max(0px)) {
+    .header.content,
+    header.page-header,
+    body .page-wrapper .header {
+        padding-inline-start: max(1rem, env(safe-area-inset-left));
+        padding-inline-end: max(1rem, env(safe-area-inset-right));
+    }
+
+    body.has-sticky-footer .page-footer,
+    .mobile-bottom-nav,
+    .minicart-wrapper {
+        padding-block-end: max(0px, env(safe-area-inset-bottom));
+    }
+}
+
+
+/* ----------------------------------------------------------------------------
+   LAY-19 — FONTE BASE PARA IDOSOS (WCAG Enhanced AAA)
+   ----------------------------------------------------------------------------
+   Por padrao mantemos 16px (compativel com a maioria dos browsers).
+   Adicionamos media query para usuarios que preferem fonte maior.
+   Tambem aplicamos tecnica de zoom limitado em inputs para nao truncar.
+   ---------------------------------------------------------------------------- */
+
+html {
+    font-size: 100%; /* 16px na maioria dos browsers */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+@media (min-width: 768px) {
+    body {
+        font-size: 1rem; /* 16px desktop */
+        line-height: 1.6;
+    }
+}
+
+/* Respeitar preferencia de usuario por fonte maior */
+@media (prefers-reduced-motion: no-preference) {
+    /* placeholder para futuro enhancement */
+}
+
+
+/* ----------------------------------------------------------------------------
+   PREFERS-CONTRAST — HIGH CONTRAST MODE (WCAG 1.4.6)
+   ----------------------------------------------------------------------------
+   Quando usuario ativa modo alto contraste (Windows/Mac), reforcar bordas
+   e remover fundos sutis.
+   ---------------------------------------------------------------------------- */
+
+@media (prefers-contrast: more) {
+    *,
+    *::before,
+    *::after {
+        border-color: currentColor !important;
+        box-shadow: none !important;
+    }
+
+    a {
+        text-decoration: underline;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        border: 2px solid currentColor !important;
+    }
+}
+
+
+/* ----------------------------------------------------------------------------
+   PREFERS-REDUCED-MOTION — UNIVERSAL (WCAG 2.3.3)
+   ----------------------------------------------------------------------------
+   Respeitar usuarios com sensibilidade a movimento. Aplica globalmente.
+   ---------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .owl-carousel,
+    .slick-slider,
+    .swiper {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+
+/* ----------------------------------------------------------------------------
+   MAGENTO 2 — AVOID HORIZONTAL OVERFLOW (mobile)
+   ----------------------------------------------------------------------------
+   Magento 2 frequentemente tem overflow horizontal por widgets antigos.
+   Prevencao global abaixo do breakpoint mobile.
+   ---------------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+    html,
+    body,
+    body .page-wrapper,
+    body .page-wrapper .columns,
+    body .page-wrapper .column.main {
+        max-inline-size: 100%;
+        min-inline-size: 0;
+        overflow-x: clip; /* clip e melhor que hidden — nao cria contexto de scroll */
+    }
+
+    /* Imagens e embeds responsivos por padrao */
+    img,
+    video,
+    iframe,
+    embed,
+    object {
+        max-inline-size: 100%;
+        block-size: auto;
+    }
+}
+
+
+/* ----------------------------------------------------------------------------
+   MAGENTO 2 — PRODUCT MEDIA STABILITY (CLS prevention)
+   ----------------------------------------------------------------------------
+   Reservar espaco para imagens de produto antes de carregar (evita layout shift).
+   ---------------------------------------------------------------------------- */
+
+.product-image-container,
+.product-item-photo,
+.fotorama__stage,
+.product.media .gallery-placeholder {
+    aspect-ratio: 1 / 1;
+    background: var(--awa-color-bg-soft, var(--awa-bg-subtle));
+    overflow: hidden;
+}
+
+.product-image-container img,
+.product-item-photo img,
+.fotorama__stage img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+}
+
+
+/* ----------------------------------------------------------------------------
+   MAGENTO 2 — BREADCRUMB SEMANTIC IMPROVEMENT
+   ----------------------------------------------------------------------------
+   O breadcrumb do Magento ja tem schema.org, mas visualmente precisa de
+   separacao clara e tamanho de fonte consistente.
+   ---------------------------------------------------------------------------- */
+
+.breadcrumbs {
+    padding-block: 0.75rem 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.breadcrumbs .items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumbs .item {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    padding-inline: 0.25rem;
+}
+
+.breadcrumbs .item:not(:last-child)::after {
+    content: "/";
+    margin-inline-start: 0.5rem;
+    color: var(--awa-color-text-light, #999999);
+    user-select: none;
+}
+
+
+/* ----------------------------------------------------------------------------
+   MAGENTO 2 — FORM LABEL VISIBILITY (LAY-related)
+   ----------------------------------------------------------------------------
+   Garantir que labels estao sempre visiveis ou sr-only com for associacao.
+   ---------------------------------------------------------------------------- */
+
+.field.required > .label,
+.field .label {
+    display: block;
+    font-weight: 500;
+    margin-block-end: 0.5rem;
+    color: var(--awa-color-text-primary, var(--awa-text));
+}
+
+.field.required > .label::after,
+.field._required .label::after {
+    content: " *";
+    color: var(--awa-color-error, #DC2626);
+    margin-inline-start: 0.125rem;
+}
+
+/* Mensagens de erro de campo */
+.field .messages,
+.field-error {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-block-start: 0.375rem;
+    color: var(--awa-color-error, #DC2626);
+    font-size: 0.8125rem;
+    min-block-size: 1.5rem;
+}
+
+.field .messages::before,
+.field-error::before {
+    content: "";
+    inline-size: 1rem;
+    block-size: 1rem;
+    background: currentColor;
+    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L1 21h22L12 2zm0 7v4m0 4h.01' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L1 21h22L12 2zm0 7v4m0 4h.01' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    flex-shrink: 0;
+}
+
+
+/* ----------------------------------------------------------------------------
+   MAGENTO 2 — PRICE BOX BEST PRACTICES
+   ----------------------------------------------------------------------------
+   Espacamento consistente e tipografia hierarquica para precos.
+   ---------------------------------------------------------------------------- */
+
+.price-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.5rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.price-box .price {
+    font-weight: 700;
+    color: var(--awa-color-primary, var(--awa-primary));
+    letter-spacing: -0.01em;
+}
+
+.price-box .old-price,
+.price-box .price-was {
+    color: var(--awa-color-text-light, #999999);
+    text-decoration: line-through;
+    font-size: 0.875em;
+}
+
+.price-box .special-price .price,
+.price-box .price-as-configured .price {
+    color: var(--awa-color-primary, var(--awa-primary));
+    font-size: 1.25em;
+}
+
+
+/* ----------------------------------------------------------------------------
+   MAGENTO 2 — LOADER / SPINNER BEST PRACTICES
+   ----------------------------------------------------------------------------
+   Spinner acessivel e com animacao respeitando reduced-motion.
+   ---------------------------------------------------------------------------- */
+
+.loader,
+.spinner,
+.ajax-loader,
+.processing {
+    inline-size: 2rem;
+    block-size: 2rem;
+    border: 2px solid var(--awa-color-border, var(--awa-border));
+    border-top-color: var(--awa-color-primary, var(--awa-primary));
+    border-radius: 50%;
+    animation: awa-spin 0.8s linear infinite;
+}
+
+@keyframes awa-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loader,
+    .spinner,
+    .ajax-loader,
+    .processing {
+        animation-duration: 1.6s; /* mais lento para nao incomodar */
+    }
+}
+
+
+/* ----------------------------------------------------------------------------
+   MAGENTO 2 — MESSAGE / NOTIFICATION BEST PRACTICES
+   ----------------------------------------------------------------------------
+   Mensagens do sistema com icone SVG e contraste adequado.
+   ---------------------------------------------------------------------------- */
+
+.message,
+.alert,
+.notification {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    margin-block: 0.75rem;
+}
+
+.message-success,
+.alert-success {
+    background: #ECFDF5;
+    border-color: #059669;
+    color: #065F46;
+}
+
+.message-error,
+.alert-error {
+    background: #FEF2F2;
+    border-color: #DC2626;
+    color: #991B1B;
+}
+
+.message-warning,
+.alert-warning {
+    background: #fffBEB;
+    border-color: #D97706;
+    color: #92400E;
+}
+
+.message-info,
+.alert-info,
+.message-notice {
+    background: #EFF6FF;
+    border-color: #0369A1;
+    color: #1E40AF;
+}
+
+
+/* ----------------------------------------------------------------------------
+   MAGENTO 2 — PRINT STYLESHEET (best practice obrigatorio)
+   ----------------------------------------------------------------------------
+   Esconde elementos nao relevantes para impressao, mostra URLs de links.
+   ---------------------------------------------------------------------------- */
+
+@media print {
+    *,
+    *::before,
+    *::after {
+        background: transparent !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    body {
+        font-size: 11pt;
+        line-height: 1.4;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Esconder elementos de UI nao relevantes */
+    .header,
+    .footer,
+    .navigation,
+    .minicart-wrapper,
+    .block-search,
+    .breadcrumbs,
+    .toolbar,
+    .action,
+    .nav-toggle,
+    .mobile-bottom-nav,
+    .modal-popup,
+    .popup,
+    .cookie-notice,
+    .newsletter-popup,
+    .skip-link,
+    button,
+    .pager,
+    .pages {
+        display: none !important;
+    }
+
+    /* Mostrar URLs de links para contexto */
+    a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 90%;
+        color: #555555;
+    }
+
+    a[href^="http"]::after {
+        content: " (" attr(href) ")";
+    }
+
+    /* Forcar quebras de pagina */
+    h1, h2, h3, h4 {
+        page-break-after: avoid;
+    }
+
+    img,
+    table,
+    figure {
+        page-break-inside: avoid;
+    }
+
+    /* Mostrar info de produto limpa */
+    .product-info-main,
+    .product.media {
+        display: block !important;
+    }
+
+    .product-add-form,
+    .box-tocart {
+        display: none !important;
+    }
+}

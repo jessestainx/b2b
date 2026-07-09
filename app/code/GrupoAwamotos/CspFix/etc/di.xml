@@ -7,6 +7,9 @@
     <type name="Magento\Csp\Model\SubresourceIntegrity\Storage\File">
         <plugin name="grupoawamotos_cspfix_sri_atomic_storage" type="GrupoAwamotos\CspFix\Plugin\Csp\SubresourceIntegrity\Storage\FileAtomicPlugin" sortOrder="10" />
     </type>
+    <type name="Magento\Csp\Model\SubresourceIntegrityRepository">
+        <plugin name="grupoawamotos_cspfix_sri_disk_verify" type="GrupoAwamotos\CspFix\Plugin\Csp\SubresourceIntegrity\RepositoryDiskVerifyPlugin" sortOrder="10" />
+    </type>
     <!-- Fix: trim trailing newline from deployed_version.txt to prevent broken RequireJS baseUrl -->
     <type name="Magento\Framework\App\View\Deployment\Version\Storage\File">
         <plugin name="grupoawamotos_cspfix_static_version_trim" type="GrupoAwamotos\CspFix\Plugin\Deployment\Version\Storage\FileTrimPlugin" sortOrder="10" />

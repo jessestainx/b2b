@@ -100,31 +100,22 @@
 		</div>
 </section>
 
-<script type="text/javascript">
-	require([
-		'jquery',
-		'mage/mage',
-		'rokanthemes/owl'
-	], function ($) {
-		'use strict';
-
-		jQuery(".block-recent-posts .owl").owlCarousel({
-			lazyLoad:true,
-			items : <?php echo (int)$default; ?>,
-			margin: 30,
-			itemsDesktop : [1199,<?php echo (int)$desktop; ?>],
-			itemsDesktopSmall : [991,<?php echo (int)$desktop_small; ?>],
-			itemsTablet: [768,<?php echo (int)$tablet; ?>],
-			itemsMobile : [480,<?php echo (int)$mobile; ?>],
-			slideSpeed : <?php echo (int)$pagination; ?>,
-			paginationSpeed : <?php echo (int)$pagination; ?>,
-			rewindSpeed : <?php echo (int)$pagination; ?>,
-			addClassActive: true,
-			navigation : <?php echo $show_next_back; ?>,
-			stopOnHover : true,
-			pagination : <?php echo $show_navigation_control; ?>,
-			scrollPerPage:true,
-		});
-	});
+<script type="text/x-magento-init">
+{
+	".block-recent-posts .owl": {
+		"awaLegacySwiper": {
+			"items": <?php echo (int)$default; ?>,
+			"itemsDesktop": [1199, <?php echo (int)$desktop; ?>],
+			"itemsDesktopSmall": [991, <?php echo (int)$desktop_small; ?>],
+			"itemsTablet": [768, <?php echo (int)$tablet; ?>],
+			"itemsMobile": [480, <?php echo (int)$mobile; ?>],
+			"slideSpeed": <?php echo (int)$pagination; ?>,
+			"navigation": <?php echo $show_next_back; ?>,
+			"pagination": <?php echo $show_navigation_control; ?>,
+			"scrollPerPage": true,
+			"label": "<?php echo $block->escapeJs(__('Posts recentes')); ?>"
+		}
+	}
+}
 </script>
 <?php } ?>

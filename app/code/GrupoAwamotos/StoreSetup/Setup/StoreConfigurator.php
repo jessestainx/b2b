@@ -1079,11 +1079,6 @@ HTML;
                 'content' => $this->homeSliderContent()
             ],
             [
-                'identifier' => 'home_fitment',
-                'title' => 'Home - Busca por Aplicação',
-                'content' => $this->homeFitmentContent()
-            ],
-            [
                 'identifier' => 'home_category_nav_visual',
                 'title' => 'Home - Navegação Visual por Categorias (B2B)',
                 'content' => $this->homeCategoryNavVisualContent()
@@ -1202,11 +1197,6 @@ HTML;
                 'identifier' => 'home_hero',
                 'title' => 'Hero Principal',
                 'content' => $this->homeHeroContent()
-            ],
-            [
-                'identifier' => 'home_fitment_search',
-                'title' => 'Busca por Aplicação (Home)',
-                'content' => $this->homeFitmentSearchContent()
             ],
             [
                 'identifier' => 'home_security_seals',
@@ -1385,13 +1375,6 @@ HTML;
 HTML;
     }
 
-    private function homeFitmentSearchContent(): string
-    {
-        // Mantém a home idempotente e evita formulário "fake" (marca/modelo/ano sem enviar q).
-        // Reutiliza o conteúdo real do Fitment (configurável em Stores > Configuration > grupoawamotos_fitment).
-        return $this->homeFitmentContent();
-    }
-
     private function homeB2bInviteContent(): string
     {
         return <<<HTML
@@ -1501,38 +1484,6 @@ HTML;
             'rokanthemes_themeoption/newsletter_popup/width',
             'rokanthemes_themeoption/newsletter_popup/height',
         ];
-    }
-
-    private function homeFitmentContent(): string
-    {
-        $enabled = (string)$this->scopeConfig->getValue('grupoawamotos_fitment/general/enable') === '1';
-        $placeholder = (string)($this->scopeConfig->getValue('grupoawamotos_fitment/general/placeholder') ?: 'Ex.: Honda CG 160 2022');
-        $hint = (string)($this->scopeConfig->getValue('grupoawamotos_fitment/general/hint') ?: 'Dica: use marca + modelo + ano para resultados mais precisos.');
-
-        if (!$enabled) {
-            $placeholder = 'Ex.: Honda CG 160 2022';
-            $hint = 'Busca por aplicação simplificada ativa. Use marca + modelo + ano.';
-        }
-
-        $placeholderEsc = htmlspecialchars($placeholder, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-        $hintEsc = htmlspecialchars($hint, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-
-        return <<<HTML
-<div class="ayo-home5-fitment">
-    <div class="ayo-home5-fitment__box">
-        <div class="ayo-home5-fitment__intro">
-            <p>Busque por modelo, ano e marca para achar compatibilidades.</p>
-        </div>
-        <form class="ayo-home5-fitment__form" action="{{store url='catalogsearch/result'}}" method="get">
-            <div class="ayo-home5-fitment__fields">
-                <input type="text" name="q" placeholder="{$placeholderEsc}" aria-label="Buscar por aplicação" required />
-                <button class="action primary" type="submit">Buscar</button>
-            </div>
-            <small class="ayo-home5-fitment__hint">{$hintEsc}</small>
-        </form>
-    </div>
-</div>
-HTML;
     }
 
     private function homeSecuritySealsContent(): string

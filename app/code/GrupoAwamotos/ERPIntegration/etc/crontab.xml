@@ -28,6 +28,12 @@
              method="execute">
             <schedule>0 */4 * * *</schedule>
         </job>
+        <job name="grupoawamotos_erp_sync_price_deltas"
+             instance="GrupoAwamotos\ERPIntegration\Cron\SyncPriceDeltas"
+             method="execute">
+            <!-- every 5 min for low-latency customer/list reconciliation -->
+            <schedule>*/5 * * * *</schedule>
+        </job>
         <job name="grupoawamotos_erp_sync_order_statuses"
              instance="GrupoAwamotos\ERPIntegration\Cron\SyncOrderStatuses"
              method="execute">

@@ -220,19 +220,4 @@
     box-sizing: border-box !important;
 }
 
-// ── §134 SSOT — Header inner container centralizado no B2B dashboard ─────────
-// Mirror do critical inline em b2b-dashboard-css.phtml.
-// Garante a regra mesmo se o PHTML preprocessed ficar stale.
-// Especificidade: html(0,0,1) + body#html-body.b2b-account-dashboard(1,1,1)
-//   + .page-wrapper.awa-site-header(0,2,0) + .header.awa-main-header(0,2,0)
-//   + .awa-main-header__inner.wp-header(0,2,0) = (1,7,2) > §1 styles-l (1,6,2).
-@media (min-width: 992px) {
-    html body#html-body.b2b-account-dashboard .page-wrapper .awa-site-header .header.awa-main-header .awa-main-header__inner.wp-header,
-    html body#html-body.b2b-account-dashboard .page-wrapper .awa-site-header .header.awa-main-header .awa-main-header__inner[data-awa-header-row] {
-        max-width: @awa-page-dash !important;
-        width: 100% !important;
-        margin-inline: auto !important;
-        padding-inline: @awa-page-pad-desktop !important;
-        box-sizing: border-box !important;
-    }
-}
+// Header layout pertence à cascata global do tema; grid de conta não regride .awa-site-header.

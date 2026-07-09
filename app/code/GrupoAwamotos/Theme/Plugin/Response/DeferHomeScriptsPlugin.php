@@ -14,7 +14,7 @@ use Magento\Framework\View\Asset\Repository as AssetRepository;
 class DeferHomeScriptsPlugin
 {
     private const HOME_ACTION = 'cms_index_index';
-    private const HOME_BOOTSTRAP_VERSION = '20260605-nav-preflight';
+    private const HOME_BOOTSTRAP_VERSION = '20260703-carousel-contract-v9';
 
     /** Scripts que bloqueiam o parser na home — adiar com defer (stub permanece síncrono). */
     private const HOME_DEFER_SCRIPT_FRAGMENTS = [
@@ -47,6 +47,7 @@ class DeferHomeScriptsPlugin
             return;
         }
 
+        $html = $this->stripBodyLoaderMageInit($html);
         $html = $this->deferBlockingHomeScripts($html);
         $html = $this->bumpHomeBootstrapAssetVersions($html);
 
@@ -86,6 +87,38 @@ class DeferHomeScriptsPlugin
         $subject->setBody($html);
     }
 
+    /**
+     * Home: body loader/loaderAjax via mage-init quebra com AMD adiado — init manual após bootstrap.
+     */
+    private function stripBodyLoaderMageInit(string $html): string
+    {
+        $html = (string) preg_replace(
+            '/<body\s+data-container="body"\s+data-mage-init=\'[^\']*loaderAjax[^\']*\'/i',
+            '<body data-container="body"',
+            $html,
+            1
+        );
+
+        if (!str_contains($html, 'awa-home-body-loader-defer')) {
+            try {
+                $loaderIcon = $this->assetRepository->getUrl('images/loader-2.gif');
+            } catch (\Throwable) {
+                return $html;
+            }
+
+            $loaderIconEsc = htmlspecialchars($loaderIcon, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $snippet = '<script>(function(w,d){"use strict";var done=false;var cfg={"loader":{"icon":"'
+                . $loaderIconEsc
+                . '"},"loaderAjax":{}};function boot(){if(done||typeof w.require!=="function"){return;}done=true;w.require(["jquery","mage/loader"],function($){var $body=$("body");if(!$body.data("mageLoader")){$body.mage("loader",cfg.loader);}if(!$body.data("mageLoaderAjax")){$body.mage("loaderAjax",cfg.loaderAjax);}});}d.addEventListener("awa:customer-data-ready",boot,{once:true});if("requestIdleCallback"in w){w.requestIdleCallback(boot,{timeout:5000});}else{w.setTimeout(boot,3500);}})(window,document);</script>';
+
+            $replaced = preg_replace('/<\/body>/i', $snippet . "\n</body>", $html, 1);
+
+            return is_string($replaced) ? $replaced : $html;
+        }
+
+        return $html;
+    }
+
     private function deferBlockingHomeScripts(string $html): string
     {
         foreach (self::HOME_DEFER_SCRIPT_FRAGMENTS as $fragment) {
@@ -103,7 +136,13 @@ class DeferHomeScriptsPlugin
     private function bumpHomeBootstrapAssetVersions(string $html): string
     {
         $version = self::HOME_BOOTSTRAP_VERSION;
-        $fragments = ['awa-home-bootstrap-defer.js', 'awa-require-stub.js'];
+        $fragments = [
+            'awa-home-bootstrap-defer.js',
+            'awa-require-stub.js',
+            'awa-home-shelf-bootstrap.js',
+            'awa-scroll-carousel.min.js',
+            'awa-scroll-carousel.js',
+        ];
 
         foreach ($fragments as $fragment) {
             $quoted = preg_quote($fragment, '#');

@@ -1,0 +1,197 @@
+<?php
+/**
+ * AWA Motos - 404 Page melhorada
+ *
+ * Sprint 3 (UX): pagina de erro com links uteis e busca.
+ */
+?>
+<div class="awa-404 awa-404-enhanced">
+    <div class="awa-404__container">
+        <h1 class="awa-404__code" aria-label="<?= $block->escapeHtmlAttr(__('Erro 404 - pagina nao encontrada')) ?>">
+            <span class="awa-404__num">404</span>
+        </h1>
+        <h2 class="awa-404__title">
+            <?= $block->escapeHtml(__('Oops! Pagina nao encontrada')) ?>
+        </h2>
+        <p class="awa-404__desc">
+            <?= $block->escapeHtml(__('A pagina que voce procura pode ter sido movida ou nao existe mais. Vamos encontrar o que voce precisa!')) ?>
+        </p>
+
+        <form class="awa-404__search"
+              action="<?= $block->escapeUrl($block->getUrl('catalogsearch/result')) ?>"
+              method="get"
+              role="search"
+              aria-label="<?= $block->escapeHtmlAttr(__('Buscar produtos')) ?>">
+            <label for="awa-404-search" class="awa-sr-only">
+                <?= $block->escapeHtml(__('O que voce procura?')) ?>
+            </label>
+            <input type="search"
+                   name="q"
+                   id="awa-404-search"
+                   class="awa-404__input"
+                   placeholder="<?= $block->escapeHtmlAttr(__('Buscar peca, marca ou modelo...')) ?>"
+                   autocomplete="off"
+                   required
+                   aria-required="true" />
+            <button type="submit"
+                    class="awa-404__button action primary"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Buscar')) ?>">
+                <?= $block->escapeHtml(__('Buscar')) ?>
+            </button>
+        </form>
+
+        <nav class="awa-404__links" aria-label="<?= $block->escapeHtmlAttr(__('Links uteis')) ?>">
+            <h3><?= $block->escapeHtml(__('Ou va para:')) ?></h3>
+            <ul>
+                <li>
+                    <a href="<?= $block->escapeUrl($block->getBaseUrl()) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Voltar para a pagina inicial')) ?>">
+                        <span aria-hidden="true">🏠</span>
+                        <?= $block->escapeHtml(__('Pagina Inicial')) ?>
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= $block->escapeUrl($block->getUrl('catalog/seo_sitemap/category')) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Ver todas as categorias')) ?>">
+                        <span aria-hidden="true">📂</span>
+                        <?= $block->escapeHtml(__('Categorias')) ?>
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= $block->escapeUrl($block->getUrl('contact')) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Falar com nosso atendimento')) ?>">
+                        <span aria-hidden="true">💬</span>
+                        <?= $block->escapeHtml(__('Atendimento')) ?>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://wa.me/5516997367588?text=Preciso%20de%20ajuda%20-%20p%C3%A1gina%20com%20erro%20404"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Falar no WhatsApp sobre pagina nao encontrada')) ?>">
+                        <span aria-hidden="true">📱</span>
+                        <?= $block->escapeHtml(__('WhatsApp')) ?>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<style>
+.awa-404-enhanced {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    background: linear-gradient(135deg, #fef9e7 0%, #fef3c7 100%);
+}
+.awa-404__container {
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    background: white;
+    border-radius: 16px;
+    padding: 48px 32px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+.awa-404__code {
+    margin: 0 0 16px;
+    font-size: 96px;
+    font-weight: 800;
+    line-height: 1;
+    color: #b73337;
+}
+.awa-404__num { display: inline-block; }
+.awa-404__title {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+}
+.awa-404__desc {
+    margin: 0 0 24px;
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+.awa-404__search {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+.awa-404__input {
+    flex: 1;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.awa-404__input:focus {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+    border-color: #2563eb;
+}
+.awa-404__button {
+    min-width: 100px;
+    min-height: 48px;
+    background: #b73337;
+    color: white;
+    border: 0;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 20px;
+}
+.awa-404__button:hover { background: #a12d30; }
+.awa-404__links h3 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+.awa-404__links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.awa-404__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    min-height: 44px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #111827;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+.awa-404__links a:hover {
+    background: #f3f4f6;
+    border-color: #b73337;
+}
+@media (max-width: 480px) {
+    .awa-404__links ul {
+        grid-template-columns: 1fr;
+    }
+    .awa-404__container {
+        padding: 32px 20px;
+    }
+    .awa-404__code {
+        font-size: 64px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .awa-404__button,
+    .awa-404__links a { transition: none !important; }
+}
+</style>

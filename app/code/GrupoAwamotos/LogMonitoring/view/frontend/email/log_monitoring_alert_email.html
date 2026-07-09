@@ -1,0 +1,33 @@
+<!--@subject Alerta de monitoramento: {{var title}} @-->
+<!--@vars
+{"var alert_type":"Tipo do alerta","var severity":"Severidade","var title":"Título","var message":"Mensagem","var timestamp":"Data/hora"}
+@-->
+
+{{template config_path="design/email/header_template"}}
+
+<table style="width:100%;">
+    <tr>
+        <td>
+            <h1 style="font-size:20px;color:#333;margin:0 0 12px;">Alerta do sistema</h1>
+            <p style="margin:0 0 8px;color:#555;">
+                <strong>Tipo:</strong> {{var alert_type}}
+                &nbsp;|&nbsp;
+                <strong>Severidade:</strong> {{var severity}}
+            </p>
+            <p style="margin:0 0 16px;color:#555;"><strong>Registrado em:</strong> {{var timestamp}}</p>
+            <table style="width:100%;border:1px solid #eee;border-radius:4px;margin:0 0 16px;">
+                <tr>
+                    <td style="padding:14px 16px;background:#fafafa;">
+                        <p style="margin:0 0 8px;font-size:16px;font-weight:600;color:#333;">{{var title}}</p>
+                        <p style="margin:0;color:#444;line-height:1.5;">{{var message}}</p>
+                    </td>
+                </tr>
+            </table>
+            <p style="margin:0;font-size:12px;color:#777;">
+                Mensagem automática do monitoramento AWA Motos. Revise os logs no painel administrativo se necessário.
+            </p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}

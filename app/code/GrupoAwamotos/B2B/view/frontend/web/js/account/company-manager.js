@@ -7,14 +7,16 @@ define([
 ], function ($, $t, _cookies, alertModal, confirmModal) {
     'use strict';
 
-    function showAlert(message) {
+    function showAlert(message)
+    {
         alertModal({
             title: $t('B2B'),
             content: message
         });
     }
 
-    function getFormKey() {
+    function getFormKey()
+    {
         if (window.FORM_KEY) {
             return window.FORM_KEY;
         }
@@ -26,7 +28,8 @@ define([
         return '';
     }
 
-    function requestAction(url, payload, onSuccess, onFail) {
+    function requestAction(url, payload, onSuccess, onFail)
+    {
         $.ajax({
             url: url,
             type: 'POST',

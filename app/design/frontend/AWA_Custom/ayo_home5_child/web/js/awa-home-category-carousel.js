@@ -26,6 +26,7 @@ define([], function () {
         let startScrollLeft = 0;
         let isDragging = false;
         let resizeTimer;
+        let scrollRaf = 0;
 
         if (!track || track.dataset.awaCategoryCarouselInit === '1') {
             return;
@@ -42,6 +43,15 @@ define([], function () {
         if (!items.length) {
             return;
         }
+
+        track.style.touchAction = 'pan-x pan-y';
+        track.style.overscrollBehaviorX = 'contain';
+        if (!track.id) {
+            track.id = 'awa-cat-carousel-track';
+        }
+        track.setAttribute('role', 'region');
+        track.setAttribute('aria-roledescription', 'carrossel');
+        track.setAttribute('aria-label', root.getAttribute('aria-label') || 'Carrossel de categorias');
 
         function getScrollAmount() {
             // Scroll by almost a full page (track.clientWidth) to match dots logic
@@ -62,19 +72,33 @@ define([], function () {
         }
 
         function buildPageOffsets() {
-            let trackW = track.clientWidth;
-            let maxScroll = getMaxScroll();
-            let offset = 0;
+            let rawTrackW = Number(track.clientWidth) || 0;
+            let trackW = Math.max(1, Math.floor(rawTrackW));
+            let maxScroll = Math.max(0, Math.floor(getMaxScroll()));
+            let maxPages = 60;
+            let approxPages;
+            let safePages;
+            let step;
+            let i;
+            let offset;
 
             pageOffsets = [0];
 
-            if (!trackW || maxScroll <= 0) {
+            if (trackW <= 0 || maxScroll <= 0) {
                 return;
             }
 
-            while (offset + trackW < maxScroll) {
-                offset += trackW;
-                pageOffsets.push(offset);
+            // Guard rail: avoid long while-loops when layout glitches produce
+            // very large scroll ranges and tiny viewport widths.
+            approxPages = Math.max(1, Math.ceil(maxScroll / trackW));
+            safePages = Math.min(maxPages, approxPages);
+            step = Math.max(1, Math.ceil(maxScroll / safePages));
+
+            for (i = 1; i <= safePages; i += 1) {
+                offset = Math.min(maxScroll, i * step);
+                if (pageOffsets[pageOffsets.length - 1] !== offset) {
+                    pageOffsets.push(offset);
+                }
             }
 
             if (pageOffsets[pageOffsets.length - 1] !== maxScroll) {
@@ -97,6 +121,25 @@ define([], function () {
             });
 
             return activeIndex;
+        }
+
+        function scheduleDotsUpdate() {
+            if (scrollRaf) {
+                return;
+            }
+
+            if (typeof window.requestAnimationFrame === 'function') {
+                scrollRaf = window.requestAnimationFrame(function () {
+                    scrollRaf = 0;
+                    updateDots();
+                });
+                return;
+            }
+
+            scrollRaf = window.setTimeout(function () {
+                scrollRaf = 0;
+                updateDots();
+            }, 16);
         }
 
         function updateNavState() {
@@ -155,6 +198,7 @@ define([], function () {
 
                     dot.className = 'awa-category-carousel__dot';
                     dot.type = 'button';
+                    dot.setAttribute('aria-controls', track.id);
                     dot.setAttribute('aria-label', 'Ir para página ' + (pageIndex + 1) + ' de ' + pages);
                     dot.setAttribute('aria-pressed', isActive ? 'true' : 'false');
                     if (isActive) {
@@ -207,12 +251,16 @@ define([], function () {
         }
 
         if (prev) {
+            prev.setAttribute('aria-controls', track.id);
+            prev.setAttribute('aria-keyshortcuts', 'ArrowLeft');
             prev.addEventListener('click', function () {
                 track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
             });
         }
 
         if (next) {
+            next.setAttribute('aria-controls', track.id);
+            next.setAttribute('aria-keyshortcuts', 'ArrowRight');
             next.addEventListener('click', function () {
                 track.scrollBy({left: getScrollAmount(), behavior: scrollBehavior()});
             });
@@ -234,6 +282,17 @@ define([], function () {
 
         track.addEventListener('touchend', function () {
             isDragging = false;
+            if (prefersReducedMotion()) {
+                return;
+            }
+            let page = getCurrentPage();
+            track.scrollTo({
+                left: pageOffsets[page] || 0,
+                behavior: scrollBehavior()
+            });
+        }, {passive: true});
+        track.addEventListener('touchcancel', function () {
+            isDragging = false;
         }, {passive: true});
 
         track.setAttribute('tabindex', '0');
@@ -247,14 +306,29 @@ define([], function () {
                 track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
                 event.preventDefault();
             }
+
+            if (event.key === 'Home') {
+                track.scrollTo({left: 0, behavior: scrollBehavior()});
+                event.preventDefault();
+            }
+
+            if (event.key === 'End') {
+                buildPageOffsets();
+                track.scrollTo({left: pageOffsets[pageOffsets.length - 1] || 0, behavior: scrollBehavior()});
+                event.preventDefault();
+            }
         });
 
-        track.addEventListener('scroll', updateDots, {passive: true});
+        track.addEventListener('scroll', scheduleDotsUpdate, {passive: true});
         buildDots();
+        updateDots();
 
         window.addEventListener('resize', function () {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(buildDots, 200);
+            resizeTimer = setTimeout(function () {
+                buildDots();
+                updateDots();
+            }, 200);
         }, {passive: true});
 
         if ('IntersectionObserver' in window && !prefersReducedMotion()) {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\ERPIntegration\Console\Command;
 
 use GrupoAwamotos\ERPIntegration\Api\CustomerSyncInterface;
+use GrupoAwamotos\B2B\Model\Sectra\SectraImportStatus;
 use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -23,9 +24,12 @@ use Symfony\Component\Console\Helper\Table;
  *  --action=list        List held orders with reason and customer details (default)
  *  --action=resolve     Try to resolve erp_code for held orders via CPF/CNPJ lookup
  *  --action=generate-sql Generate SQL for GR_INTEGRACAOVALIDADOR registration
+ *  --action=manual-import Mark an order manually entered in Sectra as imported in Magento
  */
 class HeldOrdersCommand extends Command
 {
+    private const OC_ORDER_ID_OFFSET = 200000;
+
     private OrderCollectionFactory $orderCollectionFactory;
     private CustomerRepositoryInterface $customerRepository;
     private CustomerSyncInterface $customerSync;
@@ -54,8 +58,17 @@ class HeldOrdersCommand extends Command
     {
         $this->setName('erp:orders:held')
             ->setDescription('Gerencia pedidos retidos por falta de vinculação ERP (erp_code ou GR_INTEGRACAOVALIDADOR)')
-            ->addOption('action', 'a', InputOption::VALUE_OPTIONAL, 'Ação: list, resolve, generate-sql, unacknowledged', 'list')
-            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Limite de pedidos a processar', '100');
+            ->addOption(
+                'action',
+                'a',
+                InputOption::VALUE_OPTIONAL,
+                'Ação: list, resolve, generate-sql, unacknowledged, manual-import',
+                'list'
+            )
+            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Limite de pedidos a processar', '100')
+            ->addOption('order', null, InputOption::VALUE_REQUIRED, 'Increment ID do pedido Magento (ex.: 000000096)')
+            ->addOption('erp-order-id', null, InputOption::VALUE_REQUIRED, 'Código numérico do pedido no Sectra, se existir')
+            ->addOption('note', null, InputOption::VALUE_REQUIRED, 'Observação para o histórico do pedido');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -72,8 +85,13 @@ class HeldOrdersCommand extends Command
                 return $this->generateSql($output, $limit);
             case 'unacknowledged':
                 return $this->listUnacknowledgedOrders($output, $limit);
+            case 'manual-import':
+                return $this->markManualImport($input, $output);
             default:
-                $output->writeln(sprintf('<error>Ação desconhecida: %s. Use: list, resolve, generate-sql, unacknowledged</error>', $action));
+                $output->writeln(sprintf(
+                    '<error>Ação desconhecida: %s. Use: list, resolve, generate-sql, unacknowledged, manual-import</error>',
+                    $action
+                ));
                 return Command::FAILURE;
         }
     }
@@ -298,10 +316,15 @@ class HeldOrdersCommand extends Command
         $collection = $this->orderCollectionFactory->create();
         $collection->addFieldToFilter('state', ['in' => ['new', 'pending_payment', 'processing']]);
         $collection->addFieldToFilter('customer_id', ['notnull' => true]);
+        $collection->addFieldToFilter('sectra_import_status', ['eq' => SectraImportStatus::READY_FOR_IMPORT]);
         $collection->getSelect()->where(
             'main_table.customer_erp_code IS NOT NULL'
             . ' AND main_table.customer_erp_code != \'\''
             . ' AND main_table.customer_erp_code != \'0\''
+            . ' AND NOT EXISTS ('
+            . 'SELECT 1 FROM oc_order_imported oi '
+            . 'WHERE oi.order_id = main_table.entity_id + ' . self::OC_ORDER_ID_OFFSET
+            . ')'
         );
         $collection->setPageSize($limit);
         $collection->setOrder('created_at', 'ASC');
@@ -320,7 +343,7 @@ class HeldOrdersCommand extends Command
 
         $now = new \DateTime();
         $output->writeln(sprintf(
-            '<comment>%d pedido(s) com erp_code aguardando ACK do ERP (nunca confirmados via POST /V1/erp/orders/{id}/ack):</comment>',
+            '<comment>%d pedido(s) liberado(s) para importação aguardando ACK do ERP:</comment>',
             count($orders)
         ));
         $output->writeln('');
@@ -347,25 +370,111 @@ class HeldOrdersCommand extends Command
 
         $output->writeln('');
         $output->writeln('<comment>Diagnóstico:</comment>');
-        $output->writeln('  • Estes pedidos estão disponíveis em GET /V1/erp/orders/pending');
+        $output->writeln('  • Estes pedidos estão liberados para importação e ainda não têm ACK local');
         $output->writeln('  • O ERP (Sectra) precisa chamar POST /V1/erp/orders/{incrementId}/ack para confirmá-los');
         $output->writeln('  • Último acesso registrado ao endpoint: verificar var/log/debug.log.bak.20260315');
         $output->writeln('  • Se o ERP não está chamando o endpoint, verificar integração no lado Sectra');
         $output->writeln('');
-        $output->writeln('<comment>Para marcar manualmente (somente se ERP confirmou fora do sistema):</comment>');
-        foreach ($orders as $order) {
-            $output->writeln(sprintf(
-                '  curl -s -X POST "https://awamotos.com.br/rest/V1/erp/orders/%s/ack" \\',
-                $order->getIncrementId()
-            ));
-            $output->writeln(
-                '    -H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json" \\'
-            );
-            $output->writeln(
-                '    -d \'{"erpOrderId":"MANUAL-' . $order->getIncrementId() . '"}\''
-            );
-            $output->writeln('');
+        $output->writeln('<comment>Para marcar lançamento manual no Sectra e impedir duplicidade:</comment>');
+        $output->writeln(
+            '  bin/magento erp:orders:held --action=manual-import --order=000000096 --erp-order-id=123456'
+        );
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * Mark a Magento order as manually entered in Sectra.
+     *
+     * This is intentionally local-only: it does not write to Sectra. It removes
+     * the order from oc_order by recording the OpenCart bridge ACK and marking
+     * sales_order.sectra_import_status as imported.
+     */
+    private function markManualImport(InputInterface $input, OutputInterface $output): int
+    {
+        $incrementId = trim((string) $input->getOption('order'));
+        if ($incrementId === '') {
+            $output->writeln('<error>Informe --order=000000096.</error>');
+            return Command::FAILURE;
         }
+
+        $erpOrderId = trim((string) ($input->getOption('erp-order-id') ?? ''));
+        if ($erpOrderId !== '' && (!ctype_digit($erpOrderId) || (int) $erpOrderId <= 0)) {
+            $output->writeln('<error>--erp-order-id deve ser numérico positivo, igual ao código do pedido no Sectra.</error>');
+            return Command::FAILURE;
+        }
+
+        $collection = $this->orderCollectionFactory->create();
+        $collection->addFieldToFilter('increment_id', ['eq' => $incrementId]);
+        $collection->setPageSize(1);
+        $order = $collection->getFirstItem();
+
+        if (!$order || !$order->getId()) {
+            $output->writeln(sprintf('<error>Pedido %s não encontrado.</error>', $incrementId));
+            return Command::FAILURE;
+        }
+
+        $orderId = (int) $order->getEntityId();
+        $ocOrderId = $orderId + self::OC_ORDER_ID_OFFSET;
+        $connection = $this->resourceConnection->getConnection();
+        $now = gmdate('Y-m-d H:i:s');
+
+        $connection->beginTransaction();
+        try {
+            $connection->insertOnDuplicate(
+                'oc_order_imported',
+                [
+                    'order_id' => $ocOrderId,
+                    'date_imported' => $now,
+                ],
+                ['date_imported']
+            );
+
+            $connection->update(
+                'sales_order',
+                ['sectra_import_status' => SectraImportStatus::IMPORTED],
+                ['entity_id = ?' => $orderId]
+            );
+
+            if ($erpOrderId !== '') {
+                $this->syncLogResource->setEntityMap('order', $erpOrderId, $orderId);
+            }
+
+            $connection->commit();
+        } catch (\Throwable $exception) {
+            $connection->rollBack();
+            $output->writeln(sprintf(
+                '<error>Falha ao marcar pedido %s como importado manualmente: %s</error>',
+                $incrementId,
+                $exception->getMessage()
+            ));
+            return Command::FAILURE;
+        }
+
+        $note = trim((string) ($input->getOption('note') ?? ''));
+        $comment = sprintf(
+            '[ERP CLI] Pedido lançado manualmente no Sectra. oc_order=%d%s%s',
+            $ocOrderId,
+            $erpOrderId !== '' ? sprintf(' | pedido Sectra=%s', $erpOrderId) : '',
+            $note !== '' ? sprintf(' | %s', $note) : ''
+        );
+
+        try {
+            $order->addCommentToStatusHistory(__($comment));
+            $order->save();
+        } catch (\Throwable $exception) {
+            $output->writeln(sprintf(
+                '<comment>Pedido marcado, mas falhou ao gravar comentário: %s</comment>',
+                $exception->getMessage()
+            ));
+        }
+
+        $output->writeln(sprintf(
+            '<info>Pedido %s marcado como importado manualmente. oc_order=%d%s</info>',
+            $incrementId,
+            $ocOrderId,
+            $erpOrderId !== '' ? sprintf(' | pedido Sectra=%s', $erpOrderId) : ''
+        ));
 
         return Command::SUCCESS;
     }

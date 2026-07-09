@@ -1,76 +1,142 @@
 <?php
+declare(strict_types=1);
+
 /** @var \GrupoAwamotos\B2B\Block\Account\Reorder $block */
 $orders = $block->getRecentOrders(10);
+$widgetConfig = $block->getReorderWidgetConfig();
 ?>
 <div class="b2b-reorder-page b2b-page-shell"
-     data-mage-init='<?= /* @noEscape */ json_encode(['GrupoAwamotos_B2B/js/account/reorder' => new \stdClass()]) ?>'>
+     data-mage-init='<?= /* @noEscape */ json_encode(
+         ['GrupoAwamotos_B2B/js/account/reorder' => $widgetConfig],
+         JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+     ) ?>'>
+    <div class="b2b-reorder-live" data-role="reorder-live" aria-live="polite" aria-atomic="true"></div>
+
     <div class="b2b-section-header">
-        <h1><?= __('Repetir Pedido') ?></h1>
-        <p class="section-subtitle"><?= __('Selecione um pedido anterior para adicionar os produtos ao carrinho com preços atualizados do seu grupo.') ?></p>
+        <h1 id="b2b-reorder-title"><?= $block->escapeHtml(__('Repetir Pedido')) ?></h1>
+        <p class="section-subtitle"><?= $block->escapeHtml(__('Compare preços da sua tabela e adicione itens ao carrinho.')) ?></p>
     </div>
 
     <?php if ($orders->getSize() > 0): ?>
         <?php foreach ($orders as $order): ?>
-        <div class="reorder-card">
+        <?php
+            $orderId = (int) $order->getId();
+            $visibleItems = $order->getAllVisibleItems();
+            $itemCount = is_countable($visibleItems) ? count($visibleItems) : (int) $visibleItems->getSize();
+        ?>
+        <div class="reorder-card" data-order-id="<?= $orderId ?>" data-prices-state="pending">
             <div class="reorder-card__header">
                 <div class="reorder-card__info">
-                    <strong><?= __('Pedido #%1', $block->escapeHtml($order->getIncrementId())) ?></strong>
-                    <span class="reorder-card__date"><?= $block->escapeHtml(date('d/m/Y', strtotime($order->getCreatedAt()))) ?></span>
-                    <span class="reorder-card__status reorder-status--<?= $block->escapeHtmlAttr($order->getStatus()) ?>">
+                    <strong class="reorder-card__id"><?= $block->escapeHtml(__('Pedido #%1', $order->getIncrementId())) ?></strong>
+                    <span class="reorder-card__count"><?= $block->escapeHtml(__('%1 itens', $itemCount)) ?></span>
+                    <span class="reorder-card__date"><?= $block->escapeHtml(date('d/m/Y', strtotime((string) $order->getCreatedAt()))) ?></span>
+                    <span class="reorder-card__status reorder-status--<?= $block->escapeHtmlAttr((string) $order->getStatus()) ?>">
                         <?= $block->escapeHtml($order->getStatusLabel()) ?>
                     </span>
                 </div>
-                <div class="reorder-card__total">
-                    <?= /* @noEscape */ $block->formatPrice((float)$order->getGrandTotal()) ?>
+                <div class="reorder-card__total" aria-label="<?= $block->escapeHtmlAttr(__('Total do pedido')) ?>">
+                    <?= /* @noEscape */ $block->formatPrice((float) $order->getGrandTotal()) ?>
                 </div>
             </div>
 
-            <form method="post" action="<?= $block->escapeUrl($block->getReorderUrl()) ?>">
+            <form class="js-reorder-form"
+                  method="post"
+                  action="<?= $block->escapeUrl($block->getReorderUrl()) ?>"
+                  aria-labelledby="b2b-reorder-title">
                 <?= $block->getBlockHtml('formkey') ?>
-                <input type="hidden" name="order_id" value="<?= (int)$order->getId() ?>" />
+                <input type="hidden" name="order_id" value="<?= $orderId ?>" />
 
-                <table class="reorder-items">
-                    <thead>
-                        <tr>
-                            <th class="col-select">
-                                <input type="checkbox"
-                                       checked
-                                       class="js-reorder-toggle-all"
-                                       data-order-id="<?= (int) $order->getId() ?>" />
-                            </th>
-                            <th><?= __('Produto') ?></th>
-                            <th><?= __('SKU') ?></th>
-                            <th><?= __('Qtd') ?></th>
-                            <th><?= __('Preço Original') ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($order->getAllVisibleItems() as $item): ?>
-                        <tr>
-                            <td class="col-select">
-                                <input type="checkbox" name="items[]" value="<?= (int)$item->getItemId() ?>" checked
-                                       class="js-reorder-item-check"
-                                       data-order-id="<?= (int) $order->getId() ?>" />
-                            </td>
-                            <td data-th="<?= $block->escapeHtmlAttr(__('Produto')) ?>"><?= $block->escapeHtml($item->getName()) ?></td>
-                            <td data-th="<?= $block->escapeHtmlAttr(__('SKU')) ?>"><?= $block->escapeHtml($item->getSku()) ?></td>
-                            <td data-th="<?= $block->escapeHtmlAttr(__('Qtd')) ?>"><?= (int)$item->getQtyOrdered() ?></td>
-                            <td data-th="<?= $block->escapeHtmlAttr(__('Preço')) ?>"><?= /* @noEscape */ $block->formatPrice((float)$item->getPrice()) ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <div class="table-wrapper reorder-items-wrapper">
+                    <table class="reorder-items">
+                        <thead>
+                            <tr>
+                                <th class="col-select" scope="col">
+                                    <span class="sr-only"><?= $block->escapeHtml(__('Selecionar todos')) ?></span>
+                                    <input type="checkbox"
+                                           checked
+                                           class="js-reorder-toggle-all"
+                                           data-order-id="<?= $orderId ?>"
+                                           aria-label="<?= $block->escapeHtmlAttr(__('Selecionar todos os itens do pedido %1', $order->getIncrementId())) ?>" />
+                                </th>
+                                <th scope="col"><?= $block->escapeHtml(__('Produto')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('SKU')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('Quantidade')) ?></th>
+                                <th scope="col"><?= $block->escapeHtml(__('No pedido')) ?></th>
+                                <th scope="col" class="col-current-price"><?= $block->escapeHtml(__('Hoje')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($order->getAllVisibleItems() as $item): ?>
+                            <?php $itemId = (int) $item->getItemId(); ?>
+                            <tr>
+                                <td class="col-select" data-th="<?= $block->escapeHtmlAttr(__('Selecionar')) ?>">
+                                    <input type="checkbox"
+                                           name="items[]"
+                                           value="<?= $itemId ?>"
+                                           checked
+                                           class="js-reorder-item-check"
+                                           data-order-id="<?= $orderId ?>"
+                                           aria-label="<?= $block->escapeHtmlAttr(__('Selecionar %1', $item->getName())) ?>" />
+                                </td>
+                                <td class="reorder-item-name" data-th="<?= $block->escapeHtmlAttr(__('Produto')) ?>">
+                                    <?= $block->escapeHtml($item->getName()) ?>
+                                </td>
+                                <td data-th="<?= $block->escapeHtmlAttr(__('SKU')) ?>"><?= $block->escapeHtml($item->getSku()) ?></td>
+                                <td data-th="<?= $block->escapeHtmlAttr(__('Quantidade')) ?>"><?= (int) $item->getQtyOrdered() ?></td>
+                                <td data-th="<?= $block->escapeHtmlAttr(__('No pedido')) ?>">
+                                    <?= /* @noEscape */ $block->formatPrice((float) $item->getPrice()) ?>
+                                </td>
+                                <td class="reorder-item-current-price"
+                                    data-th="<?= $block->escapeHtmlAttr(__('Hoje')) ?>"
+                                    data-reorder-item-id="<?= $itemId ?>">
+                                    <span class="reorder-price-loading" aria-hidden="true">…</span>
+                                    <span class="sr-only"><?= $block->escapeHtml(__('Carregando preço da tabela')) ?></span>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="reorder-card__actions">
-                    <button type="submit" class="btn-reorder">
-                        <?= __('Adicionar ao Carrinho') ?>
+                    <button type="submit"
+                            class="btn-reorder action primary is-prices-pending"
+                            disabled
+                            aria-disabled="true"
+                            data-label-default="<?= $block->escapeHtmlAttr(__('Adicionar ao carrinho')) ?>"
+                            aria-describedby="reorder-prices-status-<?= $orderId ?>">
+                        <?= $block->escapeHtml(__('Carregando preços…')) ?>
                     </button>
-                    <span class="reorder-note"><?= __('Preços serão atualizados conforme seu grupo B2B') ?></span>
+                    <span class="reorder-prices-status"
+                          id="reorder-prices-status-<?= $orderId ?>"
+                          data-role="reorder-prices-status"
+                          aria-live="polite"></span>
                 </div>
             </form>
         </div>
         <?php endforeach; ?>
     <?php else: ?>
-        <p class="empty-message"><?= __('Nenhum pedido encontrado para reordenar.') ?></p>
+        <div class="awa-empty-state awa-empty-state--reorder" role="status">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <p class="awa-empty-state__title"><?= $block->escapeHtml(__('Nenhum pedido concluído')) ?></p>
+            <p class="awa-empty-state__hint"><?= $block->escapeHtml(__('Depois do primeiro pedido fechado, volte aqui para repetir com os preços atuais da sua tabela.')) ?></p>
+            <div class="awa-empty-state__actions">
+                <a href="<?= $block->escapeUrl($block->getCatalogUrl()) ?>"
+                   class="action primary btn-reorder"><?= $block->escapeHtml(__('Ir ao catálogo')) ?></a>
+                <a href="<?= $block->escapeUrl($block->getUrl('sales/order/history')) ?>"
+                   class="action secondary"><?= $block->escapeHtml(__('Ver pedidos na loja')) ?></a>
+            </div>
+        </div>
     <?php endif; ?>
+
+    <noscript>
+        <p class="message notice reorder-noscript-notice">
+            <?= $block->escapeHtml(__('Sem JavaScript, os preços podem não aparecer antes do envio. O formulário continua funcionando.')) ?>
+        </p>
+    </noscript>
 </div>

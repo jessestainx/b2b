@@ -11,6 +11,22 @@
                 <value id="facebook-pixel" type="host">connect.facebook.net</value>
                 <value id="google-tagmanager" type="host">www.googletagmanager.com</value>
                 <value id="google-analytics" type="host">www.google-analytics.com</value>
+                <!-- Checkout: scripts inline globais (head/footer) reportados pelo browser -->
+                <value id="checkout-inline-kG7P06" type="hash" algorithm="sha256">kG7P06aQQhAvH29vZ78GB6em3XAvo0mTITKm6luRa08=</value>
+                <value id="checkout-inline-JKRgkf" type="hash" algorithm="sha256">JKRgkf2uU9Knh3XSJp+0CNl8R/6Bw/gua4zObRsV4S0=</value>
+                <value id="checkout-inline-2wSivi" type="hash" algorithm="sha256">2wSivibS2laERGgjd+PzjqV8ZkKBfCqWucUiHNuqHr8=</value>
+                <value id="checkout-inline-eP7ADC" type="hash" algorithm="sha256">+eP7ADCcm+vbKjNoGTOKGsfSifl/cgNldAk4BMI5YWs=</value>
+                <value id="checkout-inline-vruPiJ" type="hash" algorithm="sha256">vruPiJmm3tn3SworaQQ3ntjd7hiZHG7vlbPx6QcaQKU=</value>
+                <value id="checkout-inline-s1sMrb" type="hash" algorithm="sha256">s1sMrbaNl/fB3LW9WKaDyZC4YQ4M4yGTYo04HaI4sCI=</value>
+                <value id="checkout-inline-r2Z4Ps" type="hash" algorithm="sha256">r2Z4Psfk+IHIMeMn0bDIyREk14Y+gOmVzQnQUjaaPm0=</value>
+                <value id="checkout-inline-LVvkBU" type="hash" algorithm="sha256">LVvkBUQSTdO1Gp4TbEtrnvDh0500bMm6A6hQ8SEtu2o=</value>
+                <value id="checkout-inline-MIYXfV" type="hash" algorithm="sha256">MIYXfVkA8WsUtZ68jzLE+mQFhMy7Q3V97yG5nP6bii8=</value>
+                <value id="checkout-inline-Wu6ZBs" type="hash" algorithm="sha256">Wu6ZBs2LYKNoJY4IlHx8Eb1+wI6HGelcyYvioLg1liI=</value>
+                <value id="checkout-inline-HcXmO4" type="hash" algorithm="sha256">HcXmO4GwlxNbGis1Qdx2/S6Adkvx1myyAU66/do4eCU=</value>
+                <value id="checkout-inline-T03m91" type="hash" algorithm="sha256">T03m91xuIp7DNsemfB4pCDUb+wMYA5G9IDTeuizp5f0=</value>
+                <value id="checkout-inline-qzYTAd" type="hash" algorithm="sha256">qzYTAdZGt+anBuBh5HlHO+Ek0EYgLyiWtXnE5eNEXxA=</value>
+                <value id="checkout-inline-1wI5kK" type="hash" algorithm="sha256">+1wI5kKF0bZ5yS6A4ziTlKgkWd0eaCHA2s3cZ+9GDeQ=</value>
+                <value id="checkout-inline-lI07hi" type="hash" algorithm="sha256">lI07hiQ1lVC54fPSmuLfMxipZKxyssjSYe7EViormVg=</value>
             </values>
         </policy>
         <policy id="connect-src">
@@ -19,6 +35,7 @@
                 <value id="facebook-pixel-connect" type="host">connect.facebook.net</value>
                 <value id="google-analytics-connect" type="host">www.google-analytics.com</value>
                 <value id="google-tagmanager-connect" type="host">www.googletagmanager.com</value>
+
             </values>
         </policy>
         <policy id="img-src">

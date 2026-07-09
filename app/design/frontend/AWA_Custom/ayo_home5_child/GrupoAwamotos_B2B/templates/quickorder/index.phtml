@@ -1,0 +1,96 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Quick Order Template — override tema AWA (a11y + UX)
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$addUrl = $block->getUrl('b2b/quickorder/add');
+$quickOrderConfig = [
+    'addUrl' => $addUrl,
+    'initialRows' => 5,
+    'messages' => [
+        'addToCart' => (string) __('Adicionar ao Carrinho'),
+        'processing' => (string) __('Processando...'),
+        'skuRequired' => (string) __('Informe pelo menos um SKU.'),
+        'requestError' => (string) __('Erro ao processar pedido. Tente novamente.'),
+        'removeRow' => (string) __('Remover linha'),
+        'skuPlaceholder' => (string) __('Ex: SKU-001'),
+        'csvDropHint' => (string) __('Arraste um arquivo CSV aqui ou clique para selecionar'),
+        'csvFormatHint' => (string) __('Formato: SKU, Quantidade (uma linha por produto)'),
+        'csvLoaded' => (string) __('%1 produto(s) carregado(s) do CSV.'),
+        'csvEmpty' => (string) __('O arquivo CSV não contém produtos válidos.'),
+        'csvInvalidFile' => (string) __('Selecione um arquivo .csv válido.'),
+    ],
+];
+?>
+<div class="b2b-quickorder b2b-page-shell"
+     data-mage-init='<?= /* @noEscape */ json_encode(['GrupoAwamotos_B2B/js/quickorder' => $quickOrderConfig]) ?>'>
+    <header class="block-title">
+        <strong><?= $block->escapeHtml(__('Pedido Rápido')) ?></strong>
+        <p class="quickorder-description" id="quickorder-desc">
+            <?= $block->escapeHtml(__('Adicione produtos rapidamente informando o SKU e a quantidade desejada.')) ?>
+        </p>
+    </header>
+
+    <section class="quickorder-csv-zone" id="quickorder-csv-zone" aria-labelledby="quickorder-csv-heading">
+        <h2 class="visually-hidden" id="quickorder-csv-heading"><?= $block->escapeHtml(__('Importar via CSV')) ?></h2>
+        <div class="csv-dropzone" id="csv-dropzone" role="button" tabindex="0"
+             aria-label="<?= $block->escapeHtmlAttr(__('Importar produtos via CSV. Arraste o arquivo ou clique para selecionar.')) ?>"
+             aria-describedby="quickorder-csv-hint">
+            <div class="csv-dropzone__icon" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" focusable="false">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="12" y1="18" x2="12" y2="12"/>
+                    <polyline points="9 15 12 12 15 15"/>
+                </svg>
+            </div>
+            <p class="csv-dropzone__text"><?= $block->escapeHtml(__('Arraste um arquivo CSV aqui ou clique para selecionar')) ?></p>
+            <p class="csv-dropzone__hint" id="quickorder-csv-hint"><?= $block->escapeHtml(__('Formato: SKU, Quantidade (uma linha por produto)')) ?></p>
+            <input type="file" id="csv-file-input" accept=".csv,text/csv" class="csv-dropzone__input" tabindex="-1" aria-hidden="true" />
+        </div>
+        <div class="csv-actions">
+            <a href="#" id="csv-download-sample" class="csv-sample-link">
+                <span><?= $block->escapeHtml(__('Baixar modelo CSV')) ?></span>
+            </a>
+            <span class="csv-status" id="csv-status" role="status" aria-live="polite"></span>
+        </div>
+    </section>
+
+    <form class="quickorder-form-container" id="quickorder-container" aria-describedby="quickorder-desc" novalidate>
+        <fieldset class="quickorder-fieldset">
+            <legend class="visually-hidden"><?= $block->escapeHtml(__('Linhas de SKU e quantidade')) ?></legend>
+            <div class="quickorder-rows" id="quickorder-rows">
+                <div class="quickorder-header-row" aria-hidden="true">
+                    <span class="col-sku"><?= $block->escapeHtml(__('SKU')) ?></span>
+                    <span class="col-qty"><?= $block->escapeHtml(__('Qtd')) ?></span>
+                    <span class="col-action"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="quickorder-add-row">
+            <button type="button" id="quickorder-add-row" class="action secondary"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Adicionar nova linha de SKU')) ?>">
+                <span>+ <?= $block->escapeHtml(__('Adicionar linha')) ?></span>
+            </button>
+        </div>
+
+        <div class="quickorder-results" id="quickorder-results" hidden aria-live="polite">
+            <div class="results-success" id="quickorder-success" role="status"></div>
+            <div class="results-errors" id="quickorder-errors" role="alert"></div>
+        </div>
+
+        <div class="quickorder-actions">
+            <button type="button" id="quickorder-submit" class="action primary"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Adicionar produtos ao carrinho')) ?>">
+                <span><?= $block->escapeHtml(__('Adicionar ao Carrinho')) ?></span>
+            </button>
+            <a href="<?= $block->escapeUrl($block->getUrl('checkout/cart')) ?>" class="action secondary">
+                <span><?= $block->escapeHtml(__('Ver Carrinho')) ?></span>
+            </a>
+        </div>
+    </form>
+</div>

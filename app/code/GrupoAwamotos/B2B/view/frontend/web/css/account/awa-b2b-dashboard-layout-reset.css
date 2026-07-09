@@ -1,0 +1,14 @@
+/**
+ * AWA B2B Dashboard — Layout Reset
+ * Scoped: body.b2b-account-dashboard
+ *
+ * Float/bootstrap resets only. Column layout is CSS Grid via
+ * _awa-account-grid-architecture + _awa-b2b-dashboard-container-unify (theme).
+ */
+body.b2b-account-dashboard .page-main > .columns > [class*="col-"],
+body.b2b-account-dashboard .page-main > .columns > .sidebar,
+body.b2b-account-dashboard .page-main > .columns > .column.main {
+    float: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}

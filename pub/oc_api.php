@@ -1,4 +1,21 @@
 <?php
+
+declare(strict_types=1);
+
+// IP Whitelist — acesso restrito a conexões locais e túneis SSH autorizados.
+(static function(): void {
+    $clientIp = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    $xff      = (string) ($_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '');
+    $allowed  = ['127.0.0.1', '::1'];
+    $isLocal  = in_array($clientIp, $allowed, true);
+    $xffOk    = ($xff === '' || in_array(trim(explode(',', $xff)[0]), $allowed, true));
+    if (!$isLocal || !$xffOk) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['error' => 'Acesso restrito. Use túnel SSH autorizado.']);
+        exit;
+    }
+})();
 /**
  * OpenCart API Compatibility Layer for Sectra ERP
  * Handles HTTP requests that Sectra makes to what it thinks is an OpenCart instance.

@@ -1,0 +1,71 @@
+{
+  "before": [
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": false,
+      "naturalWidth": 0
+    },
+    {
+      "complete": false,
+      "naturalWidth": 0
+    }
+  ],
+  "clicked": "awa-owl-nav__btn awa-carousel__arrow awa-carousel__arrow--next awa-owl-nav__btn--next awa-carousel__button awa-carousel__button--next",
+  "after": [
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": true,
+      "naturalWidth": 600
+    },
+    {
+      "complete": false,
+      "naturalWidth": 0
+    }
+  ]
+}

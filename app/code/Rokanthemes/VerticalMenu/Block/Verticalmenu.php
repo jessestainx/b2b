@@ -259,7 +259,12 @@ class Verticalmenu extends \Magento\Framework\View\Element\Template
                 if(count($children) > 0) {
                     $html .= '<div class="open-children-toggle"></div>';
                 }
-                $html .= '<a href="'.$this->_categoryHelper->getCategoryUrl($category).'" class="level-top">';
+                // AWA: aria-current=page para categoria ativa
+                $categoryUrl = $this->_categoryHelper->getCategoryUrl($category);
+                $currentUrl = $this->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]);
+                $isCurrentCategory = (rtrim($currentUrl, '/') === rtrim($categoryUrl, '/'));
+                $ariaCurrent = $isCurrentCategory ? ' aria-current="page"' : '';
+                $html .= '<a href="'.$categoryUrl.'" class="level-top"'.$ariaCurrent.'>';
                 if ($vc_menu_icon_img)
                     $html .= '<img class="menu-thumb-icon" src="'.$cat_model->getImageUrl('vc_menu_icon_img').'" alt="'.$category->getName().'"/>';
                 elseif($vc_menu_font_icon)

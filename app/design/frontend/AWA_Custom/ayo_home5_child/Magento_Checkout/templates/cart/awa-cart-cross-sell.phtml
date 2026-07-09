@@ -1,0 +1,46 @@
+<?php
+/**
+ * AWA Motos - Cart Cross-Sell
+ * Sprint 2: aumentar AOV (Average Order Value).
+ *
+ * Mostra produtos relacionados que clientes costumam comprar junto.
+ */
+declare(strict_types=1);
+
+$_cart = $block->getLayout()->getBlock('checkout.cart')->getQuote();
+$_crossSellIds = [];
+try {
+    $_productIds = array_keys($block->getLayout()->getBlock('checkout.cart')->getQuote()->getAllItems());
+    if (!empty($_productIds)) {
+        // Magento tem cross-sell nativo
+        $_crossSellCollection = $block->getLayout()->createBlock('Magento\Catalog\Block\Product\CrossSell')->getItems();
+        $_crossSellIds = $_crossSellCollection;
+    }
+} catch (\Throwable $e) {
+    // Sem cross-sell
+}
+?>
+<?php if (!empty($_crossSellIds)): ?>
+<section class="awa-cart-cross-sell" aria-labelledby="awa-cart-cross-sell-heading">
+    <h2 id="awa-cart-cross-sell-heading" class="awa-cart-cross-sell__title">
+        <?= $block->escapeHtml(__('Combine com quem voce comprou')) ?>
+    </h2>
+    <p class="awa-cart-cross-sell__hint">
+        <?= $block->escapeHtml(__('Clientes que compraram itens no seu carrinho tambem levaram:')) ?>
+    </p>
+    <ol class="awa-cart-cross-sell__list">
+        <?php foreach ($_crossSellIds as $_item): ?>
+        <li class="awa-cart-cross-sell__item">
+            <a href="<?= $block->escapeUrl($_item->getProductUrl()) ?>"
+               class="awa-cart-cross-sell__link"
+               title="<?= $block->escapeHtmlAttr($_item->getName()) ?>">
+                <?= $block->escapeHtml($_item->getName()) ?>
+            </a>
+            <span class="awa-cart-cross-sell__price">
+                <?= $block->escapeHtml($block->getLayout()->getBlock('checkout.cart')->getQuote()->getStore()->formatPrice($_item->getFinalPrice())) ?>
+            </span>
+        </li>
+        <?php endforeach; ?>
+    </ol>
+</section>
+<?php endif; ?>

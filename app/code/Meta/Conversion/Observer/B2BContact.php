@@ -8,7 +8,7 @@ use Magento\Customer\Model\Customer;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
@@ -20,7 +20,7 @@ class B2BContact implements ObserverInterface
 {
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly LoggerInterface $logger,
         private readonly B2BSignalBuilder $b2bSignalBuilder,
         private readonly UserDataBuilder $userDataBuilder
@@ -65,12 +65,16 @@ class B2BContact implements ObserverInterface
             $phone = null;
             $externalId = null;
 
+            $contactFn = null;
+            $contactLn = null;
             if ($customer instanceof Customer && $customer->getId()) {
                 $email = $customer->getData('email') ?: null;
                 $externalId = (string) $customer->getId();
+                $contactFn = ($customer->getFirstname() ?: null);
+                $contactLn = ($customer->getLastname() ?: null);
             }
 
-            $userData = $this->userDataBuilder->build($email, $phone, $externalId);
+            $userData = $this->userDataBuilder->build($email, $phone, $externalId, $contactFn, $contactLn);
             $eventSourceUrl = $this->userDataBuilder->getEventSourceUrl();
 
             $uniqueId = $eventId !== '' ? $eventId : sprintf('contact-b2b-%s-%d', $contactAction, time());
@@ -96,16 +100,7 @@ class B2BContact implements ObserverInterface
                 $capiEvent['event_source_url'] = $eventSourceUrl;
             }
 
-            $result = $this->graphApi->sendEvents($pixelId, [$capiEvent], $storeId);
-
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] Contact API error', [
-                    'store_id' => $storeId,
-                    'contact_action' => $contactAction,
-                    'http_status' => $result['http_status'] ?? null,
-                    'error' => $result['error']
-                ]);
-            }
+            $this->capiDispatcher->sendEvents($pixelId, [$capiEvent], $storeId, 'Contact');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] Contact event failed', [
                 'error' => $e->getMessage()

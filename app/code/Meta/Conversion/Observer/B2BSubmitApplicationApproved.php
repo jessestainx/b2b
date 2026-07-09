@@ -8,7 +8,7 @@ use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
@@ -20,7 +20,7 @@ class B2BSubmitApplicationApproved implements ObserverInterface
 {
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly LoggerInterface $logger,
         private readonly B2BSignalBuilder $b2bSignalBuilder,
         private readonly ?UserDataBuilder $userDataBuilder = null
@@ -53,7 +53,13 @@ class B2BSubmitApplicationApproved implements ObserverInterface
             $customerId = (string) $customer->getId();
             $phone = (string) ($this->getCustomAttributeValue($customer, 'b2b_phone') ?? '');
             $userData = $this->userDataBuilder
-                ? $this->userDataBuilder->build((string) $customer->getEmail(), $phone, $customerId)
+                ? $this->userDataBuilder->build(
+                    (string) $customer->getEmail(),
+                    $phone,
+                    $customerId,
+                    (string) ($customer->getFirstname() ?: ''),
+                    (string) ($customer->getLastname() ?: '')
+                )
                 : [];
 
             $event = [
@@ -72,15 +78,7 @@ class B2BSubmitApplicationApproved implements ObserverInterface
                 ])
             ];
 
-            $result = $this->graphApi->sendEvents($pixelId, [$event], $storeId);
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] SubmitApplication approved API error', [
-                    'store_id' => $storeId,
-                    'customer_id' => $customerId,
-                    'http_status' => $result['http_status'] ?? null,
-                    'error' => $result['error']
-                ]);
-            }
+            $this->capiDispatcher->sendEvents($pixelId, [$event], $storeId, 'SubmitApplicationApproved');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] SubmitApplication approved event failed', [
                 'error' => $e->getMessage()

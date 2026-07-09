@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      layout="2columns-left"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="customer_account"/>
+    <head>
+        <title>Minha Conta B2B</title>
+        <!-- dashboard.css + dashboard-distill.css consolidados em 2026-06-15 (save 1 render-blocking request) -->
+        <css src="GrupoAwamotos_B2B::css/account/dashboard-combined.css"/>
+        <css src="css/b2b/dashboard-grid.css"/>
+        <css src="GrupoAwamotos_B2B::css/account/awa-b2b-dashboard-layout-reset.css" order="9999"/>
+    </head>
+    <body>
+        <attribute name="class" value="b2b-account-dashboard"/>
+        <referenceBlock name="rexisml.recommendations" remove="true"/>
+        <referenceBlock name="sale.reorder.sidebar" remove="true"/>
+        <referenceContainer name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="b2b.dashboard.late.css"
+                   template="GrupoAwamotos_B2B::head/b2b-dashboard-css.phtml"/>
+        </referenceContainer>
+        <referenceContainer name="content">
+            <block class="GrupoAwamotos\B2B\Block\Account\Dashboard"
+                   name="b2b.account.dashboard"
+                   template="GrupoAwamotos_B2B::account/dashboard.phtml"
+                   cacheable="false">
+                <block class="GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions"
+                       name="erp.dashboard.suggestions"
+                       template="GrupoAwamotos_B2B::account/dashboard/intelligence.phtml"/>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

@@ -16,21 +16,28 @@
             </arguments>
         </referenceBlock>
 
-        <!-- A11Y-001: adiciona aria-label em links de produto sem texto acessível (widgets Rokanthemes) -->
+        <!-- WCAG 2.4.1 (Bypass Blocks): o alvo padrão #contentarea é removido porque o tema
+             usa o override Magento_Theme::html/skip-links.phtml (links → #awa-main-content /
+             #maincontent e #awa-primary-navigation), com alvos reais já presentes no DOM. -->
         <referenceBlock name="skip_to_content.target" remove="true"/>
+        <!-- BUG-H-053: evita duplicidade de newsletter (popup legacy + formulário do rodapé). -->
+        <referenceBlock name="newsletter_popup" remove="true"/>
+        <!-- Runtime global substitui fixes inline legados de carrossel. -->
+        <referenceBlock name="awa.carousel.fixes" remove="true"/>
         <!-- NAV-FIX: nav.fixed-bottom renderizado FORA do <footer> para evitar bug Chrome -->
         <!-- position:fixed dentro de footer com scrollHeight > clientHeight = posicionamento errado -->
         <referenceContainer name="before.body.end">
-            <!-- Bloco A: CSS final após bundles async da home -->
             <block class="Magento\Framework\View\Element\Template"
-                   name="awa.search.autocomplete.body.css"
-                   template="Magento_Theme::html/awa-search-autocomplete-head-css.phtml"
+                   name="awa.cookie.consent.defer.loader"
+                   template="Magento_Theme::html/awa-cookie-consent-defer-loader.phtml"
                    before="-"/>
+            <!-- awa.search.autocomplete.body.css removido: $searchAutocompleteActiveUrl atribuída
+                 mas nunca outputada (CSS mergeado em awa-super-global — Fase 4 Jun/24) -->
             <!-- Header/minicart JS — defer-init + ui-v2 em todas as páginas (PLP/PDP/etc.) -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.custom.global.js.loader"
                    template="Magento_Theme::html/awa-custom-js-loader.phtml"
-                   after="awa.search.autocomplete.body.css">
+                   after="awa.cookie.consent.defer.loader">
                 <arguments>
                     <argument name="load_header_js" xsi:type="boolean">true</argument>
                     <argument name="skip_minicart_defer_init" xsi:type="boolean">false</argument>
@@ -112,6 +119,13 @@
                    template="Magento_Theme::html/awa-header-impeccable-critical-global.phtml"
                    after="awa.cls.nav.fix"/>
 
+            <!-- layout-sync migrado para awa-header-distill-terminal-20260616 (headerLayoutSyncTerminalRules) -->
+
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.header.mobile.grid.critical.global"
+                   template="Magento_Theme::html/awa-header-mobile-grid-critical-inline-v10.phtml"
+                   after="awa.header.impeccable.critical.global"/>
+
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.critical.inline.css"
                    template="Magento_Theme::html/awa-critical-inline.phtml"
@@ -129,20 +143,12 @@
                    template="Magento_Theme::html/awa-head-preload.phtml"
                    after="awa.impeccable.loopback.guard.global"/>
 
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.deferred.interaction.css"
-                   template="Magento_Theme::html/awa-deferred-interaction-css.phtml"
-                   after="awa.head.preload"/>
-
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.deferred.cosmetic.css"
-                   template="Magento_Theme::html/awa-deferred-cosmetic-css.phtml"
-                   after="awa.deferred.interaction.css"/>
-
+            <!-- awa.deferred.interaction.css e awa.deferred.cosmetic.css removidos:
+                 $deferredFiles = [] em ambos — zero output (Fase 4 Jun/24) -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.styles.l.last"
                    template="Magento_Theme::html/awa-styles-l-last.phtml"
-                   after="awa.deferred.cosmetic.css"/>
+                   after="awa.head.preload"/>
 
             <!-- AWA Audit Bundle: consolida 4 audit CSS em 1 request (2026-05-09)
                  Antes: awa-visual-audit-final (59KB) + awa-visual-consistency (51KB)
@@ -153,6 +159,10 @@
                    name="awa.audit.bundle.css"
                    template="Magento_Theme::html/awa-audit-bundle-css.phtml"
                    after="awa.styles.l.last"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.visual.qa.fixes.css"
+                   template="Magento_Theme::html/awa-visual-qa-fixes-css.phtml"
+                   after="awa.audit.bundle.css"/>
 
             <!-- OG Meta: gerado por URL (mesmo conteúdo para todos os visitantes na mesma URL).
                  FPC cacheia por URL — correto. Removido cacheable=false que impedia caching do site inteiro. -->
@@ -172,17 +182,13 @@
                    template="Magento_Theme::html/awa-shelf-carousel-loader.phtml"
                    after="awa.og.meta"/>
 
-            <!-- Rodada 2 Bloco A — autocomplete/busca: último CSS no head (sync) -->
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.search.autocomplete.head.css"
-                   template="Magento_Theme::html/awa-search-autocomplete-head-css.phtml"
-                   after="awa.shelf.carousel"/>
-
+            <!-- awa.search.autocomplete.head.css removido: URL computada mas nunca outputada
+                 (CSS mergeado em awa-super-global — Fase 4 Jun/24) -->
             <!-- Cookie LGPD — card flutuante, não cobre conteúdo -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.cookie.consent.fix.css"
                    template="Magento_Theme::html/awa-cookie-consent-fix-css.phtml"
-                   after="awa.search.autocomplete.head.css"/>
+                   after="awa.shelf.carousel"/>
         </referenceBlock>
     </body>
 </page>

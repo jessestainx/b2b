@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<page layout="empty"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="b2b_account_dashboard_fragment_base"/>
+    <body>
+        <referenceBlock name="b2b.dashboard.fragment"
+                        template="GrupoAwamotos_B2B::account/dashboard/orders-section.phtml"/>
+    </body>
+</page>

@@ -1,73 +1,62 @@
 <?php
-/** @var \Magento\LayeredNavigation\Block\Navigation $block */
-?>
-<?php if ($block->canShowBlock()): ?>
-    <div class="block filter" id="layered-ajax-filter-block">
-		<div class="block-content filter-content sidebar-shop sidebar-left">
+declare(strict_types=1);
+
+if ($block->canShowBlock()): ?>
+    <div class="block filter" id="layered-ajax-filter-block" data-mage-init='{"collapsible":{"openedState": "active", "collapsible": true, "active": false, "collateral": { "openedState": "filter-active", "element": "body" } }}'>
+        <div class="block-content filter-content sidebar-shop sidebar-left">
             <?php if ($block->getLayer()->getState()->getFilters()): ?>
-				<div class="widget">
-					<?php echo $block->getChildHtml('state') ?>
-					<div class="block-actions filter-actions">
-						<a href="<?php /* @escapeNotVerified */ echo $block->getClearUrl() ?>" class="action clear filter-clear"><span><?php /* @escapeNotVerified */ echo __('Clear All') ?></span></a>
-					</div>
-				</div>
+                <div class="widget">
+                    <?= $block->getChildHtml('state') ?>
+                    <div class="block-actions filter-actions">
+                        <a href="<?= $block->escapeUrl($block->getClearUrl()) ?>" class="action clear filter-clear"><span><?= $block->escapeHtml(__('Clear All')) ?></span></a>
+                    </div>
+                </div>
             <?php endif; ?>
-            <?php $wrapOptions = false; $activeKey = 0; $activeArray = []; ?>
             <?php
-                // B2B: Allowlist de filtros relevantes para catálogo de peças moto
-                $allowedB2BFilters = [
-                    'price',        // Faixa de preço
-                    'manufacturer', // Marca do produto (Honda, Yamaha, etc.)
-                    'marca_moto',   // Marca da moto (aplicação)
-                    'modelo_moto',  // Modelo da moto (aplicação)
-                    'ano_moto',     // Ano da moto (aplicação)
-                    'color',        // Cor
-                    // Aliases alternativos (compatibilidade)
-                    'brand', 'motos_marcas', 'motos_modelos', 'motos_anos', 'motos_cilindradas',
-                ];
+            $wrapOptions = false;
+            $activeKey = 0;
+            $activeArray = [];
             ?>
+            <div class="block-title filter-title">
+                <strong data-role="title"><?= $block->escapeHtml(__('Comprar por')) ?></strong>
+            </div>
             <?php foreach ($block->getFilters() as $key => $filter): ?>
-                <?php
-                    $filterCode = $filter->getRequestVar();
-                    if (!in_array($filterCode, $allowedB2BFilters) && $filterCode !== 'cat') {
-                        continue;
-                    }
-                ?>
                 <?php if ($filter->getItemsCount()): ?>
                     <?php if (!$wrapOptions): ?>
-                       <div class="filter-options widget widget-filter" id="narrow-by-list">
-                    <?php  $wrapOptions = true; endif; ?>
-                    <div class="filter-options-item">
-                        <div class="filter-options-title"><?php /* @escapeNotVerified */ echo __($filter->getName()) ?></div>
-                        <div class="filter-options-content filter-options-content--open"><?php /* @escapeNotVerified */ echo $block->getChildBlock('renderer')->render($filter); ?></div>
+                       <div class="filter-options widget widget-filter" id="narrow-by-list" data-role="content">
+                    <?php $wrapOptions = true;
+                    endif; ?>
+                    <div data-role="collapsible" class="filter-options-item">
+                        <div data-role="title" class="filter-options-title"><?= $block->escapeHtml(__($filter->getName())) ?></div>
+                        <div data-role="content" class="filter-options-content"><?= /* @noEscape */ $block->getChildBlock('renderer')->render($filter) ?></div>
                     </div>
                     <?php
-						if($this->helper('Rokanthemes\LayeredAjax\Helper\Data')->isOpenAllTab()){
-							$activeArray[] = $activeKey;
-						}
-                        $activeKey++;
+                    if ($this->helper('Rokanthemes\LayeredAjax\Helper\Data')->isOpenAllTab()) {
+                        $activeArray[] = $activeKey;
+                    }
+                    $activeKey++;
                     ?>
                 <?php endif; ?>
             <?php endforeach; ?>
             <?php if ($wrapOptions): ?>
                 </div>
-				<script type="text/x-magento-init">
-					{
-						"#narrow-by-list": {
-							"accordion": {
-								"openedState": "active",
-								"collapsible": true,
-								"active": <?php echo $this->helper('Magento\Framework\Json\Helper\Data')->jsonEncode($activeArray); ?>,
-								"multipleCollapsible": true
-							},
-							"Rokanthemes_LayeredAjax/js/layeredajax": {}
-						}
-					}
-				</script>
+                <script type="text/x-magento-init">
+                    {
+                        "#narrow-by-list": {
+                            "accordion": {
+                                "openedState": "active",
+                                "collapsible": true,
+                                "active": <?= /* @noEscape */ $this->helper('Magento\Framework\Json\Helper\Data')->jsonEncode($activeArray) ?>,
+                                "multipleCollapsible": true
+                            },
+                            "Rokanthemes_LayeredAjax/js/layeredajax": {}
+                        }
+                    }
+                </script>
             <?php endif; ?>
         </div>
-		<div id="layered_ajax_overlay" class="layered_ajax_overlay">
-			<div><img src="<?php /* @escapeNotVerified */ echo $block->getViewFileUrl('images/loader-1.gif'); ?>" alt="<?php echo __('Loading') ?>" loading="lazy" decoding="async"></div>
-		</div>
+        <div id="layered_ajax_overlay" class="layered_ajax_overlay" aria-hidden="true" hidden>
+            <div><img src="<?= $block->escapeUrl($block->getViewFileUrl('images/loader-1.gif')) ?>" alt="<?= $block->escapeHtmlAttr(__('Loading')) ?>"></div>
+        </div>
     </div>
 <?php endif; ?>

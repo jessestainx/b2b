@@ -1,0 +1,152 @@
+/*
+ * AWA Motos — Cart VTEX-Grade Additions (2026-06-27)
+ *
+ * Estilos para novos elementos enterprise do carrinho:
+ *  - .awa-free-shipping-bar (versão cart, não-minicart)
+ *  - .awa-cart-trust-seals (selos SSL/Pagamento/Entrega/Compra Protegida)
+ *
+ * Carregado de forma assíncrona (não bloqueante) via awa-cart-stack ou
+ * inline no critical acima da dobra quando o usuário tem itens.
+ *
+ * Cores usam tokens AWA (--awa-brand-primary, --awa-cc-surface-1, etc).
+ * Especificidade html body#html-body para garantir precedência sobre os
+ * estilos dos bundles globais sem necessidade de !important.
+ */
+
+@media (prefers-reduced-motion: no-preference) {
+  .awa-free-shipping-bar__fill,
+  .awa-cart-trust-seals__item {
+    transition: background 280ms cubic-bezier(.4,0,.2,1), border-color 280ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+/* ============================================================================
+   FREE SHIPPING PROGRESS BAR — variante carrinho (não-minicart)
+   ============================================================================ */
+html body#html-body.checkout-cart-index .awa-free-shipping-bar {
+  display: block;
+  margin: 0 0 var(--awa-space-3, 12px);
+  padding: var(--awa-space-4, 16px) var(--awa-space-4, 16px);
+  background: color-mix(in oklch, var(--awa-brand-primary, var(--awa-primary)) 5%, var(--awa-cc-surface-1, var(--awa-bg)));
+  border: 1px solid color-mix(in oklch, var(--awa-brand-primary, var(--awa-primary)) 18%, var(--awa-cc-border, #e5e7eb));
+  border-radius: var(--awa-radius-lg, 12px);
+  font-size: var(--awa-text-sm, 14px);
+  color: var(--awa-cc-text-1, var(--awa-text));
+}
+
+html body#html-body.checkout-cart-index .awa-free-shipping-bar__message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+html body#html-body.checkout-cart-index .awa-free-shipping-bar__message svg {
+  flex: 0 0 16px;
+  color: var(--awa-brand-primary, var(--awa-primary));
+}
+
+html body#html-body.checkout-cart-index .awa-free-shipping-bar__message--success svg {
+  color: #16a34a;
+}
+
+html body#html-body.checkout-cart-index .awa-free-shipping-bar__message--success {
+  color: #166534;
+}
+
+html body#html-body.checkout-cart-index .awa-free-shipping-bar__track {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 8px;
+  background: color-mix(in oklch, var(--awa-brand-primary, var(--awa-primary)) 12%, var(--awa-cc-surface-2, var(--awa-bg-subtle)));
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+html body#html-body.checkout-cart-index .awa-free-shipping-bar__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--awa-brand-primary, var(--awa-primary)) 0%, color-mix(in oklch, var(--awa-brand-primary, var(--awa-primary)) 80%, #f59e0b) 100%);
+  border-radius: 999px;
+  transition: width 480ms cubic-bezier(.4,0,.2,1);
+}
+
+html body#html-body.checkout-cart-index .awa-free-shipping-bar__fill[style*="100%"] {
+  background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
+}
+
+/* ============================================================================
+   TRUST SEALS — barra de selos universais (SSL/Pagamento/Entrega/Compra)
+   ============================================================================ */
+html body#html-body.checkout-cart-index .awa-cart-trust-seals {
+  display: block;
+  margin: 0;
+  padding: var(--awa-space-3, 12px);
+  background: var(--awa-cc-surface-2, var(--awa-bg-subtle));
+  border: 1px solid var(--awa-cc-border, #e5e7eb);
+  border-radius: var(--awa-radius-md, 10px);
+}
+
+html body#html-body.checkout-cart-index .awa-cart-trust-seals__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--awa-space-3, 12px) var(--awa-space-4, 16px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  html body#html-body.checkout-cart-index .awa-cart-trust-seals__list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+html body#html-body.checkout-cart-index .awa-cart-trust-seals__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+html body#html-body.checkout-cart-index .awa-cart-trust-seals__icon {
+  display: inline-flex;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--awa-cc-surface-1, var(--awa-bg));
+  border: 1px solid color-mix(in oklch, var(--awa-brand-primary, var(--awa-primary)) 20%, var(--awa-cc-border, #e5e7eb));
+  color: var(--awa-brand-primary, var(--awa-primary));
+}
+
+html body#html-body.checkout-cart-index .awa-cart-trust-seals__icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+html body#html-body.checkout-cart-index .awa-cart-trust-seals__label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+html body#html-body.checkout-cart-index .awa-cart-trust-seals__label strong {
+  font-size: var(--awa-text-sm, 14px);
+  font-weight: 700;
+  color: var(--awa-cc-text-1, var(--awa-text));
+}
+
+html body#html-body.checkout-cart-index .awa-cart-trust-seals__label small {
+  font-size: var(--awa-text-xs, 12px);
+  font-weight: 500;
+  color: var(--awa-cc-text-2, var(--awa-text-secondary));
+  margin-top: 2px;
+}

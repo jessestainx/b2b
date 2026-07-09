@@ -17,6 +17,8 @@ $cartPremiumUrl = $block->getViewFileUrl('css/b2b/pages/cart-page-premium.min.cs
 <style id="awa-cart-checkout-critical">
 :root{--awa-ccp-c1:oklch(99.2% 0.003 27)}
 body.checkout-cart-index,body.checkout-index-index,body.rokanthemes-onepagecheckout{
+  --awa-white:#fff;
+  --awa-text-inverse:#fff;
   --awa-cc-surface-1:var(--awa-ccp-c1);
   --awa-cc-surface-2:var(--awa-bg-muted,#f7f7f7);
   --awa-cc-border:var(--awa-gray-200,#e5e7eb);
@@ -71,7 +73,20 @@ html body#html-body.checkout-cart-index .page-wrapper #header.header-container,
 html body#html-body.checkout-cart-index .page-wrapper .header-container{padding-inline:clamp(14px,2.4vw,28px)!important}
 html body#html-body.checkout-cart-index .page-wrapper .header-content,
 html body#html-body.checkout-cart-index .page-wrapper .header-content.awa-checkout-header-content{padding-inline:clamp(14px,2.4vw,28px)!important}
-html body#html-body.checkout-cart-index .page-wrapper .awa-skip-link:not(:focus):not(:focus-visible){
+html body#html-body.checkout-cart-index .awa-skip-link:not(:focus):not(:focus-visible){
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+html body#html-body.checkout-cart-index .awa-skip-link:focus,
+html body#html-body.checkout-cart-index .awa-skip-link:focus-visible{
   position:fixed!important;
   top:8px!important;
   left:8px!important;
@@ -82,17 +97,21 @@ html body#html-body.checkout-cart-index .page-wrapper .awa-skip-link:not(:focus)
   clip:auto!important;
   clip-path:none!important;
   white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  opacity:0!important;
-  transform:translateY(-150%)!important;
-  pointer-events:none!important;
+  z-index:99999!important;
+  background:var(--awa-brand-primary,var(--awa-primary,#b73337))!important;
+  color:#fff!important;
+  padding:8px 16px!important;
+  border-radius:8px!important;
 }
-html body#html-body.checkout-cart-index .page-wrapper .awa-skip-link:focus,
-html body#html-body.checkout-cart-index .page-wrapper .awa-skip-link:focus-visible{
-  opacity:1!important;
-  transform:translateY(0)!important;
-  pointer-events:auto!important;
+html body#html-body.checkout-cart-index .page-wrapper .awa-site-header .action.search,
+html body#html-body.checkout-cart-index .page-wrapper .awa-site-header .minicart-wrapper .action.showcart,
+html body#html-body.checkout-cart-index .page-wrapper .awa-site-header .minicart-wrapper a.action.showcart{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+html body#html-body.checkout-cart-index .cart-empty.awa-cart-empty a.awa-cart-empty__cta{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
 }
 /* Cart focus mode: remove chrome that competes with cart actions/empty-state CTA. */
 body.checkout-cart-index nav.fixed-bottom,
@@ -554,7 +573,7 @@ html body#html-body#html-body#html-body#html-body.checkout-cart-index .page-wrap
 		}
 		/* Cart header terminal: seletor valido para vencer o critical legado carregado antes do CSS final. */
 		html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper #header.header-container[data-awa-header-shell="true"]{padding:0!important;border-bottom:0!important;background:var(--awa-primary)!important;box-shadow:none!important}
-		html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper #header.header-container[data-awa-header-shell="true"] .header-content{display:flex!important;align-items:stretch!important;box-sizing:border-box!important;width:100%!important;max-width:min(100%,1280px)!important;min-height:40px!important;margin-inline:auto!important;padding:0 16px!important}
+		html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper #header.header-container[data-awa-header-shell="true"] .header-content{display:flex!important;align-items:stretch!important;box-sizing:border-box!important;width:100%!important;max-width:min(100%,1280px)!important;min-height:40px!important;margin-inline:auto!important;padding-inline: var(--awa-page-pad-mobile, 16px); padding-block: 0!important}
 		html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper #awa-b2b-promo-bar{position:relative!important;display:flex!important;align-items:stretch!important;width:100%!important;min-height:40px!important;height:40px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:var(--awa-primary)!important;color:var(--awa-white,Canvas)!important}
 		html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper #awa-b2b-promo-bar .awa-b2b-promo-bar__inner,
 		html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper #awa-b2b-promo-bar .awa-b2b-promo-bar__layout{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:100%!important;min-height:40px!important;height:40px!important;max-width:none!important;margin:0!important;padding:0 52px 0 16px!important}

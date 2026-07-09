@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Api\Data;
@@ -19,34 +20,34 @@ interface LogMetricsInterface
 
     public function getEntityId(): ?int;
     public function setEntityId(mixed $entityId): self;
-    
+
     public function getLogType(): ?string;
     public function setLogType(string $logType): self;
-    
+
     public function getSourceFile(): ?string;
     public function setSourceFile(string $sourceFile): self;
-    
+
     public function getTotalEntries(): int;
     public function setTotalEntries(int $totalEntries): self;
-    
+
     public function getErrorEntries(): int;
     public function setErrorEntries(int $errorEntries): self;
-    
+
     public function getWarningEntries(): int;
     public function setWarningEntries(int $warningEntries): self;
-    
+
     public function getCriticalEntries(): int;
     public function setCriticalEntries(int $criticalEntries): self;
-    
+
     public function getFileSizeBytes(): int;
     public function setFileSizeBytes(int $fileSizeBytes): self;
-    
+
     public function getAnalysisData(): ?array;
     public function setAnalysisData(?array $analysisData): self;
-    
+
     public function getCreatedAt(): ?string;
     public function setCreatedAt(string $createdAt): self;
-    
+
     public function getUpdatedAt(): ?string;
     public function setUpdatedAt(string $updatedAt): self;
 }

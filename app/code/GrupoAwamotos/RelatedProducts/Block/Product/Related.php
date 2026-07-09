@@ -147,6 +147,39 @@ class Related extends AbstractProduct
     }
 
     /**
+     * Returns true when the current context allows price rendering for the given product.
+     *
+     * Product-level checks can be added later without changing templates.
+     *
+     * @param Product $product
+     * @return bool
+     */
+    public function canViewProductPrice(Product $product): bool
+    {
+        return $this->priceVisibility->canViewPrices();
+    }
+
+    /**
+     * Always enforce B2B price gate for this related carousel block.
+     * Keeps price hidden for visitors even if template cache/plugins vary at render time.
+     *
+     * @param Product $product
+     * @return string
+     */
+    public function getProductPrice(Product $product): string
+    {
+        if (!$this->priceVisibility->canViewPrices()) {
+            return '<div class="b2b-login-to-see-price">'
+                . '<span class="price-label">'
+                . $this->priceVisibility->getPriceReplacementMessage()
+                . '</span>'
+                . '</div>';
+        }
+
+        return parent::getProductPrice($product);
+    }
+
+    /**
      * Returns the message to display in place of the price for non-approved customers.
      *
      * @return string

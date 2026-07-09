@@ -11,6 +11,7 @@ $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::DEFAULT_
 $postDataHelper = $this->helper('Magento\Framework\Data\Helper\PostHelper');
 $priceHelper = $this->helper('Rokanthemes\Themeoption\Helper\Data');
 $newLabelHelper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel');
+$b2bPriceGate = $this->helper('GrupoAwamotos\B2B\Helper\Data');
 
 $i = 0;
 foreach ($products as $_item) {
@@ -77,7 +78,14 @@ foreach ($products as $_item) {
                     <span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_item->getSku()); ?></span>
                 </div>
                 <div class="info-price">
-                    <?php echo $priceHelper->getPriceDisplayCustom($block->getProductPrice($_item)); ?>
+                    <?php if ($b2bPriceGate->canViewPrices()): ?>
+                        <?php echo $priceHelper->getPriceDisplayCustom($block->getProductPrice($_item)); ?>
+                    <?php else: ?>
+                        <div class="b2b-login-to-see-price">
+                            <span class="b2b-login-to-see-price__title"><?php echo $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()); ?></span>
+                            <span class="b2b-login-to-see-price__message"><?php echo $block->escapeHtml($b2bPriceGate->getPriceGateDescription()); ?></span>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="product-info-cart">
                     <div class="actions-primary addcart-link">

@@ -1,7 +1,16 @@
 <?xml version="1.0"?>
+<!--
+    GrupoAwamotos_ERPIntegration/layout/checkout_cart_index.xml — child theme override.
+    Performance 2026-05-27: remove CSS/widget ERP do carrinho vazio (sem sugestões abaixo da dobra).
+-->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <remove src="GrupoAwamotos_ERPIntegration::css/cart-suggestions.css"/>
+    </head>
     <body>
+        <referenceBlock name="erp.cart.suggestions.css" remove="true"/>
+        <referenceBlock name="erp.cart.suggestions" remove="true"/>
         <referenceBlock name="erp.cart.suggestions.sidebar" remove="true"/>
     </body>
 </page>

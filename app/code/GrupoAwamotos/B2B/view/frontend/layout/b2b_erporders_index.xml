@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      layout="2columns-left"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="customer_account"/>
+    <head>
+        <title>Pedidos ERP</title>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="GrupoAwamotos\B2B\Block\Account\ErpOrders"
+                   name="b2b.account.erporders"
+                   template="GrupoAwamotos_B2B::account/erp-orders/list.phtml"
+                   cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

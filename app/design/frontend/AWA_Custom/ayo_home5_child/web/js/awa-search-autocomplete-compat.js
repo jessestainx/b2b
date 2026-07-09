@@ -5,8 +5,9 @@ define([
 
 	let DEFAULT_OPTIONS = {
 		inputSelector: '#search-input-autocomplate, #search, input[name="q"]',
-		panelSelector: '#search_autocomplete',
-		resultsRootSelector: '.searchsuite-autocomplete',
+		panelSelector: '#search_autocomplete, .mst-searchautocomplete__autocomplete',
+		mirasvitPanelSelector: '.mst-searchautocomplete__autocomplete',
+		resultsRootSelector: '.searchsuite-autocomplete, .mst-searchautocomplete__autocomplete',
 		fallbackEndpoint: '',
 		searchResultUrl: '/catalogsearch/result/',
 		minQueryLength: 2,
@@ -68,6 +69,89 @@ define([
 		return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
 	}
 
+	function panelHasContent($panel) {
+		if (!$panel || !$panel.length) {
+			return false;
+		}
+
+		return $panel.find([
+			'li',
+			'.mst-searchautocomplete__item',
+			'.awa-fallback-item',
+			'.qs-option-info',
+			'.suggest a',
+			'.product a',
+			'.no-result'
+		].join(',')).length > 0;
+	}
+
+	function isSearchFocused($form, $input) {
+		if ($form.is(':focus-within')) {
+			return true;
+		}
+
+		if (!$input || !$input.length) {
+			return false;
+		}
+
+		return $input.get(0) === document.activeElement;
+	}
+
+	function setPanelAriaHidden($panel, value) {
+		if (!$panel || !$panel.length) {
+			return;
+		}
+
+		if ($panel.attr('aria-hidden') !== value) {
+			$panel.attr('aria-hidden', value);
+		}
+	}
+
+	function setInputAriaExpanded($input, value) {
+		if (!$input || !$input.length) {
+			return;
+		}
+
+		if ($input.attr('aria-expanded') !== value) {
+			$input.attr('aria-expanded', value);
+		}
+	}
+
+	function promotePanelOpen($form, $panel, $input) {
+		if (!panelHasContent($panel) || !isSearchFocused($form, $input)) {
+			return false;
+		}
+
+		$form.addClass('is-open').removeClass('is-empty');
+		$panel.addClass('is-open active has-results');
+		setPanelAriaHidden($panel, 'false');
+		$panel.removeAttr('hidden');
+
+		if ($input.length) {
+			setInputAriaExpanded($input, 'true');
+		}
+
+		if (document.body) {
+			document.body.classList.add('searchautocomplete__active');
+		}
+
+		return true;
+	}
+
+	function demotePanelClosed($form, $panel, $input) {
+		$form.removeClass('is-open has-results').addClass('is-empty');
+		$panel.removeClass('is-open active has-results');
+		setPanelAriaHidden($panel, 'true');
+
+		if ($input.length) {
+			setInputAriaExpanded($input, 'false');
+		}
+
+		if (document.body) {
+			document.body.classList.remove('searchautocomplete__active');
+		}
+	}
+
 	function applyTitles($root) {
 		$root.find('a[href]').each(function () {
 			var $a = $(this);
@@ -89,12 +173,26 @@ define([
 
 	function syncState($form, options) {
 		var $input = findScoped($form, options.inputSelector);
-		var $panel = findScoped($form, options.panelSelector);
+		var $panel = resolveActivePanel($form, options);
 		let panelEl = $panel.get(0);
 		var $resultsRoot = findScoped($form, options.resultsRootSelector);
 		let hasPanel = $panel.length > 0;
 		let isVisible = hasPanel && visible(panelEl);
 		let hasResults = false;
+
+		if (isMirasvitPanelOpen($form, options)) {
+			isVisible = true;
+			hasResults = $panel.find('.mst-searchautocomplete__item, li').length > 0 ||
+				$.trim($panel.text()).length > 0;
+			if ($input.length) {
+				setInputAriaExpanded($input, 'true');
+				$input.attr('aria-controls', $panel.attr('id') || 'search_autocomplete');
+			}
+			setPanelAriaHidden($panel, 'false');
+		} else if (hasPanel && panelHasContent($panel) && isSearchFocused($form, $input)) {
+			promotePanelOpen($form, $panel, $input);
+			isVisible = true;
+		}
 
 		if ($resultsRoot.length && visible($resultsRoot.get(0))) {
 			hasResults = $resultsRoot.find('li').length > 0;
@@ -107,13 +205,25 @@ define([
 			.toggleClass('is-empty', !hasResults);
 
 		if ($input.length) {
-			$input.attr('aria-expanded', isVisible ? 'true' : 'false');
+			setInputAriaExpanded($input, isVisible ? 'true' : 'false');
 		}
 
 		if (hasPanel) {
-			$panel.attr('aria-hidden', isVisible ? 'false' : 'true');
+			setPanelAriaHidden($panel, isVisible ? 'false' : 'true');
 			$panel.toggleClass('is-open', !!isVisible)
 				.toggleClass('has-results', !!hasResults);
+
+			if (isVisible) {
+				$panel.removeAttr('hidden');
+			} else if (!panelHasContent($panel)) {
+				$panel.attr('hidden', 'hidden');
+			}
+		}
+
+		if (!isVisible && !isSearchFocused($form, $input)) {
+			if (document.body) {
+				document.body.classList.remove('searchautocomplete__active');
+			}
 		}
 
 		if ($resultsRoot.length) {
@@ -137,8 +247,34 @@ define([
 		return findScoped($form, options.resultsRootSelector);
 	}
 
-	function isMirasvitAutocompleteActive() {
-		return document.querySelector('.mst-searchautocomplete__autocomplete') !== null;
+	function getMirasvitPanel($form, options) {
+		return findScoped($form, options.mirasvitPanelSelector || '.mst-searchautocomplete__autocomplete');
+	}
+
+	function isMirasvitPanelOpen($form, options) {
+		var $mirasvit = getMirasvitPanel($form, options);
+		var el;
+
+		if (!$mirasvit.length) {
+			return false;
+		}
+
+		el = $mirasvit.get(0);
+		if ($mirasvit.hasClass('_active') || $mirasvit.hasClass('is-open')) {
+			return visible(el) || $mirasvit.find('.mst-searchautocomplete__item, li').length > 0;
+		}
+
+		return visible(el) && $mirasvit.find('.mst-searchautocomplete__item, li').length > 0;
+	}
+
+	function resolveActivePanel($form, options) {
+		var $mirasvit = getMirasvitPanel($form, options);
+
+		if (isMirasvitPanelOpen($form, options)) {
+			return $mirasvit;
+		}
+
+		return findScoped($form, options.panelSelector);
 	}
 
 	function hasNativeResults($form, options) {
@@ -146,7 +282,7 @@ define([
 		var $panel = getFallbackPanel($form, options);
 		var $nativeItems = $();
 
-		if (isMirasvitAutocompleteActive()) {
+		if (isMirasvitPanelOpen($form, options)) {
 			return true;
 		}
 
@@ -342,15 +478,12 @@ define([
 			$panel.empty();
 			$panel.removeAttr('data-awa-fallback-rendered');
 			$panel.hide();
-			$panel.attr('aria-hidden', 'true');
-			if ($input.length) {
-				$input.attr('aria-expanded', 'false');
-			}
+			demotePanelClosed($form, $panel, $input);
 		}
 	}
 
 	function renderFallback($form, options, payload, query) {
-		var $panel = getFallbackPanel($form, options);
+		var $panel = findScoped($form, '#search_autocomplete');
 		var $input = findScoped($form, options.inputSelector);
 		let normalized;
 		let html;
@@ -364,14 +497,9 @@ define([
 
 		$panel.html(html)
 			.show()
-			.attr('aria-hidden', 'false')
 			.attr('data-awa-fallback-rendered', 'true');
 
-		if ($input.length) {
-			$input.attr('aria-expanded', 'true');
-		}
-
-		$form.addClass('is-open');
+		promotePanelOpen($form, $panel, $input);
 		applyTitles($panel);
 	}
 
@@ -526,7 +654,9 @@ define([
 				return false;
 			}
 
-			nextPanelNode = findScoped($form, options.panelSelector).get(0);
+			nextPanelNode = resolveActivePanel($form, options).get(0) ||
+				findScoped($form, options.mirasvitPanelSelector).get(0) ||
+				findScoped($form, '#search_autocomplete').get(0);
 			if (!nextPanelNode) {
 				return false;
 			}
@@ -558,8 +688,8 @@ define([
 			let query = $.trim($(this).val() || '');
 
 			if (event.type === 'keyup' && event.key === 'Escape') {
-				$form.removeClass('is-open');
 				clearFallback($form, options);
+				demotePanelClosed($form, findScoped($form, options.panelSelector), $(this));
 			}
 
 			if (event.type === 'input' || event.type === 'keyup' || event.type === 'focusin') {
@@ -609,6 +739,7 @@ define([
 		}
 
 		$form.data('awaSearchCompatInit', 1);
+		$form.attr('data-awa-search-compat-init', '1');
 	}
 
 	function bootAll(config) {
@@ -667,16 +798,26 @@ define([
 			}
 		});
 
-		if (window.MutationObserver && document.body && !window[AUTO_OBSERVER_KEY]) {
+		let headerScope = document.querySelector(
+			'.awa-site-header, #header.header-container, .page-header, header.page-header'
+		);
+
+		if (window.MutationObserver && headerScope && !window[AUTO_OBSERVER_KEY]) {
 			window[AUTO_OBSERVER_KEY] = new window.MutationObserver(function (mutations) {
 				if (!shouldObserveMutation(mutations)) {
 					return;
 				}
 
 				bootAll({});
+
+				let $forms = $(SEARCH_FORM_SELECTOR);
+				if ($forms.length && $forms.filter('[data-awa-search-compat-init="1"]').length >= $forms.length) {
+					window[AUTO_OBSERVER_KEY].disconnect();
+					window[AUTO_OBSERVER_KEY] = null;
+				}
 			});
 
-			window[AUTO_OBSERVER_KEY].observe(document.body, {
+			window[AUTO_OBSERVER_KEY].observe(headerScope, {
 				childList: true,
 				subtree: true
 			});

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
@@ -33,7 +34,8 @@ class WhatsAppB2BRegistration implements B2BRegistrationInterface
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly LoggerInterface $logger,
         private readonly ResourceConnection $resource,
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc

@@ -9,6 +9,20 @@ Módulo enterprise de integração com ERP SQL Server para Magento 2.4.8, com si
 
 ---
 
+## Auditoria Sectra (estado atual)
+
+Para operacao e diagnostico atual da integracao Sectra (prospects + pedidos), use como referencia primaria:
+
+- `app/code/GrupoAwamotos/ERPIntegration/SECTRA_INTEGRATION_AUDIT.md`
+
+Esse documento cobre:
+- contrato real de `oc_pre_registration` (`lkcustomfield`)
+- gates de visibilidade/importacao de pedidos em `oc_order`
+- status observado em producao e checklist de equivalencia com o fluxo legado do desktop Sectra
+- riscos operacionais e proximas acoes recomendadas
+
+---
+
 ## 🔌 Funcionalidades Principais
 
 ### 1. Conexão SQL Server

@@ -1,0 +1,175 @@
+<?php
+/**
+ * AWA Motos - Review Form com Upload de Fotos
+ *
+ * Sprint 3 (UX): permite clientes anexarem fotos ao review.
+ * Sprint a11y: corrige IDs entity-encoded do form original.
+ */
+declare(strict_types=1);
+
+/** @var \Magento\Review\Block\Form $block */
+$_product = $block->getProductInfo();
+?>
+<?php if ($block->getAllowWriteReviewFlag()): ?>
+<form action="<?= $block->escapeUrl($block->getAction()) ?>"
+      method="post"
+      id="review-form"
+      class="review-form awa-review-form"
+      enctype="multipart/form-data"
+      data-role="product-review-form"
+      data-bind="scope: 'review-form'">
+    <?= $block->getBlockHtml('formkey') ?>
+
+    <fieldset class="review-fieldset">
+        <legend class="review-legend">
+            <span><?= $block->escapeHtml(__("Voce esta avaliando:")) ?></span>
+            <strong><?= $block->escapeHtml($_product->getName()) ?></strong>
+        </legend>
+
+        <?php if ($block->getRatings() && $block->getRatings()->getSize()): ?>
+        <fieldset class="review-field-ratings" aria-label="<?= $block->escapeHtmlAttr(__('Sua avaliacao')) ?>">
+            <legend class="review-legend"><?= $block->escapeHtml(__('Sua avaliacao')) ?>:</legend>
+            <?php foreach ($block->getRatings() as $_rating): ?>
+                <?php
+                $ratingCode = $_rating->getRatingCode();
+                // ID ASCII-safe (fix bug entity-encoded)
+                $ratingCodeAscii = preg_replace('/[^a-zA-Z0-9_]/', '_', $ratingCode);
+                $ratingId = $ratingCodeAscii . '_rating_label';
+                ?>
+                <div class="field review-field-rating">
+                    <label class="label" id="<?= $block->escapeHtmlAttr($ratingId) ?>">
+                        <span><?= $block->escapeHtml($ratingCode) ?></span>
+                    </label>
+                    <div class="control review-control-vote">
+                    <?php $options = $_rating->getOptions(); ?>
+                    <?php $iterator = 1; foreach ($options as $_option): ?>
+                        <?php
+                        $optionId = $ratingCodeAscii . '_' . $block->escapeHtmlAttr($_option->getValue());
+                        $optionLabelId = $optionId . '_label';
+                        ?>
+                        <input type="radio"
+                               name="ratings[<?= $block->escapeHtmlAttr($_rating->getId()) ?>]"
+                               id="<?= $optionId ?>"
+                               value="<?= $block->escapeHtmlAttr($_option->getId()) ?>"
+                               class="radio"
+                               data-validate="{'rating-required':true}"
+                               aria-labelledby="<?= $block->escapeHtmlAttr($ratingId) ?> <?= $block->escapeHtmlAttr($optionLabelId) ?>" />
+                        <label class="rating-<?= $block->escapeHtmlAttr($iterator) ?>"
+                               for="<?= $optionId ?>"
+                               title="<?= $block->escapeHtmlAttr(__('%1 %2', $iterator, $iterator == 1 ? 'estrela' : 'estrelas')) ?>"
+                               id="<?= $block->escapeHtmlAttr($optionLabelId) ?>">
+                            <span aria-hidden="true"><?= $block->escapeHtml($iterator) ?></span>
+                            <span class="awa-sr-only"><?= $block->escapeHtml(__('%1 %2', $iterator, $iterator == 1 ? 'estrela' : 'estrelas')) ?></span>
+                        </label>
+                    <?php $iterator++; endforeach; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </fieldset>
+        <?php endif; ?>
+
+        <div class="field review-field-nickname required">
+            <label for="nickname_field" class="label">
+                <span><?= $block->escapeHtml(__('Seu nome ou apelido')) ?></span>
+            </label>
+            <div class="control">
+                <input type="text"
+                       name="nickname"
+                       id="nickname_field"
+                       class="input-text"
+                       data-validate="{required:true}"
+                       placeholder="<?= $block->escapeHtmlAttr(__('Ex: Joao S.')) ?>"
+                       autocomplete="nickname"
+                       data-bind="value: nickname()" />
+            </div>
+        </div>
+
+        <div class="field review-field-summary required">
+            <label for="summary_field" class="label">
+                <span><?= $block->escapeHtml(__('Resumo da avaliacao')) ?></span>
+            </label>
+            <div class="control">
+                <input type="text"
+                       name="title"
+                       id="summary_field"
+                       class="input-text"
+                       data-validate="{required:true}"
+                       placeholder="<?= $block->escapeHtmlAttr(__('Ex: Otimo produto!')) ?>"
+                       data-bind="value: review().title" />
+            </div>
+        </div>
+
+        <div class="field review-field-text required">
+            <label for="review_field" class="label">
+                <span><?= $block->escapeHtml(__('Sua avaliacao detalhada')) ?></span>
+            </label>
+            <div class="control">
+                <textarea name="detail"
+                          id="review_field"
+                          cols="5"
+                          rows="3"
+                          data-validate="{required:true}"
+                          placeholder="<?= $block->escapeHtmlAttr(__('Conte sua experiencia com o produto')) ?>"
+                          data-bind="value: review().detail"></textarea>
+            </div>
+        </div>
+
+        <div class="field review-field-photos" data-awa-review-photos>
+            <label class="label">
+                <span><?= $block->escapeHtml(__('Fotos do produto (opcional)')) ?></span>
+                <span class="awa-review-field-photos__hint">
+                    <?= $block->escapeHtml(__('Maximo 5 fotos, 5MB cada')) ?>
+                </span>
+            </label>
+            <div class="control">
+                <div class="awa-review-photos-uploader"
+                     data-awa-photos-uploader
+                     role="button"
+                     tabindex="0"
+                     aria-label="<?= $block->escapeHtmlAttr(__('Adicionar fotos a avaliacao')) ?>">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span class="awa-review-photos-uploader__text">
+                        <?= $block->escapeHtml(__('Clique para adicionar fotos')) ?>
+                    </span>
+                    <input type="file"
+                           name="review_photos[]"
+                           accept="image/jpeg,image/png,image/webp"
+                           multiple
+                           class="awa-review-photos-uploader__input"
+                           aria-label="<?= $block->escapeHtmlAttr(__('Selecionar fotos')) ?>"
+                           hidden />
+                </div>
+                <ul class="awa-review-photos-preview"
+                    data-awa-photos-preview
+                    aria-label="<?= $block->escapeHtmlAttr(__('Pre-visualizacao das fotos')) ?>"
+                    aria-live="polite"></ul>
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="review-form-actions">
+        <div class="primary actions-primary">
+            <button type="submit"
+                    class="action submit primary"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Enviar avaliacao do produto com fotos')) ?>">
+                <span><?= $block->escapeHtml(__('Enviar Avaliacao')) ?></span>
+            </button>
+        </div>
+    </div>
+</form>
+
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_Review/js/review": {
+            "productReviewUrl": "<?= $block->escapeJs($block->getProductReviewUrl()) ?>",
+            "reviewsTabUrl": "<?= $block->escapeJs($block->getProductReviewsUrl()) ?>"
+        }
+    }
+}
+</script>
+<?php endif; ?>

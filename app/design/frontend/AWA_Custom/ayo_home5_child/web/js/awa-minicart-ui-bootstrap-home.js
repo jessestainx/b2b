@@ -126,7 +126,9 @@
     }
 
     function onIntent(event) {
-        if (!isCartIntent(event)) {
+        var isIntent = isCartIntent(event);
+
+        if (!isIntent) {
             return;
         }
 

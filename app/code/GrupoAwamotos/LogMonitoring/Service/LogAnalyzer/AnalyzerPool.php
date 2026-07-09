@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Service\LogAnalyzer;
@@ -24,7 +25,7 @@ class AnalyzerPool
         if (!isset($this->analyzers[$type])) {
             throw new LocalizedException(__('Analyzer type "%1" not found', $type));
         }
-        
+
         return $this->analyzers[$type];
     }
 
@@ -36,7 +37,7 @@ class AnalyzerPool
     public function analyzeAll(): array
     {
         $results = [];
-        
+
         foreach ($this->analyzers as $type => $analyzer) {
             try {
                 $results[$type] = $analyzer->analyze();
@@ -45,7 +46,7 @@ class AnalyzerPool
                 $results[$type] = ['error' => $e->getMessage()];
             }
         }
-        
+
         return $results;
     }
 }

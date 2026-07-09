@@ -1,0 +1,207 @@
+//
+// AWA Motos - PDP CEP Estimator widget
+// Sprint 2 - Quick win #1 (conversao B2B+B2C)
+// 2026-06-28
+//
+// Adiciona estilo para o bloco de calculo de frete/prazo no PDP.
+// Nao quebra layout existente - apenas adiciona estilos novos.
+//
+
+.awa-pdp-cep-estimator {
+    display: block;
+    margin: 12px 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fafbfc;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #111827;
+}
+
+.awa-pdp-cep-estimator__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.awa-pdp-cep-estimator__input-wrap {
+    flex: 1 1 180px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.awa-pdp-cep-estimator__label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #374151;
+}
+
+.awa-pdp-cep-estimator__input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    background: #fff;
+    transition: border-color .15s ease, box-shadow .15s ease;
+
+    &:focus {
+        outline: 0;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .25);
+    }
+    &[aria-invalid="true"] {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, .2);
+    }
+}
+
+.awa-pdp-cep-estimator__button {
+    flex: 0 0 auto;
+    min-width: 100px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 6px;
+    background: #111827;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color .15s ease, transform .05s ease;
+
+    &:hover { background: #1f2937; }
+    &:active { transform: translateY(1px); }
+    &:disabled { background: #6b7280; cursor: not-allowed; }
+    &[aria-busy="true"] { background: #6b7280; }
+}
+
+.awa-pdp-cep-estimator__spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 6px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: awa-cep-spin .8s linear infinite;
+    vertical-align: middle;
+
+    &[hidden] { display: none; }
+}
+
+@keyframes awa-cep-spin {
+    to { transform: rotate(360deg); }
+}
+
+.awa-pdp-cep-estimator__help {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.awa-pdp-cep-estimator__login-link {
+    margin-left: 6px;
+    color: #2563eb;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover { color: #1d4ed8; }
+}
+
+.awa-pdp-cep-estimator__results {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e5e7eb;
+
+    &[hidden] { display: none; }
+}
+
+.awa-pdp-cep-estimator__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.awa-pdp-cep-estimator__option {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 4px 12px;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 13px;
+
+    &:last-child { border-bottom: 0; }
+}
+
+.awa-pdp-cep-estimator__carrier { font-weight: 600; color: #111827; }
+.awa-pdp-cep-estimator__method { color: #4b5563; }
+.awa-pdp-cep-estimator__price {
+    font-weight: 700;
+    color: #047857;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.awa-pdp-cep-estimator__eta {
+    grid-column: 2 / 4;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.awa-pdp-cep-estimator__error {
+    margin: 0;
+    padding: 8px 10px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+    color: #991b1b;
+    font-size: 13px;
+}
+
+.awa-pdp-cep-estimator__noscript {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 4px;
+    color: #92400e;
+    font-size: 12px;
+}
+
+// Dark mode (prefers-color-scheme)
+@media (prefers-color-scheme: dark) {
+    .awa-pdp-cep-estimator {
+        background: #0f172a;
+        border-color: #1f2937;
+        color: #e5e7eb;
+    }
+    .awa-pdp-cep-estimator__label { color: #d1d5db; }
+    .awa-pdp-cep-estimator__input {
+        background: #111827;
+        border-color: #374151;
+        color: #e5e7eb;
+    }
+    .awa-pdp-cep-estimator__help,
+    .awa-pdp-cep-estimator__eta { color: #9ca3af; }
+    .awa-pdp-cep-estimator__option { border-bottom-color: #1f2937; }
+    .awa-pdp-cep-estimator__carrier { color: #e5e7eb; }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+    .awa-pdp-cep-estimator__spinner { animation: none; }
+    .awa-pdp-cep-estimator__button { transition: none; }
+}
+
+// Mobile: largura cheia
+@media (max-width: 480px) {
+    .awa-pdp-cep-estimator__row { flex-direction: column; }
+    .awa-pdp-cep-estimator__button { width: 100%; }
+}

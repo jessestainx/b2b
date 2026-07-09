@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /**
  * Header account prompt — ícone de usuário + login/cadastro (guest) ou "Minha conta" (logado).
- * Login state is resolved client-side via customer-data sections (FPC-compatible).
+ * Login state: server hint on account surfaces + customer-data JS (FPC-compatible elsewhere).
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
@@ -12,6 +12,9 @@ declare(strict_types=1);
 $b2bConfig = $this->helper(\GrupoAwamotos\B2B\Helper\Config::class);
 $isB2bEnabled = $b2bConfig->isEnabled();
 $isStrictB2b  = $isB2bEnabled && $b2bConfig->isStrictB2B();
+$layoutHandles = $block->getLayout() ? $block->getLayout()->getUpdate()->getHandles() : [];
+$isCartPageOnly = in_array('checkout_cart_index', $layoutHandles, true);
+$accountPromptJsUrl = $block->getViewFileUrl('js/awa-header-account-prompt.min.js');
 
 $loginUrl    = $isStrictB2b
     ? $block->getUrl('b2b/account/login')
@@ -19,48 +22,144 @@ $loginUrl    = $isStrictB2b
 $registerUrl = $isB2bEnabled
     ? $block->getUrl('b2b/register')
     : $block->getUrl('customer/account/create');
-$accountUrl  = $block->getUrl('customer/account');
+$accountUrl  = $isB2bEnabled
+    ? $block->getUrl('b2b/account/dashboard')
+    : $block->getUrl('customer/account');
 $ordersUrl   = $block->getUrl('sales/order/history');
 $quotesUrl   = $isB2bEnabled ? $block->getUrl('b2b/quote') : '';
 $logoutUrl   = $block->getUrl('customer/account/logout');
+
+$request = $block->getRequest();
+$fullActionName = $request ? (string) $request->getFullActionName() : '';
+$b2bAuthRoutes = ['b2b_register_index'];
+$isB2bAccountSurface = str_starts_with($fullActionName, 'b2b_')
+    && !in_array($fullActionName, $b2bAuthRoutes, true);
+$isAccountSurface = (str_starts_with($fullActionName, 'customer_account_')
+        || str_starts_with($fullActionName, 'b2b_account_')
+        || $isB2bAccountSurface
+        || in_array($fullActionName, [
+            'sales_order_history',
+            'sales_order_view',
+            'customer_address_index',
+            'customer_address_form',
+            'wishlist_index_index',
+        ], true))
+    && !in_array($fullActionName, [
+        'customer_account_login',
+        'customer_account_create',
+        'customer_account_forgotpassword',
+        'customer_account_createpassword',
+    ], true);
+
+/** @var \Magento\Customer\Model\Session $customerSession */
+$customerSession = \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Customer\Model\Session::class);
+$serverCustomerId = (int) $customerSession->getCustomerId();
+$serverIsLoggedIn = $serverCustomerId > 0;
+$serverFirstname = '';
+$serverFullname = '';
+
+if ($serverIsLoggedIn) {
+    $customer = $customerSession->getCustomer();
+    if ($customer) {
+        $serverFirstname = trim((string) $customer->getFirstname());
+        $serverLastname = trim((string) $customer->getLastname());
+        $serverFullname = trim($serverFirstname . ' ' . $serverLastname);
+    }
+}
+
+// B2B logado: o status-panel é a UI primária, mas o prompt continua no DOM como
+// fallback seguro — se o painel não renderizar, o header não fica vazio.
+// Quando o painel existe, o prompt é ocultado via CSS
+// (.awa-header-right-col:has(.b2b-status-panel)) e via JS (hidePromptForB2b).
+
+$useServerAuthHint = $isAccountSurface && $serverIsLoggedIn;
+$initialAuthState = $useServerAuthHint ? 'customer' : 'guest';
+$initialGreeting = (string) __('Olá!');
+
+if ($useServerAuthHint) {
+    if ($serverFirstname !== '') {
+        $initialGreeting = (string) __('Olá, %1!', $serverFirstname);
+    } elseif ($serverFullname !== '') {
+        $displayName = mb_strlen($serverFullname) > 20
+            ? mb_substr($serverFullname, 0, 20) . '...'
+            : $serverFullname;
+        $initialGreeting = (string) __('Olá, %1!', $displayName);
+    }
+}
+
+$authPendingAttr = ($isAccountSurface && !$useServerAuthHint) ? ' data-awa-auth-pending="true"' : '';
+$guestHiddenAttr = $useServerAuthHint ? ' hidden aria-hidden="true"' : '';
+$customerHiddenAttr = $useServerAuthHint ? '' : ' hidden aria-hidden="true"';
+$longNameClass = ($useServerAuthHint && mb_strlen($serverFirstname ?: $serverFullname) > 16)
+    ? ' awa-header-account-prompt--long-name'
+    : '';
+$serverHintClass = $useServerAuthHint ? ' awa-header-account-prompt--server-hint' : '';
+
+$layoutHandles = $block->getLayout()->getUpdate()->getHandles();
+$isHomePage = in_array('cms_index_index', $layoutHandles, true);
 ?>
-<div class="awa-header-contact-links awa-header-account-prompt"
-     data-awa-auth-state="guest"
+<div class="awa-header-contact-links awa-header-account-prompt<?= $block->escapeHtmlAttr($longNameClass . $serverHintClass) ?>"
+     data-awa-auth-state="<?= $block->escapeHtmlAttr($initialAuthState) ?>"<?= /* @noEscape */ $authPendingAttr ?>
+     data-awa-eager-auth="<?= $isAccountSurface ? '1' : '0' ?>"
+     data-awa-is-home="<?= $isHomePage ? '1' : '0' ?>"
+     data-awa-account-url="<?= $block->escapeHtmlAttr($accountUrl) ?>"
+     data-awa-login-url="<?= $block->escapeHtmlAttr($loginUrl) ?>"
+     data-awa-label-my-account="<?= $block->escapeHtmlAttr((string) __('Minha conta')) ?>"
+     data-awa-label-signin="<?= $block->escapeHtmlAttr((string) __('Entrar na conta')) ?>"
+     role="group"
      aria-label="<?= $block->escapeHtmlAttr(__('Área do cliente')) ?>">
-    <span class="awa-header-account-prompt__icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor"
-             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <span class="awa-header-account-prompt__live awa-sr-live"
+          aria-live="polite"
+          aria-atomic="true"></span>
+    <a class="awa-header-account-prompt__mobile-link"
+       href="<?= $block->escapeUrl($useServerAuthHint ? $accountUrl : $loginUrl) ?>"
+       rel="nofollow"
+       aria-label="<?= $block->escapeHtmlAttr($useServerAuthHint ? __('Minha conta') : __('Entrar na conta')) ?>"
+       data-awa-auth-link="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>
         </svg>
-    </span>
+    </a>
+    <a class="awa-header-account-prompt__icon"
+       href="<?= $block->escapeUrl($useServerAuthHint ? $accountUrl : $loginUrl) ?>"
+       rel="nofollow"
+       aria-label="<?= $block->escapeHtmlAttr($useServerAuthHint ? __('Minha conta') : __('Entrar na conta')) ?>"
+       data-awa-icon-link="true">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+        </svg>
+    </a>
     <span class="awa-header-account-prompt__text">
-        <?php /* Guest state (default, FPC-cached) */ ?>
-        <span class="awa-header-account-prompt__guest">
+        <?php /* Guest state (default on FPC pages) */ ?>
+        <span class="awa-header-account-prompt__guest"<?= /* @noEscape */ $guestHiddenAttr ?>>
             <span class="awa-header-account-prompt__line1"><?= $block->escapeHtml(__('Para ver os preços faça o')) ?></span>
-            <span class="awa-header-account-prompt__line2">
-                <a class="awa-header-account-prompt__link"
+            <span class="awa-header-account-prompt__line2 awa-header-account-prompt__actions">
+                <a class="awa-header-account-prompt__link awa-header-account-prompt__link--login"
                    href="<?= $block->escapeUrl($loginUrl) ?>"
                    rel="nofollow"
-                   data-awa-auth-link="true"">
+                   data-awa-auth-link="true">
                     <?= $block->escapeHtml(__('Login')) ?>
                 </a>
-                <span class="awa-header-account-prompt__separator"><?= $block->escapeHtml(__('ou')) ?></span>
+                <span class="awa-header-account-prompt__separator" aria-hidden="true"><?= $block->escapeHtml(__('ou')) ?></span>
                 <a class="awa-header-account-prompt__link awa-header-account-prompt__link--register"
                    href="<?= $block->escapeUrl($registerUrl) ?>"
-                   rel="nofollow"">
-                    <?= $block->escapeHtml(__('Cadastre-se')) ?>
+                   rel="nofollow">
+                    <?= $block->escapeHtml(__('cadastre-se')) ?>
                 </a>
             </span>
         </span>
-        <?php /* Logged-in state (hidden by default, shown via customer-data JS) */ ?>
-        <span class="awa-header-account-prompt__customer awa-account-dropdown" style="display:none">
-            <span class="awa-header-account-prompt__line1"><?= $block->escapeHtml(__('Seja bem-vindo(a) à AWA Motos!')) ?></span>
+        <?php /* Logged-in state (server hint on account pages, else customer-data JS) */ ?>
+        <span class="awa-header-account-prompt__customer awa-account-dropdown"<?= /* @noEscape */ $customerHiddenAttr ?>>
+            <span class="awa-header-account-prompt__line1"><?= $block->escapeHtml($initialGreeting) ?></span>
             <button class="awa-header-account-prompt__line2 awa-account-dropdown__trigger"
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded="false"
-                    aria-label="<?= $block->escapeHtmlAttr(__('Abrir menu da conta')) ?>">
+                    aria-label="<?= $block->escapeHtmlAttr(__('Abrir menu da minha conta')) ?>">
                 <span class="awa-header-account-prompt__link"><?= $block->escapeHtml(__('Minha conta')) ?></span>
                 <svg class="awa-account-dropdown__chevron" viewBox="0 0 10 6" width="9" height="9"
                      fill="none" stroke="currentColor" stroke-width="1.8"
@@ -69,19 +168,20 @@ $logoutUrl   = $block->getUrl('customer/account/logout');
                 </svg>
             </button>
             <div class="awa-account-dropdown__menu" role="menu"
+                 aria-hidden="true"
                  aria-label="<?= $block->escapeHtmlAttr(__('Opções da conta')) ?>">
                 <a class="awa-account-dropdown__item"
                    href="<?= $block->escapeUrl($accountUrl) ?>"
-                   role="menuitem"">
+                   role="menuitem">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                         <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
                         <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
                     </svg>
-                    <?= $block->escapeHtml(__('Dashboard')) ?>
+                    <?= $block->escapeHtml($isB2bEnabled ? __('Painel B2B') : __('Dashboard')) ?>
                 </a>
                 <a class="awa-account-dropdown__item"
                    href="<?= $block->escapeUrl($ordersUrl) ?>"
-                   role="menuitem"">
+                   role="menuitem">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                         <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
                         <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
@@ -91,7 +191,7 @@ $logoutUrl   = $block->getUrl('customer/account/logout');
                 <?php if ($isB2bEnabled): ?>
                 <a class="awa-account-dropdown__item"
                    href="<?= $block->escapeUrl($quotesUrl) ?>"
-                   role="menuitem"">
+                   role="menuitem">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
@@ -100,7 +200,7 @@ $logoutUrl   = $block->getUrl('customer/account/logout');
                 <?php endif; ?>
                 <a class="awa-account-dropdown__item awa-account-dropdown__item--logout"
                    href="<?= $block->escapeUrl($logoutUrl) ?>"
-                   role="menuitem"">
+                   role="menuitem">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
@@ -111,69 +211,67 @@ $logoutUrl   = $block->getUrl('customer/account/logout');
         </span>
     </span>
 </div>
+<?php if ($isCartPageOnly): ?>
 <script>
-require(['Magento_Customer/js/customer-data'], function (customerData) {
-    var customer = customerData.get('customer');
-    function toggle(data) {
-        var el = document.querySelector('.awa-header-account-prompt');
-        if (!el) return;
-        var isLoggedIn = !!(data && data.firstname);
-        el.setAttribute('data-awa-auth-state', isLoggedIn ? 'customer' : 'guest');
-        var guest = el.querySelector('.awa-header-account-prompt__guest');
-        var cust  = el.querySelector('.awa-header-account-prompt__customer');
-        if (isLoggedIn) {
-            if (guest) guest.style.setProperty('display', 'none', 'important');
-            if (cust)  cust.style.removeProperty('display');
-        } else {
-            if (guest) guest.style.removeProperty('display');
-            if (cust)  cust.style.setProperty('display', 'none', 'important');
-        }
-        if (isLoggedIn && data.firstname) {
-            var line1 = el.querySelector('.awa-header-account-prompt__customer .awa-header-account-prompt__line1');
-            if (line1) { line1.textContent = 'Olá, ' + data.firstname + '!'; }
-        }
-        // Setup dropdown toggle (once, when customer block is visible)
-        if (isLoggedIn) {
-            var trigger = el.querySelector('.awa-account-dropdown__trigger');
-            if (trigger && !trigger.dataset.dropdownInit) {
-                trigger.dataset.dropdownInit = '1';
-                trigger.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    var isOpen = this.getAttribute('aria-expanded') === 'true';
-                    this.setAttribute('aria-expanded', String(!isOpen));
-                });
-                document.addEventListener('click', function() {
-                    trigger.setAttribute('aria-expanded', 'false');
-                });
-                el.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') trigger.setAttribute('aria-expanded', 'false');
-                });
-            }
-        }
-    }
-    customer.subscribe(toggle);
-    toggle(customer());
+(function (w, d, src) {
+    'use strict';
+    var done = false;
 
-    // Fix: Magento's section invalidation after loginPost can miss the
-    // 'customer' section if it was never in section_data_ids before login.
-    // After customer-data init completes, if the section is still empty but
-    // private_content_version (set by PHP on login/cart changes) is present,
-    // explicitly reload the customer section so the header updates correctly.
-    customerData.getInitCustomerData().done(function () {
-        var data = customer();
-        if (data && data.firstname) {
-            return; // already loaded
+    function load() {
+        if (done || d.querySelector('script[data-awa-account-prompt="1"]')) {
+            return;
         }
-        // private_content_version is set by the PHP server on authenticated actions.
-        // section_data_ids is client-side JS and may not be ready yet on first load.
-        // Reloading customer when empty is safe: guests return {} with no UI change.
-        if (document.cookie.indexOf('private_content_version') !== -1) {
-            setTimeout(function () {
-                if (!customer() || !customer().firstname) {
-                    customerData.reload(['customer'], false);
-                }
-            }, 300);
-        }
-    });
-});
+        done = true;
+        var s = d.createElement('script');
+        s.src = src;
+        s.defer = true;
+        s.setAttribute('data-awa-account-prompt', '1');
+        (d.head || d.documentElement).appendChild(s);
+    }
+
+    d.querySelector('.awa-header-account-prompt')?.addEventListener('pointerdown', load, { once: true, passive: true });
+    d.querySelector('.awa-header-account-prompt')?.addEventListener('focusin', load, { once: true, passive: true });
+
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(load, { timeout: 2500 });
+    } else {
+        w.setTimeout(load, 2000);
+    }
+}(window, document, <?= /* @noEscape */ json_encode($block->escapeUrl($accountPromptJsUrl), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>));
 </script>
+<?php else: ?>
+<script src="<?= $block->escapeUrl($accountPromptJsUrl) ?>" defer></script>
+<?php endif; ?>
+<?php
+/**
+ * B2B Panel Hydration — carregado em TODAS as páginas quando B2B está ativo.
+ *
+ * Estratégia de carregamento:
+ * - CSS: dois <link> não-bloqueantes (media="print" onload trick) — zero CLS.
+ * - JS: <script defer> — carrega junto com awa-header-account-prompt.min.js, não precisa
+ *   esperar RequireJS. O módulo tem fast-path localStorage (injeção instantânea no
+ *   DOMContentLoaded) + slow-path RequireJS para sincronizar atualizações.
+ *
+ * Páginas de conta já têm o painel server-rendered; o módulo detecta isso e faz noop.
+ */
+if ($isB2bEnabled):
+    $b2bPanelCssUrl     = $block->getViewFileUrl('GrupoAwamotos_B2B::css/header/status-panel.css');
+    $b2bPanelThemeCssUrl = $block->getViewFileUrl('css/awa-b2b-status-panel.css');
+    $b2bHydrateJsUrl    = $block->getViewFileUrl('GrupoAwamotos_B2B::js/b2b-panel-hydrate.js');
+    $cssBust = '20260707-b2b-dropdown-anchor';
+?>
+<?php /* CSS não-bloqueante — pattern: media="print" swap para "all" no onload */ ?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($b2bPanelCssUrl) ?>?v=<?= $cssBust ?>"
+      media="print"
+      onload="this.media='all'"
+      data-awa-b2b-panel-css="1">
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($b2bPanelThemeCssUrl) ?>?v=<?= $cssBust ?>"
+      media="print"
+      onload="this.media='all'"
+      data-awa-b2b-status-panel="1">
+<?php /* JS defer — carrega em paralelo, executa após parse do HTML.
+        UMD: funciona sem RequireJS (fast-path localStorage) e com RequireJS (slow-path). */ ?>
+	<script src="<?= $block->escapeUrl($b2bHydrateJsUrl) ?>?v=<?= $block->escapeHtmlAttr($cssBust) ?>" defer data-awa-b2b-hydrate="1"></script>
+<?php endif; ?>

@@ -1,70 +1,47 @@
-:root {
-    /* ── b2b-sc — design tokens ─── */
-    --b2b-sc-c1: #1e293b;
-    --b2b-sc-c2: #64748b;
-    --b2b-sc-c3: #e5e7eb;
-    --b2b-sc-c4: #f1f5f9;
-    --b2b-sc-c5: #fff;
-}
-
 <?php
 /**
- * B2B Shortcuts & ERP Mockup Dashboard
- * Simula dados que viriam do painel ERP.
+ * B2B shortcuts on native account dashboard (/customer/account/)
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
 $reorderUrl = $block->getUrl('b2b/reorder/history');
-$quickOrderUrl = $block->getUrl('b2b/quickorder');
 $addressUrl = $block->getUrl('customer/address/');
 $creditUrl = $block->getUrl('b2b/credit');
-$creditLimitTotal = 15000.00;
-$creditLimitUsed = 4500.00;
-$creditLimitAvailable = $creditLimitTotal - $creditLimitUsed;
-$creditPercentage = ($creditLimitUsed / $creditLimitTotal) * 100;
-$progressBarColor = $creditPercentage > 80 ? '#A33B3B' : '#10b981';
+$dashboardUrl = $block->getUrl('b2b/account/dashboard');
+$quotesUrl = $block->getUrl('b2b/quote/history');
 ?>
 
-<div class="awa-b2b-erp-status-card" style="margin-bottom: 24px;" role="region" aria-label="<?= $block->escapeHtmlAttr(__('My Credit Limit')) ?>">
-    <div class="awa-b2b-credit-header">
-        <h3 style="margin: 0; font-size: 18px; color: var(--b2b-sc-c1);">
-            <i class="fa fa-line-chart" aria-hidden="true" style="margin-right: 8px;"></i>
-            <?= __('Meu Limite de Crédito (ERP)') ?>
-        </h3>
+<div class="awa-account-dashboard-intro" role="region" aria-label="<?= $block->escapeHtmlAttr(__('Atalhos B2B')) ?>">
+    <div class="awa-account-credit-teaser">
+        <h2 class="awa-account-credit-teaser__title"><?= $block->escapeHtml(__('Crédito e condições B2B')) ?></h2>
+        <p class="awa-account-credit-teaser__hint">
+            <?= $block->escapeHtml(__('Consulte limite disponível, histórico de movimentações e condições comerciais da sua empresa.')) ?>
+        </p>
+        <a class="action secondary awa-account-credit-teaser__link" href="<?= $block->escapeUrl($creditUrl) ?>">
+            <?= $block->escapeHtml(__('Ver meu crédito')) ?>
+        </a>
     </div>
-    <div class="awa-b2b-credit-body" style="padding: 16px; background: var(--b2b-sc-c5); border: 1px solid var(--b2b-sc-c3); border-radius: 8px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span><strong><?= __('Utilizado:') ?></strong> R$ <?= number_format($creditLimitUsed, 2, ',', '.') ?></span>
-            <span><strong><?= __('Disponível:') ?></strong> R$ <?= number_format($creditLimitAvailable, 2, ',', '.') ?></span>
-        </div>
-        <div class="awa-b2b-progress-bg" style="width: 100%; height: 16px; background: var(--b2b-sc-c4); border-radius: 99px; overflow: hidden;" role="progressbar" aria-valuenow="<?= round($creditPercentage) ?>" aria-valuemin="0" aria-valuemax="100" aria-label="<?= $block->escapeHtmlAttr(__('Credit usage percentage')) ?>">
-            <div class="awa-b2b-progress-fill" style="width: <?= $creditPercentage ?>%; height: 100%; background: <?= $progressBarColor ?>; transition: width 1s ease-in-out;"></div>
-        </div>
-        <div style="margin-top: 12px; font-size: 12px; color: var(--b2b-sc-c2); text-align: right;">
-            <?= __('Limite Total Aprovado:') ?> <strong>R$ <?= number_format($creditLimitTotal, 2, ',', '.') ?></strong>
-        </div>
-    </div>
-</div>
 
-<div class="b2b-dashboard-shortcuts" role="navigation" aria-label="<?= $block->escapeHtmlAttr(__('B2B Quick Actions')) ?>">
-    <a href="<?= $block->escapeUrl($reorderUrl) ?>" class="b2b-shortcut-card" role="button" tabindex="0" aria-label="<?= $block->escapeHtmlAttr(__('Reorder - View purchase history')) ?>">
-        <i class="b2b-shortcut-icon fa fa-history" aria-hidden="true" style="font-family: 'FontAwesome'; font-style: normal;"></i>
-        <span class="b2b-shortcut-title"><?= $block->escapeHtml(__('Refazer Pedido')) ?></span>
-        <span style="font-size: 12px; color: var(--b2b-sc-c2);"><?= $block->escapeHtml(__('Veja o histórico de compras')) ?></span>
-    </a>
-    <a href="<?= $block->escapeUrl($quickOrderUrl) ?>" class="b2b-shortcut-card" role="button" tabindex="0" aria-label="<?= $block->escapeHtmlAttr(__('Quick Order - Paste SKUs in bulk')) ?>">
-        <i class="b2b-shortcut-icon fa fa-bolt" aria-hidden="true" style="font-family: 'FontAwesome'; font-style: normal;"></i>
-        <span class="b2b-shortcut-title"><?= $block->escapeHtml(__('Compra Rápida')) ?></span>
-        <span style="font-size: 12px; color: var(--b2b-sc-c2);"><?= $block->escapeHtml(__('Cole SKUs em lote')) ?></span>
-    </a>
-    <a href="<?= $block->escapeUrl($addressUrl) ?>" class="b2b-shortcut-card" role="button" tabindex="0" aria-label="<?= $block->escapeHtmlAttr(__('My Addresses - Manage multiple shipping locations')) ?>">
-        <i class="b2b-shortcut-icon fa fa-truck" aria-hidden="true" style="font-family: 'FontAwesome'; font-style: normal;"></i>
-        <span class="b2b-shortcut-title"><?= $block->escapeHtml(__('Meus Endereços')) ?></span>
-        <span style="font-size: 12px; color: var(--b2b-sc-c2);"><?= $block->escapeHtml(__('Gerencie múltiplos destinos')) ?></span>
-    </a>
-    <a href="<?= $block->escapeUrl($creditUrl) ?>" class="b2b-shortcut-card" role="button" tabindex="0" aria-label="<?= $block->escapeHtmlAttr(__('My Credit - Check limit and availability')) ?>">
-        <i class="b2b-shortcut-icon fa fa-file-text-o" aria-hidden="true" style="font-family: 'FontAwesome'; font-style: normal;"></i>
-        <span class="b2b-shortcut-title"><?= $block->escapeHtml(__('Meu Crédito')) ?></span>
-        <span style="font-size: 12px; color: var(--b2b-sc-c2);"><?= $block->escapeHtml(__('Consulte limite e disponibilidade')) ?></span>
-    </a>
+    <div class="b2b-dashboard-shortcuts" role="navigation" aria-label="<?= $block->escapeHtmlAttr(__('Ações rápidas')) ?>">
+        <a href="<?= $block->escapeUrl($dashboardUrl) ?>" class="b2b-shortcut-card">
+            <span class="b2b-shortcut-icon b2b-shortcut-icon--dashboard" aria-hidden="true"></span>
+            <span class="b2b-shortcut-title"><?= $block->escapeHtml(__('Painel B2B')) ?></span>
+            <span class="b2b-shortcut-desc"><?= $block->escapeHtml(__('Pedidos, cotações e resumo comercial')) ?></span>
+        </a>
+        <a href="<?= $block->escapeUrl($reorderUrl) ?>" class="b2b-shortcut-card">
+            <span class="b2b-shortcut-icon b2b-shortcut-icon--reorder" aria-hidden="true"></span>
+            <span class="b2b-shortcut-title"><?= $block->escapeHtml(__('Repetir pedido')) ?></span>
+            <span class="b2b-shortcut-desc"><?= $block->escapeHtml(__('Recompra com preços B2B atualizados')) ?></span>
+        </a>
+        <a href="<?= $block->escapeUrl($quotesUrl) ?>" class="b2b-shortcut-card">
+            <span class="b2b-shortcut-icon b2b-shortcut-icon--quote" aria-hidden="true"></span>
+            <span class="b2b-shortcut-title"><?= $block->escapeHtml(__('Minhas cotações')) ?></span>
+            <span class="b2b-shortcut-desc"><?= $block->escapeHtml(__('Acompanhe propostas em aberto')) ?></span>
+        </a>
+        <a href="<?= $block->escapeUrl($addressUrl) ?>" class="b2b-shortcut-card">
+            <span class="b2b-shortcut-icon b2b-shortcut-icon--address" aria-hidden="true"></span>
+            <span class="b2b-shortcut-title"><?= $block->escapeHtml(__('Meus endereços')) ?></span>
+            <span class="b2b-shortcut-desc"><?= $block->escapeHtml(__('Gerencie destinos de entrega')) ?></span>
+        </a>
+    </div>
 </div>

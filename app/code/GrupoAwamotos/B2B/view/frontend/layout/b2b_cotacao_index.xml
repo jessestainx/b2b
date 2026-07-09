@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
+      layout="2columns-left">
+    <update handle="customer_account"/>
+    <head>
+        <css src="GrupoAwamotos_B2B::css/account/b2b-cotacao.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="GrupoAwamotos\B2B\Block\Account\Cotacao\Index"
+                   name="b2b.cotacao.index"
+                   template="GrupoAwamotos_B2B::cotacao/index.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

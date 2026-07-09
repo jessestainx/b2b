@@ -9,8 +9,9 @@ define([
     'ko',
     'Magento_Customer/js/model/customer',
     'GrupoAwamotos_B2B/js/model/checkout/order-notes-storage',
+    'GrupoAwamotos_B2B/js/model/checkout/b2b-config',
     'mage/translate'
-], function (Component, ko, customer, orderNotesStorage, $t) {
+], function (Component, ko, customer, orderNotesStorage, b2bConfig, $t) {
     'use strict';
 
     return Component.extend({
@@ -31,12 +32,8 @@ define([
                 return (this.orderNotes() || '').length;
             }, this);
 
-            var config = (window.checkoutConfig || {}).b2bCheckout || {};
-            var orderNotesConfig = config.orderNotes || {};
-            var isEnabled = orderNotesConfig.enabled === true;
-
             this.isVisible = ko.computed(function () {
-                return customer.isLoggedIn() && isEnabled;
+                return customer.isLoggedIn() && b2bConfig.isEnabled(b2bConfig.getSection('orderNotes').enabled);
             }, this);
 
             return this;

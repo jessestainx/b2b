@@ -80,7 +80,7 @@ test('design tokens exposed on home', async ({ page }) => {
   const tokens = await page.evaluate(() => {
     const root = getComputedStyle(document.documentElement);
     const body = getComputedStyle(document.body);
-    const pick = (prop) =>
+    const pick = (prop: string) =>
       root.getPropertyValue(prop).trim() || body.getPropertyValue(prop).trim();
     return {
       gapXs: pick('--awa-gap-xs'),

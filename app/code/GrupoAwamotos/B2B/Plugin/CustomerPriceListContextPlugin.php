@@ -89,11 +89,11 @@ class CustomerPriceListContextPlugin
                 return;
             }
 
-            $priceListCode = $this->customerPriceProvider->getCustomerPriceListCode($erpCode);
+            $contextToken = $this->customerPriceProvider->getContextTokenForCustomer($erpCode);
 
             $subject->setValue(
                 self::CONTEXT_PRICE_LIST,
-                (string) ($priceListCode ?? 'default'),
+                (string) ($contextToken ?? 'default:1'),
                 '0' // default for non-logged-in users
             );
         } catch (\Exception $e) {

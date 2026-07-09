@@ -13,6 +13,18 @@ use Psr\Log\LoggerInterface;
 class GraphAPIAdapter
 {
     private const DEFAULT_ACTION_SOURCE = 'website';
+    private const ALLOWED_ACTION_SOURCES = [
+        'website',
+        'app',
+        'phone_call',
+        'chat',
+        'physical_store',
+        'system_generated',
+        'business_messaging',
+        'email',
+        'other',
+    ];
+    private const MINIMUM_USER_SIGNAL_KEYS = ['em', 'ph', 'external_id', 'fbp', 'fbc'];
     private const ALLOWED_BATCH_METHODS = ['CREATE', 'UPDATE', 'DELETE'];
     private const DEFAULT_CATALOG_ITEM_TYPE = 'PRODUCT_ITEM';
     private const MAX_EVENTS_PER_REQUEST = 100;
@@ -42,12 +54,17 @@ class GraphAPIAdapter
 
         $preparedEvents = $this->prepareEvents($events);
         if ($preparedEvents === []) {
-            $this->logger->warning('[Meta CAPI] No valid events to send', [
+            $this->logger->debug('[Meta CAPI] No valid events to send', [
                 'pixel_id' => $normalizedPixelId,
                 'store_id' => $storeId
             ]);
 
-            return ['error' => 'No valid events to send', 'http_status' => 0];
+            return [
+                'success' => true,
+                'skipped' => true,
+                'skip_reason' => 'no_valid_events',
+                'http_status' => 204
+            ];
         }
 
         if (count($preparedEvents) <= self::MAX_EVENTS_PER_REQUEST) {
@@ -222,6 +239,7 @@ class GraphAPIAdapter
     {
         $prepared = [];
         $skipped = 0;
+        $skippedMissingSignals = 0;
 
         foreach ($events as $event) {
             if (!is_array($event)) {
@@ -239,7 +257,28 @@ class GraphAPIAdapter
             $event['event_name'] = $eventName;
             $event['event_time'] = max(1, (int) ($event['event_time'] ?? time()));
             $actionSource = trim((string) ($event['action_source'] ?? self::DEFAULT_ACTION_SOURCE));
-            $event['action_source'] = $actionSource !== '' ? $actionSource : self::DEFAULT_ACTION_SOURCE;
+            if ($actionSource === '') {
+                $actionSource = self::DEFAULT_ACTION_SOURCE;
+            }
+            if (!in_array($actionSource, self::ALLOWED_ACTION_SOURCES, true)) {
+                $actionSource = self::DEFAULT_ACTION_SOURCE;
+            }
+            $event['action_source'] = $actionSource;
+
+            $userData = $event['user_data'] ?? null;
+            if (!is_array($userData)) {
+                $skipped++;
+                $skippedMissingSignals++;
+                continue;
+            }
+            $userData = $this->sanitizeJsonArray($userData);
+            if (!$this->hasMinimumUserSignals($userData)) {
+                $skipped++;
+                $skippedMissingSignals++;
+                continue;
+            }
+            $event['user_data'] = $userData;
+
             if (isset($event['event_id'])) {
                 $eventId = trim((string) $event['event_id']);
                 if ($eventId === '') {
@@ -247,10 +286,6 @@ class GraphAPIAdapter
                 } else {
                     $event['event_id'] = $eventId;
                 }
-            }
-
-            if (isset($event['user_data']) && (!is_array($event['user_data']) || $event['user_data'] === [])) {
-                unset($event['user_data']);
             }
 
             if (isset($event['custom_data']) && (!is_array($event['custom_data']) || $event['custom_data'] === [])) {
@@ -261,12 +296,27 @@ class GraphAPIAdapter
         }
 
         if ($skipped > 0) {
-            $this->logger->warning('[Meta CAPI] Skipped invalid event payloads', [
-                'skipped_count' => $skipped
+            $this->logger->debug('[Meta CAPI] Skipped invalid event payloads', [
+                'skipped_count' => $skipped,
+                'skipped_missing_user_signals' => $skippedMissingSignals
             ]);
         }
 
         return $prepared;
+    }
+
+    /**
+     * @param array<string, mixed> $userData
+     */
+    private function hasMinimumUserSignals(array $userData): bool
+    {
+        foreach (self::MINIMUM_USER_SIGNAL_KEYS as $key) {
+            if (!empty($userData[$key])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

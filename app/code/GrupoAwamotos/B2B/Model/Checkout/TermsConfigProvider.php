@@ -49,9 +49,6 @@ class TermsConfigProvider implements ConfigProviderInterface
                     'enabled' => $this->isConfigEnabled('po_number_enabled'),
                     'required' => $this->isConfigEnabled('po_number_required'),
                 ],
-                'deliveryDate' => [
-                    'enabled' => $this->isConfigEnabled('delivery_date_enabled'),
-                ],
                 'orderNotes' => [
                     'enabled' => $this->isConfigEnabled('order_notes_enabled'),
                 ],

@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Legacy cart quote CTA — prefer quote/cart-button.phtml via Quote\Button block.
+ *
+ * @var \GrupoAwamotos\B2B\Block\Cart\CotacaoButton $block
+ */
+if (!$block->isB2bApproved()) {
+    return;
+}
+?>
+<div class="b2b-cotacao-cart-section">
+    <p class="b2b-cotacao-cart-section__title">
+        <?= $block->escapeHtml(__('Precisa de preços especiais para este pedido?')) ?>
+    </p>
+    <p class="b2b-cotacao-cart-section__desc">
+        <?= $block->escapeHtml(__('Solicite uma cotação B2B e nossa equipe retornará com os melhores preços para sua empresa.')) ?>
+    </p>
+    <form method="post" action="<?= $block->escapeUrl($block->getCreateUrl()) ?>" class="b2b-cotacao-cart-section__form">
+        <?= $block->getBlockHtml('formkey') ?>
+        <label class="sr-only" for="b2b-cotacao-notes"><?= $block->escapeHtml(__('Observação da cotação')) ?></label>
+        <input type="text"
+               id="b2b-cotacao-notes"
+               name="notes"
+               class="b2b-cotacao-cart-section__input"
+               placeholder="<?= $block->escapeHtmlAttr(__('Observação (opcional): prazo, quantidade mínima, etc.')) ?>"/>
+        <button type="submit" class="action primary b2b-cotacao-cart-section__submit">
+            <?= $block->escapeHtml(__('Solicitar Cotação B2B')) ?>
+        </button>
+    </form>
+</div>

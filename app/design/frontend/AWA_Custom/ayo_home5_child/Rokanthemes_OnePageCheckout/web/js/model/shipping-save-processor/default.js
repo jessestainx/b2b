@@ -31,6 +31,17 @@ define([
 ) {
     'use strict';
 
+    var pendingSaveRequest = null;
+    var pendingSaveFingerprint = '';
+
+    function getShippingSaveFingerprint(shippingMethod) {
+        if (!shippingMethod) {
+            return '';
+        }
+
+        return String(shippingMethod.carrier_code || '') + '::' + String(shippingMethod.method_code || '');
+    }
+
     function isBillingAddressUsable(billingAddress) {
         var streetLine = '';
 
@@ -125,7 +136,19 @@ define([
 
             payloadExtender(payload);
 
-            return storage.post(
+            var fingerprint = getShippingSaveFingerprint(shippingMethod);
+
+            if (
+                pendingSaveRequest &&
+                pendingSaveRequest.state &&
+                pendingSaveRequest.state() === 'pending' &&
+                pendingSaveFingerprint === fingerprint
+            ) {
+                return pendingSaveRequest;
+            }
+
+            pendingSaveFingerprint = fingerprint;
+            pendingSaveRequest = storage.post(
                 resourceUrlManager.getUrlForSetShippingInformation(quote),
                 JSON.stringify(payload)
             ).done(function (response) {
@@ -133,7 +156,14 @@ define([
                 paymentService.setPaymentMethods(methodConverter(response.payment_methods));
             }).fail(function (response) {
                 errorProcessor.process(response);
+            }).always(function () {
+                if (pendingSaveRequest && pendingSaveRequest.state() !== 'pending') {
+                    pendingSaveRequest = null;
+                    pendingSaveFingerprint = '';
+                }
             });
+
+            return pendingSaveRequest;
         }
     };
 });

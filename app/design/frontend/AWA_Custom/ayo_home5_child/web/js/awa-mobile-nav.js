@@ -6,6 +6,10 @@
 define(['jquery'], function ($) {
     'use strict';
 
+    if (window.__AWA_MENU_V2) {
+        return {};
+    }
+
     if (window.__awaMobileNavInit) return {};
     window.__awaMobileNavInit = true;
 

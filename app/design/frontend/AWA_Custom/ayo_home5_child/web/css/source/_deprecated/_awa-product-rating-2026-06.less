@@ -1,0 +1,92 @@
+//
+// AWA Motos - Product rating (estrelas) nos cards
+// Sprint 2 (2026-06-28) - Quick win #2
+//
+// Garante que estrelas de avaliacao aparecam com boa legibilidade
+// nos product cards (home, PLP, relacionados). Nao altera a logica
+// de quando mostrar - apenas o visual.
+//
+
+// Estrelas Magento padrao - container
+.product-rating {
+    display: block;
+    margin: 4px 0 6px;
+    min-height: 18px;
+    line-height: 1;
+
+    .rating-summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    // Container das estrelas
+    .rating-result {
+        position: relative;
+        display: inline-block;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1;
+        letter-spacing: 2px;
+        vertical-align: middle;
+
+        // Estrelas vazias (fundo cinza)
+        &::before {
+            content: '\2605\2605\2605\2605\2605';
+            color: #e5e7eb;
+            display: block;
+        }
+
+        // Estrelas cheias (sobreposta)
+        > .stars-active {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            white-space: nowrap;
+
+            &::before {
+                content: '\2605\2605\2605\2605\2605';
+                color: #f59e0b; // amber-500
+            }
+        }
+
+        // Reviews count
+        > .reviews-actions,
+        > .reviews-numbers {
+            display: inline-block;
+            margin-left: 6px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+    }
+
+    // Sem reviews - "Seja o primeiro"
+    .reviews-actions {
+        font-size: 11px;
+        color: #9ca3af;
+        font-style: italic;
+    }
+}
+
+// Mobile: ratings mais compactos
+@media (max-width: 480px) {
+    .product-rating {
+        margin: 2px 0 4px;
+        min-height: 16px;
+        .rating-result {
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+    }
+}
+
+// Garantir contraste no card de home (fundo claro)
+.awa-product-card .product-rating,
+.awa-shelf .product-rating,
+.rokan-bestseller .product-rating,
+.rokan-product-tab .product-rating {
+    min-height: 18px;
+}

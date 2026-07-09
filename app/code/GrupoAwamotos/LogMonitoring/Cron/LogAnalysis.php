@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Cron;
@@ -28,19 +29,19 @@ class LogAnalysis
         try {
             // Run all analyzers
             $results = $this->analyzerPool->analyzeAll();
-            
+
             // Process alerts from analyzers
             foreach ($results as $analyzerType => $result) {
                 if (isset($result['error'])) {
                     $this->logger->error("Analyzer {$analyzerType} failed: " . $result['error']);
                     continue;
                 }
-                
+
                 // Get analyzer instance and check for alerts
                 try {
                     $analyzer = $this->analyzerPool->getAnalyzer($analyzerType);
                     $alerts = $analyzer->generateAlerts();
-                    
+
                     foreach ($alerts as $alert) {
                         if ($this->shouldSendAlert($alert)) {
                             $this->notificationService->sendAlert($alert);
@@ -50,7 +51,6 @@ class LogAnalysis
                     $this->logger->error("Error processing alerts for {$analyzerType}: " . $e->getMessage());
                 }
             }
-            
         } catch (\Throwable $e) {
             $this->logger->error('Error in scheduled log analysis: ' . $e->getMessage());
         }

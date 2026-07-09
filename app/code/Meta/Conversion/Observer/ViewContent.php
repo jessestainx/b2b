@@ -9,7 +9,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
@@ -23,7 +23,7 @@ class ViewContent implements ObserverInterface
 {
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly LoggerInterface $logger,
         private readonly B2BHelper $b2bHelper,
         private readonly B2BSignalBuilder $b2bSignalBuilder,
@@ -103,15 +103,7 @@ class ViewContent implements ObserverInterface
                 $capiEvent['event_source_url'] = $eventSourceUrl;
             }
 
-            $result = $this->graphApi->sendEvents($pixelId, [$capiEvent], $storeId);
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] ViewContent API error', [
-                    'store_id' => $storeId,
-                    'product_id' => $product->getId(),
-                    'sku' => $sku,
-                    'error' => $result['error'],
-                ]);
-            }
+            $this->capiDispatcher->sendEvents($pixelId, [$capiEvent], $storeId, 'ViewContent');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] ViewContent event failed', [
                 'error' => $e->getMessage(),

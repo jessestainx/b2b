@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin: add <lastmod> to the home (store base URL) sitemap item.
  *
@@ -6,6 +7,7 @@
  * date, so the sitemap never contains a <lastmod> for the root URL.  This
  * plugin reads the update_time from the active CMS home page and injects it.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CatalogFix\Plugin;

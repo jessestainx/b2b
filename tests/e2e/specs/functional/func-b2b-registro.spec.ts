@@ -1,6 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { navigateTo } from '../../helpers/visual-audit.helpers';
 
+declare global {
+  interface Window {
+    jQuery?: {
+      (selector: string): {
+        data(name: string): unknown;
+      };
+    };
+  }
+}
+
 const REGISTER_URL = 'https://awamotos.com/b2b/register/';
 const LOGIN_URL    = 'https://awamotos.com/b2b/account/login/';
 

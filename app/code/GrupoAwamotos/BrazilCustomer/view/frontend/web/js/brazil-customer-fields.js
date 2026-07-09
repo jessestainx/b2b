@@ -17,13 +17,14 @@ define([
             var $cnpjField = $('#cnpj');
 
             // Toggle entre PF e PJ
-            function togglePersonType() {
+            function togglePersonType()
+            {
                 let type = $personType.val();
-                
+
                 if (type === 'pf') {
                     $pfFields.show();
                     $pjFields.hide();
-                    
+
                     // Ajusta validação
                     $cpfField.addClass('required-entry').attr('data-validate', '{required:true, "validate-cpf":true}');
                     $cnpjField.removeClass('required-entry').removeAttr('data-validate');
@@ -31,7 +32,7 @@ define([
                 } else {
                     $pfFields.hide();
                     $pjFields.show();
-                    
+
                     // Ajusta validação
                     $cpfField.removeClass('required-entry').removeAttr('data-validate');
                     $cnpjField.addClass('required-entry').attr('data-validate', '{required:true, "validate-cnpj":true}');
@@ -40,7 +41,8 @@ define([
             }
 
             // Aplica máscara de CPF
-            function maskCpf(value) {
+            function maskCpf(value)
+            {
                 value = value.replace(/\D/g, '');
                 value = value.replace(/(\d{3})(\d)/, '$1.$2');
                 value = value.replace(/(\d{3})(\d)/, '$1.$2');
@@ -49,7 +51,8 @@ define([
             }
 
             // Aplica máscara de CNPJ
-            function maskCnpj(value) {
+            function maskCnpj(value)
+            {
                 value = value.replace(/\D/g, '');
                 value = value.replace(/^(\d{2})(\d)/, '$1.$2');
                 value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
@@ -62,12 +65,18 @@ define([
             $.validator.addMethod(
                 'validate-cpf',
                 function (value) {
-                    if (!value) return true;
-                    
+                    if (!value) {
+                        return true;
+                    }
+
                     let cpf = value.replace(/\D/g, '');
-                    
-                    if (cpf.length !== 11) return false;
-                    if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+                    if (cpf.length !== 11) {
+                        return false;
+                    }
+                    if (/^(\d)\1{10}$/.test(cpf)) {
+                        return false;
+                    }
 
                     // Calcula primeiro dígito verificador
                     let sum = 0;
@@ -76,8 +85,10 @@ define([
                     }
                     let remainder = sum % 11;
                     let digit1 = (remainder < 2) ? 0 : 11 - remainder;
-                    
-                    if (parseInt(cpf.charAt(9)) !== digit1) return false;
+
+                    if (parseInt(cpf.charAt(9)) !== digit1) {
+                        return false;
+                    }
 
                     // Calcula segundo dígito verificador
                     sum = 0;
@@ -86,7 +97,7 @@ define([
                     }
                     remainder = sum % 11;
                     let digit2 = (remainder < 2) ? 0 : 11 - remainder;
-                    
+
                     return parseInt(cpf.charAt(10)) === digit2;
                 },
                 $.mage.__('CPF inválido. Verifique os números digitados.')
@@ -96,12 +107,18 @@ define([
             $.validator.addMethod(
                 'validate-cnpj',
                 function (value) {
-                    if (!value) return true;
-                    
+                    if (!value) {
+                        return true;
+                    }
+
                     let cnpj = value.replace(/\D/g, '');
-                    
-                    if (cnpj.length !== 14) return false;
-                    if (/^(\d)\1{13}$/.test(cnpj)) return false;
+
+                    if (cnpj.length !== 14) {
+                        return false;
+                    }
+                    if (/^(\d)\1{13}$/.test(cnpj)) {
+                        return false;
+                    }
 
                     // Calcula primeiro dígito verificador
                     let weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -111,8 +128,10 @@ define([
                     }
                     let remainder = sum % 11;
                     let digit1 = (remainder < 2) ? 0 : 11 - remainder;
-                    
-                    if (parseInt(cnpj.charAt(12)) !== digit1) return false;
+
+                    if (parseInt(cnpj.charAt(12)) !== digit1) {
+                        return false;
+                    }
 
                     // Calcula segundo dígito verificador
                     let weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -122,7 +141,7 @@ define([
                     }
                     remainder = sum % 11;
                     let digit2 = (remainder < 2) ? 0 : 11 - remainder;
-                    
+
                     return parseInt(cnpj.charAt(13)) === digit2;
                 },
                 $.mage.__('CNPJ inválido. Verifique os números digitados.')
@@ -130,11 +149,11 @@ define([
 
             // Event listeners
             $personType.on('change', togglePersonType);
-            
+
             $cpfField.on('input', function () {
                 this.value = maskCpf(this.value);
             });
-            
+
             $cnpjField.on('input', function () {
                 this.value = maskCnpj(this.value);
             });

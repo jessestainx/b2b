@@ -30,22 +30,44 @@ $showReview = (bool) $this->getConfig('review');
 $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 $sectionTitle = trim((string) $this->getConfig('title'));
 $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Lançamentos');
+$b2bPriceGate = $this->helper(\GrupoAwamotos\B2B\Helper\Data::class);
+
+/** @var \GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay|null $homeShelfDisplay */
+$homeShelfDisplay = $block->getData('home_shelf_display_view_model');
+$renderAddToCart = $homeShelfDisplay instanceof \GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay
+    ? $homeShelfDisplay->shouldRenderAddToCart($showCart, $isHomePage)
+    : $showCart;
+$pricingHelper = $this->helper(\Magento\Framework\Pricing\Helper\Data::class);
+
+$shelfViewportKey = (string) ($block->getData('awa_shelf_viewport_key') ?: '');
+if ($shelfViewportKey === '') {
+    $shelfViewportKey = $isHomePage ? 'home-new' : 'newproduct';
+}
+$viewportId = $homeShelfDisplay instanceof \GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay
+    ? $homeShelfDisplay->resolveViewportId($shelfViewportKey)
+    : 'awa-vp-' . preg_replace('/[^a-z0-9-]/', '-', strtolower($shelfViewportKey));
 ?>
 <div class="rokan-newproduct awa-shelf awa-shelf--carousel" data-awa-shelf="newproduct">
-    <?php if ($this->getConfig('title')): ?>
-    <div class="rokan-product-heading rokan-onsale-heading" aria-hidden="true">
+    <?php if ($this->getConfig('title') && !$isHomePage): ?>
+    <div class="rokan-product-heading rokan-onsale-heading">
         <h2><?= $block->escapeHtml($this->getConfig('title')) ?></h2>
         <div class="des-title"><?= $block->escapeHtml($this->getConfig('shortdec')) ?></div>
     </div>
     <?php endif; ?>
 
     <?php if (!$_productCollection->getSize()): ?>
-        <div class="rokan-newproduct-slider">
-            <p class="note-msg"><?= $block->escapeHtml(__('There are no products matching the selection.')) ?></p>
+        <div class="rokan-newproduct-slider awa-shelf-empty" role="status">
+            <p class="awa-shelf-empty__message note-msg"><?= $block->escapeHtml(
+                $isHomePage
+                    ? __('Nenhum produto disponível nesta seleção no momento.')
+                    : __('There are no products matching the selection.')
+            ) ?></p>
         </div>
     <?php else: ?>
         <div class="awa-carousel">
             <div class="awa-carousel__viewport awa-cq-card-wrapper"
+                 id="<?= $block->escapeHtmlAttr($viewportId) ?>"
+                 tabindex="0"
                  role="region"
                  aria-roledescription="<?= $block->escapeHtmlAttr(__('carrossel')) ?>"
                  aria-label="<?= $block->escapeHtmlAttr($carouselLabel) ?>">
@@ -70,6 +92,13 @@ $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Lançamento
                         // Home: LCP é o hero — prateleiras sempre lazy, sem fetchpriority
                         $productImageHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $productImageHtml);
                     }
+                    /* Core Web Vitals: offload decode da thread principal (ui-ux-pro-max perf) */
+                    if (strpos($productImageHtml, 'decoding=') === false) {
+                        $productImageHtml = str_replace('<img ', '<img decoding="async" ', $productImageHtml);
+                    }
+                    if (strpos((string)$productImageThumbHtml, 'decoding=') === false) {
+                        $productImageThumbHtml = str_replace('<img ', '<img decoding="async" ', $productImageThumbHtml);
+                    }
 
                     if ($productImageThumbUrl === '' || strpos($productImageThumbUrl, '/placeholder/') !== false) {
                         $productImageThumbHtml = $productImageHtml;
@@ -88,13 +117,15 @@ $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Lançamento
                         $position = ' style="left:' . $productImage->getWidth() . 'px;'
                             . 'top:' . $productImage->getHeight() . 'px;"';
                     }
+
+                    $productDisplayName = \GrupoAwamotos\Theme\Helper\ProductDisplayName::normalize((string) $_product->getName());
                 ?>
                     <div class="item-product awa-carousel-card-slot" data-product-id="<?= (int) $_product->getId() ?>">
                         <div class="content-item-product awa-product-card">
                             <div class="product-thumb">
                                 <a href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"
                                    class="product-thumb-link"
-                                   aria-label="<?= $block->escapeHtmlAttr($_product->getName()) ?>">
+                                   aria-label="<?= $block->escapeHtmlAttr($productDisplayName) ?>">
                                     <span class="first-thumb">
                                         <?= /* @noEscape */ $productImageHtml ?>
                                     </span>
@@ -152,6 +183,7 @@ $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Lançamento
                                 <?php endif; ?>
                             </div>
 
+                            <?php if ($renderAddToCart): ?>
                             <div class="product-info-cart">
                                 <?php if ($showCart): ?>
                                 <div class="actions-primary addcart-link">
@@ -182,13 +214,14 @@ $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Lançamento
                                 </div>
                                 <?php endif; ?>
                             </div>
+                            <?php endif; ?>
 
                             <div class="product-info">
                                 <h3 class="product-name">
                                     <a class="product-item-link"
-                                       title="<?= $block->escapeHtmlAttr($_product->getName()) ?>"
+                                       title="<?= $block->escapeHtmlAttr($productDisplayName) ?>"
                                        href="<?= $block->escapeUrl($_product->getProductUrl()) ?>">
-                                        <?= $block->escapeHtml($_product->getName()) ?>
+                                        <?= $block->escapeHtml($productDisplayName) ?>
                                     </a>
                                 </h3>
 
@@ -196,17 +229,42 @@ $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Lançamento
                                     <span class="awa-b2b-sku"><span class="awa-b2b-sku__label">REF: </span><span class="awa-b2b-sku__value"><?= $block->escapeHtml($_product->getSku()) ?></span></span>
                                 <?php endif; ?>
 
-                                <?php if ($showReview): ?>
-                                <div class="product-rating">
-                                    <?= $block->getReviewsSummaryHtml($_product, $templateType) ?>
+                                <?php
+                                // Sprint 2 (2026-06-28): reviews sempre visiveis (rich results + CTR)
+                                $_ratingHtml = '';
+                                try {
+                                    $_ratingHtml = $block->getReviewsSummaryHtml($_product, $templateType);
+                                } catch (\Throwable $e) {
+                                    $_ratingHtml = '';
+                                }
+                                ?>
+                                <?php if (trim($_ratingHtml) !== ''): ?>
+                                <div class="product-rating" data-awa-rating>
+                                    <?= /* @noEscape */ $_ratingHtml ?>
                                 </div>
                                 <?php endif; ?>
 
-                                <div class="info-price">
-                                    <?php if ($this->getConfig('show_price')): ?>
+                                <?php if ($this->getConfig('show_price')): ?>
+                                    <div class="info-price">
+                                    <?php if ($b2bPriceGate->canViewPrices()): ?>
                                         <?= /* @noEscape */ $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)) ?>
+                                    <?php else: ?>
+                                        <div class="b2b-login-to-see-price<?= $isHomePage ? ' b2b-login-to-see-price--home-card' : '' ?>">
+                                            <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()) ?></span>
+                                            <?php if (!$isHomePage): ?>
+                                                <span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bPriceGate->getPriceGateDescription()) ?></span>
+                                            <?php endif; ?>
+                                        </div>
                                     <?php endif; ?>
-                                </div>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if ($isHomePage): ?>
+                                    <a class="awa-card-view-product action secondary"
+                                       href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"
+                                       aria-label="<?= $block->escapeHtmlAttr(__('Ver produto: %1', $productDisplayName)) ?>">
+                                        <?= $block->escapeHtml(__('Ver produto')) ?>
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -224,17 +282,10 @@ $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Lançamento
             </div>
         </div>
 
-        <?php
-        $awaIsHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
-        ?>
-        <?php if (!$block->isRedirectToCartEnabled()): ?>
-        <script type="text/x-magento-init">
-        {
-            "[data-role=tocart-form]": {
-                "catalogAddToCart": {}
-            }
-        }
-        </script>
-        <?php endif; ?>
+        <?= /* @noEscape */ $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+            ->setTemplate('Magento_Theme::html/awa-shelf-carousel-chrome.phtml')
+            ->setData('viewport_id', $viewportId)
+            ->toHtml() ?>
+
     <?php endif; ?>
 </div>

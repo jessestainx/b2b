@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import { resolveBaseUrl } from './helpers/resolve-base-url';
+
+const resolvedBaseUrl = resolveBaseUrl('pw-qa-audit');
 
 export default defineConfig({
   testDir: './specs',
@@ -12,7 +15,7 @@ export default defineConfig({
     ['json', { outputFile: 'reports/qa-audit-results.json' }],
   ],
   use: {
-    baseURL: 'https://awamotos.com',
+    baseURL: resolvedBaseUrl,
     navigationTimeout: 60_000,
     actionTimeout: 15_000,
     trace: 'on-first-retry',

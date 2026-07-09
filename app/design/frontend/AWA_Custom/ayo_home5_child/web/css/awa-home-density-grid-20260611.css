@@ -545,7 +545,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   border: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  color: var(--awa-primary, #b73337) !important;
+  color: var(--awa-primary, var(--awa-primary)) !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   min-height: 32px !important;
@@ -569,9 +569,9 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .content-top-home
   .awa-owl-nav__btn {
   background: transparent !important;
-  border: 1px solid color-mix(in srgb, var(--awa-border, #e5e5e5) 85%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--awa-border, var(--awa-border)) 85%, transparent) !important;
   box-shadow: none !important;
-  color: var(--awa-text-secondary, #666) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -579,8 +579,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
     .page-wrapper
     .content-top-home
     .awa-owl-nav__btn:hover {
-    background: var(--awa-bg-subtle, #f7f7f7) !important;
-    border-color: var(--awa-border, #e5e5e5) !important;
+    background: var(--awa-bg-subtle, var(--awa-bg-subtle)) !important;
+    border-color: var(--awa-border, var(--awa-border)) !important;
     box-shadow: none !important;
   }
 }
@@ -590,8 +590,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .content-top-home
   :is(.awa-shelf--carousel, .awa-carousel-section)
   :is(.item-product, .product-item-info, .awa-carousel-card-slot, .content-item-product, .awa-product-card) {
-  background: var(--awa-bg, #fff) !important;
-  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-bg, var(--awa-bg)) !important;
+  border: 1px solid var(--awa-border, var(--awa-border)) !important;
   box-shadow: none !important;
 }
 
@@ -609,8 +609,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .content-top-home
   #awa-cat-carousel
   > .awa-category-carousel__item {
-  background: var(--awa-bg-subtle, #f7f7f7) !important;
-  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-bg-subtle, var(--awa-bg-subtle)) !important;
+  border: 1px solid var(--awa-border, var(--awa-border)) !important;
   box-shadow: none !important;
 }
 
@@ -628,9 +628,9 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .awa-home-pricing-notice {
   background: transparent !important;
   border: 0 !important;
-  border-block-start: 1px solid var(--awa-border, #e5e5e5) !important;
+  border-block-start: 1px solid var(--awa-border, var(--awa-border)) !important;
   box-shadow: none !important;
-  color: var(--awa-text-secondary, #666) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
   font-size: 13px !important;
   padding-block: 6px !important;
 }
@@ -638,8 +638,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-benefits-bar {
-  background: var(--awa-bg-subtle, #f7f7f7) !important;
-  border-block: 1px solid var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-bg-subtle, var(--awa-bg-subtle)) !important;
+  border-block: 1px solid var(--awa-border, var(--awa-border)) !important;
   box-shadow: none !important;
 }
 
@@ -649,7 +649,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   background: transparent !important;
   border-block: 0 !important;
   box-shadow: none !important;
-  color: var(--awa-text-secondary, #666) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
   padding-block: 8px !important;
 }
 
@@ -665,7 +665,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-social-proof-number {
-  color: var(--awa-text-primary, #333) !important;
+  color: var(--awa-text-primary, var(--awa-text)) !important;
   font-size: 14px !important;
   font-weight: 600 !important;
 }
@@ -686,9 +686,9 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .top-home-content--above-fold
   :is(.awa-hero-swiper__nav, .swiper-button-prev, .swiper-button-next) {
   background: rgb(255 255 255 / 88%) !important;
-  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  border: 1px solid var(--awa-border, var(--awa-border)) !important;
   box-shadow: none !important;
-  color: var(--awa-text-secondary, #666) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -696,7 +696,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
     .page-wrapper
     .top-home-content--above-fold
     :is(.awa-hero-swiper__nav, .swiper-button-prev, .swiper-button-next):hover {
-    background: var(--awa-bg, #fff) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
     box-shadow: none !important;
   }
 }
@@ -745,7 +745,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .content-top-home
   .top-home-content--above-fold
   .swiper-pagination-bullet {
-  background: var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-border, var(--awa-border)) !important;
   box-shadow: none !important;
   opacity: 1 !important;
 }
@@ -755,7 +755,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .content-top-home
   .top-home-content--above-fold
   .swiper-pagination-bullet-active {
-  background: var(--awa-primary, #b73337) !important;
+  background: var(--awa-primary, var(--awa-primary)) !important;
   box-shadow: none !important;
 }
 
@@ -781,8 +781,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .page-wrapper
   .content-top-home
   :is(.hot-deal, .item-deal-product) {
-  background: var(--awa-bg, #fff) !important;
-  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-bg, var(--awa-bg)) !important;
+  border: 1px solid var(--awa-border, var(--awa-border)) !important;
   box-shadow: none !important;
 }
 
@@ -796,7 +796,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-site-header.awa-header-professional {
-  box-shadow: 0 1px 0 var(--awa-border, #e5e5e5) !important;
+  box-shadow: 0 1px 0 var(--awa-border, var(--awa-border)) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -885,7 +885,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   :is(.awa-shelf--carousel, .awa-carousel-section)
   .product-thumb {
   aspect-ratio: var(--awa-home-thumb-ratio) !important;
-  background: var(--awa-bg-subtle, #f7f7f7) !important;
+  background: var(--awa-bg-subtle, var(--awa-bg-subtle)) !important;
   border-radius: calc(var(--awa-home-card-radius) - 2px) !important;
   display: grid !important;
   flex: 0 0 auto !important;
@@ -958,7 +958,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   :is(.awa-shelf--carousel, .awa-carousel-section)
   .product-name
   .product-item-link {
-  color: var(--awa-text-primary, #333) !important;
+  color: var(--awa-text-primary, var(--awa-text)) !important;
   display: -webkit-box !important;
   font-size: 13px !important;
   font-weight: 600 !important;
@@ -975,7 +975,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .content-top-home
   :is(.awa-shelf--carousel, .awa-carousel-section)
   .awa-b2b-sku {
-  color: var(--awa-text-secondary, #666) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
   display: block !important;
   font-size: 11px !important;
   font-weight: 500 !important;
@@ -1001,8 +1001,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .info-price
   .b2b-login-to-see-price {
   align-items: center !important;
-  background: var(--awa-bg-subtle, #f7f7f7) !important;
-  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-bg-subtle, var(--awa-bg-subtle)) !important;
+  border: 1px solid var(--awa-border, var(--awa-border)) !important;
   border-radius: 6px !important;
   box-sizing: border-box !important;
   display: flex !important;
@@ -1021,7 +1021,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .info-price
   .b2b-login-to-see-price
   a {
-  color: var(--awa-primary, #b73337) !important;
+  color: var(--awa-primary, var(--awa-primary)) !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   min-height: 32px !important;
@@ -1047,8 +1047,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   :is(.awa-shelf--carousel, .awa-carousel-section)
   .hot-onsale
   :is(.onsale, .sticker, .product-label) {
-  background: var(--awa-primary, #b73337) !important;
-  color: #fff !important;
+  background: var(--awa-primary, var(--awa-primary)) !important;
+  color: var(--awa-bg) !important;
 }
 
 /* Categoria — cards uniformes com hover sutil */
@@ -1074,8 +1074,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
     .content-top-home
     #awa-cat-carousel
     > .awa-category-carousel__item:hover {
-    background: var(--awa-bg, #fff) !important;
-    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e5e5e5)) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
+    border-color: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 35%, var(--awa-border, var(--awa-border))) !important;
   }
 
   html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -1083,7 +1083,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
     .content-top-home
     :is(.awa-shelf--carousel, .awa-carousel-section)
     :is(.content-item-product, .awa-product-card):hover {
-    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 28%, var(--awa-border, #e5e5e5)) !important;
+    border-color: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 28%, var(--awa-border, var(--awa-border))) !important;
   }
 }
 
@@ -1091,7 +1091,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .page-wrapper
   .content-top-home
   .awa-category-carousel__label {
-  color: var(--awa-text-primary, #333) !important;
+  color: var(--awa-text-primary, var(--awa-text)) !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   line-height: 1.25 !important;
@@ -1122,7 +1122,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .awa-benefits-bar
   :is(.awa-benefit-item, .awa-benefits-item)
   strong {
-  color: var(--awa-text-primary, #333) !important;
+  color: var(--awa-text-primary, var(--awa-text)) !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   line-height: 1.3 !important;
@@ -1137,7 +1137,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .awa-benefits-bar
   :is(.awa-benefit-item, .awa-benefits-item)
   span:not(strong) {
-  color: var(--awa-text-secondary, #666) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
   font-size: 12px !important;
   line-height: 1.4 !important;
 }
@@ -1148,8 +1148,8 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .awa-home-pricing-notice
   :is(.awa-home-pricing-notice__inner, .container) {
   align-items: center !important;
-  background: var(--awa-bg-subtle, #f7f7f7) !important;
-  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-bg-subtle, var(--awa-bg-subtle)) !important;
+  border: 1px solid var(--awa-border, var(--awa-border)) !important;
   border-radius: var(--awa-home-card-radius) !important;
   display: flex !important;
   flex-wrap: wrap !important;
@@ -1551,7 +1551,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
     .content-top-home
     .top-home-content--above-fold
     :is(.awa-hero-swiper__nav, .swiper-button-prev, .swiper-button-next):focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
     outline-offset: 2px !important;
   }
 

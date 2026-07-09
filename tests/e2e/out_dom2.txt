@@ -1,8 +1,0 @@
-{
-  "url": "https://awamotos.com/catalogsearch/result/?q=moto",
-  "colsClass": "columns layout layout-2-col row",
-  "mainClass": "page-main container",
-  "productsWrapperClass": "wrapper grid products-grid",
-  "productsCount": 0,
-  "sidebarClass": "sidebar sidebar-main-1"
-}

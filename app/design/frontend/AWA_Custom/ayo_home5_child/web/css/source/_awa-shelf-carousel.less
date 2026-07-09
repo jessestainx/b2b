@@ -1,17 +1,17 @@
 // =============================================================================
 // AWA Product Shelf Carousel — prateleira única para todos os carrosséis de produto
-// Cores: #b73337 #8e2629 #333333 #FFFFFF #E5E5E5 #666666
+// Cores: #b73337 #8e2629 @awa-color-dark #FFFFFF #E5E5E5 @awa-color-text-muted
 // Breakpoints: 1440/1366→5 | 1024→4 | 768→3 | 430/390→2
 // =============================================================================
 
 @import (once) '_awa-variables';
 
-@awa-shelf-red: #b73337;
-@awa-shelf-red-dark: #8e2629;
-@awa-shelf-text: #333333;
-@awa-shelf-text-muted: #666666;
-@awa-shelf-bg: #ffffff;
-@awa-shelf-border: #e5e5e5;
+@awa-shelf-red: @awa-color-primary;
+@awa-shelf-red-dark: @awa-color-primary-dark;
+@awa-shelf-text: @awa-color-text-primary;
+@awa-shelf-text-muted: @awa-color-text-muted;
+@awa-shelf-bg: @awa-color-white;
+@awa-shelf-border: @awa-color-border;
 @awa-shelf-gap-sm: 16px;
 @awa-shelf-gap-lg: 20px;
 @awa-shelf-arrow: 44px;
@@ -42,6 +42,10 @@
     gap: clamp(12px, 1.5vw, 20px);
     overflow-x: clip;
     max-width: 100%;
+}
+
+.awa-carousel-mounted {
+    position: relative;
 }
 
 .awa-shelf--has-countdown {
@@ -114,7 +118,8 @@ header.awa-section-header.awa-shelf__header {
 }
 
 .awa-shelf__view-all,
-.awa-section-header__link.awa-shelf__view-all {
+.awa-section-header__link.awa-shelf__view-all,
+.awa-shelf-view-all {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -127,6 +132,17 @@ header.awa-section-header.awa-shelf__header {
 
     &:hover {
         color: @awa-shelf-red-dark;
+    }
+}
+
+@media (min-width: 768px) {
+    #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+        .page-wrapper .content-top-home .awa-shelf-view-all--desktop-only {
+            align-items: center !important;
+            display: inline-flex !important;
+            min-height: 44px !important;
+            visibility: visible !important;
+        }
     }
 }
 
@@ -157,8 +173,24 @@ header.awa-section-header.awa-shelf__header {
 .awa-carousel__viewport {
     width: 100%;
     max-width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scroll-padding-inline: 0;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    touch-action: pan-y pinch-zoom;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.awa-carousel__viewport.is-awa-viewport-width-guarded {
+    max-width: 100%;
 }
 
 .awa-carousel__track {
@@ -208,6 +240,8 @@ header.awa-section-header.awa-shelf__header {
 .awa-carousel__slide {
     min-width: 0;
     box-sizing: border-box;
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
 }
 
 // Equal-height via flex stretch (primary — evita JS min-height)
@@ -258,6 +292,7 @@ header.awa-section-header.awa-shelf__header {
 
 .awa-shelf .product-item-photo,
 .awa-shelf .product.photo.product-item-photo {
+    position: relative;
     display: block;
     width: 100%;
     aspect-ratio: @awa-shelf-photo-ratio;
@@ -304,6 +339,40 @@ header.awa-section-header.awa-shelf__header {
     object-fit: contain;
     object-position: center;
     display: block;
+}
+
+.awa-shelf.awa-carousel-pending .product-thumb::before,
+.awa-shelf.awa-carousel-pending .product-item-photo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--awa-shelf-bg) 94%, var(--awa-shelf-text) 6%),
+            color-mix(in srgb, var(--awa-shelf-bg) 78%, var(--awa-shelf-text) 10%),
+            color-mix(in srgb, var(--awa-shelf-bg) 94%, var(--awa-shelf-text) 6%)
+        );
+    background-size: 220% 100%;
+    opacity: 0.72;
+    animation: awaShelfImageSkeleton 1.1s ease-in-out infinite;
+}
+
+.awa-shelf.awa-carousel-ready .product-thumb::before,
+.awa-shelf.awa-carousel-ready .product-item-photo::before {
+    display: none;
+}
+
+@keyframes awaShelfImageSkeleton {
+    from {
+        background-position: 100% 0;
+    }
+
+    to {
+        background-position: -100% 0;
+    }
 }
 
 // Placeholder limpo — produto sem imagem ou URL quebrada
@@ -420,6 +489,7 @@ header.awa-section-header.awa-shelf__header {
 }
 
 .awa-carousel__arrow,
+.awa-carousel__toggle,
 .awa-owl-nav__btn {
     display: inline-grid;
     place-items: center;
@@ -433,6 +503,7 @@ header.awa-section-header.awa-shelf__header {
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(51, 51, 51, 0.08);
     transition: background 0.2s, color 0.2s, border-color 0.2s;
+    position: relative;
 
     &:hover {
         background: @awa-shelf-red;
@@ -444,21 +515,31 @@ header.awa-section-header.awa-shelf__header {
         outline: 2px solid @awa-shelf-red;
         outline-offset: 2px;
     }
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        border-radius: inherit;
+    }
 }
 
 // ─── Progress ────────────────────────────────────────────────────────────────
 .awa-owl-progress {
+    width: min(160px, 42%);
     height: 3px;
     background: @awa-shelf-border;
     border-radius: 2px;
-    margin-top: 12px;
+    margin: 14px auto 0;
     overflow: hidden;
 
     &__bar {
         height: 100%;
         background: @awa-shelf-red;
-        width: 20%;
-        transition: width 0.3s ease;
+        width: 100%;
+        transform: scaleX(var(--awa-progress, 0.08));
+        transform-origin: left center;
+        transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
     }
 }
 
@@ -689,5 +770,238 @@ header.awa-section-header.awa-shelf__header {
 
     .page-wrapper .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel) .item-product {
         pointer-events: auto !important;
+    }
+}
+
+// ─── Home runtime nav host — migra o lock terminal para o componente oficial ─
+// Usa !important pontual para vencer regras legadas do mesmo bundle que ainda
+// forcam `.awa-owl-nav__btn` em 44px e nav overlay fora do header.
+#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+    .page-wrapper .content-top-home {
+        .awa-carousel-nav-host {
+            position: relative !important;
+            padding-inline-end: 96px !important;
+        }
+
+        .awa-carousel-nav-host.has-carousel-autoplay-toggle {
+            padding-inline-end: 150px !important;
+        }
+
+        .awa-carousel-nav-host.is-awa-not-scrollable {
+            padding-inline-end: 0 !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav--header-slot,
+        .awa-section-header > .awa-owl-nav--header-slot {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .awa-home-niche-shelves__panel-head.awa-carousel-nav-host {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            width: 100% !important;
+            min-height: 44px !important;
+            box-sizing: border-box !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted {
+            position: absolute !important;
+            top: 50% !important;
+            right: 0 !important;
+            left: auto !important;
+            z-index: 3 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 8px !important;
+            width: auto !important;
+            max-width: max-content !important;
+            min-width: 0 !important;
+            height: 40px !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            transform: translateY(-50%) !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted.has-autoplay-toggle {
+            gap: 6px !important;
+            height: 44px !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted[hidden] {
+            display: none !important;
+        }
+
+        .awa-shelf--carousel .awa-owl-progress[hidden] {
+            display: none !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle) {
+            --awa-carousel-control-visual: 38px;
+            appearance: none !important;
+            display: inline-grid !important;
+            place-items: center !important;
+            flex: 0 0 44px !important;
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
+            max-width: 44px !important;
+            max-height: 44px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            border-radius: 999px !important;
+            background: transparent !important;
+            background-image: none !important;
+            color: var(--awa-primary, currentColor) !important;
+            box-shadow: none !important;
+            line-height: 1 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            position: relative !important;
+            inset: auto !important;
+            transform: none !important;
+            transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, opacity 0.18s ease !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle)::before {
+            content: "";
+            position: absolute !important;
+            inset: 0 !important;
+            border-radius: 999px !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle)::after {
+            content: "";
+            position: absolute !important;
+            z-index: 0 !important;
+            width: var(--awa-carousel-control-visual) !important;
+            height: var(--awa-carousel-control-visual) !important;
+            border: 1px solid color-mix(in srgb, var(--awa-primary, currentColor) 18%, var(--awa-border, currentColor)) !important;
+            border-radius: 999px !important;
+            background: var(--awa-bg, Canvas) !important;
+            box-shadow: none !important;
+            transition: background-color 0.18s ease, border-color 0.18s ease !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle) svg {
+            display: block !important;
+            flex: 0 0 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            margin: 0 !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn.awa-carousel__toggle[hidden] {
+            display: none !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn.awa-carousel__toggle.is-paused::after {
+            background: color-mix(in srgb, var(--awa-primary, currentColor) 8%, var(--awa-bg, Canvas)) !important;
+            border-color: color-mix(in srgb, var(--awa-primary, currentColor) 30%, var(--awa-border, currentColor)) !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle):is(:disabled, .is-disabled, [aria-disabled='true']) {
+            opacity: 0.38 !important;
+            cursor: default !important;
+            pointer-events: none !important;
+        }
+
+        .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle):focus-visible {
+            outline: 2px solid var(--awa-primary, currentColor) !important;
+            outline-offset: 2px !important;
+        }
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+        .page-wrapper .content-top-home .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle):hover:not(:disabled):not(.is-disabled) {
+            color: var(--awa-text-inverse, Canvas) !important;
+        }
+
+        .page-wrapper .content-top-home .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle):hover:not(:disabled):not(.is-disabled)::after {
+            background: var(--awa-primary, currentColor) !important;
+            border-color: var(--awa-primary, currentColor) !important;
+        }
+    }
+}
+
+@media (max-width: 767px) {
+    #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+        .page-wrapper .content-top-home {
+            .awa-carousel-nav-host {
+                padding-inline-end: 82px !important;
+            }
+
+            .awa-carousel-nav-host.has-carousel-autoplay-toggle {
+                padding-inline-end: 146px !important;
+            }
+
+            .awa-carousel-nav-host .awa-section-header__link,
+            .awa-carousel-nav-host .awa-shelf__view-all,
+            .awa-carousel-nav-host .awa-shelf-view-all--desktop-only {
+                display: none !important;
+                height: 0 !important;
+                max-height: 0 !important;
+                min-height: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
+                padding: 0 !important;
+            }
+
+            :is(.awa-section-header, .awa-shelf__header) .awa-section-header__left {
+                align-items: flex-start !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            :is(.awa-section-header, .awa-shelf__header) :is(.awa-section-header__title, .awa-shelf__title) {
+                width: auto !important;
+                max-width: 100% !important;
+                white-space: normal !important;
+                overflow-wrap: normal !important;
+            }
+
+            .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted {
+                top: 0 !important;
+                gap: 6px !important;
+                height: 44px !important;
+                transform: none !important;
+            }
+
+            .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle) {
+                --awa-carousel-control-visual: 34px;
+                flex-basis: 44px !important;
+                width: 44px !important;
+                height: 44px !important;
+                min-width: 44px !important;
+                min-height: 44px !important;
+                max-width: 44px !important;
+                max-height: 44px !important;
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+        .page-wrapper .content-top-home .awa-carousel-nav-host > .awa-owl-nav.awa-carousel__nav.awa-owl-nav--header-mounted .awa-owl-nav__btn:is(.awa-carousel__arrow, .awa-carousel__toggle) {
+            transition: none !important;
+        }
     }
 }

@@ -11,42 +11,92 @@ define([
     'Magento_Customer/js/model/customer',
     'Magento_Checkout/js/model/payment/additional-validators',
     'Magento_Checkout/js/model/quote',
+    'GrupoAwamotos_B2B/js/model/checkout/b2b-config',
     'mage/translate'
-], function (Component, ko, $, customer, additionalValidators, quote, $t) {
+], function (Component, ko, $, customer, additionalValidators, quote, b2bConfig, $t) {
     'use strict';
 
-    var checkoutConfig = window.checkoutConfig || {};
-    var config = checkoutConfig.b2bCheckout || {};
-    var termsConfig = config.terms || {};
     var validatorRegistered = false;
+
+    function getTermsConfig()
+    {
+        return b2bConfig.getSection('terms');
+    }
 
     return Component.extend({
         defaults: {
             template: 'GrupoAwamotos_B2B/checkout/b2b-terms',
             isAccepted: false,
             isVisible: true,
-            checkboxText: termsConfig.checkboxText || $t('Li e aceito os termos de venda B2B'),
-            termsContent: termsConfig.content || '',
-            warningTitle: termsConfig.warningTitle || $t('Atenção'),
-            warningContent: termsConfig.warningContent || $t('Você deve aceitar os termos e condições para continuar.')
+            checkboxText: $t('Li e aceito os termos de venda B2B'),
+            termsContent: '',
+            warningTitle: $t('Atenção'),
+            warningContent: $t('Você deve aceitar os termos e condições para continuar.')
         },
 
         /**
          * Initialize component
          */
         initialize: function () {
+            var self = this;
+            var termsConfig = getTermsConfig();
+
             this._super();
+
+            if (termsConfig.checkboxText) {
+                this.checkboxText = termsConfig.checkboxText;
+            }
+            if (termsConfig.content) {
+                this.termsContent = termsConfig.content;
+            }
+            if (termsConfig.warningTitle) {
+                this.warningTitle = termsConfig.warningTitle;
+            }
+            if (termsConfig.warningContent) {
+                this.warningContent = termsConfig.warningContent;
+            }
 
             this.isAccepted = ko.observable(false);
             this.isModalOpen = ko.observable(false);
+            this.inlineError = ko.observable('');
             this.isVisible = ko.computed(function () {
-                return customer.isLoggedIn() && termsConfig.enabled === true;
+                var checkoutConfig = b2bConfig.getCheckoutConfig();
+                var loggedIn = customer.isLoggedIn() || checkoutConfig.isCustomerLoggedIn === true;
+
+                return loggedIn && b2bConfig.isEnabled(getTermsConfig().enabled);
             }, this);
 
-            if (termsConfig.enabled && !validatorRegistered) {
+            this.isModalOpen.subscribe(function (open) {
+                if (open) {
+                    self.bindModalKeyboard();
+                    window.setTimeout(function () {
+                        var closeBtn = document.querySelector('.b2b-terms-modal-close');
+
+                        if (closeBtn && typeof closeBtn.focus === 'function') {
+                            closeBtn.focus();
+                        }
+                    }, 0);
+                } else {
+                    self.unbindModalKeyboard();
+                }
+            });
+
+            if (b2bConfig.isEnabled(termsConfig.enabled) && !validatorRegistered) {
                 additionalValidators.registerValidator(this);
                 validatorRegistered = true;
             }
+
+            this.isAccepted.subscribe(function (accepted) {
+                if (accepted) {
+                    this.inlineError('');
+                    $('.b2b-terms-container').removeClass('b2b-terms-container--error');
+                }
+            }, this);
+
+            // Garante sync nativo → KO (label click / autofill antes do binding completo).
+            $(document).on('change.awaB2bTerms', '#b2b-terms-checkbox', function () {
+                self.isAccepted(!!this.checked);
+            });
 
             return this;
         },
@@ -61,8 +111,10 @@ define([
                 return true;
             }
 
+            this.syncAcceptedFromDom();
+
             if (!this.isAccepted()) {
-                this.showWarning();
+                this.showInlineBlocker();
                 return false;
             }
 
@@ -70,23 +122,62 @@ define([
         },
 
         /**
-         * Show warning modal
+         * Align KO state with the native checkbox (automation / partial KO binding edge cases).
          */
-        showWarning: function () {
+        syncAcceptedFromDom: function () {
+            var checkbox = document.getElementById('b2b-terms-checkbox');
+
+            if (checkbox && checkbox.checked && !this.isAccepted()) {
+                this.isAccepted(true);
+            }
+        },
+
+        /**
+         * Inline feedback + scroll so users see why "Concluir Pedido" did not proceed.
+         */
+        showInlineBlocker: function () {
+            var message = this.warningContent || $t('Você deve aceitar os termos e condições para continuar.');
+
+            this.inlineError(message);
+            $('.b2b-terms-container').addClass('b2b-terms-container--error');
+
+            var container = document.querySelector('.b2b-terms-container[data-awa-component="b2b-terms"]');
+
+            if (container && typeof container.scrollIntoView === 'function') {
+                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            var checkbox = document.getElementById('b2b-terms-checkbox');
+
+            if (checkbox && typeof checkbox.focus === 'function') {
+                checkbox.focus({ preventScroll: true });
+            }
+        },
+
+        /**
+         * Escape fecha o modal de termos (a11y).
+         */
+        bindModalKeyboard: function () {
             var self = this;
-            require(['Magento_Ui/js/modal/alert'], function (alert) {
-                alert({
-                    title: self.warningTitle,
-                    content: self.warningContent,
-                    buttons: [{
-                        text: $t('Entendi'),
-                        class: 'action primary',
-                        click: function () {
-                            this.closeModal(true);
-                        }
-                    }]
-                });
-            });
+
+            this._modalKeyHandler = function (event) {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    self.closeTermsModal();
+                }
+            };
+
+            document.addEventListener('keydown', this._modalKeyHandler);
+        },
+
+        /**
+         * Remove listener do modal.
+         */
+        unbindModalKeyboard: function () {
+            if (this._modalKeyHandler) {
+                document.removeEventListener('keydown', this._modalKeyHandler);
+                this._modalKeyHandler = null;
+            }
         },
 
         /**
@@ -116,6 +207,13 @@ define([
          */
         getSectionTitle: function () {
             return $t('Condições comerciais B2B');
+        },
+
+        /**
+         * @returns {string}
+         */
+        getRequiredLabel: function () {
+            return $t('Obrigatório');
         },
 
         /**

@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Model;
 
 use GrupoAwamotos\B2B\Api\AttendantRepositoryInterface;
@@ -12,7 +14,8 @@ class AttendantRepository implements AttendantRepositoryInterface
     public function __construct(
         private readonly AttendantFactory $attendantFactory,
         private readonly AttendantResource $attendantResource
-    ) {}
+    ) {
+    }
 
     public function getById(int $id): AttendantInterface
     {

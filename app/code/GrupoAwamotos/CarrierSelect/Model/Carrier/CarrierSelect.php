@@ -127,9 +127,9 @@ class CarrierSelect extends AbstractCarrier implements CarrierInterface
                 foreach ($preferredCarriers as $carrier) {
                     $method = $this->rateMethodFactory->create();
                     $method->setCarrier($this->_code);
-                    $method->setCarrierTitle($this->getConfigData('title'));
+                    $method->setCarrierTitle((string) $carrier->getName());
                     $method->setMethod($carrier->getCode());
-                    $method->setMethodTitle($carrier->getName() . ' (Frete a combinar)');
+                    $method->setMethodTitle(__('Frete a combinar'));
                     $method->setPrice(0);
                     $method->setCost(0);
                     $result->append($method);
@@ -141,7 +141,7 @@ class CarrierSelect extends AbstractCarrier implements CarrierInterface
         // Fallback: cliente sem transportadora definida — mostra opção genérica
         $method = $this->rateMethodFactory->create();
         $method->setCarrier($this->_code);
-        $method->setCarrierTitle($this->getConfigData('title'));
+        $method->setCarrierTitle(__('Frete'));
         $method->setMethod('acombinar');
         $method->setMethodTitle(__('Frete a combinar — transportadora será definida'));
         $method->setPrice(0);

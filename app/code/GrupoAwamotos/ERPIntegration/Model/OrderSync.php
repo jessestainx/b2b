@@ -8,6 +8,7 @@ use GrupoAwamotos\ERPIntegration\Api\OrderSyncInterface;
 use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\ShipmentRepositoryInterface;
@@ -52,6 +53,7 @@ class OrderSync implements OrderSyncInterface
     private SearchCriteriaBuilder $searchCriteriaBuilder;
     private Transaction $transaction;
     private LoggerInterface $logger;
+    private CustomerRepositoryInterface $customerRepository;
 
     public function __construct(
         ConnectionInterface $connection,
@@ -63,7 +65,8 @@ class OrderSync implements OrderSyncInterface
         OrderConverter $orderConverter,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         Transaction $transaction,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        CustomerRepositoryInterface $customerRepository
     ) {
         $this->connection = $connection;
         $this->helper = $helper;
@@ -75,6 +78,7 @@ class OrderSync implements OrderSyncInterface
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->transaction = $transaction;
         $this->logger = $logger;
+        $this->customerRepository = $customerRepository;
     }
 
     public function sendOrder(OrderInterface $order): array
@@ -509,7 +513,7 @@ class OrderSync implements OrderSyncInterface
         $file = $this->getOptionalColumnsCacheFilePath();
         $dir = dirname($file);
 
-        if (!is_dir($dir) && !@mkdir($dir, 0777, true) && !is_dir($dir)) {
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
             return;
         }
 
@@ -949,8 +953,23 @@ class OrderSync implements OrderSyncInterface
         }
     }
 
+    /**
+     * Resolve the ERP client code for an order.
+     *
+     * Kept in sync with OrderPullManagement::resolveErpClientCode() —
+     * both must apply the same resolution order so an order is never
+     * sent to the ERP under the wrong (or guest) client code just
+     * because it came through a different sync entry point.
+     */
     private function resolveErpClientCode(OrderInterface $order): int
     {
+        // 0. Already stamped on the order (set by OrderPlaceAfter observer)
+        $stamped = $order->getData('customer_erp_code');
+        if ($stamped && is_numeric($stamped)) {
+            return (int) $stamped;
+        }
+
+        // 1. Lookup by taxvat (CPF/CNPJ) in ERP directly
         $taxvat = $order->getCustomerTaxvat();
         if ($taxvat) {
             $erpCustomer = $this->customerSync->getErpCustomerByTaxvat($taxvat);
@@ -959,12 +978,37 @@ class OrderSync implements OrderSyncInterface
             }
         }
 
-        if ($order->getCustomerId()) {
-            $erpCode = $this->syncLogResource->getErpCodeByMagentoId('customer', (int) $order->getCustomerId());
-            if ($erpCode) {
-                return (int) $erpCode;
-            }
+        $customerId = $order->getCustomerId();
+        if (!$customerId) {
+            return self::GUEST_CLIENT_CODE;
         }
+
+        // 2. Entity map lookup
+        $erpCode = $this->syncLogResource->getErpCodeByMagentoId('customer', (int) $customerId);
+        if ($erpCode && is_numeric($erpCode)) {
+            return (int) $erpCode;
+        }
+
+        // 3. Customer erp_code attribute (definitive fallback)
+        try {
+            $customer = $this->customerRepository->getById((int) $customerId);
+            $attr = $customer->getCustomAttribute('erp_code');
+            if ($attr && $attr->getValue() && is_numeric($attr->getValue())) {
+                $this->logger->info('[ERP] Resolved ERP code from customer attribute', [
+                    'customer_id' => $customerId,
+                    'erp_code' => $attr->getValue(),
+                ]);
+                return (int) $attr->getValue();
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning('[ERP] Failed to load customer for ERP code: ' . $e->getMessage());
+        }
+
+        $this->logger->error('[ERP] Could not resolve ERP client code for order', [
+            'increment_id' => $order->getIncrementId(),
+            'customer_id' => $customerId,
+            'taxvat' => $taxvat,
+        ]);
 
         return self::GUEST_CLIENT_CODE;
     }

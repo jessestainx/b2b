@@ -18,6 +18,7 @@
 
 body .page-wrapper .minicart-wrapper {
     overflow: visible !important;
+    position: relative !important; /* AWA Fix: anchor absolute dropdown correctly */
 }
 
 body .page-wrapper .minicart-wrapper .mage-dropdown-dialog.ui-dialog,
@@ -959,9 +960,8 @@ html body .page-wrapper .erp-widget-header .erp-widget-title {
     background: oklch(from var(--awa-primary, @awa-color-primary) calc(l - 0.08) c h) !important;
   }
 
-  /* §1-i: Ícone SVG dentro do botão */
-  html body .page-wrapper #header.header-container .awa-header-search-col form .action.search svg,
-  html body .page-wrapper #header.header-container .awa-header-search-col form .action.search::before {
+  /* §1-i: Ícone SVG dentro do botão — BUG-MOB-SEARCH-001 Fix: hide ::before if SVG present */
+  html body .page-wrapper #header.header-container .awa-header-search-col form .action.search svg {
     display: inline-flex !important;
     width: 18px !important;
     height: 18px !important;
@@ -969,6 +969,11 @@ html body .page-wrapper .erp-widget-header .erp-widget-title {
     fill: none !important;
     font-size: 18px !important;
     color: @awa-color-white !important;
+  }
+
+  html body .page-wrapper #header.header-container .awa-header-search-col form .action.search::before {
+    content: none !important;
+    display: none !important;
   }
 
   /* §1-j: .nested — Magento default esconde, nós mostramos quando há conteúdo útil */
@@ -1039,6 +1044,18 @@ html body .page-wrapper .erp-widget-header .erp-widget-title {
   html body .page-wrapper #header.header-container .awa-header-search-col form input#search {
     font-size: 13px !important;
     padding-inline: 10px !important;
+  }
+
+  /* BUG-BP-360-009: Extra compact header for very small screens */
+  @media (max-width: 360px) {
+    html body .awa-site-header .awa-main-header__inner[data-awa-header-row] {
+      padding-inline: 8px !important;
+      gap: 4px 6px !important;
+    }
+
+    html body .awa-site-header .awa-header-brand-cell .logo img {
+      max-height: 32px !important;
+    }
   }
 
 }
@@ -1421,7 +1438,7 @@ button.awa-b2b-promo-close:hover {
     align-items: center !important;
     gap: var(--awa-header-grid-gap) !important;
     width: 100% !important;
-    max-width: 1440px !important;
+    max-inline-size: var(--awa-container-wide-max, 1440px) !important;
     margin-inline: auto !important;
     box-sizing: border-box !important;
     min-height: var(--awa-header-row-h) !important;
@@ -1903,7 +1920,8 @@ html body#html-body .page-wrapper .awa-site-header {
 
 @media (max-width: 767px) {
   html body#html-body .page-wrapper .awa-site-header {
-    --awa-header-main-row-h: 96px;
+    /* BUG-MOB-TOP-002: Compact row height from 96px to 68px to reduce density */
+    --awa-header-main-row-h: 68px;
     --awa-header-shell-pad: 12px;
     --awa-header-col-gap: 8px;
     --awa-header-stack-h: calc(var(--awa-header-promo-h) + var(--awa-header-main-row-h));
@@ -1955,13 +1973,13 @@ html body#html-body .page-wrapper #header .awa-b2b-promo-bar[data-awa-header-uti
   /* AWA fix: canonical dark background via token (Phase 1 — b2b promo bar color consistency) */
   background-color: var(--awa-b2b-promo-bg, #1a1a1a) !important;
   background-image: none !important;
-  border-block-end: 0 !important;
+  border-block-end: 1px solid rgba(255, 255, 255, 0.12) !important; /* BUG-B2B-BAR-004: Better integration with sub-border */
   color: var(--awa-text-inverse, #fff) !important;
   box-sizing: border-box !important;
   min-height: 32px !important;
   max-height: 40px !important;
-  /* padding-block: 6px stays; padding-inline uses canonical page pad tokens */
-  padding-block: 6px !important;
+  /* padding-block: reduced on mobile for density (BUG-MOB-TOP-002) */
+  padding-block: 4px !important;
   padding-inline: var(--awa-page-pad-desktop, 24px) !important;
   overflow: hidden !important;
 }
@@ -2559,4 +2577,38 @@ html body#html-body .page-wrapper .awa-site-header .awa-header-search-col button
 
 body.awa-header-is-sticky #awa-header-cls-placeholder {
   display: block;
+}
+
+// ── §BUG-H-004  Minicart dropdown overflow em viewports pequenos ──────────────
+// Evidência: .block-minicart.empty right: 370px em 360px viewport (10px overflow)
+// Fix: limitar largura a 100vw e manter alinhado à direita
+@media (max-width: 480px) {
+    body .page-wrapper .minicart-wrapper .block-minicart,
+    body .page-wrapper .minicart-wrapper .mage-dropdown-dialog.ui-dialog .block-minicart {
+        max-width: calc(100vw - 8px) !important;
+        width: calc(100vw - 8px) !important;
+        right: 0 !important;
+        left: auto !important;
+    }
+}
+
+// ── §BUG-H-010  Hamburger menu sem dimensões em mobile ────────────────────────
+// Evidência: .awa-header-mobile-toggle w:0, h:0 em 390/360px (sem JS inline)
+// Fix: forçar dimensões mínimas do touch target no CSS (WCAG 2.5.5)
+@media (max-width: 991px) {
+    body .page-wrapper .awa-site-header .awa-header-mobile-toggle,
+    body .page-wrapper .awa-site-header .action.nav-toggle,
+    body .page-wrapper .awa-site-header button.awa-header-mobile-toggle {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        width: 44px !important;
+        height: 44px !important;
+        flex-shrink: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+    }
 }

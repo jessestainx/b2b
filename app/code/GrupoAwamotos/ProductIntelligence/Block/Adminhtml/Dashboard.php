@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Block do Dashboard REXIS ML
+ * Block do Dashboard Product Intelligence
  * Fornece dados para KPIs, graficos e tabelas
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Block\Adminhtml;
 

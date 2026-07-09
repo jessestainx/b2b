@@ -1,0 +1,250 @@
+/**
+ * AWA Motos - Polish Final CSS
+ *
+ * Compilacao final de micro-correcoes visuais.
+ * Complementa awa-visual-bugfixes.css.
+ *
+ * @version 2026-06-28.final
+ */
+
+/* ============================================
+   Header: Micro ajustes de alinhamento
+   ============================================ */
+.awa-header-shell {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--awa-header-col-gap, 16px) !important;
+}
+.awa-header-brand,
+.awa-header-primary-nav,
+.awa-header-cart {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 48px !important;
+}
+
+/* ============================================
+   Botoes: Garantir toque >= 44x44px (B32)
+   ============================================ */
+button,
+.action,
+[role="button"] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 0 16px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+/* Botao so com icone - quadrado */
+button:has(svg:only-child),
+button:has(i:only-child),
+.action:has(svg:only-child) {
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+}
+
+/* ============================================
+   Links: Cor de hover consistente
+   ============================================ */
+a {
+    color: #2563eb !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease !important;
+}
+a:hover {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+}
+
+/* Links dentro de header/footer nao devem ser azuis */
+header a, footer a,
+.awa-header-shell a,
+.awa-footer-static5 a {
+    color: inherit !important;
+}
+header a:hover, footer a:hover {
+    color: #b73337 !important;
+}
+
+/* ============================================
+   Imagens: Garantir responsividade
+   ============================================ */
+img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+img[width][height] {
+    aspect-ratio: attr(width) / attr(height) !important;
+}
+
+/* Imagens decorativas */
+img[alt=""],
+img[role="presentation"] {
+    pointer-events: none !important;
+}
+
+/* ============================================
+   Form: Inputs com tamanho minimo para toque
+   ============================================ */
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+    min-height: 44px !important;
+    padding: 0 12px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    background: white !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 3px solid #2563eb !important;
+    outline-offset: 1px !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+/* ============================================
+   Spacing utilities
+   ============================================ */
+.awa-mt-0 { margin-top: 0 !important; }
+.awa-mt-1 { margin-top: 8px !important; }
+.awa-mt-2 { margin-top: 16px !important; }
+.awa-mt-3 { margin-top: 24px !important; }
+.awa-mt-4 { margin-top: 32px !important; }
+.awa-mb-0 { margin-bottom: 0 !important; }
+.awa-mb-1 { margin-bottom: 8px !important; }
+.awa-mb-2 { margin-bottom: 16px !important; }
+.awa-mb-3 { margin-bottom: 24px !important; }
+
+/* ============================================
+   Acessibilidade - Focus visivel (B - varios)
+   ============================================ */
+*:focus-visible {
+    outline: 3px solid #2563eb !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 1px #ffffff inset !important;
+}
+*:focus:not(:focus-visible) {
+    outline: none !important;
+}
+.awa-sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* ============================================
+   B33: Tipografia mobile (clamp)
+   ============================================ */
+html {
+    font-size: clamp(14px, 1.6vw, 16px) !important;
+}
+@media (max-width: 480px) {
+    html { font-size: 14px !important; }
+    body { line-height: 1.55 !important; }
+    h1, .awa-h1 { font-size: 24px !important; }
+    h2, .awa-h2 { font-size: 20px !important; }
+    h3, .awa-h3 { font-size: 17px !important; }
+    h4, .awa-h4 { font-size: 15px !important; }
+}
+
+/* ============================================
+   B23: Botao re-pedir
+   ============================================ */
+.awa-reorder-button {
+    background: #b73337 !important;
+    color: white !important;
+    border: 0 !important;
+    padding: 10px 20px !important;
+    border-radius: 6px !important;
+    min-height: 44px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: background 0.15s ease, transform 0.1s ease !important;
+}
+.awa-reorder-button:hover {
+    background: #a12d30 !important;
+    transform: translateY(-1px) !important;
+}
+.awa-reorder-button:focus-visible {
+    outline: 3px solid #2563eb !important;
+    outline-offset: 2px !important;
+}
+.awa-reorder-button__icon {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+/* ============================================
+   Smooth scroll
+   ============================================ */
+html {
+    scroll-behavior: smooth !important;
+}
+
+/* ============================================
+   Print styles
+   ============================================ */
+@media print {
+    .awa-whatsapp-float,
+    .awa-mobile-bottom-nav,
+    .awa-exit-popup,
+    .awa-newsletter-popup,
+    nav.awa-header,
+    .awa-back-to-top {
+        display: none !important;
+    }
+    body { font-size: 11pt !important; color: black !important; }
+    a { color: black !important; text-decoration: underline !important; }
+}
+
+/* ============================================
+   High contrast (Windows High Contrast)
+   ============================================ */
+@media (prefers-contrast: more) {
+    * {
+        border-color: currentColor !important;
+    }
+    button, .action {
+        border: 2px solid currentColor !important;
+    }
+}
+
+/* ============================================
+   Reduced motion
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}

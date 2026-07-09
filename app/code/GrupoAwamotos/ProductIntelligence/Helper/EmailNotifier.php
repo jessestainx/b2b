@@ -170,7 +170,7 @@ class EmailNotifier extends AbstractHelper
                 ->setTemplateVars($templateVars)
                 ->setFromByScope([
                     'email' => 'noreply@grupoawamotos.com.br',
-                    'name' => 'REXIS ML - Sistema de Recomendacoes'
+                    'name' => 'Product Intelligence - Sistema de Recomendacoes'
                 ])
                 ->addTo(explode(',', $emailTo))
                 ->getTransport();
@@ -191,7 +191,7 @@ class EmailNotifier extends AbstractHelper
                     ->setTemplateVars($templateVars)
                     ->setFromByScope([
                         'email' => 'noreply@grupoawamotos.com.br',
-                        'name' => 'REXIS ML - Sistema de Recomendacoes'
+                        'name' => 'Product Intelligence - Sistema de Recomendacoes'
                     ])
                     ->addTo(explode(',', $emailTo))
                     ->getTransport();

@@ -39,7 +39,6 @@ class UpdateForecasts
         }
 
         try {
-
             // Clear cache
             $this->salesProjection->clearCache();
 

@@ -219,6 +219,54 @@ class ProductStructuredData implements ArgumentInterface
             }
         }
 
+        // Sprint 4 SEO (2026-06-28): hasMerchantReturnPolicy
+        // Obrigatorio pelo Google para rich results desde 2024.
+        // Politica padrao AWA Motos: 7 dias para troca, defeito = garantia legal.
+        $schema['hasMerchantReturnPolicy'] = [
+            '@type' => 'MerchantReturnPolicy',
+            'merchantReturnDays' => 7,
+            'returnMethod' => 'https://schema.org/ReturnByMail',
+            'returnFees' => 'https://schema.org/FreeReturn',
+            'merchantReturnLink' => 'https://awamotos.com/trocas-e-devolucoes',
+            'category' => 'https://schema.org/MerchantReturnNotPermitted',
+            'description' => 'Garantia legal de 90 dias para defeitos de fabricacao. ' .
+                             'Trocas por arrependimento em ate 7 dias conforme CDC.',
+        ];
+
+        // Sprint 4 SEO (2026-06-28): shippingDetails
+        // Necessario para LSO (Local Shipping Optimization) do Google.
+        // Valores conservativos - melhorar com tabela de frete real na Sprint 2+.
+        $schema['shippingDetails'] = [
+            '@type' => 'OfferShippingDetails',
+            'shippingDestination' => [
+                '@type' => 'DefinedRegion',
+                'addressCountry' => 'BR',
+                'addressRegion' => ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA',
+                                    'MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
+                                    'RS','RO','RR','SC','SP','SE','TO'],
+            ],
+            'deliveryTime' => [
+                '@type' => 'ShippingDeliveryTime',
+                'handlingTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => 1,
+                    'maxValue' => 2,
+                    'unitCode' => 'DAY',
+                ],
+                'transitTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => 2,
+                    'maxValue' => 12,
+                    'unitCode' => 'DAY',
+                ],
+            ],
+            'shippingRate' => [
+                '@type' => 'MonetaryAmount',
+                'value' => '0.00',
+                'currency' => 'BRL',
+            ],
+        ];
+
         $this->productStructuredData = $schema;
         $this->productStructuredDataResolved = true;
 

@@ -8,11 +8,13 @@ define([
             modalSelector = config.modalSelector || '#create-list-modal',
             $modal = $(modalSelector);
 
-        function showModal() {
+        function showModal()
+        {
             $modal.show();
         }
 
-        function hideModal() {
+        function hideModal()
+        {
             $modal.hide();
         }
 

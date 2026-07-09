@@ -145,9 +145,9 @@ $tabIndex           = 0;
     $awaQuery = trim((string) $block->getRequest()->getParam('q'));
     ?>
     <div class="awa-search-empty" role="status" aria-live="polite">
-        <h1 class="awa-search-empty__title">
+        <h2 class="awa-search-empty__title">
             <?= $block->escapeHtml(__('Nenhum resultado para "%1"', $awaQuery !== '' ? $awaQuery : (string)__('sua busca'))) ?>
-        </h1>
+        </h2>
         <p class="awa-search-empty__desc">
             <?= $block->escapeHtml(__('Verifique a ortografia ou use termos mais genéricos. Você também pode navegar por todas as categorias abaixo.')) ?>
         </p>

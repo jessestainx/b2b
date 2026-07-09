@@ -16,7 +16,7 @@
 
   /* ── Texto ───────────────────────────────── */
   --awa-text:           #333333;
-  --awa-text-primary:   #333333;   /* alias --awa-text */
+  --awa-text-primary:   var(--awa-text);   /* alias --awa-text */
   --awa-text-secondary: #666666;
   --awa-text-muted:     #888888;
   --awa-text-light:     #aaaaaa;   /* mais suave que muted — datas, labels secundárias */
@@ -27,21 +27,21 @@
   --awa-bg:             #ffffff;
   --awa-bg-subtle:      #F7F7F7;
   --awa-bg-muted:       #f5f5f5;
-  --awa-bg-surface:     #ffffff;  /* alias --awa-bg para contextos de card/painel */
+  --awa-bg-surface:     var(--awa-bg);  /* alias --awa-bg para contextos de card/painel */
   --awa-border:         #e5e5e5;
   --awa-border-strong:  #d0d0d0;
 
   /* ── Escala de cinza (nomenclatura legada) ───*/
   --awa-gray-50:  #f9f9f9;
-  --awa-gray-100: #f5f5f5;   /* = --awa-bg-muted  */
-  --awa-gray-200: #e5e5e5;   /* = --awa-border    */
+  --awa-gray-100: var(--awa-bg-muted);   /* = --awa-bg-muted  */
+  --awa-gray-200: var(--awa-border);   /* = --awa-border    */
   --awa-gray-210: #e8e8e8;
   --awa-gray-250: #cccccc;
   --awa-gray-275: #cccccc;
   --awa-gray-300: #cccccc;
   --awa-gray-430: #999999;   /* = --awa-auth-muted (não confundir com --awa-text-muted: #888888) */
-  --awa-gray-550: #666666;   /* = --awa-text-secondary */
-  --awa-gray-920: #333333;   /* = --awa-text */
+  --awa-gray-550: var(--awa-text-secondary);   /* = --awa-text-secondary */
+  --awa-gray-920: var(--awa-text);   /* = --awa-text */
   --awa-gray-950: #111111;   /* dark footer bg */
 
   /* ── Border Radius ───────────────────────── */
@@ -152,7 +152,7 @@
   --awa-grid-cols-4:       repeat(auto-fill, minmax(280px, 1fr));
 
   /* ── Aliases de cor (nomenclatura legada — não usar em código novo) ── */
-  --awa-red:        #b73337;   /* alias de --awa-primary */
+  --awa-red:        var(--awa-primary);   /* alias de --awa-primary */
   --awa-red-bg:     rgba(183, 51, 55, 0.06); /* fundo tonal vermelho suave */
   --awa-red-light:  #fef2f2;   /* alias de --awa-primary-light */
 
@@ -172,11 +172,11 @@
   --awa-info-bg:      #f0f9ff;  /* fundo informativo */
 
   /* ── Alias de fundo (compatibilidade) ───── */
-  --awa-bg-alt:       #f5f5f5;  /* alias de --awa-bg-muted — não usar em código novo */
+  --awa-bg-alt:       var(--awa-bg-muted);  /* alias de --awa-bg-muted — não usar em código novo */
 
   /* ── Tokens de Autenticação (B2B/Login) ── */
-  --awa-auth-primary:       #b73337;
-  --awa-auth-text:          #333333;
+  --awa-auth-primary:       var(--awa-primary);
+  --awa-auth-text:          var(--awa-text);
   --awa-auth-muted:         #999999;
   --awa-auth-border-strong: #c7d2e1;
 
@@ -188,17 +188,17 @@
   --awa-font-size-11: 0.6875rem;
   --awa-font-size-13: 0.8125rem;
   --awa-font-size-3xl: 1.5rem;
-  --awa-accent-hover: #8e2629;
-  --awa-b2b-accent-current: #b73337;
-  --awa-color-bg-soft: #f7f7f7;
-  --awa-color-border: #e5e5e5;
-  --awa-color-primary-dark: #8e2629;
-  --awa-color-text-primary: #333333;
-  --awa-neutral-100: #f5f5f5;
-  --awa-surface: #ffffff;
-  --awa-text-1: #333333;
+  --awa-accent-hover: var(--awa-primary-hover);
+  --awa-b2b-accent-current: var(--awa-primary);
+  --awa-color-bg-soft: var(--awa-bg-subtle);
+  --awa-color-border: var(--awa-border);
+  --awa-color-primary-dark: var(--awa-primary-hover);
+  --awa-color-text-primary: var(--awa-text);
+  --awa-neutral-100: var(--awa-bg-muted);
+  --awa-surface: var(--awa-bg);
+  --awa-text-1: var(--awa-text);
   --awa-text-2: var(--awa-text-secondary);
-  --awa-text-main: #333333;
+  --awa-text-main: var(--awa-text);
   --awa-text-on-dark-muted-solid: rgba(255, 255, 255, 0.65);
   --awa-gap-2xs: 0.25rem;
   --awa-size-11: 0.6875rem;
@@ -215,19 +215,19 @@
   --awa-shell-sidebar: 280px;
   --awa-shell-checkout-sidebar: 380px;
   --awa-cat-item-w: clamp(120px, 20%, 220px);
-  --awa-focus-outline: 2px solid #b73337;
+  --awa-focus-outline: 2px solid var(--awa-primary);
   --awa-focus-offset: 2px;
   --awa-home-transition: 0.2s ease-out;
   --awa-round2-transition: 0.2s ease-out;
   --awa-glass-blur: 12px;
-  --awa-cc-surface-1: #ffffff;
+  --awa-cc-surface-1: var(--awa-bg);
   --awa-cc-surface-2: #f9f9f9;
-  --awa-cc-text-1: #1a1a1a;
-  --awa-cc-text-2: #333333;
+  --awa-cc-text-1: var(--awa-text-primary);
+  --awa-cc-text-2: var(--awa-text);
   --awa-cc-text-3: var(--awa-text-secondary);
-  --awa-cc-border: #e5e5e5;
+  --awa-cc-border: var(--awa-border);
   --awa-cc-border-strong: #d0d0d0;
-  --awa-cc-focus-ring: #b73337;
+  --awa-cc-focus-ring: var(--awa-primary);
   --awa-cc-shadow-1: 0 2px 8px rgba(0, 0, 0, 0.08);
   --awa-cc-shadow-2: 0 4px 16px rgba(0, 0, 0, 0.12);
   --awa-cc-status-error-text: #c0392b;
@@ -241,24 +241,24 @@
   --awa-footer-chip-border-strong: rgba(255, 255, 255, 0.30);
   --awa-footer-label-soft: rgba(255, 255, 255, 0.6);
   --awa-footer-text-body: rgba(255, 255, 255, 0.85);
-  --awa-footer-text-high: #ffffff;
+  --awa-footer-text-high: var(--awa-bg);
   --awa-footer-text-muted: rgba(255, 255, 255, 0.55);
   --awa-footer-trust-bg: rgba(255, 255, 255, 0.06);
   --awa-footer-trust-border: rgba(255, 255, 255, 0.12);
   --awa-footer-trust-muted: rgba(255, 255, 255, 0.6);
   --awa-ft-border: rgba(255, 255, 255, 0.12);
   --awa-ft-border-accent: rgba(183, 51, 55, 0.4);
-  --awa-ft-grad-from: #1a1a1a;
+  --awa-ft-grad-from: var(--awa-text-primary);
   --awa-ft-grad-mid: #111111;
   --awa-ft-grad-to: #0a0a0a;
   --awa-ft-surface-2: rgba(255, 255, 255, 0.04);
-  --awa-ft-text-1: #ffffff;
+  --awa-ft-text-1: var(--awa-bg);
   --awa-ft-text-2: rgba(255, 255, 255, 0.85);
   --awa-ft-text-3: rgba(255, 255, 255, 0.6);
   --awa-ft-transition: 0.2s ease-out;
   --awa-hc-border-strong: #d0d0d0;
   --awa-hc-surface-2: #f9f9f9;
-  --awa-hc-text-1: #333333;
+  --awa-hc-text-1: var(--awa-text);
   --awa-hc-text-2: var(--awa-text-secondary);
   --awa-header-gutter: 1rem;
   --awa-header-search-gap-icon: 0.5rem;
@@ -282,7 +282,7 @@
   --awa-main-nav-link-radius: 6px;
   --awa-safe-chip-bg: rgba(255, 255, 255, 0.08);
   --awa-safe-chip-border: rgba(255, 255, 255, 0.15);
-  --awa-safe-search-border: #e5e5e5;
+  --awa-safe-search-border: var(--awa-border);
   --awa-safe-search-button-size: 44px;
   --awa-safe-search-control-height: 44px;
   --awa-safe-search-gap-icon: 0.5rem;
@@ -292,7 +292,7 @@
   --awa-safe-search-input-pad-start: 1rem;
   --awa-safe-search-shell-height: 44px;
   --awa-safe-search-shell-radius: 22px;
-  --awa-safe-topbar-bg: #1a1a1a;
+  --awa-safe-topbar-bg: var(--awa-text-primary);
   --awa-safe-topbar-border: rgba(255, 255, 255, 0.1);
   --awa-safe-topbar-text: rgba(255, 255, 255, 0.85);
   --awa-top-account-link-min-height: 44px;

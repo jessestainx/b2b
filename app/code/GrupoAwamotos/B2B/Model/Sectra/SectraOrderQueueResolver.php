@@ -80,17 +80,20 @@ class SectraOrderQueueResolver
             );
         }
 
-        if ($importStatus === SectraImportStatus::AWAITING_CUSTOMER_VALIDATION
-            || (int) ($row['is_b2b_confirmed'] ?? 0) !== 1
-        ) {
-            $reason = $importStatus === SectraImportStatus::AWAITING_CUSTOMER_VALIDATION
-                ? (string) __('Aguardando validação ERP do cliente')
-                : (string) __('Cliente não confirmado no validador Sectra (GR_INTEGRACAOVALIDADOR)');
+        if ($importStatus === SectraImportStatus::ORDER_BLOCKED_PRODUCT_NOT_REGISTERED) {
+            return $this->result(
+                self::BUCKET_BLOCKED,
+                (string) __('Pedido bloqueado — contém produto sem cadastro OpenCardB2B no Sectra'),
+                (string) __('Sincronizar cadastro de produto no Sectra e aguardar cron liberar'),
+                false
+            );
+        }
 
+        if ($importStatus === SectraImportStatus::AWAITING_CUSTOMER_VALIDATION) {
             return $this->result(
                 self::BUCKET_AWAITING,
-                $reason,
-                (string) __('Sectra → Importar Clientes Prospect'),
+                (string) __('Status antigo: aguardando validação ERP do cliente'),
+                (string) __('Aguardar cron liberar para Importar Pedidos'),
                 false
             );
         }
@@ -170,8 +173,8 @@ class SectraOrderQueueResolver
             return (string) __('Cliente ausente na tabela oc_customer (bridge)');
         }
 
-        if ((int) ($row['oc_customer_group_id'] ?? 0) !== 2) {
-            return (string) __('oc_customer.customer_group_id deve ser 2 (B2B)');
+        if ((int) ($row['oc_customer_group_id'] ?? 0) < 1) {
+            return (string) __('oc_customer.customer_group_id vazio — lista de preço (FATORPRECO) não resolvida no ERP');
         }
 
         $ocCnpj = $this->normalizeDigits((string) ($row['oc_customer_cnpj'] ?? ''));

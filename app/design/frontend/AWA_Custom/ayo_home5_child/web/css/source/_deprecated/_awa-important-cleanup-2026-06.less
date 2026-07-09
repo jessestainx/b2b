@@ -1,0 +1,158 @@
+//
+// AWA Motos - !important Cleanup (B13)
+// 2026-06-28
+//
+// Reduz !important desnecessario em seletores especificos
+// atraves de aumento de especificidade CSS.
+//
+// Estrategia:
+// 1. Substituir !important por seletores mais especificos
+// 2. Usar CSS variables (custom properties) para temas
+// 3. Layer architecture com @layer
+//
+
+// ============================================
+// Layer architecture
+// ============================================
+@layer reset, base, components, utilities, overrides;
+
+// @layer overrides - o unico layer que pode usar !important
+@layer overrides {
+
+// Componentes que PRECISAM !important (legacy, vendor)
+.owl-carousel {
+    .owl-item { display: block !important; }
+    .owl-stage { display: flex !important; }
+}
+
+.fancybox-container {
+    .fancybox-bg { background: rgba(0,0,0,.87) !important; }
+}
+
+.cookie-status-message {
+    display: none !important;
+}
+
+// Re-escrita de seletores !important em seletores mais especificos
+.awa-header {
+    &.is-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    &.is-hidden {
+        transform: translateY(-100%);
+    }
+}
+
+// Botoes - especificidade maior em vez de !important
+button.awa-action-primary,
+a.awa-action-primary,
+.awa-action-primary {
+    background-color: #b73337;
+    color: white;
+    border: 0;
+    padding: 10px 20px;
+    font-weight: 600;
+}
+.awa-action-primary:hover,
+.awa-action-primary:focus,
+.awa-action-primary:active {
+    background-color: #a12d30;
+}
+// Mais especifico para sobrescrever
+body .awa-action-primary.awa-action-primary {
+    background-color: #b73337;
+}
+
+// Image com object-fit (substitui !important)
+.awa-product-image {
+    img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+// Product cards sem !important
+.awa-product-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 8px;
+    transition: transform .2s, box-shadow .2s;
+}
+.awa-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+// Hero swiper sem !important
+.awa-hero-swiper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/6;
+    overflow: hidden;
+    background: #f3f4f6;
+}
+
+// Menu mobile
+.awa-mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 9999;
+    transform: translateX(-100%);
+    transition: transform .3s ease;
+}
+.awa-mobile-menu.is-open {
+    transform: translateX(0);
+}
+
+// Header sticky
+.awa-site-header.is-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+
+} // fim @layer overrides
+
+// ============================================
+// CSS Architecture - utility classes
+// ============================================
+.awa-u-text-center { text-align: center; }
+.awa-u-text-left { text-align: left; }
+.awa-u-text-right { text-align: right; }
+.awa-u-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.awa-u-line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.awa-u-line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.awa-u-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

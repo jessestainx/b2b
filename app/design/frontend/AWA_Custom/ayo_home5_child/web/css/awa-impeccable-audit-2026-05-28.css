@@ -63,7 +63,7 @@ html body#html-body .page-wrapper .page_footer .awa-footer-trust-bar .awa-footer
 html body#html-body .page-wrapper .page-footer .awa-footer-trust-bar .awa-footer-trust-copy strong,
 #html-body .page-wrapper .page_footer .awa-footer-trust-bar .awa-footer-trust-copy strong,
 #html-body .page-wrapper .page-footer .awa-footer-trust-bar .awa-footer-trust-copy strong {
-  color: #ffffff !important;
+  color: var(--awa-bg) !important;
 }
 
 html body#html-body .page-wrapper .page_footer .awa-footer-trust-bar .awa-footer-trust-copy span,
@@ -78,7 +78,7 @@ html body#html-body .page-wrapper .awa-footer-business-contact__action,
 html body#html-body .page-wrapper .awa-footer-business-contact__action--primary,
 #html-body .page-wrapper .awa-footer-business-contact__action,
 #html-body .page-wrapper .awa-footer-business-contact__action--primary {
-  background: #ffffff !important;
+  background: var(--awa-bg) !important;
   border: 1px solid #e5e7eb !important;
   color: #111827 !important;
 }
@@ -136,7 +136,7 @@ html body#html-body .page-wrapper .page_footer p.awa-footer-atendimento__store-a
 
 html body#html-body .page-wrapper .awa-footer-trust-copy strong,
 html body#html-body .page-wrapper .page_footer .awa-footer-trust-item .awa-footer-trust-copy strong {
-  color: #ffffff !important;
+  color: var(--awa-bg) !important;
   font-size: max(12px, 0.75rem) !important;
 }
 
@@ -189,7 +189,7 @@ html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
 #html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-hero-b2b-cta__btn--primary:focus-visible {
-  color: var(--awa-text-on-primary, #ffffff) !important;
+  color: var(--awa-text-on-primary, var(--awa-bg)) !important;
 }
 
 /* --- /impeccable layout: mobile home — nav bar off, hero colado ao header --- */

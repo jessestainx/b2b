@@ -106,6 +106,9 @@ define([], function () {
                 return;
             }
             cleaned = true;
+            if (document.activeElement && banner.contains(document.activeElement)) {
+                document.activeElement.blur();
+            }
             banner.classList.remove('awa-cookie-banner--visible');
             banner.setAttribute('aria-hidden', 'true');
             banner.setAttribute('hidden', 'hidden');

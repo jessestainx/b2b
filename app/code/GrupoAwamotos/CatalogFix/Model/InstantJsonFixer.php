@@ -78,7 +78,8 @@ class InstantJsonFixer
 
             $changed = false;
             foreach (self::INDEX_KEYS as $indexKey) {
-                if (isset($sourceEngine[$indexKey], $config[$targetKey][$indexKey])
+                if (
+                    isset($sourceEngine[$indexKey], $config[$targetKey][$indexKey])
                     && $config[$targetKey][$indexKey] !== $sourceEngine[$indexKey]
                 ) {
                     $config[$targetKey][$indexKey] = $sourceEngine[$indexKey];

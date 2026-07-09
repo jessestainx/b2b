@@ -3,5 +3,11 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <!-- B2B CTA removido - login agora usa página dedicada em b2b/account/login -->
+        <referenceBlock name="customer.section.config"
+                        template="Magento_Theme::html/awa-customer-sections-defer.phtml">
+            <arguments>
+                <argument name="boot_immediate" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
     </body>
 </page>

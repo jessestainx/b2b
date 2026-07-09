@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'chartjs'
+    'awaChartjs',
 ], function ($, Chart) {
     'use strict';
 
@@ -17,11 +17,13 @@ define([
             return;
         }
 
-        let labels = rawData.map(function(item) { return item.label; });
-        let values = rawData.map(function(item) { return item.value; });
+        let labels = rawData.map(function (item) {
+            return item.label; });
+        let values = rawData.map(function (item) {
+            return item.value; });
 
         let ctx = $canvas[0].getContext('2d');
-        
+
         // Gradient for a premium look
         let gradient = ctx.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, 'rgba(183, 51, 55, 0.4)');
@@ -62,7 +64,7 @@ define([
                         borderWidth: 1,
                         padding: 12,
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -100,7 +102,7 @@ define([
                                 family: 'Inter, sans-serif',
                                 size: 11
                             },
-                            callback: function(value) {
+                            callback: function (value) {
                                 if (value >= 1000) {
                                     return 'R$ ' + (value / 1000) + 'k';
                                 }

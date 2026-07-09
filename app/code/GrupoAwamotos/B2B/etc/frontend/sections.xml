@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Customer:etc/sections.xsd">
+
+    <!--
+        Invalida as sections de customer e cart após ações B2B que alteram
+        o estado do cliente (cadastro, login B2B, aprovação).
+        Sem isso, Magento não sabe que as sections devem ser recarregadas.
+    -->
+    <action name="b2b/register/post">
+        <section name="customer"/>
+        <section name="cart"/>
+    </action>
+
+    <action name="b2b/account/login">
+        <section name="customer"/>
+        <section name="b2b_panel"/>
+    </action>
+
+    <!-- Também invalida b2b_panel no login padrão do Magento (caso cliente mude de grupo) -->
+    <action name="customer/account/loginPost">
+        <section name="b2b_panel"/>
+    </action>
+
+</config>

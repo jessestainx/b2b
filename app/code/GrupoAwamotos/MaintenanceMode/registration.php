@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * GrupoAwamotos MaintenanceMode Module
  *
  * Modo de manutenção customizado com controle via admin
  */
+
+declare(strict_types=1);
 
 use Magento\Framework\Component\ComponentRegistrar;
 

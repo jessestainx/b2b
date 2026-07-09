@@ -17,6 +17,13 @@ test.describe('Checkout — fluxo', () => {
   test('02 — sem tela em branco (P0)', async ({ page }) => {
     const url = page.url();
     if (url.includes('/cart/')) { console.info('[INFO] Redir para carrinho vazio — OK'); return; }
+    // B2B portal: checkout redireciona para login quando não autenticado — comportamento correto
+    if (url.includes('/customer/account/login') || url.includes('/b2b/') || url.includes('account/login')) {
+      console.info('[INFO] B2B gate redirect — checkout protegido por login, comportamento esperado');
+      const loginForm = page.locator('.block-customer-login, .login-container, form[action*="login"], .b2b-login');
+      const isLogin = await loginForm.isVisible().catch(() => false);
+      if (isLogin) return; // gate OK
+    }
     const content = page.locator('.opc-wrapper, #checkoutSteps, .checkout-container, .cart-empty, .page-title').first();
     await expect(content).toBeVisible({ timeout: 20_000 });
   });

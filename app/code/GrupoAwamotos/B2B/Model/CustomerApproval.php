@@ -262,9 +262,9 @@ class CustomerApproval implements CustomerApprovalInterface
     {
         $status = $this->getApprovalStatus($customerId);
 
-        // Se não tem status, considerar aprovado (compatibilidade com clientes antigos)
-        if ($status === null) {
-            return true;
+        // Fail-closed: clientes sem status explícito não devem comprar como B2B.
+        if ($status === null || $status === '') {
+            return false;
         }
 
         return $status === ApprovalStatus::STATUS_APPROVED;
@@ -551,5 +551,4 @@ class CustomerApproval implements CustomerApprovalInterface
             $this->logger->warning('B2B: Failed to recalibrate pending alert counter: ' . $e->getMessage());
         }
     }
-
 }

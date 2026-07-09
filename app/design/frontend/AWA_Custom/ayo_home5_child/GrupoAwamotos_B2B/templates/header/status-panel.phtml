@@ -1,0 +1,167 @@
+<?php
+/**
+ * B2B Header Status Panel — refinamento AWA (tema filho).
+ *
+ * @var \GrupoAwamotos\B2B\Block\Header\StatusPanel $block
+ */
+
+declare(strict_types=1);
+
+if (!$block->shouldDisplay()) {
+    return;
+}
+
+$data = $block->getCustomerData();
+$company = trim((string) ($data['company'] ?? ''));
+$firstName = (string) ($data['first_name'] ?? '');
+$badgeColor = $block->escapeHtmlAttr($data['group_badge']['color']);
+$badgeIcon = (string) ($data['group_badge']['icon']);
+$groupName = $block->escapeHtml($data['group_name']);
+$discount = (int) $data['discount'];
+$logoutUrl = $block->getUrl('customer/account/logout');
+$line2Raw = $company !== '' ? $company : (string) ($data['group_name'] ?? '');
+$line2TriggerRaw = ($company !== '' && mb_strlen($company) > 24)
+    ? (string) ($data['group_name'] ?? '')
+    : $line2Raw;
+$line2Label = $block->escapeHtml($line2TriggerRaw !== '' ? $line2TriggerRaw : (string) ($data['group_name'] ?? ''));
+$line2Title = $block->escapeHtmlAttr($line2Raw !== '' ? $line2Raw : (string) ($data['group_name'] ?? ''));
+
+/**
+ * Ícones SVG inline (padrão AWA — sem FontAwesome no painel).
+ */
+$renderIcon = static function (string $name): string {
+    $icons = [
+        'building' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01"/></svg>',
+        'crown' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 18h18"/><path d="M5 18l1.5-9 4.5 4 3-6 3 6 4.5-4L19 18z"/></svg>',
+        'clock-o' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+        'store' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 9l2-5h14l2 5"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M9 21V12h6v9"/></svg>',
+        'user' => '<svg class="awa-b2b-panel-icon awa-b2b-panel-icon--user" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        'chevron' => '<svg class="awa-b2b-panel-icon awa-b2b-panel-icon--chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
+        'percent' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="2"/><circle cx="17" cy="17" r="2"/><path d="M19 5L5 19"/></svg>',
+        'credit-card' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+        'tachometer' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>',
+        'file-text-o' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>',
+        'list-ul' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
+        'calculator' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15h0"/></svg>',
+        'user-circle-o' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5c1.2-2.2 3.3-3.5 5.5-3.5s4.3 1.3 5.5 3.5"/></svg>',
+        'sign-out' => '<svg class="awa-b2b-panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+    ];
+
+    return $icons[$name] ?? $icons['store'];
+};
+
+$creditPercent = $data['credit_limit'] > 0
+    ? min(100, (int) (($data['credit_available'] / $data['credit_limit']) * 100))
+    : 0;
+?>
+<div class="b2b-status-panel"
+     data-mage-init='{"GrupoAwamotos_B2B/js/header-status-panel": {}}'
+     role="region"
+     aria-label="<?= $block->escapeHtmlAttr(__('Painel B2B')) ?>">
+
+    <button type="button"
+            class="b2b-status-trigger"
+            aria-expanded="false"
+            aria-controls="b2b-status-dropdown"
+            aria-haspopup="true">
+        <span class="b2b-status-trigger__icon" aria-hidden="true">
+            <?= /* @noEscape */ $renderIcon('user') ?>
+        </span>
+        <span class="b2b-status-trigger__text">
+            <span class="b2b-status-trigger__line1">
+                <?= $block->escapeHtml(__('Olá, %1', $firstName)) ?>
+            </span>
+            <span class="b2b-status-trigger__line2" title="<?= $line2Title ?>">
+                <?= $line2Label ?>
+                <?php if ($discount > 0): ?>
+                <span class="b2b-status-trigger__discount">−<?= $discount ?>%</span>
+                <?php endif; ?>
+            </span>
+        </span>
+        <span class="b2b-status-trigger__chevron" aria-hidden="true">
+            <?= /* @noEscape */ $renderIcon('chevron') ?>
+        </span>
+    </button>
+
+    <div id="b2b-status-dropdown" class="b2b-status-dropdown" aria-hidden="true">
+        <div class="dropdown-inner">
+            <div class="dropdown-section user-section">
+                <div class="user-avatar" style="--avatar-color: <?= $badgeColor ?>">
+                    <?= $block->escapeHtml(mb_strtoupper(mb_substr($data['first_name'], 0, 1))) ?>
+                </div>
+                <div class="user-details">
+                    <span class="user-name"><?= $block->escapeHtml($data['full_name']) ?></span>
+                    <?php if ($company !== ''): ?>
+                    <span class="user-company">
+                        <?= /* @noEscape */ $renderIcon('building') ?>
+                        <?= $block->escapeHtml($company) ?>
+                    </span>
+                    <?php endif; ?>
+                    <span class="user-tier" style="--tier-color: <?= $badgeColor ?>">
+                        <?= /* @noEscape */ $renderIcon($badgeIcon) ?>
+                        <?= $groupName ?>
+                    </span>
+                </div>
+            </div>
+
+            <?php if ($discount > 0 || $data['credit_limit'] > 0): ?>
+            <div class="dropdown-section stats-section">
+                <?php if ($discount > 0): ?>
+                <div class="stat-item discount-stat">
+                    <span class="stat-icon"><?= /* @noEscape */ $renderIcon('percent') ?></span>
+                    <span class="stat-content">
+                        <span class="stat-value">−<?= $discount ?>%</span>
+                        <span class="stat-label"><?= $block->escapeHtml(__('Desconto exclusivo')) ?></span>
+                    </span>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($data['credit_limit'] > 0): ?>
+                <div class="stat-item credit-stat">
+                    <span class="stat-icon"><?= /* @noEscape */ $renderIcon('credit-card') ?></span>
+                    <span class="stat-content">
+                        <span class="stat-value"><?= /* @noEscape */ $block->formatPrice($data['credit_available']) ?></span>
+                        <span class="stat-label"><?= $block->escapeHtml(__('Crédito disponível')) ?></span>
+                    </span>
+                    <div class="credit-bar" role="progressbar"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
+                         aria-valuenow="<?= $creditPercent ?>"
+                         aria-label="<?= $block->escapeHtmlAttr(__('Crédito utilizado')) ?>">
+                        <div class="credit-bar-fill" style="--b2b-credit-width: <?= $creditPercent ?>%"></div>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+
+            <div class="dropdown-section actions-section">
+                <span class="section-title"><?= $block->escapeHtml(__('Acesso rápido')) ?></span>
+                <nav class="quick-actions" aria-label="<?= $block->escapeHtmlAttr(__('Ações rápidas B2B')) ?>">
+                    <?php foreach ($block->getQuickActions() as $action): ?>
+                    <a href="<?= $block->escapeUrl($action['url']) ?>" class="quick-action-link">
+                        <span class="quick-action-icon"><?= /* @noEscape */ $renderIcon((string) $action['icon']) ?></span>
+                        <span class="quick-action-label"><?= $block->escapeHtml($action['label']) ?></span>
+                    </a>
+                    <?php endforeach; ?>
+                </nav>
+            </div>
+
+            <div class="dropdown-footer">
+                <a href="<?= $block->escapeUrl($block->getUrl('b2b/account/dashboard')) ?>" class="footer-link account-link">
+                    <?= /* @noEscape */ $renderIcon('user-circle-o') ?>
+                    <?= $block->escapeHtml(__('Minha conta')) ?>
+                </a>
+                <a href="<?= $block->escapeUrl($logoutUrl) ?>"
+                   class="footer-link logout-link"
+                   data-post='<?= $block->escapeHtmlAttr(json_encode([
+                       'action' => $logoutUrl,
+                       'data' => ['uenc' => '']
+                   ])) ?>'>
+                    <?= /* @noEscape */ $renderIcon('sign-out') ?>
+                    <?= $block->escapeHtml(__('Sair')) ?>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

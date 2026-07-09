@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Service;
@@ -31,7 +32,8 @@ class PrivateLabelDetector
         private readonly ResourceConnection $resourceConnection,
         private readonly ErpConnection $erpConnection,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     /**
      * Verifica via ERP se o SKU é exclusivo de algum cliente e o protege.
@@ -53,7 +55,10 @@ class PrivateLabelDetector
                     $this->upsertExclusive($productId, $customer['customer_id'], $customer['label']);
                     $this->logger->info(sprintf(
                         '[PrivateLabel] Produto %d (SKU: %s) é exclusivo da lista ERP #%d → customer_id %d',
-                        $productId, $sku, $listCode, $customer['customer_id']
+                        $productId,
+                        $sku,
+                        $listCode,
+                        $customer['customer_id']
                     ));
                     return true;
                 }
@@ -98,7 +103,8 @@ class PrivateLabelDetector
 
             $this->logger->info(sprintf(
                 '[PrivateLabel] Lista ERP #%d: %d SKUs exclusivos encontrados',
-                $listCode, count($exclusiveSkus)
+                $listCode,
+                count($exclusiveSkus)
             ));
 
             foreach ($exclusiveSkus as $sku) {

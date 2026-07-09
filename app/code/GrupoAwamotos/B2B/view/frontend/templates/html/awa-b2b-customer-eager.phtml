@@ -1,0 +1,62 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * B2B/conta: inicializa customer-data cedo (minicart + header) sem esperar idle/home defer.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+
+    if (w.__awaB2bCustomerEagerInit) {
+        return;
+    }
+    w.__awaB2bCustomerEagerInit = true;
+
+    function applyOperationalHeader() {
+        var header = d.querySelector('.awa-site-header');
+        var sticky = d.querySelector('.header-wrapper-sticky');
+
+        if (header) {
+            header.classList.add('awa-header-condensed', 'awa-account-header');
+        }
+        if (sticky) {
+            sticky.classList.add('awa-header-condensed', 'is-sticky');
+        }
+    }
+
+    function boot() {
+        applyOperationalHeader();
+
+        if (typeof w.require !== 'function') {
+            w.setTimeout(boot, 40);
+            return;
+        }
+
+        w.require([
+            'Magento_Customer/js/customer-data',
+            'GrupoAwamotos_B2B/js/account/nav-mobile'
+        ], function (customerData, initNavMobile) {
+            customerData.get('customer');
+            customerData.get('cart');
+
+            if (typeof initNavMobile === 'function') {
+                initNavMobile();
+            }
+
+            if (typeof w.CustomEvent === 'function') {
+                d.dispatchEvent(new w.CustomEvent('awa:customer-data-ready'));
+            }
+        });
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+        boot();
+    }
+}(window, document));
+</script>

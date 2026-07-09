@@ -187,25 +187,66 @@ define([
         }
     }
 
+    const PRODUCT_OBSERVER_ROOT =
+        '.page-main, #maincontent, .column.main, .products-grid, .product-items';
+    const PRODUCT_MUTATION_SEL =
+        '.b2b-login-to-see-price, .product-item, .item-product, [data-product-id]';
+
+    function resolveProductObserverRoot() {
+        return document.querySelector(PRODUCT_OBSERVER_ROOT);
+    }
+
+    function mutationTouchesCatalog(mutations) {
+        let i;
+        let j;
+        let node;
+
+        for (i = 0; i < mutations.length; i++) {
+            let added = mutations[i].addedNodes;
+            if (!added || !added.length) {
+                continue;
+            }
+            for (j = 0; j < added.length; j++) {
+                node = added[j];
+                if (node.nodeType !== 1) {
+                    continue;
+                }
+                if (node.matches && node.matches(PRODUCT_MUTATION_SEL)) {
+                    return true;
+                }
+                if (node.querySelector && node.querySelector(PRODUCT_MUTATION_SEL)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     function startObserver() {
+        let root;
+
         if (observerStarted) {
+            return;
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startObserver, { once: true });
+            return;
+        }
+
+        root = resolveProductObserverRoot();
+        if (!root) {
             return;
         }
 
         observerStarted = true;
         new MutationObserver(function (mutations) {
-            let shouldRefresh = false;
-
-            mutations.forEach(function (mutation) {
-                if (mutation.addedNodes && mutation.addedNodes.length) {
-                    shouldRefresh = true;
-                }
-            });
-
-            if (shouldRefresh) {
-                scheduleHydration();
+            if (!mutationTouchesCatalog(mutations)) {
+                return;
             }
-        }).observe(document.body, {childList: true, subtree: true});
+            scheduleHydration();
+        }).observe(root, { childList: true, subtree: true });
     }
 
     return init;

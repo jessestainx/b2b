@@ -12,32 +12,31 @@
 ?>
 <?php if (isset($data['font']['custom']) && $data['font']['custom'] && $data['font']['font_family'] == 'google'): ?>
 <?php if ($isMontserrat): ?>
-<!-- AWA T1.3: Montserrat Font Optimization (self-hosted WOFF2 + subsetting)
-     - Eliminates DNS/connection to googleapis.com + gstatic.com (Critical Path save: ~2-3s)
-     - Unicode-range: Latin only (latin-ext available, CJK excluded)
-     - Font-display: optional (self-hosted, fast, no FOUT accepted)
-     - Preload: rel="preload" on latin variant (above-fold typography)
-     - Performance impact: -15-20KB transferred, FCP -50-100ms
--->
-<link rel="preload" as="font" type="font/woff2" crossorigin
-      href="<?= $this->escapeUrl($this->getViewFileUrl('fonts/montserrat/montserrat-latin.woff2')) ?>"/>
+<!-- AWA Fonts 2026-06-11: o design system (tokens --awa-font-*) usa Rubik (títulos) e
+     Source Sans 3 (corpo). O preload anterior de Montserrat (38KB) baixava fonte não usada
+     em nenhum CSS publicado. Agora: preload + @font-face inline das fontes reais acima da
+     dobra (rubik-600 para headings, source-sans-3-400 para body), self-hosted, swap.
+     As demais variações de peso carregam via awa-super-global (async). -->
+<link rel="preload"
+      href="<?= $this->escapeUrl($this->getViewFileUrl('fonts/rubik/rubik-600.woff2')) ?>"
+      as="font" type="font/woff2" crossorigin="anonymous"/>
+<link rel="preload"
+      href="<?= $this->escapeUrl($this->getViewFileUrl('fonts/source-sans-3/source-sans-3-400.woff2')) ?>"
+      as="font" type="font/woff2" crossorigin="anonymous"/>
 <style>
-/* Montserrat variable font — self-hosted (latin + latin-ext subsets) */
 @font-face {
-    font-family: 'Montserrat';
+    font-family: 'Rubik';
     font-style: normal;
-    font-weight: 300 700;
-    font-display: optional;
-    src: url('<?= $this->escapeUrl($this->getViewFileUrl('fonts/montserrat/montserrat-latin-ext.woff2')) ?>') format('woff2');
-    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    font-weight: 600;
+    font-display: swap;
+    src: url('<?= $this->escapeUrl($this->getViewFileUrl('fonts/rubik/rubik-600.woff2')) ?>') format('woff2');
 }
 @font-face {
-    font-family: 'Montserrat';
+    font-family: 'Source Sans 3';
     font-style: normal;
-    font-weight: 300 700;
-    font-display: optional;
-    src: url('<?= $this->escapeUrl($this->getViewFileUrl('fonts/montserrat/montserrat-latin.woff2')) ?>') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    font-weight: 400;
+    font-display: swap;
+    src: url('<?= $this->escapeUrl($this->getViewFileUrl('fonts/source-sans-3/source-sans-3-400.woff2')) ?>') format('woff2');
 }
 </style>
 <?php else: ?>
@@ -62,11 +61,206 @@
 <!-- (movidos para bloco dedicado via head.additional em default.xml — sem duplicatas)         -->
 <!-- ===== Fim CSS de Interação ===== -->
 <!-- Rokanthemes theme option CSS: carregado de forma não-bloqueante (AWA_Custom 2026-03-17) -->
-<link rel="stylesheet" media="print" onload="this.media='all'"
+<link rel="stylesheet" type="text/css" media="all"
       href="<?= $this->escapeUrl($_helper->getThemeOption()) ?>"/>
-<noscript><link rel="stylesheet" type="text/css" media="all" href="<?= $this->escapeUrl($_helper->getThemeOption()) ?>"/></noscript>
 <?php
 /* AWA Brand Palette Bridge: Admin config → CSS Custom Properties
    Injected into custom_default.css (external file) to bypass CSP inline-style restrictions.
    Run: bin/magento awa:theme:regenerate-css or save ThemeOption in admin to regenerate. */
 ?>
+
+<script id="awa-web-vitals-rum">
+(function (w, d, p) {
+    'use strict';
+
+    if (w.__awaWebVitalsRumInit) {
+        return;
+    }
+    w.__awaWebVitalsRumInit = true;
+
+    var supported = (w.PerformanceObserver && w.PerformanceObserver.supportedEntryTypes)
+        ? w.PerformanceObserver.supportedEntryTypes
+        : [];
+    var sent = {};
+    var clsValue = 0;
+    var lcpEntry = null;
+    var inpValue = 0;
+    var inpSource = 'event';
+    var pagePath = (w.location && w.location.pathname) ? w.location.pathname : '/';
+    var lowerPath = (pagePath || '').toLowerCase();
+    var pageKind = (lowerPath === '/' || lowerPath === '/index.php') ? 'home' : 'internal';
+    var navEntry = (p && typeof p.getEntriesByType === 'function') ? p.getEntriesByType('navigation')[0] : null;
+    var finalized = false;
+
+    function round(value, decimals) {
+        var factor;
+
+        if (typeof value !== 'number' || !isFinite(value)) {
+            return null;
+        }
+
+        factor = Math.pow(10, decimals || 0);
+
+        return Math.round(value * factor) / factor;
+    }
+
+    function getRating(name, value) {
+        if (name === 'LCP') {
+            return value <= 2500 ? 'good' : (value <= 4000 ? 'needs-improvement' : 'poor');
+        }
+        if (name === 'CLS') {
+            return value <= 0.1 ? 'good' : (value <= 0.25 ? 'needs-improvement' : 'poor');
+        }
+        if (name === 'INP') {
+            return value <= 200 ? 'good' : (value <= 500 ? 'needs-improvement' : 'poor');
+        }
+        if (name === 'FCP') {
+            return value <= 1800 ? 'good' : (value <= 3000 ? 'needs-improvement' : 'poor');
+        }
+        if (name === 'TTFB') {
+            return value <= 800 ? 'good' : (value <= 1800 ? 'needs-improvement' : 'poor');
+        }
+
+        return 'unknown';
+    }
+
+    function pushVital(name, value, extra) {
+        var payload;
+        var rounded = round(value, name === 'CLS' ? 4 : 0);
+
+        if (rounded === null || sent[name]) {
+            return;
+        }
+        sent[name] = true;
+
+        w.dataLayer = w.dataLayer || [];
+
+        payload = {
+            event: 'awa_web_vital',
+            web_vital_name: name,
+            web_vital_value: rounded,
+            web_vital_rating: getRating(name, rounded),
+            web_vital_page_path: pagePath,
+            web_vital_page_kind: pageKind
+        };
+
+        if (extra && typeof extra === 'object') {
+            if (extra.id) {
+                payload.web_vital_id = extra.id;
+            }
+            if (extra.delta !== undefined && extra.delta !== null) {
+                payload.web_vital_delta = round(extra.delta, name === 'CLS' ? 4 : 0);
+            }
+            if (extra.navigationType) {
+                payload.web_vital_navigation_type = extra.navigationType;
+            }
+            if (extra.source) {
+                payload.web_vital_source = extra.source;
+            }
+        }
+
+        try {
+            w.dataLayer.push(payload);
+        } catch (e) {
+            // no-op: telemetria não pode afetar a renderização
+        }
+    }
+
+    function finalizeVitals() {
+        if (finalized) {
+            return;
+        }
+        finalized = true;
+
+        if (lcpEntry && typeof lcpEntry.startTime === 'number') {
+            pushVital('LCP', lcpEntry.startTime, { id: lcpEntry.id });
+        }
+        pushVital('CLS', clsValue);
+
+        if (inpValue > 0) {
+            pushVital('INP', inpValue, { source: inpSource });
+        }
+    }
+
+    if (navEntry && typeof navEntry.responseStart === 'number') {
+        pushVital('TTFB', navEntry.responseStart, { navigationType: navEntry.type || 'navigate' });
+    }
+
+    if (supported.indexOf('paint') !== -1) {
+        try {
+            (new w.PerformanceObserver(function (list) {
+                list.getEntries().forEach(function (entry) {
+                    if (entry && entry.name === 'first-contentful-paint') {
+                        pushVital('FCP', entry.startTime, { id: entry.name });
+                    }
+                });
+            })).observe({ type: 'paint', buffered: true });
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    if (supported.indexOf('largest-contentful-paint') !== -1) {
+        try {
+            (new w.PerformanceObserver(function (list) {
+                var entries = list.getEntries();
+                if (entries.length) {
+                    lcpEntry = entries[entries.length - 1];
+                }
+            })).observe({ type: 'largest-contentful-paint', buffered: true });
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    if (supported.indexOf('layout-shift') !== -1) {
+        try {
+            (new w.PerformanceObserver(function (list) {
+                list.getEntries().forEach(function (entry) {
+                    if (entry && !entry.hadRecentInput) {
+                        clsValue += entry.value;
+                    }
+                });
+            })).observe({ type: 'layout-shift', buffered: true });
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    if (supported.indexOf('event') !== -1) {
+        try {
+            (new w.PerformanceObserver(function (list) {
+                list.getEntries().forEach(function (entry) {
+                    if (entry && entry.interactionId && entry.duration > inpValue) {
+                        inpValue = entry.duration;
+                    }
+                });
+            })).observe({ type: 'event', buffered: true, durationThreshold: 40 });
+        } catch (e) {
+            // ignore
+        }
+    } else if (supported.indexOf('first-input') !== -1) {
+        inpSource = 'first-input';
+        try {
+            (new w.PerformanceObserver(function (list) {
+                var firstInput = list.getEntries()[0];
+                if (firstInput && firstInput.duration > inpValue) {
+                    inpValue = firstInput.duration;
+                }
+            })).observe({ type: 'first-input', buffered: true });
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    w.addEventListener('pagehide', finalizeVitals, { capture: true, once: true });
+    d.addEventListener('visibilitychange', function () {
+        if (d.visibilityState === 'hidden') {
+            finalizeVitals();
+        }
+    }, { capture: true, once: true });
+    w.addEventListener('load', function () {
+        w.setTimeout(finalizeVitals, 15000);
+    }, { once: true });
+})(window, document, window.performance || null);
+</script>

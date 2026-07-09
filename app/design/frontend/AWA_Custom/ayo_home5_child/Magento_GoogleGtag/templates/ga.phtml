@@ -1,0 +1,62 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Override: GA4 adiado para interação na home (não compete com LCP/TBT).
+ * Nas demais páginas mantém o comportamento original inline.
+ *
+ * @var \Magento\GoogleGtag\Block\Ga $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+$analyticsData = $block->getAnalyticsData();
+if (!$analyticsData) {
+    return;
+}
+
+$layoutHandles = $block->getLayout()->getUpdate()->getHandles();
+$isHomePage = in_array('cms_index_index', $layoutHandles, true);
+?>
+<?php if ($isHomePage): ?>
+<script type="application/json" id="awa-ga4-defer-json"><?= /* @noEscape */ $analyticsData ?></script>
+<script>
+(function (w, d) {
+    'use strict';
+    var applied = false;
+    var events = ['pointerdown', 'keydown', 'touchstart'];
+
+    function boot() {
+        var el, cfg, script;
+        if (applied) { return; }
+        if (typeof w.require !== 'function') {
+            w.setTimeout(boot, 200);
+            return;
+        }
+        applied = true;
+        events.forEach(function (ev) { w.removeEventListener(ev, boot, true); });
+        el = d.getElementById('awa-ga4-defer-json');
+        if (!el || !el.textContent) { return; }
+        try { cfg = JSON.parse(el.textContent); } catch (e) { return; }
+        script = d.createElement('script');
+        script.type = 'text/x-magento-init';
+        script.textContent = JSON.stringify({ '*': { 'Magento_GoogleGtag/js/google-analytics': cfg } });
+        d.head.appendChild(script);
+        w.require(['mage/apply/main']);
+    }
+
+    events.forEach(function (ev) {
+        w.addEventListener(ev, boot, { capture: true, passive: ev !== 'keydown', once: true });
+    });
+})(window, document);
+</script>
+<?php else: ?>
+<!-- BEGIN GOOGLE ANALYTICS 4 CODE -->
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_GoogleGtag/js/google-analytics": <?= /* @noEscape */ $analyticsData ?>
+    }
+}
+</script>
+<!-- END GOOGLE ANALYTICS 4 CODE -->
+<?php endif; ?>

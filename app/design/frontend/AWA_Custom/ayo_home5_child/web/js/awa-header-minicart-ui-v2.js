@@ -5,6 +5,15 @@
 (function () {
     'use strict';
 
+    var runtime = window.__awaHeaderMinicartRuntime = window.__awaHeaderMinicartRuntime || {};
+    if (!runtime.owner) {
+        runtime.owner = 'v2';
+        runtime.ownerSource = 'awa-header-minicart-ui-v2.js';
+        runtime.ownerClaimedAt = Date.now();
+    } else if (runtime.owner !== 'v2') {
+        return;
+    }
+
     if (window.__awaRound2HeaderMinicartUiInit) {
         return;
     }
@@ -66,6 +75,16 @@
         return !!b && (b.classList.contains('catalog-category-view') || b.classList.contains('catalogsearch-result-index'));
     }
 
+    function isAuthShell() {
+        var body = bodyEl();
+        return !!body && (
+            body.classList.contains('b2b-auth-shell') ||
+            body.classList.contains('customer-account') ||
+            body.classList.contains('customer-account-login') ||
+            body.classList.contains('customer-account-create')
+        );
+    }
+
     function setStyleImportant(el, prop, value) {
         if (!el || el.getAttribute('data-awa-js-layout') === 'css') {
             return;
@@ -100,6 +119,9 @@
     var syncFlags = { search: false, layout: false, scroll: false, resize: false };
 
     function scheduleSearchSync() {
+        if (isMinicartOverlayActive()) {
+            return;
+        }
         schedule(function searchSyncJob() {
             if (searchSyncRunning) {
                 return;
@@ -140,8 +162,8 @@
             input: form.querySelector('#search, #search-input-autocomplate, input[name="q"]'),
             actions: form.querySelector('.actions'),
             button: form.querySelector('.action.search, button[type="submit"]'),
-            panel: block.querySelector('#search_autocomplete'),
-            resultsRoot: block.querySelector('.mst-searchautocomplete__autocomplete, .searchsuite-autocomplete')
+            panel: block.querySelector('.mst-searchautocomplete__autocomplete, #search_autocomplete'),
+            resultsRoot: block.querySelector('.mst-searchautocomplete__autocomplete, .searchsuite-autocomplete, #search_autocomplete')
         };
     }
 
@@ -297,6 +319,75 @@
         return region;
     }
 
+    function setLiveRegionText(region, text) {
+        if (!region) {
+            return;
+        }
+        var nextText = text || '';
+        if (region.textContent !== nextText) {
+            region.textContent = nextText;
+        }
+    }
+
+    function isIgnorableA11yLiveMutation(mutation) {
+        var target = mutation && mutation.target ? mutation.target : null;
+        if (!target || mutation.type !== 'childList') {
+            return false;
+        }
+        if (target.id === 'awa-search-live-region') {
+            return true;
+        }
+        if (target.getAttribute && target.getAttribute('data-awa-search-status') === 'true') {
+            return true;
+        }
+        return !!(target.classList && target.classList.contains('awa-sr-only'));
+    }
+
+    var OVERLAY_MUTATION_TARGET_SEL =
+        '.minicart-wrapper, .block-minicart, ' +
+        '.mst-searchautocomplete__autocomplete, .searchsuite-autocomplete, #search_autocomplete, ' +
+        '.awa-header-categories, [data-role="awa-vertical-menu-panel"], .awa-header-minicart';
+
+    var minicartPanelLayoutKey = '';
+
+    function isMinicartOverlayActive() {
+        return !!(document.body && document.body.classList.contains('awa-minicart-overlay-active'));
+    }
+
+    function isRelevantHeaderOverlayMutation(mutation) {
+        var target = mutation && mutation.target ? mutation.target : null;
+
+        if (isIgnorableA11yLiveMutation(mutation)) {
+            return false;
+        }
+        if (!target || !target.closest) {
+            return false;
+        }
+        // BUG-a1f9f3 v11: com minicart aberto, compat da busca ainda toggla
+        // has-results/is-open → observer → closeSearchOverlay → loop (~46 sync/s).
+        if (isMinicartOverlayActive() && target.closest(
+            '.block-search, .mst-searchautocomplete__autocomplete, .searchsuite-autocomplete, #search_autocomplete'
+        )) {
+            return false;
+        }
+        // BUG-a1f9f3 v6: attributeFilter=class no header inteiro (subtree) reagia a
+        // is-empty/is-ready no form de busca e a toggles sticky no .awa-site-header,
+        // realimentando scheduleOverlaySync() em ~10 sync/s no dashboard B2B.
+        if (mutation.type === 'attributes') {
+            if (mutation.attributeName !== 'class' && mutation.attributeName !== 'aria-expanded') {
+                return false;
+            }
+            if (target.matches && target.matches('.awa-site-header')) {
+                return false;
+            }
+            return !!target.closest(OVERLAY_MUTATION_TARGET_SEL);
+        }
+        if (mutation.type === 'childList') {
+            return !!target.closest(OVERLAY_MUTATION_TARGET_SEL);
+        }
+        return false;
+    }
+
     function syncSearchPanelState() {
         var ctx = getSearchContext();
         var panelOpen;
@@ -308,6 +399,9 @@
         var query;
 
         if (!ctx) {
+            return;
+        }
+        if (isMinicartOverlayActive()) {
             return;
         }
 
@@ -322,9 +416,13 @@
             }
         }
 
-        panelOpen = !!(ctx.panel && isVisible(ctx.panel) &&
-            window.getComputedStyle(ctx.panel).display !== 'none');
         options = getSearchOptions(ctx);
+        panelOpen = !!(ctx.panel && (
+            (isVisible(ctx.panel) && window.getComputedStyle(ctx.panel).display !== 'none') ||
+            (ctx.form.contains(document.activeElement) &&
+                ctx.panel.children.length > 0 &&
+                (options.length > 0 || (ctx.panel.textContent || '').trim() !== ''))
+        ));
 
         if (ctx.resultsRoot && isVisible(ctx.resultsRoot)) {
             hasResults = options.length > 0 || ctx.resultsRoot.querySelectorAll('li').length > 0;
@@ -352,11 +450,23 @@
             ctx.input.setAttribute('aria-haspopup', 'listbox');
         }
         if (ctx.panel) {
-            ctx.panel.setAttribute('aria-hidden', panelOpen ? 'false' : 'true');
+            // ARIA (aria-hidden/hidden) do painel: awa-header-a11y-performance +
+            // awa-search-autocomplete-compat. Escrever aqui gerava ping-pong H14.
             ctx.panel.classList.toggle('is-open', panelOpen);
             ctx.panel.classList.toggle('has-results', hasResults);
             if (panelOpen) {
+                ctx.panel.removeAttribute('hidden');
                 ctx.panel.style.removeProperty('display');
+                ctx.panel.style.removeProperty('visibility');
+                ctx.panel.style.removeProperty('opacity');
+                if (document.body) {
+                    document.body.classList.add('searchautocomplete__active');
+                }
+            } else if (document.body) {
+                // BUG-a1f9f3: remover sempre que o painel fecha — antes só removia
+                // quando !hasResults, deixando a classe presa e mantendo listObs
+                // chamando closeVerticalMenuOverlay() em loop (~11/s no dashboard).
+                document.body.classList.remove('searchautocomplete__active');
             }
         }
 
@@ -372,11 +482,11 @@
         region = ensureSearchLiveRegion(ctx);
         if (region) {
             if (panelOpen && hasResults) {
-                region.textContent = options.length + ' sugestões disponíveis. Use seta para baixo e cima para navegar.';
+                setLiveRegionText(region, options.length + ' sugestões disponíveis. Use seta para baixo e cima para navegar.');
             } else if (panelOpen && !hasResults && query.length >= 2) {
-                region.textContent = 'Nenhuma sugestão encontrada.';
+                setLiveRegionText(region, 'Nenhuma sugestão encontrada.');
             } else {
-                region.textContent = '';
+                setLiveRegionText(region, '');
             }
         }
     }
@@ -613,29 +723,38 @@
     }
 
     function closeVerticalMenuOverlay() {
-        if (isMenuV2DeptOpen()) {
+        var deptOpen = isMenuV2DeptOpen();
+        if (deptOpen) {
             return;
         }
-        document.querySelectorAll('.awa-header-categories.menu_left_home1').forEach(function (nav) {
-            var title = nav.querySelector('[data-role="awa-vertical-menu-trigger"], .title-category-dropdown');
-            var list = nav.querySelector('ul.togge-menu.list-category-dropdown');
-            nav.classList.remove('menu-open', 'vmm-open', 'active', 'open');
-            if (title) {
-                title.classList.remove('active', 'open');
-                title.setAttribute('aria-expanded', 'false');
-            }
-            if (list) {
-                list.classList.remove('menu-open', 'vmm-open', 'vmm-animate-in', 'open', 'active');
-                list.setAttribute('aria-hidden', 'true');
-                setOverlayStyleImportant(list, 'display', 'none');
-                list.style.removeProperty('visibility');
-                list.style.removeProperty('opacity');
-                list.style.removeProperty('pointer-events');
-            }
-        });
+        // BUG-a1f9f3: com menu v2, awa-menu-controller.js é dono do painel
+        // ul.togge-menu — manipular aria-hidden/classe aqui brigava com syncAria().
+        if (!window.__AWA_MENU_V2) {
+            document.querySelectorAll('.awa-header-categories.menu_left_home1').forEach(function (nav) {
+                var title = nav.querySelector('[data-role="awa-vertical-menu-trigger"], .title-category-dropdown');
+                var list = nav.querySelector('ul.togge-menu.list-category-dropdown');
+                nav.classList.remove('menu-open', 'vmm-open', 'active', 'open');
+                if (title) {
+                    title.classList.remove('active', 'open');
+                    title.setAttribute('aria-expanded', 'false');
+                }
+                if (list) {
+                    list.classList.remove('menu-open', 'vmm-open', 'vmm-animate-in', 'open', 'active');
+                    if (list.getAttribute('aria-hidden') !== 'true') {
+                        list.setAttribute('aria-hidden', 'true');
+                    }
+                    setOverlayStyleImportant(list, 'display', 'none');
+                    list.style.removeProperty('visibility');
+                    list.style.removeProperty('opacity');
+                    list.style.removeProperty('pointer-events');
+                }
+            });
+        }
         document.querySelectorAll('body > .awa-vmf-portal, body > .level0.submenu, body > .navigation__submenu').forEach(function (panel) {
             panel.classList.remove('menu-open', 'vmm-open', 'vmm-animate-in', 'open', 'active');
-            panel.setAttribute('aria-hidden', 'true');
+            if (panel.getAttribute('aria-hidden') !== 'true') {
+                panel.setAttribute('aria-hidden', 'true');
+            }
             setOverlayStyleImportant(panel, 'display', 'none');
             setOverlayStyleImportant(panel, 'visibility', 'hidden');
             setOverlayStyleImportant(panel, 'opacity', '0');
@@ -646,20 +765,39 @@
     function closeSearchOverlay() {
         var ctx = getSearchContext();
         var panels = document.querySelectorAll('#search_autocomplete, .mst-searchautocomplete__autocomplete, .searchsuite-autocomplete');
+        var needsClose = isSearchOverlayOpen();
+        var i;
+        var panel;
+
+        if (!needsClose) {
+            for (i = 0; i < panels.length; i += 1) {
+                panel = panels[i];
+                if (panel.classList.contains('is-open') || panel.classList.contains('has-results') ||
+                    panel.classList.contains('_active') || panel.classList.contains('active')) {
+                    needsClose = true;
+                    break;
+                }
+            }
+        }
+        if (!needsClose && !(ctx && ctx.form && ctx.form.classList.contains('is-open'))) {
+            return;
+        }
         if (ctx && ctx.form) {
             ctx.form.setAttribute('data-awa-panel-closed', 'true');
-            ctx.form.classList.remove('is-open');
+            ctx.form.classList.remove('is-open', 'has-results');
         }
         if (ctx && ctx.input) {
             ctx.input.setAttribute('aria-expanded', 'false');
         }
-        panels.forEach(function (panel) {
-            panel.classList.remove('is-open');
-            panel.setAttribute('aria-hidden', 'true');
-            panel.style.setProperty('display', 'none', 'important');
-            panel.style.setProperty('visibility', 'hidden', 'important');
-            panel.style.setProperty('opacity', '0', 'important');
-            panel.style.setProperty('pointer-events', 'none', 'important');
+        panels.forEach(function (panelEl) {
+            panelEl.classList.remove('is-open', 'has-results', '_active', 'active');
+            if (panelEl.getAttribute('aria-hidden') !== 'true') {
+                panelEl.setAttribute('aria-hidden', 'true');
+            }
+            panelEl.style.setProperty('display', 'none', 'important');
+            panelEl.style.setProperty('visibility', 'hidden', 'important');
+            panelEl.style.setProperty('opacity', '0', 'important');
+            panelEl.style.setProperty('pointer-events', 'none', 'important');
         });
         if (document.body) {
             document.body.classList.remove('searchautocomplete__active');
@@ -667,7 +805,14 @@
     }
 
     function closeMinicartOverlay() {
-        document.querySelectorAll('.awa-site-header .minicart-wrapper.active, .awa-site-header .minicart-wrapper.show, .awa-site-header .minicart-wrapper.is-open').forEach(function (wrap) {
+        var wraps = document.querySelectorAll('.awa-site-header .minicart-wrapper.active, .awa-site-header .minicart-wrapper.show, .awa-site-header .minicart-wrapper.is-open');
+        var bodyHasOverlay = !!(document.body && document.body.classList.contains('awa-minicart-overlay-active'));
+
+        if (!wraps.length && !bodyHasOverlay) {
+            return;
+        }
+
+        wraps.forEach(function (wrap) {
             var panel = wrap.querySelector('.block-minicart');
             var close = wrap.querySelector('.block-minicart .action.close, .block-minicart .close');
             if (close && typeof close.click === 'function') {
@@ -676,9 +821,12 @@
             wrap.classList.remove('active', 'show', 'is-open');
             if (panel) {
                 panel.classList.remove('_active');
-                panel.style.setProperty('display', 'none', 'important');
-                panel.style.setProperty('visibility', 'hidden', 'important');
-                panel.style.setProperty('pointer-events', 'none', 'important');
+                // BUG-a1f9f3 v10: display:none !important inline impedia reabrir o dropdown
+                // (inline vence o CSS terminal display:flex !important).
+                panel.style.removeProperty('display');
+                panel.style.removeProperty('visibility');
+                panel.style.removeProperty('pointer-events');
+                panel.style.removeProperty('opacity');
             }
         });
         if (document.body) {
@@ -703,22 +851,63 @@
     }
 
     function getOpenMinicartPanel() {
-        var panels = document.querySelectorAll(
-            '.awa-site-header .minicart-wrapper.active .block-minicart, ' +
-            '.awa-site-header .minicart-wrapper.show .block-minicart, ' +
-            '.awa-site-header .minicart-wrapper.is-open .block-minicart, ' +
-            '.awa-site-header .minicart-wrapper .block-minicart._active, ' +
-            '.awa-site-header .block-minicart'
+        var wraps = document.querySelectorAll(
+            '.awa-site-header .minicart-wrapper.active, ' +
+            '.awa-site-header .minicart-wrapper.show, ' +
+            '.awa-site-header .minicart-wrapper.is-open'
         );
         var i;
+        var panel;
 
-        for (i = 0; i < panels.length; i += 1) {
-            if (isOverlayVisible(panels[i])) {
-                return panels[i];
+        for (i = 0; i < wraps.length; i += 1) {
+            panel = wraps[i].querySelector('.block-minicart');
+            if (panel && isOverlayVisible(panel)) {
+                return panel;
             }
         }
 
         return null;
+    }
+
+    function isSearchOverlayOpen() {
+        var panel = getOpenSearchPanel();
+        var form;
+        var ctx;
+
+        if (!panel || !isOverlayVisible(panel)) {
+            return false;
+        }
+        if (document.body && document.body.classList.contains('searchautocomplete__active')) {
+            return true;
+        }
+        ctx = getSearchContext();
+        form = ctx && ctx.form ? ctx.form : document.querySelector('#search_mini_form, form.minisearch');
+        return !!(form && form.classList.contains('is-open') && form.contains(document.activeElement));
+    }
+
+    function isVerticalMenuListOpen(list) {
+        if (!list) {
+            return false;
+        }
+        // BUG-a1f9f3: NÃO usar isOverlayVisible(list) — o <ul> do menu vertical
+        // sempre tem dimensões no header e isso fazia o observer tratá-lo como
+        // permanentemente aberto, gerando ~11 sync/s em idle no dashboard.
+        if (list.getAttribute('data-awa-menu-state') === 'open') {
+            return true;
+        }
+        return list.classList.contains('menu-open') || list.classList.contains('vmm-open');
+    }
+
+    function cleanupStaleOverlayState() {
+        if (!document.body) {
+            return;
+        }
+        if (!isSearchOverlayOpen()) {
+            document.body.classList.remove('searchautocomplete__active');
+        }
+        if (!isOverlayVisible(getOpenMinicartPanel())) {
+            document.body.classList.remove('awa-minicart-overlay-active');
+        }
     }
 
     function getOpenSearchPanel() {
@@ -732,7 +921,6 @@
         return document.querySelector(
             '.awa-header-categories.menu_left_home1 ul.togge-menu.menu-open, ' +
             '.awa-header-categories.menu_left_home1 ul.togge-menu.vmm-open, ' +
-            '.awa-header-categories.menu_left_home1 ul.togge-menu[aria-hidden="false"], ' +
             '[data-role="awa-vertical-menu-panel"][data-awa-menu-state="open"], ' +
             'body > .awa-vmf-portal, body > .level0.submenu, body > .navigation__submenu'
         );
@@ -746,17 +934,44 @@
         var headerRect;
         var cartRect;
         var right;
-        if (!panel || !(window.matchMedia && window.matchMedia('(min-width: 992px)').matches)) {
+        var isDesktop = !!(window.matchMedia && window.matchMedia('(min-width: 992px)').matches);
+
+        // AWA Fix: skip fixed positioning in auth shells to avoid conflict with absolute positioning
+        if (typeof isAuthShell === 'function' && isAuthShell()) {
+            return;
+        }
+
+        if (!panel || !isDesktop) {
+            return;
+        }
+        if (!wrap || !(wrap.classList.contains('active') || wrap.classList.contains('show') || wrap.classList.contains('is-open'))) {
             return;
         }
         headerRect = header ? header.getBoundingClientRect() : { bottom: 0 };
         cartRect = cart ? cart.getBoundingClientRect() : { right: window.innerWidth - 24 };
         right = Math.max(16, Math.round(window.innerWidth - cartRect.right));
+        var nextLayoutKey = [
+            Math.round(headerRect.bottom),
+            right,
+            Math.round(window.innerWidth)
+        ].join('|');
+        if (nextLayoutKey === minicartPanelLayoutKey) {
+            return;
+        }
+        minicartPanelLayoutKey = nextLayoutKey;
+        panel.style.removeProperty('display');
+        panel.style.removeProperty('visibility');
+        panel.style.removeProperty('pointer-events');
+        panel.style.removeProperty('opacity');
         setStyleImportant(panel, 'position', 'fixed');
         setStyleImportant(panel, 'top', Math.max(0, Math.round(headerRect.bottom + 8)) + 'px');
         setStyleImportant(panel, 'right', right + 'px');
         setStyleImportant(panel, 'left', 'auto');
-        setStyleImportant(panel, 'z-index', '1200');
+        setStyleImportant(panel, 'width', 'min(380px, calc(100vw - 32px))');
+        setStyleImportant(panel, 'max-width', 'min(380px, calc(100vw - 32px))');
+        setStyleImportant(panel, 'min-width', '280px');
+        // BUG-a1f9f3 v10: z-index 1200 ficava abaixo do header (100120) — painel atrás/clippado.
+        setStyleImportant(panel, 'z-index', 'var(--awa-z-minicart, 1300)');
         setStyleImportant(panel, 'max-height', 'calc(100vh - ' + Math.max(0, Math.round(headerRect.bottom + 24)) + 'px)');
         setStyleImportant(panel, 'overflow-y', 'auto');
     }
@@ -775,15 +990,20 @@
                 if (document.body) {
                     document.body.classList.add('awa-minicart-overlay-active');
                 }
-                closeSearchOverlay();
+                if (!document.body.getAttribute('data-awa-search-closed-for-minicart')) {
+                    closeSearchOverlay();
+                    document.body.setAttribute('data-awa-search-closed-for-minicart', '1');
+                }
                 closeVerticalMenuOverlayFrames(4);
                 positionOpenMinicartPanel();
                 return;
             }
             if (document.body) {
                 document.body.classList.remove('awa-minicart-overlay-active');
+                document.body.removeAttribute('data-awa-search-closed-for-minicart');
+                minicartPanelLayoutKey = '';
             }
-            if (isOverlayVisible(search)) {
+            if (isSearchOverlayOpen()) {
                 closeMinicartOverlay();
                 if (!isMenuV2DeptOpen()) {
                     closeVerticalMenuOverlay();
@@ -982,6 +1202,7 @@
     }
 
     function runHeaderPass() {
+        cleanupStaleOverlayState();
         syncStickyCondensed();
         fixSearchFormAction();
         syncPlpToolbarOffset();
@@ -1122,7 +1343,7 @@
             new MutationObserver(function (mutations) {
                 var i;
                 for (i = 0; i < mutations.length; i += 1) {
-                    if (mutations[i].type === 'childList') {
+                    if (mutations[i].type === 'childList' && !isIgnorableA11yLiveMutation(mutations[i])) {
                         scheduleSearchSync();
                         return;
                     }
@@ -1134,6 +1355,9 @@
             new MutationObserver(function (mutations) {
                 var i;
                 for (i = 0; i < mutations.length; i += 1) {
+                    if (!isRelevantHeaderOverlayMutation(mutations[i])) {
+                        continue;
+                    }
                     if (mutations[i].type === 'attributes' || mutations[i].type === 'childList') {
                         scheduleOverlaySync();
                         return;
@@ -1141,13 +1365,23 @@
                 }
             }).observe(document.querySelector('.awa-site-header'), {
                 attributes: true,
-                attributeFilter: ['class', 'style', 'aria-hidden'],
+                // BUG-a1f9f3: aria-hidden removido — mudanças ARIA em overlays
+                // (menu/busca) realimentavam scheduleOverlaySync() em loop.
+                attributeFilter: ['class'],
                 childList: true,
                 subtree: true
             });
+            // Menu v2 (awa-menu-controller.js) gerencia seu próprio ARIA/estado;
+            // o listObs legado brigava com syncAria() e gerava loop contínuo.
+            if (!window.__AWA_MENU_V2) {
             document.querySelectorAll('.awa-header-categories.menu_left_home1 ul.togge-menu.list-category-dropdown').forEach(function (list) {
                 new MutationObserver(function () {
                     if (!document.body) {
+                        return;
+                    }
+                    // BUG-a1f9f3: não fechar menu já fechado — evita loop quando
+                    // searchautocomplete__active ficava presa no body.
+                    if (!isVerticalMenuListOpen(list)) {
                         return;
                     }
                     if (
@@ -1165,9 +1399,10 @@
                     }
                 }).observe(list, {
                     attributes: true,
-                    attributeFilter: ['class', 'style', 'aria-hidden']
+                    attributeFilter: ['class']
                 });
             });
+            }
         }
     }
 
@@ -1208,6 +1443,8 @@
 (function () {
     'use strict';
 
+    // AWA Fix: cada IIFE é um closure independente — isAuthShell() precisa
+    // existir localmente aqui também (não é compartilhada com a IIFE acima).
     function isAuthShell() {
         var body = document.body;
         return !!body && (

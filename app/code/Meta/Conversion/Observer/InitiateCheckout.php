@@ -8,7 +8,7 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Quote\Model\Quote;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
 
@@ -21,7 +21,7 @@ class InitiateCheckout implements ObserverInterface
 
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly \Magento\Checkout\Model\Session $checkoutSession,
         private readonly LoggerInterface $logger,
         private readonly ?UserDataBuilder $userDataBuilder = null
@@ -73,13 +73,32 @@ class InitiateCheckout implements ObserverInterface
             $eventTime = time();
             $eventId = sprintf('ic-%s-%d', (string) $quote->getId(), $eventTime);
             $externalId = (string) ($quote->getCustomerId() ?: $quote->getId());
+
+            $address    = $quote->getShippingAddress() ?: $quote->getBillingAddress();
+            $telephone  = (string) ($address?->getTelephone() ?: '');
+            $firstName  = (string) ($quote->getCustomerFirstname() ?: $address?->getFirstname() ?: '');
+            $lastName   = (string) ($quote->getCustomerLastname() ?: $address?->getLastname() ?: '');
+            $city       = (string) ($address?->getCity() ?: '');
+            $state      = (string) ($address?->getRegionCode() ?: $address?->getRegion() ?: '');
+            $zip        = (string) ($address?->getPostcode() ?: '');
+            $country    = strtolower((string) ($address?->getCountryId() ?: 'br'));
+
             $userData = $this->userDataBuilder
                 ? $this->userDataBuilder->build(
                     (string) ($quote->getCustomerEmail() ?: ''),
-                    (string) ($quote->getBillingAddress()?->getTelephone() ?: ''),
-                    $externalId
+                    $telephone,
+                    $externalId,
+                    $firstName,
+                    $lastName,
+                    $city,
+                    $state,
+                    $zip,
+                    $country
                 )
                 : [];
+            if ($this->userDataBuilder && !$this->userDataBuilder->hasMinimumSignals($userData)) {
+                return;
+            }
             $eventSourceUrl = $this->userDataBuilder?->getEventSourceUrl();
 
             $event = [
@@ -103,18 +122,11 @@ class InitiateCheckout implements ObserverInterface
 
             $eventData = [$event];
 
-            $result = $this->graphApi->sendEvents($pixelId, $eventData, $storeId);
             if ($quoteSignature !== '') {
                 $this->checkoutSession->setData(self::SESSION_KEY_LAST_SIGNATURE, $quoteSignature);
             }
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] InitiateCheckout API error', [
-                    'store_id' => $storeId,
-                    'quote_id' => $quote->getId(),
-                    'http_status' => $result['http_status'] ?? null,
-                    'error' => $result['error']
-                ]);
-            }
+
+            $this->capiDispatcher->sendEvents($pixelId, $eventData, $storeId, 'InitiateCheckout');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] InitiateCheckout event failed', [
                 'error' => $e->getMessage()

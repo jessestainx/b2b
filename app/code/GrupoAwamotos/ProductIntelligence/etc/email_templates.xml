@@ -2,14 +2,14 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
     <template id="rexisml_churn_alert"
-              label="REXIS ML - Alerta de risco de perda"
+              label="Product Intelligence - Alerta de risco de perda"
               file="rexisml_churn_alert.html"
               type="html"
               module="GrupoAwamotos_ProductIntelligence"
               area="frontend"/>
 
     <template id="rexisml_crosssell_alert"
-              label="REXIS ML - Alerta de venda cruzada"
+              label="Product Intelligence - Alerta de venda cruzada"
               file="rexisml_crosssell_alert.html"
               type="html"
               module="GrupoAwamotos_ProductIntelligence"

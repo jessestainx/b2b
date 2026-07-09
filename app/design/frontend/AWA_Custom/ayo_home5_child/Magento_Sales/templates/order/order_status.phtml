@@ -1,0 +1,10 @@
+<?php
+/**
+ * AWA override — status badge legível
+ *
+ * @var \Magento\Sales\Block\Order\Info $block
+ */
+?>
+<span class="order-status awa-order-status-badge" role="status">
+    <?= $block->escapeHtml($block->getOrder()->getStatusLabel()) ?>
+</span>

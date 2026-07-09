@@ -6,6 +6,7 @@
             <module name="Magento_Backend"/>
             <module name="Magento_Customer"/>
             <module name="GrupoAwamotos_B2B"/>
+            <module name="GrupoAwamotos_Theme"/>
             <module name="GrupoAwamotos_ERPIntegration"/>
             <module name="Meta_BusinessExtension"/>
             <module name="Meta_Conversion"/>

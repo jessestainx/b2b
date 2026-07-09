@@ -95,9 +95,21 @@
                 sortOrder="20"/>
     </type>
 
+    <type name="Rokanthemes\Brand\Block\Widget\Brandlisttab">
+        <plugin name="grupoawamotos_b2b_hide_brand_widget_price"
+                type="GrupoAwamotos\B2B\Plugin\Brand\HideBrandWidgetProductPricePlugin"
+                sortOrder="10"/>
+    </type>
+
     <type name="Magento\Catalog\Pricing\Render\FinalPriceBox">
         <plugin name="grupoawamotos_b2b_hide_final_price"
                 type="GrupoAwamotos\B2B\Plugin\HideFinalPricePlugin"
+                sortOrder="10"/>
+    </type>
+
+    <type name="Rokanthemes\Themeoption\Helper\Data">
+        <plugin name="grupoawamotos_b2b_hide_price_display_custom"
+                type="GrupoAwamotos\B2B\Plugin\Themeoption\HidePriceDisplayCustomPlugin"
                 sortOrder="10"/>
     </type>
 
@@ -113,6 +125,26 @@
                 sortOrder="10"/>
     </type>
 
+    <type name="Magento\Checkout\Controller\Cart\Index">
+        <plugin name="grupoawamotos_b2b_redirect_cart_to_success"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\RedirectCartToSuccessPlugin"
+                sortOrder="5"/>
+    </type>
+
+    <type name="Magento\Framework\View\Result\Page">
+        <plugin name="grupoawamotos_b2b_cart_empty_page_title"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\CartEmptyPageTitlePlugin"
+                sortOrder="20"/>
+    </type>
+
+    <!-- Proxies: plugin roda em todo Result\Page — sessão/ViewModel só instanciam nas rotas que usam -->
+    <type name="GrupoAwamotos\B2B\Plugin\Checkout\CartEmptyPageTitlePlugin">
+        <arguments>
+            <argument name="checkoutSession" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
+            <argument name="emptyCartContext" xsi:type="object">GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext\Proxy</argument>
+        </arguments>
+    </type>
+
     <type name="Magento\Checkout\Controller\Index\Index">
         <plugin name="grupoawamotos_b2b_block_checkout"
                 type="GrupoAwamotos\B2B\Plugin\BlockCheckoutPlugin"
@@ -122,8 +154,7 @@
     <type name="Rokanthemes\OnePageCheckout\Controller\Index\Index">
         <plugin name="grupoawamotos_b2b_block_express_checkout"
                 type="GrupoAwamotos\B2B\Plugin\BlockExpressCheckoutPlugin"
-                sortOrder="10"
-                disabled="true"/>
+                sortOrder="10"/>
     </type>
 
     <type name="Magento\Catalog\Controller\Product\View">
@@ -133,9 +164,31 @@
     </type>
 
     <type name="Magento\Catalog\Model\ResourceModel\Product\Collection">
+        <plugin name="grupoawamotos_b2b_exclusive_product_catalog"
+                type="GrupoAwamotos\B2B\Plugin\Catalog\Product\ExclusiveProductCollectionFilter"
+                sortOrder="90"/>
         <plugin name="grupoawamotos_b2b_restricted_catalog"
                 type="GrupoAwamotos\B2B\Plugin\Catalog\RestrictedProductCollectionPlugin"
                 sortOrder="100"/>
+    </type>
+
+    <type name="GrupoAwamotos\B2B\Plugin\Catalog\Product\ExclusiveProductCollectionFilter">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
+    <!-- Proxy injection para ExclusiveProductViewPlugin e PrivateLabelBadge evitam bootstrap prematuro de sessão -->
+    <type name="GrupoAwamotos\B2B\Plugin\Catalog\Controller\ExclusiveProductViewPlugin">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="GrupoAwamotos\B2B\Block\Catalog\PrivateLabelBadge">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
     </type>
 
     <type name="GrupoAwamotos\B2B\Block\LoginToCart">
@@ -162,7 +215,18 @@
                 sortOrder="10"/>
     </type>
 
+    <type name="Magento\Checkout\Model\CompositeConfigProvider">
+        <arguments>
+            <argument name="configProviders" xsi:type="array">
+                <item name="grupoawamotos_b2b_checkout_terms" xsi:type="object">GrupoAwamotos\B2B\Model\Checkout\TermsConfigProvider</item>
+            </argument>
+        </arguments>
+    </type>
+
     <type name="Magento\Checkout\Model\DefaultConfigProvider">
+        <plugin name="grupoawamotos_b2b_min_order_config"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\MinOrderConfigPlugin"
+                sortOrder="50"/>
         <plugin name="grupoawamotos_b2b_hide_checkout_price"
                 type="GrupoAwamotos\B2B\Plugin\Checkout\HideCheckoutPricePlugin"
                 sortOrder="100"/>
@@ -214,6 +278,18 @@
     </type>
 
     <type name="GrupoAwamotos\B2B\Plugin\App\HttpContextPlugin">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="GrupoAwamotos\B2B\Plugin\Catalog\RestrictedProductCollectionPlugin">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="GrupoAwamotos\B2B\Observer\B2BPriceWarmObserver">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
@@ -294,10 +370,11 @@
         form_key cookie, starting a PHP session even when FPC will serve the cached page.
         REQUIRES: bin/magento setup:di:compile
     -->
+    <!-- FormKeySessionGuard desativado: bloqueava FormKey::set em GET e quebrava CSRF no login. -->
     <type name="Magento\Framework\Data\Form\FormKey">
-        <plugin name="grupoawamotos_b2b_form_key_session_guard"
-                type="GrupoAwamotos\B2B\Plugin\FormKeySessionGuardPlugin"
-                sortOrder="1"/>
+        <plugin name="grupoawamotos_b2b_form_key_cookie_sync"
+                type="GrupoAwamotos\B2B\Plugin\FormKeyCookieSyncPlugin"
+                sortOrder="20"/>
     </type>
 
     <!-- B2B Checkout Validators -->
@@ -314,6 +391,25 @@
             <argument name="validationService" xsi:type="object">GrupoAwamotos\B2B\Model\Checkout\B2BCheckoutValidationService</argument>
             <argument name="cartRepository" xsi:type="object">Magento\Quote\Api\CartRepositoryInterface</argument>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
+        <plugin name="grupoawamotos_b2b_checkout_layout_processor"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\LayoutProcessorPlugin"
+                sortOrder="50"/>
+    </type>
+
+    <!--
+        Customer Section: b2b_panel
+        Provê dados B2B para o header em páginas FPC (home, categoria, PDP).
+        Carregado via /customer/section/load — nunca cacheado pelo FPC.
+    -->
+    <type name="Magento\Customer\CustomerData\SectionPoolInterface">
+        <arguments>
+            <argument name="sectionSourceMap" xsi:type="array">
+                <item name="b2b_panel" xsi:type="string">GrupoAwamotos\B2B\Model\CustomerData\B2bPanel</item>
+            </argument>
         </arguments>
     </type>
 

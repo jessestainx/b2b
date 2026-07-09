@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;
@@ -59,7 +60,7 @@ class SubscriptionService
     {
         $customerId = (int) $subscription->getData('customer_id');
         $customer = $this->customerRepository->getById($customerId);
-        
+
         // Create Quote
         $cartId = $this->cartManagement->createEmptyCart();
         $quote = $this->cartRepository->get($cartId);
@@ -86,20 +87,20 @@ class SubscriptionService
         $quote->getBillingAddress()->importCustomerAddressData($customer->getDefaultBillingAddress());
         $shippingAddress = $quote->getShippingAddress();
         $shippingAddress->importCustomerAddressData($customer->getDefaultShippingAddress());
-        
+
         $shippingAddress->setCollectShippingRates(true)
                         ->collectShippingRates()
                         ->setShippingMethod('flatrate_flatrate'); // Default fallback
 
         $quote->setPaymentMethod('checkmo'); // Default fallback for automated orders
         $quote->getPayment()->importData(['method' => 'checkmo']);
-        
+
         $quote->collectTotals();
         $this->cartRepository->save($quote);
 
         // Place Order
         $orderId = (int) $this->cartManagement->placeOrder($quote->getId());
-        
+
         // Update Subscription
         $subscription->setData('last_run_at', date('Y-m-d H:i:s'));
         $subscription->setData('next_run_at', $this->calculateNextRun($subscription));

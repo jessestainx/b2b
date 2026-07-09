@@ -7,14 +7,21 @@
         <title>Ativar Acesso Online</title>
     </head>
     <body>
+        <referenceBlock name="messages" remove="true"/>
         <referenceContainer name="main">
-            <block class="Magento\Framework\View\Element\Messages"
-                   name="b2b.claim.messages"
-                   before="-"/>
             <block class="GrupoAwamotos\B2B\Block\Account\Claim"
                    name="b2b.account.claim"
                    template="GrupoAwamotos_B2B::account/claim.phtml"
-                   cacheable="false"/>
+                   cacheable="false">
+                <block class="GrupoAwamotos\B2B\Block\Account\AuthLogo"
+                       name="auth.logo"
+                       as="auth_logo"
+                       template="GrupoAwamotos_B2B::html/auth-logo.phtml"/>
+                <block class="Magento\Framework\View\Element\Messages"
+                       name="b2b_claim_messages"
+                       as="b2b_claim_messages"
+                       template="GrupoAwamotos_B2B::account/login-messages.phtml"/>
+            </block>
         </referenceContainer>
     </body>
 </page>

@@ -722,10 +722,24 @@
             + '.awa-header-brand-cell[data-awa-header-brand="true"]{grid-area:brand!important;justify-self:center!important}'
             + 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] '
             + '.awa-header-primary-row .awa-header-cart-link{grid-area:cart!important;justify-self:end!important}'
+            /* BUGFIX-B2B-PANEL-MOBILE-2026-07-08: esta regra (layer alta prioridade,
+               vence !important normal via reversao de ordem de camadas) zerava o
+               right-col inteiro no mobile — incluindo o painel B2B injetado por JS
+               dentro dele (b2b-panel-hydrate.js/header-status-panel.js). Resultado:
+               trigger com display:none e o "modal" do painel B2B nunca renderizava
+               no mobile (confirmado via CDP getMatchedStylesForNode). Exceção via
+               :has() para manter o comportamento legado quando o painel B2B não
+               está presente. */
             + 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] '
-            + '.awa-header-right-col[data-awa-header-right="true"]{display:none!important;visibility:hidden!important;'
+            + '.awa-header-right-col[data-awa-header-right="true"]:not(:has(.b2b-status-panel)){display:none!important;visibility:hidden!important;'
             + 'width:0!important;min-width:0!important;max-width:0!important;height:0!important;min-height:0!important;'
             + 'max-height:0!important;overflow:hidden!important;pointer-events:none!important}'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            + '.page-wrapper header.awa-site-header[data-awa-header-mode="default"] '
+            + '.awa-header-right-col[data-awa-header-right="true"]:has(.b2b-status-panel){display:flex!important;visibility:visible!important;'
+            + 'width:auto!important;min-width:0!important;max-width:min(220px,54vw)!important;height:44px!important;min-height:44px!important;'
+            + 'max-height:44px!important;overflow:visible!important;pointer-events:auto!important;grid-area:actions!important;'
+            + 'justify-self:end!important;align-self:center!important}'
             + 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header:not(.awa-header-condensed) '
             + ':is(.header-wrapper-sticky,.header.awa-main-header){height:auto!important;min-height:0!important;'
             + 'max-height:none!important;padding-block:0!important;overflow:visible!important}'
@@ -754,6 +768,21 @@
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar{background:#ffffff!important;background-color:#ffffff!important;color:var(--awa-text-primary,#111827)!important;border-bottom-color:var(--awa-border-subtle,var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas)))!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__tail,.awa-b2b-promo-bar__separator,.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta strong){color:var(--awa-text-primary,#111827)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-close{background:transparent!important;color:var(--awa-text-secondary,var(--awa-text,#111827))!important}'
+            /* FIX-HOME-PROMO-GHOST-MOBILE-2026-07-05: colapso equivalente ao bloco
+               desktop abaixo, porém FORA do @media(min-width:992px) — confirmado via
+               CDP getMatchedStylesForNode em viewport 360px que o computed height da
+               promo bar ficava travado em 36/44px (várias regras !important de altura
+               fixa no bundle legado vencem a regra mobile de baixa especificidade em
+               awa-header-mobile-grid-critical.css). Mesma especificidade de 7 IDs usada
+               no fix desktop, sem media query, cobre todos os breakpoints. */
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar.awa-promo-bar--scrolled-away,'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5).awa-header-is-sticky .awa-site-header #awa-b2b-promo-bar,'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header.awa-header-condensed #awa-b2b-promo-bar{'
+            + 'height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar.awa-promo-bar--scrolled-away :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout,.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__cta),'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5).awa-header-is-sticky .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout,.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__cta),'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header.awa-header-condensed #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout,.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__cta){'
+            + 'height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important}'
             + '@media(min-width:992px){'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header{background:var(--awa-bg-surface,var(--awa-bg,Canvas))!important;border-bottom:0!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #header.header-container{height:32px!important;min-height:32px!important;max-height:32px!important;overflow:visible!important;background:transparent!important}'
@@ -763,6 +792,21 @@
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta strong){color:var(--awa-text-primary,#111827)!important;line-height:32px!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__cta{font-weight:700!important;color:var(--awa-primary,var(--awa-red,currentColor))!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-close{position:absolute!important;top:0!important;right:0!important;inset-block-start:0!important;inset-inline-end:0!important;width:40px!important;min-width:40px!important;max-width:40px!important;height:31px!important;min-height:31px!important;max-height:31px!important;border:0!important;border-radius:0!important;background:transparent!important;color:var(--awa-text-secondary,var(--awa-text,#111827))!important;font-size:16px!important;font-weight:600!important;line-height:31px!important;transform:none!important}'
+            /* FIX-HOME-PROMO-GHOST-2026-07-05: o lock de 32px acima vence as regras de
+               colapso do estado sticky (.awa-promo-bar--scrolled-away / .awa-header-condensed),
+               deixando uma faixa invisível de 32px no fluxo do header (confirmado via
+               H3 hiddenInFlow nos logs de runtime + CDP getMatchedStyles). Este bloco,
+               com a MESMA especificidade de 7 IDs + classe de estado e declarado DEPOIS
+               no mesmo stylesheet, colapsa promo bar e seu contêiner quando rolado. */
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header #awa-b2b-promo-bar.awa-promo-bar--scrolled-away,'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5).awa-header-is-sticky .awa-site-header #awa-b2b-promo-bar,'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header.awa-header-condensed #awa-b2b-promo-bar{'
+            + 'height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5).awa-header-is-sticky .awa-site-header #header.header-container,'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5).awa-header-is-sticky .awa-site-header #header.header-container .header-content,'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header.awa-header-condensed #header.header-container,'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header.awa-header-condensed #header.header-container .header-content{'
+            + 'height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky:not(.is-sticky){display:block!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;margin:0!important;background:transparent!important;box-shadow:none!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky.is-sticky{box-sizing:border-box!important;padding-block-start:4px!important;padding-inline:max(16px,calc((100% - min(100%,1280px))/2))!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header.awa-main-header{height:74px!important;min-height:74px!important;max-height:74px!important;padding:0!important;padding-block:0!important;padding-inline:0!important;margin:0!important;background:var(--awa-bg-surface,var(--awa-bg,Canvas))!important;border-bottom:0!important}'
@@ -804,20 +848,20 @@
             + 'max-height:min(58vh,430px)!important;aspect-ratio:auto!important;object-fit:contain!important;'
             + 'object-position:center center!important;background:var(--awa-bg,Canvas)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer){'
-            + 'background:var(--awa-primary)!important;color:var(--awa-on-primary,oklch(98% .004 20))!important}'
+            + 'background:var(--awa-bg-soft,var(--awa-bg,Canvas))!important;color:var(--awa-text,CanvasText)!important;min-height:0!important;height:auto!important;padding-block:0!important;overflow-x:clip!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             + ':is(#footer,.footer-container,.footer.content,.footer-top,.footer-middle,.footer-content,.row,.rowFlexMargin,.velaBlock,.velaContent,.awa-footer-newsletter){'
-            + 'background:transparent!important;background-color:transparent!important;color:var(--awa-on-primary,oklch(98% .004 20))!important}'
+            + 'background:transparent!important;background-color:transparent!important;color:var(--awa-text,CanvasText)!important;min-height:0!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             + ':is(input,textarea,select,.control input){background:var(--awa-bg,Canvas)!important;color:var(--awa-text,CanvasText)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
-            + ':is(h2,h3,h4,.footer-title,.awa-footer-title){color:var(--awa-on-primary,oklch(98% .004 20))!important}'
+            + ':is(h2,h3,h4,.footer-title,.awa-footer-title){color:var(--awa-text,CanvasText)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
-            + ':is(a,p,li,span,.footer.links a,.footer-content a){color:oklch(96% .006 20 / .92)!important}'
+            + ':is(a,p,li,span,.footer.links a,.footer-content a){color:var(--awa-text,CanvasText)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) .footer-bottom{'
             + 'background:var(--awa-bg,Canvas)!important;color:var(--awa-text,CanvasText)!important;border-radius:12px!important;'
-            + 'margin-inline:0!important;width:auto!important;max-width:100%!important;padding:clamp(16px,2.4vw,28px)!important;'
-            + 'box-shadow:0 2px 10px color-mix(in srgb,CanvasText 10%,transparent)!important}'
+            + 'box-sizing:border-box!important;margin-inline:auto!important;width:min(100%,1248px)!important;max-width:calc(100% - 32px)!important;padding:clamp(16px,2.4vw,28px)!important;'
+            + 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 14%,Canvas))!important;box-shadow:none!important;overflow:hidden!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
             + '.page-wrapper .top-home-content--category-carousel :is(.awa-section-header,.awa-category-carousel__header){'
             + 'display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important}'
@@ -1130,6 +1174,50 @@
         var style = document.getElementById('awa-footer-contrast-terminal');
         var css;
 
+        function isFooterDark() {
+            var footer = document.querySelector('.page_footer, .page-footer');
+            var color;
+            var match;
+            var lightness;
+            var r;
+            var g;
+            var b;
+
+            if (!footer) {
+                return false;
+            }
+
+            color = window.getComputedStyle(footer).backgroundColor || '';
+            match = color.match(/oklch\(\s*([0-9.]+)(%)?/i);
+            if (match) {
+                lightness = parseFloat(match[1]);
+                if (match[2]) {
+                    lightness /= 100;
+                }
+
+                return lightness < 0.62;
+            }
+
+            match = color.match(/rgba?\(\s*([0-9.]+)[,\s]+([0-9.]+)[,\s]+([0-9.]+)/i);
+            if (match) {
+                r = parseFloat(match[1]) / 255;
+                g = parseFloat(match[2]) / 255;
+                b = parseFloat(match[3]) / 255;
+
+                return (0.2126 * r + 0.7152 * g + 0.0722 * b) < 0.5;
+            }
+
+            return footer.classList.contains('awa-footer--dark');
+        }
+
+        if (!isFooterDark()) {
+            if (style) {
+                style.textContent = '';
+            }
+
+            return;
+        }
+
         if (!style) {
             style = document.createElement('style');
             style.id = 'awa-footer-contrast-terminal';
@@ -1246,25 +1334,25 @@
 }());
 
 /*
- * Fix terminal — ícone do carrinho (showcart) invisível (2026-07-02).
+ * Fix terminal — ícone do carrinho (showcart) invisível (2026-07-02, corrigido 2026-07-07).
  *
- * Diagnóstico: o botão showcart é um CTA vermelho sólido
- * (background: var(--awa-primary)) com `color: var(--awa-text-inverse)`
- * branco no próprio `<a>`. O ícone SVG usa `stroke="currentColor"`
- * (atributo de apresentação, baixa prioridade) esperando herdar o branco
- * do pai. Isolado por bisseção de document.styleSheets: o `<a>` reporta
- * `color: rgb(255,255,255)` corretamente, mas o `<svg class="awa-minicart-icon">`
- * filho reporta uma cor vermelha (oklch) sem nenhuma regra de folha de
- * estilo (externa ou <style> injetado) que bata no seletor via
- * `Element.matches()` — indício de que algum agente externo ao CSSOM
- * documentado (extensão do navegador, dark-mode automático do host, ou
- * heurística de recolorização) está quebrando a herança nesta camada,
- * fora do nosso controle via stylesheet. Ícone ficava 100% invisível
- * (vermelho sobre vermelho) para o usuário final.
+ * Diagnóstico original (2026-07-02) estava incorreto: assumia que o botão
+ * showcart tinha fundo vermelho sólido (background: var(--awa-primary)) e
+ * que o ícone precisava ser branco para contrastar com ele. Confirmado por
+ * runtime (getComputedStyle + getBoundingClientRect via CDP em 2026-07-07)
+ * que o `.showcart`/`.awa-header-cart-fallback` real tem
+ * `background-color: transparent` — NÃO existe fundo vermelho. O ícone SVG
+ * usa `stroke="currentColor"` e herda corretamente `color: var(--awa-primary)`
+ * (vermelho) da cascata CSS, o que já o torna visível sobre o fundo branco
+ * da página. O reforço inline anterior forçava `color/stroke: #fff`, criando
+ * branco sobre branco — o ícone ficava 100% invisível para o usuário final
+ * (regressão introduzida pelo próprio "fix").
  *
- * Correção definitiva: reforço inline com prioridade "important",
- * mesmo padrão comprovado no fix de contraste do footer acima — inline
- * important vence qualquer regra de stylesheet, documentada ou não.
+ * Correção: reforçar a cor CORRETA (var(--awa-primary), vermelho AWA) via
+ * inline important, em vez de branco — mantém o mesmo mecanismo de reforço
+ * (inline important vence qualquer regra de stylesheet) mas com o valor
+ * certo, garantindo visibilidade mesmo se algum agente externo ao CSSOM
+ * documentado quebrar a herança de `color` nesta camada.
  */
 (function () {
     'use strict';
@@ -1277,10 +1365,10 @@
     function forceCartIconContrast() {
         var els = document.querySelectorAll(ICON_SELECTOR);
         for (var i = 0; i < els.length; i++) {
-            els[i].style.setProperty('color', '#fff', 'important');
-            els[i].style.setProperty('stroke', '#fff', 'important');
+            els[i].style.setProperty('color', 'var(--awa-primary, #b73337)', 'important');
+            els[i].style.setProperty('stroke', 'var(--awa-primary, #b73337)', 'important');
             if (els[i].tagName === 'circle') {
-                els[i].style.setProperty('fill', '#fff', 'important');
+                els[i].style.setProperty('fill', 'var(--awa-primary, #b73337)', 'important');
             }
         }
     }
@@ -1390,4 +1478,106 @@
             window.setTimeout(forceHomeTabAndFooterToggleContrast, 30);
         }
     }, { capture: true, passive: true });
+}());
+
+/*
+ * VISUAL-20260707: footer home/PLP e quickview PLP.
+ *
+ * O footer recebe regras concorrentes em inline head, bundles assíncronos e
+ * este próprio gate. Algumas rotas ainda chegavam no fim do carregamento com o
+ * container externo vermelho, embora os filhos já estivessem claros. Esta
+ * camada aplica a decisão visual diretamente nos containers-alvo, depois das
+ * folhas tardias, sem tocar no conteúdo nem nas rotas.
+ */
+(function () {
+    'use strict';
+
+    function isTargetPage() {
+        return document.body && document.body.matches(
+            '.catalog-category-view,.catalogsearch-result-index,.cms-index-index,.cms-home,.cms-homepage_ayo_home5'
+        );
+    }
+
+    function setImportant(el, prop, value) {
+        if (el) {
+            el.style.setProperty(prop, value, 'important');
+        }
+    }
+
+    function applyFooterShellFix() {
+        if (!isTargetPage()) {
+            return;
+        }
+
+        document.querySelectorAll('.page_footer, .page-footer').forEach(function (footer) {
+            setImportant(footer, 'background', 'var(--awa-bg-soft,var(--awa-bg,Canvas))');
+            setImportant(footer, 'background-color', 'var(--awa-bg-soft,var(--awa-bg,Canvas))');
+            setImportant(footer, 'color', 'var(--awa-text,CanvasText)');
+            setImportant(footer, 'height', 'auto');
+            setImportant(footer, 'min-height', '0');
+            setImportant(footer, 'padding-block', '0');
+            setImportant(footer, 'overflow-x', 'clip');
+            setImportant(footer, 'max-width', '100%');
+        });
+
+        document.querySelectorAll(
+            '.page_footer #footer, .page-footer #footer, ' +
+            '.page_footer .footer-container, .page-footer .footer-container'
+        ).forEach(function (el) {
+            setImportant(el, 'background', 'transparent');
+            setImportant(el, 'background-color', 'transparent');
+            setImportant(el, 'color', 'var(--awa-text,CanvasText)');
+            setImportant(el, 'min-height', '0');
+        });
+
+        document.querySelectorAll('.page_footer .footer-bottom, .page-footer .footer-bottom').forEach(function (el) {
+            setImportant(el, 'box-sizing', 'border-box');
+            setImportant(el, 'background', 'var(--awa-bg,Canvas)');
+            setImportant(el, 'background-color', 'var(--awa-bg,Canvas)');
+            setImportant(el, 'color', 'var(--awa-text,CanvasText)');
+            setImportant(el, 'margin-inline', 'auto');
+            setImportant(el, 'max-width', 'calc(100% - 32px)');
+            setImportant(el, 'width', 'min(100%,1248px)');
+            setImportant(el, 'overflow', 'hidden');
+            setImportant(el, 'box-shadow', 'none');
+        });
+    }
+
+    function applyCatalogQuickviewFix() {
+        if (!document.body || !document.body.matches('.catalog-category-view,.catalogsearch-result-index')) {
+            return;
+        }
+
+        document.querySelectorAll('.products-grid .product-thumb').forEach(function (el) {
+            setImportant(el, 'position', 'relative');
+            setImportant(el, 'overflow', 'hidden');
+        });
+
+        document.querySelectorAll('.products-grid .quickview-link').forEach(function (el) {
+            setImportant(el, 'box-sizing', 'border-box');
+            setImportant(el, 'inline-size', '40px');
+            setImportant(el, 'block-size', '40px');
+            setImportant(el, 'max-width', '40px');
+            setImportant(el, 'min-width', '0');
+            setImportant(el, 'right', '0');
+            setImportant(el, 'inset-inline-end', '0');
+        });
+    }
+
+    function applyVisualBugfixTerminal() {
+        applyFooterShellFix();
+        applyCatalogQuickviewFix();
+    }
+
+    if (document.readyState !== 'loading') {
+        applyVisualBugfixTerminal();
+    } else {
+        document.addEventListener('DOMContentLoaded', applyVisualBugfixTerminal, { once: true });
+    }
+
+    document.addEventListener('awa:css-gate-applied', applyVisualBugfixTerminal, { passive: true });
+    window.addEventListener('load', applyVisualBugfixTerminal, { once: true, passive: true });
+    window.setTimeout(applyVisualBugfixTerminal, 800);
+    window.setTimeout(applyVisualBugfixTerminal, 2400);
+    window.setTimeout(applyVisualBugfixTerminal, 5000);
 }());

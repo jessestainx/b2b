@@ -70,6 +70,7 @@ class CustomerErpPendingDataProvider extends AbstractDataProvider
         $erpAttrId = $this->resolveAttributeId('erp_customer_sync_status');
         $approvalAttrId = $this->resolveAttributeId('b2b_approval_status');
         $cnpjAttrId = $this->resolveAttributeId('b2b_cnpj');
+        $erpCodeAttrId = $this->resolveAttributeId('erp_code');
 
         $pendingStatuses = ErpPendingQueueResolver::ERP_PENDING_STATUSES;
         $validatedStatuses = ErpPendingQueueResolver::VALIDATED_STATUSES;
@@ -79,8 +80,13 @@ class CustomerErpPendingDataProvider extends AbstractDataProvider
             'b2b_map.magento_customer_id = e.entity_id',
             []
         )->joinLeft(
+            ['erp_code_attr' => $varcharTable],
+            'erp_code_attr.entity_id = e.entity_id AND erp_code_attr.attribute_id = ' . $erpCodeAttrId
+                . " AND erp_code_attr.value REGEXP '^[0-9]+$'",
+            []
+        )->joinLeft(
             ['b2b_conf' => $confirmedTable],
-            'b2b_conf.customer_id = b2b_map.old_oc_customer_id',
+            'b2b_conf.customer_id = COALESCE(NULLIF(CAST(erp_code_attr.value AS UNSIGNED), 0), b2b_map.old_oc_customer_id)',
             ['erp_confirmed' => 'b2b_conf.customer_id']
         )->joinLeft(
             ['erp_status' => $varcharTable],

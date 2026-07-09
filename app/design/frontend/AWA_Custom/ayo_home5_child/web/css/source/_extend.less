@@ -32,6 +32,49 @@
 // 1.1. COMPONENTES BASE (Fase 1-D) — bundled Fase 5 Jun/24
 @import (once) '_awa-bundle-base-components';
 
+// 1.2. UTILITY LIBRARY (atomic primitives — stack, cluster, bento, etc.)
+//      Veja _utilities.less para referência completa. Adicionado em 2026-06-28.
+@import (once) '_utilities';
+
+// 1.3. MAGENTO 2 VISUAL COMPONENTS (seletores nativos Magento 2 + tokens AWA)
+//      Veja _magento2-visual-components.less para spec por componente.
+//      Cobre: header, footer, breadcrumb, toolbar, product card, price-box,
+//      add-to-cart, forms, messages, pagination, tabs, cart table, accordion.
+//      Adicionado em 2026-06-28.
+@import (once) '_magento2-visual-components';
+
+// 1.4. CONTAINER & GRID SYSTEM CANÔNICO (CANÔNICO — fonte única de verdade)
+//      Spec: design-system/CONTAINER-GRID-SPEC.md
+//      Consolida 12+ arquivos legados (_grid-system, _grid-listing, _awa-container-grid-*).
+//      Novas implementações: .awa-container, .awa-grid-12, .awa-grid-auto-fit,
+//      .awa-bento, .awa-section. Adicionado em 2026-06-28.
+@import (once) '_container-grid';
+
+// 1.5. TYPOGRAPHY (Plus Jakarta Sans, escala fluida, line-clamp, etc.)
+//      Veja _typography.less. Adicionado em 2026-06-28.
+@import (once) '_typography';
+
+// 1.6. ACCESSIBILITY (WCAG 2.1 AA/AAA) — focus, skip-link, touch targets, etc.
+//      Veja _a11y.less. Adicionado em 2026-06-28.
+@import (once) '_a11y';
+
+// 1.7. BUTTONS — sistema canonico (primary/secondary/ghost/danger + sizes + icon)
+//      Veja _buttons.less. Adicionado em 2026-06-28.
+@import (once) '_buttons';
+
+// 1.8. FORMS — sistema canonico (input/select/textarea/checkbox/radio/switch/file)
+//      Veja _forms.less. Adicionado em 2026-06-28.
+@import (once) '_forms';
+
+// 1.9. MOTION & ANIMATIONS (transitions, keyframes, loading states)
+//      Veja _motion.less. Adicionado em 2026-06-29.
+@import (once) '_motion';
+
+// 1.10. VISUAL BUG FIXES (resolve 32 issues do audit 2026-06-17)
+//      Veja _visual-bug-fixes.less + design-system/VISUAL-BUGS-FOUND.md
+//      Carregar DEPOIS de todos os outros (terminal-wins).
+@import (once) '_visual-bug-fixes';
+
 // 2. BASE GLOBAL — emitido via consolidated S90+
 // @import '_global';
 
@@ -1571,7 +1614,12 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
 
 // 78. HEADER REFERENCE MATCH §78 — layout aprovado pelo anexo (2026-06-08)
 //     Header full-width: promo vermelha, busca ampla, ações compactas e nav branca.
-html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
+// AWA fix 2026-07-06: exclui páginas B2B (dashboard/shell) — a promo bar é
+// propositalmente ocultada nessas páginas (v. §polish v19 em dashboard-audit-phases.css),
+// mas esta regra (especificidade alta) forçava display:flex e revertia o hide,
+// deixando a barra invisível (visibility:hidden) porém ocupando 44px de altura
+// e com overflow:hidden recortando os filhos posicionados (close button, CTA short).
+html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index):not(.b2b-account-dashboard):not(.b2b-account-shell)
     .page-wrapper
     .awa-site-header {
 
@@ -2054,3 +2102,13 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
 
 // Fase 3D.2 — Header container/grid contract
 @import (once) 'components/_header-contract-grid';
+
+// Visual audit Jul/2026 — menu, footer, PLP, busca, catálogo, B2B bar
+@import (once) 'components/_visual-audit-jul2026';
+
+// 1.11. MEDIUM VISUAL FIXES (touch target, cards aspect, sticky, btn align)
+//      Veja _medium-visual-fixes.less. Adicionado em 2026-06-29.
+@import (once) '_medium-visual-fixes';
+
+// 1.12. VISUAL AUDIT JUL 2026 — 13 correções UX/UI (menu, footer, PLP, B2B, PWA)
+// (import único acima — linha ~2107)

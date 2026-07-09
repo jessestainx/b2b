@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="GrupoAwamotos_B2B::css/order/erp-operations.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="GrupoAwamotos\B2B\Block\Order\ErpOperations"
+                   name="b2b.order.erp.operations"
+                   template="GrupoAwamotos_B2B::order/erp-operations.phtml"
+                   before="sales.order.info.links"
+                   cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

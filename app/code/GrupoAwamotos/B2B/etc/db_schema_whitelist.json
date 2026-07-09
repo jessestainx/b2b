@@ -22,7 +22,8 @@
         "index": {
             "GRUPOAWAMOTOS_B2B_QUOTE_REQUEST_STATUS": true,
             "GRUPOAWAMOTOS_B2B_QUOTE_REQUEST_CUSTOMER_EMAIL": true,
-            "GRUPOAWAMOTOS_B2B_QUOTE_REQUEST_CREATED_AT": true
+            "GRUPOAWAMOTOS_B2B_QUOTE_REQUEST_CREATED_AT": true,
+            "GRUPOAWAMOTOS_B2B_QUOTE_REQUEST_CUSTOMER_ID_STATUS": true
         },
         "constraint": {
             "PRIMARY": true,
@@ -175,7 +176,8 @@
         },
         "constraint": {
             "PRIMARY": true,
-            "GRUPOAWAMOTOS_B2B_CREDIT_TRANSACTION_CSTR_ID_CSTR_ENTT_ENTT_ID": true
+            "GRUPOAWAMOTOS_B2B_CREDIT_TRANSACTION_CSTR_ID_CSTR_ENTT_ENTT_ID": true,
+            "FK_32E2EEA44BDDF8C1334CF9374D8A1455": true
         }
     },
     "grupoawamotos_b2b_company": {
@@ -249,10 +251,14 @@
             "max_customers": true,
             "admin_user_id": true,
             "created_at": true,
-            "updated_at": true
+            "updated_at": true,
+            "chatwoot_agent_id": true,
+            "erp_seller_code": true
         },
         "index": {
-            "GRUPOAWAMOTOS_B2B_ATTENDANTS_DEPARTMENT_IS_ACTIVE": true
+            "GRUPOAWAMOTOS_B2B_ATTENDANTS_DEPARTMENT_IS_ACTIVE": true,
+            "GRUPOAWAMOTOS_B2B_ATTENDANTS_ERP_SELLER_CODE": true,
+            "GRUPOAWAMOTOS_B2B_ATTENDANTS_CHATWOOT_AGENT_ID": true
         },
         "constraint": {
             "PRIMARY": true,
@@ -274,7 +280,8 @@
         "constraint": {
             "PRIMARY": true,
             "GRUPOAWAMOTOS_B2B_CUSTOMER_ATTENDANT_CUSTOMER_ID": true,
-            "FK_C3BE08EB1B9C2765CE6B0FF6C92F68BD": true
+            "FK_C3BE08EB1B9C2765CE6B0FF6C92F68BD": true,
+            "GRUPOAWAMOTOS_B2B_CSTR_ATTENDANT_CSTR_ID_CSTR_ENTT_ENTT_ID": true
         }
     },
     "grupoawamotos_b2b_attendant_log": {
@@ -344,12 +351,92 @@
             "GRUPOAWAMOTOS_B2B_FOLLOWUP_CUSTOMER_ID": true,
             "GRUPOAWAMOTOS_B2B_FOLLOWUP_ATTENDANT_ID": true,
             "GRUPOAWAMOTOS_B2B_FOLLOWUP_NEXT_CONTACT": true,
-            "GRUPOAWAMOTOS_B2B_FOLLOWUP_STATUS": true
+            "GRUPOAWAMOTOS_B2B_FOLLOWUP_STATUS": true,
+            "GRUPOAWAMOTOS_B2B_FOLLOWUP_NEXT_CONTACT_AT": true
         },
         "constraint": {
             "PRIMARY": true,
             "GRUPOAWAMOTOS_B2B_FOLLOWUP_CUSTOMER_ID": true,
-            "GRUPOAWAMOTOS_B2B_FOLLOWUP_ATTENDANT_ID": true
+            "GRUPOAWAMOTOS_B2B_FOLLOWUP_ATTENDANT_ID": true,
+            "GRUPOAWAMOTOS_B2B_FOLLOWUP_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "FK_091D9C2C915D9B4A320DFB6D260FD7F3": true
+        }
+    },
+    "grupoawamotos_b2b_quote_audit_log": {
+        "column": {
+            "log_id": true,
+            "request_id": true,
+            "action": true,
+            "old_status": true,
+            "new_status": true,
+            "old_quoted_total": true,
+            "new_quoted_total": true,
+            "admin_user_id": true,
+            "comment": true,
+            "created_at": true
+        },
+        "index": {
+            "GRUPOAWAMOTOS_B2B_QUOTE_AUDIT_LOG_REQUEST_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FK_426CE4591095DD1FD9B845BEBFDDD780": true
+        }
+    },
+    "quote": {
+        "column": {
+            "b2b_po_number": true,
+            "b2b_order_notes": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "b2b_po_number": true,
+            "b2b_order_notes": true
+        }
+    },
+    "grupoawamotos_b2b_subscriptions": {
+        "column": {
+            "subscription_id": true,
+            "customer_id": true,
+            "name": true,
+            "status": true,
+            "frequency": true,
+            "next_run_at": true,
+            "last_run_at": true,
+            "items_serialized": true,
+            "shipping_address_id": true,
+            "payment_method": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "GRUPOAWAMOTOS_B2B_SUBSCRIPTIONS_CUSTOMER_ID": true,
+            "GRUPOAWAMOTOS_B2B_SUBSCRIPTIONS_NEXT_RUN_AT": true,
+            "GRUPOAWAMOTOS_B2B_SUBSCRIPTIONS_STATUS": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "GRUPOAWAMOTOS_B2B_SUBSCRIPTIONS_CSTR_ID_CSTR_ENTT_ENTT_ID": true
+        }
+    },
+    "grupoawamotos_b2b_sectra_poll_state": {
+        "column": {
+            "customer_id": true,
+            "sectra_chave": true,
+            "last_result": true,
+            "attempts": true,
+            "last_checked_at": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "GRUPOAWAMOTOS_B2B_SECTRA_POLL_STATE_LAST_CHECKED_AT": true,
+            "GRUPOAWAMOTOS_B2B_SECTRA_POLL_STATE_LAST_RESULT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "GRUPOAWAMOTOS_B2B_SECTRA_POLL_STATE_CSTR_ID_CSTR_ENTT_ENTT_ID": true
         }
     }
 }

@@ -1,0 +1,43 @@
+{
+  "name": "awa-motos-pwa",
+  "version": "1.0.0",
+  "description": "AWA Motos PWA Studio — Migração gradual do tema AYO para Venia UI",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "venia-concept start",
+    "build": "venia-concept build",
+    "start": "venia-concept start",
+    "lint": "eslint --ignore-path .gitignore --ignore-pattern 'build/**' --ext .js,.jsx,.ts,.tsx src",
+    "stage:venia": "yarn build --env=stage",
+    "preview": "venia-concept preview",
+    "test": "yarn jest",
+    "test:watch": "yarn jest --watch",
+    "test:snap": "yarn jest -u"
+  },
+  "dependencies": {
+    "@magento/pwa-buildpack": "~11.0.0",
+    "@magento/venia-concept": "~12.0.0",
+    "@magento/venia-ui": "~8.0.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "react-redux": "^7.2.0",
+    "react-router-dom": "^5.2.0",
+    "redux": "^4.1.0",
+    "redux-thunk": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@testing-library/jest-dom": "^5.0.0",
+    "@testing-library/react": "^11.0.0",
+    "eslint": "^7.0.0",
+    "jest": "^26.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.0.0"
+  }
+}

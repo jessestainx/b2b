@@ -12,7 +12,7 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
     --vm-radius: 12px;
     --vm-item-h: 44px;
     --vm-icon-size: 20px;
-    --vm-font: Inter, Roboto, system-ui, -apple-system, sans-serif;
+    --vm-font: "Source Sans 3", system-ui, -apple-system, sans-serif;
     --vm-bg: rgba(255, 255, 255, 0.96);
     --vm-bg-glass: rgba(255, 255, 255, 0.88);
     --vm-blur: 12px;
@@ -20,10 +20,14 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
     --vm-shadow-flyout: 0 20px 50px -12px rgba(0, 0, 0, 0.2), 0 4px 15px rgba(0, 0, 0, 0.05);
     --vm-border: rgb(0 0 0 / 8%);
     --vm-hover-bg: var(--awa-primary-subtle, rgba(183, 51, 55, 0.05));
-    --vm-active-bar: var(--awa-primary, #b73337);
-    --vm-transition: 240ms cubic-bezier(0.4, 0, 0.2, 1);
-    --vm-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --vm-active-bar: var(--awa-primary, var(--awa-primary));
+    --vm-transition: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    --vm-transition-fast: 150ms cubic-bezier(0.22, 1, 0.36, 1);
     --vm-flyout-enter: 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    --vm-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --vm-space-2: 8px;
+    --vm-space-3: 12px;
+    --vm-space-4: 16px;
 }
 
 /* ─── 2. TRIGGER "Departamentos" ──────────────────────────────────────── */
@@ -99,13 +103,13 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.vmm-sc
 }
 body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.vmm-scroll-top::before {
     top: 0 !important;
-    background: linear-gradient(to bottom, var(--awa-white, #fff) 0%, transparent 100%) !important;
+    background: linear-gradient(to bottom, var(--awa-white, var(--awa-bg)) 0%, transparent 100%) !important;
     margin-bottom: -24px !important;
     opacity: 1 !important;
 }
 body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.vmm-scroll-bottom::after {
     bottom: 0 !important;
-    background: linear-gradient(to top, var(--awa-white, #fff) 0%, transparent 100%) !important;
+    background: linear-gradient(to top, var(--awa-white, var(--awa-bg)) 0%, transparent 100%) !important;
     margin-top: -24px !important;
     opacity: 1 !important;
 }
@@ -128,61 +132,46 @@ body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown >
     min-height: var(--vm-item-h) !important;
     padding: 0 36px 0 14px !important;
     gap: 10px !important;
-    color: var(--awa-text, #333) !important;
+    color: var(--awa-text, var(--awa-text)) !important;
     transition: color var(--vm-transition),
                 background var(--vm-transition),
                 padding-left var(--vm-transition) !important;
     position: relative !important;
 }
 
-/* Barra ativa esquerda via pseudo-elemento */
-body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top::before {
-    content: '' !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 6px !important;
-    bottom: 6px !important;
-    width: 3px !important;
-    border-radius: 0 3px 3px 0 !important;
-    background: var(--vm-active-bar) !important;
-    transform: scaleY(0) !important;
-    transition: transform var(--vm-transition) !important;
-    transform-origin: center !important;
+/* Estado ativo/hover: fundo tintado, sem barra lateral (Impeccable product register) */
+body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top::before,
+body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top::before,
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-active > a.level-top::before,
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0._active > a.level-top::before,
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-current-category > a.level-top::before {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
 }
 
 /* Hover state */
 body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top {
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
     background: var(--vm-hover-bg) !important;
-    padding-left: 18px !important;
-}
-body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top::before {
-    transform: scaleY(1) !important;
+    padding-inline: 14px !important;
 }
 
 /* Active state */
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-active > a.level-top,
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0._active > a.level-top {
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
     font-weight: 550 !important;
-    padding-left: 18px !important;
-}
-body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-active > a.level-top::before,
-body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0._active > a.level-top::before {
-    transform: scaleY(1) !important;
+    padding-inline: 14px !important;
+    background: var(--vm-hover-bg) !important;
 }
 
 /* ─── 4b. CURRENT CATEGORY HIGHLIGHT ─────────────────────────────────── */
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-current-category > a.level-top {
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
     font-weight: 600 !important;
-    padding-left: 18px !important;
-    background: rgba(183, 51, 55, 0.04) !important;
-}
-body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-current-category > a.level-top::before {
-    transform: scaleY(1) !important;
-    width: 3px !important;
-    background: var(--awa-primary, #b73337) !important;
+    padding-inline: 14px !important;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 6%, var(--awa-bg, var(--awa-bg))) !important;
 }
 
 /* ─── 5. ÍCONES SVG — refinamento ────────────────────────────────────── */
@@ -198,7 +187,7 @@ body .page-wrapper .navigation.verticalmenu .vmm-cat-icon {
 body .page-wrapper .navigation.verticalmenu li.level0:hover .awa-vmenu-icon svg,
 body .page-wrapper .navigation.verticalmenu li.level0:hover .vmm-cat-icon {
     opacity: 1 !important;
-    stroke: var(--awa-primary, #b73337) !important;
+    stroke: var(--awa-primary, var(--awa-primary)) !important;
     transform: scale(1.1) !important;
 }
 body .page-wrapper .navigation.verticalmenu li.level0.vmm-active .awa-vmenu-icon svg,
@@ -206,7 +195,7 @@ body .page-wrapper .navigation.verticalmenu li.level0.vmm-active .vmm-cat-icon,
 body .page-wrapper .navigation.verticalmenu li.level0.vmm-current-category .awa-vmenu-icon svg,
 body .page-wrapper .navigation.verticalmenu li.level0.vmm-current-category .vmm-cat-icon {
     opacity: 1 !important;
-    stroke: var(--awa-red, #b73337) !important;
+    stroke: var(--awa-red, var(--awa-primary)) !important;
 }
 
 /* ─── 6. SETA DE SUBCATEGORIA (chevron moderno) ──────────────────────── */
@@ -226,11 +215,11 @@ body .page-wrapper .navigation.verticalmenu li.level0.vmm-current-category .vmm-
         transition: border-color var(--vm-transition), transform var(--vm-transition) !important;
     }
     body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent:hover > a.level-top::after {
-        border-color: var(--awa-primary, #b73337) !important;
+        border-color: var(--awa-primary, var(--awa-primary)) !important;
         transform: rotate(45deg) translateX(2px) !important;
     }
     body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent.vmm-active > a.level-top::after {
-        border-color: var(--awa-primary, #b73337) !important;
+        border-color: var(--awa-primary, var(--awa-primary)) !important;
     }
 }
 
@@ -253,7 +242,7 @@ body .page-wrapper .navigation.verticalmenu .cat-label[style*="background:var(--
 body .page-wrapper .navigation.verticalmenu .cat-label[style*="background: var(--awa-vmenu-orange, #ff6600)"],
 body .page-wrapper .navigation.verticalmenu .cat-label.cat-label-hot {
     background: linear-gradient(135deg, var(--awa-vmenu-orange, #ff6600) 0%, var(--awa-vmenu-red, #ff4400) 100%) !important;
-    color: var(--awa-white, #fff) !important;
+    color: var(--awa-white, var(--awa-bg)) !important;
     animation: vmm-badge-glow-hot 2.5s ease-in-out infinite !important;
 }
 
@@ -262,7 +251,7 @@ body .page-wrapper .navigation.verticalmenu .cat-label[style*="background:var(--
 body .page-wrapper .navigation.verticalmenu .cat-label[style*="background: var(--awa-vmenu-green, #00aa00)"],
 body .page-wrapper .navigation.verticalmenu .cat-label.cat-label-sale {
     background: linear-gradient(135deg, var(--awa-vmenu-green-hover, #0d9f4f) 0%, var(--awa-vmenu-green-active, #0a7f3f) 100%) !important;
-    color: var(--awa-white, #fff) !important;
+    color: var(--awa-white, var(--awa-bg)) !important;
 }
 
 @keyframes vmm-badge-pulse {
@@ -317,7 +306,7 @@ body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label::after {
         border-radius: 0 var(--vm-radius) var(--vm-radius) 0 !important;
         box-shadow: var(--vm-shadow-flyout) !important;
         border: 1px solid var(--vm-border) !important;
-        border-left: 3px solid var(--awa-primary, #b73337) !important;
+        border-left: 3px solid var(--awa-primary, var(--awa-primary)) !important;
         /* Animação de entrada suave */
         opacity: 0 !important;
         transform: translateX(-8px) !important;
@@ -378,26 +367,15 @@ body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label::after {
     }
     body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:hover,
     body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-item--level1 > a:hover {
-        color: var(--awa-red, #b73337) !important;
+        color: var(--awa-red, var(--awa-primary)) !important;
         background: var(--vm-hover-bg) !important;
-        padding-left: 18px !important;
+        padding-inline: 14px !important;
     }
 
-    /* Mini-barra no hover dos sub-links */
-    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a::before {
-        content: '' !important;
-        position: absolute !important;
-        left: 4px !important;
-        top: 50% !important;
-        width: 2px !important;
-        height: 0 !important;
-        background: var(--awa-primary, #b73337) !important;
-        border-radius: 2px !important;
-        transform: translateY(-50%) !important;
-        transition: height var(--vm-transition-fast) !important;
-    }
-    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a:hover::before {
-        height: 14px !important;
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a::before,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-item--level1 > a::before {
+        display: none !important;
+        content: none !important;
     }
 
     /* Subcategorias nível 1 (títulos) */
@@ -414,7 +392,7 @@ body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label::after {
         font-family: var(--vm-font) !important;
         font-size: 12px !important;
         font-weight: 700 !important;
-        color: var(--awa-red, #b73337) !important;
+        color: var(--awa-red, var(--awa-primary)) !important;
         text-transform: uppercase !important;
         letter-spacing: 0.05em !important;
         padding: 8px 14px !important;
@@ -428,8 +406,8 @@ body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label::after {
     }
     body .page-wrapper .navigation.verticalmenu .level0.submenu .vmm-view-all-link:hover,
     body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-item--all > a:hover {
-        background: var(--awa-primary, #b73337) !important;
-        color: var(--awa-white, #fff) !important;
+        background: var(--awa-primary, var(--awa-primary)) !important;
+        color: var(--awa-white, var(--awa-bg)) !important;
         transform: translateX(2px) !important;
     }
 
@@ -458,7 +436,7 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
     border-bottom: none !important;
     position: sticky !important;
     bottom: 0 !important;
-    background: var(--awa-white, #fff) !important;
+    background: var(--awa-white, var(--awa-bg)) !important;
     z-index: 3 !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories {
@@ -467,9 +445,12 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
     font-weight: 600 !important;
     letter-spacing: 0.3px !important;
     text-transform: uppercase !important;
-    color: var(--awa-red, #b73337) !important;
+    color: var(--awa-red, var(--awa-primary)) !important;
     padding: 10px 14px !important;
     gap: 6px !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
     border-radius: 0 0 var(--vm-radius) var(--vm-radius) !important;
     transition: background var(--vm-transition), color var(--vm-transition) !important;
     display: flex !important;
@@ -477,12 +458,13 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-lin
     justify-content: center !important;
     width: 100% !important;
     text-decoration: none !important;
+    box-sizing: border-box !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories:hover {
     background: rgba(183, 51, 55, 0.06) !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-icon {
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: transform var(--vm-transition) !important;
     font-size: 11px !important;
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories.expanding .vm-toggle-icon {
@@ -497,7 +479,7 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0
 }
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0.vmm-all-categories > a.level-top {
     font-weight: 600 !important;
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
     justify-content: center !important;
     font-size: 12px !important;
     text-transform: uppercase !important;
@@ -551,8 +533,8 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0
 
     /* Submenu mobile expandido */
     body.nav-open .page-wrapper .navigation.verticalmenu .level0.submenu {
-        background: var(--awa-bg-subtle, #fafafa) !important;
-        border-left: 3px solid var(--awa-primary, #b73337) !important;
+        background: var(--awa-bg-subtle, var(--awa-bg-subtle)) !important;
+        border-left: 3px solid var(--awa-primary, var(--awa-primary)) !important;
         border-top: 1px solid rgb(0 0 0 / 4%) !important;
         padding: 8px 12px !important;
     }
@@ -568,7 +550,7 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0
     body.nav-open .page-wrapper .navigation.verticalmenu .level0.submenu a:hover,
     body.nav-open .page-wrapper .navigation.verticalmenu .level0.submenu a:active {
         background: var(--vm-hover-bg) !important;
-        color: var(--awa-red, #b73337) !important;
+        color: var(--awa-red, var(--awa-primary)) !important;
     }
 
     /* Botão fechar drawer */
@@ -621,14 +603,14 @@ body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0
 
 /* ─── 15. FOCUS VISIBLE — acessibilidade moderna ─────────────────────── */
 body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top:focus-visible {
-    outline: 2px solid var(--awa-red, #b73337) !important;
+    outline: 2px solid var(--awa-red, var(--awa-primary)) !important;
     outline-offset: -2px !important;
     border-radius: 4px !important;
     background: rgb(183 51 55 / 5%) !important;
 }
 
 body .page-wrapper .navigation.verticalmenu .level0.submenu a:focus-visible {
-    outline: 2px solid var(--awa-red, #b73337) !important;
+    outline: 2px solid var(--awa-red, var(--awa-primary)) !important;
     outline-offset: -2px !important;
     border-radius: 4px !important;
 }
@@ -725,7 +707,7 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu a:focus-visible {
         border-radius: 0 !important;
         border: none !important;
         box-shadow: none !important;
-        background: #fff !important;
+        background: var(--awa-bg) !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
     }
@@ -742,7 +724,7 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu a:focus-visible {
         justify-content: space-between !important;
         padding: 16px 20px !important;
         border-bottom: 1px solid var(--vm-border) !important;
-        background: #fff !important;
+        background: var(--awa-bg) !important;
         position: sticky !important;
         top: 0 !important;
         z-index: 10 !important;
@@ -758,7 +740,7 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu a:focus-visible {
         border: none !important;
         font-size: 28px !important;
         line-height: 1 !important;
-        color: #333 !important;
+        color: var(--awa-text) !important;
         padding: 0 !important;
         cursor: pointer !important;
     }
@@ -821,10 +803,10 @@ li.awa-vem-extra-li:hover {
     align-items: center !important;
     gap: 8px !important;
     padding: 10px 16px !important;
-    font-family: var(--vm-font, Inter, system-ui, sans-serif) !important;
+    font-family: var(--vm-font, "Source Sans 3", system-ui, sans-serif) !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    color: var(--awa-text-dark, #333) !important;
+    color: var(--awa-text-dark, var(--awa-text)) !important;
     text-decoration: none !important;
     transition: background 150ms ease, color 150ms ease !important;
     border-radius: 6px !important;
@@ -834,12 +816,12 @@ li.awa-vem-extra-li:hover {
 .awa-vem-link:hover,
 .awa-vem-link:focus-visible {
     background: var(--vm-hover-bg, rgba(183, 51, 55, 0.06)) !important;
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
     text-decoration: none !important;
 }
 
 .awa-vem-link:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
     outline-offset: -2px !important;
 }
 
@@ -849,4 +831,358 @@ li.awa-vem-extra-li:hover {
         padding: 12px 16px !important;
         font-size: 14px !important;
     }
+}
+
+/* ─── 22. ADAPT — toque, tablet e viewports estreitos (2026-05-28) ────── */
+@media (max-width: 991px) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+        --vm-mobile-trigger-h: 52px;
+        --vm-mobile-safe-edge: 16px;
+        box-sizing: border-box !important;
+        inline-size: 100% !important;
+        max-inline-size: 100% !important;
+        min-inline-size: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+        overscroll-behavior: contain !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .our_categories.title-category-dropdown {
+        align-items: center !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        inline-size: 100% !important;
+        min-block-size: var(--vm-mobile-trigger-h) !important;
+        padding-block: 0 !important;
+        padding-inline: max(var(--vm-mobile-safe-edge), env(safe-area-inset-left, 0px)) max(var(--vm-mobile-safe-edge), env(safe-area-inset-right, 0px)) !important;
+        touch-action: manipulation !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .awa-vmenu-trigger-text {
+        flex: 1 1 auto !important;
+        min-inline-size: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown {
+        box-sizing: border-box !important;
+        inline-size: 100% !important;
+        max-inline-size: 100% !important;
+        min-inline-size: 0 !important;
+        max-block-size: calc(100dvh - var(--vm-mobile-trigger-h) - env(safe-area-inset-bottom, 0px)) !important;
+        overflow-x: visible !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain !important;
+        scrollbar-gutter: stable !important;
+        -webkit-overflow-scrolling: touch !important;
+        contain: layout style !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li > a.level-top,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li > a.navigation__link {
+        box-sizing: border-box !important;
+        max-inline-size: 100% !important;
+        min-inline-size: 0 !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li > a.level-top,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown > li > a.navigation__link,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .level0.submenu a,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .subchildmenu a,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .awa-vem-link {
+        min-block-size: 48px !important;
+        touch-action: manipulation !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .open-children-toggle.navigation__toggle,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .vmm-mobile-close,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .vmm-drill-back-btn {
+        min-block-size: 44px !important;
+        min-inline-size: 44px !important;
+        touch-action: manipulation !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .subchildmenu {
+        box-sizing: border-box !important;
+        inline-size: 100% !important;
+        max-inline-size: 100% !important;
+        overflow-x: hidden !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    body.nav-open .page-wrapper .navigation.verticalmenu.side-verticalmenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+        --vm-mobile-trigger-h: 64px;
+        max-inline-size: min(520px, 100vw) !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown {
+        max-block-size: calc(100dvh - var(--vm-mobile-trigger-h) - env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
+
+@media (min-width: 992px) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+        --vm-desktop-edge: 24px;
+        --vm-flyout-offset: 304px;
+        --vm-flyout-gutter: 16px;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown {
+        max-inline-size: min(var(--vmm-width, var(--awa-vmenu-panel-width, 280px)), calc(100vw - var(--vm-desktop-edge))) !important;
+        overflow: visible !important;
+    }
+
+    body .awa-vmf-portal.submenu,
+    body .awa-vmf-portal.navigation__submenu {
+        max-inline-size: calc(100vw - var(--vmm-left, 0px) - var(--vm-flyout-offset) - var(--vm-flyout-gutter)) !important;
+        max-block-size: calc(100dvh - var(--vmm-top, 140px) - var(--vm-flyout-gutter)) !important;
+        overflow: auto !important;
+        overscroll-behavior: contain !important;
+    }
+}
+
+/* §23 HARDEN — overflow, empty state, reduced motion (2026-05-28) */
+body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top,
+body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.navigation__link {
+    min-inline-size: 0 !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top .navigation__label,
+body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.navigation__link .navigation__label,
+body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top > span:not(.cat-label),
+body .page-wrapper .navigation.verticalmenu .level0.submenu a,
+body .page-wrapper .navigation.verticalmenu .subchildmenu a {
+    display: block !important;
+    min-inline-size: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.awa-vmenu-empty {
+    padding: 16px 14px !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.awa-vmenu-empty .awa-vmenu-empty__text {
+    color: var(--awa-text-muted, oklch(0.52 0.01 25)) !important;
+    display: block !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    white-space: normal !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown,
+    body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu .subchildmenu {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* §24 POLISH — estados, ritmo e acabamento final (2026-05-28) */
+#html-body .page-wrapper .our_categories.title-category-dropdown:focus-visible {
+    outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
+    outline-offset: 2px !important;
+}
+
+#html-body .page-wrapper .our_categories.title-category-dropdown.active {
+    border-radius: var(--vm-radius) var(--vm-radius) 0 0 !important;
+    box-shadow: 0 4px 14px rgb(183 51 55 / 18%) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories:focus-visible {
+    outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
+    outline-offset: -2px !important;
+    background: var(--vm-hover-bg) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .open-children-toggle.navigation__toggle:focus-visible {
+    outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
+    outline-offset: 2px !important;
+    border-radius: 6px !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.awa-vmenu-empty {
+    padding: var(--vm-space-4) var(--vm-space-3) !important;
+    text-align: center !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu > li.awa-vmenu-empty .awa-vmenu-empty__text {
+    max-inline-size: 28ch !important;
+    margin-inline: auto !important;
+}
+
+@media (max-width: 991px) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .vmm-mobile-header {
+        padding: var(--vm-space-4) max(var(--vm-mobile-safe-edge, 16px), env(safe-area-inset-left, 0px)) !important;
+        padding-inline-end: max(var(--vm-mobile-safe-edge, 16px), env(safe-area-inset-right, 0px)) !important;
+        background: var(--awa-white, oklch(0.99 0.005 25)) !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .vmm-mobile-close {
+        align-items: center !important;
+        border-radius: 8px !important;
+        color: var(--awa-text, oklch(0.35 0.01 25)) !important;
+        display: inline-flex !important;
+        justify-content: center !important;
+        min-block-size: 44px !important;
+        min-inline-size: 44px !important;
+        padding: var(--vm-space-2) !important;
+        transition: background var(--vm-transition-fast), color var(--vm-transition-fast) !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .vmm-mobile-close:hover {
+        background: var(--vm-hover-bg) !important;
+        color: var(--awa-primary, var(--awa-primary)) !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .vmm-mobile-close:focus-visible {
+        background: var(--vm-hover-bg) !important;
+        outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
+        outline-offset: 2px !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .vmm-mobile-close:active {
+        transform: scale(0.96) !important;
+    }
+}
+
+@media (min-width: 992px) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .our_categories.title-category-dropdown .awa-vmenu-trigger-icon {
+        flex-shrink: 0 !important;
+        inline-size: 20px !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .awa-vmenu-trigger-text {
+        letter-spacing: 0.02em !important;
+    }
+}
+
+/* §25 OPTIMIZE — contenção sem paint (flyouts não podem ser recortados) */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+    contain: layout style !important;
+}
+
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown {
+    contain: layout style !important;
+}
+
+@media (min-width: 992px) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown:not(.menu-open):not(.vmm-open) {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: var(--vm-bg, rgba(255, 255, 255, 0.96)) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+/* §27 DISTILL — 2026-05-28
+ * Cortes: backdrop-filter decorativo | side-stripes 3px | var(--awa-bg)/var(--awa-text) hard-coded
+ * | inline style no trigger movido para cá | hoverDelay reduzido no PHTML.
+ * Regra: side-stripe > 1px como acento colorido é banida.
+ * Simplificação: painel e flyout usam fundo sólido + sombra (suficiente para
+ * hierarquia). Backdrop-filter sem fundo para revelar não agrega valor visual.
+ */
+
+/* 27a. Trigger — resets que estavam como inline style no PHTML */
+#html-body .page-wrapper .our_categories.title-category-dropdown {
+    border: none !important;
+    cursor: pointer !important;
+    text-align: left !important;
+    font: inherit !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+
+/* 27b. Painel dropdown — fundo sólido, sem glass blur */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu,
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    background: var(--vm-bg) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 27c. Flyout desktop — fundo sólido, sem glass blur, sem side-stripe */
+@media (min-width: 992px) {
+    body .page-wrapper .navigation.verticalmenu .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu .level0 > .level0.submenu {
+        background: var(--vm-bg) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-left: none !important;
+        border-top: 2px solid var(--awa-primary, var(--awa-primary)) !important;
+    }
+}
+
+/* 27d. Submenu mobile — sem side-stripe */
+body.nav-open .page-wrapper .navigation.verticalmenu .level0.submenu {
+    border-left: none !important;
+    background: oklch(98.5% 0.004 25) !important;
+    border-top: 1px solid rgb(0 0 0 / 6%) !important;
+}
+
+/* 27e. Category-dropdown li — neutraliza side-stripe herdada de awa-super-global */
+body .page-wrapper .verticalmenu .category-dropdown li {
+    border-inline-start: none !important;
+}
+
+/* 27f. Mobile optimizations — tokens em vez de var(--awa-bg)/var(--awa-text) */
+@media (max-width: 991px) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu {
+        background: var(--vm-bg) !important;
+    }
+    .vmm-mobile-header {
+        background: var(--vm-bg) !important;
+    }
+    .vmm-mobile-close {
+        color: var(--awa-gray-700, oklch(42% 0.007 265)) !important;
+    }
+}
+
+/* 27g. Overlay mobile — blur AQUI tem sentido (revela conteúdo atrás) — mantém */
+
+/* 27h. Remove regra de backdrop-filter "off" redundante já coberta acima */
+@media (min-width: 992px) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu.list-category-dropdown:not(.menu-open):not(.vmm-open) {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: var(--vm-bg) !important;
+    }
+}
+
+/* §26 HARDEN — controles nativos e foco (2026-05-28) */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu button.open-children-toggle.navigation__toggle {
+    appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    font: inherit !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu button.open-children-toggle.navigation__toggle:focus-visible {
+    outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
+    outline-offset: 2px !important;
+}
+
+#html-body .page-wrapper .our_categories.title-category-dropdown:focus:not(:focus-visible) {
+    outline: none !important;
 }

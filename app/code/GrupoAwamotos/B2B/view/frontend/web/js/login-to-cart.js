@@ -14,11 +14,13 @@ define([
         + '<polyline points="12 6 12 12 16 14"></polyline>'
         + '</svg>';
 
-    function isElementVisible(el) {
+    function isElementVisible(el)
+    {
         return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
     }
 
-    function createLoginButton(options) {
+    function createLoginButton(options)
+    {
         let btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'b2b-login-to-buy-btn' + (options && options.variantClass ? (' ' + options.variantClass) : '');
@@ -38,7 +40,8 @@ define([
      * Check if customer is actually logged in using customer-data sections.
      * This is the authoritative source of truth, not the server-side mode from cached HTML.
      */
-    function isCustomerDataLoggedIn(customer) {
+    function isCustomerDataLoggedIn(customer)
+    {
         if (!customer || typeof customer !== 'object') {
             return false;
         }
@@ -52,7 +55,8 @@ define([
         );
     }
 
-    function getCustomerDataPayload() {
+    function getCustomerDataPayload()
+    {
         try {
             return customerData.get('customer')();
         } catch (e) {
@@ -60,7 +64,8 @@ define([
         }
     }
 
-    function isCustomerLoggedIn() {
+    function isCustomerLoggedIn()
+    {
         try {
             return isCustomerDataLoggedIn(getCustomerDataPayload());
         } catch (e) {
@@ -72,7 +77,8 @@ define([
      * Restore original add-to-cart buttons that were hidden by this script.
      * Called when we detect the customer is actually logged in.
      */
-    function restoreOriginalButtons() {
+    function restoreOriginalButtons()
+    {
         // Remove body classes
         document.body.classList.remove('b2b-guest-mode', 'b2b-pending-mode', 'b2b-restricted-mode');
 
@@ -102,10 +108,13 @@ define([
         if (overlay) {
             overlay.classList.remove('active');
             overlay.setAttribute('aria-hidden', 'true');
+            overlay.setAttribute('inert', '');
+            overlay.hidden = true;
         }
     }
 
-    function init(config) {
+    function init(config)
+    {
         // Skip on pages with no product add-to-cart buttons (homepage, checkout, etc.)
         if (!document.querySelector('.product-item-actions, .product-add-form, .product-info-cart')) {
             return;
@@ -115,7 +124,7 @@ define([
             return;
         }
 
-        // Determine mode from server: 'guest' or 'pending'
+        // Determine mode from server: 'guest', 'pending' or 'approved_restricted'
         let serverMode = config.mode || 'guest';
         let activeMode = serverMode; // May be overridden by customer-data
         let isRestricted = true; // Assume restricted until customer-data confirms otherwise
@@ -131,13 +140,47 @@ define([
         let observerInstance = null;
         let priceSyncStarted = false;
 
-        function hasHiddenPriceMarkers() {
+        function hasHiddenPriceMarkers()
+        {
             return !!document.querySelector(
                 '.b2b-login-to-see-price, [data-awa-gate-state="guest"], .product .price-box .price-label a[href*="login"]'
             );
         }
 
-        function getProductIdFromNode(node) {
+        function escapeHtml(value)
+        {
+            return String(value || '').replace(/[&<>"']/g, function (char) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[char];
+            });
+        }
+
+        function syncPendingPriceMarkers(root)
+        {
+            let scope = root && root.querySelectorAll ? root : document;
+            let label = (config && config.pendingPriceText) ? config.pendingPriceText : 'Aguardando aprovação';
+            let note = (config && config.pendingPriceNote) ? config.pendingPriceNote : 'Preços liberados após análise';
+
+            if (activeMode !== 'pending') {
+                return;
+            }
+
+            scope.querySelectorAll('.b2b-login-to-see-price').forEach(function (priceMarker) {
+                priceMarker.classList.add('b2b-price-pending');
+                priceMarker.setAttribute('data-b2b-pending-price', '1');
+                priceMarker.setAttribute('aria-label', label + '. ' + note);
+                priceMarker.innerHTML = '<span class="price-label">' + escapeHtml(label) + '</span>'
+                    + '<span class="price-note">' + escapeHtml(note) + '</span>';
+            });
+        }
+
+        function getProductIdFromNode(node)
+        {
             let root;
             let fromDataset;
             let productInput;
@@ -160,7 +203,8 @@ define([
             return productInput && productInput.value ? String(parseInt(productInput.value, 10)) : null;
         }
 
-        function collectPriceTargets() {
+        function collectPriceTargets()
+        {
             let targetsByProductId = {};
 
             document.querySelectorAll('.b2b-login-to-see-price').forEach(function (priceMarker) {
@@ -180,7 +224,8 @@ define([
             return targetsByProductId;
         }
 
-        function replacePriceTarget(priceMarker, html) {
+        function replacePriceTarget(priceMarker, html)
+        {
             if (!priceMarker || !html) {
                 return;
             }
@@ -190,7 +235,8 @@ define([
             }
         }
 
-        function hydrateHiddenPrices() {
+        function hydrateHiddenPrices()
+        {
             let targetsByProductId = collectPriceTargets();
             let productIds = Object.keys(targetsByProductId);
 
@@ -231,7 +277,8 @@ define([
             });
         }
 
-        function syncPriceBlocksAfterLogin() {
+        function syncPriceBlocksAfterLogin()
+        {
             if (priceSyncStarted || isRestricted || !hasHiddenPriceMarkers()) {
                 return;
             }
@@ -254,11 +301,13 @@ define([
             });
         }
 
-        function isModalOpen() {
+        function isModalOpen()
+        {
             return overlay && overlay.classList.contains('active');
         }
 
-        function getFocusableElements() {
+        function getFocusableElements()
+        {
             if (!dialog) {
                 return [];
             }
@@ -274,7 +323,8 @@ define([
             });
         }
 
-        function openModal(triggerEl) {
+        function openModal(triggerEl)
+        {
             if (!overlay || activeMode !== 'guest' || isModalOpen()) {
                 return;
             }
@@ -283,6 +333,8 @@ define([
             if (lastTriggerButton && typeof lastTriggerButton.setAttribute === 'function') {
                 lastTriggerButton.setAttribute('aria-expanded', 'true');
             }
+            overlay.hidden = false;
+            overlay.removeAttribute('inert');
             overlay.classList.add('active');
             overlay.setAttribute('aria-hidden', 'false');
 
@@ -301,12 +353,15 @@ define([
             }, 0);
         }
 
-        function closeModal() {
+        function closeModal()
+        {
             if (!overlay) {
                 return;
             }
             overlay.classList.remove('active');
             overlay.setAttribute('aria-hidden', 'true');
+            overlay.setAttribute('inert', '');
+            overlay.hidden = true;
 
             document.body.style.overflow = previousBodyOverflow !== null ? previousBodyOverflow : '';
             previousBodyOverflow = null;
@@ -373,7 +428,22 @@ define([
             }
         });
 
-        function replaceAddToCartButtons() {
+        function wireSsrGuestButton(btn)
+        {
+            if (!btn || btn.getAttribute('data-b2b-wired') === '1' || activeMode !== 'guest') {
+                return;
+            }
+
+            btn.setAttribute('data-b2b-wired', '1');
+            btn.setAttribute('aria-haspopup', 'dialog');
+            btn.setAttribute('aria-controls', 'b2b-login-modal');
+            btn.addEventListener('click', function (e) {
+                openModal(e.currentTarget);
+            });
+        }
+
+        function replaceAddToCartButtons()
+        {
             // CRITICAL: If customer-data confirms user is logged in, don't replace buttons
             if (!isRestricted) {
                 return;
@@ -381,10 +451,12 @@ define([
 
             let isGuestMode = (activeMode === 'guest');
             let isPendingMode = (activeMode === 'pending');
+            let isDisabledMode = !isGuestMode;
 
             // Add the appropriate body class
             document.body.classList.add(bodyClass);
             document.body.classList.add('b2b-restricted-mode');
+            syncPendingPriceMarkers();
 
             let iconSvg = isGuestMode ? PDP_ICON_SVG : PENDING_ICON_SVG;
 
@@ -395,12 +467,18 @@ define([
                 let qtyField = productAddForm.querySelector('.box-tocart .field.qty');
                 let instantPurchase = productAddForm.querySelector('#instant-purchase');
                 let addToCartBtn = productAddForm.querySelector('button.tocart, button#product-addtocart-button');
+                let ssrGuestBtn = productAddForm.querySelector('.b2b-login-to-buy-btn[data-b2b-ssr="guest"]');
 
-                if (boxToCart) {
+                if (ssrGuestBtn && isGuestMode) {
+                    if (boxToCart) {
+                        boxToCart.classList.add('b2b-login-to-buy-mode');
+                    }
+                    wireSsrGuestButton(ssrGuestBtn);
+                } else if (boxToCart) {
                     boxToCart.classList.add('b2b-login-to-buy-mode');
                 }
 
-                if (qtyField) {
+                if (qtyField && !ssrGuestBtn) {
                     qtyField.setAttribute('data-b2b-original-hidden', '1');
                     qtyField.style.display = 'none';
                 }
@@ -410,13 +488,13 @@ define([
                     instantPurchase.style.display = 'none';
                 }
 
-                if (addToCartBtn && !productAddForm.querySelector('.b2b-login-to-buy-btn')) {
+                if (!ssrGuestBtn && addToCartBtn && !productAddForm.querySelector('.b2b-login-to-buy-btn')) {
                     addToCartBtn.setAttribute('data-b2b-original-hidden', '1');
                     addToCartBtn.style.display = 'none';
 
                     let pdpBtn = createLoginButton({
                         html: iconSvg + ' ' + ((config && config.pdpButtonText) ? config.pdpButtonText : 'Entrar para Comprar'),
-                        disabled: isPendingMode
+                        disabled: isDisabledMode
                     });
                     pdpBtn.setAttribute('data-b2b-injected', '1');
 
@@ -442,7 +520,7 @@ define([
                     let listingBtn = createLoginButton({
                         text: (config && config.listingButtonText) ? config.listingButtonText : 'Entrar para Comprar',
                         variantClass: 'b2b--listing',
-                        disabled: isPendingMode
+                        disabled: isDisabledMode
                     });
                     listingBtn.setAttribute('data-b2b-injected', '1');
 
@@ -463,7 +541,8 @@ define([
          * Check customer-data and update restriction state.
          * If customer is logged in, restore original buttons.
          */
-        function checkAndUpdateState() {
+        function checkAndUpdateState()
+        {
             if (serverMode === 'guest' && isCustomerLoggedIn()) {
                 // Customer is actually logged in - FPC served a stale guest page
                 isRestricted = false;
@@ -478,16 +557,45 @@ define([
             }
         }
 
+        function bindCustomerDataSubscribe()
+        {
+            if (serverMode !== 'guest') {
+                return;
+            }
+
+            try {
+                customerData.get('customer').subscribe(function (customer) {
+                    if (isCustomerDataLoggedIn(customer)) {
+                        isRestricted = false;
+                        restoreOriginalButtons();
+                        syncPriceBlocksAfterLogin();
+                        if (observerInstance) {
+                            observerInstance.disconnect();
+                            observerInstance = null;
+                        }
+                    }
+                });
+            } catch (e) {
+                // ignore
+            }
+        }
+
         // Show pending banner if in pending mode
         if (serverMode === 'pending' && pendingBanner) {
             pendingBanner.hidden = false;
+        }
+
+        checkAndUpdateState();
+        bindCustomerDataSubscribe();
+
+        if (!isRestricted) {
+            return;
         }
 
         // Initial run - replace buttons (may be reverted by customer-data check)
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function () {
                 replaceAddToCartButtons();
-                // Check customer-data shortly after (it loads async)
                 window.setTimeout(checkAndUpdateState, 100);
             });
         } else {
@@ -497,7 +605,8 @@ define([
 
         // Re-run with throttle on DOM changes
         let scheduled = false;
-        function scheduleReplace() {
+        function scheduleReplace()
+        {
             if (scheduled || !isRestricted) {
                 return;
             }
@@ -514,6 +623,7 @@ define([
                     observerInstance.disconnect();
                 }
                 replaceAddToCartButtons();
+                syncPendingPriceMarkers();
                 // Reconectar para capturar conteúdo carregado via AJAX (abas de produto)
                 if (isRestricted && observerInstance) {
                     observerInstance.observe(document.body, {childList: true, subtree: true});
@@ -531,25 +641,6 @@ define([
         });
 
         observerInstance.observe(document.body, {childList: true, subtree: true});
-
-        // Subscribe to customer-data changes - this is the KEY fix
-        // When customer-data loads (async), it will tell us if the user is actually logged in
-        try {
-            customerData.get('customer').subscribe(function (customer) {
-                if (serverMode === 'guest' && isCustomerDataLoggedIn(customer)) {
-                    // Customer IS logged in - restore everything
-                    isRestricted = false;
-                    restoreOriginalButtons();
-                    syncPriceBlocksAfterLogin();
-                    if (observerInstance) {
-                        observerInstance.disconnect();
-                        observerInstance = null;
-                    }
-                }
-            });
-        } catch (e) {
-            // ignore
-        }
     }
 
     return init;

@@ -1,0 +1,154 @@
+<?php
+use Magento\Framework\App\Action\Action;
+
+$_brandCollection = $block->getBrandCollection();
+$b2bPriceGate = $this->helper(\GrupoAwamotos\B2B\Helper\Data::class);
+?>
+<?php if ( $_brandCollection->count() ){ ?>
+<?php 
+$title = $this->getConfig('widget_title');
+$show_brand_name = $this->getConfig('show_brand_name');
+$blockId = strtotime('now');
+?>
+<div class="section brand-product-tab">
+	<div class="widget-brand-list-tab-title rokan-title">
+		<h3 class="module-title"><?= $title; ?></h3>
+		<a href="<?= $this->getUrl().$block->getBrandConfig('general_settings/route');?>"><?= __('View All Brands');?></a>
+	</div>
+	<div class="brand-list-tab-fixed-widget">
+		<div class="brand-list-tab-container-title">
+			<?php 
+			$tab = 0;
+			foreach ($_brandCollection as $_brand) { $tab ++;?>
+			<?php $active = (1 == $tab) ? 'active' : '' ?>
+			<div class="item title <?= $active ?>">
+				<a class="switch" href="#brand-tab-<?= $blockId.$tab;?>">
+					<img src="<?php echo $_brand->getThumbnailUrl(); ?>" alt="<?php echo $_brand->getName(); ?>"/>
+					<?php if($show_brand_name){ ?>
+					<span><?php echo $_brand->getName() ?></span>
+					<?php } ?>
+				</a>
+			</div>
+			<?php } ?>
+		</div>
+		<div class="brand-list-tab-container-content">
+			<?php 
+			$tab = 0;
+			foreach ($_brandCollection as $_brand) { $tab ++; ?>
+				<?php $display = (1 == $tab) ? 'show-blocks' : 'hide-blocks' ?>
+				<div id="brand-tab-<?= $blockId.$tab;?>" class="item content <?= $display ?>">
+					<?php 
+						$products = $block->getProductsByBrandId($_brand->getId());
+						if($products->count() > 0){
+							$rows = $this->getConfig('rows');
+					?>
+					<div class="row-container-brand-content-tab products wrapper grid products-grid">
+						<ul class="products list items product-items owl-carousel owl-theme" data-rtl="false" data-items="<?php echo $this->getConfig('default_item');?>" data-bigdesktop="<?php echo $this->getConfig('destop_item');?>" data-smalldesktop="<?php echo $this->getConfig('small_destop_item');?>" data-bigtablet="<?php echo $this->getConfig('tablet_item');?>" data-tablet="<?php echo $this->getConfig('tablet_item');?>" data-smalltablet="<?php echo $this->getConfig('mobile_item');?>" data-mobile="<?php echo $this->getConfig('mobile_item');?>" data-margin="<?php echo $this->getConfig('data_margin');?>" data-loop="false" data-center="false" data-mousedrag="true" data-touchdrag="true" data-stagepadding="1" data-nav="<?php echo ($this->getConfig('show_navigation_control')) ? 'true' : 'false';?>" data-navnext="" data-navprev="" data-rewind="true" data-dots="<?php echo ($this->getConfig('show_next_back_control')) ? 'true' : 'false';?>" data-lazyload="false" data-autoplay="<?php echo ($this->getConfig('auto_play_control')) ? 'true' : 'false';?>" data-autoplaytimeout="500" data-autoplayhoverpause="true" data-speed="750">
+							<?php 
+								$i=0;
+								$image = 'category_page_grid';
+								$pos = $block->getPositioned();
+								$_helper = $this->helper('Magento\Catalog\Helper\Output');
+								$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
+								foreach ($products as $_product) {
+									if($i %$rows == 0) echo "<li class='item-load item bestsellerslider-item'>";
+									$i ++;
+								?>
+									<div class="item product product-item">
+										<div class="product-item-info">
+											<?php
+											$productImage = $block->getImage($_product, $image);
+											if ($pos != null) {
+												$position = ' style="left:' . $productImage->getWidth() . 'px;'
+													. 'top:' . $productImage->getHeight() . 'px;"';
+											}
+											?>
+											<?php // Product Image ?>
+											<a href="<?php /* @escapeNotVerified */ echo $_product->getProductUrl() ?>" class="product photo product-item-photo" tabindex="-1">
+												<?php echo $productImage->toHtml(); ?>
+											</a>
+											<?php if ( $_product->getFinalPrice() < $_product->getPrice() ): ?>
+												<span class="product-label onsale">
+													<span class="value"><?= -100 + round(($_product->getFinalPrice() / $_product->getPrice() * 100)) ?>%</span>
+												</span>
+											<?php endif; ?>
+											<?php $todayDate = time(); 
+												$timeStartNew = strtotime($_product->getData('news_from_date'));
+												$timeEndNew = strtotime($_product->getData('news_to_date')); ?>
+											<?php if ( $timeEndNew >= $todayDate && $timeStartNew <= $todayDate): ?>
+												<span class="product-label newlabel">
+													<span><?php echo __('New') ?></span>
+												</span>
+											<?php endif; ?>
+											 <div class="product details product-item-details">
+												<?php
+													$_productNameStripped = $block->stripTags($_product->getName(), null, true);
+												?>
+												<strong class="product name product-item-name">
+													<a class="product-item-link"
+													   href="<?= $block->escapeUrl($_product->getProductUrl()) ?>">
+														<?= /* @noEscape */ $_helper->productAttribute($_product, $_product->getName(), 'name') ?>
+													</a>
+												</strong>
+									<?= $block->getReviewsSummaryHtml($_product, $templateType) ?>
+									<?php if ($b2bPriceGate->canViewPrices()): ?>
+										<?= /* @noEscape */ $block->getProductPrice($_product) ?>
+									<?php else: ?>
+										<div class="b2b-login-to-see-price">
+											<span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()) ?></span>
+											<span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bPriceGate->getPriceGateDescription()) ?></span>
+										</div>
+									<?php endif; ?>
+									<?php if ($_product->isAvailable()) :?>
+										<?= $block->getProductDetailsHtml($_product) ?>
+									<?php endif; ?>
+
+												<div class="product-item-inner">
+													<div class="product actions product-item-actions">
+														<div class="actions-primary">
+															<?php if ($_product->isSaleable()) :?>
+																<?php $postParams = $block->getAddToCartPostParams($_product); ?>
+																<form data-role="tocart-form"
+																	  data-product-sku="<?= $block->escapeHtmlAttr($_product->getSku()) ?>"
+																	  action="<?= $block->escapeUrl($postParams['action']) ?>"
+																	  method="post">
+																	<input type="hidden"
+																		   name="product"
+																		   value="<?= /* @noEscape */ $postParams['data']['product'] ?>">
+																	<input type="hidden" name="<?= /* @noEscape */ Action::PARAM_NAME_URL_ENCODED ?>"
+																		   value="<?= /* @noEscape */ $postParams['data'][Action::PARAM_NAME_URL_ENCODED] ?>">
+																	<?= $block->getBlockHtml('formkey') ?>
+																	<button type="submit"
+																			title="<?= $block->escapeHtmlAttr(__('Add to Cart')) ?>"
+																			class="action tocart primary">
+																		<span><?= $block->escapeHtml(__('Add to Cart')) ?></span>
+																	</button>
+																</form>
+															<?php else :?>
+																<?php if ($_product->isAvailable()) :?>
+																	<div class="stock available"><span><?= $block->escapeHtml(__('In stock')) ?></span></div>
+																<?php else :?>
+																	<div class="stock unavailable"><span><?= $block->escapeHtml(__('Out of stock')) ?></span></div>
+																<?php endif; ?>
+															<?php endif; ?>
+														</div>
+															<?php /* B2B: wishlist/compare desativados */ ?>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								<?php if($i %$rows == 0) echo "</li>"; ?>
+							<?php 
+								}
+							?>
+							<?php if($i %$rows != 0) echo "</li>"; ?>
+						</ul>
+					</div>
+					<?php } ?>
+				</div>
+			<?php } ?>
+		</div>
+	</div>
+</div>
+<?php } ?>

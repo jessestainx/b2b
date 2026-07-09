@@ -12,7 +12,9 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Model\Payment;
 
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
+use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use GrupoAwamotos\B2B\Model\CreditService;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
@@ -67,6 +69,7 @@ class CreditPayment extends AbstractMethod
      * @var B2BHelper
      */
     private B2BHelper $b2bHelper;
+    private CustomerRepositoryInterface $customerRepository;
 
     /**
      * Assign data from checkout to payment info.
@@ -103,6 +106,7 @@ class CreditPayment extends AbstractMethod
         \Magento\Payment\Model\Method\Logger $logger,
         CreditService $creditService,
         B2BHelper $b2bHelper,
+        CustomerRepositoryInterface $customerRepository,
         ?AbstractResource $resource = null,
         ?AbstractDb $resourceCollection = null,
         array $data = [],
@@ -123,6 +127,7 @@ class CreditPayment extends AbstractMethod
         );
         $this->creditService = $creditService;
         $this->b2bHelper = $b2bHelper;
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -139,6 +144,10 @@ class CreditPayment extends AbstractMethod
 
         $customerId = (int)$quote->getCustomerId();
         if ($customerId === 0) {
+            return false;
+        }
+
+        if (!$this->isApprovedCustomer($customerId)) {
             return false;
         }
 
@@ -224,5 +233,20 @@ class CreditPayment extends AbstractMethod
         );
 
         return $title ? (string)$title : (string)__('Crédito B2B (Faturamento)');
+    }
+
+    private function isApprovedCustomer(int $customerId): bool
+    {
+        try {
+            $customer = $this->customerRepository->getById($customerId);
+            $statusAttribute = $customer->getCustomAttribute('b2b_approval_status');
+            if ($statusAttribute === null) {
+                return false;
+            }
+
+            return (string) $statusAttribute->getValue() === ApprovalStatus::STATUS_APPROVED;
+        } catch (\Exception) {
+            return false;
+        }
     }
 }

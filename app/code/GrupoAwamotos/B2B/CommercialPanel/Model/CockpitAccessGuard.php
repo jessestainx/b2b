@@ -17,6 +17,7 @@ class CockpitAccessGuard
     private const ALLOWED_FULL_PATHS = [
         'admin/auth/logout',
         'admin/auth/deniedcookie',
+        'admin/denied/index',
         'admin/noroute/index',
         'mui/index/render',
         'mui/bookmark/save',
@@ -28,7 +29,6 @@ class CockpitAccessGuard
     /** @var string[] frontName das rotas permitidas (não confundir com getModuleName()) */
     private const ALLOWED_ROUTE_NAMES = [
         'awa_commercial',
-        'awa_b2b',
     ];
 
     public function isRequestAllowed(RequestInterface $request): bool

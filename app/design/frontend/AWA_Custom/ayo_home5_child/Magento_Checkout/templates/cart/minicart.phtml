@@ -19,7 +19,6 @@ $sanitizeUrl = static function (?string $value): string {
 
 $request = $block->getRequest();
 $isHomeUiDefer = $request && (string) $request->getFullActionName() === 'cms_index_index';
-
 $serializedCheckoutConfig = method_exists($block, 'getSerializedConfig')
     ? (string) $block->getSerializedConfig()
     : (string) json_encode($block->getConfig(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -36,7 +35,7 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
        aria-controls="minicart-content-wrapper"
        <?= $isHomeUiDefer ? 'data-awa-minicart-defer="trigger"' : 'data-bind="scope: \'minicart_content\'"' ?>>
         <span class="awa-sr-only"><?= $block->escapeHtml(__('Carrinho de compras')) ?> </span>
-        <svg class="awa-minicart-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block !important; width:20px !important; height:20px !important; min-width:20px !important; min-height:20px !important; visibility:visible !important; opacity:1 !important;">
+        <svg class="awa-minicart-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="20" r="1"></circle>
             <circle cx="18" cy="20" r="1"></circle>
             <path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path>
@@ -69,6 +68,7 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
                     "parentClass":"is-open",
                     "buttons":[]}}'
                  <?php endif; ?>>
+            <h2 id="minicart-title" class="awa-sr-only"><?= $block->escapeHtml(__('Meu Carrinho')) ?></h2>
             <div id="minicart-content-wrapper"
                  role="dialog"
                  aria-modal="true"
@@ -101,8 +101,8 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
     <script>
         (function () {
             var minicartConfig = <?= /* @noEscape */ $serializedCheckoutConfig ?> || {};
-            // applyCartIcon removido: o SVG inline em .awa-minicart-icon já garante
-            // visibilidade com estilos inline próprios. Background-image duplicava o ícone.
+            // applyCartIcon removido: .awa-minicart-icon é controlado pelo CSS do tema.
+            // Background-image duplicava o ícone.
 
             var fallbackCheckoutConfig = Object.assign({
                 storeCode: '',

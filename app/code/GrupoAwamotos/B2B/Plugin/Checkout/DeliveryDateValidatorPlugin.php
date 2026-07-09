@@ -44,7 +44,7 @@ class DeliveryDateValidatorPlugin
         PaymentInterface $paymentMethod,
         ?AddressInterface $billingAddress = null
     ): array {
-        $this->validateAndSaveDeliveryDate($cartId);
+        $this->validateAndSaveDeliveryDate($cartId, $paymentMethod);
         return [$cartId, $paymentMethod, $billingAddress];
     }
 
@@ -64,7 +64,7 @@ class DeliveryDateValidatorPlugin
         PaymentInterface $paymentMethod,
         ?AddressInterface $billingAddress = null
     ): array {
-        $this->validateAndSaveDeliveryDate($cartId);
+        $this->validateAndSaveDeliveryDate($cartId, $paymentMethod);
         return [$cartId, $paymentMethod, $billingAddress];
     }
 
@@ -72,14 +72,15 @@ class DeliveryDateValidatorPlugin
      * Validate and save delivery date
      *
      * @param int $cartId
+     * @param PaymentInterface $paymentMethod
      * @return void
      * @throws LocalizedException
      */
-    private function validateAndSaveDeliveryDate(int $cartId): void
+    private function validateAndSaveDeliveryDate(int $cartId, PaymentInterface $paymentMethod): void
     {
         try {
             $quote = $this->cartRepository->getActive($cartId);
-            $this->validationService->validateCheckoutData($quote, null);
+            $this->validationService->validateCheckoutData($quote, $paymentMethod);
 
             $this->logger->info('[B2B] Delivery date validated', [
                 'quote_id' => $cartId,

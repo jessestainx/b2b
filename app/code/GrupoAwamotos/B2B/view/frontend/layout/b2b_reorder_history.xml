@@ -2,7 +2,15 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="customer_account"/>
+    <head>
+        <title>Repetir Pedido</title>
+        <css src="GrupoAwamotos_B2B::css/account/pages-reorder.css"/>
+    </head>
     <body>
+        <!-- BUG-CORE-2026-07-04: ver customer_account.xml — split evita merge de classes -->
+        <attribute name="class" value="account"/>
+        <attribute name="class" value="b2b-reorder-history"/>
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Account\Reorder"
                    name="b2b.reorder.history"
@@ -15,7 +23,7 @@
                    template="GrupoAwamotos_B2B::navigation/breadcrumbs.phtml"
                    before="-">
                 <arguments>
-                    <argument name="page_title" xsi:type="string"></argument>
+                    <argument name="page_title" xsi:type="string" translate="true">Repetir Pedido</argument>
                 </arguments>
             </block>
         </referenceContainer>

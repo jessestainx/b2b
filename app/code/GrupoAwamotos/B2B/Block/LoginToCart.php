@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Block for B2B access restriction modals.
  * Shown to guests (login/register modal) AND to logged-in non-approved users (pending message).
@@ -26,7 +24,6 @@ use Magento\Framework\View\Element\Template\Context;
 
 class LoginToCart extends Template
 {
-
     /**
      * @var Config
      */

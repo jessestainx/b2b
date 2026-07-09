@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="log_monitoring_alert_email"
+              label="Monitoramento - Alerta do sistema"
+              file="log_monitoring_alert_email.html"
+              type="html"
+              module="GrupoAwamotos_LogMonitoring"
+              area="frontend"/>
+</config>

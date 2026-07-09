@@ -11,7 +11,7 @@ use Magento\Framework\App\Action\HttpGetActionInterface;
 
 class Index extends Action implements HttpGetActionInterface
 {
-    const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::recommendations';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::recommendations';
 
     private PageFactory $resultPageFactory;
 
@@ -25,7 +25,7 @@ class Index extends Action implements HttpGetActionInterface
     {
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('GrupoAwamotos_ProductIntelligence::recommendations');
-        $resultPage->getConfig()->getTitle()->prepend(__('REXIS ML - Recomendacoes'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Product Intelligence - Recomendacoes'));
         return $resultPage;
     }
 }

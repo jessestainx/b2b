@@ -20,7 +20,8 @@ class RestartConsumers
 
     public function __construct(
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function execute(): void
     {
@@ -68,10 +69,28 @@ class RestartConsumers
 
     private function isRunning(string $consumerName): bool
     {
-        // pgrep returns 0 if at least one process matches, 1 if none
         $pattern = 'queue:consumers:start ' . $consumerName;
-        // phpcs:ignore Magento2.Functions.DiscouragedFunction
-        exec('pgrep -f ' . escapeshellarg($pattern), $output, $rc); // nosemgrep: php.lang.security.exec-use.exec-use
-        return $rc === 0;
+
+        foreach (new \DirectoryIterator('/proc') as $entry) {
+            if (!$entry->isDir() || !$entry->isReadable() || !ctype_digit($entry->getFilename())) {
+                continue;
+            }
+
+            $cmdlinePath = $entry->getPathname() . '/cmdline';
+            if (!is_readable($cmdlinePath)) {
+                continue;
+            }
+
+            $cmdline = file_get_contents($cmdlinePath);
+            if ($cmdline === false || $cmdline === '') {
+                continue;
+            }
+
+            if (str_contains(str_replace("\0", ' ', $cmdline), $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

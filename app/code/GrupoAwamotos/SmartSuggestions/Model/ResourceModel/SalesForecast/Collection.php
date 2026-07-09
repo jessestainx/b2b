@@ -88,7 +88,7 @@ class Collection extends AbstractCollection
      */
     public function getTotalPredictedRevenue(): float
     {
-        $this->getSelect()->reset(\Zend_Db_Select::COLUMNS)
+        $this->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)
             ->columns(['total' => 'SUM(predicted_revenue)']);
 
         return (float) $this->getConnection()->fetchOne($this->getSelect());
@@ -99,7 +99,7 @@ class Collection extends AbstractCollection
      */
     public function getAverageConfidence(): float
     {
-        $this->getSelect()->reset(\Zend_Db_Select::COLUMNS)
+        $this->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS)
             ->columns(['avg_confidence' => 'AVG(confidence_level)']);
 
         return (float) $this->getConnection()->fetchOne($this->getSelect());

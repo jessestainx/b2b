@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Service;
@@ -25,7 +26,8 @@ class CustomerGroupManager
         private readonly GroupCollectionFactory $groupCollectionFactory,
         private readonly CacheInterface $cache,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function assignToPendingGroup(int $customerId): void
     {

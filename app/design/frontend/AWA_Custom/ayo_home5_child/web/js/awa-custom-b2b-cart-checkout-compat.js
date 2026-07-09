@@ -1,1 +1,284 @@
-define(["jquery"],function(t){"use strict";let e="__awaB2bCheckoutCompatObserver",a=!1;function i(){let t=document.body;return!!t&&(t.classList.contains("checkout-cart-index")||t.classList.contains("checkout-index-index")||t.classList.contains("rokanthemes-onepagecheckout"))}function o(t,e){t.length&&e&&(t.attr("title")||t.attr("title",e),t.attr("aria-label")||t.attr("aria-label",e))}function c(e,a){e.each(function(){let e=t(this);e.attr("data-awa-component")||e.attr("data-awa-component",a)})}function n(){let e,a={pricesHidden:!!(e=window.checkoutConfig||{}).b2bPricesHidden,message:t.trim(e.b2bPriceMessage||"")},i=t("#opc-sidebar, .opc-sidebar, .opc-block-summary").first(),o=i.find(".shipping-information, .opc-block-shipping-information").first(),c=o.length?o:i.children().first(),n=a.message||"A liberacao das condicoes comerciais acontece apos a aprovacao da conta empresarial.";if(i.length){if(!a.pricesHidden)return i.find(".awa-b2b-checkout-gate").remove(),void i.removeClass("awa-b2b-checkout-restricted");i.addClass("awa-b2b-checkout-restricted"),i.find(".awa-b2b-checkout-gate").length||t('<section class="awa-b2b-checkout-gate" data-awa-component="b2b-checkout-gate" aria-live="polite"><span class="awa-b2b-checkout-gate__badge">Portal comercial B2B</span><h3 class="awa-b2b-checkout-gate__title">Resumo comercial protegido</h3><p class="awa-b2b-checkout-gate__text"></p><p class="awa-b2b-checkout-gate__note">Finalize a aprovacao da conta para visualizar valores, frete e totais negociados.</p></section>').insertBefore(c),i.find(".awa-b2b-checkout-gate__text").text(n),i.find(".totals, .grand.totals, .opc-block-summary .items-in-cart, .opc-block-summary .minicart-items").each(function(){t(this).attr("data-b2b-summary-hidden","true")})}}function r(){let e=t(document.body);(e.hasClass("checkout-index-index")||e.hasClass("rokanthemes-onepagecheckout"))&&(c(t(".checkout-container"),"checkout-container"),c(t(".opc-wrapper"),"checkout-main"),c(t("#opc-sidebar, .opc-sidebar, .opc-block-summary"),"checkout-summary"),c(t(".payment-method"),"checkout-payment-method"),c(t(".opc-payment"),"checkout-payment-list"),t(".opc-wrapper .step-title, .checkout-payment-method .step-title").each(function(){let e=t(this),a=t.trim(e.text());a&&!e.attr("title")&&e.attr("title",a)}),t(".payment-method-title .label, .payment-method-title label").each(function(){let e=t(this),a=t.trim(e.text());a&&(e.attr("data-awa-payment-label","1"),o(e,a))}),t(".actions-toolbar .btn-placeorder, .actions-toolbar .action.checkout").each(function(){o(t(this),"Finalizar pedido")}),t(".opc-block-summary input, .opc-wrapper input, .opc-wrapper select, .opc-wrapper textarea").each(function(){let e=t(this);if(!e.attr("aria-label")&&!e.attr("aria-labelledby")){let a=t.trim(e.closest(".field").find("label .label, label").first().text());a&&e.attr("aria-label",a)}}),n(),t(".b2b-po-number-container").each(function(){let e,a=t(this),i=a.find('input[name="b2b_po_number"]').first(),n=a.find(".field-note .note").first();c(a,"b2b-po-number"),a.attr("data-awa-initialized","true"),i.length&&(o(i,"Número do Pedido de Compra"),i.attr("autocomplete","off"),n.length&&(e=n.attr("id")||"awa-b2b-po-note",n.attr("id",e),i.attr("aria-describedby",e)))}),t(".b2b-terms-container").each(function(){let e=t(this),a=e.find('#b2b-terms-checkbox, input[name="b2b_terms_accepted"]').first(),i=e.find(".b2b-terms-link").first(),n=e.find(".b2b-terms-status").first(),r=!!a.length&&!!a.prop("checked");c(e,"b2b-terms"),e.attr("data-awa-initialized","true").toggleClass("is-accepted",r),a.length&&o(a,"Aceitar termos de venda B2B"),i.length&&o(i,"Abrir termos e condições de venda B2B"),n.length&&n.attr("aria-live","polite")}),t(".b2b-terms-modal-overlay").each(function(){let e,a=t(this),i=a.find(".b2b-terms-modal").first(),o=!(!(e=this)||!(e.offsetWidth||e.offsetHeight||e.getClientRects().length));a.toggleClass("is-open",o).attr("aria-hidden",o?"false":"true"),i.length&&i.attr("role","dialog").attr("aria-modal","true")}),t(".b2b-terms-modal-close").each(function(){o(t(this),"Fechar termos B2B")}),t(".b2b-terms-modal-footer .action.primary").each(function(){o(t(this),"Aceitar termos de venda B2B")}),t(".b2b-terms-modal-footer .action.secondary").each(function(){o(t(this),"Fechar modal de termos")}))}function s(){let e,a,n;i()&&(e=t(document.body),a=t(".cart-summary"),n=t(".cart-container"),e.hasClass("checkout-cart-index")&&(c(n,"cart-container"),c(a,"cart-summary"),c(t(".cart.table-wrapper"),"cart-table"),c(t(".cart-summary .discount.coupon, .cart-container .fieldset.coupon"),"cart-coupon"),t(".checkout-methods-items .action.checkout, .cart-summary .action.checkout").each(function(){o(t(this),"Ir para checkout")}),t(".cart-summary .action.multicheckout").each(function(){o(t(this),"Finalizar com múltiplos endereços")}),t(".cart.table-wrapper .actions-toolbar .action-delete, .cart.table-wrapper .action-delete").each(function(){o(t(this),"Remover item do carrinho")}),t(".cart.table-wrapper input.qty").each(function(){let e=t(this),a=t.trim(e.closest("tr.item-info, .cart.item").find(".product-item-name, .item-name").first().text());o(e,a?"Quantidade para "+a:"Quantidade do item")}),t(".b2b-login-modal-close, [data-b2b-login-close]").each(function(){o(t(this),"Fechar modal de login B2B")}),t(".b2b-login-option").each(function(){let e=t(this);o(e,t.trim(e.find(".b2b-login-option-title").text())||t.trim(e.text()))})),r())}return function(){if(i()&&(s(),window.MutationObserver&&!window[e])){if(window[e]=new window.MutationObserver(function(){!function(){function t(){a=!1,s()}a||(a=!0,"function"!=typeof window.requestAnimationFrame?window.setTimeout(t,0):window.requestAnimationFrame(t))}()}),!document.body)return;window[e].observe(document.body,{childList:!0,subtree:!0})}}});
+define([
+    'jquery'
+], function ($) {
+    'use strict';
+
+    var scheduled = false;
+    var CONTENT_EVENT = 'contentUpdated.awaB2bCheckoutCompat';
+
+    function inScope() {
+        var body = document.body;
+
+        if (!body) {
+            return false;
+        }
+
+        return body.classList.contains('checkout-cart-index') ||
+            body.classList.contains('checkout-index-index') ||
+            body.classList.contains('rokanthemes-onepagecheckout');
+    }
+
+    function visible(el) {
+        return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+    }
+
+    function setLabel($el, text) {
+        if (!$el.length || !text) {
+            return;
+        }
+
+        if (!$el.attr('title')) {
+            $el.attr('title', text);
+        }
+
+        if (!$el.attr('aria-label')) {
+            $el.attr('aria-label', text);
+        }
+    }
+
+    function setComponent($els, name) {
+        $els.each(function () {
+            var $el = $(this);
+
+            if (!$el.attr('data-awa-component')) {
+                $el.attr('data-awa-component', name);
+            }
+        });
+    }
+
+    function decorateCart() {
+        var $body = $(document.body);
+
+        if (!$body.hasClass('checkout-cart-index')) {
+            return;
+        }
+
+        setComponent($('.cart-container'), 'cart-container');
+        setComponent($('.cart-summary'), 'cart-summary');
+        setComponent($('.cart.table-wrapper'), 'cart-table');
+        setComponent($('.cart-summary .discount.coupon, .cart-container .fieldset.coupon'), 'cart-coupon');
+
+        $('.checkout-methods-items .action.checkout, .cart-summary .action.checkout').each(function () {
+            setLabel($(this), 'Ir para checkout');
+        });
+
+        $('.cart-summary .action.multicheckout').each(function () {
+            setLabel($(this), 'Finalizar com múltiplos endereços');
+        });
+
+        $('.cart.table-wrapper .actions-toolbar .action-delete, .cart.table-wrapper .action-delete').each(function () {
+            setLabel($(this), 'Remover item do carrinho');
+        });
+
+        $('.cart.table-wrapper input.qty').each(function () {
+            var $input = $(this);
+            var itemName = $.trim($input.closest('tr.item-info, .cart.item').find('.product-item-name, .item-name').first().text());
+            var label = itemName ? ('Quantidade para ' + itemName) : 'Quantidade do item';
+
+            setLabel($input, label);
+        });
+
+        $('.b2b-login-modal-close, [data-b2b-login-close]').each(function () {
+            setLabel($(this), 'Fechar modal de login B2B');
+        });
+
+        $('.b2b-login-option').each(function () {
+            var $link = $(this);
+
+            setLabel($link, $.trim($link.find('.b2b-login-option-title').text()) || $.trim($link.text()));
+        });
+    }
+
+    function decoratePoNumber() {
+        $('.b2b-po-number-container').each(function () {
+            var $box = $(this);
+            var $input = $box.find('input[name="b2b_po_number"]').first();
+            var $note = $box.find('.field-note .note').first();
+            var noteId;
+
+            setComponent($box, 'b2b-po-number');
+            $box.attr('data-awa-initialized', 'true');
+
+            if ($input.length) {
+                setLabel($input, 'Número do Pedido de Compra');
+                $input.attr('autocomplete', 'off');
+
+                if ($note.length) {
+                    noteId = $note.attr('id') || 'awa-b2b-po-note';
+                    $note.attr('id', noteId);
+                    $input.attr('aria-describedby', noteId);
+                }
+            }
+        });
+    }
+
+    function decorateTerms() {
+        $('.b2b-terms-container').each(function () {
+            var $box = $(this);
+            var $checkbox = $box.find('#b2b-terms-checkbox, input[name="b2b_terms_accepted"]').first();
+            var $link = $box.find('.b2b-terms-link').first();
+            var $status = $box.find('.b2b-terms-status').first();
+            var accepted = $checkbox.length ? !!$checkbox.prop('checked') : false;
+
+            setComponent($box, 'b2b-terms');
+            $box.attr('data-awa-initialized', 'true')
+                .toggleClass('is-accepted', accepted);
+
+            if ($checkbox.length) {
+                setLabel($checkbox, 'Aceitar termos de venda B2B');
+            }
+
+            if ($link.length) {
+                setLabel($link, 'Abrir termos e condições de venda B2B');
+            }
+
+            if ($status.length) {
+                $status.attr('aria-live', 'polite');
+            }
+        });
+
+        $('.b2b-terms-modal-overlay').each(function () {
+            var $overlay = $(this);
+            var $modal = $overlay.find('.b2b-terms-modal').first();
+            var isOpen = visible(this);
+
+            $overlay.toggleClass('is-open', isOpen)
+                .attr('aria-hidden', isOpen ? 'false' : 'true');
+
+            if ($modal.length) {
+                $modal.attr('role', 'dialog').attr('aria-modal', 'true');
+            }
+        });
+
+        $('.b2b-terms-modal-close').each(function () {
+            setLabel($(this), 'Fechar termos B2B');
+        });
+
+        $('.b2b-terms-modal-footer .action.primary').each(function () {
+            setLabel($(this), 'Aceitar termos de venda B2B');
+        });
+
+        $('.b2b-terms-modal-footer .action.secondary').each(function () {
+            setLabel($(this), 'Fechar modal de termos');
+        });
+    }
+
+    function decorateCheckout() {
+        var $body = $(document.body);
+
+        if (!$body.hasClass('checkout-index-index') && !$body.hasClass('rokanthemes-onepagecheckout')) {
+            return;
+        }
+
+        setComponent($('.checkout-container'), 'checkout-container');
+        setComponent($('.opc-wrapper'), 'checkout-main');
+        setComponent($('#opc-sidebar, .opc-sidebar, .opc-block-summary'), 'checkout-summary');
+        setComponent($('.payment-method'), 'checkout-payment-method');
+        setComponent($('.opc-payment'), 'checkout-payment-list');
+
+        $('.opc-wrapper .step-title, .checkout-payment-method .step-title').each(function () {
+            var $title = $(this);
+            var txt = $.trim($title.text());
+
+            if (txt && !$title.attr('title')) {
+                $title.attr('title', txt);
+            }
+        });
+
+        $('.payment-method-title .label, .payment-method-title label').each(function () {
+            var $label = $(this);
+            var methodTitle = $.trim($label.text());
+
+            if (methodTitle) {
+                $label.attr('data-awa-payment-label', '1');
+                setLabel($label, methodTitle);
+            }
+        });
+
+        $('.actions-toolbar .btn-placeorder, .actions-toolbar .action.checkout').each(function () {
+            setLabel($(this), 'Finalizar pedido');
+        });
+
+        $('.discount-code .action-apply').each(function () {
+            setLabel($(this), 'Aplicar cupom');
+        });
+
+        $('.discount-code .action-cancel').each(function () {
+            setLabel($(this), 'Remover cupom');
+        });
+
+        $('.opc-block-summary input, .opc-wrapper input, .opc-wrapper select, .opc-wrapper textarea').each(function () {
+            var $field = $(this);
+
+            if (!$field.attr('aria-label') && !$field.attr('aria-labelledby')) {
+                var labelText = $.trim($field.closest('.field').find('label .label, label').first().text());
+
+                if (labelText) {
+                    $field.attr('aria-label', labelText);
+                }
+            }
+        });
+
+        decoratePoNumber();
+        decorateTerms();
+    }
+
+    function decorate() {
+        if (!inScope()) {
+            return;
+        }
+
+        decorateCart();
+        decorateCheckout();
+    }
+
+    function scheduleDecorate() {
+        if (scheduled) {
+            return;
+        }
+
+        scheduled = true;
+
+        function flush() {
+            scheduled = false;
+            decorate();
+        }
+
+        if (typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(flush);
+            return;
+        }
+
+        window.setTimeout(flush, 0);
+    }
+
+    function isRelevantContentUpdate(target) {
+        if (!target || target.nodeType !== 1) {
+            return true;
+        }
+
+        return $(target).closest('.cart-container, .checkout-container, .opc-wrapper, #opc-sidebar, .opc-sidebar').length > 0;
+    }
+
+    return function initAwaB2bCartCheckoutCompat() {
+        if (!inScope()) {
+            return;
+        }
+
+        // Desliga observer legado que observava document.body (loop infinito no carrinho).
+        if (window.__awaB2bCheckoutCompatObserver) {
+            window.__awaB2bCheckoutCompatObserver.disconnect();
+            window.__awaB2bCheckoutCompatObserver = null;
+        }
+
+        decorate();
+
+        $(document).off(CONTENT_EVENT).on(CONTENT_EVENT, function (event) {
+            if (!isRelevantContentUpdate(event && event.target)) {
+                return;
+            }
+
+            scheduleDecorate();
+        });
+    };
+});

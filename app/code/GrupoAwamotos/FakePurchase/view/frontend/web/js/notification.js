@@ -22,7 +22,8 @@ define([], function () {
         let reducedMotion = false;
         let hideAnimationMs;
 
-        function toMs(value, fallback) {
+        function toMs(value, fallback)
+        {
             let parsed = Number(value);
 
             if (Number.isFinite(parsed) && parsed >= 0) {
@@ -32,7 +33,8 @@ define([], function () {
             return fallback;
         }
 
-        function clearTimers() {
+        function clearTimers()
+        {
             window.clearTimeout(displayTimerId);
             window.clearTimeout(nextShowTimerId);
             window.clearTimeout(hideAnimationTimerId);
@@ -41,11 +43,13 @@ define([], function () {
             hideAnimationTimerId = null;
         }
 
-        function getRandomItem(items) {
+        function getRandomItem(items)
+        {
             return items[Math.floor(Math.random() * items.length)];
         }
 
-        function getRandomTime() {
+        function getRandomTime()
+        {
             return getRandomItem([
                 'há poucos minutos',
                 'há 2 minutos',
@@ -54,7 +58,8 @@ define([], function () {
             ]);
         }
 
-        function scheduleNextShow(delayMs) {
+        function scheduleNextShow(delayMs)
+        {
             if (notificationCount >= toMs(config.maxNotifications, 10)) {
                 return;
             }
@@ -62,7 +67,8 @@ define([], function () {
             nextShowTimerId = window.setTimeout(showNotification, delayMs);
         }
 
-        function hideNotification() {
+        function hideNotification()
+        {
             if (!isVisible) {
                 return;
             }
@@ -77,7 +83,8 @@ define([], function () {
             }, hideAnimationMs);
         }
 
-        function showNotification() {
+        function showNotification()
+        {
             let product;
             let buyerName;
             let buyerCity;

@@ -1,0 +1,244 @@
+<?php
+/**
+ * AWA Motos - Exit Intent Popup
+ *
+ * Sprint 3 (Marketing): popup que aparece quando usuario tenta sair.
+ * Configuravel para oferecer cupom de desconto.
+ */
+declare(strict_types=1);
+
+$_couponCode = 'VOLTA5';
+$_discountPercent = 5;
+$_validUntil = date('Y-m-d', strtotime('+7 days'));
+?>
+<div class="awa-exit-popup"
+     data-awa-exit-popup
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="awa-exit-popup-title"
+     aria-describedby="awa-exit-popup-desc"
+     hidden>
+
+    <div class="awa-exit-popup__backdrop" data-awa-exit-popup-close></div>
+
+    <div class="awa-exit-popup__content">
+        <button type="button"
+                class="awa-exit-popup__close"
+                data-awa-exit-popup-close
+                aria-label="<?= $block->escapeHtmlAttr(__('Fechar popup')) ?>">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+
+        <div class="awa-exit-popup__header">
+            <span class="awa-exit-popup__badge">
+                <?= $block->escapeHtml(__('OFERTA ESPECIAL')) ?>
+            </span>
+        </div>
+
+        <h2 id="awa-exit-popup-title" class="awa-exit-popup__title">
+            <?= $block->escapeHtml(__('Espera! Volte e ganhe')) ?>
+            <span class="awa-exit-popup__discount"><?= $block->escapeHtml($_discountPercent . '% OFF') ?></span>
+        </h2>
+
+        <p id="awa-exit-popup-desc" class="awa-exit-popup__desc">
+            <?= $block->escapeHtml(__('Use o cupom abaixo e ganhe desconto na sua primeira compra!')) ?>
+        </p>
+
+        <div class="awa-exit-popup__coupon">
+            <span class="awa-exit-popup__coupon-label">
+                <?= $block->escapeHtml(__('Seu cupom:')) ?>
+            </span>
+            <code class="awa-exit-popup__coupon-code" data-awa-exit-popup-code><?= $block->escapeHtml($_couponCode) ?></code>
+            <button type="button"
+                    class="awa-exit-popup__copy"
+                    data-awa-exit-popup-copy
+                    aria-label="<?= $block->escapeHtmlAttr(__('Copiar codigo do cupom')) ?>">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                <?= $block->escapeHtml(__('Copiar')) ?>
+            </button>
+        </div>
+
+        <p class="awa-exit-popup__validity">
+            <?= $block->escapeHtml(__('Valido ate ' . date('d/m/Y', strtotime($_validUntil)))) ?>
+        </p>
+
+        <div class="awa-exit-popup__actions">
+            <button type="button"
+                    class="awa-exit-popup__cta action primary"
+                    data-awa-exit-popup-cta>
+                <?= $block->escapeHtml(__('Quero o desconto!')) ?>
+            </button>
+            <button type="button"
+                    class="awa-exit-popup__decline"
+                    data-awa-exit-popup-close
+                    aria-label="<?= $block->escapeHtmlAttr(__('Nao quero o cupom')) ?>">
+                <?= $block->escapeHtml(__('Nao, obrigado')) ?>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.awa-exit-popup {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 100000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.awa-exit-popup[hidden] { display: none !important; }
+.awa-exit-popup__backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.65) !important;
+    backdrop-filter: blur(4px) !important;
+}
+.awa-exit-popup__content {
+    position: relative !important;
+    max-width: 480px !important;
+    width: calc(100% - 32px) !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 32px 28px !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4) !important;
+    text-align: center !important;
+    animation: awa-exit-popup-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes awa-exit-popup-enter {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.awa-exit-popup__close {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 8px !important;
+    cursor: pointer !important;
+    color: #6b7280 !important;
+    border-radius: 6px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.awa-exit-popup__close:hover { background: #f3f4f6 !important; color: #111827 !important; }
+.awa-exit-popup__badge {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.awa-exit-popup__title {
+    margin: 12px 0 8px !important;
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    color: #111827 !important;
+}
+.awa-exit-popup__discount {
+    display: block;
+    font-size: 42px;
+    color: #b73337;
+    margin-top: 4px;
+}
+.awa-exit-popup__desc {
+    margin: 0 0 16px !important;
+    font-size: 14px !important;
+    color: #4b5563 !important;
+}
+.awa-exit-popup__coupon {
+    background: #fef9e7;
+    border: 2px dashed #f59e0b;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 16px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.awa-exit-popup__coupon-label {
+    font-size: 12px;
+    color: #92400e;
+    width: 100%;
+}
+.awa-exit-popup__coupon-code {
+    font-family: ui-monospace, monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: #92400e;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: 1px solid #fcd34d;
+    letter-spacing: 2px;
+}
+.awa-exit-popup__copy {
+    background: #f59e0b !important;
+    color: white !important;
+    border: 0 !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    min-height: 40px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+.awa-exit-popup__copy:hover { background: #d97706 !important; }
+.awa-exit-popup__validity {
+    margin: 8px 0 16px !important;
+    font-size: 11px !important;
+    color: #6b7280 !important;
+}
+.awa-exit-popup__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.awa-exit-popup__cta {
+    background: #b73337 !important;
+    color: white !important;
+    border: 0 !important;
+    padding: 14px 24px !important;
+    border-radius: 8px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    min-height: 48px !important;
+}
+.awa-exit-popup__cta:hover { background: #a12d30 !important; }
+.awa-exit-popup__decline {
+    background: transparent !important;
+    color: #6b7280 !important;
+    border: 0 !important;
+    padding: 8px !important;
+    cursor: pointer !important;
+    text-decoration: underline !important;
+    min-height: 40px !important;
+    font-size: 12px !important;
+}
+.awa-exit-popup__decline:hover { color: #374151 !important; }
+@media (prefers-reduced-motion: reduce) {
+    .awa-exit-popup__content { animation: none !important; }
+}
+</style>

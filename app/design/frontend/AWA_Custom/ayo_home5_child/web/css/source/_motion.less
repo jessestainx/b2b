@@ -1,0 +1,410 @@
+// ============================================================================
+// AWA MOTOS — MOTION & ANIMATION SYSTEM
+// ----------------------------------------------------------------------------
+// Tokens canonicos de timing, easing, e animacoes pre-definidas.
+// Audit 2025-12-05: 96 animacoes no projeto, sem padronizacao. Este arquivo
+// consolida as que sao uteis e substitui ad-hoc animations.
+//
+// BEST PRACTICES:
+//   - Duracoes curtas (150-300ms) para interacao
+//   - ease-out para entrada, ease-in para saida
+//   - Respeitar prefers-reduced-motion (sempre)
+//   - Usar transform/opacity (composited, sem layout shift)
+//   - Evitar animacoes > 500ms (frustrating)
+// ============================================================================
+
+
+// ============================================================================
+// 1. TOKENS DE TIMING & EASING
+// ============================================================================
+
+:root {
+    /* Durations */
+    --awa-duration-instant: 0ms;
+    --awa-duration-fast: 150ms;
+    --awa-duration-base: 250ms;
+    --awa-duration-slow: 350ms;
+    --awa-duration-slower: 500ms;
+
+    /* Easings */
+    --awa-ease-linear: linear;
+    --awa-ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --awa-ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --awa-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --awa-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --awa-ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Combined transitions (uso direto) */
+    --awa-transition-fast: var(--awa-duration-fast) var(--awa-ease-out);
+    --awa-transition-base: var(--awa-duration-base) var(--awa-ease-out);
+    --awa-transition-slow: var(--awa-duration-slow) var(--awa-ease-in-out);
+}
+
+
+// ============================================================================
+// 2. TRANSITION UTILITIES
+// ============================================================================
+
+.awa-transition-none {
+    transition: none !important;
+}
+
+.awa-transition-fast {
+    transition: all var(--awa-duration-fast, 150ms) var(--awa-ease-out, ease);
+}
+
+.awa-transition-base {
+    transition: all var(--awa-duration-base, 250ms) var(--awa-ease-out, ease);
+}
+
+.awa-transition-slow {
+    transition: all var(--awa-duration-slow, 350ms) var(--awa-ease-in-out, ease);
+}
+
+// Specific properties (better performance)
+.awa-transition-colors {
+    transition: background-color var(--awa-duration-fast, 150ms) var(--awa-ease-out, ease),
+                color var(--awa-duration-fast, 150ms) var(--awa-ease-out, ease),
+                border-color var(--awa-duration-fast, 150ms) var(--awa-ease-out, ease);
+}
+
+.awa-transition-transform {
+    transition: transform var(--awa-duration-base, 250ms) var(--awa-ease-out, ease);
+}
+
+.awa-transition-opacity {
+    transition: opacity var(--awa-duration-base, 250ms) var(--awa-ease-out, ease);
+}
+
+.awa-transition-shadow {
+    transition: box-shadow var(--awa-duration-base, 250ms) var(--awa-ease-out, ease);
+}
+
+
+// ============================================================================
+// 3. ANIMATIONS PRE-DEFINIDAS (keyframes)
+// ============================================================================
+
+// --- Fade in/out ---
+@keyframes awa-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes awa-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+// --- Slide ---
+@keyframes awa-slide-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes awa-slide-in-down {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes awa-slide-in-left {
+    from {
+        opacity: 0;
+        transform: translateX(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes awa-slide-in-right {
+    from {
+        opacity: 0;
+        transform: translateX(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+// --- Scale ---
+@keyframes awa-scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes awa-scale-up {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+}
+
+// --- Spin ---
+@keyframes awa-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes awa-spin-reverse {
+    to { transform: rotate(-360deg); }
+}
+
+// --- Pulse (notification badge, attention) ---
+@keyframes awa-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes awa-pulse-ring {
+    0% {
+        transform: scale(0.95);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.4);
+        opacity: 0;
+    }
+}
+
+// --- Shake (error feedback) ---
+@keyframes awa-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+// --- Bounce (success feedback) ---
+@keyframes awa-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+// --- Skeleton shimmer (loading) ---
+@keyframes awa-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+// --- Progress indeterminate ---
+@keyframes awa-progress-indeterminate {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(400%);
+    }
+}
+
+
+// ============================================================================
+// 4. ANIMATION UTILITIES
+// ============================================================================
+
+// --- Fade ---
+.awa-anim-fade-in {
+    animation: awa-fade-in var(--awa-duration-base, 250ms) var(--awa-ease-out, ease) both;
+}
+
+// --- Slide ---
+.awa-anim-slide-up {
+    animation: awa-slide-in-up var(--awa-duration-base, 250ms) var(--awa-ease-out, ease) both;
+}
+
+.awa-anim-slide-down {
+    animation: awa-slide-in-down var(--awa-duration-base, 250ms) var(--awa-ease-out, ease) both;
+}
+
+.awa-anim-slide-left {
+    animation: awa-slide-in-left var(--awa-duration-base, 250ms) var(--awa-ease-out, ease) both;
+}
+
+.awa-anim-slide-right {
+    animation: awa-slide-in-right var(--awa-duration-base, 250ms) var(--awa-ease-out, ease) both;
+}
+
+// --- Scale ---
+.awa-anim-scale-in {
+    animation: awa-scale-in var(--awa-duration-base, 250ms) var(--awa-ease-out, ease) both;
+}
+
+// --- Spin (loading, badge) ---
+.awa-anim-spin {
+    animation: awa-spin var(--awa-duration-slower, 500ms) linear infinite;
+}
+
+.awa-anim-spin-slow {
+    animation: awa-spin 1.5s linear infinite;
+}
+
+// --- Pulse (notification) ---
+.awa-anim-pulse {
+    animation: awa-pulse 2s var(--awa-ease-in-out, ease) infinite;
+}
+
+.awa-anim-pulse-ring {
+    animation: awa-pulse-ring 1.5s var(--awa-ease-out, ease) infinite;
+}
+
+// --- Shake (error) ---
+.awa-anim-shake {
+    animation: awa-shake var(--awa-duration-base, 250ms) ease;
+}
+
+// --- Bounce (success) ---
+.awa-anim-bounce {
+    animation: awa-bounce var(--awa-duration-base, 250ms) ease;
+}
+
+// --- Shimmer (skeleton loading) ---
+.awa-anim-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--awa-color-bg-soft, #f7f7f7) 0%,
+        #e8e8e8 50%,
+        var(--awa-color-bg-soft, #f7f7f7) 100%
+    );
+    background-size: 200% 100%;
+    animation: awa-shimmer 1.5s ease-in-out infinite;
+}
+
+
+// ============================================================================
+// 5. SKELETON LOADING
+// ============================================================================
+
+.awa-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--awa-color-bg-soft, #f7f7f7) 0%,
+        #e8e8e8 50%,
+        var(--awa-color-bg-soft, #f7f7f7) 100%
+    );
+    background-size: 200% 100%;
+    animation: awa-shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--awa-radius-sm, 4px);
+    block-size: 1em;
+}
+
+
+// ============================================================================
+// 6. HOVER LIFT (card interativo, sutil)
+// ============================================================================
+
+.awa-hover-lift {
+    transition: transform var(--awa-duration-base, 250ms) var(--awa-ease-out, ease),
+                box-shadow var(--awa-duration-base, 250ms) var(--awa-ease-out, ease);
+}
+
+.awa-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--awa-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
+}
+
+
+// ============================================================================
+// 7. PROGRESS BAR
+// ============================================================================
+
+.awa-progress {
+    position: relative;
+    block-size: 4px;
+    background: var(--awa-color-bg-soft, #f7f7f7);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.awa-progress__bar {
+    block-size: 100%;
+    background: var(--awa-color-primary, #b73337);
+    transition: inline-size var(--awa-duration-slow, 350ms) var(--awa-ease-in-out, ease);
+}
+
+.awa-progress--indeterminate .awa-progress__bar {
+    inline-size: 25%;
+    animation: awa-progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+
+// ============================================================================
+// 8. RESPONSIVE — duration scales down on small viewports
+// ============================================================================
+
+@media (max-width: 767px) {
+    :root {
+        --awa-duration-base: 200ms;
+        --awa-duration-slow: 300ms;
+    }
+}
+
+
+// ============================================================================
+// 9. REDUCED MOTION — UNIVERSAL
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    // Desabilita animacoes decorativas especificas
+    .awa-anim-spin,
+    .awa-anim-spin-slow,
+    .awa-anim-pulse,
+    .awa-anim-pulse-ring,
+    .awa-anim-shimmer,
+    .awa-progress--indeterminate .awa-progress__bar {
+        animation: none !important;
+    }
+
+    // Hover lift vira sem transform
+    .awa-hover-lift:hover {
+        transform: none;
+    }
+}
+
+
+// ============================================================================
+// 10. PERFORMANCE — hint para o browser
+// ============================================================================
+
+.awa-will-change-transform {
+    will-change: transform;
+}
+
+.awa-will-change-opacity {
+    will-change: opacity;
+}
+
+// Auto-cleanup (NAO use will-change em muitos elementos simultaneos)
+.awa-will-change-auto {
+    will-change: auto;
+}

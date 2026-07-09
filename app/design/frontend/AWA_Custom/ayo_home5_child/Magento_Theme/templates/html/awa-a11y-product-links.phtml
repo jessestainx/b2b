@@ -4,7 +4,135 @@
  * Widgets Rokanthemes (ProductTab, BestsellerProduct, etc.) geram anchors de imagem
  * sem aria-label. Este script corrige todos ao carregar a página.
  */
+declare(strict_types=1);
+
+$request = $block->getRequest();
+$fullActionName = $request ? (string) $request->getFullActionName() : '';
+$pathSlug = trim((string) ($request ? ($request->getOriginalPathInfo() ?: $request->getPathInfo()) : ''), '/');
+$layoutHandles = $block->getLayout() ? $block->getLayout()->getUpdate()->getHandles() : [];
+$isCmsHomeRoute = in_array('cms_index_index', $layoutHandles, true)
+    || $fullActionName === 'cms_index_index'
+    || $pathSlug === '';
 ?>
+<?php if ($isCmsHomeRoute): ?>
+<script>
+(function (w, d) {
+    'use strict';
+
+    var LINK_SELECTOR = '.product-item-photo, .product-thumb-link, a.product-item-photo';
+
+    function fixProductLinks(root) {
+        var scope = root && root.querySelectorAll ? root : d;
+        scope.querySelectorAll(LINK_SELECTOR).forEach(function (link) {
+            if (link.getAttribute('aria-label') ||
+                link.getAttribute('aria-labelledby') ||
+                link.textContent.trim()) {
+                return;
+            }
+
+            var img = link.querySelector('img[alt]');
+            if (img && img.alt && img.alt.trim()) {
+                link.setAttribute('aria-label', img.alt.trim());
+            }
+        });
+    }
+
+    var intentEvents = ['pointerdown', 'keydown', 'touchstart'];
+    var fixesScheduled = false;
+
+    function scheduleFixes() {
+        if (fixesScheduled) {
+            return;
+        }
+        fixesScheduled = true;
+        intentEvents.forEach(function (name) {
+            w.removeEventListener(name, scheduleFixes, true);
+        });
+        fixProductLinks(d);
+    }
+
+    d.addEventListener('contentUpdated', function (event) {
+        var target = event && event.target && event.target.querySelectorAll ? event.target : d;
+        fixProductLinks(target);
+    });
+
+    intentEvents.forEach(function (name) {
+        w.addEventListener(name, scheduleFixes, { capture: true, passive: name !== 'keydown', once: true });
+    });
+}(window, document));
+</script>
+<script>
+(function (w, d) {
+    'use strict';
+
+    function runA11yGlobals() {
+        var logo = d.querySelector('.logo a, a.logo');
+        if (logo) {
+            logo.removeAttribute('aria-hidden');
+            if (!logo.getAttribute('aria-label')) {
+                logo.setAttribute('aria-label', 'AWA Motos - Página inicial');
+            }
+        }
+
+        d.querySelectorAll('.minicart-wrapper img:not([alt]), .minicart-wrapper img[alt=""]').forEach(function (img) {
+            img.setAttribute('alt', 'Produto no carrinho');
+        });
+
+        var emptyLinkSelectors = [
+            '.action.showcart',
+            '.action.nav-toggle',
+            '.action.wishlist',
+            '.action.tocompare',
+            'a.action.quickview-handler'
+        ];
+        var labelMap = {
+            showcart: 'Carrinho de compras',
+            'nav-toggle': 'Menu de navegação',
+            wishlist: 'Lista de desejos',
+            tocompare: 'Comparar produto',
+            'quickview-handler': 'Visualização rápida'
+        };
+
+        emptyLinkSelectors.forEach(function (sel) {
+            d.querySelectorAll(sel).forEach(function (link) {
+                if (!link.getAttribute('aria-label') && !link.textContent.trim()) {
+                    var key = sel.split('.').pop();
+                    if (labelMap[key]) {
+                        link.setAttribute('aria-label', labelMap[key]);
+                    }
+                }
+            });
+        });
+
+        var seen = {};
+        d.querySelectorAll('.product-item[id]').forEach(function (el) {
+            if (seen[el.id]) {
+                el.id = el.id + '-tab-' + (Object.keys(seen).length);
+            }
+            seen[el.id] = true;
+        });
+    }
+
+    var a11yIntent = ['pointerdown', 'keydown', 'touchstart'];
+    var a11yDone = false;
+
+    function runOnIntent() {
+        if (a11yDone) {
+            return;
+        }
+        a11yDone = true;
+        a11yIntent.forEach(function (name) {
+            w.removeEventListener(name, runOnIntent, true);
+        });
+        runA11yGlobals();
+    }
+
+    a11yIntent.forEach(function (name) {
+        w.addEventListener(name, runOnIntent, { capture: true, passive: name !== 'keydown', once: true });
+    });
+}(window, document));
+</script>
+<?php else: ?>
 <script>
 require(['domReady!'], function () {
     'use strict';
@@ -26,11 +154,67 @@ require(['domReady!'], function () {
             || body.classList.contains('cms-homepage_ayo_home5');
     }
 
+    function isCatalogPage() {
+        var body = document.body;
+
+        if (!body) {
+            return false;
+        }
+
+        return body.classList.contains('catalog-category-view')
+            || body.classList.contains('catalogsearch-result-index');
+    }
+
     function setImportantStyle(element, property, value) {
         if (!element) {
             return;
         }
         element.style.setProperty(property, value, 'important');
+    }
+
+    function clearInlineStyles(element, properties) {
+        if (!element) {
+            return;
+        }
+
+        properties.forEach(function (property) {
+            element.style.removeProperty(property);
+        });
+    }
+
+    function shouldLockPrimaryThumb(thumb) {
+        if (!thumb) {
+            return true;
+        }
+
+        if (isCatalogPage()) {
+            return true;
+        }
+
+        if (thumb.getAttribute('data-no-swap') === 'true') {
+            return true;
+        }
+
+        var second = thumb.querySelector('.second-thumb');
+        if (!second) {
+            return true;
+        }
+
+        var secondImage = second.querySelector('img.product-image-photo, img');
+        if (!secondImage) {
+            return true;
+        }
+
+        var secondSrc = secondImage.getAttribute('src') || '';
+        if (secondSrc.indexOf('placeholder') !== -1) {
+            return true;
+        }
+
+        if (secondImage.complete && secondImage.naturalWidth === 0) {
+            return true;
+        }
+
+        return false;
     }
 
     function keepPrimaryImageVisible(thumb) {
@@ -66,19 +250,41 @@ require(['domReady!'], function () {
         }
     }
 
+    function releaseThumbSwap(thumb) {
+        if (!thumb) {
+            return;
+        }
+
+        var first = thumb.querySelector('.first-thumb');
+        var second = thumb.querySelector('.second-thumb');
+        var secondImage = second ? second.querySelector('img.product-image-photo, img') : null;
+        var props = ['display', 'opacity', 'visibility', 'position', 'inset', 'z-index', 'pointer-events'];
+
+        clearInlineStyles(first, props);
+        clearInlineStyles(second, props);
+        clearInlineStyles(secondImage, props);
+        thumb.removeAttribute(HOVER_GUARD_ATTR);
+    }
+
     function addHoverGuard(thumb) {
         if (!thumb || thumb.getAttribute(HOVER_GUARD_ATTR) === 'true') {
             return;
         }
 
         thumb.addEventListener('mouseenter', function () {
-            keepPrimaryImageVisible(thumb);
+            if (shouldLockPrimaryThumb(thumb)) {
+                keepPrimaryImageVisible(thumb);
+            }
         });
         thumb.addEventListener('mouseleave', function () {
-            keepPrimaryImageVisible(thumb);
+            if (shouldLockPrimaryThumb(thumb)) {
+                keepPrimaryImageVisible(thumb);
+            }
         });
         thumb.addEventListener('touchstart', function () {
-            keepPrimaryImageVisible(thumb);
+            if (shouldLockPrimaryThumb(thumb)) {
+                keepPrimaryImageVisible(thumb);
+            }
         }, { passive: true });
 
         thumb.setAttribute(HOVER_GUARD_ATTR, 'true');
@@ -113,6 +319,11 @@ require(['domReady!'], function () {
         var container = first ? first.querySelector('.product-image-container') : null;
         var wrapper = first ? first.querySelector('.product-image-wrapper') : null;
         var image = first ? first.querySelector('img.product-image-photo, img') : null;
+        var body = document.body;
+        var isListingGrid = !!thumb.closest('.wrapper.grid.products-grid, .products-grid, .products-list') &&
+            !!body &&
+            (body.classList.contains('catalog-category-view') ||
+                body.classList.contains('catalogsearch-result-index'));
 
         if (!link || !first || !container || !wrapper || !image) {
             return;
@@ -138,9 +349,11 @@ require(['domReady!'], function () {
         setImportantStyle(container, 'display', 'block');
         setImportantStyle(container, 'position', 'relative');
         setImportantStyle(container, 'width', '100%');
-        setImportantStyle(container, 'height', 'auto');
         setImportantStyle(container, 'aspect-ratio', '1 / 1');
-        setImportantStyle(container, 'min-height', 'var(--card-photo-min-h, 220px)');
+        setImportantStyle(container, 'height', isListingGrid ? '100%' : 'auto');
+        setImportantStyle(container, 'min-height', isListingGrid ? '0' : 'var(--card-photo-min-h, 220px)');
+        setImportantStyle(container, 'max-height', isListingGrid ? '100%' : '100%');
+        setImportantStyle(container, 'overflow', isListingGrid ? 'hidden' : 'visible');
 
         setImportantStyle(wrapper, 'display', 'block');
         setImportantStyle(wrapper, 'position', 'absolute');
@@ -148,7 +361,7 @@ require(['domReady!'], function () {
         setImportantStyle(wrapper, 'width', '100%');
         setImportantStyle(wrapper, 'height', '100%');
         setImportantStyle(wrapper, 'padding-bottom', '0');
-        setImportantStyle(wrapper, 'overflow', 'hidden');
+        setImportantStyle(wrapper, 'overflow', isListingGrid ? 'hidden' : 'visible');
 
         setImportantStyle(image, 'display', 'block');
         setImportantStyle(image, 'position', 'absolute');
@@ -162,10 +375,22 @@ require(['domReady!'], function () {
         setImportantStyle(image, 'object-fit', 'contain');
         setImportantStyle(image, 'object-position', 'center');
 
-        keepPrimaryImageVisible(thumb);
-        addHoverGuard(thumb);
+        if (shouldLockPrimaryThumb(thumb)) {
+            keepPrimaryImageVisible(thumb);
+            addHoverGuard(thumb);
+        } else {
+            releaseThumbSwap(thumb);
+        }
 
         thumb.setAttribute('data-awa-image-normalized', 'true');
+    }
+
+    function renormalizeThumbs(root) {
+        var scope = root && root.querySelectorAll ? root : document;
+        scope.querySelectorAll(THUMB_SELECTOR).forEach(function (thumb) {
+            thumb.removeAttribute('data-awa-image-normalized');
+        });
+        normalizeThumbs(scope);
     }
 
     function normalizeThumbs(root) {
@@ -206,6 +431,10 @@ require(['domReady!'], function () {
 
         document.addEventListener('contentUpdated', function (event) {
             scheduleRun(event && event.target ? event.target : document);
+        });
+
+        document.addEventListener('awa:product-images-ready', function (event) {
+            renormalizeThumbs(event && event.target ? event.target : document);
         });
 
         if (window.MutationObserver && document.body) {
@@ -308,17 +537,6 @@ require(['domReady!'], function () {
         });
     });
 
-    /* #10: Fix duplicate toolbar IDs — suffix bottom toolbar elements */
-    var toolbars = document.querySelectorAll('.toolbar.toolbar-products');
-    if (toolbars.length > 1) {
-        for (var i = 1; i < toolbars.length; i++) {
-            var dupes = toolbars[i].querySelectorAll('[id]');
-            dupes.forEach(function (el) {
-                el.id = el.id + '-bottom-' + i;
-            });
-        }
-    }
-
     /* #5: Fix cart heading hierarchy — h1 jumps to h3, add aria-level to bridge */
     if (document.body.classList.contains("checkout-cart-index")) {
         document.querySelectorAll(".cart-summary h3, .block.crosssell h3").forEach(function (h3) {
@@ -337,3 +555,4 @@ require(['domReady!'], function () {
     });
 });
 </script>
+<?php endif; ?>

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
-# setup-chrome-debug-mcp.sh — Valida instalação do Chrome DevTools MCP (CDP :9222)
-set -euo pipefail
+# setup-chrome-debug-mcp.sh — DESATIVADO (projeto usa somente MCP nativo do Cursor)
+echo "chrome-devtools-mcp foi removido deste projeto."
+echo "Use cursor-ide-browser (nativo) ou: cd tests/e2e && npx playwright test"
+echo "Diagnóstico: scripts/mcp-performance.sh status"
+exit 0
+
+# --- legado abaixo (não executado) ---
 
 NODE_BIN="/usr/bin/node"
 MCP_BIN="/usr/lib/node_modules/chrome-devtools-mcp/build/src/bin/chrome-devtools-mcp.js"

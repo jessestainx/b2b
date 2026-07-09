@@ -1,5 +1,5 @@
 /**
- * REXIS ML - Real-time Recommendations Module
+ * Product Intelligence - Real-time Recommendations Module
  *
  * Usage:
  * require(['rexisRecommendations'], function(rexis) {
@@ -18,7 +18,7 @@ define([
     'mage/url',
     'mage/template',
     'mage/storage'
-], function($, urlBuilder, mageTemplate, storage) {
+], function ($, urlBuilder, mageTemplate, storage) {
     'use strict';
 
     let defaultTemplate =
@@ -48,7 +48,7 @@ define([
          *
          * @param {Object} options
          */
-        load: function(options) {
+        load: function (options) {
             let settings = $.extend({
                 container: '#rexis-recommendations',
                 classificacao: null,
@@ -62,7 +62,7 @@ define([
 
             var $container = $(settings.container);
             if ($container.length === 0) {
-                console.warn('REXIS ML: Container not found -', settings.container);
+                console.warn('Product Intelligence: Container not found -', settings.container);
                 return;
             }
 
@@ -88,7 +88,7 @@ define([
                 type: 'GET',
                 data: params,
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     if (response.success && response.recommendations.length > 0) {
                         let template = settings.template || defaultTemplate;
                         let compiled = mageTemplate(template);
@@ -99,7 +99,7 @@ define([
                         $container.html(html);
 
                         // Bind add to cart
-                        $container.find('.rexis-ajax-addtocart').on('click', function(e) {
+                        $container.find('.rexis-ajax-addtocart').on('click', function (e) {
                             e.preventDefault();
                             var $btn = $(this);
                             let productId = $btn.closest('.rexis-ajax-item').data('product-id');
@@ -132,14 +132,14 @@ define([
                         $container.html('<div class="rexis-ajax-empty">Nenhuma recomendação disponível no momento.</div>');
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     $container.html('<div class="rexis-ajax-error">Erro ao carregar recomendações.</div>');
 
                     if (settings.onError) {
                         settings.onError(error);
                     }
 
-                    console.error('REXIS ML Error:', error);
+                    console.error('Product Intelligence Error:', error);
                 }
             });
         },
@@ -147,7 +147,7 @@ define([
         /**
          * Refresh recommendations in container
          */
-        refresh: function(container) {
+        refresh: function (container) {
             var $container = $(container);
             let options = $container.data('rexis-options') || {};
             options.container = container;
@@ -157,14 +157,14 @@ define([
         /**
          * Track recommendation view (for analytics)
          */
-        trackView: function(productId, score) {
+        trackView: function (productId, score) {
             // Analytics tracking — silent by design
         },
 
         /**
          * Track recommendation click
          */
-        trackClick: function(productId, score) {
+        trackClick: function (productId, score) {
             // Analytics tracking — silent by design
         }
     };

@@ -97,11 +97,11 @@ class Index implements HttpPostActionInterface
     {
         $added = 0;
         $errors = [];
-        $selectedItems = $this->request->getParam('items', []);
+        $selectedItems = array_map('intval', (array) $this->request->getParam('items', []));
 
         /** @var \Magento\Sales\Model\Order\Item $item */
         foreach ($order->getAllVisibleItems() as $item) {
-            if (!empty($selectedItems) && !in_array($item->getItemId(), $selectedItems)) {
+            if (!empty($selectedItems) && !in_array((int) $item->getItemId(), $selectedItems, true)) {
                 continue;
             }
             $result = $this->addItemToCart($item);

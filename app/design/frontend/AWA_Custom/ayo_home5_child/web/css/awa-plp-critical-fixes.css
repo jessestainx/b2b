@@ -38,7 +38,7 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) :is(
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .nav-breadcrumbs,
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .nav-breadcrumbs .breadcrumbs,
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .nav-breadcrumbs .breadcrumbs .items {
-  color: #666666 !important;
+  color: var(--awa-text-secondary) !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .awa-site-header :is(
@@ -399,8 +399,8 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) :is(
   #awa-b2b-promo-bar,
   #awa-b2b-promo-bar.top-header.awa-b2b-promo-bar
 ) {
-  background: var(--awa-bg-subtle, var(--awa-color-bg-soft, #f7f7f7)) !important;
-  color: var(--awa-text-secondary, #666666) !important;
+  background: var(--awa-bg-subtle, var(--awa-color-bg-soft, var(--awa-bg-subtle))) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
   border: 0 !important;
   box-shadow: none !important;
 }
@@ -421,12 +421,12 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) :is(
   .awa-b2b-promo-bar__tail,
   .awa-b2b-promo-bar__text
 ) {
-  color: var(--awa-text-secondary, #666666) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .awa-b2b-promo-bar__cta,
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .awa-b2b-promo-bar__cta strong {
-  color: var(--awa-text-inverse, #ffffff) !important;
+  color: var(--awa-text-inverse, var(--awa-bg)) !important;
   background: transparent !important;
   text-decoration: underline !important;
   text-underline-offset: 2px !important;
@@ -435,7 +435,7 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .awa
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .awa-category-hero__title {
   background: transparent !important;
   background-color: transparent !important;
-  color: var(--awa-text-primary, #333333) !important;
+  color: var(--awa-text-primary, var(--awa-text)) !important;
   padding: 0 !important;
   border-radius: 0 !important;
   display: block !important;
@@ -443,11 +443,11 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .pag
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .awa-category-hero--has-image .awa-category-hero__count {
-  color: var(--awa-text-secondary, #666666) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .awa-category-hero:not(.awa-category-hero--has-image) .awa-category-hero__count {
-  color: var(--awa-text-muted, #666666) !important;
+  color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
 }
 
 /* B2B gate preço — 1º paint (ex-inline head-preload, optimize 2026-06-08h) */
@@ -460,12 +460,12 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .awa
   min-height: 44px !important;
   padding: 8px 12px !important;
   margin-top: auto !important;
-  background: #ffffff !important;
-  border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e5e5e5)) !important;
+  background: var(--awa-bg) !important;
+  border: 1px solid color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 35%, var(--awa-border, var(--awa-border))) !important;
   border-radius: 8px !important;
   font-size: 13px !important;
   line-height: 1.35 !important;
-  color: var(--awa-primary, #b73337) !important;
+  color: var(--awa-primary, var(--awa-primary)) !important;
   box-sizing: border-box !important;
   width: 100% !important;
 }
@@ -489,7 +489,7 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .awa
   border-radius: 0 !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  color: var(--awa-primary, #b73337) !important;
+  color: var(--awa-primary, var(--awa-primary)) !important;
   text-decoration: none !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
@@ -511,7 +511,7 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .awa
 
 /* §108b — Busca: empty state + termo em destaque (1º paint) */
 html body#html-body.catalogsearch-result-index .page-wrapper .page-title-wrapper.search .page-title .base {
-  color: var(--awa-primary, #b73337) !important;
+  color: var(--awa-primary, var(--awa-primary)) !important;
   font-weight: 700 !important;
 }
 
@@ -525,10 +525,10 @@ html body#html-body.catalogsearch-result-index .page-wrapper :is(
   margin: 24px auto 32px !important;
   padding: 32px 16px !important;
   text-align: center !important;
-  border: 1px dashed var(--awa-border, #e5e5e5) !important;
+  border: 1px dashed var(--awa-border, var(--awa-border)) !important;
   border-radius: 12px !important;
-  background: var(--awa-bg-soft, #f7f7f7) !important;
-  color: var(--awa-text-muted, #666666) !important;
+  background: var(--awa-bg-soft, var(--awa-bg-subtle)) !important;
+  color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
   font-size: 14px !important;
   line-height: 1.55 !important;
 }
@@ -562,7 +562,7 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .pag
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .nav-breadcrumbs,
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .nav-breadcrumbs .breadcrumbs,
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .nav-breadcrumbs .breadcrumbs .items {
-  color: #666666 !important;
+  color: var(--awa-text-secondary) !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .awa-site-header :is(
@@ -588,7 +588,7 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .pag
 
 /* §121 — PLP a11y + touch (2026-06-09) */
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .wrapper.grid.products-grid .item-product :is(h3.product-name a, .product-item-link):focus-visible {
-  outline: 2px solid var(--awa-primary, #b73337) !important;
+  outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
   outline-offset: 2px !important;
   border-radius: 4px !important;
 }
@@ -600,14 +600,14 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .pag
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .filter-options-title:focus-visible,
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .filter-options-content :is(a, label, input):focus-visible {
-  outline: 2px solid var(--awa-primary, #b73337) !important;
+  outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
   outline-offset: 2px !important;
   border-radius: 4px !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .toolbar-products .modes .mode-icon:focus-visible,
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .toolbar-products .sorter-action:focus-visible {
-  outline: 2px solid var(--awa-primary, #b73337) !important;
+  outline: 2px solid var(--awa-primary, var(--awa-primary)) !important;
   outline-offset: 2px !important;
   border-radius: 6px !important;
 }
@@ -623,7 +623,7 @@ html body#html-body.catalogsearch-result-index .page-wrapper .page-title-wrapper
 html body#html-body.catalogsearch-result-index .page-wrapper .search.results > .toolbar-amount {
   font-size: max(13px, 0.8125rem) !important;
   line-height: 1.45 !important;
-  color: var(--awa-text-muted, #666666) !important;
+  color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
   margin-block: 0 12px !important;
 }
 
@@ -633,8 +633,8 @@ html body#html-body.catalogsearch-result-index .page-wrapper .message.info.empty
   padding: 14px 16px !important;
   font-size: max(14px, 0.875rem) !important;
   line-height: 1.45 !important;
-  background: var(--awa-bg-muted, #f7f7f7) !important;
-  border: 1px solid var(--awa-border, #e5e5e5) !important;
+  background: var(--awa-bg-muted, var(--awa-bg-subtle)) !important;
+  border: 1px solid var(--awa-border, var(--awa-border)) !important;
 }
 
 @media (max-width: 767px) {
@@ -757,4 +757,106 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
   .counter.qty {
   border-width: 0 !important;
   box-shadow: none !important;
+}
+
+/* ── §BUG-H-046 — Breadcrumb 4px wide na PLP (invisível)
+   Evidência: breadcrumb.rect: {w: 4, h: 107} na PLP.
+   Fix: forçar width:100% nos containers da cadeia .nav-breadcrumbs */
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  .nav-breadcrumbs {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  .nav-breadcrumbs
+  .container,
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  .nav-breadcrumbs
+  .row,
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  .nav-breadcrumbs
+  .col-sm-12 {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+/* ── §BUG-H-048 — Footer CNPJ badge overflow 61px na PLP mobile
+   Evidência: .awa-footer-cnpj-badge right: 451px em 390px viewport.
+   Fix: containment de overflow no wrapper do footer */
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  .awa-footer-cnpj-badge {
+  max-width: 100% !important;
+  width: auto !important;
+  right: auto !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  .page-footer {
+  overflow-x: clip !important;
+}
+
+/* ── §BUG-H-047 — Search bar 4px wide na PLP mobile
+   Evidência: PLP mobile 390px: search.rect: {l:11, w:4}.
+   Fix: forçar largura e visibilidade do search na PLP mobile */
+@media (max-width: 991px) {
+  html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .awa-site-header
+    .awa-header-search-col,
+  html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .awa-site-header
+    .block-search {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    display: block !important;
+    visibility: visible !important;
+    overflow: visible !important;
+  }
+
+  html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .awa-site-header
+    .awa-header-search-col
+    form#search_mini_form,
+  html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .awa-site-header
+    .block-search
+    form.minisearch {
+    width: 100% !important;
+    display: flex !important;
+  }
+
+  html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .awa-site-header
+    .awa-header-search-col
+    form#search_mini_form
+    input#search,
+  html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .awa-site-header
+    .block-search
+    input#search {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+  }
 }

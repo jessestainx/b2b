@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\CatalogFix\Plugin\View\Page\Config;
 
+use Magento\Framework\View\Page\Config;
 use Magento\Framework\View\Page\Title;
 
 /**
  * PDP-001: Normaliza títulos de página ALL CAPS (vindos do ERP via meta_title) para Title Case.
  *
- * Intercepta Title::getShort() porque:
+ * Intercepta Title::get() para o <title> e Config::setMetaTitle() para <meta name="title">.
  *  - getMetaTitle() é método mágico (__call/getData) — não é interceptável por plugins
- *  - getShort() é o método usado pelo Renderer para gerar <title>
+ *  - get() é o método usado pelo Renderer para gerar <title>
+ *  - setMetaTitle() é público e interceptável, normalizando <meta name="title">
  *
  * Exemplo:
  *   "RETROVISOR TITAN 2000 03 D E  | AWA Motos" → "Retrovisor Titan 2000 03 D E | AWA Motos"
@@ -29,9 +31,38 @@ class TitleNormalizationPlugin
     ];
 
     /**
+     * PDP-004: Normaliza o <meta name="title"> que vem do campo meta_title do ERP (ALL CAPS).
+     *
+     * O valor recebido pode incluir sufixo da loja (ex: "RETROVISOR ... | AWA Motos"),
+     * por isso precisamos extrair apenas o título principal antes de normalizar.
+     *
+     * @param Config $subject
+     * @param string|null $title
+     * @return array{0: string|null}
+     */
+    public function beforeSetMetaTitle(Config $subject, ?string $title): array
+    {
+        if ($title === null || $title === '') {
+            return [$title];
+        }
+
+        $sepPos = mb_strpos($title, ' | ', 0, 'UTF-8');
+        if ($sepPos === false) {
+            $title = $this->normalizeIfAllCaps($title);
+            return [$title];
+        }
+
+        $mainTitle = trim(mb_substr($title, 0, $sepPos, 'UTF-8'));
+        $suffix    = mb_substr($title, $sepPos, null, 'UTF-8');
+        $normalized = $this->normalizeIfAllCaps($mainTitle);
+
+        return [$normalized !== $mainTitle ? $normalized . $suffix : $title];
+    }
+
+    /**
      * @param Title $subject
-     * @param string|null $result
-     * @return string|null
+     * @param string $result
+     * @return string
      */
     public function afterGet(Title $subject, string $result): string
     {

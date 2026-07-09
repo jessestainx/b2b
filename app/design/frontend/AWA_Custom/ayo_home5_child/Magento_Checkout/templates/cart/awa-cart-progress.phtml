@@ -1,0 +1,137 @@
+<?php
+/**
+ * AWA Motos - Cart Progress Indicator + Continue Shopping
+ *
+ * Sprint 3 (UX): indica progresso para frete gratis e link continuar comprando.
+ */
+declare(strict_types=1);
+
+$_subtotal = (float) $block->getLayout()->getBlock('checkout.cart')->getQuote()->getSubtotal();
+$_freeShippingThreshold = 199.0; // >= R$ 199 = frete gratis
+$_remaining = max(0, $_freeShippingThreshold - $_subtotal);
+$_progress = $_freeShippingThreshold > 0 ? min(100, ($_subtotal / $_freeShippingThreshold) * 100) : 100;
+$_percentComplete = (int) $_progress;
+$_isFreeShipping = $_subtotal >= $_freeShippingThreshold;
+$_currency = 'BRL';
+$_symbol = 'R$';
+$_storeUrl = $block->getBaseUrl();
+?>
+<div class="awa-cart-progress" data-awa-cart-progress aria-label="<?= $block->escapeHtmlAttr(__('Progresso para frete gratis')) ?>">
+
+    <?php if ($_isFreeShipping): ?>
+    <p class="awa-cart-progress__success" role="status">
+        <span aria-hidden="true">✓</span>
+        <?= $block->escapeHtml(__('Voce ganhou frete gratis!')) ?>
+    </p>
+    <?php else: ?>
+    <p class="awa-cart-progress__hint" role="status">
+        <?= $block->escapeHtml(__('Faltam ' . $_symbol . ' ' . number_format($_remaining, 2, ',', '.') . ' para voce ganhar frete gratis')) ?>
+    </p>
+    <?php endif; ?>
+
+    <div class="awa-cart-progress__bar"
+         role="progressbar"
+         aria-valuenow="<?= $block->escapeHtmlAttr($_percentComplete) ?>"
+         aria-valuemin="0"
+         aria-valuemax="100"
+         aria-label="<?= $block->escapeHtmlAttr(__('Progresso para frete gratis')) ?>">
+        <div class="awa-cart-progress__fill" style="width: <?= $block->escapeHtmlAttr($_percentComplete) ?>%"></div>
+        <span class="awa-cart-progress__milestone awa-cart-progress__milestone--start" aria-hidden="true"></span>
+        <span class="awa-cart-progress__milestone awa-cart-progress__milestone--end" aria-hidden="true"></span>
+    </div>
+
+    <div class="awa-cart-progress__actions">
+        <a href="<?= $block->escapeUrl($_storeUrl) ?>"
+           class="awa-cart-progress__continue action secondary"
+           aria-label="<?= $block->escapeHtmlAttr(__('Continuar comprando mais produtos')) ?>">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            <?= $block->escapeHtml(__('Continuar comprando')) ?>
+        </a>
+
+        <button type="button"
+                class="awa-cart-progress__save-for-later"
+                data-awa-save-for-later
+                aria-label="<?= $block->escapeHtmlAttr(__('Salvar carrinho para depois')) ?>">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+            <?= $block->escapeHtml(__('Salvar para depois')) ?>
+        </button>
+    </div>
+</div>
+
+<style>
+.awa-cart-progress {
+    margin: 16px 0;
+    padding: 16px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+}
+.awa-cart-progress__hint,
+.awa-cart-progress__success {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #075985;
+}
+.awa-cart-progress__success { color: #047857; }
+.awa-cart-progress__bar {
+    position: relative;
+    height: 12px;
+    background: #ffffff;
+    border: 1px solid #bae6fd;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.awa-cart-progress__fill {
+    height: 100%;
+    background: linear-gradient(90deg, #b73337 0%, #dc2626 100%);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.awa-cart-progress__milestone {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+.awa-cart-progress__milestone--start { left: 0; background: #047857; }
+.awa-cart-progress__milestone--end { left: 100%; background: #b73337; border: 2px solid white; }
+.awa-cart-progress__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.awa-cart-progress__continue,
+.awa-cart-progress__save-for-later {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    min-height: 40px;
+    border-radius: 8px;
+    border: 1px solid #bae6fd;
+    background: white;
+    color: #075985;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+.awa-cart-progress__continue:hover,
+.awa-cart-progress__save-for-later:hover {
+    background: #f0f9ff;
+    border-color: #7dd3fc;
+}
+@media (prefers-reduced-motion: reduce) {
+    .awa-cart-progress__fill,
+    .awa-cart-progress__continue,
+    .awa-cart-progress__save-for-later { transition: none !important; }
+}
+</style>

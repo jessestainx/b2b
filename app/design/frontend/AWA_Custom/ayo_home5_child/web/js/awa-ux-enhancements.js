@@ -113,7 +113,7 @@ define(['jquery'], function ($) {
                     if (!badge) {
                         badge = document.createElement('span');
                         badge.className = 'awa-filter-badge';
-                        badge.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#A33B3B;color:#fff;border-radius:50%;font-size:11px;font-weight:700;margin-left:6px;vertical-align:middle;';
+                        badge.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#b73337;color:#fff;border-radius:50%;font-size:11px;font-weight:700;margin-left:6px;vertical-align:middle;';
                         btn.appendChild(badge);
                     }
                     badge.textContent = count;
@@ -193,6 +193,9 @@ define(['jquery'], function ($) {
                 '.awa-home-products'
             ].join(', ');
             document.querySelectorAll(selectors).forEach(function (el) {
+                if (el.classList.contains('awa-home-section--below-fold')) {
+                    return;
+                }
                 if (window.getComputedStyle(el).contentVisibility === 'auto') {
                     el.style.contentVisibility = 'visible';
                     el.style.containIntrinsicSize = 'unset';
@@ -202,34 +205,10 @@ define(['jquery'], function ($) {
     }
 
     /* ============================================================
-       10. initScrollProgress
+       10. initScrollProgress — desativado (ui-ux-pro-max: ruído visual)
     ============================================================ */
     function initScrollProgress() {
-        try {
-            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            if (document.getElementById('awa-scroll-progress')) return;
-
-            let bar   = document.createElement('div');
-            bar.id    = 'awa-scroll-progress';
-            bar.setAttribute('role', 'progressbar');
-            bar.setAttribute('aria-label', 'Progresso de leitura');
-            bar.setAttribute('aria-valuemin', '0');
-            bar.setAttribute('aria-valuemax', '100');
-            bar.setAttribute('aria-valuenow', '0');
-
-            let style = document.createElement('style');
-            style.id   = 'awa-scroll-style';
-            style.textContent = '#awa-scroll-progress{position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,#A33B3B,#e05a5e);z-index:99999;transition:width .1s linear;pointer-events:none}';
-            document.head.appendChild(style);
-            document.body.prepend(bar);
-
-            window.addEventListener('scroll', function () {
-                let docH = document.documentElement.scrollHeight - window.innerHeight;
-                let pct  = docH > 0 ? Math.round((window.scrollY / docH) * 100) : 0;
-                bar.style.width = pct + '%';
-                bar.setAttribute('aria-valuenow', pct);
-            }, { passive: true });
-        } catch (e) {}
+        return;
     }
 
     /* ============================================================
@@ -281,47 +260,95 @@ define(['jquery'], function ($) {
     ============================================================ */
     function fixMobileTouch() {
         try {
-            if (window.innerWidth > 991) return;
+            if (window.innerWidth > 1024) return;
 
             let style = document.createElement('style');
             style.id   = 'awa-touch-style';
             style.textContent = [
                 '.nav-toggle,.action.showcart,.action.towishlist,',
                 '.product-item-actions .action{min-width:44px!important;min-height:44px!important}',
-                '.nav-toggle{display:flex!important;align-items:center!important;justify-content:center!important}'
+                '.nav-toggle{display:flex!important;align-items:center!important;justify-content:center!important}',
+                'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view) .page-wrapper .wrapper.grid.products-grid .item-product :is(.product-name>a.product-item-link,.product-item-name>a.product-item-link,a.product-item-link),',
+                'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view) .page-wrapper :is(.products-grid,.awa-pdp-related,.rx-pdp-crosssell,.block.related,.block.upsell) :is(.item-product,.product-item,li.item-product) :is(.product-name>a.product-item-link,.product-item-name>a.product-item-link,a.product-item-link){',
+                'min-height:44px!important;height:auto!important;max-height:none!important;',
+                'padding-top:4px!important;padding-bottom:4px!important;box-sizing:border-box!important}',
+                'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper :is(.rx-pdp-login-link,.awa-related-price-notice__login-link){',
+                'display:inline-flex!important;align-items:center!important;min-height:44px!important;',
+                'height:auto!important;padding-top:10px!important;padding-bottom:10px!important;',
+                'line-height:1.2!important;box-sizing:border-box!important}'
             ].join('');
-            document.head.appendChild(style);
+            (document.body || document.documentElement).appendChild(style);
+
+            let productLinks = document.querySelectorAll(
+                '.wrapper.grid.products-grid .item-product .product-item-link,' +
+                '.products-grid .item-product .product-item-link,' +
+                '.awa-pdp-related .product-item-link,' +
+                '.rx-pdp-crosssell .product-item-link'
+            );
+            productLinks.forEach(function (link) {
+                link.style.setProperty('min-height', '44px', 'important');
+                link.style.setProperty('height', 'auto', 'important');
+                link.style.setProperty('max-height', 'none', 'important');
+                link.style.setProperty('padding-top', '4px', 'important');
+                link.style.setProperty('padding-bottom', '4px', 'important');
+                link.style.setProperty('box-sizing', 'border-box', 'important');
+            });
+
+            let loginLinks = document.querySelectorAll('.rx-pdp-login-link, .awa-related-price-notice__login-link');
+            loginLinks.forEach(function (link) {
+                link.style.setProperty('display', 'inline-flex', 'important');
+                link.style.setProperty('align-items', 'center', 'important');
+                link.style.setProperty('min-height', '44px', 'important');
+                link.style.setProperty('height', 'auto', 'important');
+                link.style.setProperty('padding-top', '10px', 'important');
+                link.style.setProperty('padding-bottom', '10px', 'important');
+                link.style.setProperty('line-height', '1.2', 'important');
+                link.style.setProperty('box-sizing', 'border-box', 'important');
+            });
         } catch (e) {}
     }
 
     /* ============================================================
        14. initSearchEnhance — botão limpar busca
     ============================================================ */
+    function setSearchClearVisible(clearBtn, visible) {
+        clearBtn.hidden = !visible;
+        clearBtn.style.display = visible ? 'inline-flex' : 'none';
+        clearBtn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    }
+
     function initSearchEnhance() {
         try {
             let searchInput = document.querySelector('#search, .header-search input[type="text"], .block-search input.input-text');
             if (!searchInput || document.getElementById('awa-search-clear')) return;
 
             let clearBtn = document.createElement('button');
-            clearBtn.id   = 'awa-search-clear';
+            clearBtn.id = 'awa-search-clear';
             clearBtn.type = 'button';
+            clearBtn.className = 'awa-search-clear-btn';
             clearBtn.setAttribute('aria-label', 'Limpar busca');
-            clearBtn.textContent = '✕';
+            clearBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
 
             /* Append ao fim do .control — NÃO após o input (quebra $input.next() do Mirasvit). */
             let control = searchInput.closest('.control[data-awa-search-control], .field.search .control, .control')
                 || searchInput.parentElement;
 
             if (control) {
+                if (getComputedStyle(control).position === 'static') {
+                    control.style.position = 'relative';
+                }
                 control.appendChild(clearBtn);
             }
 
+            setSearchClearVisible(clearBtn, false);
+            searchInput.classList.add('awa-search-input--clearable');
+
             searchInput.addEventListener('input', function () {
-                clearBtn.style.display = this.value ? 'flex' : 'none';
+                setSearchClearVisible(clearBtn, !!this.value);
             });
             clearBtn.addEventListener('click', function () {
                 searchInput.value = '';
-                clearBtn.style.display = 'none';
+                setSearchClearVisible(clearBtn, false);
                 searchInput.dispatchEvent(new Event('input', { bubbles: true }));
                 searchInput.focus();
             });
@@ -494,10 +521,44 @@ define(['jquery'], function ($) {
         } catch (e) {}
     }
 
+    function isHomePage() {
+        let body = document.body;
+        if (!body) {
+            return false;
+        }
+
+        return body.classList.contains('cms-index-index') ||
+            body.classList.contains('cms-home') ||
+            body.classList.contains('cms-homepage_ayo_home5');
+    }
+
+    function isCatalogListingPage() {
+        let body = document.body;
+        if (!body) {
+            return false;
+        }
+
+        return body.classList.contains('catalog-category-view') ||
+            body.classList.contains('catalogsearch-result-index');
+    }
+
     /* ============================================================
        INIT
     ============================================================ */
     function init() {
+        if (isCatalogListingPage()) {
+            /*
+             * PLP/search stability: this module's search autocomplete observer and
+             * image/lazyload enhancements were reproducing Chrome "page unresponsive"
+             * after product images started loading. Keep only tiny safe fixes here;
+             * Magento native filters, product cards and add-to-cart remain untouched.
+             */
+            fixHashLinks();
+            fixFooterEmail();
+            fixMobileTouch();
+            return;
+        }
+
         fixHashLinks();
         fixSocialAria();
         fixFooterEmail();
@@ -505,8 +566,10 @@ define(['jquery'], function ($) {
         fixBreadcrumb();
         fixMobileTouch();
         // injectWhatsApp(); // Removido para evitar duplicidade (Bug #3)
-        initActiveFiltersBadge();
-        initScrollProgress();
+        if (!isHomePage()) {
+            initActiveFiltersBadge();
+            initScrollProgress();
+        }
         initImageLazyLoad();
         initCartFeedback();
         initSearchEnhance();
@@ -520,6 +583,10 @@ define(['jquery'], function ($) {
     }
 
     window.setTimeout(function () {
+        if (isCatalogListingPage()) {
+            return;
+        }
+
         fixSocialAria();
         fixFooterEmail();
         contentVisibilityFix();

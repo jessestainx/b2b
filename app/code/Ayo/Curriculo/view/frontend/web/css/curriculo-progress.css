@@ -757,6 +757,34 @@
     
     .form.curriculo .fieldset {
         padding: 20px 18px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .form.curriculo .curriculo-grid,
+    .form.curriculo .field,
+    .form.curriculo .control {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .form.curriculo .curriculo-grid {
+        grid-template-columns: minmax(0, 1fr);
+        overflow: hidden;
+    }
+
+    .form.curriculo .input-text,
+    .form.curriculo select,
+    .form.curriculo textarea {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     
     .form.curriculo .legend span {
@@ -835,6 +863,29 @@
 @media (width <= 640px) {
     .curriculo-specialties-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .form.curriculo .curriculo-specialties-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) !important;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .form.curriculo .curriculo-specialties-grid .specialty-checkbox {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .form.curriculo .curriculo-specialties-grid .specialty-checkbox label {
+        min-width: 0;
+        overflow-wrap: anywhere;
     }
 }
 

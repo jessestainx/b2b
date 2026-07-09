@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /**
- * Inicializa melhorias de UX do checkout AWA (scroll, trust strip).
+ * Inicializa melhorias de UX do checkout AWA (scroll, trust strip, resiliência).
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
@@ -9,7 +9,8 @@ declare(strict_types=1);
 <script type="text/x-magento-init">
 {
     "*": {
-        "js/awa-checkout-ux": {}
+        "js/awa-checkout-ux": {},
+        "js/awa-checkout-resilience": {}
     }
 }
 </script>

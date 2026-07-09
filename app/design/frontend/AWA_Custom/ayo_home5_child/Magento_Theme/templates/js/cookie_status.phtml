@@ -1,0 +1,12 @@
+<?php
+/**
+ * AWA override — cookie_status.phtml
+ * Substituído pelo módulo GrupoAwamotos_CookieConsent (banner LGPD próprio).
+ * Renderiza apenas um elemento oculto para não quebrar o contrato de layout do Magento.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+?>
+<div class="cookie-status-message" id="cookie-status" aria-hidden="true" hidden style="display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;position:absolute!important;pointer-events:none!important;"></div>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', ['type' => 'text/javascript'], 'var el=document.getElementById("cookie-status");if(el){el.style.cssText="display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;position:absolute!important;pointer-events:none!important;";}', false) ?>

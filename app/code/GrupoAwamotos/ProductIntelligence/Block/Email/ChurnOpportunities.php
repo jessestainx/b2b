@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Block para renderizar oportunidades de churn em emails
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Block\Email;
 

@@ -2,6 +2,9 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="customer_account"/>
+    <head>
+        <css src="GrupoAwamotos_B2B::css/account/pages-shoppinglist.css"/>
+    </head>
     <body>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Customer\ShoppingList\ListBlock"
@@ -18,7 +21,7 @@
                    template="GrupoAwamotos_B2B::navigation/breadcrumbs.phtml"
                    before="-">
                 <arguments>
-                    <argument name="page_title" xsi:type="string"></argument>
+                    <argument name="page_title" xsi:type="string" translate="true">Minhas Listas de Compras</argument>
                 </arguments>
             </block>
         </referenceContainer>

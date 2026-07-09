@@ -1,0 +1,94 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Finance\BoletoList $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+if (!$block->isAvailable()) {
+    return;
+}
+
+$summary = $block->getSummary();
+$activeTab = $block->getActiveTab();
+$receivables = $block->getReceivables();
+?>
+<div class="account b2b-finance-page">
+
+    <div class="b2b-dashboard-header">
+        <div>
+            <h1 class="dashboard-title page-title">
+                <span><?= $escaper->escapeHtml(__('Financeiro')) ?></span>
+            </h1>
+        </div>
+    </div>
+
+    <div class="column main">
+
+        <div class="b2b-section">
+            <nav class="b2b-finance-tabs" aria-label="<?= $escaper->escapeHtmlAttr(__('Filtro de situação')) ?>">
+                <?php foreach ($block->getTabs() as $tab): ?>
+                    <a href="<?= $escaper->escapeUrl($block->getTabUrl($tab)) ?>"
+                       class="action <?= $tab === $activeTab ? 'primary' : 'secondary' ?>">
+                        <?= $escaper->escapeHtml($block->getTabLabel($tab)) ?>
+                        <?php if (isset($summary[$tab])): ?>
+                            (<?= (int) $summary[$tab] ?>)
+                        <?php endif; ?>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+        </div>
+
+        <?php if (empty($receivables)): ?>
+        <div class="b2b-section">
+            <div class="empty-state-message">
+                <p><?= $escaper->escapeHtml(__('Nenhum título encontrado para esta situação.')) ?></p>
+            </div>
+        </div>
+        <?php else: ?>
+        <div class="b2b-section">
+            <div class="b2b-table-scroll"
+                 data-mage-init='{"GrupoAwamotos_B2B/js/finance/print-modal": {}}'>
+            <table class="data-table" aria-label="<?= $escaper->escapeHtmlAttr(__('Títulos financeiros')) ?>">
+                <thead>
+                    <tr>
+                        <th><?= $escaper->escapeHtml(__('Documento')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Pedido')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Emissão')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Vencimento')) ?></th>
+                        <th class="col-total"><?= $escaper->escapeHtml(__('Valor')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Situação')) ?></th>
+                        <th class="col-actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($receivables as $titulo): ?>
+                    <tr>
+                        <td><?= $escaper->escapeHtml((string) ($titulo['nro_documento'] ?? '')) ?></td>
+                        <td>
+                            <?php if (!empty($titulo['pedido'])): ?>
+                                #<?= (int) $titulo['pedido'] ?>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= $escaper->escapeHtml((string) ($titulo['data_emissao_fmt'] ?? '')) ?></td>
+                        <td><?= $escaper->escapeHtml((string) ($titulo['data_vencimento_fmt'] ?? '')) ?></td>
+                        <td class="col-total"><?= $escaper->escapeHtml((string) ($titulo['valor_devido_fmt'] ?? '')) ?></td>
+                        <td>
+                            <span class="b2b-finance-badge b2b-finance-badge--<?= $escaper->escapeHtmlAttr((string) ($titulo['situacao'] ?? '')) ?>">
+                                <?= $escaper->escapeHtml($block->getTabLabel((string) ($titulo['situacao'] ?? ''))) ?>
+                            </span>
+                        </td>
+                        <td class="col-actions">
+                            <a class="action secondary"
+                               href="<?= $escaper->escapeUrl($block->getPrintUrl((int) ($titulo['codigo'] ?? 0))) ?>"
+                               data-print-boleto-url="<?= $escaper->escapeUrl($block->getPrintUrl((int) ($titulo['codigo'] ?? 0))) ?>">
+                                <?= $escaper->escapeHtml(__('Imprimir')) ?>
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+            </div>
+        </div>
+        <?php endif; ?>
+
+    </div>
+</div>

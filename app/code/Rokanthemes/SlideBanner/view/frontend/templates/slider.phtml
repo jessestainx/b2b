@@ -114,8 +114,8 @@ if ($banners = $block->getBannerCollection()):
 
                 var $prev = $root.find('.owl-prev');
                 var $next = $root.find('.owl-next');
-                $prev.attr({'aria-label': '<?php echo __('Slide anterior') ?>', 'role': 'button', 'tabindex': '0'});
-                $next.attr({'aria-label': '<?php echo __('Próximo slide') ?>', 'role': 'button', 'tabindex': '0'});
+                $prev.attr({'aria-label': '<?php echo __('Slide anterior') ?>', 'role': 'button', 'tabindex': '0', 'aria-controls': 'slider-content'});
+                $next.attr({'aria-label': '<?php echo __('Próximo slide') ?>', 'role': 'button', 'tabindex': '0', 'aria-controls': 'slider-content'});
 
                 $root.find('.owl-pagination')
                     .attr({'role': 'tablist', 'aria-label': '<?php echo __('Indicadores de slides') ?>'});

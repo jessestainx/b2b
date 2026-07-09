@@ -10,14 +10,14 @@ define([
 
     return function (config) {
         let isLoggedIn = $.mage.cookies.get('customer_logged_in') === '1';
-        
+
         // Only show for guests
         if (isLoggedIn) {
             return;
         }
 
         var $targetContainer = $('.top-bar-right .top-info, .top-account, .header.links');
-        
+
         if ($targetContainer.length === 0) {
             // Fallback: add to header content
             $targetContainer = $('.header-content .top-header');

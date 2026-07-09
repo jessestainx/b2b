@@ -17,6 +17,7 @@ use Magento\Checkout\Model\Cart;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\DataObject;
@@ -38,6 +39,7 @@ class Accept implements HttpPostActionInterface
     private LoggerInterface $logger;
     private EventManagerInterface $eventManager;
     private StoreManagerInterface $storeManager;
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
         RequestInterface $request,
@@ -50,7 +52,8 @@ class Accept implements HttpPostActionInterface
         ManagerInterface $messageManager,
         LoggerInterface $logger,
         EventManagerInterface $eventManager,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        ResourceConnection $resourceConnection
     ) {
         $this->request = $request;
         $this->redirectFactory = $redirectFactory;
@@ -63,11 +66,15 @@ class Accept implements HttpPostActionInterface
         $this->logger = $logger;
         $this->eventManager = $eventManager;
         $this->storeManager = $storeManager;
+        $this->resourceConnection = $resourceConnection;
     }
 
     public function execute()
     {
         $redirect = $this->redirectFactory->create();
+        $requestId = 0;
+        $customerId = 0;
+        $statusLockAcquired = false;
 
         try {
             // Validate form key
@@ -111,6 +118,14 @@ class Accept implements HttpPostActionInterface
                 return $redirect->setPath('b2b/quote/view', ['id' => $requestId]);
             }
 
+            $statusLockAcquired = $this->lockQuotedRequest($requestId, $customerId);
+            if (!$statusLockAcquired) {
+                $this->messageManager->addErrorMessage(
+                    __('Esta cotação já está sendo processada ou já foi aceita em outra sessão.')
+                );
+                return $redirect->setPath('b2b/quote/view', ['id' => $requestId]);
+            }
+
             // Clear current cart
             $this->cart->truncate();
 
@@ -144,6 +159,8 @@ class Accept implements HttpPostActionInterface
             }
 
             if ($added === 0) {
+                $this->restoreQuotedStatus($requestId);
+                $statusLockAcquired = false;
                 $this->messageManager->addErrorMessage(
                     __('Nenhum produto da cotação pôde ser adicionado ao carrinho. Produtos podem estar indisponíveis.')
                 );
@@ -175,6 +192,7 @@ class Accept implements HttpPostActionInterface
             $quoteRequest->setStatus(QuoteRequestInterface::STATUS_ACCEPTED);
             $quoteRequest->setQuoteId((int) $magentoQuote->getId());
             $this->quoteRequestRepository->save($quoteRequest);
+            $statusLockAcquired = false;
 
             $this->eventManager->dispatch('grupoawamotos_b2b_quote_accepted', [
                 'quote_request' => $quoteRequest,
@@ -202,14 +220,57 @@ class Accept implements HttpPostActionInterface
             // Redirect to checkout
             return $redirect->setPath('checkout');
         } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+            if ($statusLockAcquired && $requestId > 0) {
+                $this->restoreQuotedStatus($requestId);
+            }
             $this->messageManager->addErrorMessage(__('Cotação não encontrada.'));
             return $redirect->setPath('b2b/quote/history');
         } catch (\Exception $e) {
+            if ($statusLockAcquired && $requestId > 0) {
+                $this->restoreQuotedStatus($requestId);
+            }
             $this->logger->error('[B2B Quote Accept] Error: ' . $e->getMessage());
             $this->messageManager->addErrorMessage(
                 __('Erro ao processar aceitação da cotação. Tente novamente.')
             );
             return $redirect->setPath('b2b/quote/history');
+        }
+    }
+
+    private function lockQuotedRequest(int $requestId, int $customerId): bool
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $table = $this->resourceConnection->getTableName('grupoawamotos_b2b_quote_request');
+        $updated = (int) $connection->update(
+            $table,
+            ['status' => QuoteRequestInterface::STATUS_PROCESSING],
+            [
+                'request_id = ?' => $requestId,
+                'customer_id = ?' => $customerId,
+                'status = ?' => QuoteRequestInterface::STATUS_QUOTED,
+            ]
+        );
+
+        return $updated === 1;
+    }
+
+    private function restoreQuotedStatus(int $requestId): void
+    {
+        try {
+            $connection = $this->resourceConnection->getConnection();
+            $table = $this->resourceConnection->getTableName('grupoawamotos_b2b_quote_request');
+            $connection->update(
+                $table,
+                ['status' => QuoteRequestInterface::STATUS_QUOTED],
+                [
+                    'request_id = ?' => $requestId,
+                    'status = ?' => QuoteRequestInterface::STATUS_PROCESSING,
+                ]
+            );
+        } catch (\Exception $e) {
+            $this->logger->warning(
+                sprintf('[B2B Quote Accept] Failed to restore quoted status for #%d: %s', $requestId, $e->getMessage())
+            );
         }
     }
 }

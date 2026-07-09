@@ -1,0 +1,61 @@
+<?php
+/**
+ * AWA Motos - SVG A11y Helper
+ *
+ * Bug fix (2026-06-28): SVGs sem aria-hidden/role sao anunciados como "image"
+ * por screen readers, poluindo a navegacao.
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaSvgA11yFixInit) { return; }
+    w.__awaSvgA11yFixInit = true;
+
+    function fixSvg(svg) {
+        if (svg.dataset.awaSvgFixed === '1') { return; }
+        var hasAriaLabel = svg.hasAttribute('aria-label');
+        var hasAriaLabelledby = svg.hasAttribute('aria-labelledby');
+        var hasRole = svg.hasAttribute('role');
+        var hasAriaHidden = svg.getAttribute('aria-hidden') === 'true';
+        var hasTitle = svg.querySelector('title');
+        var hasDesc = svg.querySelector('desc');
+
+        if (!hasAriaLabel && !hasAriaLabelledby && !hasRole && !hasAriaHidden && !hasTitle && !hasDesc) {
+            svg.setAttribute('aria-hidden', 'true');
+            svg.setAttribute('focusable', 'false');
+        }
+        svg.dataset.awaSvgFixed = '1';
+    }
+
+    function fixAll() {
+        var svgs = d.querySelectorAll('svg:not([data-awa-svg-fixed])');
+        for (var i = 0; i < svgs.length; i++) { fixSvg(svgs[i]); }
+    }
+
+    function init() {
+        fixAll();
+        if (typeof MutationObserver !== 'undefined') {
+            var observer = new MutationObserver(function (mutations) {
+                var hasNewSvg = false;
+                for (var i = 0; i < mutations.length; i++) {
+                    if (mutations[i].addedNodes.length) {
+                        for (var j = 0; j < mutations[i].addedNodes.length; j++) {
+                            var n = mutations[i].addedNodes[j];
+                            if (n.nodeName === 'svg' || (n.querySelectorAll && n.querySelectorAll('svg').length)) {
+                                hasNewSvg = true; break;
+                            }
+                        }
+                    }
+                }
+                if (hasNewSvg) { setTimeout(fixAll, 50); }
+            });
+            observer.observe(d.body || d.documentElement, { childList: true, subtree: true });
+        }
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', init, { once: true });
+    } else { init(); }
+})(window, document);
+</script>

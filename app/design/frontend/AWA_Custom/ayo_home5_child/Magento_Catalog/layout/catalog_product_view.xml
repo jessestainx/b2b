@@ -54,6 +54,12 @@
             Renderiza campo CEP + botao Calcular que faz AJAX para /awa/cep/estimate.
             Posicionado apos product.info.price, antes de product.info.addtocart,
             seguindo o padrao awa.product.info.compatibility.
+
+            DESATIVADO 2026-07-03: "por enquanto não vai ter" cotação de frete na PDP.
+            Bloco/template/JS mantidos intactos — só removido do layout via
+            referenceBlock remove="true" logo abaixo. Para reativar, apagar essa
+            referenceBlock (e implementar o endpoint /awa/cep/estimate, que hoje
+            não existe — ver nota do template).
         -->
         <referenceContainer name="product.info.main">
             <block class="Magento\Catalog\Block\Product\View"
@@ -62,6 +68,7 @@
                    after="awa.product.info.compatibility"
                    before="product.info.addtocart"/>
         </referenceContainer>
+        <referenceBlock name="awa.product.info.cep.estimator" remove="true"/>
 
         <!--
             BUG-07: Carrega os CSS de conversão/polish de forma não-bloqueante.
@@ -101,6 +108,21 @@
                    name="awa.pdp.conversion.async.css"
                    template="Magento_Theme::html/awa-pdp-conversion-async.phtml"
                    before="-"/>
+        </referenceContainer>
+
+        <!--
+            FASE 8 (2026-07-03): Safety net do botao "Adicionar ao Carrinho".
+            Ver comentario completo em awa-pdp-addtocart-safety.phtml. Resumo:
+            o botao nasce com disabled="disabled" (padrao do core Magento) e so
+            e liberado por Magento_Catalog/js/validate-product; este bloco
+            garante que ele nao fique preso desabilitado se essa cadeia de JS
+            falhar por qualquer motivo, e reporta o evento para monitoramento.
+        -->
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.pdp.addtocart.safety"
+                   template="Magento_Theme::html/awa-pdp-addtocart-safety.phtml"
+                   after="awa.pdp.conversion.async.css"/>
         </referenceContainer>
 
         <!--

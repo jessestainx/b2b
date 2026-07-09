@@ -1,0 +1,55 @@
+<?php
+/**
+ * AWA Motos - View Transitions API (2026-06-28, corrigido 2026-07-03)
+ *
+ * Adiciona transicoes suaves entre paginas usando a API NATIVA de
+ * "cross-document view transitions" (Chrome/Edge 126+): a regra CSS
+ * "@view-transition { navigation: auto; }" e suficiente para o proprio
+ * browser animar a troca de documento em navegacoes normais (<a href>,
+ * back/forward). Nao e necessario nenhum JavaScript para isso.
+ *
+ * Correcao (causa raiz de "AbortError: Transition was skipped"):
+ * a versao anterior interceptava CLIQUES via JS e chamava manualmente
+ * document.startViewTransition(() => location.href = href). Essa API e
+ * feita para atualizacoes de DOM dentro do MESMO documento (estilo SPA);
+ * usada para disparar uma navegacao real (troca de documento), o proprio
+ * unload da pagina aborta a transicao antes do callback terminar, e o
+ * browser rejeita as promises da transicao com AbortError. Como isso
+ * competia com a transicao nativa cross-document (ja habilitada pelo CSS
+ * abaixo), o resultado era so o erro no console, sem beneficio visual
+ * adicional. Removendo a interceptacao de clique, a transicao nativa
+ * continua funcionando normalmente (progressive enhancement: navegadores
+ * sem suporte simplesmente ignoram a regra @view-transition).
+ */
+?>
+<style>
+@supports (view-transition-name: none) {
+    @view-transition {
+        navigation: auto;
+    }
+
+    ::view-transition-old(root) {
+        animation: awa-fade-out 0.25s ease forwards;
+    }
+
+    ::view-transition-new(root) {
+        animation: awa-fade-in 0.25s ease forwards;
+    }
+
+    @keyframes awa-fade-out {
+        to { opacity: 0; }
+    }
+
+    @keyframes awa-fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+            animation: none;
+        }
+    }
+}
+</style>

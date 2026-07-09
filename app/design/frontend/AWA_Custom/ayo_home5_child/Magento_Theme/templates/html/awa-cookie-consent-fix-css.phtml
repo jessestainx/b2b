@@ -1,10 +1,16 @@
 <?php declare(strict_types=1);
 
 /**
- * AWA Cookie Consent fix — CSS global (sync, final-wins).
+ * AWA Cookie Consent — critical inline + preload (loader JS em before.body.end).
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
 $cookieFixUrl = $block->getViewFileUrl('css/awa-cookie-consent-fix.min.css');
 ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($cookieFixUrl) ?>"/>
+<style id="awa-cookie-consent-critical">
+#awa-cookie-banner,.awa-cookie-banner,#html-body .awa-cookie-banner--visible{
+  position:fixed!important;inset-inline:0!important;inset-block-end:0!important;
+  z-index:850!important;box-sizing:border-box!important;max-width:100%!important}
+</style>
+<link rel="preload" href="<?= $block->escapeUrl($cookieFixUrl) ?>" as="style"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cookieFixUrl) ?>"/></noscript>

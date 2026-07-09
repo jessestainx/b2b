@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { navigateTo, waitForImages, checkOverflow } from '../../helpers/deep-audit.helpers';
 
-const HOME = 'https://awamotos.com';
+const HOME = '/';
 
 test.describe('Visual — Home', () => {
   test.beforeEach(async ({ page }) => {
@@ -40,5 +40,31 @@ test.describe('Visual — Home', () => {
       const ratio = box.width / box.height;
       if (ratio < 1.5 || ratio > 6) console.warn('[P2] Banner ratio: ' + ratio.toFixed(2));
     }
+  });
+
+  test('04 — sem overflow horizontal', async ({ page }) => {
+    const { hasOverflow, diff } = await checkOverflow(page);
+    expect(hasOverflow, `Home com overflow horizontal de ${diff}px`).toBeFalsy();
+  });
+
+  test('05 — banners promocionais contidos no mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await waitForImages(page);
+
+    const promoItems = page.locator('.awa-product-promo-banners__item');
+    const count = await promoItems.count();
+    if (count === 0) {
+      test.skip();
+      return;
+    }
+
+    const viewport = page.viewportSize()!;
+    const firstBox = await promoItems.first().boundingBox();
+    expect(firstBox, 'Banner promocional mobile não renderizou com caixa mensurável').toBeTruthy();
+    expect(Math.ceil(firstBox!.width), 'Banner promocional mobile maior que o viewport').toBeLessThanOrEqual(viewport.width);
+
+    const { hasOverflow, diff } = await checkOverflow(page);
+    expect(hasOverflow, `Home mobile com overflow horizontal de ${diff}px`).toBeFalsy();
   });
 });

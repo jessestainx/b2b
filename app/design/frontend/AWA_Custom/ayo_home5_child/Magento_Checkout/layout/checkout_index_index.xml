@@ -12,7 +12,10 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="checkout_index_index_promax"/>
     <head>
+        <!-- SEO: página transacional — fora do índice -->
+        <meta name="robots" content="NOINDEX,NOFOLLOW"/>
         <css src="css/awa-checkout-layout-lock.css" order="200"/>
+        <css src="css/awa-checkout-shell-final.css" order="10000"/>
     </head>
     <body>
         <referenceBlock name="head.additional">
@@ -24,12 +27,20 @@
                    name="awa.checkout.polish.async"
                    template="Magento_Theme::html/awa-checkout-polish-async.phtml"
                    after="awa.checkout.layout.lock.init"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.checkout.shell.final"
+                   template="Magento_Theme::html/awa-checkout-shell-final-loader.phtml"
+                   after="awa.checkout.polish.async"/>
         </referenceBlock>
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.checkout.ux.init.standard"
                    template="Rokanthemes_OnePageCheckout::checkout-ux-init.phtml"
                    after="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.align.grid.terminal.checkout"
+                   template="Magento_Theme::html/awa-align-grid-terminal-loader.phtml"
+                   after="awa.checkout.ux.init.standard"/>
         </referenceContainer>
     </body>
 </page>

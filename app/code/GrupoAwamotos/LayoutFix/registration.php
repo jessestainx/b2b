@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * GrupoAwamotos LayoutFix
  * Fixes layout reference issues in admin
  */
+
+declare(strict_types=1);
 
 use Magento\Framework\Component\ComponentRegistrar;
 

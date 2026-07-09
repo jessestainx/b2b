@@ -1,0 +1,278 @@
+/**
+ * AWA Vertical Menu Polish — 2026-05-28
+ * Passada final pós distill + harden. Alinha tokens AWA, ritmo e estados.
+ */
+
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+    --awa-vmenu-polish-divider: color-mix(in srgb, var(--awa-text, oklch(42% 0.01 25)) 7%, transparent);
+    --awa-vmenu-polish-muted: color-mix(in srgb, var(--awa-text, oklch(42% 0.01 25)) 62%, transparent);
+}
+
+/* Trigger + painel: junção visual limpa */
+#html-body .page-wrapper .navigation.verticalmenu .our_categories.title-category-dropdown,
+#html-body .page-wrapper .our_categories.title-category-dropdown {
+    border-radius: 10px 10px 0 0 !important;
+    min-height: 46px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: none !important;
+}
+
+#html-body .page-wrapper .navigation.verticalmenu .our_categories.title-category-dropdown[aria-expanded="true"],
+#html-body .page-wrapper .our_categories.title-category-dropdown.active {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    border-radius: 0 0 10px 10px !important;
+    border-top: none !important;
+    box-shadow: var(--awa-vmenu-flyout-shadow) !important;
+}
+
+/* Badges: flat, sem gradiente/pulso */
+body .page-wrapper .navigation.verticalmenu .cat-label {
+    animation: none !important;
+    box-shadow: none !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 88%, oklch(30% 0.02 25)) !important;
+    color: oklch(99% 0.004 25) !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    padding: 2px 6px !important;
+    border-radius: 999px !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .cat-label.cat-label-hot,
+body .page-wrapper .navigation.verticalmenu .cat-label[style*="ff6600"],
+body .page-wrapper .navigation.verticalmenu .cat-label[style*="ff4400"] {
+    background: color-mix(in srgb, var(--awa-vmenu-orange, #e85d04) 90%, oklch(35% 0.03 45)) !important;
+}
+
+@media (min-width: 992px) {
+    /* Lista: divisores + sem side-stripe (ban Impeccable) */
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 {
+        border-bottom: 1px solid var(--awa-vmenu-polish-divider) !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:last-child,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.expand-category-link {
+        border-bottom: none !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top::before,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link::before,
+    body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown
+        > li.ui-menu-item.level0 > a.level-top::before {
+        display: none !important;
+        content: none !important;
+        width: 0 !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top.navigation__link,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > a.level-top.navigation__link,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active > a.level-top.navigation__link {
+        padding-inline: 14px !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > a.level-top.navigation__link
+        .navigation__label,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active > a.level-top.navigation__link
+        .navigation__label {
+        font-weight: 600 !important;
+    }
+
+    /* Neutralizar ::after legado (era 5x5px ponto, confuso) */
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.parent > a.level-top::after,
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.navigation__item--parent > a.level-top::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    /* Expand indicator: › injetado via vertical-menu.js, legível a qualquer escala */
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0 > a.level-top .awa-vmenu-expand {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 16px !important;
+        width: 16px !important;
+        height: 16px !important;
+        margin-left: auto !important;
+        padding: 0 !important;
+        font-size: 14px !important;
+        font-style: normal !important;
+        line-height: 1 !important;
+        color: var(--awa-vmenu-polish-muted, oklch(65% 0.01 25)) !important;
+        transition: color 120ms ease-out, transform 120ms ease-out !important;
+        pointer-events: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0:hover > a.level-top .awa-vmenu-expand,
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.vmm-active > a.level-top .awa-vmenu-expand,
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.level0.awa-vmf-active > a.level-top .awa-vmenu-expand {
+        color: var(--awa-primary, #b73337) !important;
+        transform: translateX(2px) !important;
+    }
+
+    /* Flyout: hierarquia tipográfica calma */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-title span,
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-title span {
+        color: var(--awa-text, oklch(38% 0.012 25)) !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-second-level > a,
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-second-level > a {
+        line-height: 1.35 !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-second-level > a:active,
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-second-level > a:active {
+        background: color-mix(in srgb, var(--awa-primary, #b73337) 12%, transparent) !important;
+    }
+
+    /* Ver tudo: link comercial, não botão */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--all > a,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .vmm-view-all-link,
+    body .awa-vmf-portal .navigation__inner-item--all > a {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        margin-top: 10px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.01em !important;
+        text-transform: none !important;
+        color: var(--awa-primary, #b73337) !important;
+        text-decoration: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--all > a::after,
+    body .awa-vmf-portal .navigation__inner-item--all > a::after {
+        content: " \203A" !important;
+        font-size: 15px !important;
+        line-height: 1 !important;
+        vertical-align: middle !important;
+        transition: transform 120ms ease-out !important;
+        display: inline-block !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--all > a:hover,
+    body .awa-vmf-portal .navigation__inner-item--all > a:hover {
+        background: transparent !important;
+        color: color-mix(in srgb, var(--awa-primary, #b73337) 82%, oklch(25% 0.02 25)) !important;
+        text-decoration: underline !important;
+        text-underline-offset: 3px !important;
+        transform: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--all > a:hover::after,
+    body .awa-vmf-portal .navigation__inner-item--all > a:hover::after {
+        transform: translateX(3px) !important;
+    }
+
+    /* Expandir categorias */
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link {
+        border-top: 1px solid var(--awa-vmenu-polish-divider) !important;
+        margin-top: 2px !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        text-decoration: underline !important;
+        text-underline-offset: 2px !important;
+        background: transparent !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories:hover {
+        background: var(--awa-vmenu-hover) !important;
+        text-decoration: none !important;
+    }
+
+    /* Scrollbar lista */
+    body .page-wrapper .navigation.verticalmenu .togge-menu.list-category-dropdown {
+        scrollbar-color: color-mix(in srgb, var(--awa-text, oklch(42% 0.01 25)) 18%, transparent) transparent !important;
+    }
+}
+
+@media (max-width: 991px) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .vmm-mobile-header {
+        border-bottom: 1px solid var(--awa-vmenu-polish-divider) !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top::before {
+        display: none !important;
+        content: none !important;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   DELIGHT: Icon micro-pulse
+   Ao hover no item de categoria, o ícone SVG escala levemente —
+   sinal de que o elemento é interativo, sem ruído visual.
+   ══════════════════════════════════════════════════════════════════════ */
+@media (min-width: 992px) and (prefers-reduced-motion: no-preference) {
+    body .page-wrapper .navigation.verticalmenu .togge-menu
+        > li.level0 > a.level-top .awa-vmenu-icon,
+    body .page-wrapper .navigation.verticalmenu .togge-menu
+        > li.level0 > a.level-top em.menu-thumb-icon {
+        transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+                    opacity 160ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+        transform-origin: center !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .togge-menu
+        > li.level0:hover > a.level-top .awa-vmenu-icon,
+    body .page-wrapper .navigation.verticalmenu .togge-menu
+        > li.level0:hover > a.level-top em.menu-thumb-icon,
+    body .page-wrapper .navigation.verticalmenu .togge-menu
+        > li.level0.awa-vmf-active > a.level-top .awa-vmenu-icon,
+    body .page-wrapper .navigation.verticalmenu .togge-menu
+        > li.level0.awa-vmf-active > a.level-top em.menu-thumb-icon {
+        transform: scale(1.14) !important;
+        opacity: 1 !important;
+    }
+
+    /* Expand indicator: small spring no hover */
+    body .page-wrapper .navigation.verticalmenu .togge-menu
+        > li.level0 > a.level-top .awa-vmenu-expand {
+        transition: color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 160ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .navigation.verticalmenu .togge-menu a.level-top,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu a {
+        transition: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .togge-menu a.level-top .awa-vmenu-icon,
+    body .page-wrapper .navigation.verticalmenu .togge-menu a.level-top em.menu-thumb-icon,
+    body .page-wrapper .navigation.verticalmenu .togge-menu a.level-top .awa-vmenu-expand {
+        transition: none !important;
+    }
+}

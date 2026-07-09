@@ -152,12 +152,16 @@ define([
          */
         placeOrder: function (data, event) {
             var self = this;
+            var allowed;
+            var result;
 
             if (event) {
                 event.preventDefault();
             }
 
-            if (!this.isPlaceOrderActionAllowed()) {
+            allowed = this.isPlaceOrderActionAllowed();
+
+            if (!allowed) {
                 return false;
             }
 
@@ -165,7 +169,7 @@ define([
             fullScreenLoader.startLoader();
 
             // Delegate to parent placeOrder — it returns a deferred/promise
-            var result = this._super(data, event);
+            result = this._super(data, event);
 
             // Handle both jQuery deferred and native Promise
             if (result && typeof result.always === 'function') {

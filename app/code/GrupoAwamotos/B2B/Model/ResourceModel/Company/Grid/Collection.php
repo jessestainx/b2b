@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Model\ResourceModel\Company\Grid;
 
 use Magento\Framework\Api\Search\AggregationInterface;
@@ -35,11 +37,33 @@ class Collection extends CompanyCollection implements SearchResultInterface
         $this->_init(Document::class, $resourceModel);
     }
 
-    public function getAggregations(): AggregationInterface { return $this->aggregations; }
-    public function setAggregations($a): static { $this->aggregations = $a; return $this; }
-    public function getSearchCriteria(): ?SearchCriteriaInterface { return null; }
-    public function setSearchCriteria(SearchCriteriaInterface $s): static { return $this; }
-    public function getTotalCount(): int { return $this->getSize(); }
-    public function setTotalCount($t): static { return $this; }
-    public function setItems(?array $items = null): static { return $this; }
+    public function getAggregations(): AggregationInterface
+    {
+        return $this->aggregations;
+    }
+    public function setAggregations($a): static
+    {
+        $this->aggregations = $a;
+        return $this;
+    }
+    public function getSearchCriteria(): ?SearchCriteriaInterface
+    {
+        return null;
+    }
+    public function setSearchCriteria(SearchCriteriaInterface $s): static
+    {
+        return $this;
+    }
+    public function getTotalCount(): int
+    {
+        return $this->getSize();
+    }
+    public function setTotalCount($t): static
+    {
+        return $this;
+    }
+    public function setItems(?array $items = null): static
+    {
+        return $this;
+    }
 }

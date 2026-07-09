@@ -1,0 +1,21 @@
+{
+  "route": "b2b_login",
+  "viewport": "vp-390x844",
+  "requestedUrl": "https://awamotos.com/b2b/account/login/",
+  "screenshot": "shots/phase1-baseline-2026-06-27/b2b_login__vp-390x844.png",
+  "startedAt": "2026-06-27T03:52:19.319Z",
+  "httpStatus": 200,
+  "finalUrl": "https://awamotos.com/b2b/account/login/",
+  "navError": null,
+  "consoleErrorCount": 0,
+  "httpErrorCount": 0,
+  "metrics": {
+    "scrollWidth": 390,
+    "clientWidth": 390,
+    "overflow": false,
+    "owlAll": 0,
+    "owlLoaded": 0,
+    "searchVisible": false
+  },
+  "finishedAt": "2026-06-27T03:52:20.178Z"
+}

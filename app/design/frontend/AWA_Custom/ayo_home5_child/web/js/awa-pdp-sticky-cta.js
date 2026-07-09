@@ -19,7 +19,8 @@
         b2bLoginButton: ".product-add-form .b2b-login-to-buy-btn",
         b2bPendingBanner: "#b2b-pending-banner",
         media: ".product.col.media, .product.media, .column.main .fotorama__stage, .gallery-placeholder",
-        price: ".product-info-price .price-box .price-wrapper .price, .product-info-main .price-box .price",
+        price: ".product-info-price .price-box .price-wrapper .price, .product-info-main .price-box .price-final_price .price, .product-info-main .price-box .price",
+        productName: ".page-title-wrapper .page-title .base, h1.page-title .base, .product-info-main .page-title .base",
         productInfoMain: ".product-info-main"
     };
 
@@ -225,11 +226,19 @@
         let bar = document.createElement("div");
         bar.className = "awa-pdp-sticky-cta";
         bar.setAttribute("aria-hidden", "true");
-        bar.innerHTML = '<div class="awa-pdp-sticky-cta__inner" role="region" aria-label="Atalho de compra do produto"><div class="awa-pdp-sticky-cta__meta"><span class="awa-pdp-sticky-cta__label">Comprar agora</span><span class="awa-pdp-sticky-cta__price"></span></div><button type="button" class="awa-pdp-sticky-cta__button" title="Comprar" aria-label="Comprar">Comprar</button></div>';
+        bar.innerHTML = '<div class="awa-pdp-sticky-cta__inner" role="region" aria-label="Atalho de compra do produto">' +
+            '<div class="awa-pdp-sticky-cta__meta">' +
+            '<span class="awa-pdp-sticky-cta__name" hidden></span>' +
+            '<span class="awa-pdp-sticky-cta__label">Comprar agora</span>' +
+            '<span class="awa-pdp-sticky-cta__price"></span>' +
+            '</div>' +
+            '<button type="button" class="awa-pdp-sticky-cta__button" title="Comprar" aria-label="Comprar">Comprar</button>' +
+            '</div>';
         document.body.appendChild(bar);
 
         let stickyButton = bar.querySelector(".awa-pdp-sticky-cta__button");
         let stickyPrice = bar.querySelector(".awa-pdp-sticky-cta__price");
+        let stickyName = bar.querySelector(".awa-pdp-sticky-cta__name");
 
         function getLiveButton() {
             return typeof getButton === "function" ? getButton() : null;
@@ -240,14 +249,26 @@
             let label = getButtonLabel(originalButton) || "Comprar";
             let priceNode = document.querySelector(SELECTORS.price);
             let priceText = normalizeText(priceNode ? (priceNode.textContent || "") : "");
+            let nameNode = document.querySelector(SELECTORS.productName);
+            let nameText = normalizeText(nameNode ? (nameNode.textContent || "") : "");
             let canAct = isActionableAddToCartButton(originalButton);
             stickyButton.textContent = label;
             stickyButton.title = label;
-            stickyButton.setAttribute("aria-label", label);
+            stickyButton.setAttribute("aria-label", nameText ? label + " — " + nameText : label);
             stickyButton.disabled = !canAct;
             bar.classList.toggle("awa-pdp-sticky-cta--disabled", !canAct);
             stickyPrice.classList.toggle("awa-pdp-sticky-cta__price--muted", !priceText);
             stickyPrice.textContent = priceText || "Confira condições";
+
+            if (stickyName) {
+                if (nameText) {
+                    stickyName.textContent = nameText;
+                    stickyName.hidden = false;
+                } else {
+                    stickyName.textContent = "";
+                    stickyName.hidden = true;
+                }
+            }
         }
 
         stickyButton.addEventListener("click", function () {

@@ -7,6 +7,10 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <remove src="css/print.css"/>
+        <!-- BUG-CSS-AUTHORITY-011 (2026-07-04): awa-visual-fixes-2026-06-29-final.css é
+             adicionado incondicionalmente em default_head_blocks.xml (todas as rotas);
+             seletores são 100% PLP/carrossel/galeria de produto, inexistentes neste shell. -->
+        <remove src="css/awa-visual-fixes-2026-06-29-final.css"/>
         <css src="css/awa-b2b-auth-shell-final.css" order="10000"/>
     </head>
     <body>
@@ -35,6 +39,11 @@
         <referenceBlock name="awa.search.autocomplete.head.css" remove="true"/>
         <referenceBlock name="awa.search.autocomplete.body.css" remove="true"/>
         <referenceBlock name="awa.mobile.nav" remove="true"/>
+        <!-- Auth shell: PWA modal e overlays de marketing não fazem parte do fluxo de cadastro/login. -->
+        <referenceBlock name="awa.pwa.install" remove="true"/>
+        <referenceBlock name="awa.push.notifications" remove="true"/>
+        <referenceBlock name="awa.dark.mode.toggle" remove="true"/>
+        <referenceBlock name="awa.ab.testing" remove="true"/>
         <referenceBlock name="awa.audit.bundle.css" remove="true"/>
         <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
         <referenceBlock name="awa.impeccable.audit.uncached.global.v10" remove="true"/>
@@ -60,6 +69,18 @@
         <referenceBlock name="awa.cookie.consent.defer.loader" remove="true"/>
         <referenceBlock name="awa.custom.global.js.loader" remove="true"/>
         <referenceBlock name="newsletter_popup" remove="true"/>
+
+        <!-- BUG-CSS-AUTHORITY-011 (2026-07-04): 3 blocos adicionados a default.xml/tema pai
+             depois desta lista ter sido escrita, nunca incluídos aqui. Todos escopados a
+             header/nav/PLP (.awa-site-header, #header, .products-grid) — inexistentes neste
+             shell, já que toki_header/toki_footer são removidos acima. Ver
+             var/fase-b-css-authority/relatorio.md. -->
+        <!-- app/design/frontend/ayo/ayo_home5/Rokanthemes_Themeoption/layout/default.xml (tema pai):
+             4 dos 6 links desse bloco (round9/round10/components-b2b-foundation/compat-b2b-nav)
+             já nem têm arquivo-fonte no tema filho — servidos de cache órfã em pub/static. -->
+        <referenceBlock name="awa.post.themeoption.css" remove="true"/>
+        <referenceBlock name="awa.header.mobile.grid.critical.global" remove="true"/>
+        <referenceBlock name="awa.visual.qa.fixes.css" remove="true"/>
 
         <!-- tabindex=-1 em #maincontent: awa-b2b-auth-critical-css.phtml (layout <attribute> inválido no XSD 2.4) -->
     </body>

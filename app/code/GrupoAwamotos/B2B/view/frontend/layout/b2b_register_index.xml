@@ -9,12 +9,18 @@
     </head>
     <body>
         <referenceBlock name="formkey" remove="true"/>
+        <referenceBlock name="messages" remove="true"/>
         <referenceContainer name="main">
-            <block class="Magento\Framework\View\Element\Messages"
-                   name="b2b.register.messages"
-                   before="-"/>
             <block class="GrupoAwamotos\B2B\Block\Register\Form" name="b2b.register.form" template="GrupoAwamotos_B2B::register/form.phtml" cacheable="false">
+                <block class="GrupoAwamotos\B2B\Block\Account\AuthLogo"
+                       name="auth.logo"
+                       as="auth_logo"
+                       template="GrupoAwamotos_B2B::html/auth-logo.phtml"/>
                 <block class="Magento\Framework\View\Element\FormKey" name="b2b.register.form.key" as="b2b_form_key"/>
+                <block class="Magento\Framework\View\Element\Messages"
+                       name="b2b_register_messages"
+                       as="b2b_register_messages"
+                       template="GrupoAwamotos_B2B::account/login-messages.phtml"/>
             </block>
         </referenceContainer>
     </body>

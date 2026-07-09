@@ -1,0 +1,489 @@
+// ============================================================================
+// AWA MOTOS — ACCESSIBILITY (WCAG 2.1 AA/AAA) PATTERNS
+// ----------------------------------------------------------------------------
+// Padroes de acessibilidade para Magento 2 + tema AWA.
+// WCAG 2.1 AA e AAA compliance.
+//
+// BEST PRACTICES IMPLEMENTADAS:
+//   - Focus visible universal (2.4.7)
+//   - Skip-to-content link (2.4.1)
+//   - Touch target 44x44px (2.5.5)
+//   - Screen reader only (.awa-sr-only)
+//   - prefers-reduced-motion (2.3.3)
+//   - prefers-contrast (1.4.6)
+//   - Form labels visiveis (3.3.2)
+//   - aria-live regions
+//   - Reduced motion global
+// ============================================================================
+
+
+// ============================================================================
+// 1. FOCUS MANAGEMENT — Universal visible focus ring
+// ============================================================================
+
+// --- Reset focus for mouse users ---
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+// --- Visible focus for keyboard users ---
+:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+// Stronger focus for interactive elements
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: 2px;
+}
+
+// Form inputs: inset focus (offset 0) for clarity
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline-offset: -2px;
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+
+// ============================================================================
+// 2. SKIP-TO-CONTENT — WCAG 2.4.1 Bypass Blocks
+// ============================================================================
+
+.skip-link,
+.awa-skip-link,
+a[href="#main-content"],
+a[href="#maincontent"] {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: -9999px;
+    z-index: 99999;
+    padding: var(--awa-space-3, 12px) var(--awa-space-6, 24px);
+    background: var(--awa-color-primary, #b73337);
+    // !important necessario: vence "a, a:focus{color:#b73337!important}" injetado via
+    // painel admin (Rokanthemes Theme Options -> pub/media/rokanthemes/theme_option/custom_default.css),
+    // que nao pode ser editado diretamente. Sem isto o skip-link (WCAG 2.4.1) fica com
+    // texto vermelho sobre fundo vermelho ao receber foco de teclado (contraste ~2:1).
+    color: var(--awa-white, #ffffff) !important;
+    font-weight: var(--awa-weight-bold, 700);
+    font-size: var(--awa-fs-base, 16px);
+    text-decoration: none;
+    border-radius: 0 0 var(--awa-radius-md, 8px) 0;
+    min-block-size: 44px;
+    min-inline-size: 200px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.skip-link:focus,
+.awa-skip-link:focus,
+a[href="#main-content"]:focus,
+a[href="#maincontent"]:focus {
+    inset-inline-start: var(--awa-space-2, 8px);
+    inset-block-start: var(--awa-space-2, 8px);
+    outline: 3px solid var(--awa-white, #ffffff);
+    outline-offset: 2px;
+}
+
+// !important necessario: vence "a:hover{color:#8e2629!important}" injetado via painel admin.
+// Especificidade classe+pseudo-classe (0,2,0) > elemento+pseudo-classe (0,1,1) do admin, entao
+// isto vence mesmo com !important de ambos os lados. Sem isto, passar o mouse sobre o skip-link
+// (usuario de teclado + mouse) troca o texto para vermelho escuro sobre fundo vermelho (~1.4:1).
+.skip-link:hover,
+.awa-skip-link:hover,
+a[href="#main-content"]:hover,
+a[href="#maincontent"]:hover {
+    color: var(--awa-white, #ffffff) !important;
+}
+
+
+// ============================================================================
+// 3. SCREEN-READER ONLY — hide visually, keep accessible
+// ============================================================================
+
+.awa-sr-only,
+.sr-only,
+.visually-hidden {
+    position: absolute !important;
+    inline-size: 1px !important;
+    block-size: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+}
+
+// Allow focus when navigating via keyboard
+.awa-sr-only-focusable:focus,
+.sr-only-focusable:focus {
+    position: static !important;
+    inline-size: auto !important;
+    block-size: auto !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    font-size: var(--awa-fs-base, 16px) !important;
+    line-height: var(--awa-leading-normal, 1.5) !important;
+}
+
+
+// ============================================================================
+// 4. TOUCH TARGETS — 44x44px WCAG 2.5.5 Level AAA (2.5.8 Level AA)
+// ============================================================================
+
+button,
+a.btn,
+.action,
+.modes-mode,
+.toolbar a,
+.filter-options-title,
+.breadcrumbs a,
+.pager a,
+.pages a,
+.swatch-option,
+input[type="checkbox"],
+input[type="radio"],
+input[type="submit"],
+input[type="button"],
+[role="button"],
+[role="checkbox"],
+[role="radio"],
+[role="tab"],
+[role="menuitem"],
+summary {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+}
+
+button,
+[role="button"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--awa-gap-xs, 4px);
+}
+
+// Exception: visually small inputs that need expanded hit area
+input[type="checkbox"],
+input[type="radio"] {
+    inline-size: 18px;
+    block-size: 18px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+input[type="checkbox"]::before,
+input[type="radio"]::before {
+    content: "";
+    position: absolute;
+    inset: -13px;  /* expand hit area to 44x44 (18 + 13*2) */
+    cursor: pointer;
+}
+
+
+// ============================================================================
+// 5. REDUCED MOTION — WCAG 2.3.3
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+// ============================================================================
+// 6. HIGH CONTRAST — WCAG 1.4.6
+// ============================================================================
+
+@media (prefers-contrast: more) {
+    *,
+    *::before,
+    *::after {
+        border-color: currentColor !important;
+        box-shadow: none !important;
+    }
+
+    a {
+        text-decoration: underline;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        border: 2px solid currentColor !important;
+    }
+
+    .price-box .price {
+        color: var(--awa-color-primary-dark, #8e2629) !important;
+        font-weight: 900 !important;
+    }
+
+    :focus-visible {
+        outline-width: 3px !important;
+    }
+}
+
+
+// ============================================================================
+// 7. FORM LABELS — WCAG 3.3.2 Labels or Instructions
+// ============================================================================
+
+.field .label,
+.field > label,
+.fieldset > .legend,
+.form > .legend {
+    display: block;
+    margin-block-end: var(--awa-gap-xs, 4px);
+    font-weight: var(--awa-weight-medium, 500);
+    font-size: var(--awa-fs-base, 16px);
+    color: var(--awa-text-primary, #333333);
+}
+
+.field.required > .label::after,
+.field._required > .label::after,
+.field.required > label::after {
+    content: " *";
+    color: var(--awa-color-error, #DC2626);
+    font-weight: var(--awa-weight-bold, 700);
+    margin-inline-start: 0.125rem;
+}
+
+// Hide label visually but keep accessible (for icon-only labels)
+.awa-label-hidden {
+    position: absolute !important;
+    inline-size: 1px !important;
+    block-size: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+}
+
+
+// ============================================================================
+// 8. ERROR MESSAGES — WCAG 3.3.1 Error Identification
+// ============================================================================
+
+.field._error .control input,
+.field._error .control select,
+.field._error .control textarea {
+    border-color: var(--awa-color-error, #DC2626);
+    border-width: 2px;
+}
+
+.field .messages,
+.field .mage-error,
+.field-error {
+    display: flex;
+    align-items: center;
+    gap: var(--awa-gap-xs, 4px);
+    margin-block-start: var(--awa-gap-xs, 4px);
+    color: var(--awa-color-error, #DC2626);
+    font-size: var(--awa-fs-sm, 14px);
+    line-height: var(--awa-leading-normal, 1.5);
+    min-block-size: 1.5rem;
+    font-weight: var(--awa-weight-medium, 500);
+}
+
+// Error icon via CSS pseudo-element (sem depender de SVG)
+.field-error::before,
+.message.error::before {
+    content: "!";
+    display: inline-grid;
+    place-items: center;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    border-radius: 50%;
+    background: currentColor;
+    color: var(--awa-white, #ffffff);
+    font-size: 0.75rem;
+    font-weight: var(--awa-weight-bold, 700);
+    flex-shrink: 0;
+}
+
+
+// ============================================================================
+// 9. ARIA LIVE REGIONS — screen reader announcements
+// ============================================================================
+
+.awa-live-region {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+// Polite announcements (don't interrupt). Keep this scoped to dedicated live
+// regions; many visible widgets use aria-live for semantics and must remain in
+// normal document flow.
+.awa-live-region[aria-live="polite"],
+.awa-sr-only[aria-live="polite"],
+.visually-hidden[aria-live="polite"],
+[role="status"].awa-live-region,
+[role="status"].awa-sr-only,
+[role="status"].visually-hidden {
+    position: absolute;
+    inset-block-end: var(--awa-space-4, 16px);
+    inset-inline-end: var(--awa-space-4, 16px);
+    z-index: 9999;
+    padding: var(--awa-space-3, 12px);
+    background: var(--awa-text-primary, #333333);
+    color: var(--awa-white, #ffffff);
+    border-radius: var(--awa-radius-md, 8px);
+    font-size: var(--awa-fs-sm, 14px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+// ============================================================================
+// 10. NAVIGATION — keyboard accessible dropdowns, breadcrumbs
+// ============================================================================
+
+// Make sure :focus-visible works on nested clickable elements
+.breadcrumbs a:focus-visible,
+.navigation a:focus-visible,
+.menu a:focus-visible {
+    background: var(--surface-hover, color-mix(in srgb, currentColor 8%, transparent));
+    outline-offset: -2px;
+}
+
+// Tab navigation in modals
+.modal-popup,
+.drawer,
+.minicart-wrapper {
+    &:focus-within {
+        // When any element inside is focused, ensure container is highlighted
+    }
+}
+
+
+// ============================================================================
+// 11. IMAGES — alt text and decorative content
+// ============================================================================
+
+img {
+    max-inline-size: 100%;
+    block-size: auto;
+}
+
+// Decorative images should have alt="" — handled at PHTML level
+// Informative images should have descriptive alt — handled at PHTML level
+
+
+// ============================================================================
+// 12. LINKS — distinguish from text (WCAG 1.4.1)
+// ============================================================================
+
+a {
+    color: var(--awa-color-primary, #b73337);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+}
+
+a:hover {
+    color: var(--awa-color-primary-dark, #8e2629);
+    text-decoration-thickness: 2px;
+}
+
+// Unstyled link (when in nav, etc)
+a.awa-link-plain,
+nav a,
+.breadcrumbs a,
+.toolbar a {
+    text-decoration: none;
+}
+
+
+// ============================================================================
+// 13. DARK MODE PREFERENCE (futuro)
+// ============================================================================
+
+@media (prefers-color-scheme: dark) {
+    /* Placeholder — AWA ainda usa light mode */
+    /* Quando implementar:
+       :root {
+           --awa-bg: #0a0a0a;
+           --awa-text-primary: #f5f5f5;
+       } */
+}
+
+
+// ============================================================================
+// 14. PRINT — accessibility (cores, contraste, sem dependencia de cor)
+// ============================================================================
+
+@media print {
+    * {
+        color: #000000 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    a {
+        color: #000000 !important;
+        text-decoration: underline;
+    }
+
+    a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.85em;
+        color: #555555 !important;
+    }
+
+    .skip-link,
+    .navigation,
+    .menu,
+    .toolbar {
+        display: none !important;
+    }
+}
+
+
+// ============================================================================
+// 15. MISC UTILITIES
+// ============================================================================
+
+// Force respect for user motion preference
+.awa-motion-safe {
+    transition: all 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-motion-safe {
+        transition: none;
+    }
+}
+
+// Hide from screen readers only (visual keep)
+.awa-hidden-accessible {
+    aria-hidden: true;
+}

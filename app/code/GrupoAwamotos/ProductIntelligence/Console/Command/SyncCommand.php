@@ -62,7 +62,7 @@ class SyncCommand extends Command
         $startTime = microtime(true);
         $months = (int)$input->getOption('months');
 
-        $output->writeln('<info>REXIS ML - Sincronizacao via PHP (pipeline nativo)</info>');
+        $output->writeln('<info>Product Intelligence - Sincronizacao via PHP (pipeline nativo)</info>');
         $output->writeln('');
 
         try {

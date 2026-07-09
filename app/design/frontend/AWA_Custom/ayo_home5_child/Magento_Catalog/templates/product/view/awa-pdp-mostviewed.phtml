@@ -18,6 +18,7 @@ if (!$_productCollection || !$_productCollection->getSize()) {
 }
 
 $image = 'category_page_grid';
+$b2bPriceGate = $this->helper('GrupoAwamotos\B2B\Helper\Data');
 ?>
 
 <section class="awa-pdp-mostviewed" aria-labelledby="awa-pdp-mv-heading">
@@ -111,7 +112,14 @@ $image = 'category_page_grid';
 
                                 <?php if ($this->getConfig('show_price')): ?>
                                     <div class="info-price">
-                                        <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                                        <?php if ($b2bPriceGate->canViewPrices()): ?>
+                                            <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                                        <?php else: ?>
+                                            <div class="b2b-login-to-see-price">
+                                                <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()) ?></span>
+                                                <span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bPriceGate->getPriceGateDescription()) ?></span>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endif; ?>
 

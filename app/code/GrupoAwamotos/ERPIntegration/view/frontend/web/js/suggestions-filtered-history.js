@@ -26,18 +26,21 @@ define([
             cross_sell: 'Cross-sell'
         };
 
-        function getFormKey() {
+        function getFormKey()
+        {
             return $.mage && $.mage.cookies ? $.mage.cookies.get('form_key') : '';
         }
 
-        function formatPrice(value) {
+        function formatPrice(value)
+        {
             return 'R$ ' + Number(value || 0).toLocaleString('pt-BR', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
 
-        function formatDate(dateStr) {
+        function formatDate(dateStr)
+        {
             if (!dateStr) {
                 return '-';
             }
@@ -52,7 +55,8 @@ define([
             }
         }
 
-        function escapeHtml(str) {
+        function escapeHtml(str)
+        {
             if (!str) {
                 return '';
             }
@@ -61,7 +65,8 @@ define([
             return div.innerHTML;
         }
 
-        function addToCart(sku, qty) {
+        function addToCart(sku, qty)
+        {
             return new Promise(function (resolve, reject) {
                 $.ajax({
                     url: addBySkuUrl,
@@ -84,7 +89,8 @@ define([
             });
         }
 
-        function renderPagination(currentPage, totalPages) {
+        function renderPagination(currentPage, totalPages)
+        {
             if (totalPages <= 1) {
                 return;
             }
@@ -109,7 +115,8 @@ define([
             });
         }
 
-        function renderFilteredItems(items) {
+        function renderFilteredItems(items)
+        {
             var $list = $('#erp-filter-results-list');
             $list.empty();
 
@@ -194,7 +201,8 @@ define([
             });
         }
 
-        function loadFilteredHistory() {
+        function loadFilteredHistory()
+        {
             let freqVal = String($('#erp-filter-freq').val() || '0-0').split('-');
             let oppType = $('#erp-filter-opportunity').val();
             let params = {

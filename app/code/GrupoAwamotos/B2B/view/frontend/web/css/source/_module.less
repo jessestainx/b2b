@@ -1,0 +1,310 @@
+// ============================================================
+// AWA Motos — B2B Module Styles
+// ============================================================
+
+// ── Barra de cadastro B2B (template awa-b2b-register-bar.phtml) ──────────────
+// Estilos autoritativos aqui — não duplicar no template phtml
+.awa-b2b-register-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    min-height: 48px;
+    max-height: 48px;
+    background: var(--awa-primary-light, #f9e5e5);
+    border-bottom: 1px solid #f0c0c0;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    &[aria-hidden="true"],
+    &--hidden { display: none !important; }
+
+    // Ocultar nas páginas de autenticação, B2B e checkout
+    body.b2b-auth-shell &,
+    body.b2b-register-index &,
+    body.customer-account-login &,
+    body.customer-account-create &,
+    body.b2b-account-login &,
+    body.checkout-cart-index &,
+    body.checkout-index-index &,
+    body.rokanthemes-onepagecheckout & { display: none !important; }
+
+    &__icon {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        color: var(--awa-primary, #b73337);
+
+        svg { display: block; width: 18px; height: 18px; }
+    }
+
+    &__text {
+        flex: 1 1 0;
+        min-width: 0;
+        font-size: 13px;
+        line-height: 1.35;
+        color: #5a2020;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__actions {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    &__btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 14px;
+        height: 32px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+        color: #fff !important;
+        background: var(--awa-primary, #b73337);
+        border: none;
+        border-radius: var(--awa-radius-sm, 4px);
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.15s ease;
+
+        &:hover, &:focus {
+            background: var(--awa-primary-hover, #8e2629);
+            color: #fff !important;
+            text-decoration: none;
+        }
+        &:focus-visible {
+            outline: 2px solid var(--awa-primary, #b73337);
+            outline-offset: 2px;
+        }
+    }
+
+    &__link {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--awa-primary, #b73337);
+        text-decoration: underline;
+        white-space: nowrap;
+
+        &:hover { color: var(--awa-primary-hover, #8e2629); }
+    }
+
+    @media (max-width: 767px) {
+        flex-direction: column;
+        align-items: stretch;
+        max-height: none;
+        min-height: 0;
+        padding: 10px 16px;
+        gap: 8px;
+
+        &__text { white-space: normal; overflow: visible; text-overflow: unset; text-align: center; }
+        &__actions { flex-direction: column; gap: 6px; width: 100%; }
+        &__btn { width: 100%; height: 38px; font-size: 14px; }
+        &__link { text-align: center; display: block; }
+    }
+}
+
+// ── Preço oculto (modo B2B estrito) ──────────────────────────────────────────
+.b2b-price-hidden {
+    display: block;
+    padding: 6px 0;
+
+    .b2b-login-cta {
+        display: inline-block;
+        font-size: 12px;
+        color: #666;
+        line-height: 1.4;
+    }
+
+    .b2b-login-link,
+    .b2b-register-link {
+        color: #e31f2a;
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover { text-decoration: underline; }
+    }
+}
+
+// Oculta botão "Adicionar ao carrinho" para não-B2B em modo estrito
+.b2b-strict-mode {
+    .product-item-actions,
+    .action.tocart {
+        display: none !important;
+    }
+}
+
+// ── Formulário de cadastro B2B ───────────────────────────────────────────────
+.b2b-register-page {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px 20px;
+
+    .b2b-register-header {
+        margin-bottom: 30px;
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    }
+
+    .fieldset {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+
+        .legend {
+            padding: 0 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    }
+
+    .field {
+        margin-bottom: 16px;
+
+        .label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 5px;
+        }
+
+        .control input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+
+            &:focus {
+                border-color: #e31f2a;
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(227, 31, 42, 0.1);
+            }
+        }
+
+        &.required .label::after {
+            content: ' *';
+            color: #e31f2a;
+        }
+    }
+
+    .actions-toolbar {
+        margin-top: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+
+        .action.submit.primary {
+            background: #e31f2a;
+            color: #fff;
+            border: none;
+            padding: 12px 32px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+
+            &:hover { background: #c41a23; }
+        }
+
+        .action.login {
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+
+            &:hover { color: #e31f2a; }
+        }
+    }
+
+    // Status de validação do CNPJ
+    #cnpj {
+        &.valid   { border-color: #2e7d32; }
+        &.invalid { border-color: #c62828; }
+    }
+
+    .cnpj-feedback {
+        font-size: 11px;
+        margin-top: 4px;
+        &.ok  { color: #2e7d32; }
+        &.err { color: #c62828; }
+    }
+
+    // Linhas de campos lado a lado (Número+Complemento, Cidade+UF)
+    .b2b-field-row {
+        display: flex;
+        gap: 16px;
+
+        @media (max-width: 480px) {
+            flex-wrap: wrap;
+
+            > .field {
+                flex: 1 1 100% !important;
+                min-width: 0;
+            }
+        }
+    }
+}
+
+// Trust strip no carrinho: estilos em AWA_Custom/ayo_home5_child/css/awa-cart-polish.css
+
+// ── Painel B2B na página da conta do cliente ─────────────────────────────────
+.b2b-account-status {
+    background: #f5f5f5;
+    border-left: 4px solid #e31f2a;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-radius: 0 4px 4px 0;
+
+    &.approved  { border-color: #2e7d32; }
+    &.pending   { border-color: #f57c00; }
+    &.rejected  { border-color: #c62828; }
+
+    .b2b-status-label {
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    p {
+        font-size: 12px;
+        margin: 6px 0 0;
+        color: #666;
+    }
+
+    &.approved p { color: #1b5e20; }
+    &.rejected p { color: #c62828; }
+
+    a {
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--awa-primary, #b73337);
+        text-decoration: none;
+
+        &:hover { text-decoration: underline; }
+    }
+}

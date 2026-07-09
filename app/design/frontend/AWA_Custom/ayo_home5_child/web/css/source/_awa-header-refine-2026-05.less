@@ -80,7 +80,7 @@ body .page-wrapper .awa-site-header {
     grid-template-columns: clamp(140px, 16%, 200px) 1fr auto !important;
     align-items: center !important;
     gap: clamp(16px, 2vw, 32px) !important;
-    max-width: 1440px !important;
+    max-inline-size: var(--awa-container-wide-max, 1440px) !important;
     min-height: 80px !important;
     padding-block: 0 !important;
   }
@@ -374,7 +374,7 @@ body.awa-header-is-sticky .page-wrapper .awa-site-header .awa-main-header {
     max-height: 44px !important;
   }
 
-  body .page-wrapper .awa-site-header .awa-header-right-col > :not(.awa-header-minicart),
+  body .page-wrapper .awa-site-header .awa-header-right-col > :not(.awa-header-minicart):not(.b2b-status-panel),
   body .page-wrapper .awa-site-header .awa-header-right-col .awa-b2b-mode-badge,
   body .page-wrapper .awa-site-header .awa-header-right-col .awa-header-account-prompt {
     display: none !important;

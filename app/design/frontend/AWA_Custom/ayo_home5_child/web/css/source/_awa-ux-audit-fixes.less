@@ -69,13 +69,19 @@ body::after {
     }
 }
 
-/* 4. Header Break at 1024px Tablet (P0)
+/* 4. Header Break at 1024px Tablet (P0) — BUG-BP-1024-008
  * The header compresses and elements overlap. We allow wrap and adjust margins.
+ * Reduced logo width and gap to prevent overflow.
  */
 @media (min-width: @awa-breakpoint-sm) and (max-width: @awa-breakpoint-lg) {
     body.awa-ds .awa-main-header .awa-main-header__inner {
         flex-wrap: wrap;
         justify-content: space-between;
+        gap: var(--awa-space-3, 12px) !important;
+    }
+
+    body.awa-ds .awa-main-header .awa-header-brand-cell {
+        max-width: 140px !important;
     }
 
     body.awa-ds .awa-main-header .awa-header-search-col {
@@ -84,6 +90,33 @@ body::after {
         margin-top: @awa-space-4;
         max-width: 100%;
     }
+}
+
+/* 13. Homepage Empty Sections (P2) — BUG-HOMEPAGE-EMPTY-WS
+ * Hide CMS sections/carousels that are empty to remove massive whitespace gaps.
+ */
+.awa-home-section:empty,
+.awa-home-section:has(.owl-stage:empty),
+.awa-home-section:has(.awa-reel:empty) {
+    display: none !important;
+}
+
+/* 14. Carousel CMS Dependency & Trust Grid (P2) — BUG-CAROUSEL-CMS-DEPENDENCY
+ * Ensure trust grid and carousels don't collapse or create ghost heights.
+ * Fix for .top-home-content__trust-offers-grid identified in previous audits.
+ */
+.top-home-content__trust-offers-grid {
+    display: grid !important;
+    min-height: 0 !important;
+}
+
+.top-home-content__trust-offers-grid:empty {
+    display: none !important;
+}
+
+/* Ensure Owl carousels that failed to init don't show stacked vertical items */
+.owl-carousel:not(.owl-loaded) > .item:nth-child(n+2) {
+    display: none !important;
 }
 
 /* 5. Product Card Boundaries and Button Alignment (P2)
@@ -856,7 +889,6 @@ body.awa-ds .page-wrapper .minicart-wrapper .block-minicart._active {
     border-radius: @awa-radius-md;
     box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.18);
     border: 1px solid @awa-neutral-200;
-    padding: @awa-space-6;
     width: 380px; /* give it proper width */
 }
 
@@ -955,7 +987,7 @@ body.awa-ds .page-wrapper .minicart-wrapper .block-minicart._active .minicart.em
     font-size: var(--awa-font-sm);
     color: @awa-neutral-500;
     text-align: center;
-    padding: @awa-space-6 0;
+    padding: @awa-space-4 0; /* Reduced from @awa-space-6 to avoid bloating */
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

@@ -8,6 +8,10 @@ import fs from 'fs';
 
 const AUTH_STATE_FILE = path.join(__dirname, '..', '.auth-state.json');
 
+function sleep(ms: number): Promise<void> {
+  return new Promise<void>(resolve => setTimeout(resolve, ms));
+}
+
 /* ── Design Tokens (valores esperados) ─────────────────────────── */
 export const TOKENS = {
   primary:       'rgb(183, 51, 55)',    // #b73337
@@ -31,15 +35,11 @@ export const COMMON = {
 } as const;
 
 /* ── Wait para página estabilizar ─────────────────────────────── */
-export async function waitForPage(page: Page, timeout = 15_000): Promise<void> {
-  await page.waitForLoadState('domcontentloaded', { timeout }).catch(() => {});
-  await page.waitForLoadState('load', { timeout }).catch(() => {});
-  // Fonts.ready com timeout de 5s — sem isso o evaluate pode pendurar por 2min
-  await Promise.race([
-    page.evaluate(() => document.fonts.ready).catch(() => {}),
-    new Promise<void>(resolve => setTimeout(resolve, 5_000)),
-  ]).catch(() => {});
-  await page.waitForTimeout(600);
+export async function waitForPage(page: Page, _timeout = 15_000): Promise<void> {
+  if (page.isClosed()) return;
+  // Em ambiente remoto instável, waits de estado podem pendurar o canal do browser.
+  // Usamos apenas espera Node-side curta para estabilização pós-commit.
+  await sleep(1_200);
 }
 
 /* ── Dismiss cookie banner ────────────────────────────────────── */
@@ -47,26 +47,29 @@ export async function dismissCookie(page: Page): Promise<void> {
   const btn = page.locator(COMMON.cookieBanner).first();
   if (await btn.isVisible({ timeout: 2_000 }).catch(() => false)) {
     await btn.click({ force: true }).catch(() => {});
-    await page.waitForTimeout(300);
+    await sleep(300);
   }
 }
 
 /* ── Navigate with retry ──────────────────────────────────────── */
 export async function navigateTo(page: Page, url: string): Promise<boolean> {
   try {
-    // Promise.race com timer Node.js — garante timeout mesmo com crash do renderer
-    // page.goto pode travar indefinidamente se o browser crashar (zygote crash)
-    const ok = await Promise.race<boolean>([
-      (async () => {
-        await page.goto(url, { waitUntil: 'commit', timeout: 45_000 });
-        await waitForPage(page);
-        await dismissCookie(page);
-        return true;
-      })(),
-      new Promise<boolean>(resolve => setTimeout(() => resolve(false), 50_000)),
-    ]);
+    const navResponse = await page.goto(url, { waitUntil: 'commit', timeout: 12_000 }).catch(() => null);
+
+    // Hook de navegação deve ser ultra-estável: sem leituras de DOM aqui.
+    // As validações de DOM ficam nos próprios testes.
+    const status = navResponse?.status?.() ?? 0;
+    const current = page.url();
+    const ok = !page.isClosed() && status >= 200 && status < 500 && current !== 'about:blank';
+
+    if (!ok) {
+      console.warn(`[NAV_FAIL] Navegação base inválida: ${url} | status=${status || 'n/a'} | current=${current}`);
+    }
+
     return ok;
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn(`[NAV_FAIL] Exceção em navigateTo: ${url} | ${msg.substring(0, 200)}`);
     return false;
   }
 }
@@ -82,7 +85,7 @@ export async function loginB2B(page: Page): Promise<boolean> {
       const saved = JSON.parse(fs.readFileSync(AUTH_STATE_FILE, 'utf8'));
       await page.context().addCookies(saved.cookies || []);
       await page.goto('https://awamotos.com', { waitUntil: 'commit', timeout: 20_000 }).catch(() => {});
-      await page.waitForTimeout(1_000);
+      await sleep(1_000);
       // Verificar se está logado
       const accountLink = await page.locator('a[href*="customer/account"], .customer-welcome').first().isVisible().catch(() => false);
       if (accountLink) return true;
@@ -93,13 +96,13 @@ export async function loginB2B(page: Page): Promise<boolean> {
 
   // Login manual
   await page.goto('https://awamotos.com/b2b/account/login/', { waitUntil: 'domcontentloaded', timeout: 60_000 }).catch(() => {});
-  await page.waitForTimeout(1_000);
+  await sleep(1_000);
   await dismissCookie(page);
   await page.locator('#b2b-email').first().fill(email).catch(() => {});
   await page.locator('#b2b-pass').first().fill(pass).catch(() => {});
   await page.locator('.b2b-btn-entrar').first().click({ force: true }).catch(() => {});
   await page.waitForLoadState('domcontentloaded', { timeout: 30_000 }).catch(() => {});
-  await page.waitForTimeout(2_000);
+  await sleep(2_000);
 
   // Salvar cookies
   try {

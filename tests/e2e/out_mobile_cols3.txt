@@ -1,6 +1,0 @@
-{
-  "colsAlignItems": "start",
-  "sidebarAlignSelf": "auto",
-  "sidebarWidth": "237.484px",
-  "sidebarDisplay": "block"
-}

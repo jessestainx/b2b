@@ -5,6 +5,15 @@
     <preference for="Meta\BusinessExtension\Api\SystemConfigInterface"
                 type="Meta\BusinessExtension\Model\System\Config"/>
 
+    <!-- Meta Conversion: torna ViewContent assíncrono (fire-and-forget após response enviado).
+         Impede que curl síncrono 15s×3 bloqueie PHP-FPM workers em PDPs FPC-MISS.
+         @see GrupoAwamotos\MarketingIntelligence\Plugin\MetaConversionAsyncPlugin -->
+    <type name="Meta\Conversion\Observer\ViewContent">
+        <plugin name="grupoawamotos_meta_conversion_async"
+                type="GrupoAwamotos\MarketingIntelligence\Plugin\MetaConversionAsyncPlugin"
+                sortOrder="1"/>
+    </type>
+
     <!-- Repository preferences -->
     <preference for="GrupoAwamotos\MarketingIntelligence\Api\ProspectRepositoryInterface"
                 type="GrupoAwamotos\MarketingIntelligence\Model\ProspectRepository"/>

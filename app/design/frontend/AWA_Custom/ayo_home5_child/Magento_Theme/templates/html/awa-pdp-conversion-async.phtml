@@ -137,4 +137,212 @@ html body#html-body.catalog-product-view .page-wrapper .product-info-main .field
 html body#html-body.catalog-product-view .page-wrapper .product-info-main .info-qty input.qty {
     min-width: 44px !important;
 }
+/* 2026-07-06 PDP runtime fixes: evidence showed .product.media with top:188px,
+   add-to-cart at 200px height, boxed breadcrumb, compressed mobile search and
+   dark-mode overlay crossing the buy area/related carousel. */
+html body#html-body.catalog-product-view :is(.nav-breadcrumbs .breadcrumbs, .page-main > .breadcrumbs, .breadcrumbs) {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    height: auto !important;
+    margin-block: 8px 14px !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+}
+html body#html-body.catalog-product-view .breadcrumbs .items {
+    align-items: center !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px 8px !important;
+    line-height: 1.35 !important;
+    list-style: none !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    white-space: normal !important;
+}
+html body#html-body.catalog-product-view .breadcrumbs :is(.item, a, strong, span) {
+    display: inline !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    word-break: normal !important;
+}
+html body#html-body.catalog-product-view .breadcrumbs .item:not(:last-child)::after {
+    color: var(--awa-text-muted, #94a3b8) !important;
+    content: "/" !important;
+    margin-inline-start: 8px !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product.media {
+    top: auto !important;
+    padding-top: 0 !important;
+    transform: none !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .main-detail > .row {
+    align-items: flex-start !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-info-price {
+    gap: 10px !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main > .box-inner1 {
+    order: 1 !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main > .attr-info {
+    order: 2 !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main > .social-proof-container {
+    order: 3 !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main > .product.alert.price {
+    order: 4 !important;
+    margin-block: 0 !important;
+    min-height: 0 !important;
+    padding: 6px 0 0 !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-add-form,
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .fieldset,
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .actions {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .fieldset {
+    align-items: flex-end !important;
+    display: flex !important;
+    gap: 12px !important;
+    overflow: visible !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .field.qty {
+    flex: 0 0 112px !important;
+    height: auto !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .actions {
+    flex: 1 1 auto !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .product-info-main #product-addtocart-button,
+html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .action.tocart {
+    height: 52px !important;
+    max-height: 52px !important;
+    min-height: 52px !important;
+    padding-block: 0 !important;
+}
+html body#html-body.catalog-product-view .awa-dark-mode-toggle {
+    display: none !important;
+    pointer-events: none !important;
+}
+html body#html-body.catalog-product-view .page-wrapper :is(.awa-pdp-related, .rx-pdp-crosssell, .awa-pdp-mostviewed) {
+    overflow-x: clip !important;
+}
+html body#html-body.catalog-product-view .page-wrapper .awa-pdp-related.awa-shelf--carousel .awa-carousel__viewport {
+    scrollbar-width: thin !important;
+}
+@media (max-width: 767px) {
+    html body#html-body.catalog-product-view .page-wrapper .awa-site-header .awa-header-search-col,
+    html body#html-body.catalog-product-view .page-wrapper .awa-site-header :is(.block-search, .block-content),
+    html body#html-body.catalog-product-view .page-wrapper .awa-site-header form#search_mini_form {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .awa-site-header form#search_mini_form {
+        display: flex !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .awa-site-header form#search_mini_form :is(.field.search, .control) {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .awa-site-header input#search {
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100% !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .awa-site-header form#search_mini_form .actions {
+        flex: 0 0 44px !important;
+        width: 44px !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .product-info-main #product-addtocart-button,
+    html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .action.tocart {
+        width: 100% !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .fieldset {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .field.qty {
+        flex-basis: auto !important;
+        width: 100% !important;
+    }
+}
 </style>
+<script>
+(function (w, d) {
+    'use strict';
+    if (!d.body || !d.body.classList.contains('catalog-product-view')) {
+        return;
+    }
+
+    function forcePdpLightMode() {
+        d.body.classList.remove('awa-dark-mode');
+        d.body.classList.add('awa-light-mode');
+    }
+
+    forcePdpLightMode();
+    if (w.MutationObserver) {
+        new MutationObserver(forcePdpLightMode).observe(d.body, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+
+    function localizeFotoramaLabels() {
+        var labels = {
+            'Previous': 'Imagem anterior',
+            'Next': 'Próxima imagem',
+            'Exit fullscreen': 'Sair da tela cheia',
+            'Zoom in': 'Ampliar imagem',
+            'Zoom out': 'Reduzir imagem'
+        };
+        Object.keys(labels).forEach(function (source) {
+            d.querySelectorAll('[aria-label="' + source + '"], [title="' + source + '"]').forEach(function (el) {
+                if (el.getAttribute('aria-label') === source) {
+                    el.setAttribute('aria-label', labels[source]);
+                }
+                if (el.getAttribute('title') === source) {
+                    el.setAttribute('title', labels[source]);
+                }
+            });
+        });
+    }
+
+    localizeFotoramaLabels();
+    d.addEventListener('DOMContentLoaded', localizeFotoramaLabels, { once: true });
+    d.addEventListener('fotorama:ready', localizeFotoramaLabels);
+    d.addEventListener('fotorama:show', localizeFotoramaLabels);
+    if (w.MutationObserver) {
+        new MutationObserver(localizeFotoramaLabels).observe(d.body, {
+            subtree: true,
+            childList: true,
+            attributes: true,
+            attributeFilter: ['aria-label', 'title']
+        });
+    }
+
+})(window, document);
+</script>

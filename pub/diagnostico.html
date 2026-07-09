@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>AWA Motos - Diagnóstico de Conexão</title>
+<style>
+body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f8f8f9; color: #333; }
+h1 { color: #b73337; border-bottom: 3px solid #b73337; padding-bottom: 12px; }
+.ok { background: #d4edda; border-left: 4px solid #28a745; padding: 12px 16px; margin: 12px 0; border-radius: 4px; }
+.fail { background: #f8d7da; border-left: 4px solid #dc3545; padding: 12px 16px; margin: 12px 0; border-radius: 4px; }
+.warn { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 0; border-radius: 4px; }
+table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+td, th { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+th { background: #333; color: #fff; }
+code { background: #eee; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 13px; }
+button { background: #b73337; color: #fff; border: 0; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+button:hover { background: #8e2629; }
+.btn-secondary { background: #333; }
+.actions { display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<h1>🏍️ AWA Motos — Diagnóstico de Conexão</h1>
+
+<div class="ok">
+<strong>✅ Servidor respondendo</strong><br>
+Você está vendo esta página porque o servidor está 100% funcional.
+Se a home principal não carrega, o problema é cache local do seu navegador.
+</div>
+
+<h2>📊 Status do Servidor</h2>
+<table>
+<tr><th>Métrica</th><th>Valor</th></tr>
+<tr><td>Data/Hora</td><td><span id="datetime">—</span></td></tr>
+<tr><td>Versão static deploy</td><td>1782624298 (atual) — você pode estar vendo <strong>1782622962</strong> (cache antigo)</td></tr>
+<tr><td>Service Worker</td><td>Desabilitado (NOOP) — limpa caches antigos automaticamente</td></tr>
+<tr><td>JS files críticos</td><td>Todos validados sintaticamente ✅</td></tr>
+<tr><td>Memória PHP-FPM</td><td>40 children máx, ~600MB total</td></tr>
+<tr><td>Memória servidor livre</td><td>24 GB / 31 GB</td></tr>
+</table>
+
+<h2>⚠️ Por que você está vendo a versão antiga (1782622962)?</h2>
+<div class="warn">
+Seu navegador tem <strong>cache local</strong> dos arquivos CSS/JS antigos. 
+A URL dos arquivos inclui a versão do deploy (<code>/static/version1782622962/...</code>), 
+mas seu navegador está usando a cópia antiga em cache em vez de buscar a nova.
+</div>
+
+<h2>🔧 Solução Definitiva (30 segundos)</h2>
+
+<div class="actions">
+<button onclick="window.location.reload(true)">🔄 Recarregar com Ctrl+F5</button>
+<button class="btn-secondary" onclick="document.getElementById('cache-steps').scrollIntoView()">📋 Ver passos de limpeza</button>
+</div>
+
+<h3 id="cache-steps">Passo a passo para limpar cache (Chrome/Edge):</h3>
+
+<div class="ok">
+<strong>1.</strong> Abra uma <strong>JANELA ANÔNIMA</strong> com <code>Ctrl + Shift + N</code>
+</div>
+
+<div class="ok">
+<strong>2.</strong> Cole e acesse esta URL:<br>
+<code>chrome://serviceworker-internals</code><br>
+Se aparecer <code>awamotos.com</code> na lista, clique <strong>Unregister</strong>
+</div>
+
+<div class="ok">
+<strong>3.</strong> Vá em <code>chrome://settings/clearBrowserData</code><br>
+- Período: <strong>Todo o período</strong><br>
+- Marque <strong>todas</strong> as 4 caixas<br>
+- Clique <strong>Limpar dados</strong>
+</div>
+
+<div class="ok">
+<strong>4.</strong> Desabilite a extensão <strong>Service Worker Detector</strong>:<br>
+<code>chrome://extensions/?id=bdkgmiklpdmaojlpflclinlofgjfpabf</code>
+</div>
+
+<div class="ok">
+<strong>5.</strong> <strong>Feche TODAS as janelas</strong> do Chrome completamente
+</div>
+
+<div class="ok">
+<strong>6.</strong> Reabra o Chrome e acesse <code>https://awamotos.com/</code>
+</div>
+
+<h2>🧪 Testes do Servidor (curl direto do servidor)</h2>
+<table>
+<tr><th>Rota</th><th>Status</th><th>Tempo</th></tr>
+<tr><td>Home (/)</td><td>200 OK</td><td>~25ms</td></tr>
+<tr><td>PLP (/bagageiros.html)</td><td>200 OK</td><td>~600ms</td></tr>
+<tr><td>B2B Login</td><td>200 OK</td><td>~200ms</td></tr>
+<tr><td>Cart</td><td>200 OK</td><td>~400ms</td></tr>
+<tr><td>PDP</td><td>200 OK</td><td>~270ms</td></tr>
+</table>
+
+<h2>📞 Se ainda travar</h2>
+<p>Por favor responda com:</p>
+<ol>
+<li>Esta página <code>https://awamotos.com/diagnostico.html</code> carrega?</li>
+<li>Você vê esta página bem desenhada (com cores e botões)?</li>
+<li>Qual mensagem exata aparece quando você tenta abrir <code>https://awamotos.com/</code>?</li>
+<li>Quantas abas estão abertas no Chrome?</li>
+</ol>
+
+<p style="margin-top: 40px; color: #666; font-size: 13px;">
+Página gerada em 2026-06-28 para diagnóstico. Servidor: nginx + PHP-FPM 8.4 + MySQL.
+</p>
+
+<script>
+// Apenas para mostrar a hora local — se JS falhar, página continua funcionando
+document.getElementById('datetime').textContent = new Date().toLocaleString('pt-BR');
+</script>
+
+</body>
+</html>

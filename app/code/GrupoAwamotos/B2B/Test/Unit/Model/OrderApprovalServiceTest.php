@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Test\Unit\Model;
 
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
+use GrupoAwamotos\B2B\Model\CompanyService;
 use GrupoAwamotos\B2B\Model\OrderApproval;
 use GrupoAwamotos\B2B\Model\OrderApprovalFactory;
 use GrupoAwamotos\B2B\Model\OrderApprovalService;
@@ -12,6 +13,7 @@ use GrupoAwamotos\B2B\Model\ResourceModel\OrderApproval as OrderApprovalResource
 use GrupoAwamotos\B2B\Model\ResourceModel\OrderApproval\CollectionFactory;
 use GrupoAwamotos\B2B\Model\ResourceModel\OrderApproval\Collection;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\Exception\AuthorizationException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
@@ -32,6 +34,7 @@ class OrderApprovalServiceTest extends TestCase
     private CollectionFactory&MockObject $collectionFactory;
     private B2BHelper&MockObject $b2bHelper;
     private LoggerInterface&MockObject $logger;
+    private CompanyService&MockObject $companyService;
 
     protected function setUp(): void
     {
@@ -42,6 +45,12 @@ class OrderApprovalServiceTest extends TestCase
         $this->collectionFactory = $this->createMock(CollectionFactory::class);
         $this->b2bHelper = $this->createMock(B2BHelper::class);
         $this->logger = $this->createMock(LoggerInterface::class);
+        $this->companyService = $this->createMock(CompanyService::class);
+
+        // Default: requester and approver belong to the same company, so the
+        // cross-company guard (assertApproverBelongsToCompany) does not
+        // interfere with tests that aren't specifically exercising it.
+        $this->companyService->method('getCompanyIdsForCustomer')->willReturn([1]);
 
         $this->service = new OrderApprovalService(
             $this->orderRepository,
@@ -50,7 +59,8 @@ class OrderApprovalServiceTest extends TestCase
             $this->approvalResource,
             $this->collectionFactory,
             $this->b2bHelper,
-            $this->logger
+            $this->logger,
+            $this->companyService
         );
     }
 
@@ -219,6 +229,46 @@ class OrderApprovalServiceTest extends TestCase
 
         $this->expectException(LocalizedException::class);
         $this->service->approve(1, 10);
+    }
+
+    public function testApproveThrowsAuthorizationExceptionWhenApproverBelongsToDifferentCompany(): void
+    {
+        $approval = $this->getMockBuilder(OrderApproval::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getId', 'getData'])
+            ->getMock();
+        $approval->method('getId')->willReturn(1);
+        $approval->method('getData')->willReturnCallback(function (string $key) {
+            return match ($key) {
+                'status' => OrderApproval::STATUS_PENDING,
+                'customer_id' => 42,
+                default => null,
+            };
+        });
+
+        $this->approvalFactory->method('create')->willReturn($approval);
+
+        // Requester (customer 42) and approver (customer 99) belong to different companies,
+        // with no overlap — even accounting for multi-empresa (multiple companies per customer).
+        $this->companyService = $this->createMock(CompanyService::class);
+        $this->companyService->method('getCompanyIdsForCustomer')->willReturnMap([
+            [42, [1]],
+            [99, [2]],
+        ]);
+
+        $this->service = new OrderApprovalService(
+            $this->orderRepository,
+            $this->customerSession,
+            $this->approvalFactory,
+            $this->approvalResource,
+            $this->collectionFactory,
+            $this->b2bHelper,
+            $this->logger,
+            $this->companyService
+        );
+
+        $this->expectException(AuthorizationException::class);
+        $this->service->approve(1, 99);
     }
 
     public function testApproveAdvancesToNextLevelWhenNotFullyApproved(): void

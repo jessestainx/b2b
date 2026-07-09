@@ -59,6 +59,26 @@ class Suggestions extends Template
     }
 
     /**
+     * Cache TTL: 30 minutes. ERP data (suggestions, history) changes infrequently.
+     * Prevents repeated slow SQL Server queries on every dashboard page load.
+     */
+    public function getCacheLifetime(): int
+    {
+        return 1800;
+    }
+
+    /**
+     * Cache key is scoped per customer so no cross-customer data leaks.
+     */
+    public function getCacheKeyInfo(): array
+    {
+        return [
+            'ERP_CUSTOMER_SUGGESTIONS',
+            (string) ($this->customerSession->getCustomerId() ?? '0'),
+        ];
+    }
+
+    /**
      * Check if suggestions are enabled
      */
     public function isEnabled(): bool

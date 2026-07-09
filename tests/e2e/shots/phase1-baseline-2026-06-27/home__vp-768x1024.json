@@ -1,0 +1,21 @@
+{
+  "route": "home",
+  "viewport": "vp-768x1024",
+  "requestedUrl": "https://awamotos.com/",
+  "screenshot": "shots/phase1-baseline-2026-06-27/home__vp-768x1024.png",
+  "startedAt": "2026-06-27T03:52:03.878Z",
+  "httpStatus": 200,
+  "finalUrl": "https://awamotos.com/",
+  "navError": null,
+  "consoleErrorCount": 0,
+  "httpErrorCount": 0,
+  "metrics": {
+    "scrollWidth": 768,
+    "clientWidth": 768,
+    "overflow": false,
+    "owlAll": 0,
+    "owlLoaded": 0,
+    "searchVisible": true
+  },
+  "finishedAt": "2026-06-27T03:52:04.609Z"
+}

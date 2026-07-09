@@ -1,0 +1,210 @@
+<?php
+/**
+ * AWA Motos - Toast/Notification System (2026-06-28)
+ *
+ * Sistema global de feedback visual para acoes do usuario.
+ * - success, error, warning, info
+ * - Stack automatico
+ * - Auto-dismiss configuravel
+ * - ARIA live regions
+ */
+?>
+<div class="awa-toast-container"
+     data-awa-toast-container
+     role="region"
+     aria-label="<?= $block->escapeHtmlAttr(__('Notificacoes')) ?>"
+     aria-live="polite"
+     aria-atomic="false"></div>
+
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaToastSystemInit) return;
+    w.__awaToastSystemInit = true;
+
+    var TOAST_ICONS = {
+        success: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>',
+        error: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        warning: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        info: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+    };
+
+    var TOAST_TITLES = {
+        success: 'Sucesso',
+        error: 'Erro',
+        warning: 'Atencao',
+        info: 'Informacao'
+    };
+
+    var container = null;
+    var counter = 0;
+
+    function getContainer() {
+        if (!container) {
+            container = d.querySelector('[data-awa-toast-container]');
+        }
+        return container;
+    }
+
+    function show(opts) {
+        var c = getContainer();
+        if (!c) return;
+        var id = 'awa-toast-' + (++counter);
+        var type = opts.type || 'info';
+        var title = opts.title || TOAST_TITLES[type];
+        var message = opts.message || '';
+        var duration = opts.duration !== undefined ? opts.duration : 5000;
+
+        var toast = d.createElement('div');
+        toast.id = id;
+        toast.className = 'awa-toast awa-toast--' + type;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.setAttribute('aria-labelledby', id + '-title');
+        toast.setAttribute('aria-describedby', id + '-msg');
+        toast.innerHTML =
+            '<div class="awa-toast__icon" aria-hidden="true">' + TOAST_ICONS[type] + '</div>' +
+            '<div class="awa-toast__content">' +
+                '<p class="awa-toast__title" id="' + id + '-title">' + escapeHtml(title) + '</p>' +
+                (message ? '<p class="awa-toast__message" id="' + id + '-msg">' + escapeHtml(message) + '</p>' : '') +
+            '</div>' +
+            '<button type="button" class="awa-toast__close" data-awa-toast-close aria-label="Fechar notificacao">' +
+                '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+            '</button>';
+
+        c.appendChild(toast);
+        // Trigger animacao
+        requestAnimationFrame(function () { toast.classList.add('awa-toast--visible'); });
+
+        // Close handler
+        toast.querySelector('[data-awa-toast-close]').addEventListener('click', function () { hide(toast); });
+
+        // Auto dismiss
+        if (duration > 0) {
+            setTimeout(function () { hide(toast); }, duration);
+        }
+        return toast;
+    }
+
+    function hide(toast) {
+        if (!toast || !toast.parentElement) return;
+        toast.classList.remove('awa-toast--visible');
+        toast.classList.add('awa-toast--hiding');
+        setTimeout(function () { if (toast.parentElement) toast.remove(); }, 300);
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    // API publica
+    w.AWA = w.AWA || {};
+    w.AWA.toast = {
+        success: function (message, opts) { return show(Object.assign({ type: 'success', message: message }, opts || {})); },
+        error: function (message, opts) { return show(Object.assign({ type: 'error', message: message, duration: 7000 }, opts || {})); },
+        warning: function (message, opts) { return show(Object.assign({ type: 'warning', message: message }, opts || {})); },
+        info: function (message, opts) { return show(Object.assign({ type: 'info', message: message }, opts || {})); }
+    };
+})(window, document);
+</script>
+
+<style>
+.awa-toast-container {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 99995;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+    max-width: 360px;
+    width: calc(100% - 32px);
+}
+.awa-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-left: 4px solid #6b7280;
+    pointer-events: auto;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+}
+.awa-toast--visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+.awa-toast--hiding {
+    transform: translateX(120%);
+    opacity: 0;
+}
+.awa-toast--success { border-left-color: #10b981; }
+.awa-toast--success .awa-toast__icon { color: #10b981; }
+.awa-toast--error { border-left-color: #ef4444; }
+.awa-toast--error .awa-toast__icon { color: #ef4444; }
+.awa-toast--warning { border-left-color: #f59e0b; }
+.awa-toast--warning .awa-toast__icon { color: #f59e0b; }
+.awa-toast--info { border-left-color: #3b82f6; }
+.awa-toast--info .awa-toast__icon { color: #3b82f6; }
+.awa-toast__icon {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+}
+.awa-toast__content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.awa-toast__title {
+    margin: 0 0 2px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.3;
+}
+.awa-toast__message {
+    margin: 0;
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+.awa-toast__close {
+    flex: 0 0 auto;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 4px;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: 4px;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -2px;
+}
+.awa-toast__close:hover { background: #f3f4f6; }
+@media (max-width: 480px) {
+    .awa-toast-container {
+        top: 8px;
+        right: 8px;
+        left: 8px;
+        max-width: none;
+        width: auto;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .awa-toast { transition: none; }
+}
+</style>

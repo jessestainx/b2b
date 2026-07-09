@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
@@ -25,7 +26,8 @@ class WhatsAppReview implements ReviewInterface
         private readonly StoreManagerInterface $storeManager,
         private readonly ResourceConnection $resource,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function saveReview(
         string $phone,

@@ -13,7 +13,8 @@ use Psr\Log\LoggerInterface;
 
 class CmsMissingMediaRepairer
 {
-    private const MEDIA_DIRECTIVE_PATTERN = '/\{\{media url=\'([^\']+)\'\}\}/';
+    private const MEDIA_DIRECTIVE_PATTERN = '/\{\{\s*media\s+url=(["\']?)([^"\'\s\}]+)\1\s*\}\}/i';
+    private const HOME_BANNERS_PREFIX = 'wysiwyg/home-banners/';
 
     /**
      * Reparos limitados a blocos demo/legados para não alterar o storefront ativo.
@@ -23,19 +24,24 @@ class CmsMissingMediaRepairer
     private const TARGET_BLOCK_IDENTIFIERS = [
         'banner_mid2_home1',
         'banner_left2_default',
+        'banner_category_home_3_1',
+        'banner_category_home_3_2',
         'banner_category_home_4_1',
         'banner_category_home_4_2',
         'banner_category_home_4_3',
         'banner_category_home_4_4',
+        'banner-storelocator',
         'banner_mid_home4',
         'banner_mid_home6',
         'banner_mid_home7',
         'banner_bottom7',
         'block-topbar-image7',
         'banner2_mid_home10',
+        'banner1_mid_home10',
         'banner1_mid_home11',
         'banner_mid_home13',
         'banner1_mid_home15',
+        'shipping_support_fashion',
         'shipping_support_fashion_2',
     ];
 
@@ -50,6 +56,12 @@ class CmsMissingMediaRepairer
     ];
 
     private const ICON_FALLBACK = 'wysiwyg/logo-awa.png';
+    /**
+     * Extensões comuns de imagens legadas sem pasta (ex: "banner10-1.jpg").
+     *
+     * @var string[]
+     */
+    private const LEGACY_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'svg'];
 
     public function __construct(
         private readonly BlockCollectionFactory $blockCollectionFactory,
@@ -190,13 +202,17 @@ class CmsMissingMediaRepairer
         $repairedContent = (string) preg_replace_callback(
             self::MEDIA_DIRECTIVE_PATTERN,
             function (array $matches) use ($identifier, &$replacementIndex, &$replacedCount): string {
-                $mediaPath = ltrim($matches[1], '/');
+                $quote = $matches[1];
+                $mediaPath = $this->normalizeMediaPath((string) $matches[2]);
+                if ($mediaPath === '') {
+                    return $matches[0];
+                }
 
                 if ($this->mediaFileExists($mediaPath)) {
                     return $matches[0];
                 }
 
-                if (!$this->shouldRepairIdentifier($identifier)) {
+                if (!$this->shouldRepairReference($identifier, $mediaPath)) {
                     return $matches[0];
                 }
 
@@ -204,7 +220,11 @@ class CmsMissingMediaRepairer
                 $replacementIndex++;
                 $replacedCount++;
 
-                return sprintf("{{media url='%s'}}", $fallbackPath);
+                if ($quote === '') {
+                    return sprintf('{{media url=%s}}', $fallbackPath);
+                }
+
+                return sprintf('{{media url=%s%s%s}}', $quote, $fallbackPath, $quote);
             },
             $content
         );
@@ -215,9 +235,24 @@ class CmsMissingMediaRepairer
         ];
     }
 
-    private function shouldRepairIdentifier(string $identifier): bool
+    private function shouldRepairReference(string $identifier, string $mediaPath): bool
     {
-        return in_array($identifier, self::TARGET_BLOCK_IDENTIFIERS, true);
+        if (in_array($identifier, self::TARGET_BLOCK_IDENTIFIERS, true)) {
+            return true;
+        }
+
+        $normalizedPath = strtolower($mediaPath);
+        if (str_starts_with($normalizedPath, self::HOME_BANNERS_PREFIX)) {
+            return true;
+        }
+
+        if (str_contains($normalizedPath, '/')) {
+            return false;
+        }
+
+        $extension = strtolower((string) pathinfo($normalizedPath, PATHINFO_EXTENSION));
+
+        return $extension !== '' && in_array($extension, self::LEGACY_IMAGE_EXTENSIONS, true);
     }
 
     private function resolveFallbackPath(string $identifier, string $missingMediaPath, int $replacementIndex): string
@@ -245,5 +280,14 @@ class CmsMissingMediaRepairer
         $mediaRoot = $this->directoryList->getPath(DirectoryList::MEDIA);
 
         return is_file($mediaRoot . '/' . ltrim($mediaPath, '/'));
+    }
+
+    private function normalizeMediaPath(string $mediaPath): string
+    {
+        $decodedPath = html_entity_decode($mediaPath, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $decodedPath = trim($decodedPath);
+        $decodedPath = trim($decodedPath, "\"'");
+
+        return ltrim($decodedPath, '/');
     }
 }

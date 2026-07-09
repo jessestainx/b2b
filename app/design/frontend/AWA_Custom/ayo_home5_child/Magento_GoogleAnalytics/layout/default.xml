@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Override: remove bloco UA (Universal Analytics) em todas as páginas.
+    UA foi descontinuado pelo Google em julho/2024.
+    Rastreamento coberto integralmente por Magento_GoogleGtag (GA4).
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="google_analytics" remove="true"/>
+    </body>
+</page>

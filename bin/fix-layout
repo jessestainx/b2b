@@ -1,0 +1,273 @@
+#!/usr/bin/env bash
+# ==========================================================================
+# fix-layout — Corrige layout quebrado por cache/desync de frontend Magento
+#
+# Ciclo completo:
+#   1. Audita PHTML/CSS desatualizados (source vs preprocessed/static)
+#   2. Sincroniza var/view_preprocessed a partir do tema filho
+#   3. (opcional) setup:static-content:deploy + post-deploy-static-sync
+#   4. Purga Magento cache + Redis FPC + Varnish + reload PHP-FPM
+#   5. Valida resposta HTTP da home
+#
+# Uso:
+#   bin/fix-layout                    # purge + sync PHTML desatualizados
+#   bin/fix-layout --audit            # só relatório
+#   bin/fix-layout --static           # inclui deploy estático do child theme
+#   bin/fix-layout --purge-only       # só purga caches (sem sync/deploy)
+#   bin/fix-layout --static --clean   # rebuild static (remove frontend/ antes)
+# ==========================================================================
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+THEME='AWA_Custom/ayo_home5_child'
+LOCALE='pt_BR'
+THEME_SRC="app/design/frontend/${THEME}"
+PREPROC_BASE="var/view_preprocessed/pub/static/app/design/frontend/${THEME}"
+REDIS_PASS='Aw4R3d1s2026Sec'
+SITE_URL='https://awamotos.com/'
+
+DO_AUDIT=0
+DO_PURGE_ONLY=0
+DO_STATIC=0
+DO_CLEAN_STATIC=0
+DO_SYNC=1
+
+RED=$'\033[0;31m'
+GRN=$'\033[0;32m'
+YLW=$'\033[1;33m'
+BLU=$'\033[0;34m'
+RST=$'\033[0m'
+
+info()  { printf '%b[INFO]%b  %s\n' "$BLU" "$RST" "$1" >&2; }
+ok()    { printf '%b[OK]%b    %s\n' "$GRN" "$RST" "$1" >&2; }
+warn()  { printf '%b[WARN]%b  %s\n' "$YLW" "$RST" "$1" >&2; }
+err()   { printf '%b[ERR]%b   %s\n' "$RED" "$RST" "$1" >&2; }
+
+print_help() {
+  cat <<'EOF'
+Corrige layout quebrado (cache FPC/Varnish + preprocessed/static desatualizado).
+
+Opções:
+  --audit         Apenas audita e lista arquivos desatualizados
+  --purge-only    Só purga caches (Magento, Redis FPC, Varnish, PHP-FPM)
+  --static        Roda setup:static-content:deploy do tema filho + post-deploy sync
+  --clean         Com --static: remove pub/static/frontend antes do deploy
+  --no-sync       Não copia PHTML desatualizados para view_preprocessed
+  -h, --help      Esta ajuda
+
+Exemplos:
+  bin/fix-layout
+  bin/fix-layout --audit
+  bin/fix-layout --static
+  bin/fix-layout --purge-only
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --audit)       DO_AUDIT=1; DO_SYNC=0; shift ;;
+    --purge-only)  DO_PURGE_ONLY=1; DO_SYNC=0; shift ;;
+    --static)      DO_STATIC=1; shift ;;
+    --clean)       DO_CLEAN_STATIC=1; shift ;;
+    --no-sync)     DO_SYNC=0; shift ;;
+    -h|--help)     print_help; exit 0 ;;
+    *) err "Opção inválida: $1"; print_help; exit 2 ;;
+  esac
+done
+
+audit_phtml() {
+  local outdated=0
+  local missing=0
+  local ok_count=0
+
+  info "Auditando PHTML: ${THEME_SRC} → ${PREPROC_BASE}"
+
+  while IFS= read -r -d '' src; do
+    rel="${src#${THEME_SRC}/}"
+    dst="${PREPROC_BASE}/${rel}"
+
+    if [[ ! -f "$dst" ]]; then
+      printf '  %bMISSING%b  %s\n' "$RED" "$RST" "$rel" >&2
+      missing=$((missing + 1))
+      continue
+    fi
+
+    if [[ "$src" -nt "$dst" ]]; then
+      printf '  %bSTALE%b   %s (source %s > preproc %s)\n' \
+        "$YLW" "$RST" "$rel" \
+        "$(date -r "$src" '+%Y-%m-%d %H:%M')" \
+        "$(date -r "$dst" '+%Y-%m-%d %H:%M')" >&2
+      outdated=$((outdated + 1))
+    else
+      ok_count=$((ok_count + 1))
+    fi
+  done < <(find "$THEME_SRC" -name '*.phtml' -print0 2>/dev/null)
+
+  echo "" >&2
+  info "PHTML: ${ok_count} ok | ${outdated} desatualizados | ${missing} ausentes"
+
+  local css_newer=0
+  if [[ -f pub/static/deployed_version.txt ]]; then
+    local deploy_ts
+    deploy_ts="$(date -r pub/static/deployed_version.txt '+%Y-%m-%d %H:%M' 2>/dev/null || echo '?')"
+    info "Último static deploy: ${deploy_ts} (pub/static/deployed_version.txt)"
+
+    if [[ -d "${THEME_SRC}/web/css" ]]; then
+      while IFS= read -r css; do
+        css_newer=$((css_newer + 1))
+        printf '  %bCSS NEW%b  %s (alterado após static deploy)\n' "$YLW" "$RST" "${css#${ROOT_DIR}/}" >&2
+      done < <(find "${THEME_SRC}/web/css" \( -name '*.css' -o -name '*.less' \) -newer pub/static/deployed_version.txt 2>/dev/null | head -20)
+      if [[ "$css_newer" -gt 0 ]]; then
+        warn "${css_newer}+ arquivo(s) CSS/LESS mais novos que o deploy — use --static"
+      fi
+    fi
+  else
+    warn "pub/static/deployed_version.txt ausente — static deploy necessário"
+    css_newer=1
+  fi
+
+  echo "${outdated} ${missing} ${css_newer}"
+}
+
+sync_phtml() {
+  local synced=0
+  local created=0
+
+  info "Sincronizando PHTML desatualizados → view_preprocessed..."
+
+  while IFS= read -r -d '' src; do
+    rel="${src#${THEME_SRC}/}"
+    dst="${PREPROC_BASE}/${rel}"
+    dst_dir="$(dirname "$dst")"
+
+    if [[ -f "$dst" && ! "$src" -nt "$dst" ]]; then
+      continue
+    fi
+
+    php -l "$src" >/dev/null
+    sudo -u www-data mkdir -p "$dst_dir"
+    sudo -u www-data cp "$src" "$dst"
+    if [[ ! -f "$dst" ]]; then
+      created=$((created + 1))
+    else
+      synced=$((synced + 1))
+    fi
+    ok "sync ${rel}"
+  done < <(find "$THEME_SRC" -name '*.phtml' -print0 2>/dev/null)
+
+  ok "PHTML sincronizados: ${synced} atualizados, ${created} criados/copiados"
+}
+
+run_static_deploy() {
+  if [[ "$DO_CLEAN_STATIC" -eq 1 ]]; then
+    info "Limpando pub/static/frontend..."
+    sudo rm -rf pub/static/frontend pub/static/_cache pub/static/deployed_version.txt 2>/dev/null || true
+  fi
+
+  info "Deploy estático: ${THEME} (${LOCALE})..."
+  sudo -u www-data php bin/magento setup:static-content:deploy "${LOCALE}" -f \
+    --theme "${THEME}" --jobs 4
+
+  info "Corrigindo ownership dos symlinks static..."
+  sudo find pub/static/frontend -type l -exec chown -h jessessh:www-data {} \; 2>/dev/null || true
+
+  if [[ -x scripts/post-deploy-static-sync.sh ]]; then
+    info "Executando post-deploy-static-sync..."
+    bash scripts/post-deploy-static-sync.sh || warn "post-deploy-static-sync terminou com avisos (rsync/perms)"
+  fi
+}
+
+purge_caches() {
+  info "Limpando cache Magento..."
+  sudo -u www-data php bin/magento cache:flush
+
+  info "Limpando Redis FPC (DB2)..."
+  if redis-cli -h ::1 -a "$REDIS_PASS" -n 2 FLUSHDB >/dev/null 2>&1; then
+    ok "Redis DB2 (FPC) limpo"
+  else
+    warn "Redis DB2 indisponível"
+  fi
+
+  info "Purgando Varnish..."
+  if sudo varnishadm 'ban req.url ~ .' >/dev/null 2>&1; then
+    ok "Varnish purgado"
+  elif curl -sf -m 5 -X PURGE -H 'X-Magento-Tags-Pattern: .*' http://127.0.0.1:6081/ >/dev/null 2>&1; then
+    ok "Varnish purgado (curl PURGE)"
+  else
+    warn "Varnish indisponível"
+  fi
+
+  info "Recarregando PHP-FPM..."
+  sudo systemctl reload php8.4-fpm 2>/dev/null \
+    || sudo systemctl reload php8.3-fpm 2>/dev/null \
+    || warn "PHP-FPM reload falhou"
+}
+
+validate_http() {
+  info "Validando ${SITE_URL}..."
+  local code size time_total
+  read -r code size time_total < <(
+    curl -k -sS -L -m 90 -o /tmp/awa-fix-layout.html -w '%{http_code} %{size_download} %{time_total}' "${SITE_URL}" \
+      || echo '000 0 0'
+  )
+
+  if [[ "$code" == "200" && "$size" -gt 10000 ]]; then
+    ok "Home OK — HTTP ${code}, ${size} bytes, ${time_total}s"
+    return 0
+  fi
+
+  err "Home com problema — HTTP ${code}, ${size} bytes, ${time_total}s"
+  return 1
+}
+
+# --- main ---
+
+if [[ ! -d "$THEME_SRC" ]]; then
+  err "Tema não encontrado: ${THEME_SRC}"
+  exit 1
+fi
+
+audit_result="$(audit_phtml)"
+read -r stale_count missing_count css_newer <<< "$audit_result"
+
+if [[ "$DO_AUDIT" -eq 1 ]]; then
+  if [[ "$stale_count" -gt 0 || "$missing_count" -gt 0 || "$css_newer" -gt 0 ]]; then
+    warn "Execute: bin/fix-layout${DO_STATIC:+ --static} para corrigir"
+    exit 1
+  fi
+  ok "Nenhum desync detectado"
+  exit 0
+fi
+
+if [[ "$DO_PURGE_ONLY" -eq 1 ]]; then
+  purge_caches
+  attempt=1
+  while [[ "$attempt" -le 3 ]]; do
+    if validate_http; then
+      exit 0
+    fi
+    warn "Tentativa ${attempt}/3 falhou — aguardando cold cache..."
+    sleep 5
+    attempt=$((attempt + 1))
+  done
+  exit 1
+fi
+
+if [[ "$DO_SYNC" -eq 1 && ( "$stale_count" -gt 0 || "$missing_count" -gt 0 ) ]]; then
+  sync_phtml
+elif [[ "$DO_SYNC" -eq 1 ]]; then
+  ok "PHTML já sincronizados"
+fi
+
+if [[ "$DO_STATIC" -eq 1 ]]; then
+  run_static_deploy
+elif [[ "$css_newer" -gt 0 ]]; then
+  warn "CSS/LESS desatualizado — rode: bin/fix-layout --static"
+fi
+
+purge_caches
+validate_http || exit 1
+
+ok "fix-layout concluído"

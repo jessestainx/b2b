@@ -34,7 +34,8 @@
         .then(startFlipbook)
         .catch(showFallback);
 
-    function loadScript(url) {
+    function loadScript(url)
+    {
         return fetch(url, { credentials: 'same-origin' }).then(function (response) {
             if (!response.ok) {
                 throw new Error('Failed to load ' + url);
@@ -57,7 +58,8 @@
         });
     }
 
-    function showFallback() {
+    function showFallback()
+    {
         if (statusEl) {
             statusEl.classList.add('is-hidden');
         }
@@ -72,7 +74,8 @@
         }
     }
 
-    function startFlipbook() {
+    function startFlipbook()
+    {
         var pdfjsLib = window.pdfjsLib;
         var PageFlip = window.St && window.St.PageFlip;
 
@@ -85,7 +88,8 @@
         pdfjsLib.getDocument(pdfUrl).promise.then(renderFlipbook).catch(showFallback);
     }
 
-    function renderFlipbook(pdf) {
+    function renderFlipbook(pdf)
+    {
         return pdf.getPage(1).then(function (firstPage) {
             var baseViewport = firstPage.getViewport({ scale: 1 });
             var scale = Math.min(1200 / baseViewport.width, 1.25);
@@ -106,7 +110,8 @@
         }).catch(showFallback);
     }
 
-    function renderPage(pdf, pageNum, scale) {
+    function renderPage(pdf, pageNum, scale)
+    {
         return pdf.getPage(pageNum).then(function (page) {
             var viewport = page.getViewport({ scale: scale });
             var canvas = document.createElement('canvas');
@@ -127,7 +132,8 @@
         });
     }
 
-    function initPageFlip(dimensions, numPages) {
+    function initPageFlip(dimensions, numPages)
+    {
         var PageFlip = window.St && window.St.PageFlip;
         var isMobile = window.matchMedia('(max-width: 767px)').matches;
         var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -149,14 +155,16 @@
 
         pageFlip.loadFromHTML(bookEl.querySelectorAll('.awa-catalog-flipbook__page'));
 
-        function updateCounter() {
+        function updateCounter()
+        {
             counterEl.textContent = (pageFlip.getCurrentPageIndex() + 1) + ' / ' + numPages;
         }
 
         pageFlip.on('flip', updateCounter);
         updateCounter();
 
-        function goToPage(targetIndex) {
+        function goToPage(targetIndex)
+        {
             if (targetIndex < 0 || targetIndex >= numPages) {
                 return;
             }

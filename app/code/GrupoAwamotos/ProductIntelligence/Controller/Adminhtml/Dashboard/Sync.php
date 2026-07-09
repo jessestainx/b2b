@@ -16,7 +16,7 @@ use Magento\Framework\App\Action\HttpGetActionInterface;
 
 class Sync extends Action implements HttpGetActionInterface
 {
-    const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::dashboard';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::dashboard';
 
     private JsonFactory $jsonFactory;
     private ErpDataCollector $collector;

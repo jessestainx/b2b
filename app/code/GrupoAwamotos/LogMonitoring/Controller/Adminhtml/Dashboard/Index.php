@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Controller\Adminhtml\Dashboard;
@@ -27,7 +28,7 @@ class Index extends Action implements HttpGetActionInterface
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('GrupoAwamotos_LogMonitoring::dashboard');
         $resultPage->getConfig()->getTitle()->prepend(__('AWA Log Monitoring Dashboard'));
-        
+
         return $resultPage;
     }
 }

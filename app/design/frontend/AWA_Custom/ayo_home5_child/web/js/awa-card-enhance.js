@@ -1,7 +1,7 @@
 /**
  * AWA Motos — awa-card-enhance.js
  *
- * Re-inicializa awa-qty-control em slides clonados por carouseis (Owl/Swiper).
+ * Re-inicializa awa-qty-control em slides clonados por carrosseis (scroll-snap/Swiper).
  * Carouseis clonam nos do DOM — o guard data-awa-qty-bound no clone impede
  * a re-binding automatica do Magento widget framework, deixando os botoes +/- mudos.
  *
@@ -14,7 +14,7 @@ define(['jquery', 'mage/apply/main'], function ($, mageApply) {
     'use strict';
 
     let CAROUSEL_SELECTORS = [
-        '.owl-stage',
+        '.awa-carousel__track',
         '.swiper-wrapper',
         '.slick-list'
     ].join(', ');

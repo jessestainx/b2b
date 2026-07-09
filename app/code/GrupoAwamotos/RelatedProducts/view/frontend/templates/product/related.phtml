@@ -11,7 +11,6 @@ if (!$collection || !$collection->getSize()) {
     return;
 }
 
-$canShowPrice = $block->canShowPrice();
 $imageType    = 'category_page_grid';
 $addLabel     = $block->escapeHtml((string) __('Adicionar'));
 $soldOutLabel = $block->escapeHtml((string) __('Produto esgotado'));
@@ -67,7 +66,8 @@ $loginUrl     = $block->escapeUrl($block->getUrl('b2b/account/login'));
                                         </a>
                                     </h3>
 
-                                    <?php if ($canShowPrice): ?>
+                                    <?php $canShowPriceForItem = $block->canViewProductPrice($product); ?>
+                                    <?php if ($canShowPriceForItem): ?>
                                     <div class="info-price">
                                         <div class="price-box">
                                             <?= /* @noEscape */ $block->getProductPrice($product) ?>
@@ -91,7 +91,7 @@ $loginUrl     = $block->escapeUrl($block->getUrl('b2b/account/login'));
 
                                     <div class="product-info-cart">
                                         <div class="actions-primary addcart-link product-actions">
-                                            <?php if ($canShowPrice && $product->isSaleable()): ?>
+                                            <?php if ($canShowPriceForItem && $product->isSaleable()): ?>
                                                 <?php $postParams = $block->getAddToCartPostParams($product); ?>
                                                 <?php if (!empty($postParams['action']) && !empty($postParams['data']) && is_array($postParams['data'])): ?>
                                                 <form data-role="tocart-form"
@@ -99,9 +99,9 @@ $loginUrl     = $block->escapeUrl($block->getUrl('b2b/account/login'));
                                                       action="<?= $block->escapeUrl((string) $postParams['action']) ?>"
                                                       method="post">
                                                     <?php foreach ($postParams['data'] as $key => $value): ?>
-                                                    <input type="hidden"
-                                                           name="<?= $block->escapeHtmlAttr((string) $key) ?>"
-                                                           value="<?= $block->escapeHtmlAttr((string) $value) ?>">
+                                                        <input type="hidden"
+                                                               name="<?= $block->escapeHtmlAttr((string) $key) ?>"
+                                                               value="<?= $block->escapeHtmlAttr((string) $value) ?>">
                                                     <?php endforeach; ?>
                                                     <button type="submit"
                                                             class="action tocart primary btn-add-to-cart related-addtocart"
@@ -110,7 +110,7 @@ $loginUrl     = $block->escapeUrl($block->getUrl('b2b/account/login'));
                                                     </button>
                                                 </form>
                                                 <?php endif; ?>
-                                            <?php elseif ($canShowPrice): ?>
+                                            <?php elseif ($canShowPriceForItem): ?>
                                                 <div class="stock unavailable" aria-live="polite">
                                                     <span><?= /* @noEscape */ $soldOutLabel ?></span>
                                                 </div>

@@ -27,11 +27,11 @@ define([
          */
         _bindEvents: function () {
             let self = this;
-            
+
             this.element.on('input.inputMask keyup.inputMask', function () {
                 self._applyMask();
             });
-            
+
             this.element.on('focus.inputMask', function () {
                 self._applyMask();
             });

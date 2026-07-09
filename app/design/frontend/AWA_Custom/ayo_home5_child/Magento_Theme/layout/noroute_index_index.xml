@@ -12,6 +12,10 @@
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <!-- Remove CSS src herdado de cms_page_view; loader PHTML abaixo já carrega async -->
+        <remove src="css/awa-cms-shell-final.css"/>
+    </head>
     <body>
         <!-- Remove o segundo bloco de H1 que o parent theme injeta na 404 -->
         <!-- Descomente e ajuste o nome se o bloco duplicado for identificado: -->

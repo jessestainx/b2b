@@ -1,6 +1,6 @@
 {
     "api_url": "https://awamotos.com",
-    "token": "SUBSTITUIR_PELO_TOKEN_DA_INTEGRACAO_SECTRA",
+    "token": "COLE_AQUI_O_TOKEN_ROTACIONADO_DA_INTEGRACAO_SECTRA_ERP",
     "sql_instance": "localhost",
     "database": "INDUSTRIAL",
     "log_dir": "C:\\SectraSync\\logs",

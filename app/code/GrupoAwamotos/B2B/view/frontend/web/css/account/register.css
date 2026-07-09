@@ -72,6 +72,22 @@ body.b2b-register-index {
     --b2b-reg-ayo-card-shadow: 0 12px 32px rgb(15 23 42 / 8%);
 }
 
+/* Honeypot anti-bot: manter totalmente invisivel sem artefatos visuais. */
+body.b2b-auth-shell.b2b-register-index #b2b_website {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+}
+
 /* =============================================
    PAGE CONTAINER
    ============================================= */
@@ -88,7 +104,7 @@ html body .page-wrapper .b2b-register-shell .b2b-register-shell-content {
     margin: 0 auto;
     flex: 1;
     padding: 8px 20px 0;
-    overflow-x: clip;
+    overflow-x: visible;
     box-sizing: border-box;
 }
 
@@ -101,7 +117,7 @@ html body .page-wrapper .b2b-register-page {
     max-width: 1280px;
     margin: 0 auto;
     padding: 30px 0;
-    overflow-x: clip;
+    overflow-x: visible;
     box-sizing: border-box;
 }
 
@@ -426,10 +442,14 @@ html body .page-wrapper .b2b-register-page .form-section:last-of-type {
 }
 
 html body .page-wrapper .b2b-register-page .form-section .form-section__heading,
-html body .page-wrapper .b2b-register-page .form-section h3 {
+html body .page-wrapper .b2b-register-page .form-section h2 {
     margin: 0 0 18px;
     padding-left: 0;
     border-left: 0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--awa-text-primary, #333);
 }
 
 html body .page-wrapper .b2b-register-page .form-section .form-section__toggle {
@@ -562,6 +582,7 @@ html body .page-wrapper .b2b-register-page .field .label {
     font-size: 14px;
     color: var(--b2b-reg-c10);
     margin-bottom: 8px;
+    overflow-wrap: anywhere;
 }
 
 .b2b-register-page .field .control {
@@ -625,6 +646,7 @@ html body .page-wrapper .b2b-register-page .field select {
     background-color: var(--b2b-reg-white);
     color: var(--awa-text-primary, #333);
     line-height: 1.5;
+    min-width: 0;
 }
 
 /* =============================================
@@ -657,6 +679,15 @@ html body .page-wrapper .b2b-register-page .field .input-text::placeholder {
     color: var(--awa-text-muted, #666);
     margin-top: 6px;
     line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+html body .page-wrapper .b2b-register-page .field input:disabled,
+html body .page-wrapper .b2b-register-page .field select:disabled {
+    background: var(--b2b-reg-bg-muted) !important;
+    color: var(--b2b-reg-c2);
+    cursor: wait;
+    opacity: 1;
 }
 
 /* =============================================
@@ -727,23 +758,97 @@ html body .page-wrapper .b2b-register-page .terms-section {
 }
 
 html body .page-wrapper .b2b-register-page .terms-section .field.choice {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--b2b-reg-border-main);
+    border-radius: 10px;
+    background: var(--b2b-reg-bg-muted);
+    text-align: left;
+    cursor: default;
 }
 
-html body .page-wrapper .b2b-register-page .terms-section .checkbox {
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    flex-shrink: 0;
+html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-input {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
 }
 
 html body .page-wrapper .b2b-register-page .terms-section .label {
+    display: grid !important;
+    grid-template-columns: 22px minmax(0, 1fr);
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    max-width: none;
     margin: 0;
+    padding: 0 !important;
     font-weight: normal;
     font-size: 14px;
     color: var(--b2b-reg-c9);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .label::before,
+html body .page-wrapper .b2b-register-page .terms-section .label::after {
+    content: none !important;
+    display: none !important;
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    border: 2px solid var(--b2b-reg-border-mid);
+    border-radius: 5px;
+    background: var(--b2b-reg-white);
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-box::after {
+    content: '';
+    width: 5px;
+    height: 10px;
+    border: solid var(--b2b-reg-white);
+    border-width: 0 2px 2px 0;
+    opacity: 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-input:checked + .b2b-terms-box {
+    border-color: var(--b2b-reg-ayo-primary);
+    background: var(--b2b-reg-ayo-primary);
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-input:checked + .b2b-terms-box::after {
+    opacity: 1;
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-input:focus-visible + .b2b-terms-box {
+    outline: 2px solid var(--b2b-reg-ayo-primary-dark);
+    outline-offset: 2px;
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-copy {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 html body .page-wrapper .b2b-register-page .terms-section .label a {
@@ -755,10 +860,34 @@ html body .page-wrapper .b2b-register-page .terms-section .label a:hover {
     text-decoration: underline;
 }
 
+html body .page-wrapper .b2b-register-page .terms-section .label a:focus-visible {
+    outline: 2px solid var(--b2b-reg-ayo-primary-dark);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .note {
+    margin-top: 2px;
+    margin-left: 32px;
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .mage-error {
+    margin: 6px 0 0 32px;
+}
+
+html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-label .mage-error {
+    grid-column: 2;
+    margin: 6px 0 0;
+}
+
 /* =============================================
    SUBMIT BUTTON — Override awa-palette-global.css red !important
    ============================================= */
 html body .page-wrapper .b2b-register-page .actions-toolbar {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 18px;
     margin-top: 26px;
     padding-top: 22px;
     border-top: 1px solid var(--b2b-reg-border-main);
@@ -769,13 +898,13 @@ html body .page-wrapper .b2b-register-page .actions-toolbar > .primary,
 html body .page-wrapper .b2b-register-page .actions-toolbar > .secondary {
     float: none !important;
     clear: none !important;
-    width: auto !important;
+    width: min(100%, 420px) !important;
     margin: 0 !important;
     min-width: 0;
 }
 
 html body .page-wrapper .b2b-register-page .actions-toolbar .primary {
-    margin-bottom: 15px;
+    margin-bottom: 0;
 }
 
 html body .page-wrapper .b2b-register-page .actions-toolbar .actions-primary-note {
@@ -845,12 +974,21 @@ html body .page-wrapper .b2b-register-page .actions-toolbar .action.primary:disa
     box-shadow: none !important;
 }
 
+html body .page-wrapper .b2b-register-page .b2b-register-form.is-submitting .actions-primary-note {
+    color: var(--b2b-reg-ayo-primary-dark);
+    font-weight: 600;
+}
+
 html body .page-wrapper .b2b-register-page .actions-toolbar .secondary {
     text-align: center;
     font-size: 13px;
     color: var(--b2b-reg-c2);
     white-space: normal;
     overflow-wrap: anywhere;
+    padding: 14px;
+    border: 1px solid var(--b2b-reg-border-main);
+    border-radius: 12px;
+    background: var(--b2b-reg-white);
 }
 
 html body .page-wrapper .b2b-register-page .actions-toolbar .secondary > span {
@@ -896,10 +1034,9 @@ html body .page-wrapper .b2b-register-page .actions-toolbar .action.secondary:fo
     }
 
     html body .page-wrapper .b2b-register-page .actions-toolbar {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: start;
-        gap: 16px;
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 18px;
     }
 
     html body .page-wrapper .b2b-register-page .actions-toolbar > .primary {
@@ -908,9 +1045,8 @@ html body .page-wrapper .b2b-register-page .actions-toolbar .action.secondary:fo
     }
 
     html body .page-wrapper .b2b-register-page .actions-toolbar > .secondary {
-        text-align: right;
-        padding-top: 2px;
-        justify-self: end;
+        text-align: center;
+        justify-self: center;
         max-width: 220px;
     }
 }
@@ -922,11 +1058,16 @@ html body .page-wrapper .b2b-register-page .mage-error {
     color: var(--b2b-reg-c16);
     font-size: 12px;
     margin-top: 6px;
+    display: block;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
 html body .page-wrapper .b2b-register-page .field._error .input-text,
-html body .page-wrapper .b2b-register-page .field._error input {
+html body .page-wrapper .b2b-register-page .field._error input,
+html body .page-wrapper .b2b-register-page .field._error select {
     border-color: var(--b2b-reg-c16) !important;
+    box-shadow: 0 0 0 3px rgb(220 38 38 / 8%) !important;
 }
 
 /* =============================================
@@ -1013,6 +1154,7 @@ html body .page-wrapper .b2b-register-page .message.info {
     font-size: 14px;
     color: var(--b2b-reg-c44);
     font-weight: 500;
+    overflow-wrap: anywhere;
 }
 
 .b2b-register-page .company-info-item .info-value.info-value-muted {
@@ -1265,38 +1407,33 @@ html body .page-wrapper .b2b-register-page .field input.autofilled {
         position: sticky;
         top: 8px;
         z-index: 12;
-        display: flex !important;
-        flex-wrap: nowrap;
-        gap: 8px !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px !important;
         margin: -2px 0 8px;
         padding: 6px;
         border: 1px solid var(--b2b-reg-border-main);
         border-radius: 12px;
         background: rgb(255 255 255 / 96%);
         box-shadow: 0 4px 14px rgb(15 23 42 / 6%);
-        overflow: auto hidden;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x proximity;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        overscroll-behavior-x: contain;
-    }
-
-    .b2b-register-page .b2b-register-progress::-webkit-scrollbar {
-        display: none;
+        overflow: hidden;
+        scroll-snap-type: none;
     }
 
     .b2b-register-page .progress-step {
-        flex: 0 0 auto;
-        min-width: 106px;
-        max-width: 150px;
+        justify-content: center;
+        min-width: 0;
+        max-width: none;
+        width: 100%;
         min-height: 36px;
-        padding: 7px 8px;
-        font-size: 11px;
-        gap: 6px;
+        padding: 6px 4px;
+        font-size: 9px;
+        gap: 3px;
         white-space: normal;
+        overflow: hidden;
+        text-align: center;
         align-items: center;
-        scroll-snap-align: start;
+        line-height: 1.2;
     }
 
     .b2b-register-page .progress-step__num {
@@ -1417,6 +1554,14 @@ html body .page-wrapper .b2b-register-page .field input.autofilled {
         font-size: 11px;
     }
 
+    html body .page-wrapper .b2b-register-page .terms-section .field.choice {
+        padding: 12px;
+    }
+
+    html body .page-wrapper .b2b-register-page .terms-section .note {
+        margin-left: 32px;
+    }
+
     .b2b-register-page .company-info-grid {
         grid-template-columns: 1fr;
     }
@@ -1507,10 +1652,15 @@ html body .page-wrapper .b2b-register-page .field input.autofilled {
 
     .b2b-register-page .progress-step {
         min-height: 34px;
-        font-size: 10px;
-        padding: 6px 7px;
-        min-width: 92px;
-        max-width: 128px;
+        font-size: 0;
+        padding: 6px 3px;
+        min-width: 0;
+        max-width: none;
+    }
+
+    /* On very small screens, show only the step number */
+    .b2b-register-page .progress-step__num {
+        font-size: 11px;
     }
 
     .b2b-register-page .progress-step__num {
@@ -1686,4 +1836,64 @@ html body .page-wrapper .b2b-register-page .email-check-alert-content {
         transform: none;
     }
 }
+
 .b2b-register-page .password-strength-meter.is-weak::after{width:33%;background:var(--b2b-reg-c43)}.b2b-register-page .password-strength-meter.is-medium::after{width:66%;background:var(--b2b-reg-c26)}.b2b-register-page .password-strength-meter.is-strong::after{width:100%;background:var(--b2b-reg-c13)}.b2b-register-page .b2b-password-strength-label{font-size:12px;margin-top:4px;min-height:16px;color:var(--b2b-reg-c2)}
+
+/* Auth shell SSOT — densidade 4–16px (tema register-override.css reforça com locks) */
+body.b2b-auth-shell.b2b-register-index .b2b-register-page {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+body.b2b-auth-shell.b2b-register-index .b2b-register-page .b2b-register-container {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+}
+
+body.b2b-auth-shell.b2b-register-index .b2b-register-page .b2b-register-form {
+    gap: 12px;
+}
+
+body.b2b-auth-shell.b2b-register-index .b2b-register-page .field {
+    margin-bottom: 0;
+}
+
+body.b2b-auth-shell.b2b-register-index .b2b-register-page .field-row {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+body.b2b-auth-shell.b2b-register-index .b2b-register-page .field-row .field {
+    flex: unset;
+    max-width: none;
+    min-width: 0;
+}
+
+body.b2b-auth-shell.b2b-register-index .b2b-register-page .form-section {
+    padding: 8px 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.b2b-auth-shell.b2b-register-index .b2b-register-page .b2b-register-progress {
+    gap: 4px;
+    margin: 0;
+    padding: 4px 0;
+    background: transparent;
+    border: 0;
+}
+
+/* Required because the auth shell does not load the terminal align-grid bundle on first paint. */
+html body.b2b-auth-shell.b2b-register-index .page-wrapper .b2b-register-page .progress-step {
+    min-height: 44px !important;
+    height: 44px !important;
+}

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;
@@ -7,14 +8,14 @@ use Magento\Framework\Model\AbstractModel;
 
 class Subscription extends AbstractModel
 {
-    const STATUS_ACTIVE = 'active';
-    const STATUS_PAUSED = 'paused';
-    const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_PAUSED = 'paused';
+    public const STATUS_CANCELLED = 'cancelled';
 
-    const FREQUENCY_WEEKLY = 'weekly';
-    const FREQUENCY_BIWEEKLY = 'biweekly';
-    const FREQUENCY_MONTHLY = 'monthly';
-    const FREQUENCY_QUARTERLY = 'quarterly';
+    public const FREQUENCY_WEEKLY = 'weekly';
+    public const FREQUENCY_BIWEEKLY = 'biweekly';
+    public const FREQUENCY_MONTHLY = 'monthly';
+    public const FREQUENCY_QUARTERLY = 'quarterly';
 
     /**
      * @inheritdoc

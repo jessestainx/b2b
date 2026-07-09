@@ -10,11 +10,10 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Plugin\Checkout;
 
 use GrupoAwamotos\B2B\Helper\Config;
+use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
 use GrupoAwamotos\B2B\Model\CheckoutAccessValidator;
 use GrupoAwamotos\B2B\Model\CreditService;
-use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Checkout\Api\PaymentInformationManagementInterface;
-use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -40,19 +39,14 @@ class BlockPlaceOrderPlugin
     private $customerSession;
 
     /**
-     * @var CustomerRepositoryInterface
-     */
-    private $customerRepository;
-
-    /**
-     * @var SyncLogResource
-     */
-    private $syncLogResource;
-
-    /**
      * @var CreditService
      */
     private $creditService;
+
+    /**
+     * @var B2BHelper
+     */
+    private $b2bHelper;
 
     /**
      * @var LoggerInterface
@@ -66,19 +60,17 @@ class BlockPlaceOrderPlugin
 
     public function __construct(
         Config $config,
+        B2BHelper $b2bHelper,
         CartRepositoryInterface $cartRepository,
         CustomerSession $customerSession,
-        CustomerRepositoryInterface $customerRepository,
-        SyncLogResource $syncLogResource,
         CreditService $creditService,
         CheckoutAccessValidator $checkoutAccessValidator,
         ?LoggerInterface $logger = null
     ) {
         $this->config = $config;
+        $this->b2bHelper = $b2bHelper;
         $this->cartRepository = $cartRepository;
         $this->customerSession = $customerSession;
-        $this->customerRepository = $customerRepository;
-        $this->syncLogResource = $syncLogResource;
         $this->creditService = $creditService;
         $this->checkoutAccessValidator = $checkoutAccessValidator;
         $this->logger = $logger;
@@ -140,31 +132,24 @@ class BlockPlaceOrderPlugin
         /** @var \Magento\Quote\Model\Quote $quote */
         $quote = $this->cartRepository->getActive($cartId);
         $customerId = (int) $quote->getCustomerId();
+        $customerGroupId = (int) $quote->getCustomerGroupId();
+        $isB2bGroup = $this->b2bHelper->isB2BGroup($customerGroupId);
 
         if ($customerId <= 0 && $this->customerSession->isLoggedIn()) {
             $customerId = (int) $this->customerSession->getCustomerId();
         }
 
-        $customerState = $this->checkoutAccessValidator->resolveCustomerState($customerId);
-
-        if ($customerState !== CheckoutAccessValidator::STATE_APPROVED) {
-            if ($customerState === CheckoutAccessValidator::STATE_PENDING_ERP) {
-                throw new CouldNotSaveException(
-                    __('Seu cadastro ainda não está vinculado ao sistema ERP. Entre em contato com o departamento comercial para liberar seus pedidos.')
-                );
-            }
-
+        if ($isB2bGroup && $customerId <= 0) {
             throw new CouldNotSaveException(
-                __('Sua conta precisa ser aprovada antes de realizar compras. Por favor, aguarde a aprovação.')
+                __('Faça login com uma conta B2B aprovada para finalizar este pedido.')
             );
         }
 
-        // Validate ERP customer code exists (required for ERP order sync)
-        if ($customerId > 0) {
-            $erpCode = $this->getCustomerErpCode($customerId);
-            if (!$erpCode) {
+        if ($isB2bGroup) {
+            $customerState = $this->checkoutAccessValidator->resolveCustomerState($customerId);
+            if ($customerState !== CheckoutAccessValidator::STATE_APPROVED) {
                 throw new CouldNotSaveException(
-                    __('Seu cadastro ainda não está vinculado ao sistema ERP. Entre em contato com o departamento comercial para liberar seus pedidos.')
+                    __('Sua conta precisa ser aprovada antes de realizar compras. Por favor, aguarde a aprovação.')
                 );
             }
         }
@@ -209,26 +194,6 @@ class BlockPlaceOrderPlugin
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Get customer ERP code from attribute or entity_map fallback
-     */
-    private function getCustomerErpCode(int $customerId): ?int
-    {
-        try {
-            $customer = $this->customerRepository->getById($customerId);
-            $attr = $customer->getCustomAttribute('erp_code');
-            $erpCode = ($attr && $attr->getValue()) ? $attr->getValue() : null;
-
-            if ($erpCode === null) {
-                $erpCode = $this->syncLogResource->getErpCodeByMagentoId('customer', $customerId);
-            }
-
-            return ($erpCode !== null && is_numeric($erpCode)) ? (int) $erpCode : null;
-        } catch (\Exception $e) {
-            return null;
         }
     }
 }

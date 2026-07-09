@@ -382,22 +382,34 @@ define(['jquery', 'mage/url'], function ($, urlBuilder) {
         });
 
         /* MutationObserver for AJAX-loaded products (infinite scroll etc.) */
-        let observer = new MutationObserver(function (mutations) {
-            mutations.forEach(function (m) {
-                m.addedNodes.forEach(function (node) {
-                    if (node.nodeType !== 1) { return; }
-                    node.querySelectorAll('[data-compare-add]').forEach(function (btn) {
-                        if (!btn._awaCompareBound) {
-                            btn._awaCompareBound = true;
-                            bindPlpButton(btn);
+        let compareRoot = document.querySelector(
+            '.column.main, .products-grid, .product-items, #maincontent'
+        );
+
+        if (compareRoot) {
+            let observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (m) {
+                    m.addedNodes.forEach(function (node) {
+                        if (node.nodeType !== 1) { return; }
+                        if (node.matches && node.matches('[data-compare-add]')) {
+                            if (!node._awaCompareBound) {
+                                node._awaCompareBound = true;
+                                bindPlpButton(node);
+                            }
                         }
+                        node.querySelectorAll('[data-compare-add]').forEach(function (btn) {
+                            if (!btn._awaCompareBound) {
+                                btn._awaCompareBound = true;
+                                bindPlpButton(btn);
+                            }
+                        });
                     });
                 });
             });
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-        // Disconnect on page unload to prevent memory leak (B5)
-        window.addEventListener('pagehide', function () { observer.disconnect(); }, { once: true });
+            observer.observe(compareRoot, { childList: true, subtree: true });
+            // Disconnect on page unload to prevent memory leak (B5)
+            window.addEventListener('pagehide', function () { observer.disconnect(); }, { once: true });
+        }
 
         /* Render bar for items already in localStorage */
         renderBar();

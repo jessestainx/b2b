@@ -23,6 +23,7 @@ class FooterData implements ArgumentInterface
     private const XML_PATH_SOCIAL_INSTAGRAM = 'grupoawamotos_theme/social/instagram_url';
     private const XML_PATH_SOCIAL_FACEBOOK = 'grupoawamotos_theme/social/facebook_url';
     private const XML_PATH_SOCIAL_YOUTUBE = 'grupoawamotos_theme/social/youtube_url';
+    private const XML_PATH_SOCIAL_PINTEREST = 'grupoawamotos_theme/social/pinterest_url';
     private const XML_PATH_FOOTER_EXPERIMENT_ENABLED = 'grupoawamotos_theme/footer_experiment/enabled';
     private const XML_PATH_FOOTER_EXPERIMENT_ROLLOUT = 'grupoawamotos_theme/footer_experiment/rollout_percentage';
     private const XML_PATH_FOOTER_EXPERIMENT_SEED = 'grupoawamotos_theme/footer_experiment/variant_seed';
@@ -36,6 +37,7 @@ class FooterData implements ArgumentInterface
     private const DEFAULT_INSTAGRAM_URL = 'https://www.instagram.com/awamotos';
     private const DEFAULT_FACEBOOK_URL = 'https://www.facebook.com/awamotos';
     private const DEFAULT_YOUTUBE_URL = 'https://www.youtube.com/@awamotos';
+    private const DEFAULT_PINTEREST_URL = 'https://www.pinterest.com.br/awamotos/';
     private const DEFAULT_FOOTER_EXPERIMENT_SEED = 'home5_footer_v1';
 
     public function __construct(
@@ -80,6 +82,8 @@ class FooterData implements ArgumentInterface
     private ?string $facebookUrl = null;
 
     private ?string $youtubeUrl = null;
+
+    private ?string $pinterestUrl = null;
 
     private ?bool $mobileMenuEnabled = null;
 
@@ -269,6 +273,17 @@ class FooterData implements ArgumentInterface
         return $this->youtubeUrl;
     }
 
+    public function getPinterestUrl(): string
+    {
+        if ($this->pinterestUrl !== null) {
+            return $this->pinterestUrl;
+        }
+
+        $this->pinterestUrl = $this->getConfigValue(self::XML_PATH_SOCIAL_PINTEREST, self::DEFAULT_PINTEREST_URL);
+
+        return $this->pinterestUrl;
+    }
+
     public function isFooterExperimentEnabled(): bool
     {
         if ($this->footerExperimentEnabled !== null) {
@@ -325,6 +340,21 @@ class FooterData implements ArgumentInterface
         $this->formattedAddress = implode(' - ', array_filter($parts));
 
         return $this->formattedAddress;
+    }
+
+    public function getMapsUrl(): string
+    {
+        $parts = array_filter([
+            $this->getStreetLine1(),
+            $this->getCityLabel(),
+            $this->getPostcode() !== '' ? 'CEP ' . $this->getPostcode() : '',
+        ]);
+
+        if ($parts === []) {
+            return '';
+        }
+
+        return 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode(implode(', ', $parts));
     }
 
     private function normalizePhone(string $value): string

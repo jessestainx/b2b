@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Shoppinglist;
 
 use GrupoAwamotos\B2B\Model\ShoppingListService;
@@ -19,7 +21,8 @@ class Delete implements HttpPostActionInterface
         private readonly FormKeyValidator $formKeyValidator,
         private readonly MessageManagerInterface $messageManager,
         private readonly ShoppingListService $shoppingListService
-    ) {}
+    ) {
+    }
 
     public function execute()
     {

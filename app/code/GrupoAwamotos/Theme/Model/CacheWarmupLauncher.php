@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 class CacheWarmupLauncher
 {
     private const LOCK_FILENAME = 'cache_warmer_launcher.lock';
+    private const CURSOR_DEV_FLAG = 'tmp/cursor-dev-active';
     private const LOCK_TTL_SECONDS = 180;
     private const CACHE_WARMER_RELATIVE_PATH = 'scripts/cache_warmer.sh';
 
@@ -43,6 +44,13 @@ class CacheWarmupLauncher
         $maintenanceEnabled = $maintenanceIsOn ?? is_file($varPath . '/.maintenance.flag');
         if ($maintenanceEnabled) {
             $this->logger->info('[Theme] Warm-up ignorado porque maintenance mode está ativo.', [
+                'reason' => $reason,
+            ]);
+            return;
+        }
+
+        if (is_file($varPath . '/' . self::CURSOR_DEV_FLAG)) {
+            $this->logger->info('[Theme] Warm-up ignorado — sessão Cursor IDE ativa.', [
                 'reason' => $reason,
             ]);
             return;

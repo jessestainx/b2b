@@ -137,10 +137,10 @@ $headerMode = $isPasswordAuthHeader
 			aria-label="<?= $escaper->escapeHtmlAttr(__('Ambiente exclusivo para empresas')) ?>">
 			<div class="awa-b2b-promo-bar__inner awa-b2b-promo-bar__layout">
 				<p class="awa-b2b-promo-bar__text">
-						<span class="awa-b2b-promo-bar__lead">
-							<span class="awa-b2b-promo-bar__lead-long"><?= $escaper->escapeHtml(__('Vendas corporativas B2B')) ?></span>
-							<span class="awa-b2b-promo-bar__lead-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Vendas B2B')) ?></span>
-						</span>
+					<span class="awa-b2b-promo-bar__lead">
+						<span class="awa-b2b-promo-bar__lead-long"><?= $escaper->escapeHtml(__('Ambiente exclusivo para vendas corporativas |')) ?></span>
+						<span class="awa-b2b-promo-bar__lead-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Vendas B2B')) ?></span>
+					</span>
 						<?php /* A11Y-001: aria-label fixo no <a> — as variantes -long/-short trocam de
 						   visibilidade por breakpoint (uma delas some via display:none, a outra
 						   carrega aria-hidden="true"), deixando o link sem nome acessível em
@@ -155,10 +155,14 @@ $headerMode = $isPasswordAuthHeader
 						   texto curto; o texto longo ficava orfao. Rearranjado para conter
 						   ambos como substrings literais. */ ?>
 						<a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta" aria-label="<?= $escaper->escapeHtmlAttr(__('Cadastre agora — Cadastre-se no Cadastro B2B')) ?>">
-							<strong class="awa-b2b-promo-bar__cta-long" aria-hidden="true"><?= $escaper->escapeHtml(__('Cadastre agora')) ?></strong>
-							<strong class="awa-b2b-promo-bar__cta-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Cadastre-se')) ?></strong>
-						</a>
-					</p>
+						<strong class="awa-b2b-promo-bar__cta-long" aria-hidden="true"><?= $escaper->escapeHtml(__('Cadastre agora')) ?></strong>
+						<strong class="awa-b2b-promo-bar__cta-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Cadastre-se')) ?></strong>
+					</a>
+					<span class="awa-b2b-promo-bar__lead">
+						<span class="awa-b2b-promo-bar__lead-long"><?= $escaper->escapeHtml(__('sua empresa e confira ofertas especiais para o seu CNPJ.')) ?></span>
+						<span class="awa-b2b-promo-bar__lead-short" aria-hidden="true"></span>
+					</span>
+				</p>
 				<button type="button" id="awa-b2b-promo-close" class="awa-b2b-promo-close" aria-label="<?= $escaper->escapeHtmlAttr(__('Fechar')) ?>">&times;</button>
 			</div>
 		</div>
@@ -166,7 +170,8 @@ $headerMode = $isPasswordAuthHeader
 			/* Promo bar: esconde imediatamente se já foi dispensado (previne CLS).
 			   Click listener delegado ao awa-header-runtime-bootstrap.js (defer). */
 			try {
-				if (localStorage.getItem('awa_b2b_promo_dismissed') === '1') {
+				if (localStorage.getItem('awa_b2b_promo_dismissed') === '1'
+					|| sessionStorage.getItem('awa_b2b_promo_dismissed_session') === '1') {
 					var _awaDismissedBar = document.getElementById('awa-b2b-promo-bar');
 					if (_awaDismissedBar) { _awaDismissedBar.style.display = 'none'; }
 				}

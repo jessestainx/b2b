@@ -17,12 +17,50 @@ use Magento\Theme\Block\Html\Header\Logo;
 
 class Form extends Template
 {
+    private const SESSION_FORM_DATA_KEY = 'b2b_register_form_data';
+
+    /**
+     * @var list<array{code: string, label: string}>
+     */
+    private const BRAZILIAN_UFS = [
+        ['code' => 'AC', 'label' => 'AC'],
+        ['code' => 'AL', 'label' => 'AL'],
+        ['code' => 'AP', 'label' => 'AP'],
+        ['code' => 'AM', 'label' => 'AM'],
+        ['code' => 'BA', 'label' => 'BA'],
+        ['code' => 'CE', 'label' => 'CE'],
+        ['code' => 'DF', 'label' => 'DF'],
+        ['code' => 'ES', 'label' => 'ES'],
+        ['code' => 'GO', 'label' => 'GO'],
+        ['code' => 'MA', 'label' => 'MA'],
+        ['code' => 'MT', 'label' => 'MT'],
+        ['code' => 'MS', 'label' => 'MS'],
+        ['code' => 'MG', 'label' => 'MG'],
+        ['code' => 'PA', 'label' => 'PA'],
+        ['code' => 'PB', 'label' => 'PB'],
+        ['code' => 'PR', 'label' => 'PR'],
+        ['code' => 'PE', 'label' => 'PE'],
+        ['code' => 'PI', 'label' => 'PI'],
+        ['code' => 'RJ', 'label' => 'RJ'],
+        ['code' => 'RN', 'label' => 'RN'],
+        ['code' => 'RS', 'label' => 'RS'],
+        ['code' => 'RO', 'label' => 'RO'],
+        ['code' => 'RR', 'label' => 'RR'],
+        ['code' => 'SC', 'label' => 'SC'],
+        ['code' => 'SP', 'label' => 'SP'],
+        ['code' => 'SE', 'label' => 'SE'],
+        ['code' => 'TO', 'label' => 'TO'],
+    ];
+
     /**
      * @var CustomerSession
      */
     private $customerSession;
     private Logo $logo;
     private AuthLogoResolver $authLogoResolver;
+
+    /** @var array<string, string>|null */
+    private ?array $persistedFormData = null;
 
     public function __construct(
         Context $context,
@@ -118,5 +156,62 @@ class Form extends Template
     public function getHomeUrl(): string
     {
         return $this->getUrl('');
+    }
+
+    public function getCepLookupUrl(): string
+    {
+        return $this->getUrl('b2b/ajax/ceplookup');
+    }
+
+    /**
+     * @return list<array{code: string, label: string}>
+     */
+    public function getBrazilianRegionOptions(): array
+    {
+        return self::BRAZILIAN_UFS;
+    }
+
+    public function getFormValue(string $field): string
+    {
+        $data = $this->getPersistedFormData();
+
+        return isset($data[$field]) ? (string) $data[$field] : '';
+    }
+
+    public function isFormValueSelected(string $field, string $value): bool
+    {
+        return strtoupper($this->getFormValue($field)) === strtoupper($value);
+    }
+
+    public function getPasswordRequirementHint(): string
+    {
+        $minLength = $this->getMinimumPasswordLength();
+        $classes = $this->getRequiredCharacterClassesNumber();
+
+        if ($classes <= 2) {
+            return (string) __('Mínimo %1 caracteres com letras e números.', $minLength);
+        }
+
+        return (string) __(
+            'Mínimo %1 caracteres, combinando maiúsculas, minúsculas, números ou símbolos (%2 tipos).',
+            $minLength,
+            $classes
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getPersistedFormData(): array
+    {
+        if ($this->persistedFormData !== null) {
+            return $this->persistedFormData;
+        }
+
+        $data = $this->customerSession->getData(self::SESSION_FORM_DATA_KEY);
+        $this->customerSession->unsetData(self::SESSION_FORM_DATA_KEY);
+        $this->persistedFormData = is_array($data) ? $data : [];
+
+        return $this->persistedFormData;
     }
 }

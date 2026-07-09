@@ -1,0 +1,8 @@
+{
+  "files": [
+    "app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Theme/templates/html/awa-impeccable-live-loader.phtml"
+  ],
+  "insertAfter": "<!-- impeccable-live-anchor -->",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

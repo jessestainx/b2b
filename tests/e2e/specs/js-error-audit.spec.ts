@@ -102,21 +102,50 @@ async function auditPage(
     }
   });
 
-  await Promise.race<void>([
-    page.goto(BASE_URL + pageInfo.url, { waitUntil: 'domcontentloaded' }).catch(() => {}),
-    new Promise<void>(r => setTimeout(r, 30_000)),
-  ]);
+  let pageClosedUnexpectedly = false;
+  page.on('close', () => {
+    pageClosedUnexpectedly = true;
+  });
 
-  // Aguarda scripts assíncronos (RequireJS, Knockout, etc.)
-  await page.waitForTimeout(5_000);
+  try {
+    await page.goto(BASE_URL + pageInfo.url, { waitUntil: 'commit', timeout: 30_000 });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    errors.push({ type: 'pageerror', message: `Falha ao abrir ${pageInfo.url}: ${msg.substring(0, 500)}` });
+  }
+
+  // Aguarda scripts assíncronos (RequireJS, Knockout, etc.) sem depender do canal do browser.
+  await new Promise<void>((resolve) => setTimeout(resolve, 5_000));
+
+  if (pageClosedUnexpectedly || page.isClosed()) {
+    errors.push({ type: 'pageerror', message: `Página fechou inesperadamente durante a auditoria: ${pageInfo.url}` });
+    return { errors, warnings, networkFails };
+  }
 
   fs.mkdirSync(SS_DIR, { recursive: true });
-  await page.screenshot({
-    path: path.join(SS_DIR, `${pageInfo.name}.png`),
-    fullPage: false,
-  }).catch(() => {});
+  try {
+    await Promise.race([
+      page.screenshot({
+        path: path.join(SS_DIR, `${pageInfo.name}.png`),
+        fullPage: false,
+        timeout: 10_000,
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('screenshot-timeout')), 12_000)),
+    ]);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    warnings.push({ type: 'console.warn', message: `Screenshot não concluído em ${pageInfo.url}: ${msg.substring(0, 300)}` });
+  }
 
-  await page.close();
+  try {
+    await Promise.race([
+      page.close(),
+      new Promise<void>((resolve) => setTimeout(resolve, 5_000)),
+    ]);
+  } catch {
+    // ignora falhas de fechamento para não travar a auditoria
+  }
+
   return { errors, warnings, networkFails };
 }
 

@@ -126,7 +126,7 @@ class Topmenu extends \Magento\Framework\View\Element\Template
        
         return $html;
     }
-    public function getSubmenuItemsHtml($children, $level = 1, $max_level = 0, $column_width=12, $menu_type = 'fullwidth', $columns = null)
+    public function getSubmenuItemsHtml($children, $level = 1, $max_level = 0, $column_width=12, $menu_type = 'fullwidth', $columns = null, $parent_id = null)
     {
         $html = '';
         
@@ -136,7 +136,8 @@ class Topmenu extends \Magento\Framework\View\Element\Template
                 $column_class = "col-sm-".$column_width." ";
                 $column_class .= "mega-columns columns".$columns;
             }
-            $html = '<ul class="subchildmenu '.$column_class.'">';
+            $ulId = ($parent_id !== null) ? ' id="submenu-menu-' . (int)$parent_id . '"' : '';
+            $html = '<ul' . $ulId . ' class="subchildmenu '.$column_class.'">';
             foreach($children as $child) {
                 $cat_model = $this->getCategoryModel($child->getId());
                 
@@ -180,7 +181,7 @@ class Topmenu extends \Magento\Framework\View\Element\Template
                         $html .= '<span class="cat-label cat-label-'.$rt_menu_cat_label.'">'.$this->_custommenuConfig['cat_labels'][$rt_menu_cat_label].'</span>';
                     $html .= '</span></a>';
                     if(count($sub_children) > 0) {
-                        $html .= $this->getSubmenuItemsHtml($sub_children, $level+1, $max_level, $column_width, $menu_type);
+                        $html .= $this->getSubmenuItemsHtml($sub_children, $level+1, $max_level, $column_width, $menu_type, null, $child->getId());
                     }
                     $html .= '</li>';
                 }

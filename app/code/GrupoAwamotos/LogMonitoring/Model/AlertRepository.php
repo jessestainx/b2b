@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Model;
@@ -53,7 +54,7 @@ class AlertRepository implements AlertRepositoryInterface
             $this->logger->error('Error saving alert: ' . $e->getMessage());
             throw new LocalizedException(__('Unable to save alert: %1', $e->getMessage()));
         }
-        
+
         return $alert;
     }
 
@@ -61,18 +62,18 @@ class AlertRepository implements AlertRepositoryInterface
     {
         $alert = $this->alertFactory->create();
         $this->resource->load($alert, $id);
-        
+
         if (!$alert->getEntityId()) {
             throw new NoSuchEntityException(__('Alert with ID %1 does not exist', $id));
         }
-        
+
         return $alert;
     }
 
     public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
     {
         $collection = $this->collectionFactory->create();
-        
+
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
             foreach ($filterGroup->getFilters() as $filter) {
                 $condition = $filter->getConditionType() ?: 'eq';
@@ -103,7 +104,7 @@ class AlertRepository implements AlertRepositoryInterface
             $this->logger->error('Error deleting alert: ' . $e->getMessage());
             throw new LocalizedException(__('Unable to delete alert: %1', $e->getMessage()));
         }
-        
+
         return true;
     }
 
@@ -150,7 +151,7 @@ class AlertRepository implements AlertRepositoryInterface
             $alert->setStatus(AlertInterface::STATUS_ACKNOWLEDGED);
             $alert->setAcknowledgedAt($this->dateTime->gmtDate());
             $alert->setAcknowledgedBy($acknowledgedBy);
-            
+
             $this->save($alert);
             return true;
         } catch (\Exception $e) {
@@ -166,7 +167,7 @@ class AlertRepository implements AlertRepositoryInterface
             $alert->setStatus(AlertInterface::STATUS_RESOLVED);
             $alert->setResolvedAt($this->dateTime->gmtDate());
             $alert->setResolvedBy($resolvedBy);
-            
+
             $this->save($alert);
             return true;
         } catch (\Exception $e) {

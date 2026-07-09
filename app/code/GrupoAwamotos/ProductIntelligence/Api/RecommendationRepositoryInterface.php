@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Interface para API de Recomendações REXIS ML
+ * Interface para API de Recomendações Product Intelligence
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Api;
 

@@ -11,6 +11,10 @@
 define(['jquery'], function ($) {
     'use strict';
 
+    if (window.__AWA_MENU_V2) {
+        return {};
+    }
+
     if (window.__awaMobileNavInit) { return {}; }
     window.__awaMobileNavInit = true;
 
@@ -40,7 +44,11 @@ define(['jquery'], function ($) {
         let panel   = document.querySelector(PANEL_SEL);
         let outer   = document.querySelector(OUTER_SEL);
         let content = document.querySelector(CONTENT_SEL);
+        let menuPanel;
+        let trigger;
         if (!panel) { return; }
+        menuPanel = panel.querySelector('[data-role="awa-vertical-menu-panel"]');
+        trigger = panel.querySelector('[data-role="awa-vertical-menu-trigger"]');
 
         /*
          * IMPORTANTE: Não aplicar transform no outer.
@@ -82,6 +90,24 @@ define(['jquery'], function ($) {
             content.style.setProperty('transform',  'none',    'important');
         }
 
+        if (menuPanel) {
+            menuPanel.setAttribute('aria-hidden', 'false');
+            menuPanel.setAttribute('data-awa-menu-state', 'open');
+            menuPanel.classList.add('menu-open', 'vmm-open');
+            menuPanel.style.setProperty('display',    'block',   'important');
+            menuPanel.style.setProperty('visibility', 'visible', 'important');
+            menuPanel.style.setProperty('opacity',    '1',       'important');
+            menuPanel.style.setProperty('position',   'static',  'important');
+            menuPanel.style.setProperty('width',      '100%',    'important');
+            menuPanel.style.setProperty('height',     'auto',    'important');
+            menuPanel.style.setProperty('max-height', 'none',    'important');
+            menuPanel.style.setProperty('overflow',   'visible', 'important');
+        }
+
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', 'true');
+        }
+
         panel.classList.add(OPEN_CLS);
         document.body.classList.add(BODY_OPEN_CLS);
         /* Não adicionamos 'nav-open' — evita o overlay nativo do RokanThemes */
@@ -105,10 +131,23 @@ define(['jquery'], function ($) {
         let panel   = document.querySelector(PANEL_SEL);
         let outer   = document.querySelector(OUTER_SEL);
         let content = document.querySelector(CONTENT_SEL);
+        let menuPanel = panel ? panel.querySelector('[data-role="awa-vertical-menu-panel"]') : null;
+        let trigger = panel ? panel.querySelector('[data-role="awa-vertical-menu-trigger"]') : null;
 
         [outer, panel, content].forEach(function (el) {
             if (el) { el.removeAttribute('style'); }
         });
+
+        if (menuPanel) {
+            menuPanel.setAttribute('aria-hidden', 'true');
+            menuPanel.setAttribute('data-awa-menu-state', 'closed');
+            menuPanel.classList.remove('menu-open', 'vmm-open');
+            menuPanel.removeAttribute('style');
+        }
+
+        if (trigger) {
+            trigger.setAttribute('aria-expanded', 'false');
+        }
 
         if (panel) { panel.classList.remove(OPEN_CLS); }
         document.body.classList.remove(BODY_OPEN_CLS);

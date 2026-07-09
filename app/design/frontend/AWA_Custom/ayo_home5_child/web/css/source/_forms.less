@@ -1,233 +1,562 @@
-// =============================================
-// AWA MOTOS — FORMULÁRIOS (MODERN)
-// Inputs, selects, labels, validação
-// =============================================
+// ============================================================================
+// AWA MOTOS — FORMS SYSTEM (CANÔNICO)
+// ----------------------------------------------------------------------------
+// Sistema de formulários unificado para Magento 2 + tema AWA.
+// Substitui estilos inconsistentes espalhados em _awa-forms.less, _forms.less,
+// _awa-account-forms.less, etc.
+//
+// WCAG 3.3.2 (Labels or Instructions)
+// WCAG 3.3.1 (Error Identification)
+// WCAG 1.4.11 (Non-text Contrast)
+// WCAG 2.4.7 (Focus Visible)
+// ============================================================================
 
-// Label
-label,
-.label {
-  font-size: var(--awa-font-size-sm);
-  font-weight: var(--awa-weight-medium);
-  color: var(--awa-text);
-  margin-bottom: var(--awa-space-xs);
-  display: block;
-  line-height: var(--awa-leading-snug);
 
-  .required & {
-    &::after {
-      content: ' *';
-      color: var(--awa-error);
-      font-weight: var(--awa-weight-normal);
-    }
-  }
+// ============================================================================
+// 1. FORM LAYOUT
+// ============================================================================
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-space-4, 16px);
 }
 
-// Input e textarea
+.form--inline {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--awa-space-3, 12px);
+}
+
+.form--grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--awa-space-4, 16px);
+}
+
+@media (max-width: 600px) {
+    .form--grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+// ============================================================================
+// 2. FIELD — wrapper para label + input + helper + error
+// ============================================================================
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-gap-xs, 4px);
+    inline-size: 100%;
+}
+
+.field--horizontal {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--awa-space-3, 12px);
+}
+
+.field--horizontal > .label {
+    flex: 0 0 auto;
+    inline-size: 140px;
+    margin-block-end: 0;
+}
+
+
+// ============================================================================
+// 3. LABEL
+// ============================================================================
+
+.field > .label,
+.field > label {
+    display: block;
+    font-weight: var(--awa-weight-medium, 500);
+    font-size: var(--awa-fs-base, 16px);
+    color: var(--awa-text-primary, #333333);
+    line-height: var(--awa-leading-snug, 1.3);
+}
+
+.field.required > .label::after,
+.field.required > label::after,
+.field._required > .label::after {
+    content: " *";
+    color: var(--awa-color-error, #DC2626);
+    font-weight: var(--awa-weight-bold, 700);
+    margin-inline-start: 0.125rem;
+}
+
+
+// ============================================================================
+// 4. INPUTS — text, email, tel, password, number, search, url
+// ============================================================================
+
+.input,
 input[type="text"],
 input[type="email"],
-input[type="password"],
 input[type="tel"],
+input[type="password"],
 input[type="number"],
 input[type="search"],
 input[type="url"],
-textarea,
-.input-text {
-  width: 100%;
-  min-height: @awa-control-height;
-  padding: 0 var(--awa-space-md);
-  border: var(--awa-border-width) solid var(--awa-border);
-  border-radius: var(--awa-radius-sm);  // 8px — inputs
-  font-size: var(--awa-font-size-sm);
-  line-height: var(--awa-leading-normal);
-  color: var(--awa-text);
-  background: var(--awa-bg);
-  transition: border-color var(--awa-duration) var(--awa-ease),
-              box-shadow var(--awa-duration) var(--awa-ease),
-              background-color var(--awa-duration) var(--awa-ease);
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: 44px;
+    padding-inline: var(--awa-space-3, 12px);
+    padding-block: var(--awa-space-2, 8px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-white, #ffffff);
+    font-family: inherit;
+    font-size: ~"max(1rem, 16px)";  /* iOS safe (>=16px) */
+    line-height: var(--awa-leading-normal, 1.5);
+    color: var(--awa-text-primary, #333333);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
 
-  &::placeholder {
-    color: var(--awa-text-light);
-  }
+.input::placeholder,
+input::placeholder {
+    color: var(--awa-text-light, #999999);
+    opacity: 1;
+}
 
-  &:focus,
-  &:focus-visible {
-    border-color: var(--awa-primary);
-    outline: none;
-    box-shadow: @awa-focus-ring;
-  }
+.input:hover,
+input:hover {
+    border-color: var(--awa-text-muted, #666666);
+}
 
-  &:disabled {
-    background: var(--awa-bg-surface);
-    color: var(--awa-text-light);
+.input:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: -2px;
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+.input:disabled,
+input:disabled {
+    background: var(--awa-color-bg-soft, #f7f7f7);
     cursor: not-allowed;
-    opacity: 0.7;
-  }
-
-  // Erro
-  &.mage-error,
-  &.validation-failed {
-    border-color: var(--awa-error);
-    box-shadow: 0 0 0 3px fade(@awa-color-error, 12%);
-
-    &:focus {
-      border-color: var(--awa-error);
-      box-shadow: 0 0 0 3px fade(@awa-color-error, 18%);
-    }
-  }
+    opacity: 0.6;
 }
 
+.input[readonly],
+input[readonly] {
+    background: var(--awa-color-bg-soft, #f7f7f7);
+}
+
+// --- Sizes ---
+.input--sm {
+    min-block-size: 36px;
+    padding-inline: var(--awa-space-2, 8px);
+    font-size: var(--awa-fs-sm, 14px);
+}
+
+.input--lg {
+    min-block-size: 54px;
+    padding-inline: var(--awa-space-4, 16px);
+    font-size: var(--awa-fs-lg, 18px);
+}
+
+
+// ============================================================================
+// 5. TEXTAREA
+// ============================================================================
+
+textarea.input,
 textarea {
-  height: auto;
-  min-height: 100px;
-  padding: var(--awa-space-sm) var(--awa-space-md);
-  resize: vertical;
-  line-height: var(--awa-leading-normal);
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: 6rem;
+    max-block-size: 24rem;
+    padding: var(--awa-space-3, 12px);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-white, #ffffff);
+    font-family: inherit;
+    font-size: ~"max(1rem, 16px)";
+    line-height: var(--awa-leading-relaxed, 1.65);
+    color: var(--awa-text-primary, #333333);
+    resize: vertical;
 }
 
-// Select
+textarea:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: -2px;
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+
+// ============================================================================
+// 6. SELECT
+// ============================================================================
+
+select.input,
 select {
-  width: 100%;
-  min-height: @awa-control-height;
-  padding: 0 36px 0 var(--awa-space-md);
-  border: var(--awa-border-width) solid var(--awa-border);
-  border-radius: var(--awa-radius-sm);  // 8px — inputs
-  font-size: var(--awa-font-size-sm);
-  line-height: var(--awa-leading-normal);
-  color: var(--awa-text);
-  background: var(--awa-bg);
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  cursor: pointer;
-  transition: border-color var(--awa-duration) var(--awa-ease),
-              box-shadow var(--awa-duration) var(--awa-ease);
-
-  &:focus,
-  &:focus-visible {
-    border-color: var(--awa-primary);
-    outline: none;
-    box-shadow: @awa-focus-ring;
-  }
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: 44px;
+    padding-inline: var(--awa-space-3, 12px);
+    padding-inline-end: var(--awa-space-7, 32px);  /* room for chevron */
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-white, #ffffff);
+    font-family: inherit;
+    font-size: ~"max(1rem, 16px)";
+    color: var(--awa-text-primary, #333333);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    /* Chevron via background image (SVG inline) */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23333' stroke-width='1.5'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--awa-space-3, 12px) center;
+    background-size: 12px;
 }
 
-// Checkbox e radio
+select:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: -2px;
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+
+// ============================================================================
+// 7. CHECKBOX & RADIO
+// ============================================================================
+
 input[type="checkbox"],
 input[type="radio"] {
-  width: @awa-space-4;  // 16px (touch target via accent-color)
-  height: @awa-space-4;
-  accent-color: var(--awa-primary);
-  cursor: pointer;
-  margin-right: var(--awa-space-xs);
-}
-
-// Validation error message
-div.mage-error,
-.field-error {
-  font-size: var(--awa-font-size-xs);
-  color: var(--awa-error);
-  margin-top: var(--awa-space-xs);
-  font-weight: var(--awa-weight-normal);
-  display: flex;
-  align-items: center;
-  gap: @awa-space-1;  // 4px
-
-  &::before {
-    content: '!';
-    width: 16px;
-    height: 16px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: var(--awa-weight-bold);
-    color: @awa-color-white;
-    background: var(--awa-error);
+    box-sizing: border-box;
+    inline-size: 18px;
+    block-size: 18px;
     flex-shrink: 0;
-  }
-}
-
-// Field group
-.field,
-.form-group {
-  margin-bottom: var(--awa-space-md);
-}
-
-// Fieldset
-fieldset {
-  border: var(--awa-border-width) solid var(--awa-border);
-  border-radius: var(--awa-radius-lg);
-  padding: var(--awa-space-lg);
-  margin-bottom: var(--awa-space-lg);
-
-  legend {
-    font-size: var(--awa-font-size-md);
-    font-weight: var(--awa-weight-bold);
-    color: var(--awa-text);
-    padding: 0 var(--awa-space-sm);
-  }
-}
-
-// Qty selector
-.qty-wrapper,
-.control.qty {
-  display: inline-flex;
-  align-items: center;
-  border: var(--awa-border-width) solid var(--awa-border);
-  border-radius: var(--awa-radius-sm);  // 8px — controles
-  overflow: hidden;
-
-  button, .qty-btn {
-    width: @awa-control-height-sm;  // 36px
-    min-height: @awa-control-height-sm;
-    border: none;
-    background: var(--awa-bg-surface);
-    color: var(--awa-text);
-    font-size: var(--awa-font-size-md);
+    position: relative;
+    margin: 0;
     cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid var(--awa-border, #cbd5e1);
+    background: var(--awa-white, #ffffff);
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+input[type="checkbox"] {
+    border-radius: var(--awa-radius-xs, 4px);
+}
+
+input[type="radio"] {
+    border-radius: 50%;
+}
+
+// Expanded hit area (44x44)
+input[type="checkbox"]::before,
+input[type="radio"]::before {
+    content: "";
+    position: absolute;
+    inset: -13px;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+    background: var(--awa-color-primary, #b73337);
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 1px;
+    inset-inline-start: 5px;
+    inline-size: 4px;
+    block-size: 8px;
+    border: solid var(--awa-white, #ffffff);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+input[type="radio"]:checked {
+    border-color: var(--awa-color-primary, #b73337);
+}
+
+input[type="radio"]:checked::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-start: 2px;
+    inline-size: 10px;
+    block-size: 10px;
+    border-radius: 50%;
+    background: var(--awa-color-primary, #b73337);
+}
+
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: 2px;
+}
+
+// --- Choice wrapper (label + checkbox/radio) ---
+.choice {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all var(--awa-duration-fast) var(--awa-ease);
-
-    &:hover {
-      background: var(--awa-primary);
-      color: var(--awa-text-inverse);
-    }
-
-    &:active {
-      transform: scale(0.98);
-    }
-  }
-
-  input.qty,
-  input[type="number"].qty {
-    width: @awa-space-9;  // 48px
-    min-height: @awa-control-height-sm;
-    text-align: center;
-    border: none;
-    border-left: var(--awa-border-width) solid var(--awa-border);
-    border-right: var(--awa-border-width) solid var(--awa-border);
-    border-radius: 0;
-    font-weight: var(--awa-weight-semi);
-    font-size: var(--awa-font-size-sm);
-    -moz-appearance: textfield;
-
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
-    &:focus { box-shadow: none; }
-  }
+    gap: var(--awa-gap-sm, 8px);
+    min-block-size: 44px;
+    padding-inline: var(--awa-space-2, 8px);
+    cursor: pointer;
 }
 
-@media (max-width: (@awa-breakpoint-sm - 1)) {
-  .field,
-  .form-group {
-    margin-bottom: var(--awa-space-sm);
-  }
+.choice > input[type="checkbox"],
+.choice > input[type="radio"] {
+    margin: 0;
+}
 
-  fieldset {
-    padding: var(--awa-space-md);
-  }
+.choice > .label {
+    flex: 1;
+    margin: 0;
+    font-weight: var(--awa-weight-normal, 400);
+    color: var(--awa-text-primary, #333333);
+}
+
+
+// ============================================================================
+// 8. SWITCH / TOGGLE
+// ============================================================================
+
+input[type="checkbox"].switch,
+.switch-input {
+    inline-size: 44px;
+    block-size: 24px;
+    border-radius: var(--awa-radius-lg, 12px);
+    border: 0;
+    background: var(--awa-border, #cbd5e1);
+    position: relative;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+input[type="checkbox"].switch::before,
+.switch-input::before {
+    inset: 0;
+    border: 0;
+}
+
+input[type="checkbox"].switch::after,
+.switch-input::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-start: 2px;
+    inline-size: 20px;
+    block-size: 20px;
+    border-radius: 50%;
+    background: var(--awa-white, #ffffff);
+    transition: transform 150ms ease;
+}
+
+input[type="checkbox"].switch:checked,
+.switch-input:checked {
+    background: var(--awa-color-primary, #b73337);
+}
+
+input[type="checkbox"].switch:checked::after,
+.switch-input:checked::after {
+    transform: translateX(20px);
+}
+
+
+// ============================================================================
+// 9. FILE INPUT
+// ============================================================================
+
+input[type="file"] {
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: 44px;
+    padding: var(--awa-space-2, 8px);
+    border: 1px dashed var(--awa-border, #cbd5e1);
+    border-radius: var(--awa-radius-md, 8px);
+    background: var(--awa-color-bg-soft, #f7f7f7);
+    font-size: var(--awa-fs-base, 16px);
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+    margin-inline-end: var(--awa-space-3, 12px);
+    padding: var(--awa-space-2, 8px) var(--awa-space-4, 16px);
+    border: 0;
+    border-radius: var(--awa-radius-sm, 4px);
+    background: var(--awa-color-primary, #b73337);
+    color: var(--awa-white, #ffffff);
+    font-weight: var(--awa-weight-bold, 700);
+    cursor: pointer;
+}
+
+
+// ============================================================================
+// 10. RANGE INPUT
+// ============================================================================
+
+input[type="range"] {
+    inline-size: 100%;
+    min-block-size: 44px;
+    accent-color: var(--awa-color-primary, #b73337);
+}
+
+
+// ============================================================================
+// 11. HELPER TEXT (below field)
+// ============================================================================
+
+.field > .helper,
+.field > .note,
+.field > .field-helper {
+    font-size: var(--awa-fs-sm, 14px);
+    color: var(--awa-text-muted, #666666);
+    line-height: var(--awa-leading-normal, 1.5);
+    margin-block-start: var(--awa-gap-xs, 4px);
+}
+
+
+// ============================================================================
+// 12. ERROR STATE
+// ============================================================================
+
+.field._error > .label,
+.field.error > .label,
+.field.has-error > .label {
+    color: var(--awa-color-error, #DC2626);
+}
+
+.field._error .control input,
+.field._error .control select,
+.field._error .control textarea,
+.field._error .input,
+.field.has-error input,
+.field.has-error select,
+.field.has-error textarea {
+    border-color: var(--awa-color-error, #DC2626);
+    border-width: 2px;
+}
+
+.field._error .input:focus-visible,
+.field.has-error input:focus-visible {
+    outline-color: var(--awa-color-error, #DC2626);
+    border-color: var(--awa-color-error, #DC2626);
+}
+
+.field .messages,
+.field .mage-error,
+.field-error {
+    display: flex;
+    align-items: center;
+    gap: var(--awa-gap-xs, 4px);
+    margin-block-start: var(--awa-gap-xs, 4px);
+    color: var(--awa-color-error, #DC2626);
+    font-size: var(--awa-fs-sm, 14px);
+    line-height: var(--awa-leading-normal, 1.5);
+    font-weight: var(--awa-weight-medium, 500);
+    min-block-size: 1.25rem;
+}
+
+.field-error::before,
+.messages.message-error::before {
+    content: "!";
+    display: inline-grid;
+    place-items: center;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    border-radius: 50%;
+    background: currentColor;
+    color: var(--awa-white, #ffffff);
+    font-size: 0.75rem;
+    font-weight: var(--awa-weight-bold, 700);
+    flex-shrink: 0;
+}
+
+
+// ============================================================================
+// 13. SUCCESS STATE
+// ============================================================================
+
+.field._success > .input,
+.field._success input,
+.field.success input {
+    border-color: var(--awa-color-success, #059669);
+}
+
+
+// ============================================================================
+// 14. FORM ACTIONS
+// ============================================================================
+
+.form-actions,
+.actions-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--awa-space-3, 12px);
+    align-items: center;
+    margin-block-start: var(--awa-space-5, 20px);
+    padding-block-start: var(--awa-space-4, 16px);
+    border-block-start: 1px solid var(--awa-border, #e5e5e5);
+}
+
+.form-actions--end {
+    justify-content: flex-end;
+}
+
+.form-actions--between {
+    justify-content: space-between;
+}
+
+.form-actions--center {
+    justify-content: center;
+}
+
+
+// ============================================================================
+// 15. CHECKOUT-SPECIFIC FORMS
+// ============================================================================
+
+.opc-wrapper .field {
+    margin-block-end: var(--awa-space-4, 16px);
+}
+
+.opc-wrapper .field.choice {
+    margin: 0;
+}
+
+// ============================================================================
+// 16. REDUCED MOTION
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .input,
+    input,
+    select,
+    textarea,
+    .btn,
+    button {
+        transition: none !important;
+    }
+}
+
+
+// ============================================================================
+// 17. PRINT
+// ============================================================================
+
+@media print {
+    input,
+    select,
+    textarea {
+        border: 1px solid #000000 !important;
+        background: transparent !important;
+        color: #000000 !important;
+    }
 }

@@ -123,6 +123,11 @@ class HeaderExperiment extends AbstractHelper
 
     private function resolveVisitorSeed(): string
     {
+        // FPC: não tocar CustomerSession/SessionManager sem cookie (evita session_start em PLP/home).
+        if (($_COOKIE[session_name()] ?? null) === null) {
+            return 'guest:anonymous';
+        }
+
         $customerId = (int) $this->customerSession->getCustomerId();
         if ($customerId > 0) {
             return 'customer:' . $customerId;

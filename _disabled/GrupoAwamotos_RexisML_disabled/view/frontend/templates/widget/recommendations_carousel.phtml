@@ -1,0 +1,122 @@
+<?php
+/**
+ * Widget Template - Recomendações (Carrossel)
+ *
+ * @var $block \GrupoAwamotos\RexisML\Block\Widget\Recommendations
+ */
+declare(strict_types=1);
+
+$recommendations = $block->getRecommendedProducts();
+
+if (empty($recommendations) && !$block->getShowForGuest()) {
+    return;
+}
+
+$customClass = $block->getCustomClass();
+$uniqueId = 'rexis-carousel-' . uniqid();
+$carouselConfig = [
+    'GrupoAwamotos_RexisML/js/rexis-carousel' => [
+        'trackSelector' => '.rexis-carousel-track',
+        'slideSelector' => '.rexis-carousel-slide',
+        'prevSelector' => '.rexis-prev',
+        'nextSelector' => '.rexis-next',
+        'mobileBreakpoint' => 480,
+        'tabletBreakpoint' => 768,
+        'desktopBreakpoint' => 992,
+    ],
+];
+?>
+
+<div class="rexis-widget-carousel <?= $block->escapeHtmlAttr($customClass) ?>"
+     id="<?= $block->escapeHtmlAttr($uniqueId) ?>"
+     data-mage-init='<?= /* @noEscape */ json_encode($carouselConfig, JSON_UNESCAPED_UNICODE) ?>'>
+    <?php if (empty($recommendations)): ?>
+        <div class="rexis-login-prompt">
+            <div class="rexis-login-content">
+                <span class="rexis-lock-icon">🔒</span>
+                <h3><?= $block->escapeHtml(__('Recomendações Personalizadas')) ?></h3>
+                <p><?= $block->escapeHtml(__('Faça login para ver produtos selecionados especialmente para você.')) ?></p>
+                <a href="<?= $block->escapeUrl($block->getUrl('customer/account/login')) ?>" class="rexis-login-button">
+                    <?= $block->escapeHtml(__('Fazer Login')) ?>
+                </a>
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="rexis-carousel-header">
+            <h2 class="rexis-carousel-title">
+                🎯 <?= $block->escapeHtml($block->getWidgetTitle()) ?>
+                <span class="rexis-badge">IA</span>
+            </h2>
+            <div class="rexis-carousel-nav">
+                <button type="button" class="rexis-nav-btn rexis-prev" aria-label="<?= $block->escapeHtmlAttr(__('Anterior')) ?>">‹</button>
+                <button type="button" class="rexis-nav-btn rexis-next" aria-label="<?= $block->escapeHtmlAttr(__('Próximo')) ?>">›</button>
+            </div>
+        </div>
+
+        <div class="rexis-carousel-track-wrapper">
+            <div class="rexis-carousel-track">
+                <?php foreach ($recommendations as $item): ?>
+                    <?php
+                    $product = $item['product'];
+                    $score = $item['score'] * 100;
+                    $classificacao = strtolower((string) ($item['classificacao'] ?? ''));
+                    ?>
+                    <div class="rexis-carousel-slide">
+                        <div class="rexis-carousel-card">
+                            <?php if (str_contains($classificacao, 'churn')): ?>
+                                <span class="rexis-item-badge badge-churn">⭐ Você Amava</span>
+                            <?php elseif (str_contains($classificacao, 'cross')): ?>
+                                <span class="rexis-item-badge badge-crosssell">💡 Sugerido</span>
+                            <?php elseif (str_contains($classificacao, 'irregular')): ?>
+                                <span class="rexis-item-badge badge-irregular">🔄 Recorrente</span>
+                            <?php endif; ?>
+
+                            <?php if ($score >= 85): ?>
+                                <span class="rexis-card-score"><?= round($score) ?>%</span>
+                            <?php endif; ?>
+
+                            <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>"
+                               title="<?= $block->escapeHtmlAttr($product->getName()) ?>">
+                                <img src="<?= $block->escapeUrl($block->getProductImageUrl($product)) ?>"
+                                     alt="<?= $block->escapeHtmlAttr($product->getName()) ?>"
+                                     class="rexis-card-img"
+                                     loading="lazy"
+                                     decoding="async"
+                                     width="160"
+                                     height="160" />
+                            </a>
+                            <div class="rexis-card-details">
+                                <h3 class="rexis-card-name">
+                                    <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>">
+                                        <?= $block->escapeHtml($product->getName()) ?>
+                                    </a>
+                                </h3>
+                                <div class="rexis-card-price">
+                                    <?= /* @noEscape */ $block->getLayout()->createBlock('Magento\Catalog\Pricing\Render')->render(
+                                        'final_price', $product, ['zone' => 'item_list']
+                                    ) ?>
+                                </div>
+                                <?php $postParams = $block->getAddToCartPostParams($product); ?>
+                                <?php if (!empty($postParams['action']) && !empty($postParams['data']) && is_array($postParams['data'])): ?>
+                                    <form data-role="tocart-form"
+                                          action="<?= $block->escapeUrl((string) $postParams['action']) ?>"
+                                          method="post"
+                                          class="rexis-card-cart-form">
+                                        <?php foreach ($postParams['data'] as $key => $value): ?>
+                                            <input type="hidden"
+                                                   name="<?= $block->escapeHtmlAttr((string) $key) ?>"
+                                                   value="<?= $block->escapeHtmlAttr((string) $value) ?>" />
+                                        <?php endforeach; ?>
+                                        <button type="submit" class="action tocart primary rexis-card-cart">
+                                            <span><?= $block->escapeHtml(__('Adicionar')) ?></span>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>

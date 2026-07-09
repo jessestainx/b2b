@@ -433,6 +433,31 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
+                <field id="delta_enabled" translate="label comment" type="select" sortOrder="40"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Habilitar Sync Incremental (Delta)</label>
+                    <comment>Executa reconciliacao curta de listas/itens para reduzir janela de inconsistencia de preco B2B.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="delta_batch_size" translate="label comment" type="text" sortOrder="50"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Batch Delta de SKUs</label>
+                    <comment>Quantidade de SKUs por lote no sync incremental de precos (padrao: 500).</comment>
+                    <depends>
+                        <field id="delta_enabled">1</field>
+                    </depends>
+                </field>
+                <field id="customer_delta_batch_size" translate="label comment" type="text" sortOrder="60"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Batch Delta de Clientes</label>
+                    <comment>Quantidade de clientes ERP por lote no sync incremental de lista de preco (padrao: 500).</comment>
+                    <depends>
+                        <field id="delta_enabled">1</field>
+                    </depends>
+                </field>
             </group>
 
             <!-- Image Sync -->

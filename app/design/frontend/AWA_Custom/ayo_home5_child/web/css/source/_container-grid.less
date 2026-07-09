@@ -1,0 +1,378 @@
+// ============================================================================
+// AWA MOTOS — CANONICAL CONTAINER & GRID SYSTEM
+// ----------------------------------------------------------------------------
+// FONTE UNICA DE VERDADE para containers e grids.
+//
+// Spec: design-system/CONTAINER-GRID-SPEC.md
+// Tokens: _awa-variables.less (linhas 137-153)
+//
+// REGRAS:
+//   1. SEMPRE .awa-container (nunca .container legado)
+//   2. SEMPRE var(--awa-page-pad-*) para padding
+//   3. SEMPRE var(--awa-container-max) para max-width
+//   4. SEMPRE gap em containers (nunca margin entre filhos)
+//   5. SEMPRE repeat(auto-fit, minmax(...)) para grids responsivos
+//
+// ANTI-PATTERNS PROIBIDOS (validados por CI):
+//   - class="container" (legado Bootstrap)
+//   - max-width hardcoded (>1440px ou <960px fora de exceções)
+//   - padding: 0 Xpx (deve usar var(--awa-page-pad-*))
+//   - grid-template-columns fixo em PHTML
+// ============================================================================
+
+
+// ============================================================================
+// 1. CONTAINER — wrapper horizontal com max-width + padding responsivo
+// ============================================================================
+
+.awa-container {
+    box-sizing: border-box;
+    margin-inline: auto;
+    max-inline-size: var(--awa-container-max, 1280px);
+    padding-inline: var(--awa-page-pad-mobile, 16px);
+    inline-size: 100%;
+}
+
+@media (min-width: 768px) {
+    .awa-container {
+        padding-inline: var(--awa-page-pad-tablet, 16px);
+    }
+}
+
+@media (min-width: 1024px) {
+    .awa-container {
+        padding-inline: var(--awa-page-pad-desktop, 24px);
+    }
+}
+
+
+// --- Variantes de largura ---
+
+.awa-container--narrow {
+    max-inline-size: var(--awa-container-small-max, 960px);
+}
+
+.awa-container--wide {
+    max-inline-size: var(--awa-container-wide-max, 1440px);
+}
+
+.awa-container--full {
+    max-inline-size: 100%;
+    padding-inline: 0;
+}
+
+// --- Variante específica para catálogo (PLP/PDP) ---
+
+.awa-container--catalog {
+    padding-inline: var(--awa-page-pad-catalog, 16px);
+}
+
+
+// ============================================================================
+// 2. GRID 12-COL — para layouts complexos de página
+// ============================================================================
+
+.awa-grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--awa-grid-gap, 16px);
+    inline-size: 100%;
+}
+
+// --- Colunas (span) ---
+
+.awa-col-1  { grid-column: span 1; }
+.awa-col-2  { grid-column: span 2; }
+.awa-col-3  { grid-column: span 3; }
+.awa-col-4  { grid-column: span 4; }
+.awa-col-5  { grid-column: span 5; }
+.awa-col-6  { grid-column: span 6; }
+.awa-col-7  { grid-column: span 7; }
+.awa-col-8  { grid-column: span 8; }
+.awa-col-9  { grid-column: span 9; }
+.awa-col-10 { grid-column: span 10; }
+.awa-col-11 { grid-column: span 11; }
+.awa-col-12 { grid-column: span 12; }
+
+// --- Mobile: stack automático (full-width) ---
+
+@media (max-width: 767px) {
+    .awa-col-1,
+    .awa-col-2,
+    .awa-col-3,
+    .awa-col-4,
+    .awa-col-5,
+    .awa-col-6,
+    .awa-col-7,
+    .awa-col-8,
+    .awa-col-9,
+    .awa-col-10,
+    .awa-col-11 {
+        grid-column: span 12;
+    }
+}
+
+// --- Variantes de gap ---
+
+.awa-grid-12--tight {
+    gap: var(--awa-grid-gap-tight, 8px);
+}
+
+.awa-grid-12--loose {
+    gap: var(--awa-grid-gap-loose, 24px);
+}
+
+
+// ============================================================================
+// 3. GRID AUTO-FIT — listas responsivas intrínsecas (cards, vitrines)
+// ============================================================================
+
+.awa-grid-auto-fit {
+    display: grid;
+    gap: var(--awa-grid-gap-loose, 24px);
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(18rem, 100%), 1fr))";
+}
+
+.awa-grid-auto-fit--tight {
+    gap: var(--awa-grid-gap, 16px);
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(14rem, 100%), 1fr))";
+}
+
+.awa-grid-auto-fit--loose {
+    gap: var(--awa-grid-gap-loose, 24px);
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(22rem, 100%), 1fr))";
+}
+
+.awa-grid-auto-fit--narrow {
+    gap: var(--awa-grid-gap, 16px);
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(12rem, 100%), 1fr))";
+}
+
+
+// ============================================================================
+// 4. GRID AUTO-FILL — similar ao auto-fit mas mantém tracks vazias
+// ============================================================================
+
+.awa-grid-auto-fill {
+    display: grid;
+    gap: var(--awa-grid-gap-loose, 24px);
+    grid-template-columns: ~"repeat(auto-fill, minmax(min(18rem, 100%), 1fr))";
+}
+
+
+// ============================================================================
+// 5. CONTAINER QUERIES — grid que responde ao container (não viewport)
+// ============================================================================
+
+.awa-grid-cq {
+    container-type: inline-size;
+    container-name: awa-grid;
+}
+
+@container awa-grid (min-width: 60rem) {
+    .awa-grid-cq {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@container awa-grid (min-width: 90rem) {
+    .awa-grid-cq {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@container awa-grid (min-width: 120rem) {
+    .awa-grid-cq {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+
+// ============================================================================
+// 6. BENTO — grid assimétrico para hero / highlights
+// ============================================================================
+
+.awa-bento {
+    display: grid;
+    gap: var(--awa-grid-gap, 16px);
+    grid-template-areas:
+        "primary   secondary"
+        "primary   tertiary";
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    min-block-size: 24rem;
+}
+
+.awa-bento__primary   { grid-area: primary; }
+.awa-bento__secondary { grid-area: secondary; }
+.awa-bento__tertiary  { grid-area: tertiary; }
+
+.awa-bento--reverse {
+    grid-template-areas:
+        "secondary primary"
+        "tertiary  primary";
+}
+
+.awa-bento--horizontal {
+    grid-template-areas: "primary secondary tertiary";
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+.awa-bento--vertical {
+    grid-template-areas:
+        "primary"
+        "secondary"
+        "tertiary";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+}
+
+@media (max-width: 767px) {
+    .awa-bento,
+    .awa-bento--reverse,
+    .awa-bento--horizontal {
+        grid-template-areas:
+            "primary"
+            "secondary"
+            "tertiary";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        min-block-size: 0;
+    }
+}
+
+
+// ============================================================================
+// 7. CONTAINER + GRID PRESETS — combinações prontas para uso comum
+// ============================================================================
+
+// --- Padrão PLP: container + grid auto-fit de produtos ---
+
+.awa-catalog-layout {
+    .awa-container > &,
+    & > .awa-container {
+        display: block;
+    }
+}
+
+// --- Padrão PDP: container + grid 12-col com mídia + info ---
+
+.awa-product-layout {
+    display: grid;
+    gap: var(--awa-grid-gap-loose, 24px);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: start;
+}
+
+@media (max-width: 991px) {
+    .awa-product-layout {
+        grid-template-columns: 1fr;
+        gap: var(--awa-grid-gap, 16px);
+    }
+}
+
+
+// --- Padrão account: container + sidebar + main ---
+
+.awa-account-layout {
+    display: grid;
+    gap: var(--awa-grid-gap-loose, 24px);
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    align-items: start;
+}
+
+@media (max-width: 767px) {
+    .awa-account-layout {
+        grid-template-columns: 1fr;
+        gap: var(--awa-grid-gap, 16px);
+    }
+}
+
+
+// ============================================================================
+// 8. UTILITIES DE GAP — para containers que precisam de override
+// ============================================================================
+
+.awa-gap-none  { gap: 0; }
+.awa-gap-xs    { gap: var(--awa-space-1, 4px); }
+.awa-gap-sm    { gap: var(--awa-space-2, 8px); }
+.awa-gap-md    { gap: var(--awa-space-4, 16px); }
+.awa-gap-lg    { gap: var(--awa-space-6, 24px); }
+.awa-gap-xl    { gap: var(--awa-space-7, 32px); }
+.awa-gap-2xl   { gap: var(--awa-space-8, 40px); }
+.awa-gap-3xl   { gap: var(--awa-space-9, 48px); }
+.awa-gap-4xl   { gap: var(--awa-space-10, 64px); }
+
+
+// ============================================================================
+// 9. SECTION SPACING — padding de seção fluido (1-up pair)
+// ============================================================================
+
+.awa-section {
+    padding-block: clamp(1.5rem, 1rem + 2vw, 3rem);
+    padding-inline: var(--awa-page-pad-mobile, 16px);
+}
+
+@media (min-width: 1024px) {
+    .awa-section {
+        padding-inline: var(--awa-page-pad-desktop, 24px);
+    }
+}
+
+.awa-section--lg {
+    padding-block: clamp(2rem, 1.5rem + 2.5vw, 4rem);
+}
+
+.awa-section--sm {
+    padding-block: clamp(1rem, 0.75rem + 1vw, 1.5rem);
+}
+
+.awa-section--tight {
+    padding-block: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
+}
+
+.awa-section--none {
+    padding-block: 0;
+}
+
+
+// ============================================================================
+// 10. REDUCED MOTION — global (respetar preferencia)
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-bento,
+    .awa-grid-auto-fit,
+    .awa-grid-auto-fill,
+    .awa-grid-12,
+    .awa-grid-cq {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+
+// ============================================================================
+// 11. PRINT — grids colapsam, container sem limit
+// ============================================================================
+
+@media print {
+    .awa-container {
+        max-inline-size: 100%;
+        padding-inline: 0;
+    }
+
+    .awa-grid-12,
+    .awa-grid-auto-fit,
+    .awa-grid-auto-fill,
+    .awa-bento {
+        display: block;
+    }
+
+    .awa-col-1, .awa-col-2, .awa-col-3, .awa-col-4,
+    .awa-col-5, .awa-col-6, .awa-col-7, .awa-col-8,
+    .awa-col-9, .awa-col-10, .awa-col-11, .awa-col-12 {
+        grid-column: span 12;
+    }
+}

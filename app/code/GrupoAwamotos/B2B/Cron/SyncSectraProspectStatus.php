@@ -21,6 +21,7 @@ use Psr\Log\LoggerInterface;
 class SyncSectraProspectStatus
 {
     private const LOCK_NAME = 'grupoawamotos_b2b_sync_sectra_prospect_status';
+    private const OC_ORDER_ID_OFFSET = 200000;
 
     public function __construct(
         private readonly ErpHelper $erpHelper,
@@ -51,16 +52,19 @@ class SyncSectraProspectStatus
 
         try {
             $validation = $this->prospectPipeline->pollPendingValidations();
+            $released = $this->orderImportGate->backfillOrderImportStatus();
             $dryRun = $this->b2bConfig->isSectraCancelStuckDryRun();
             $cancelResult = $this->stuckOrderCleanup->cancelOrdersForUnvalidatedCustomers($dryRun);
             $imported = $this->orderImportGate->syncImportedOrderFlags();
 
-            if ($validation['validated'] > 0 || $validation['still_pending'] > 0 || $imported > 0
+            if (
+                $validation['validated'] > 0 || $validation['still_pending'] > 0 || $released > 0 || $imported > 0
                 || $cancelResult['cancelled'] > 0 || count($cancelResult['candidates']) > 0
             ) {
                 $this->logger->info('[B2B-Sectra] Cron validação prospect', [
                     'validated' => $validation['validated'],
                     'still_pending' => $validation['still_pending'],
+                    'orders_released_for_import' => $released,
                     'cancel_dry_run' => $dryRun,
                     'cancel_candidates' => count($cancelResult['candidates']),
                     'orders_cancelled' => $cancelResult['cancelled'],
@@ -116,7 +120,7 @@ class SyncSectraProspectStatus
         $importedFlags = (int) $connection->fetchOne(
             "SELECT COUNT(*)
              FROM oc_order_imported oi
-             INNER JOIN sales_order so ON so.entity_id = oi.order_id
+             INNER JOIN sales_order so ON so.entity_id + " . self::OC_ORDER_ID_OFFSET . " = oi.order_id
              WHERE so.sectra_import_status IS NULL
                 OR so.sectra_import_status IN (?, ?)",
             [

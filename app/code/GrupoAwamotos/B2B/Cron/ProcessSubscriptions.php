@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Cron;
@@ -31,7 +32,7 @@ class ProcessSubscriptions
     public function execute(): void
     {
         $this->logger->info('B2B: Starting subscription processing cron...');
-        
+
         $collection = $this->collectionFactory->create();
         $collection->filterDue();
 

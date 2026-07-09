@@ -1,6 +1,7 @@
 <?php 
 	$enable = $block->getConfig('enabled');
 	if($enable < 1) return ; 
+	$isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 	$items = $block->getConfig('items');
 	$speed = $block->getConfig('speed');
 	$qty = $block->getConfig('qty');
@@ -10,19 +11,30 @@
 	$show_navigation = $block->getConfig('navigation');
 	$show_pagination = $block->getConfig('pagination');
 	$auto = $block->getConfig('auto');
+	$showPrice = (bool) $block->getConfig('show_price');
 	$rows = $block->getSlideRow();
 	$slide_limit = $block->getSlideLimit();
 	$title = $block->getTitle(); 
 	$identify = trim($block->getIdentify()); 
+	$identifyClass = preg_replace('/[^a-zA-Z0-9_-]+/', '-', $identify);
+	if ($identifyClass === '') {
+		$identifyClass = 'default';
+	}
+	$scopeSuffix = preg_replace('/[^a-zA-Z0-9_-]+/', '-', (string) $block->getNameInLayout());
+	if ($scopeSuffix === '') {
+		$scopeSuffix = 'widget';
+	}
+	$scopedIdentify = $identifyClass . '-' . $scopeSuffix;
 	$categoryIds = $block->getCategoryIds();
 	$categoryIds = explode(',', $categoryIds);
+	$b2bPriceGate = $this->helper('GrupoAwamotos\B2B\Helper\Data');
 
 ?>
 
-<div class="categorytab-container">
+<div class="categorytab-container awa-cat-tabs-<?php echo $block->escapeHtmlAttr($scopedIdentify); ?>">
 <div class="container">
 <header class='group-title1'><?php 	echo '<h2>'.$title.'</h2>'; ?></header>
-  <ul class="tabs tabs<?php echo '-'.$identify;?>"> 
+   <ul class="tabs tabs<?php echo '-'.$identifyClass;?>"> 
    <?php 
 	$k = 0;
 	foreach($categoryIds as $cate_id) {
@@ -31,7 +43,7 @@
 		//echo "<pre>"; print_r($cate_model->getData()); die; 
 		if($cateName) {
    ?>
-			<li class="<?php if($k==0){ echo "active"; }?>" rel="tab<?php echo $cate_id.'-'.$identify;?>"><?php  echo $cateName; ?></li>
+			<li class="<?php if($k==0){ echo "active"; }?>" rel="tab<?php echo $cate_id.'-'.$scopedIdentify;?>"><?php  echo $cateName; ?></li>
 	<?php }  $k++; } ?>
     </ul>
      <?php 
@@ -45,21 +57,33 @@
 	?>
 	<div class="tab_container"> 
 		<?php foreach($categoryIds as $cate_id) { ?>
-		<div id="tab<?php echo $cate_id.'-'.$identify;?>" class="tab_content_<?php echo $identify; ?>"> 
+		<div id="tab<?php echo $cate_id.'-'.$scopedIdentify;?>" class="tab_content_<?php echo $identifyClass; ?>"> 
 		<div class="owl-container">		
 			<div class="category_tab_slider owl-carousel">
 				<?php 
 				$newItems =  $block -> getProductCate($cate_id)->getItems(); 
+				$gridImgRank = 0;
 				$i=0;
 				foreach($newItems as $_item) { 
 					$productImage = $block->getImage($_item, $image);
+					$productImageHtml = (string) $productImage->toHtml();
+					if ($isHomePage) {
+						$productImageHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $productImageHtml);
+					} elseif ($gridImgRank < 2) {
+						$productImageHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $productImageHtml);
+					} else {
+						$productImageHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $productImageHtml);
+					}
+					if (strpos($productImageHtml, 'decoding=') === false) {
+						$productImageHtml = str_replace('<img ', '<img decoding="async" ', $productImageHtml);
+					}
 				?>
 				<?php if($i++%$rows==0) { ?> <div class="product_row"> <?php } ?>
 					<div class="item">
 						<div class="item-inner">
 							<div class="image-container">
 								<a href="<?php echo $block->getProductUrl($_item) ?>" class="product-item-photo">
-									<?php echo $productImage->toHtml() ?>
+									<?php echo /* @noEscape */ $productImageHtml; ?>
 								</a>
 								<div class="actions">
 									<?php if ($showCart): ?>
@@ -113,7 +137,7 @@
 									<?php endif; ?>
 								</div>
 							</div>
-							<div class="des">
+								<div class="des">
 								<div class="product-name">
 									<strong class="product-item-name">
 										<a title="<?php echo $block->escapeHtml($_item->getName()) ?>"
@@ -123,7 +147,16 @@
 										</a>
 									</strong>
 								</div>
-								<?php /* @escapeNotVerified */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+								<?php if ($showPrice): ?>
+									<?php if ($b2bPriceGate->canViewPrices()): ?>
+										<?php /* @escapeNotVerified */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+									<?php else: ?>
+										<div class="b2b-login-to-see-price">
+											<span class="b2b-login-to-see-price__title"><?php echo $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()); ?></span>
+											<span class="b2b-login-to-see-price__message"><?php echo $block->escapeHtml($b2bPriceGate->getPriceGateDescription()); ?></span>
+										</div>
+									<?php endif; ?>
+								<?php endif; ?>
 								 
 								<?php if ($templateType): ?>
 									<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
@@ -134,6 +167,7 @@
 					</div>
 						<?php if($i%$rows==0 || $i == count($newItems)) { ?> </div> <?php }?>
 				<?php 
+				$gridImgRank++;
 				}
 				?>
 			</div>
@@ -146,14 +180,14 @@
 	 </div> <!-- .tab_container --> 
 </div>
 </div>
-<script type="text/javascript">
-require(['jquery', 'mage/mage', 'rokanthemes/owl'], function ($) {
-	'use strict';
-	$( document ).ready(function() {
-		$(".tab_content_<?php echo $identify; ?>").hide();
-		$(".tab_content_<?php echo $identify; ?>:first").show(); 
-	});
-});
- 
-
+<script type="text/x-magento-init">
+{
+	".awa-cat-tabs-<?php echo $block->escapeJsQuote($scopedIdentify); ?>": {
+		"js/tab-carousel-init": {
+			"tabsSelector": "ul.tabs-<?php echo $block->escapeJsQuote($identifyClass); ?> li",
+			"contentSelector": ".tab_content_<?php echo $block->escapeJsQuote($identifyClass); ?>",
+			"carouselSelector": ".category_tab_slider"
+		}
+	}
+}
 </script> 

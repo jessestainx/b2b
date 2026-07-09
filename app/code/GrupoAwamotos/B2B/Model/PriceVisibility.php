@@ -12,9 +12,11 @@ use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use GrupoAwamotos\B2B\Model\ErpCodeResolver;
+use GrupoAwamotos\ERPIntegration\Model\PurchaseHistory;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Model\Context as CustomerContext;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\App\Http\Context as HttpContext;
 use Magento\Framework\UrlInterface;
@@ -56,6 +58,7 @@ class PriceVisibility implements PriceVisibilityInterface
      */
     private $logger;
     private ?ErpCodeResolver $erpCodeResolver;
+    private ?PurchaseHistory $purchaseHistory;
     private HttpContext $httpContext;
 
     /**
@@ -79,7 +82,8 @@ class PriceVisibility implements PriceVisibilityInterface
         UrlInterface $urlBuilder,
         ?SyncLogResource $syncLogResource = null,
         ?LoggerInterface $logger = null,
-        ?ErpCodeResolver $erpCodeResolver = null
+        ?ErpCodeResolver $erpCodeResolver = null,
+        ?PurchaseHistory $purchaseHistory = null
     ) {
         $this->config = $config;
         $this->customerSession = $customerSession;
@@ -89,6 +93,7 @@ class PriceVisibility implements PriceVisibilityInterface
         $this->syncLogResource = $syncLogResource;
         $this->logger = $logger ?? new \Psr\Log\NullLogger();
         $this->erpCodeResolver = $erpCodeResolver;
+        $this->purchaseHistory = $purchaseHistory;
     }
 
     /**
@@ -119,7 +124,9 @@ class PriceVisibility implements PriceVisibilityInterface
                 return true;
             }
 
-            // Cliente aprovado — verificar se tem código ERP
+            // Cliente aprovado, mas ainda sem código ERP vinculado — tabela de preços
+            // não está definida, então não deve ver preços (bug: este check estava
+            // ausente, permitindo vazamento de preços para clientes não vinculados ao ERP).
             if ($approvalStatus === ApprovalStatus::STATUS_APPROVED) {
                 if ($this->isApprovedCustomerMissingErp()) {
                     $this->canViewPricesCache = false;
@@ -184,7 +191,8 @@ class PriceVisibility implements PriceVisibilityInterface
                 $this->canAddToCartCache = false;
                 return false;
             }
-            // Aprovado mas sem ERP code — bloquear compra
+            // Mesma regra de canViewPrices(): aprovado sem ERP vinculado não pode
+            // comprar, pois não há tabela de preços/condições comerciais definidas.
             if ($this->isApprovedCustomerMissingErp()) {
                 $this->canAddToCartCache = false;
                 return false;
@@ -265,7 +273,8 @@ class PriceVisibility implements PriceVisibilityInterface
 
         $approvalStatus = $this->getCustomerApprovalStatus();
         if ($approvalStatus !== null) {
-            return $approvalStatus === ApprovalStatus::STATUS_APPROVED || $approvalStatus === '';
+            // Fail-closed: sem status explícito não deve comprar como B2B.
+            return $approvalStatus === ApprovalStatus::STATUS_APPROVED;
         }
 
         try {
@@ -275,15 +284,16 @@ class PriceVisibility implements PriceVisibilityInterface
             $approvalStatusAttr = $customer->getCustomAttribute('b2b_approval_status');
             $approvalStatus = $approvalStatusAttr ? $approvalStatusAttr->getValue() : null;
 
-            // Se não há status definido, considerar como aprovado (compatibilidade)
+            // Fail-closed: sem status explícito não deve comprar como B2B.
             if (empty($approvalStatus)) {
-                return true;
+                return false;
             }
 
             return $approvalStatus === ApprovalStatus::STATUS_APPROVED;
         } catch (\Exception $e) {
-            // Se houver erro ao buscar cliente, permitir por segurança
-            return true;
+            // Fail-closed: erro ao consultar aprovação não deve liberar compra B2B.
+            $this->logger->error('[B2B PriceVisibility] isCustomerApproved error: ' . $e->getMessage());
+            return false;
         }
     }
 
@@ -354,7 +364,9 @@ class PriceVisibility implements PriceVisibilityInterface
 
             if ($this->erpCodeResolver !== null) {
                 $this->erpCodeCache = $this->erpCodeResolver->resolveForCustomerId($customerId, $customer);
-                return $this->erpCodeCache;
+                if ($this->erpCodeCache !== null) {
+                    return $this->erpCodeCache;
+                }
             }
 
             // Primary: erp_code attribute
@@ -366,6 +378,10 @@ class PriceVisibility implements PriceVisibilityInterface
                 $erpCode = $this->syncLogResource->getErpCodeByMagentoId('customer', $customerId);
             }
 
+            if ($erpCode === null) {
+                $erpCode = $this->resolveErpCodeByDocument($customer);
+            }
+
             $this->erpCodeCache = ($erpCode !== null && is_numeric($erpCode)) ? (int) $erpCode : null;
         } catch (\Exception $e) {
             $this->logger->error('[B2B PriceVisibility] getCustomerErpCode error: ' . $e->getMessage());
@@ -373,6 +389,40 @@ class PriceVisibility implements PriceVisibilityInterface
         }
 
         return $this->erpCodeCache;
+    }
+
+    private function resolveErpCodeByDocument(CustomerInterface $customer): ?int
+    {
+        if ($this->purchaseHistory === null) {
+            return null;
+        }
+
+        $cnpj = '';
+
+        $sessionCustomer = $this->customerSession->getCustomer();
+        if ($sessionCustomer && (int) $sessionCustomer->getId() > 0) {
+            $cnpj = (string) $sessionCustomer->getData('b2b_cnpj');
+            if ($cnpj === '') {
+                $cnpj = (string) ($sessionCustomer->getTaxvat() ?? '');
+            }
+        }
+
+        if ($cnpj === '') {
+            $cnpjAttr = $customer->getCustomAttribute('b2b_cnpj');
+            $cnpj = is_object($cnpjAttr) && method_exists($cnpjAttr, 'getValue')
+                ? (string) $cnpjAttr->getValue()
+                : '';
+            if ($cnpj === '') {
+                $cnpj = (string) ($customer->getTaxvat() ?? '');
+            }
+        }
+
+        if ($cnpj === '') {
+            return null;
+        }
+
+        $erpCode = $this->purchaseHistory->getCustomerCodeByCnpj($cnpj);
+        return ($erpCode !== null && is_numeric($erpCode)) ? (int) $erpCode : null;
     }
 
     /**

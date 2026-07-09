@@ -16,7 +16,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 
 class Reject extends Action implements HttpPostActionInterface
 {
-    const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::customer_approval';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::customer_approval';
 
     /**
      * @var CustomerApprovalInterface

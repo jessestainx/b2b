@@ -10,10 +10,31 @@
     <head>
         <!-- SEO: páginas de resultado de busca não devem ser indexadas (conteúdo duplicado) -->
         <meta name="robots" content="NOINDEX,FOLLOW"/>
-        <css src="css/awa-plp-final-polish.css" />
-        <css src="css/awa-visual-qa-category.css"/>
+        <remove src="css/awa-plp-final-polish.css"/>
+        <remove src="css/awa-visual-qa-category.css"/>
+        <!-- awa-plp-shell-final.css removido: referência órfã (404 em produção). -->
     </head>
     <body>
+        <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
+        <!-- Performance: stack busca = PLP (plp-promax + §89/91/93) -->
+        <referenceBlock name="awa.head.preload">
+            <arguments>
+                <argument name="awa_skip_audit_bundle" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="awa.impeccable.audit.uncached.global.v10" remove="true"/>
+        <referenceBlock name="awa.custom.global.js.loader">
+            <arguments>
+                <argument name="load_search_compat_js" xsi:type="boolean">true</argument>
+                <argument name="load_home_category_compat_js" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.impeccable.category.critical.fixes"
+                   template="Magento_Theme::html/awa-impeccable-category-critical-fixes-v4.phtml"
+                   before="-"/>
+        </referenceBlock>
         <referenceContainer name="before.body.end">
             <block class="GrupoAwamotos\B2B\Block\LoginToCart"
                    name="b2b.login.to.cart.search"

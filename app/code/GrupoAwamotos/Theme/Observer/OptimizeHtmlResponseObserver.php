@@ -348,10 +348,12 @@ class OptimizeHtmlResponseObserver implements ObserverInterface
             return $html;
         }
 
-        if (preg_match(
-            '/<link\s[^>]*rel=["\']stylesheet["\'][^>]*awa-menu-v2-dept-open-fix\.css[^>]*>/i',
-            $html
-        ) || preg_match('/awa-menu-v2-dept-open-fix\.css[^>]*data-awa-defer/i', $html)) {
+        if (
+            preg_match(
+                '/<link\s[^>]*rel=["\']stylesheet["\'][^>]*awa-menu-v2-dept-open-fix\.css[^>]*>/i',
+                $html
+            ) || preg_match('/awa-menu-v2-dept-open-fix\.css[^>]*data-awa-defer/i', $html)
+        ) {
             return $html;
         }
 
@@ -385,4 +387,3 @@ class OptimizeHtmlResponseObserver implements ObserverInterface
         return $html;
     }
 }
-

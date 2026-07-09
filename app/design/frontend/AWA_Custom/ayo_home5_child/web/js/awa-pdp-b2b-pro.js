@@ -17,6 +17,143 @@
         }
     }
 
+    var pdpGalleryLayoutScheduled = false;
+    var pdpGalleryLayoutObserver = null;
+    var pdpGalleryMutationObserver = null;
+    var pdpGalleryLayoutPendingMedia = null;
+
+    function getPdpMediaColumn() {
+        return document.querySelector('.catalog-product-view .product.col.media') ||
+               document.querySelector('.catalog-product-view .product.media');
+    }
+
+    function setPdpGalleryLayout(media) {
+        media = media || getPdpMediaColumn();
+        if (!media) {
+            return;
+        }
+
+        var galleryPlaceholder = media.querySelector('.gallery-placeholder');
+        var stage = media.querySelector('.fotorama__stage');
+        var shaft = media.querySelector('.fotorama__stage__shaft');
+        var frame = media.querySelector('.fotorama__stage__frame');
+        var wrap = media.querySelector('.fotorama__wrap');
+        var item = media.querySelector('.fotorama-item');
+
+        var mediaWidth = Math.max(media.clientWidth || 0, galleryPlaceholder && galleryPlaceholder.clientWidth || 0);
+        if (!mediaWidth) {
+            return;
+        }
+
+        var targetWidth = mediaWidth + 'px';
+        var normalizedWidth = Math.max(240, Math.round(mediaWidth));
+        var compactHeight = Math.max(220, Math.round(normalizedWidth * 0.68));
+        var maxHeight = Math.min(520, compactHeight);
+
+        [galleryPlaceholder, stage, shaft, frame, wrap, item].forEach(function (el) {
+            if (!el) return;
+            el.style.width = targetWidth;
+            el.style.maxWidth = '100%';
+            el.style.minWidth = '0px';
+            el.style.boxSizing = 'border-box';
+        });
+
+        if (galleryPlaceholder) {
+            galleryPlaceholder.style.minHeight = compactHeight + 'px';
+            galleryPlaceholder.style.maxHeight = maxHeight + 'px';
+            galleryPlaceholder.style.overflow = 'hidden';
+        }
+
+        if (shaft) {
+            shaft.style.left = '0px';
+            shaft.style.transform = 'none';
+        }
+    }
+
+    function schedulePdpGalleryLayout(media) {
+        if (media) {
+            pdpGalleryLayoutPendingMedia = media;
+        }
+        if (pdpGalleryLayoutScheduled) {
+            return;
+        }
+        pdpGalleryLayoutScheduled = true;
+        if (!window.requestAnimationFrame) {
+            setPdpGalleryLayout(pdpGalleryLayoutPendingMedia);
+            pdpGalleryLayoutPendingMedia = null;
+            pdpGalleryLayoutScheduled = false;
+            return;
+        }
+        window.requestAnimationFrame(function () {
+            setPdpGalleryLayout(pdpGalleryLayoutPendingMedia);
+            pdpGalleryLayoutPendingMedia = null;
+            pdpGalleryLayoutScheduled = false;
+        });
+    }
+
+    function initPdpGalleryObservers(media) {
+        media = media || getPdpMediaColumn();
+        if (!media) {
+            return;
+        }
+
+        if (pdpGalleryLayoutObserver && pdpGalleryLayoutObserver.disconnect) {
+            pdpGalleryLayoutObserver.disconnect();
+            pdpGalleryLayoutObserver = null;
+        }
+        if (pdpGalleryMutationObserver && pdpGalleryMutationObserver.disconnect) {
+            pdpGalleryMutationObserver.disconnect();
+            pdpGalleryMutationObserver = null;
+        }
+
+        media.querySelectorAll('.fotorama__stage img, .gallery-placeholder img, .fotorama__img')
+            .forEach(function (img) {
+                if (img.complete && img.naturalWidth) {
+                    return;
+                }
+                img.addEventListener('load', function () {
+                    schedulePdpGalleryLayout(media);
+                }, { once: true });
+            });
+
+        if (window.ResizeObserver) {
+            pdpGalleryLayoutObserver = new ResizeObserver(function () {
+                schedulePdpGalleryLayout(media);
+            });
+            [media,
+             media.querySelector('.gallery-placeholder'),
+             media.querySelector('.fotorama'),
+             media.querySelector('.fotorama__stage'),
+             media.querySelector('.fotorama__wrap'),
+             media.querySelector('.fotorama__stage__shaft')].forEach(function (el) {
+                if (!el) return;
+                pdpGalleryLayoutObserver.observe(el);
+            });
+        }
+
+        if (window.MutationObserver) {
+            pdpGalleryMutationObserver = new MutationObserver(function () {
+                schedulePdpGalleryLayout(media);
+            });
+            pdpGalleryMutationObserver.observe(media, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+        }
+
+        if (typeof jQuery !== 'undefined' && jQuery.fn && media.querySelector('.fotorama')) {
+            jQuery(document).off('fotorama:ready.pdpGallery fotorama:show.pdpGallery fotorama:load.pdpGallery');
+            jQuery(document).on('fotorama:ready.pdpGallery fotorama:show.pdpGallery fotorama:load.pdpGallery', '.fotorama', function () {
+                schedulePdpGalleryLayout(media);
+            });
+            jQuery(media.querySelector('.fotorama')).on('fotorama:ready.fallbackPdpGallery fotorama:show.fallbackPdpGallery', function () {
+                schedulePdpGalleryLayout(media);
+            });
+        }
+    }
+
     /* ========================================
        1. IMAGE ZOOM OVERLAY
        ======================================== */
@@ -255,15 +392,35 @@
             let fotorama = document.querySelector('.fotorama__stage');
             if (fotorama) {
                 clearInterval(fotoramaCheck);
+                var media = getPdpMediaColumn();
                 initImageZoom();
+                schedulePdpGalleryLayout(media);
+                initPdpGalleryObservers(media);
             }
         }, 300);
         // Timeout after 10s
-        setTimeout(function () { clearInterval(fotoramaCheck); initImageZoom(); }, 10000);
+        setTimeout(function () {
+            clearInterval(fotoramaCheck);
+            initImageZoom();
+            var media = getPdpMediaColumn();
+            schedulePdpGalleryLayout();
+            initPdpGalleryObservers(media);
+        }, 10000);
 
         initTabs();
         initShare();
         initLazyLoad();
         initSmoothScroll();
+
+        schedulePdpGalleryLayout();
+        window.addEventListener('resize', function () {
+            schedulePdpGalleryLayout();
+        }, { passive: true });
+        window.addEventListener('orientationchange', function () {
+            schedulePdpGalleryLayout();
+        });
+        window.addEventListener('load', function () {
+            schedulePdpGalleryLayout();
+        }, { once: true });
     });
 })();

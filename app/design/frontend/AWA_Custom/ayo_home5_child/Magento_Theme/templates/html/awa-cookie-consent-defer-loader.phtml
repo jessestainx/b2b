@@ -11,7 +11,12 @@ $urlJson = json_encode($block->escapeUrl($cookieFixUrl), JSON_HEX_TAG | JSON_HEX
 <script>
 (function (d, url) {
     'use strict';
-    if (!url || d.querySelector('link[data-awa-cookie-consent-css="1"]')) {
+    /* Checa QUALQUER <link rel=stylesheet> já apontando pro arquivo (não só o
+       criado por este script) — na home, awa-cookie-consent-home-head.phtml já
+       injeta o mesmo CSS de forma síncrona (media=print->all); sem esse check
+       amplo o defer loader duplicava o <link> após o idle callback (confirmado
+       via telemetria de runtime 2026-07-05). */
+    if (!url || d.querySelector('link[rel="stylesheet"][href*="awa-cookie-consent-fix"]')) {
         return;
     }
     function load() {

@@ -1,22 +1,23 @@
 <?php
 /**
  * Quote History Template
- * 
+ *
  * @var \GrupoAwamotos\B2B\Block\Quote\History $block
  */
 ?>
 <div class="b2b-quote-history b2b-page-shell">
-    <div class="block-title">
-        <strong><?= $block->escapeHtml(__('Minhas Cotações')) ?></strong>
+    <div class="b2b-section-header">
+        <h1><?= $block->escapeHtml(__('Minhas cotações')) ?></h1>
+        <p class="section-subtitle"><?= $block->escapeHtml(__('Acompanhe orçamentos solicitados, status e validade.')) ?></p>
     </div>
-    
+
     <?php if (!$block->hasQuoteRequests()): ?>
         <div class="message info empty">
-            <span><?= $block->escapeHtml(__('Você ainda não possui solicitações de cotação.')) ?></span>
+            <span><?= $block->escapeHtml(__('Nenhuma cotação solicitada. Monte o carrinho e peça um orçamento formal.')) ?></span>
         </div>
         <div class="actions">
-            <a href="<?= $block->escapeUrl($block->getUrl('/')) ?>" class="action primary">
-                <span><?= $block->escapeHtml(__('Continuar Comprando')) ?></span>
+            <a href="<?= $block->escapeUrl($block->getUrl('b2b/quote')) ?>" class="action primary">
+                <span><?= $block->escapeHtml(__('Solicitar cotação')) ?></span>
             </a>
         </div>
     <?php else: ?>
@@ -35,7 +36,7 @@
                 </thead>
                 <tbody>
                     <?php foreach ($block->getQuoteRequests() as $quote): ?>
-                        <?php 
+                        <?php
                         $statusClass = '';
                         switch ($quote->getStatus()) {
                             case 'approved':
@@ -86,7 +87,7 @@
                                 <?php endif; ?>
                             </td>
                             <td data-th="<?= $block->escapeHtmlAttr(__('Ações')) ?>" class="col actions">
-                                <a href="<?= $block->escapeUrl($block->getViewUrl($quote->getRequestId())) ?>" 
+                                <a href="<?= $block->escapeUrl($block->getViewUrl($quote->getRequestId())) ?>"
                                    class="action view"
                                    title="<?= $block->escapeHtmlAttr(__('Ver Detalhes')) ?>">
                                     <span><?= $block->escapeHtml(__('Ver')) ?></span>

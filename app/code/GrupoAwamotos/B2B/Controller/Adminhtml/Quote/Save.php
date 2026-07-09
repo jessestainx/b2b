@@ -13,14 +13,17 @@ use GrupoAwamotos\B2B\Api\Data\QuoteRequestInterface;
 use GrupoAwamotos\B2B\Helper\Config;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class Save extends Action implements HttpPostActionInterface
 {
-    const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::quotes';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::quotes';
 
     /**
      * @var QuoteRequestRepositoryInterface
@@ -47,19 +50,40 @@ class Save extends Action implements HttpPostActionInterface
      */
     private $eventManager;
 
+    /**
+     * @var ResourceConnection
+     */
+    private $resourceConnection;
+
+    /**
+     * @var DateTime
+     */
+    private $dateTime;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         Context $context,
         QuoteRequestRepositoryInterface $quoteRequestRepository,
         Config $config,
         TransportBuilder $transportBuilder,
         StoreManagerInterface $storeManager,
-        EventManagerInterface $eventManager
+        EventManagerInterface $eventManager,
+        ResourceConnection $resourceConnection,
+        DateTime $dateTime,
+        LoggerInterface $logger
     ) {
         $this->quoteRequestRepository = $quoteRequestRepository;
         $this->config = $config;
         $this->transportBuilder = $transportBuilder;
         $this->storeManager = $storeManager;
         $this->eventManager = $eventManager;
+        $this->resourceConnection = $resourceConnection;
+        $this->dateTime = $dateTime;
+        $this->logger = $logger;
         parent::__construct($context);
     }
 
@@ -86,7 +110,10 @@ class Save extends Action implements HttpPostActionInterface
         try {
             $quoteRequest = $this->quoteRequestRepository->getById($requestId);
             $previousStatus = $quoteRequest->getStatus();
+            $previousQuotedTotal = $quoteRequest->getQuotedTotal();
             $storeId = (int) $this->storeManager->getStore()->getId();
+            $adminUser = $this->_auth->getUser();
+            $adminUserId = $adminUser ? (int) $adminUser->getId() : null;
 
             if ($action === 'reject') {
                 // Rejeitar cotação
@@ -95,11 +122,23 @@ class Save extends Action implements HttpPostActionInterface
 
                 $this->quoteRequestRepository->save($quoteRequest);
 
+                $this->logAudit(
+                    $requestId,
+                    'rejected',
+                    $previousStatus,
+                    QuoteRequestInterface::STATUS_REJECTED,
+                    $previousQuotedTotal,
+                    $previousQuotedTotal,
+                    $adminUserId,
+                    $adminNotes
+                );
+
                 $this->eventManager->dispatch('grupoawamotos_b2b_quote_merchant_rejected', [
                     'quote_request' => $quoteRequest,
                     'previous_status' => $previousStatus,
                     'lifecycle_event' => 'merchant_rejected',
                     'store_id' => $storeId,
+                    'admin_user_id' => $adminUserId,
                 ]);
 
                 // Enviar email de rejeição
@@ -125,12 +164,24 @@ class Save extends Action implements HttpPostActionInterface
 
                 $this->quoteRequestRepository->save($quoteRequest);
 
+                $this->logAudit(
+                    $requestId,
+                    'quoted',
+                    $previousStatus,
+                    QuoteRequestInterface::STATUS_QUOTED,
+                    $previousQuotedTotal,
+                    $quotedTotal,
+                    $adminUserId,
+                    $adminNotes
+                );
+
                 $this->eventManager->dispatch('grupoawamotos_b2b_quote_responded', [
                     'quote_request' => $quoteRequest,
                     'previous_status' => $previousStatus,
                     'lifecycle_event' => 'quoted',
                     'store_id' => $storeId,
                     'quoted_total' => $quotedTotal,
+                    'admin_user_id' => $adminUserId,
                 ]);
 
                 // Enviar email com orçamento
@@ -152,6 +203,49 @@ class Save extends Action implements HttpPostActionInterface
         }
 
         return $redirect->setPath('*/*/');
+    }
+
+    /**
+     * Persist an audit trail entry when an admin approves/rejects a quote and sets its total.
+     *
+     * @param int $requestId
+     * @param string $action
+     * @param string|null $oldStatus
+     * @param string $newStatus
+     * @param float|null $oldQuotedTotal
+     * @param float|null $newQuotedTotal
+     * @param int|null $adminUserId
+     * @param string|null $comment
+     * @return void
+     */
+    private function logAudit(
+        int $requestId,
+        string $action,
+        ?string $oldStatus,
+        string $newStatus,
+        ?float $oldQuotedTotal,
+        ?float $newQuotedTotal,
+        ?int $adminUserId,
+        ?string $comment
+    ): void {
+        try {
+            $connection = $this->resourceConnection->getConnection();
+            $tableName = $this->resourceConnection->getTableName('grupoawamotos_b2b_quote_audit_log');
+
+            $connection->insert($tableName, [
+                'request_id' => $requestId,
+                'action' => $action,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'old_quoted_total' => $oldQuotedTotal,
+                'new_quoted_total' => $newQuotedTotal,
+                'admin_user_id' => $adminUserId,
+                'comment' => $comment,
+                'created_at' => $this->dateTime->gmtDate(),
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('B2B Quote audit log error: ' . $e->getMessage());
+        }
     }
 
     /**

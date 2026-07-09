@@ -241,9 +241,9 @@ class VisualImprovementsTestSuite
         $moduleManager = $this->objectManager->get(\Magento\Framework\Module\Manager::class);
         $isEnabled = $moduleManager->isEnabled('GrupoAwamotos_Fitment');
         $this->assert(
-            'Fitment module ativo',
-            $isEnabled,
-            $isEnabled ? 'Habilitado' : 'Desabilitado'
+            'Fitment module removido',
+            !$isEnabled,
+            $isEnabled ? 'Ainda habilitado' : 'Removido/desabilitado'
         );
     }
     

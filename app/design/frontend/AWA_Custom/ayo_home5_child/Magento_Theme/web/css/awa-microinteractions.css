@@ -1,0 +1,333 @@
+/**
+ * AWA Motos - Advanced Microinteractions (2026-06-28)
+ *
+ * Animações sutis que melhoram UX sem distrair.
+ * - Hover effects em cards/botões
+ * - Click feedback
+ * - Smooth transitions
+ * - Loading states
+ * - Ripple effect
+ */
+
+/* ============================================
+   RIPPLE EFFECT em botoes
+   ============================================ */
+.awa-ripple {
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+.awa-ripple::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+.awa-ripple:active::after {
+    opacity: 0.08;
+    transition: opacity 0s;
+}
+
+/* ============================================
+   HOVER EFFECTS
+   ============================================ */
+
+/* Lift effect em cards */
+.awa-hover-lift {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.awa-hover-lift:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Tilt effect em cards de produto */
+.awa-hover-tilt {
+    transition: transform 0.3s ease;
+    transform-style: preserve-3d;
+}
+.awa-hover-tilt:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
+}
+
+/* Shine effect em botoes primarios */
+.awa-shine {
+    position: relative;
+    overflow: hidden;
+}
+.awa-shine::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+.awa-shine:hover::before {
+    left: 100%;
+}
+
+/* Glow effect em links/buttons */
+.awa-glow {
+    transition: all 0.3s ease;
+}
+.awa-glow:hover {
+    box-shadow: 0 0 0 4px rgba(183, 51, 55, 0.1);
+}
+
+/* Pulse sutil em CTAs criticos */
+@keyframes awa-pulse-subtle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+.awa-pulse {
+    animation: awa-pulse-subtle 3s ease-in-out infinite;
+}
+
+/* ============================================
+   CLICK FEEDBACK
+   ============================================ */
+.awa-press {
+    transition: transform 0.1s ease !important;
+}
+.awa-press:active {
+    transform: scale(0.97) !important;
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+.awa-loading {
+    position: relative !important;
+    color: transparent !important;
+    pointer-events: none !important;
+}
+.awa-loading::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin: -8px 0 0 -8px !important;
+    border: 2px solid currentColor !important;
+    border-top-color: transparent !important;
+    border-radius: 50% !important;
+    animation: awa-spin 0.8s linear infinite !important;
+}
+@keyframes awa-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Skeleton screens */
+.awa-skeleton-text {
+    height: 1em;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: awa-skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+    color: transparent !important;
+    display: inline-block;
+    width: 100%;
+}
+@keyframes awa-skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   SMOOTH TRANSITIONS
+   ============================================ */
+.awa-fade-in {
+    animation: awa-fade-in 0.4s ease-out;
+}
+@keyframes awa-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.awa-slide-up {
+    animation: awa-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes awa-slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.awa-scale-in {
+    animation: awa-scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes awa-scale-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================
+   SCROLL-TRIGGERED
+   ============================================ */
+.awa-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.awa-reveal.awa-revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered children */
+.awa-reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.awa-reveal-stagger.awa-revealed > *:nth-child(1) { transition-delay: 0.05s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(2) { transition-delay: 0.10s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(3) { transition-delay: 0.15s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(4) { transition-delay: 0.20s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(5) { transition-delay: 0.25s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(6) { transition-delay: 0.30s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(7) { transition-delay: 0.35s; }
+.awa-reveal-stagger.awa-revealed > *:nth-child(8) { transition-delay: 0.40s; }
+.awa-reveal-stagger.awa-revealed > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================
+   PARALLAX LITE
+   ============================================ */
+.awa-parallax-slow {
+    transition: transform 0.2s ease-out;
+    will-change: transform;
+}
+
+/* ============================================
+   BORDER EFFECTS
+   ============================================ */
+.awa-border-glow {
+    position: relative;
+    transition: all 0.3s ease;
+}
+.awa-border-glow::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #b73337, #fbbf24, #b73337);
+    background-size: 200% 200%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+    animation: awa-border-shift 3s ease infinite;
+}
+.awa-border-glow:hover::before {
+    opacity: 0.5;
+}
+@keyframes awa-border-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* ============================================
+   ICON ANIMATIONS
+   ============================================ */
+.awa-icon-spin-hover {
+    display: inline-block;
+    transition: transform 0.4s ease;
+}
+.awa-icon-spin-hover:hover {
+    transform: rotate(360deg);
+}
+
+.awa-icon-bounce-hover {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+.awa-icon-bounce-hover:hover {
+    transform: scale(1.3);
+}
+
+.awa-icon-shake-hover {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+.awa-icon-shake-hover:hover {
+    animation: awa-shake 0.4s ease;
+}
+@keyframes awa-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+/* ============================================
+   TAG ANIMATIONS
+   ============================================ */
+.awa-tag-bounce {
+    animation: awa-tag-bounce 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+@keyframes awa-tag-bounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* ============================================
+   BADGE
+   ============================================ */
+.awa-badge-pulse {
+    position: relative;
+}
+.awa-badge-pulse::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: inherit;
+    opacity: 0.4;
+    animation: awa-badge-pulse 1.5s ease-in-out infinite;
+    z-index: -1;
+}
+@keyframes awa-badge-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.4); opacity: 0; }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    .awa-hover-lift:hover,
+    .awa-hover-tilt:hover,
+    .awa-shine:hover::before,
+    .awa-pulse,
+    .awa-press:active,
+    .awa-loading::after,
+    .awa-skeleton-text,
+    .awa-fade-in,
+    .awa-slide-up,
+    .awa-scale-in,
+    .awa-reveal,
+    .awa-reveal-stagger > *,
+    .awa-border-glow::before,
+    .awa-icon-spin-hover:hover,
+    .awa-icon-bounce-hover:hover,
+    .awa-icon-shake-hover:hover,
+    .awa-tag-bounce,
+    .awa-badge-pulse::before {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
+}

@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Implementação do Repositório de Recomendações
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Model;
 

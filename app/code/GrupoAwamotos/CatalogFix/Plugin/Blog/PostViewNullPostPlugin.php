@@ -21,7 +21,8 @@ final class PostViewNullPostPlugin
 {
     public function __construct(
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     /**
      * @param View $subject

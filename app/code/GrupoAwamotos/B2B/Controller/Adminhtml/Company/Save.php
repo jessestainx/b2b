@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Company;
 
 use GrupoAwamotos\B2B\Model\CompanyFactory;
@@ -16,19 +18,24 @@ class Save extends Action implements HttpPostActionInterface
         Context $context,
         private readonly CompanyFactory $companyFactory,
         private readonly CompanyResource $companyResource
-    ) { parent::__construct($context); }
+    ) { parent::__construct($context);
+    }
 
     public function execute()
     {
         $redirect = $this->resultRedirectFactory->create();
         $data = $this->getRequest()->getPostValue();
-        if (!$data) return $redirect->setPath('*/*/');
+        if (!$data) {
+            return $redirect->setPath('*/*/');
+        }
         $id = isset($data['company_id']) ? (int)$data['company_id'] : 0;
         try {
             $company = $this->companyFactory->create();
             if ($id) {
                 $this->companyResource->load($company, $id);
-                if (!$company->getId()) throw new \RuntimeException('Empresa não encontrada.');
+                if (!$company->getId()) {
+                    throw new \RuntimeException('Empresa não encontrada.');
+                }
             }
             $company->setData(array_merge($company->getData(), $data));
             $this->companyResource->save($company);

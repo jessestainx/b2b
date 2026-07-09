@@ -7,7 +7,6 @@ declare(strict_types=1);
  * @var \GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions $block
  */
 
-
 if (!$block->isEnabled()) {
     if ($block->isSuggestedCartPage()) {
         echo '<div class="erp-suggestions-wrapper"><div class="erp-empty-state"><h3>Carrinho Sugerido</h3><p>Este recurso está temporariamente indisponível. Tente novamente mais tarde.</p></div></div>';
@@ -16,6 +15,11 @@ if (!$block->isEnabled()) {
 }
 
 if (!$block->isLoggedIn()) {
+    // Sessão pode ainda não estar sincronizada no momento deste render (ver isLoggedIn()).
+    // Sem este fallback, a página dedicada ficava 100% em branco para o cliente.
+    if ($block->isSuggestedCartPage()) {
+        echo '<div class="erp-suggestions-wrapper"><div class="erp-empty-state"><h3>Carrinho Sugerido</h3><p>Não foi possível carregar sua sessão. Atualize a página para ver seu carrinho sugerido.</p></div></div>';
+    }
     return;
 }
 
@@ -49,18 +53,18 @@ if (!empty($suggestedCart['sections'])) {
 <div class="erp-suggestions-wrapper" id="erp-suggestions-container">
 
     <!-- Customer Welcome & RFM Badge -->
-    <?php if ($rfmData): ?>
-    <div class="erp-customer-header">
+    <div class="erp-customer-header<?= $rfmData ? '' : ' erp-customer-header--minimal' ?>">
         <div class="erp-welcome">
-            <h2>Olá, <?= $block->escapeHtml($suggestedCart['customer']['trade_name'] ?? $suggestedCart['customer']['name'] ?? 'Cliente') ?>!</h2>
+            <h2><?php if ($rfmData): ?>Olá, <?= $block->escapeHtml($suggestedCart['customer']['trade_name'] ?? $suggestedCart['customer']['name'] ?? 'Cliente') ?>!<?php else: ?>Carrinho Sugerido Personalizado<?php endif; ?></h2>
             <p>Preparamos sugestões personalizadas baseadas no seu histórico de compras.</p>
         </div>
+        <?php if ($rfmData): ?>
         <div class="erp-rfm-badge" style="--erp-seg-color:<?= $block->escapeHtmlAttr($rfmData['segment_color'] ?? '#666') ?>">
             <span class="erp-badge-icon">🏆</span>
             <span class="erp-badge-text"><?= $block->escapeHtml($rfmData['segment_label'] ?? 'Cliente') ?></span>
         </div>
+        <?php endif; ?>
     </div>
-    <?php endif; ?>
 
     <!-- Purchase Summary Card -->
     <?php if (!empty($summary)): ?>

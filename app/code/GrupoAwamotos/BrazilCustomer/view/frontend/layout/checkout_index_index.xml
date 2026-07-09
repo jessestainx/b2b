@@ -27,7 +27,8 @@
                                                                     <item name="dataScope" xsi:type="string">shippingAddress.custom_attributes.person_type</item>
                                                                     <item name="label" xsi:type="string" translate="true">Tipo de Pessoa</item>
                                                                     <item name="provider" xsi:type="string">checkoutProvider</item>
-                                                                    <item name="visible" xsi:type="boolean">true</item>
+                                                                    <item name="visible" xsi:type="boolean">false</item>
+                                                                    <item name="value" xsi:type="string">pj</item>
                                                                     <item name="sortOrder" xsi:type="string">50</item>
                                                                     <item name="options" xsi:type="array">
                                                                         <item name="0" xsi:type="array">
@@ -51,7 +52,7 @@
                                                                     <item name="dataScope" xsi:type="string">shippingAddress.custom_attributes.cpf</item>
                                                                     <item name="label" xsi:type="string" translate="true">CPF</item>
                                                                     <item name="provider" xsi:type="string">checkoutProvider</item>
-                                                                    <item name="visible" xsi:type="boolean">true</item>
+                                                                    <item name="visible" xsi:type="boolean">false</item>
                                                                     <item name="validation" xsi:type="array">
                                                                         <item name="validate-cpf" xsi:type="boolean">true</item>
                                                                     </item>
@@ -69,7 +70,7 @@
                                                                     <item name="dataScope" xsi:type="string">shippingAddress.custom_attributes.cnpj</item>
                                                                     <item name="label" xsi:type="string" translate="true">CNPJ</item>
                                                                     <item name="provider" xsi:type="string">checkoutProvider</item>
-                                                                    <item name="visible" xsi:type="boolean">false</item>
+                                                                    <item name="visible" xsi:type="boolean">true</item>
                                                                     <item name="validation" xsi:type="array">
                                                                         <item name="validate-cnpj" xsi:type="boolean">true</item>
                                                                     </item>

@@ -1,0 +1,760 @@
+{
+  "meta": {
+    "startedAt": "2026-06-18T00:21:15.493Z",
+    "finishedAt": "2026-06-18T00:21:46.979Z",
+    "mode": "retest",
+    "baseUrl": "https://awamotos.com",
+    "pages": [
+      "home",
+      "plp",
+      "pdp",
+      "cart",
+      "b2b-login",
+      "b2b-register",
+      "login",
+      "contact",
+      "404"
+    ],
+    "viewports": [
+      390,
+      768,
+      1366,
+      1920
+    ],
+    "issueTypes": [
+      "duplicated-borders",
+      "inconsistent-spacing",
+      "excessive-white-spaces",
+      "broken-grid-alignment",
+      "elements-outside-container",
+      "overflow-x",
+      "misaligned-icons",
+      "inconsistent-button-heights",
+      "inconsistent-card-spacing",
+      "responsive-layout-failures",
+      "different-paddings-between-pages",
+      "typography-inconsistencies",
+      "overlapping-elements",
+      "inconsistent-header-widths",
+      "different-container-sizes",
+      "carousels-breaking-layout",
+      "css-conflicts",
+      "unexpected-margin-padding",
+      "visual-hierarchy-issues"
+    ]
+  },
+  "issues": [
+    {
+      "id": "home__vp-1366__elements-outside-container__1",
+      "type": "elements-outside-container",
+      "detail": "Child exceeds container bounds (L:false R:true)",
+      "selector": "ul.awa-hero-benefits",
+      "rect": {
+        "x": 38,
+        "y": 649,
+        "width": 1240,
+        "height": 112
+      },
+      "pageId": "home",
+      "pagePath": "/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/",
+      "screenshots": {
+        "before": "screenshots/after/home__vp-1366__full.png",
+        "issue": "screenshots/home__vp-1366__elements-outside-container__1.png"
+      },
+      "cause": "Child has fixed width, negative margin, or absolute positioning exceeding parent overflow bounds.",
+      "fix": "Add overflow-x: clip on shell; replace fixed px widths with max-width: 100%; fix absolute offsets."
+    },
+    {
+      "id": "home__vp-1366__css-conflicts__2",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)×6; html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger×4; html×7)",
+      "selector": "html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)",
+      "rect": null,
+      "pageId": "home",
+      "pagePath": "/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/",
+      "screenshots": {
+        "before": "screenshots/after/home__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    },
+    {
+      "id": "plp__vp-1366__inconsistent-header-widths__1",
+      "type": "inconsistent-header-widths",
+      "detail": "Header width 1366px vs main container 1280px (Δ86)",
+      "selector": ".awa-site-header / .page-main .container",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 228
+      },
+      "pageId": "plp",
+      "pagePath": "/carcacas.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/carcacas.html",
+      "screenshots": {
+        "before": "screenshots/after/plp__vp-1366__full.png",
+        "issue": "screenshots/plp__vp-1366__inconsistent-header-widths__1.png"
+      },
+      "cause": "Sticky header inner shell width differs from .page-main .container axis.",
+      "fix": "Match .header.content width to .page-main > .container; audit awa-header-cart-fix.css."
+    },
+    {
+      "id": "plp__vp-1366__misaligned-icons__2",
+      "type": "misaligned-icons",
+      "detail": "Icon vertical offset 8px inside control",
+      "selector": "DIV.awa-footer-trust-item",
+      "rect": {
+        "x": 59,
+        "y": 2349,
+        "width": 300,
+        "height": 71
+      },
+      "pageId": "plp",
+      "pagePath": "/carcacas.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/carcacas.html",
+      "screenshots": {
+        "before": "screenshots/after/plp__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Flex align-items mismatch, line-height on icon font, or unequal padding inside icon+label buttons.",
+      "fix": "Use inline-flex + align-items: center on buttons; set icon line-height: 1 and equal padding-inline."
+    },
+    {
+      "id": "plp__vp-1366__overlapping-elements__3",
+      "type": "overlapping-elements",
+      "detail": "Elements overlap 1214×238px",
+      "selector": "IMG.awa-category-hero__bg-image × DIV.awa-category-hero__overlay",
+      "rect": {
+        "x": 76,
+        "y": 353,
+        "width": 1214,
+        "height": 238
+      },
+      "pageId": "plp",
+      "pagePath": "/carcacas.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/carcacas.html",
+      "screenshots": {
+        "before": "screenshots/after/plp__vp-1366__full.png",
+        "issue": "screenshots/plp__vp-1366__overlapping-elements__3.png"
+      },
+      "cause": "Absolute/fixed positioning without z-index discipline, or negative margins pulling elements atop each other.",
+      "fix": "Adjust z-index stack; replace negative margins; ensure dropdowns use portal or overflow: visible on parent."
+    },
+    {
+      "id": "plp__vp-1366__css-conflicts__4",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (:root×104; html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .toolbar.toolbar-products×7; html×16)",
+      "selector": ":root",
+      "rect": null,
+      "pageId": "plp",
+      "pagePath": "/carcacas.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/carcacas.html",
+      "screenshots": {
+        "before": "screenshots/after/plp__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    },
+    {
+      "id": "pdp__vp-1366__different-container-sizes__1",
+      "type": "different-container-sizes",
+      "detail": "Container widths vary by 48px on same page",
+      "selector": ".container, .page-main.container",
+      "rect": {
+        "x": 43,
+        "y": 228,
+        "width": 1280,
+        "height": 1637
+      },
+      "pageId": "pdp",
+      "pagePath": "/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "screenshots": {
+        "before": "screenshots/after/pdp__vp-1366__full.png",
+        "issue": "screenshots/pdp__vp-1366__different-container-sizes__1.png"
+      },
+      "cause": "Multiple .container elements on one page resolve to different computed widths.",
+      "fix": "Single --awa-grid-shell-max token; remove per-page container width overrides."
+    },
+    {
+      "id": "pdp__vp-1366__inconsistent-header-widths__2",
+      "type": "inconsistent-header-widths",
+      "detail": "Header width 1366px vs main container 1280px (Δ86)",
+      "selector": ".awa-site-header / .page-main .container",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 228
+      },
+      "pageId": "pdp",
+      "pagePath": "/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "screenshots": {
+        "before": "screenshots/after/pdp__vp-1366__full.png",
+        "issue": "screenshots/pdp__vp-1366__inconsistent-header-widths__2.png"
+      },
+      "cause": "Sticky header inner shell width differs from .page-main .container axis.",
+      "fix": "Match .header.content width to .page-main > .container; audit awa-header-cart-fix.css."
+    },
+    {
+      "id": "pdp__vp-1366__visual-hierarchy-issues__3",
+      "type": "visual-hierarchy-issues",
+      "detail": "H1 (14px) smaller than H2 (18px)",
+      "selector": "H1 + H2",
+      "rect": {
+        "x": 969,
+        "y": 272,
+        "width": 306,
+        "height": 18
+      },
+      "pageId": "pdp",
+      "pagePath": "/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "screenshots": {
+        "before": "screenshots/after/pdp__vp-1366__full.png",
+        "issue": "screenshots/pdp__vp-1366__visual-hierarchy-issues__3.png"
+      },
+      "cause": "Heading level smaller than child text, low contrast title, or CTA visually weaker than secondary content.",
+      "fix": "Enforce h1 > h2 > body scale; strengthen primary CTA contrast/size; demote decorative text."
+    },
+    {
+      "id": "pdp__vp-1366__overlapping-elements__4",
+      "type": "overlapping-elements",
+      "detail": "Elements overlap 44×44px",
+      "selector": "DIV.fotorama__fullscreen-icon × DIV.fotorama__stage__shaft",
+      "rect": {
+        "x": 654,
+        "y": 315,
+        "width": 44,
+        "height": 44
+      },
+      "pageId": "pdp",
+      "pagePath": "/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "screenshots": {
+        "before": "screenshots/after/pdp__vp-1366__full.png",
+        "issue": "screenshots/pdp__vp-1366__overlapping-elements__4.png"
+      },
+      "cause": "Absolute/fixed positioning without z-index discipline, or negative margins pulling elements atop each other.",
+      "fix": "Adjust z-index stack; replace negative margins; ensure dropdowns use portal or overflow: visible on parent."
+    },
+    {
+      "id": "pdp__vp-1366__css-conflicts__5",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (:root×107; html body#html-body.catalog-product-view×6; html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-info-price×7)",
+      "selector": ":root",
+      "rect": null,
+      "pageId": "pdp",
+      "pagePath": "/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/bagageiro-titan-150-09-13-modelo-preto-macico-3000.html",
+      "screenshots": {
+        "before": "screenshots/after/pdp__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    },
+    {
+      "id": "cart__vp-1366__inconsistent-header-widths__1",
+      "type": "inconsistent-header-widths",
+      "detail": "Header width 1366px vs main container 1280px (Δ86)",
+      "selector": ".awa-site-header / .page-main .container",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 226
+      },
+      "pageId": "cart",
+      "pagePath": "/checkout/cart/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/checkout/cart/",
+      "screenshots": {
+        "before": "screenshots/after/cart__vp-1366__full.png",
+        "issue": "screenshots/cart__vp-1366__inconsistent-header-widths__1.png"
+      },
+      "cause": "Sticky header inner shell width differs from .page-main .container axis.",
+      "fix": "Match .header.content width to .page-main > .container; audit awa-header-cart-fix.css."
+    },
+    {
+      "id": "cart__vp-1366__overlapping-elements__2",
+      "type": "overlapping-elements",
+      "detail": "Elements overlap 129×70px",
+      "selector": "H1.page-title × DIV.columns",
+      "rect": {
+        "x": 59,
+        "y": 246,
+        "width": 129,
+        "height": 70
+      },
+      "pageId": "cart",
+      "pagePath": "/checkout/cart/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/checkout/cart/",
+      "screenshots": {
+        "before": "screenshots/after/cart__vp-1366__full.png",
+        "issue": "screenshots/cart__vp-1366__overlapping-elements__2.png"
+      },
+      "cause": "Absolute/fixed positioning without z-index discipline, or negative margins pulling elements atop each other.",
+      "fix": "Adjust z-index stack; replace negative margins; ensure dropdowns use portal or overflow: visible on parent."
+    },
+    {
+      "id": "cart__vp-1366__css-conflicts__3",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (body.checkout-cart-index .cart-summary×8; html body#html-body.checkout-cart-index .page-wrapper .page-title-wrapper .page-title×5; :root×40)",
+      "selector": "body.checkout-cart-index .cart-summary",
+      "rect": null,
+      "pageId": "cart",
+      "pagePath": "/checkout/cart/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/checkout/cart/",
+      "screenshots": {
+        "before": "screenshots/after/cart__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    },
+    {
+      "id": "b2b-login__vp-1366__broken-grid-alignment__1",
+      "type": "broken-grid-alignment",
+      "detail": "Container left edges spread 32px (values: 363, 395)",
+      "selector": "page-main container | column main",
+      "rect": {
+        "x": 363,
+        "y": 0,
+        "width": 640,
+        "height": 768
+      },
+      "pageId": "b2b-login",
+      "pagePath": "/b2b/account/login/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/b2b/account/login/",
+      "screenshots": {
+        "before": "screenshots/after/b2b-login__vp-1366__full.png",
+        "issue": "screenshots/b2b-login__vp-1366__broken-grid-alignment__1.png"
+      },
+      "cause": "Containers use different max-width, margin, or padding — align-grid bundle not loaded or overridden.",
+      "fix": "Ensure align-grid-terminal bundle loads; set consistent .container max-width and margin-inline: auto."
+    },
+    {
+      "id": "b2b-login__vp-1366__different-container-sizes__2",
+      "type": "different-container-sizes",
+      "detail": "Container widths vary by 64px on same page",
+      "selector": ".container, .page-main.container",
+      "rect": {
+        "x": 363,
+        "y": 0,
+        "width": 640,
+        "height": 768
+      },
+      "pageId": "b2b-login",
+      "pagePath": "/b2b/account/login/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/b2b/account/login/",
+      "screenshots": {
+        "before": "screenshots/after/b2b-login__vp-1366__full.png",
+        "issue": "screenshots/b2b-login__vp-1366__different-container-sizes__2.png"
+      },
+      "cause": "Multiple .container elements on one page resolve to different computed widths.",
+      "fix": "Single --awa-grid-shell-max token; remove per-page container width overrides."
+    },
+    {
+      "id": "b2b-login__vp-1366__overlapping-elements__3",
+      "type": "overlapping-elements",
+      "detail": "Elements overlap 44×44px",
+      "selector": "INPUT. × BUTTON.b2b-password-toggle",
+      "rect": {
+        "x": 842,
+        "y": 366,
+        "width": 44,
+        "height": 44
+      },
+      "pageId": "b2b-login",
+      "pagePath": "/b2b/account/login/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/b2b/account/login/",
+      "screenshots": {
+        "before": "screenshots/after/b2b-login__vp-1366__full.png",
+        "issue": "screenshots/b2b-login__vp-1366__overlapping-elements__3.png"
+      },
+      "cause": "Absolute/fixed positioning without z-index discipline, or negative margins pulling elements atop each other.",
+      "fix": "Adjust z-index stack; replace negative margins; ensure dropdowns use portal or overflow: visible on parent."
+    },
+    {
+      "id": "b2b-login__vp-1366__css-conflicts__4",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (:root×4)",
+      "selector": ":root",
+      "rect": null,
+      "pageId": "b2b-login",
+      "pagePath": "/b2b/account/login/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/b2b/account/login/",
+      "screenshots": {
+        "before": "screenshots/after/b2b-login__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    },
+    {
+      "id": "b2b-register__vp-1366__broken-grid-alignment__1",
+      "type": "broken-grid-alignment",
+      "detail": "Container left edges spread 100px (values: 363, 395, 463)",
+      "selector": "page-main container | column main | b2b-login-card b2b-register-card",
+      "rect": {
+        "x": 363,
+        "y": 0,
+        "width": 640,
+        "height": 2164
+      },
+      "pageId": "b2b-register",
+      "pagePath": "/b2b/register/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/b2b/register/",
+      "screenshots": {
+        "before": "screenshots/after/b2b-register__vp-1366__full.png",
+        "issue": "screenshots/b2b-register__vp-1366__broken-grid-alignment__1.png"
+      },
+      "cause": "Containers use different max-width, margin, or padding — align-grid bundle not loaded or overridden.",
+      "fix": "Ensure align-grid-terminal bundle loads; set consistent .container max-width and margin-inline: auto."
+    },
+    {
+      "id": "b2b-register__vp-1366__different-container-sizes__2",
+      "type": "different-container-sizes",
+      "detail": "Container widths vary by 200px on same page",
+      "selector": ".container, .page-main.container",
+      "rect": {
+        "x": 363,
+        "y": 0,
+        "width": 640,
+        "height": 2164
+      },
+      "pageId": "b2b-register",
+      "pagePath": "/b2b/register/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/b2b/register/",
+      "screenshots": {
+        "before": "screenshots/after/b2b-register__vp-1366__full.png",
+        "issue": "screenshots/b2b-register__vp-1366__different-container-sizes__2.png"
+      },
+      "cause": "Multiple .container elements on one page resolve to different computed widths.",
+      "fix": "Single --awa-grid-shell-max token; remove per-page container width overrides."
+    },
+    {
+      "id": "b2b-register__vp-1366__overlapping-elements__3",
+      "type": "overlapping-elements",
+      "detail": "Elements overlap 24×24px",
+      "selector": "INPUT.input-text × DIV.cnpj-status",
+      "rect": {
+        "x": 850,
+        "y": 524,
+        "width": 24,
+        "height": 24
+      },
+      "pageId": "b2b-register",
+      "pagePath": "/b2b/register/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/b2b/register/",
+      "screenshots": {
+        "before": "screenshots/after/b2b-register__vp-1366__full.png",
+        "issue": "screenshots/b2b-register__vp-1366__overlapping-elements__3.png"
+      },
+      "cause": "Absolute/fixed positioning without z-index discipline, or negative margins pulling elements atop each other.",
+      "fix": "Adjust z-index stack; replace negative margins; ensure dropdowns use portal or overflow: visible on parent."
+    },
+    {
+      "id": "b2b-register__vp-1366__css-conflicts__4",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (:root×5)",
+      "selector": ":root",
+      "rect": null,
+      "pageId": "b2b-register",
+      "pagePath": "/b2b/register/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/b2b/register/",
+      "screenshots": {
+        "before": "screenshots/after/b2b-register__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    },
+    {
+      "id": "login__vp-1366__broken-grid-alignment__1",
+      "type": "broken-grid-alignment",
+      "detail": "Container left edges spread 32px (values: 363, 395)",
+      "selector": "page-main container | column main",
+      "rect": {
+        "x": 363,
+        "y": 0,
+        "width": 640,
+        "height": 768
+      },
+      "pageId": "login",
+      "pagePath": "/customer/account/login/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/customer/account/login/",
+      "screenshots": {
+        "before": "screenshots/after/login__vp-1366__full.png",
+        "issue": "screenshots/login__vp-1366__broken-grid-alignment__1.png"
+      },
+      "cause": "Containers use different max-width, margin, or padding — align-grid bundle not loaded or overridden.",
+      "fix": "Ensure align-grid-terminal bundle loads; set consistent .container max-width and margin-inline: auto."
+    },
+    {
+      "id": "login__vp-1366__different-container-sizes__2",
+      "type": "different-container-sizes",
+      "detail": "Container widths vary by 64px on same page",
+      "selector": ".container, .page-main.container",
+      "rect": {
+        "x": 363,
+        "y": 0,
+        "width": 640,
+        "height": 768
+      },
+      "pageId": "login",
+      "pagePath": "/customer/account/login/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/customer/account/login/",
+      "screenshots": {
+        "before": "screenshots/after/login__vp-1366__full.png",
+        "issue": "screenshots/login__vp-1366__different-container-sizes__2.png"
+      },
+      "cause": "Multiple .container elements on one page resolve to different computed widths.",
+      "fix": "Single --awa-grid-shell-max token; remove per-page container width overrides."
+    },
+    {
+      "id": "login__vp-1366__overlapping-elements__3",
+      "type": "overlapping-elements",
+      "detail": "Elements overlap 44×44px",
+      "selector": "INPUT. × BUTTON.b2b-password-toggle",
+      "rect": {
+        "x": 842,
+        "y": 366,
+        "width": 44,
+        "height": 44
+      },
+      "pageId": "login",
+      "pagePath": "/customer/account/login/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/customer/account/login/",
+      "screenshots": {
+        "before": "screenshots/after/login__vp-1366__full.png",
+        "issue": "screenshots/login__vp-1366__overlapping-elements__3.png"
+      },
+      "cause": "Absolute/fixed positioning without z-index discipline, or negative margins pulling elements atop each other.",
+      "fix": "Adjust z-index stack; replace negative margins; ensure dropdowns use portal or overflow: visible on parent."
+    },
+    {
+      "id": "login__vp-1366__css-conflicts__4",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (:root×4)",
+      "selector": ":root",
+      "rect": null,
+      "pageId": "login",
+      "pagePath": "/customer/account/login/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/customer/account/login/",
+      "screenshots": {
+        "before": "screenshots/after/login__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    },
+    {
+      "id": "contact__vp-1366__inconsistent-header-widths__1",
+      "type": "inconsistent-header-widths",
+      "detail": "Header width 1366px vs main container 1280px (Δ86)",
+      "selector": ".awa-site-header / .page-main .container",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 228
+      },
+      "pageId": "contact",
+      "pagePath": "/contact/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/contact/",
+      "screenshots": {
+        "before": "screenshots/after/contact__vp-1366__full.png",
+        "issue": "screenshots/contact__vp-1366__inconsistent-header-widths__1.png"
+      },
+      "cause": "Sticky header inner shell width differs from .page-main .container axis.",
+      "fix": "Match .header.content width to .page-main > .container; audit awa-header-cart-fix.css."
+    },
+    {
+      "id": "contact__vp-1366__css-conflicts__2",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (:root×104; html×17; body×17)",
+      "selector": ":root",
+      "rect": null,
+      "pageId": "contact",
+      "pagePath": "/contact/",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/contact/",
+      "screenshots": {
+        "before": "screenshots/after/contact__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    },
+    {
+      "id": "404__vp-1366__broken-grid-alignment__1",
+      "type": "broken-grid-alignment",
+      "detail": "Container left edges spread 320px (values: 43, 363)",
+      "selector": "page-main container | column main",
+      "rect": {
+        "x": 43,
+        "y": 228,
+        "width": 1280,
+        "height": 694
+      },
+      "pageId": "404",
+      "pagePath": "/__vqa-404-not-found-test-page__.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/__vqa-404-not-found-test-page__.html",
+      "screenshots": {
+        "before": "screenshots/after/404__vp-1366__full.png",
+        "issue": "screenshots/404__vp-1366__broken-grid-alignment__1.png"
+      },
+      "cause": "Containers use different max-width, margin, or padding — align-grid bundle not loaded or overridden.",
+      "fix": "Ensure align-grid-terminal bundle loads; set consistent .container max-width and margin-inline: auto."
+    },
+    {
+      "id": "404__vp-1366__different-container-sizes__2",
+      "type": "different-container-sizes",
+      "detail": "Container widths vary by 640px on same page",
+      "selector": ".container, .page-main.container",
+      "rect": {
+        "x": 43,
+        "y": 228,
+        "width": 1280,
+        "height": 694
+      },
+      "pageId": "404",
+      "pagePath": "/__vqa-404-not-found-test-page__.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/__vqa-404-not-found-test-page__.html",
+      "screenshots": {
+        "before": "screenshots/after/404__vp-1366__full.png",
+        "issue": "screenshots/404__vp-1366__different-container-sizes__2.png"
+      },
+      "cause": "Multiple .container elements on one page resolve to different computed widths.",
+      "fix": "Single --awa-grid-shell-max token; remove per-page container width overrides."
+    },
+    {
+      "id": "404__vp-1366__inconsistent-header-widths__3",
+      "type": "inconsistent-header-widths",
+      "detail": "Header width 1366px vs main container 1280px (Δ86)",
+      "selector": ".awa-site-header / .page-main .container",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 228
+      },
+      "pageId": "404",
+      "pagePath": "/__vqa-404-not-found-test-page__.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/__vqa-404-not-found-test-page__.html",
+      "screenshots": {
+        "before": "screenshots/after/404__vp-1366__full.png",
+        "issue": "screenshots/404__vp-1366__inconsistent-header-widths__3.png"
+      },
+      "cause": "Sticky header inner shell width differs from .page-main .container axis.",
+      "fix": "Match .header.content width to .page-main > .container; audit awa-header-cart-fix.css."
+    },
+    {
+      "id": "404__vp-1366__css-conflicts__4",
+      "type": "css-conflicts",
+      "detail": "Repeated selectors in stylesheets (:root×104; html×17; body×17)",
+      "selector": ":root",
+      "rect": null,
+      "pageId": "404",
+      "pagePath": "/__vqa-404-not-found-test-page__.html",
+      "viewport": 1366,
+      "viewportId": "vp-1366",
+      "url": "https://awamotos.com/__vqa-404-not-found-test-page__.html",
+      "screenshots": {
+        "before": "screenshots/after/404__vp-1366__full.png",
+        "issue": ""
+      },
+      "cause": "Same selector styled in multiple bundles — later rule uses !important or higher specificity unexpectedly.",
+      "fix": "Grep selector across web/css/; move winning rule to lowest sufficient bundle; drop dead overrides."
+    }
+  ],
+  "summary": {
+    "duplicated-borders": 0,
+    "inconsistent-spacing": 0,
+    "excessive-white-spaces": 0,
+    "broken-grid-alignment": 4,
+    "elements-outside-container": 1,
+    "overflow-x": 0,
+    "misaligned-icons": 1,
+    "inconsistent-button-heights": 0,
+    "inconsistent-card-spacing": 0,
+    "responsive-layout-failures": 0,
+    "different-paddings-between-pages": 0,
+    "typography-inconsistencies": 0,
+    "overlapping-elements": 6,
+    "inconsistent-header-widths": 5,
+    "different-container-sizes": 5,
+    "carousels-breaking-layout": 0,
+    "css-conflicts": 9,
+    "unexpected-margin-padding": 0,
+    "visual-hierarchy-issues": 1
+  }
+}

@@ -524,18 +524,7 @@ html body#html-body .page-wrapper .awa-site-header .awa-header-right-col:has(.b2
         width: ~"min(360px, calc(100vw - 24px))";
     }
 }
-
-@media screen and (min-width: 768px) {
-    .b2b-status-panel.is-open::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        z-index: calc(var(--awa-z-overlay, 1000) - 1);
-        background: rgb(15 23 42 / 14%);
-        pointer-events: none;
-        animation: awa-b2b-panel-fade-in 0.2s ease;
-    }
-}
+/* Desktop intentionally has no page backdrop; panel behaves as dropdown/popover. */
 
 @media screen and (min-width: 992px) and (max-width: 1199px) {
     .b2b-status-trigger__line1 {

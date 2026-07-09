@@ -1,21 +1,21 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Interface de dados para Cross-sell (Market Basket Analysis)
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Api\Data;
 
 interface CrosssellInterface
 {
-    const ANTECEDENT = 'antecedent';
-    const CONSEQUENT = 'consequent';
-    const SUPPORT = 'support';
-    const CONFIDENCE = 'confidence';
-    const LIFT = 'lift';
-    const CONVICTION = 'conviction';
+    public const ANTECEDENT = 'antecedent';
+    public const CONSEQUENT = 'consequent';
+    public const SUPPORT = 'support';
+    public const CONFIDENCE = 'confidence';
+    public const LIFT = 'lift';
+    public const CONVICTION = 'conviction';
 
     /**
      * @return string

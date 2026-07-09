@@ -80,7 +80,7 @@ class ClassifyCnaeCommand extends Command
         try {
             $this->appState->setAreaCode(Area::AREA_ADMINHTML);
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
-$this->logger->warning($e->getMessage());
+            $this->logger->warning($e->getMessage());
         }
 
         $dryRun     = (bool) $input->getOption(self::OPTION_DRY_RUN);

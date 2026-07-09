@@ -13,16 +13,18 @@ import {
   isVisible, hasNoOverflow, collectJsErrors, assertMinHeight,
   waitForPage, dismissCookie,
 } from '../helpers/visual-audit.helpers';
+import { targetUrl } from '../helpers/target-url';
+import { blockOptionalThirdParty } from '../helpers/third-party-block';
 
-const BASE = 'https://awamotos.com';
-const PDP_URL = `${BASE}/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html`;
+const PDP_URL = targetUrl('/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html', 'visual-audit-cart-checkout-404');
 
 /* ═══════════════════════════════════════════════════════════════════
    FASE 8A — CART PREMIUM
    ═══════════════════════════════════════════════════════════════════ */
 test.describe('Fase 8 — Cart Premium', () => {
   test.beforeEach(async ({ page }) => {
-    if (!await navigateTo(page, `${BASE}/checkout/cart/`)) test.skip();
+    await blockOptionalThirdParty(page.context());
+    if (!await navigateTo(page, targetUrl('/checkout/cart/', 'visual-audit-cart-checkout-404'))) test.skip();
   });
 
   test('Página de carrinho carrega corretamente', async ({ page }) => {
@@ -57,7 +59,8 @@ test.describe('Fase 8 — Cart Premium', () => {
    ═══════════════════════════════════════════════════════════════════ */
 test.describe('Fase 8 — Checkout Premium', () => {
   test.beforeEach(async ({ page }) => {
-    if (!await navigateTo(page, `${BASE}/checkout/`)) test.skip();
+    await blockOptionalThirdParty(page.context());
+    if (!await navigateTo(page, targetUrl('/checkout/', 'visual-audit-cart-checkout-404'))) test.skip();
     // Checkout redireciona para cart se vazio — verificar URL
     const url = page.url();
     if (url.includes('/cart') && !url.includes('/checkout')) {
@@ -105,9 +108,10 @@ test.describe('Fase 8 — Checkout Premium', () => {
    ═══════════════════════════════════════════════════════════════════ */
 test.describe('Fase 8 — 404 Premium', () => {
   test.beforeEach(async ({ page }) => {
+    await blockOptionalThirdParty(page.context());
     // Navegar com timer Node.js — trata cold-start crash (2.2m → 18s)
     const committed = await Promise.race<boolean>([
-      page.goto(`${BASE}/no-route`, { waitUntil: 'commit', timeout: 18_000 })
+      page.goto(targetUrl('/no-route', 'visual-audit-cart-checkout-404'), { waitUntil: 'commit', timeout: 18_000 })
         .then(() => true)
         .catch(() => false),
       new Promise<boolean>(resolve => setTimeout(() => resolve(false), 18_000)),
@@ -214,7 +218,8 @@ test.describe('Fase 8 — 404 Premium', () => {
    ═══════════════════════════════════════════════════════════════════ */
 test.describe.skip('Account Premium', () => { // Sem credenciais de teste — skip permanente
   test.beforeEach(async ({ page }) => {
-    if (!await navigateTo(page, `${BASE}/customer/account/`)) { test.skip(); return; }
+    await blockOptionalThirdParty(page.context());
+    if (!await navigateTo(page, targetUrl('/customer/account/', 'visual-audit-cart-checkout-404'))) { test.skip(); return; }
     // Verificar liveness — zygote crash pode ter ocorrido durante navigateTo
     if (!await page.evaluate(() => true).catch(() => false)) { test.skip(); return; }
     // Pode redirecionar para login — sem credenciais, skip imediato

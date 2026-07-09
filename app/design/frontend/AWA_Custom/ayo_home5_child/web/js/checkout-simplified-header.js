@@ -52,8 +52,13 @@ define([], function () {
     }
 
     /**
-     * Block setAttribute('style', ...) on an element so bulk style
-     * reassignment by awa-bundle-site.js is ignored.
+     * Intercept setAttribute('style', ...) so bulk style reassignment from
+     * awa-bundle-site.js is redirected through our setProperty interceptor
+     * (which already overrides display:grid and blocks grid-template-*).
+     *
+     * Instead of silently discarding the entire style string, we parse each
+     * CSS declaration and forward it via the already-intercepted setProperty —
+     * this preserves non-conflicting properties set by third-party components.
      *
      * @param {HTMLElement} el - Target element
      */
@@ -61,11 +66,39 @@ define([], function () {
         let orig = el.setAttribute.bind(el);
 
         el.setAttribute = function (name, value) {
-            if (name === 'style') {
+            if (name !== 'style') {
+                orig(name, value);
                 return;
             }
 
-            orig(name, value);
+            // Route each declaration through the setProperty interceptor so
+            // override + block rules are enforced without dropping the call.
+            let declarations = (value || '').split(';');
+
+            for (let i = 0; i < declarations.length; i++) {
+                let decl = declarations[i].trim();
+
+                if (!decl) {
+                    continue;
+                }
+
+                let colonIdx = decl.indexOf(':');
+
+                if (colonIdx < 0) {
+                    continue;
+                }
+
+                let prop = decl.slice(0, colonIdx).trim();
+                let rawVal = decl.slice(colonIdx + 1).trim();
+                let priority = '';
+
+                if (rawVal.endsWith('!important')) {
+                    priority = 'important';
+                    rawVal = rawVal.slice(0, -10).trim();
+                }
+
+                el.style.setProperty(prop, rawVal, priority);
+            }
         };
     }
 

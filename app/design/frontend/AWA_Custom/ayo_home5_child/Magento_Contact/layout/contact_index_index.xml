@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+    AWA Motos — rota nativa /contact (Magento_Contact).
+    SSOT shell: awa-cms-shell-final.css (container 1280px, prose 800px, spacing 4–16px)
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <title>Fale Conosco</title>
+    </head>
+    <body>
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.contact.seo.head"
+                   template="Magento_Contact::awa-contact-seo-head.phtml"
+                   before="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cms.shell.final.contact"
+                   template="Magento_Theme::html/awa-cms-shell-final-loader.phtml"
+                   after="-"/>
+        </referenceBlock>
+    </body>
+</page>

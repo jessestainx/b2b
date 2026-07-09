@@ -183,11 +183,9 @@ $monthlyData = $block->getMonthlyComparison();
     </div>
 </div>
 
-<!-- ApexCharts Library -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+require(['apexcharts'], function (ApexCharts) {
+    document.addEventListener('DOMContentLoaded', function () {
     // Daily Sales Chart
     var salesData = <?= /* @noEscape */ $block->getSalesTrendChartData() ?>;
 
@@ -276,6 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         new ApexCharts(document.querySelector("#monthly-chart"), monthlyOptions).render();
     }
+    });
 });
 </script>
 

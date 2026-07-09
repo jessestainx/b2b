@@ -1,0 +1,77 @@
+<!--@subject {{trans "REXIS ML - %count oportunidades de risco de perda" count=$count}} @-->
+<!--@vars {
+    "var alert_date":"Data do alerta",
+    "var count":"Quantidade de oportunidades",
+    "var total_value":"Valor total",
+    "var opportunities_html":"Tabela de oportunidades"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table class="message-info" style="width: 100%;">
+    <tr>
+        <td>
+            <h1 style="color: #ef4444; font-size: 24px; margin: 0 0 20px;">
+                🚨 Oportunidades de recuperação identificadas
+            </h1>
+            <p style="font-size: 16px; line-height: 24px; margin: 0 0 20px;">
+                O REXIS ML identificou <strong>{{var count}} cliente(s) com risco relevante de perda</strong>,
+                com potencial financeiro que merece atuação imediata da equipe comercial.
+            </p>
+            <p style="font-size: 14px; color: #666; margin: 0 0 30px;">
+                <strong>Data do alerta:</strong> {{var alert_date}}<br>
+                <strong>Receita potencial protegida:</strong> R$ {{var total_value}}
+            </p>
+        </td>
+    </tr>
+</table>
+
+<table class="message-details" style="width: 100%; border-collapse: collapse; margin: 0 0 30px;">
+    <thead>
+        <tr style="background: #f3f4f6;">
+            <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb;">Cliente</th>
+            <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb;">Produto</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #e5e7eb;">Score preditivo</th>
+            <th style="padding: 12px; text-align: right; border: 1px solid #e5e7eb;">Valor previsto</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #e5e7eb;">Dias sem Comprar</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{var opportunities_html}}
+    </tbody>
+</table>
+
+<table class="message-cta" style="width: 100%; margin: 0 0 30px;">
+    <tr>
+        <td style="text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px;">
+            <p style="margin: 0 0 15px; font-size: 14px; font-weight: 600; color: #92400e;">
+                💡 Próxima ação sugerida
+            </p>
+            <p style="margin: 0 0 15px; font-size: 13px; color: #78350f;">
+                Priorize um contato consultivo com estes clientes, valide o motivo da redução de compras<br>
+                e ofereça uma condição relevante para reativação.
+            </p>
+            <a href="{{store url='admin/rexisml/dashboard/index'}}"
+               style="display: inline-block; padding: 12px 24px; background: #ef4444; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                Acessar painel REXIS ML
+            </a>
+        </td>
+    </tr>
+</table>
+
+<table class="message-footer" style="width: 100%; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+    <tr>
+        <td style="font-size: 12px; color: #9ca3af; line-height: 18px;">
+            <p style="margin: 0 0 10px;">
+                Este é um alerta automático gerado pelo sistema REXIS ML.<br>
+                A análise considera o histórico recente de relacionamento e modelos preditivos dos últimos 12 meses.
+            </p>
+            <p style="margin: 0;">
+                <strong>Score preditivo:</strong> chance estimada de queda ou retomada do relacionamento (0-100%)<br>
+                <strong>Dias sem comprar:</strong> tempo desde a última compra do item monitorado
+            </p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}

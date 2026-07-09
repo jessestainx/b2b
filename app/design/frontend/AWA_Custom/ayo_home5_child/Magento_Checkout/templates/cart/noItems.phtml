@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /**
- * AWA Motos — Carrinho Vazio (noItems.phtml)
+ * AWA Motos — Carrinho Vazio / Confirmação pós-pedido (noItems.phtml)
  *
  * @var \Magento\Checkout\Block\Cart $block
  * @var \GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext|null $viewModel
@@ -16,76 +16,105 @@ $allCategoriesUrl = $viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Cart\Empt
 $featuredCategories = $viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext
     ? $viewModel->getFeaturedCategories()
     : [];
-$whatsappText = rawurlencode((string) __('Olá, estou no carrinho e preciso de ajuda com meu pedido B2B.'));
+$whatsappText = rawurlencode((string) __('Olá, acabei de fazer um pedido B2B e preciso de ajuda.'));
 $whatsappUrl = 'https://wa.me/5516997367588?text=' . $whatsappText;
 $showExpressNotice = $viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext
     && $viewModel->consumeExpressCheckoutNotice();
 $emptyCartSubtitle = $viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext
     ? $viewModel->getEmptyCartSubtitle()
     : (string) __('Adicione peças ao carrinho para seguir ao checkout B2B.');
+$quote = method_exists($block, 'getQuote') ? $block->getQuote() : null;
+$serverItemsCount = $quote ? (int) $quote->getItemsCount() : 0;
+$orderSuccess = $viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext
+    ? $viewModel->getOrderSuccessPresentation()
+    : null;
+$isOrderSuccess = $orderSuccess !== null;
 ?>
+<?php if ($isOrderSuccess): ?>
+<div class="cart-empty awa-cart-empty awa-cart-empty--success"
+     data-awa-cart-empty="1"
+     data-awa-order-success="1"
+     data-awa-server-items-count="<?= (int) $serverItemsCount ?>">
+    <?= $block->getChildHtml('checkout_cart_empty_widget') ?>
+    <?= $block->getLayout()
+        ->createBlock(\Magento\Framework\View\Element\Template::class)
+        ->setTemplate('Magento_Checkout::checkout/order-success-card.phtml')
+        ->setData('presentation', $orderSuccess)
+        ->setData('catalog_url', $catalogUrl)
+        ->setData('whatsapp_url', $whatsappUrl)
+        ->setData('show_categories', true)
+        ->setData('featured_categories', $featuredCategories)
+        ->setData('all_categories_url', $allCategoriesUrl)
+        ->toHtml() ?>
+    <?= $block->getChildHtml('shopping.cart.table.after') ?>
+</div>
+<?php else: ?>
 <div class="cart-empty awa-cart-empty"
      data-awa-cart-empty="1"
+     data-awa-server-items-count="<?= (int) $serverItemsCount ?>"
      <?= $showExpressNotice ? ' data-awa-express-notice="1"' : '' ?>
      aria-labelledby="awa-cart-empty-title">
     <?= $block->getChildHtml('checkout_cart_empty_widget') ?>
 
-    <div class="awa-cart-empty__icon-wrap" aria-hidden="true">
-        <svg class="awa-cart-empty__icon-svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="24" cy="54" r="3"/>
-            <circle cx="46" cy="54" r="3"/>
-            <path d="M3 6h7l6 30h28l5-22H17"/>
-            <path d="M24 36h22"/>
-        </svg>
-    </div>
-
-    <h1 id="awa-cart-empty-title" class="awa-cart-empty__title">
-        <?= $block->escapeHtml(__('Seu carrinho está vazio')) ?>
-    </h1>
-
-    <?php if ($showExpressNotice): ?>
-        <div class="awa-cart-empty__notice" role="status">
-            <?= $block->escapeHtml($viewModel->getExpressCheckoutNotice()) ?>
+    <div class="awa-cart-empty__hero">
+        <div class="awa-cart-empty__icon-wrap" aria-hidden="true">
+            <svg class="awa-cart-empty__icon-svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="24" cy="54" r="3"/>
+                <circle cx="46" cy="54" r="3"/>
+                <path d="M3 6h7l6 30h28l5-22H17"/>
+                <path d="M24 36h22"/>
+            </svg>
         </div>
-    <?php endif; ?>
 
-    <p class="awa-cart-empty__subtitle">
-        <?= $block->escapeHtml($emptyCartSubtitle) ?>
-    </p>
-
-    <?php if ($viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext && $viewModel->shouldShowMinOrderHint()): ?>
-        <p class="awa-cart-empty__min-order" role="note">
-            <?= $block->escapeHtml(__('Pedido mínimo B2B:')) ?>
-            <strong><?= $block->escapeHtml($viewModel->getMinOrderAmountFormatted()) ?></strong>.
-            <?= $block->escapeHtml(__('Adicione peças para seguir ao checkout.')) ?>
+        <?php /* p estilizado: o H1 da página já anuncia "Carrinho vazio" — evita título duplicado para leitores de tela */ ?>
+        <p id="awa-cart-empty-title" class="awa-cart-empty__title">
+            <?= $block->escapeHtml(__('Seu carrinho está vazio')) ?>
         </p>
-    <?php endif; ?>
 
-    <div class="awa-cart-empty__actions" role="group" aria-label="<?= $block->escapeHtmlAttr(__('Próximos passos')) ?>">
-        <a href="<?= $block->escapeUrl($catalogUrl) ?>" class="awa-cart-empty__cta action primary">
-            <?= $block->escapeHtml(__('Explorar catálogo')) ?>
-        </a>
+        <?php if ($showExpressNotice): ?>
+            <div class="awa-cart-empty__notice" role="status">
+                <?= $block->escapeHtml($viewModel->getExpressCheckoutNotice()) ?>
+            </div>
+        <?php endif; ?>
 
-        <div class="awa-cart-empty__secondary">
-            <a href="<?= $block->escapeUrl($whatsappUrl) ?>"
-               class="awa-cart-empty__suggestion awa-cart-empty__suggestion--wa"
-               target="_blank"
-               rel="noopener noreferrer"
-               aria-label="<?= $block->escapeHtmlAttr(__('Ajuda para cotação (abre no WhatsApp em nova aba)')) ?>">
-                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-4.1-1.2L3 20l1.3-4.5a8.47 8.47 0 1 1 16.7-4z"/>
-                    <path d="M8.5 9.5c.6 2 2 3.4 4 4l1.2-1.2c.2-.2.5-.3.8-.2 1 .3 2 .5 3 .5"/>
-                </svg>
-                <?= $block->escapeHtml(__('Ajuda para cotação')) ?>
+        <p class="awa-cart-empty__subtitle">
+            <?= $block->escapeHtml($emptyCartSubtitle) ?>
+        </p>
+
+        <?php if ($viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext && $viewModel->shouldShowMinOrderHint()): ?>
+            <p class="awa-cart-empty__min-order" role="note">
+                <?= $block->escapeHtml(__('Pedido mínimo B2B:')) ?>
+                <strong><?= $block->escapeHtml($viewModel->getMinOrderAmountFormatted()) ?></strong>.
+                <?= $block->escapeHtml(__('Adicione peças para seguir ao checkout.')) ?>
+            </p>
+        <?php endif; ?>
+
+        <div class="awa-cart-empty__actions" role="group" aria-label="<?= $block->escapeHtmlAttr(__('Próximos passos')) ?>">
+            <a href="<?= $block->escapeUrl($catalogUrl) ?>" class="awa-cart-empty__cta action primary">
+                <?= $block->escapeHtml(__('Explorar catálogo')) ?>
             </a>
+
+            <div class="awa-cart-empty__secondary">
+                <a href="<?= $block->escapeUrl($whatsappUrl) ?>"
+                   class="awa-cart-empty__suggestion awa-cart-empty__suggestion--wa"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="<?= $block->escapeHtmlAttr(__('Ajuda para cotação (abre no WhatsApp em nova aba)')) ?>">
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-4.1-1.2L3 20l1.3-4.5a8.47 8.47 0 1 1 16.7-4z"/>
+                        <path d="M8.5 9.5c.6 2 2 3.4 4 4l1.2-1.2c.2-.2.5-.3.8-.2 1 .3 2 .5 3 .5"/>
+                    </svg>
+                    <?= $block->escapeHtml(__('Ajuda para cotação')) ?>
+                </a>
+            </div>
         </div>
     </div>
 
     <?php if ($featuredCategories !== []): ?>
     <div class="awa-cart-empty__categories" aria-labelledby="awa-cart-empty-categories-heading">
-        <h3 id="awa-cart-empty-categories-heading" class="awa-cart-empty__categories-heading">
+        <h2 id="awa-cart-empty-categories-heading" class="awa-cart-empty__categories-heading">
             <?= $block->escapeHtml(__('Comece por estas categorias')) ?>
-        </h3>
+        </h2>
         <div class="awa-cart-empty__categories-list">
             <?php foreach ($featuredCategories as $cat): ?>
             <a href="<?= $block->escapeUrl($cat['url']) ?>"
@@ -110,6 +139,7 @@ $emptyCartSubtitle = $viewModel instanceof \GrupoAwamotos\B2B\ViewModel\Cart\Emp
 
     <?= $block->getChildHtml('shopping.cart.table.after') ?>
 </div>
+<?php endif; ?>
 <script type="text/x-magento-init">
 {
     "*": {

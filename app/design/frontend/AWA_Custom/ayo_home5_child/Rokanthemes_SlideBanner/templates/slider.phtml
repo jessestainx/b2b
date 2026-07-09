@@ -127,44 +127,24 @@ if ($banners = $block->getBannerCollection()):
         <?php } ?>
     </div>
 </div>
-<script>
-    require([
-        'jquery',
-        'mage/mage',
-        'rokanthemes/owl'
-    ], function ($) {
-        'use strict';
-
-        function doAnimations(elems) {
-            var animEndEv = 'webkitAnimationEnd animationend';
-            elems.each(function () {
-                var $this = $(this),
-                    $animationType = $this.data('animation');
-                if ($animationType) {
-                    $this.addClass($animationType).one(animEndEv, function () {
-                        $this.removeClass($animationType);
-                    });
-                }
-            });
-        }
-
-        var owlConfig = $.extend(true, {}, <?php echo json_encode($owlConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>, {
-            afterInit: function (elem) {
-                var $firstSlide = elem.find('.owl-item').eq(0);
-                doAnimations($firstSlide.find('.text-banner').find("[data-animation ^= 'animated']"));
-            },
-            afterMove: function (elem) {
-                var $currentSlide = elem.find('.owl-item').eq(this.currentItem);
-                doAnimations($currentSlide.find('.text-banner').find("[data-animation ^= 'animated']"));
-            }
-        });
-
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            owlConfig.autoPlay = false;
-        }
-
-        $(".slider_<?php echo (int) $sliderId; ?> .owl").owlCarousel(owlConfig);
-        $(".slider_<?php echo (int) $sliderId; ?>_mobile .owl").owlCarousel(owlConfig);
-    });
+<?php
+$heroSwiperConfig = array_merge($owlConfig, [
+    'items' => 1,
+    'itemsMobile' => [0, 1],
+    'itemsTablet' => [768, 1],
+    'itemsDesktopSmall' => [992, 1],
+    'itemsDesktop' => [1200, 1],
+    'effect' => 'fade',
+    'autoHeight' => true,
+    'animateText' => true,
+    'label' => (string) __('Destaques'),
+]);
+$heroMageInit = [
+    '.slider_' . (int) $sliderId . ' .owl' => ['awaLegacySwiper' => $heroSwiperConfig],
+    '.slider_' . (int) $sliderId . '_mobile .owl' => ['awaLegacySwiper' => $heroSwiperConfig],
+];
+?>
+<script type="text/x-magento-init">
+<?= /* @noEscape */ json_encode($heroMageInit, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>
 <?php endif; ?>

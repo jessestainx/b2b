@@ -1,16 +1,8 @@
 <?php declare(strict_types=1);
-/** @var \GrupoAwamotos\B2B\Block\Checkout\ErpGateNotice $block */
-if (!$block->isCheckoutBlocked()) {
-    return;
-}
+/**
+ * Gate ERP desativado — apenas limpa UI residual em checkout/carrinho.
+ */
 ?>
-<script>
-(function () {
-    window.checkoutConfig = window.checkoutConfig || {};
-    window.checkoutConfig.b2bCheckoutBlocked = true;
-    window.checkoutConfig.b2bCheckoutBlockMessage = <?= /* @noEscape */ json_encode($block->getBlockMessage(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
-})();
-</script>
 <script type="text/x-magento-init">
 {
     "*": {

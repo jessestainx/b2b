@@ -1,0 +1,50 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 0,
+  "title": "AWA Motos - Overview",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Load Average (1m)",
+      "targets": [{"expr": "awa_load_average{period=\"1m\"}", "legendFormat": "1m"}],
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Memory Used",
+      "targets": [{"expr": "awa_memory_bytes{type=\"used\"} / 1024 / 1024", "legendFormat": "MB"}],
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Disk Used %",
+      "targets": [{"expr": "(awa_disk_bytes{type=\"used\"} / awa_disk_bytes{type=\"total\"}) * 100", "legendFormat": "%"}],
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "DB Size",
+      "targets": [{"expr": "awa_mysql_size_bytes / 1024 / 1024", "legendFormat": "MB"}],
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "graph",
+      "title": "Redis Cache Hit Rate",
+      "targets": [
+        {"expr": "rate(awa_redis_hits_total[5m])", "legendFormat": "hits/s"}
+      ],
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8}
+    },
+    {
+      "type": "graph",
+      "title": "Cron Health",
+      "targets": [
+        {"expr": "awa_cron_seconds_since_last_run", "legendFormat": "seconds"}
+      ],
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8}
+    }
+  ],
+  "schemaVersion": 30,
+  "tags": ["awa", "magento"]
+}

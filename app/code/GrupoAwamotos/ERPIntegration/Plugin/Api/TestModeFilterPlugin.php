@@ -21,7 +21,8 @@ class TestModeFilterPlugin
     public function __construct(
         private readonly Helper $helper,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * @param ZApiClient $subject
@@ -164,7 +165,8 @@ class TestModeFilterPlugin
             $normalizedAllowed = $this->normalizePhone($allowedPhone);
             $allowedWithoutCountry = $this->stripBrazilCountryCode($normalizedAllowed);
 
-            if ($normalizedInput === $normalizedAllowed
+            if (
+                $normalizedInput === $normalizedAllowed
                 || $inputWithoutCountry === $allowedWithoutCountry
             ) {
                 return true;

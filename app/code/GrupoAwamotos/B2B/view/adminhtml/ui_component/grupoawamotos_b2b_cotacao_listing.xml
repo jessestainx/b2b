@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">grupoawamotos_b2b_cotacao_listing.grupoawamotos_b2b_cotacao_listing_data_source</item>
+        </item>
+    </argument>
+
+    <settings>
+        <spinner>grupoawamotos_b2b_cotacao_listing_columns</spinner>
+        <deps>
+            <dep>grupoawamotos_b2b_cotacao_listing.grupoawamotos_b2b_cotacao_listing_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="grupoawamotos_b2b_cotacao_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">cotacao_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>GrupoAwamotos_B2B::quotes</aclResource>
+        <dataProvider class="GrupoAwamotos\B2B\Ui\Component\Listing\CotacaoDataProvider"
+                      name="grupoawamotos_b2b_cotacao_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>cotacao_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <columns name="grupoawamotos_b2b_cotacao_listing_columns">
+        <column name="cotacao_id">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">ID ↓</label>
+                <sorting>desc</sorting>
+            </settings>
+        </column>
+        <column name="b2b_customer_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">B2B ID</label>
+            </settings>
+        </column>
+        <column name="status" class="GrupoAwamotos\B2B\Ui\Component\Listing\Column\CotacaoStatus"
+                component="Magento_Ui/js/grid/columns/column">
+            <settings>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Status</label>
+                <options class="GrupoAwamotos\B2B\Model\Source\CotacaoStatus"/>
+            </settings>
+        </column>
+        <column name="notes">
+            <settings>
+                <label translate="true">Observação do cliente</label>
+            </settings>
+        </column>
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date"
+                component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Solicitado em</label>
+                <sorting>desc</sorting>
+            </settings>
+        </column>
+        <column name="quoted_at" class="Magento\Ui\Component\Listing\Columns\Date"
+                component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Cotado em</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="GrupoAwamotos\B2B\Ui\Component\Listing\Column\QuoteActions">
+            <settings>
+                <indexField>cotacao_id</indexField>
+                <label translate="true">Ações</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

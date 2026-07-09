@@ -25,6 +25,7 @@ import {
   isVisible,
   checkOverlap,
 } from '../helpers/header.helpers';
+import { blockOptionalThirdParty } from '../helpers/third-party-block';
 
 /* ── Screenshot dir relativo ao config ───────────────────────────────── */
 const SCREENSHOT_DIR = path.join(__dirname, '..', 'screenshots');
@@ -58,6 +59,7 @@ async function goHomeQuiet(page: Page): Promise<boolean> {
 async function createHomePage(browser: import('@playwright/test').Browser): Promise<Page | null> {
   const ctx = await browser.newContext().catch(() => null);
   if (!ctx) return null;
+  await blockOptionalThirdParty(ctx);
   const p = await ctx.newPage().catch(() => null);
   if (!p) { await ctx.close().catch(() => {}); return null; }
   const ok = await goHomeQuiet(p).catch(() => false);

@@ -20,6 +20,12 @@ class StuckOrderCleanup
 
     private const B2B_GROUP_IDS = [4, 5, 6];
 
+    /**
+     * Grace period for legacy statuses only. Normal B2B orders must stay available
+     * because Sectra validates/imports the client during "Importar Pedidos".
+     */
+    private const MIN_ORDER_AGE_DAYS = 7;
+
     public function __construct(
         private readonly OrderFactory $orderFactory,
         private readonly ValidatorChecker $validatorChecker,
@@ -55,9 +61,8 @@ class StuckOrderCleanup
              INNER JOIN customer_entity ce ON ce.entity_id = so.customer_id
              WHERE ce.group_id IN (4, 5, 6)
                AND so.state NOT IN ('canceled', 'closed', 'complete')
-               AND (so.sectra_import_status IS NULL
-                    OR so.sectra_import_status IN (?, ?))"
-            ,
+               AND so.created_at < DATE_SUB(NOW(), INTERVAL " . self::MIN_ORDER_AGE_DAYS . " DAY)
+              AND so.sectra_import_status IN (?, ?)",
             [
                 SectraImportStatus::AWAITING_CUSTOMER_VALIDATION,
                 SectraImportStatus::ORDER_BLOCKED_CUSTOMER_NOT_VALIDATED,
@@ -196,7 +201,8 @@ class StuckOrderCleanup
             'SELECT sectra_import_status FROM sales_order WHERE entity_id = ?',
             [$orderId]
         );
-        if ($sectraStatus === SectraImportStatus::IMPORTED
+        if (
+            $sectraStatus === SectraImportStatus::IMPORTED
             || $sectraStatus === SectraImportStatus::ORDER_CANCELLED_BEFORE_ERP_IMPORT
             || $sectraStatus === SectraImportStatus::READY_FOR_IMPORT
         ) {

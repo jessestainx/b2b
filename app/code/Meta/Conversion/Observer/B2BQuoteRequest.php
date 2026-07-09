@@ -8,7 +8,7 @@ use GrupoAwamotos\B2B\Api\Data\QuoteRequestInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
@@ -20,7 +20,7 @@ class B2BQuoteRequest implements ObserverInterface
 {
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly LoggerInterface $logger,
         private readonly B2BSignalBuilder $b2bSignalBuilder,
         private readonly UserDataBuilder $userDataBuilder
@@ -79,10 +79,14 @@ class B2BQuoteRequest implements ObserverInterface
                 ? (string) $customerId
                 : (string) ($quoteRequest->getCustomerEmail() ?: $quoteRequest->getRequestId());
 
+            $qrFullName = trim((string) ($customerData['name'] ?? $quoteRequest->getCustomerName() ?? ''));
+            $qrNameParts = $qrFullName !== '' ? explode(' ', $qrFullName, 2) : [];
             $userData = $this->userDataBuilder->build(
                 (string) ($customerData['email'] ?? $quoteRequest->getCustomerEmail()),
                 (string) ($customerData['phone'] ?? $quoteRequest->getPhone()),
-                $externalId
+                $externalId,
+                $qrNameParts[0] ?? null,
+                $qrNameParts[1] ?? null
             );
             $eventSourceUrl = $this->userDataBuilder->getEventSourceUrl();
 
@@ -122,15 +126,7 @@ class B2BQuoteRequest implements ObserverInterface
                 $capiEvent['event_source_url'] = $eventSourceUrl;
             }
 
-            $result = $this->graphApi->sendEvents($pixelId, [$capiEvent], $storeId);
-            if (isset($result['error'])) { // phpcs:ignore Squiz.Operators.ComparisonOperatorUsage
-                $this->logger->warning('[Meta CAPI] RequestQuote API error', [
-                    'store_id' => $storeId,
-                    'request_id' => $quoteRequest->getRequestId(),
-                    'http_status' => $result['http_status'] ?? null,
-                    'error' => $result['error']
-                ]);
-            }
+            $this->capiDispatcher->sendEvents($pixelId, [$capiEvent], $storeId, 'RequestQuote');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] RequestQuote event failed', [
                 'error' => $e->getMessage()

@@ -12,15 +12,15 @@ use Magento\Framework\Model\AbstractModel;
 
 class OrderApproval extends AbstractModel
 {
-    const STATUS_PENDING = 'pending';
-    const STATUS_APPROVED = 'approved';
-    const STATUS_REJECTED = 'rejected';
-    const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_CANCELLED = 'cancelled';
 
-    const LEVEL_BUYER = 1;      // Comprador
-    const LEVEL_MANAGER = 2;    // Gerente
-    const LEVEL_FINANCE = 3;    // Financeiro
-    const LEVEL_DIRECTOR = 4;   // Diretor
+    public const LEVEL_BUYER = 1;      // Comprador
+    public const LEVEL_MANAGER = 2;    // Gerente
+    public const LEVEL_FINANCE = 3;    // Financeiro
+    public const LEVEL_DIRECTOR = 4;   // Diretor
 
     /**
      * @inheritDoc

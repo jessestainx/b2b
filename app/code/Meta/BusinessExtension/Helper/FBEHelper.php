@@ -18,6 +18,7 @@ class FBEHelper
     private const GRAPH_API_BASE_URL = 'https://graph.facebook.com';
     private const REQUEST_TIMEOUT_SECONDS = 15;
     private const CONNECT_TIMEOUT_SECONDS = 5;
+    private const DNS_CACHE_TIMEOUT_SECONDS = 300;
     private const MAX_RETRIES = 2;
     private const MAX_RETRY_DELAY_MS = 1500;
     private const RETRYABLE_HTTP_CODES = [429, 500, 502, 503, 504];
@@ -26,6 +27,18 @@ class FBEHelper
     private const META_PERMISSION_DENIED_CODE = 10;
     private const CATALOG_RATE_LIMIT_COOLDOWN_MS = 60000;
     private const COOLDOWN_SKIP_LOG_INTERVAL_MS = 5000;
+    private const RETRYABLE_NETWORK_ERROR_MARKERS = [
+        'resolving timed out',
+        'could not resolve host',
+        'name or service not known',
+        'temporary failure in name resolution',
+        'connection timed out',
+        'operation timed out',
+        'failed to connect',
+        'connection refused',
+        'network is unreachable',
+        'ssl connect error',
+    ];
 
     /** @var array<string, int> */
     private static array $endpointCooldownUntilMs = [];
@@ -177,16 +190,25 @@ class FBEHelper
                     'http_status' => 0
                 ];
 
-                $this->logger->error('[Meta FBE] API request failed', [
+                $hasRetryAttemptsRemaining = $attempt <= self::MAX_RETRIES;
+                $isRetryableNetworkFailure = $this->isRetryableNetworkFailure($e);
+                $logContext = [
                     'method' => $method,
                     'endpoint' => $endpoint,
                     'store_id' => $storeId,
                     'attempt' => $attempt,
+                    'will_retry' => $hasRetryAttemptsRemaining && $isRetryableNetworkFailure,
                     'exception_type' => $e::class,
                     'error' => $e->getMessage()
-                ]);
+                ];
 
-                if ($attempt > self::MAX_RETRIES) {
+                if ($hasRetryAttemptsRemaining && $isRetryableNetworkFailure) {
+                    $this->logger->warning('[Meta FBE] API request transient failure, retrying', $logContext);
+                } else {
+                    $this->logger->error('[Meta FBE] API request failed', $logContext);
+                }
+
+                if (!$isRetryableNetworkFailure || !$hasRetryAttemptsRemaining) {
                     return $lastResponse;
                 }
 
@@ -211,6 +233,11 @@ class FBEHelper
     {
         $this->curl->setTimeout(self::REQUEST_TIMEOUT_SECONDS);
         $this->curl->setOption(CURLOPT_CONNECTTIMEOUT, self::CONNECT_TIMEOUT_SECONDS);
+        $this->curl->setOption(CURLOPT_DNS_CACHE_TIMEOUT, self::DNS_CACHE_TIMEOUT_SECONDS);
+        if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')) {
+            // VPS com IPv6 instável pode gerar timeout de resolução; forçar IPv4 reduz falhas transitórias.
+            $this->curl->setOption(CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        }
         $this->curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->curl->setHeaders([]);
         $this->curl->removeCookies();
@@ -312,6 +339,22 @@ class FBEHelper
         $delayMs = min(self::MAX_RETRY_DELAY_MS, max(0, $delayMs));
 
         usleep($delayMs * 1000);
+    }
+
+    private function isRetryableNetworkFailure(Throwable $exception): bool
+    {
+        $message = strtolower(trim($exception->getMessage()));
+        if ($message === '') {
+            return false;
+        }
+
+        foreach (self::RETRYABLE_NETWORK_ERROR_MARKERS as $marker) {
+            if (str_contains($message, $marker)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function getRetryAfterDelayMs(): ?int

@@ -29,24 +29,6 @@
     </rule>
 
     <!--
-        DISABLED: WordPress_Security_EscapeOutput
-        This rule is WordPress-specific and flags Magento's __() translation
-        helper as XSS risk. It is a false positive in Magento context.
-    -->
-    <rule ref="WordPress.Security.EscapeOutput">
-        <severity>0</severity>
-    </rule>
-
-    <!--
-        Downgrade MEQP1 file_get_contents warning level for test files.
-        file_get_contents() is legitimate in unit tests for reading fixtures.
-    -->
-    <rule ref="MEQP1.Security.DiscouragedFunction">
-        <exclude-pattern>*/Test/*</exclude-pattern>
-        <exclude-pattern>*/tests/*</exclude-pattern>
-    </rule>
-
-    <!--
         DISABLED: PSR2.Methods.MethodDeclaration (underscore prefix)
         Magento 2 uses `protected function _construct()` as a second-stage
         initializer in AbstractModel. It is a valid framework pattern,
@@ -77,17 +59,38 @@
             <property name="lineLimit" value="150"/>
             <property name="absoluteLineLimit" value="200"/>
         </properties>
+        <!--
+            Excludes files that intentionally embed long single-line content:
+            minified inline JS/CSS (performance-critical head/critical-CSS
+            injection) or seeded CMS HTML blocks (Data Patches). Wrapping
+            these would either break the minification or make the seed
+            content diff-unfriendly without any real readability gain.
+        -->
+        <exclude-pattern>*/Theme/Plugin/Response/OptimizeHeadStylesPlugin.php</exclude-pattern>
+        <exclude-pattern>*/Theme/Model/HeaderImpeccableCascadeLockCss.php</exclude-pattern>
+        <exclude-pattern>*/StoreSetup/Setup/StoreConfigurator.php</exclude-pattern>
+        <exclude-pattern>*/StoreSetup/Setup/Patch/Data/*.php</exclude-pattern>
     </rule>
 
     <!--
-        ADJUSTED: MEQP1.Security.DiscouragedFunction
-        Excludes test files (already done above). Additionally, suppresses the
-        rule entirely because the flagged functions (file_exists, is_dir,
+        Minified build artifacts are not source files and must not be
+        style-checked (they also trip the tokenizer, which cannot parse
+        minified CSS/JS).
+    -->
+    <exclude-pattern>*.min.css</exclude-pattern>
+    <exclude-pattern>*.min.js</exclude-pattern>
+
+    <!--
+        ADJUSTED: Magento2.Functions.DiscouragedFunction
+        (renamed from the legacy MEQP1.Security.DiscouragedFunction sniff,
+        which no longer exists in magento/magento-coding-standard and was
+        silently breaking the entire phpcs run with an unresolved-sniff error).
+        Suppressed because the flagged functions (file_exists, is_dir,
         chmod, sleep, fclose, file_put_contents with LOCK_EX) are all
         legitimate uses in this Magento 2 codebase — they are not security
         risks in internal CLI/cron/integration contexts.
     -->
-    <rule ref="MEQP1.Security.DiscouragedFunction">
+    <rule ref="Magento2.Functions.DiscouragedFunction">
         <severity>0</severity>
     </rule>
 

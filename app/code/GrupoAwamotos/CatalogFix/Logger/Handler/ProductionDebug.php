@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Copyright © AWA Motos. All rights reserved.
  */
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CatalogFix\Logger\Handler;

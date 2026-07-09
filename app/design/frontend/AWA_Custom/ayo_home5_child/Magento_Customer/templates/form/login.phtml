@@ -1,0 +1,122 @@
+<?php
+/**
+ * AWA Motos - Login form enhanced
+ * Sprint 3 (Security + UX): adicionar captcha + indicador de forca.
+ */
+declare(strict_types=1);
+?>
+<?php
+/**
+ * Login form template
+ *
+ * @var \Magento\Customer\Block\Form\Login $block
+ */
+?>
+<div class="block block-customer-login awa-login-enhanced">
+    <div class="block-title">
+        <strong id="block-customer-login-heading" role="heading" aria-level="2">
+            <?= $block->escapeHtml(__('Entrar')) ?>
+        </strong>
+    </div>
+    <div class="block-content" aria-labelledby="block-customer-login-heading">
+        <form class="form form-login"
+              action="<?= $block->escapeUrl($block->getPostActionUrl()) ?>"
+              method="post"
+              id="login-form"
+              data-mage-init='{"validation":{}}'
+              aria-label="<?= $block->escapeHtmlAttr(__('Formulario de login')) ?>">
+            <?= $block->getBlockHtml('formkey') ?>
+
+            <fieldset class="fieldset login" data-hasrequired="<?= $block->escapeHtmlAttr(__('* Required Fields')) ?>">
+                <legend class="awa-sr-only"><?= $block->escapeHtml(__('Credenciais de acesso')) ?></legend>
+
+                <div class="field email required">
+                    <label class="label" for="email">
+                        <span><?= $block->escapeHtml(__('E-mail')) ?></span>
+                    </label>
+                    <div class="control">
+                        <input name="login[username]"
+                               value="<?= $block->escapeHtmlAttr($block->getUsername()) ?>"
+                               <?php if ($block->getAutocomplete()): ?> autocomplete="<?= $block->escapeHtmlAttr($block->getAutocomplete()) ?>"<?php endif; ?>
+                               id="email"
+                               type="email"
+                               class="input-text"
+                               title="<?= $block->escapeHtmlAttr(__('Email')) ?>"
+                               placeholder="<?= $block->escapeHtmlAttr(__('seu@email.com')) ?>"
+                               data-validate="{required:true, 'validate-email':true}"
+                               aria-required="true"
+                               aria-describedby="email-help"
+                               autocomplete="email"
+                               inputmode="email" />
+                        <span id="email-help" class="awa-sr-only">
+                            <?= $block->escapeHtml(__('Digite o email cadastrado')) ?>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field password required">
+                    <label for="pass" class="label">
+                        <span><?= $block->escapeHtml(__('Senha')) ?></span>
+                    </label>
+                    <div class="control">
+                        <input name="login[password]"
+                               type="password"
+                               <?php if ($block->getAutocomplete()): ?> autocomplete="<?= $block->escapeHtmlAttr($block->getAutocomplete()) ?>"<?php endif; ?>
+                               class="input-text"
+                               id="pass"
+                               title="<?= $block->escapeHtmlAttr(__('Password')) ?>"
+                               placeholder="<?= $block->escapeHtmlAttr(__('Sua senha')) ?>"
+                               data-validate="{required:true}"
+                               aria-required="true"
+                               autocomplete="current-password" />
+                    </div>
+                </div>
+
+                <div class="field password-strength" data-awa-password-strength hidden>
+                    <label class="label"><?= $block->escapeHtml(__('Forca da senha')) ?></label>
+                    <div class="control">
+                        <div class="awa-password-strength__bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            <div class="awa-password-strength__fill"></div>
+                        </div>
+                        <p class="awa-password-strength__label" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <?php if ($block->getChildBlock('captcha')): ?>
+                <?= $block->getChildHtml('captcha') ?>
+                <?php endif; ?>
+
+                <?php if ($block->getChildBlock('additional-login-form-fields')): ?>
+                <?= $block->getChildHtml('additional-login-form-fields') ?>
+                <?php endif; ?>
+            </fieldset>
+
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button type="submit"
+                            class="action login primary"
+                            name="send"
+                            id="send2"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Entrar na minha conta')) ?>">
+                        <span><?= $block->escapeHtml(__('Entrar')) ?></span>
+                    </button>
+                </div>
+                <div class="secondary">
+                    <a class="action remind"
+                       href="<?= $block->escapeUrl($block->getForgotPasswordUrl()) ?>"
+                       aria-label="<?= $block->escapeHtmlAttr(__('Recuperar minha senha esquecida')) ?>">
+                        <span><?= $block->escapeHtml(__('Esqueceu a senha?')) ?></span>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/x-magento-init">
+{
+    "#login-form": {
+        "validation": {},
+        "awaLoginEnhancer": {}
+    }
+}
+</script>

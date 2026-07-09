@@ -15,7 +15,8 @@ class CustomerRegisterSuccess implements ObserverInterface
     public function __construct(
         private readonly LeadLoversClient $client,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {

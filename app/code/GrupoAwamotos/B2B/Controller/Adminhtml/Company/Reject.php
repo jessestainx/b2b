@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Company;
 
 use GrupoAwamotos\B2B\Model\CustomerApproval;
@@ -16,7 +18,8 @@ class Reject extends Action implements HttpPostActionInterface
         Context $context,
         private readonly CustomerApproval $customerApproval,
         private readonly AdminSession $adminSession
-    ) { parent::__construct($context); }
+    ) { parent::__construct($context);
+    }
 
     public function execute()
     {

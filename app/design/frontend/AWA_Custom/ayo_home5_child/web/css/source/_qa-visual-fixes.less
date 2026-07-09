@@ -53,7 +53,7 @@ body .page-wrapper .awa-site-header .awa-nav-bar {
           color: var(--awa-text-inverse);
           font-weight: 500;
           font-size: var(--awa-font-sm);
-          padding: 0 16px;
+          padding-inline: var(--awa-page-pad-mobile, 16px); padding-block: 0;
           text-decoration: none;
           transition: background 0.15s ease;
           background: transparent;
@@ -233,7 +233,7 @@ body.catalogsearch-result-index .sidebar .filter-options input[type="checkbox"] 
   width: 260px;
   flex: 0 0 260px;
 
-  @media (max-width: 960px) {
+  @media (max-inline-size: var(--awa-container-small-max, 960px)) {
     display: none !important;
   }
 }
@@ -362,7 +362,7 @@ body.catalogsearch-result-index .breadcrumbs a {
   height: 44px;
   border: 1.5px solid var(--awa-border, @awa-color-border);
   border-radius: var(--awa-radius-md, 8px);
-  padding: 0 16px;
+  padding-inline: var(--awa-page-pad-mobile, 16px); padding-block: 0;
   font-size: var(--awa-fs-xs);
   transition: border-color 0.2s ease;
 

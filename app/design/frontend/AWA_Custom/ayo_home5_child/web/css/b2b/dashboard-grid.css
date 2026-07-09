@@ -9,12 +9,12 @@
 .b2b-dashboard {
     max-width: var(--awa-container, 1280px);
     margin-inline: auto;
-    padding: 0 var(--awa-container-pad, 24px) var(--awa-space-10, 40px);
+    padding: 0 0 var(--awa-acct-gap-lg, 16px);
 }
 
 @media (max-width: 767px) {
     .b2b-dashboard {
-        padding-inline: var(--awa-container-pad-sm, 15px);
+        padding-inline: 0;
     }
 }
 
@@ -27,9 +27,9 @@
 */
 .b2b-summary-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--awa-space-4, 16px);
-    margin: var(--awa-space-5, 20px) 0;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 0;
 }
 
 @media (max-width: 639px) {
@@ -47,13 +47,13 @@
 */
 .b2b-quick-actions {
     display: block;
-    margin: var(--awa-space-6, 24px) 0;
+    margin: 0;
 }
 
 .b2b-quick-actions .actions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: var(--awa-space-3, 12px);
+    gap: 12px;
 }
 
 @media (max-width: 479px) {
@@ -108,7 +108,7 @@
 
 /* --- 6. Sections spacing --------------------------------------- */
 .b2b-section {
-    margin-bottom: var(--awa-space-8, 32px);
+    margin-bottom: 12px;
 }
 
 /* --- 7. Reorder list ------------------------------------------ */
@@ -130,8 +130,8 @@
 
 /* --- 9. Visual polish for B2B cards ----------------------------- */
 .b2b-summary-cards .summary-card {
-    background: var(--awa-bg, #fff);
-    border: 1px solid var(--awa-border, #e5e5e5);
+    background: var(--awa-bg, var(--awa-bg));
+    border: 1px solid var(--awa-border, var(--awa-border));
     border-radius: var(--awa-radius-lg, 16px);
     padding: var(--awa-space-4-5, 18px);
     box-shadow: var(--awa-shadow-xs, 0 1px 3px rgba(0, 0, 0, 0.04));
@@ -158,38 +158,47 @@
     font-size: clamp(22px, 2.2vw, 30px);
     line-height: 1.1;
     font-weight: var(--awa-weight-extrabold, 800);
-    color: var(--awa-text, #1a1a1a);
+    color: var(--awa-text, var(--awa-text-primary));
 }
 
 /* --- 10. Quick actions card buttons ------------------------------ */
 .b2b-quick-actions .action-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: var(--awa-btn-h, 44px);
-    padding: var(--awa-space-2-5, 10px) var(--awa-space-3-5, 14px);
-    border: 1.5px solid var(--awa-border, #e5e5e5);
-    border-radius: var(--awa-radius-md, 8px);
-    background: var(--awa-bg, #fff);
+    gap: 4px;
+    min-height: 72px;
+    padding: 8px;
+    border: 1px solid var(--awa-border, var(--awa-border));
+    border-radius: 8px;
+    background: var(--awa-bg, var(--awa-bg));
     color: var(--awa-text-secondary, #555);
-    font-size: var(--awa-font-sm, 12px);
-    font-weight: var(--awa-weight-semibold, 600);
+    font-size: 12px;
+    font-weight: 600;
     text-align: center;
     text-decoration: none;
-    transition: all var(--awa-duration-fast, 0.15s) var(--awa-ease);
+}
+
+.b2b-quick-actions .action-item svg {
+    width: 24px;
+    height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    flex-shrink: 0;
 }
 
 .b2b-quick-actions .action-item:hover,
 .b2b-quick-actions .action-item:focus-visible {
-    border-color: var(--awa-primary, #b73337);
+    border-color: var(--awa-primary, var(--awa-primary));
     background: var(--awa-primary-light, #fef2f2);
-    color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, var(--awa-primary));
 }
 
 /* --- 11. ERP product cards -------------------------------------- */
 .erp-products-grid .erp-product-card {
-    background: var(--awa-bg, #fff);
-    border: 1px solid var(--awa-border, #e5e5e5);
+    background: var(--awa-bg, var(--awa-bg));
+    border: 1px solid var(--awa-border, var(--awa-border));
     border-radius: var(--awa-radius-lg, 16px);
     padding: var(--awa-space-3-5, 14px);
     box-shadow: var(--awa-shadow-xs, 0 1px 3px rgba(0, 0, 0, 0.04));
@@ -207,7 +216,7 @@
     font-size: var(--awa-font-base, 14px);
     font-weight: var(--awa-weight-bold, 700);
     line-height: 1.35;
-    color: var(--awa-text, #1a1a1a);
+    color: var(--awa-text, var(--awa-text-primary));
 }
 
 .erp-products-grid .erp-product-card .product-meta {
@@ -220,18 +229,126 @@
 .b2b-section > h2,
 .b2b-section > h3,
 .b2b-section .section-title {
-    margin: 0 0 var(--awa-space-3, 12px);
-    font-size: var(--awa-font-2xl, 20px);
-    line-height: 1.2;
-    font-weight: var(--awa-weight-extrabold, 800);
-    color: var(--awa-text, #1a1a1a);
-    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 700;
+    color: var(--awa-text, var(--awa-text-primary));
+    letter-spacing: normal;
+}
+
+.b2b-company-info {
+    padding: 12px;
+    border: 1px solid var(--awa-border, var(--awa-border));
+    border-radius: 8px;
+    background: var(--awa-bg, var(--awa-bg));
+}
+
+.b2b-company-info .company-info-title {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.b2b-company-info .company-details {
+    display: grid;
+    gap: 8px;
+}
+
+.b2b-company-info .detail-item {
+    display: grid;
+    grid-template-columns: minmax(100px, 140px) minmax(0, 1fr);
+    gap: 8px 12px;
+    align-items: baseline;
+    font-size: 13px;
+}
+
+.b2b-company-info .detail-item .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--awa-text-muted, #888);
 }
 
 /* --- 13. Suggestions cards -------------------------------------- */
 .suggestions-grid > * {
-    background: var(--awa-bg, #fff);
-    border: 1px solid var(--awa-border, #e5e5e5);
+    background: var(--awa-bg, var(--awa-bg));
+    border: 1px solid var(--awa-border, var(--awa-border));
     border-radius: var(--awa-radius-lg, 16px);
     padding: var(--awa-space-4, 16px);
+}
+
+/* --- 14. Touch targets + focus (WCAG 2.5.5) --------------------- */
+.b2b-dashboard .b2b-tour-link,
+.b2b-dashboard .b2b-quick-actions .action-item,
+.b2b-dashboard .b2b-quick-actions .actions-grid > a {
+    min-height: var(--awa-touch-target, 44px);
+    box-sizing: border-box;
+}
+
+.b2b-dashboard .b2b-tour-link:focus-visible,
+.b2b-dashboard .b2b-quick-actions .action-item:focus-visible,
+.b2b-dashboard .b2b-quick-actions .actions-grid > a:focus-visible,
+.b2b-dashboard .checklist-action:focus-visible {
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
+    outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+    .b2b-company-info .detail-item {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}
+
+/* --- 15. Breadcrumbs — separador único -------------------------- */
+.b2b-breadcrumbs-container .breadcrumbs .item:not(:last-child)::after {
+    content: none !important;
+    display: none !important;
+}
+
+.b2b-breadcrumbs-container .breadcrumbs .item + .item::before {
+    content: '/' !important;
+    margin-inline: 0.35em;
+    color: var(--awa-text-muted, var(--awa-text-secondary));
+    font-weight: 400;
+}
+
+/* --- 16. Intelligence — densidade comercial (anti hero-metric) --- */
+.b2b-intelligence-section .intelligence-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--awa-s-2, 16px);
+}
+
+.b2b-intelligence-section .freq-value {
+    font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--awa-text-primary, var(--awa-text));
+}
+
+.b2b-intelligence-section .advanced-chart {
+    height: clamp(220px, 32vw, 320px) !important;
+    min-height: 220px;
+}
+
+.b2b-dashboard .b2b-discount-badge .discount-value {
+    font-size: clamp(1.5rem, 2.5vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.b2b-dashboard .b2b-discount-badge .discount-label {
+    font-size: var(--awa-fs-sm, 13px);
+    font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .b2b-summary-cards .summary-card,
+    .b2b-intelligence-section .intelligence-card,
+    .erp-products-grid .erp-product-card {
+        transition: none !important;
+        transform: none !important;
+    }
 }

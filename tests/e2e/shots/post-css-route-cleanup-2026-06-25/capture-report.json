@@ -1,0 +1,179 @@
+{
+  "generatedAt": "2026-06-25T08:21:09.861Z",
+  "results": [
+    {
+      "route": "home",
+      "url": "https://awamotos.com/",
+      "viewport": "1440x900",
+      "file": "home__vp-1440x900.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "home",
+      "url": "https://awamotos.com/",
+      "viewport": "768x1024",
+      "file": "home__vp-768x1024.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "home",
+      "url": "https://awamotos.com/",
+      "viewport": "390x844",
+      "file": "home__vp-390x844.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "plp",
+      "url": "https://awamotos.com/retrovisores.html",
+      "viewport": "1440x900",
+      "file": "plp__vp-1440x900.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "plp",
+      "url": "https://awamotos.com/retrovisores.html",
+      "viewport": "768x1024",
+      "file": "plp__vp-768x1024.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "plp",
+      "url": "https://awamotos.com/retrovisores.html",
+      "viewport": "390x844",
+      "file": "plp__vp-390x844.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "pdp",
+      "url": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "viewport": "1440x900",
+      "file": "pdp__vp-1440x900.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "pdp",
+      "url": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "viewport": "768x1024",
+      "file": "pdp__vp-768x1024.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "pdp",
+      "url": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "viewport": "390x844",
+      "file": "pdp__vp-390x844.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "search_real",
+      "url": "https://awamotos.com/catalogsearch/result/?q=bagageiro",
+      "viewport": "1440x900",
+      "file": "search_real__vp-1440x900.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "search_real",
+      "url": "https://awamotos.com/catalogsearch/result/?q=bagageiro",
+      "viewport": "768x1024",
+      "file": "search_real__vp-768x1024.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "search_real",
+      "url": "https://awamotos.com/catalogsearch/result/?q=bagageiro",
+      "viewport": "390x844",
+      "file": "search_real__vp-390x844.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "b2b_login",
+      "url": "https://awamotos.com/b2b/account/login/",
+      "viewport": "1440x900",
+      "file": "b2b_login__vp-1440x900.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/b2b/account/login/",
+      "bytes": 70676
+    },
+    {
+      "route": "b2b_login",
+      "url": "https://awamotos.com/b2b/account/login/",
+      "viewport": "768x1024",
+      "file": "b2b_login__vp-768x1024.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/b2b/account/login/",
+      "bytes": 70306
+    },
+    {
+      "route": "b2b_login",
+      "url": "https://awamotos.com/b2b/account/login/",
+      "viewport": "390x844",
+      "file": "b2b_login__vp-390x844.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/b2b/account/login/",
+      "bytes": 62888
+    },
+    {
+      "route": "b2b_register",
+      "url": "https://awamotos.com/b2b/register/",
+      "viewport": "1440x900",
+      "file": "b2b_register__vp-1440x900.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/b2b/register/",
+      "bytes": 84686
+    },
+    {
+      "route": "b2b_register",
+      "url": "https://awamotos.com/b2b/register/",
+      "viewport": "768x1024",
+      "file": "b2b_register__vp-768x1024.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/b2b/register/",
+      "bytes": 85953
+    },
+    {
+      "route": "b2b_register",
+      "url": "https://awamotos.com/b2b/register/",
+      "viewport": "390x844",
+      "file": "b2b_register__vp-390x844.png",
+      "status": "ok",
+      "finalUrl": "https://awamotos.com/b2b/register/",
+      "bytes": 68486
+    },
+    {
+      "route": "cart",
+      "url": "https://awamotos.com/checkout/cart/",
+      "viewport": "1440x900",
+      "file": "cart__vp-1440x900.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "cart",
+      "url": "https://awamotos.com/checkout/cart/",
+      "viewport": "768x1024",
+      "file": "cart__vp-768x1024.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    },
+    {
+      "route": "cart",
+      "url": "https://awamotos.com/checkout/cart/",
+      "viewport": "390x844",
+      "file": "cart__vp-390x844.png",
+      "status": "error",
+      "error": "page.goto: Timeout 45000ms exceeded."
+    }
+  ]
+}

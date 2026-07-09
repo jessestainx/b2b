@@ -12,8 +12,12 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Cron;
 
 use GrupoAwamotos\B2B\Helper\Config;
+use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use GrupoAwamotos\B2B\Model\ShoppingListService;
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -28,6 +32,8 @@ class ProcessRecurringShoppingLists
     private CartRepositoryInterface $cartRepository;
     private ProductRepositoryInterface $productRepository;
     private StoreManagerInterface $storeManager;
+    private CustomerRepositoryInterface $customerRepository;
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -37,6 +43,8 @@ class ProcessRecurringShoppingLists
         CartRepositoryInterface $cartRepository,
         ProductRepositoryInterface $productRepository,
         StoreManagerInterface $storeManager,
+        CustomerRepositoryInterface $customerRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
         LoggerInterface $logger
     ) {
         $this->shoppingListService = $shoppingListService;
@@ -45,6 +53,8 @@ class ProcessRecurringShoppingLists
         $this->cartRepository = $cartRepository;
         $this->productRepository = $productRepository;
         $this->storeManager = $storeManager;
+        $this->customerRepository = $customerRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->logger = $logger;
     }
 
@@ -63,12 +73,18 @@ class ProcessRecurringShoppingLists
             return;
         }
 
+        $customerIds = [];
+        foreach ($dueLists as $list) {
+            $customerIds[] = (int) $list->getCustomerId();
+        }
+        $approvedCustomerIds = $this->getApprovedCustomerIds($customerIds);
+
         $processed = 0;
         $errors = 0;
 
         foreach ($dueLists as $list) {
             try {
-                $this->processRecurringList($list);
+                $this->processRecurringList($list, $approvedCustomerIds);
                 $processed++;
             } catch (\Exception $e) {
                 $errors++;
@@ -87,10 +103,18 @@ class ProcessRecurringShoppingLists
         ));
     }
 
-    private function processRecurringList($list): void
+    private function processRecurringList($list, array $approvedCustomerIds): void
     {
         $customerId = (int) $list->getCustomerId();
         $listId = (int) $list->getId();
+
+        if (!isset($approvedCustomerIds[$customerId])) {
+            $this->rescheduleList($list, sprintf(
+                'Cliente #%d não está aprovado para recorrência automática.',
+                $customerId
+            ));
+            return;
+        }
 
         // Create a new cart for the customer
         $cartId = $this->cartManagement->createEmptyCartForCustomer($customerId);
@@ -101,13 +125,23 @@ class ProcessRecurringShoppingLists
             $quote->setStoreId((int) $store->getId());
         }
 
-        // Load list items and add to cart
+        // Load list items and add to cart (batch-loading products avoids N+1 queries)
         $items = $list->getItemsCollection();
+
+        $productIds = [];
+        foreach ($items as $item) {
+            $productIds[] = (int) $item->getProductId();
+        }
+        $products = $this->getProductsByIds($productIds);
+
         $added = 0;
 
         foreach ($items as $item) {
             try {
-                $product = $this->productRepository->getById((int) $item->getProductId());
+                $product = $products[(int) $item->getProductId()] ?? null;
+                if ($product === null) {
+                    throw new NoSuchEntityException(__('Produto não encontrado.'));
+                }
 
                 if (!$product->isSalable()) {
                     $this->logger->warning(sprintf(
@@ -137,11 +171,7 @@ class ProcessRecurringShoppingLists
         }
 
         // Update next_order_date
-        $intervalDays = (int) $list->getData('recurring_interval');
-        if ($intervalDays < 1) {
-            $intervalDays = 30;
-        }
-        $nextDate = date('Y-m-d', strtotime("+{$intervalDays} days"));
+        $nextDate = $this->calculateNextDate($list);
         $list->setData('next_order_date', $nextDate);
         $list->save();
 
@@ -150,6 +180,96 @@ class ProcessRecurringShoppingLists
             $listId,
             $added,
             $customerId,
+            $nextDate
+        ));
+    }
+
+    /**
+     * Batch-load customers and resolve which ones are B2B-approved, avoiding
+     * one customerRepository->getById() call per due list.
+     *
+     * @param int[] $customerIds
+     * @return array<int, bool> Map of approved customer IDs (present => approved)
+     */
+    private function getApprovedCustomerIds(array $customerIds): array
+    {
+        $customerIds = array_values(array_unique(array_filter($customerIds, static fn ($id) => $id > 0)));
+        if ($customerIds === []) {
+            return [];
+        }
+
+        $approved = [];
+        try {
+            $searchCriteria = $this->searchCriteriaBuilder
+                ->addFilter('entity_id', $customerIds, 'in')
+                ->create();
+
+            foreach ($this->customerRepository->getList($searchCriteria)->getItems() as $customer) {
+                $statusAttribute = $customer->getCustomAttribute('b2b_approval_status');
+                $status = $statusAttribute ? (string) $statusAttribute->getValue() : '';
+
+                if ($status === ApprovalStatus::STATUS_APPROVED) {
+                    $approved[(int) $customer->getId()] = true;
+                }
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning(
+                '[B2B Recurring] Falha ao pré-carregar aprovação de clientes: ' . $e->getMessage()
+            );
+        }
+
+        return $approved;
+    }
+
+    /**
+     * Batch-load products by ID to avoid N+1 queries when iterating list items.
+     *
+     * @param int[] $productIds
+     * @return \Magento\Catalog\Api\Data\ProductInterface[] Indexed by product ID
+     */
+    private function getProductsByIds(array $productIds): array
+    {
+        $productIds = array_values(array_unique(array_filter($productIds)));
+        if ($productIds === []) {
+            return [];
+        }
+
+        $products = [];
+        try {
+            $searchCriteria = $this->searchCriteriaBuilder
+                ->addFilter('entity_id', $productIds, 'in')
+                ->create();
+
+            foreach ($this->productRepository->getList($searchCriteria)->getItems() as $product) {
+                $products[(int) $product->getId()] = $product;
+            }
+        } catch (\Exception $e) {
+            $this->logger->warning('[B2B Recurring] Falha ao pré-carregar produtos: ' . $e->getMessage());
+        }
+
+        return $products;
+    }
+
+    private function calculateNextDate($list): string
+    {
+        $intervalDays = (int) $list->getData('recurring_interval');
+        if ($intervalDays < 1) {
+            $intervalDays = 30;
+        }
+
+        return date('Y-m-d', strtotime("+{$intervalDays} days"));
+    }
+
+    private function rescheduleList($list, string $reason): void
+    {
+        $nextDate = $this->calculateNextDate($list);
+        $list->setData('next_order_date', $nextDate);
+        $list->save();
+
+        $this->logger->info(sprintf(
+            '[B2B Recurring] Lista #%d reagendada sem gerar carrinho. Motivo: %s Próxima: %s',
+            (int) $list->getId(),
+            $reason,
             $nextDate
         ));
     }

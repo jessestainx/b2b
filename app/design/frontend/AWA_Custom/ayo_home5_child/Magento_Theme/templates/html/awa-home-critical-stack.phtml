@@ -22,7 +22,7 @@ $stackEsc = $block->escapeUrl($stackUrl);
 <?php
 /** awa-home-corporate-density-grid: removido de cms_index_index.xml (era media="all" blocking), carregado aqui async */
 $__corpGridUrl = $block->escapeUrl(
-    $block->getViewFileUrl('css/awa-home-corporate-density-grid-2026-06.min.css')
+    $block->getViewFileUrl('css/awa-home-corporate-density-grid-2026-06.min.css') . '?v=20260629-product-design-audit-polish'
 );
 ?>
 <link rel="preload" href="<?= $__corpGridUrl ?>" as="style"/>

@@ -1,0 +1,184 @@
+name: Playwright Visual QA
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "URL base para QA visual. Ex: https://staging.awamotos.com"
+        required: true
+        type: string
+      suite:
+        description: "Escopo dos testes"
+        required: false
+        default: "smoke"
+        type: choice
+        options:
+          - smoke
+          - full
+      allow_production_validation:
+        description: "Permitir awamotos.com? Apenas QA visual read-only."
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playwright-visual-qa-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  resolve-url:
+    name: Validar BASE_URL
+    runs-on: ubuntu-latest
+    outputs:
+      base_url: ${{ steps.resolve.outputs.base_url }}
+      allow_production: ${{ steps.resolve.outputs.allow_production }}
+      suite: ${{ steps.resolve.outputs.suite }}
+    steps:
+      - name: Resolver URL alvo
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_BASE_URL: ${{ inputs.base_url }}
+          DISPATCH_SUITE: ${{ inputs.suite || 'smoke' }}
+          DISPATCH_ALLOW_PROD: ${{ inputs.allow_production_validation || 'false' }}
+          PR_BASE_URL: ${{ vars.BASE_URL || secrets.BASE_URL || vars.PLAYWRIGHT_BASE_URL_PR || secrets.PLAYWRIGHT_BASE_URL_PR }}
+        run: |
+          python3 - <<'PYEOF'
+          import os
+          import re
+          import sys
+          from urllib.parse import urlparse
+
+          event = os.environ.get("EVENT_NAME", "")
+          raw = (
+              os.environ.get("DISPATCH_BASE_URL", "").strip()
+              if event == "workflow_dispatch"
+              else os.environ.get("PR_BASE_URL", "").strip()
+          )
+          suite = os.environ.get("DISPATCH_SUITE", "smoke").strip() or "smoke"
+          allow_prod = os.environ.get("DISPATCH_ALLOW_PROD", "false").lower() == "true"
+
+          if suite not in {"smoke", "full"}:
+              print(f"::error::Suite invalida: {suite}")
+              sys.exit(1)
+
+          if not raw:
+              print("::error::BASE_URL ausente. Configure vars/secrets BASE_URL para pull_request ou informe base_url no workflow_dispatch.")
+              sys.exit(1)
+
+          if not re.match(r"^https?://", raw):
+              print("::error::BASE_URL invalida. Use URL completa com http:// ou https://.")
+              sys.exit(1)
+
+          parsed = urlparse(raw)
+          host = parsed.hostname or ""
+          if "awamotos.com" in host.lower() and not allow_prod:
+              print("::error::Producao bloqueada por padrao. Para QA read-only em awamotos.com, use allow_production_validation=true no dispatch.")
+              sys.exit(1)
+
+          normalized = raw.rstrip("/")
+          if "awamotos.com" in host.lower():
+              print(f"::warning::QA visual contra producao permitido explicitamente: {parsed.scheme}://{host}")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"base_url={normalized}\n")
+              output.write(f"allow_production={'true' if allow_prod else 'false'}\n")
+              output.write(f"suite={suite}\n")
+
+          print(f"BASE_URL validada: {parsed.scheme}://{host}")
+          print(f"Suite: {suite}")
+          PYEOF
+
+  visual-qa:
+    name: Playwright visual QA
+    needs: resolve-url
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: "true"
+      PLAYWRIGHT_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
+      BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
+      ALLOW_PRODUCTION_VALIDATION: ${{ needs.resolve-url.outputs.allow_production }}
+      PLAYWRIGHT_BLOCK_THIRD_PARTY: "1"
+      PLAYWRIGHT_HTML_OPEN: never
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Install Playwright Chromium only
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke visual QA
+        if: needs.resolve-url.outputs.suite == 'smoke'
+        working-directory: tests/e2e
+        run: |
+          npx playwright test \
+            --config=playwright.config.ts \
+            --project=desktop-1440 \
+            --project=notebook-1280 \
+            --project=mobile-390 \
+            --workers=1 \
+            --retries=1 \
+            --max-failures=8 \
+            --reporter=list,html \
+            specs/visual-audit-home-header-footer.spec.ts \
+            specs/category-plp.spec.ts \
+            specs/pdp-layout.spec.ts
+
+      - name: Run full visual QA
+        if: needs.resolve-url.outputs.suite == 'full'
+        working-directory: tests/e2e
+        run: |
+          npx playwright test \
+            --config=playwright.config.ts \
+            --project=desktop-1440 \
+            --project=notebook-1280 \
+            --project=mobile-390 \
+            --workers=1 \
+            --retries=1 \
+            --max-failures=12 \
+            --reporter=list,html \
+            specs/visual-audit-home-header-footer.spec.ts \
+            specs/header-layout.spec.ts \
+            specs/visual-audit-search-autocomplete.spec.ts \
+            specs/b2b-login-readonly.spec.ts \
+            specs/category-plp.spec.ts \
+            specs/pdp-layout.spec.ts \
+            specs/visual-audit-cart-checkout-404.spec.ts \
+            specs/visual-audit-footer.spec.ts \
+            specs/b2b-register.spec.ts
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-visual-qa-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            tests/e2e/test-results/**
+            tests/e2e/reports/**
+            tests/e2e/playwright-report/**
+            tests/e2e/screenshots/**
+          retention-days: 5

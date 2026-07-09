@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Service;
@@ -41,7 +42,6 @@ class SystemHealthService
                 'last_check' => date('Y-m-d H:i:s'),
                 'recommendations' => $this->generateRecommendations($components)
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('Error checking system health: ' . $e->getMessage());
             return [
@@ -83,7 +83,6 @@ class SystemHealthService
 
             $connection->insertOnDuplicate($tableName, $data);
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('Error updating component health: ' . $e->getMessage());
             return false;
@@ -94,7 +93,7 @@ class SystemHealthService
     {
         try {
             $connection = $this->resourceConnection->getConnection();
-            
+
             // Test basic connectivity
             $startTime = microtime(true);
             $connection->query('SELECT 1');
@@ -102,7 +101,7 @@ class SystemHealthService
 
             // Check slow queries
             $slowQueries = $this->getSlowQueriesCount();
-            
+
             // Check connection count
             $connectionCount = $this->getDatabaseConnections();
 
@@ -134,7 +133,6 @@ class SystemHealthService
                 ],
                 'issues' => $issues
             ];
-
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
@@ -149,7 +147,7 @@ class SystemHealthService
     {
         $issues = [];
         $score = 100;
-        
+
         // Check disk space
         $diskUsage = $this->getDiskUsage();
         if ($diskUsage > 90) {
@@ -188,7 +186,7 @@ class SystemHealthService
     {
         $issues = [];
         $score = 100;
-        
+
         try {
             // Check cache hit ratio
             $hitRatio = $this->getCacheHitRatio();
@@ -216,7 +214,6 @@ class SystemHealthService
                 ],
                 'issues' => $issues
             ];
-
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
@@ -231,9 +228,9 @@ class SystemHealthService
     {
         $issues = [];
         $score = 100;
-        
+
         $logDir = BP . '/var/log/';
-        
+
         // Check log file sizes
         $largeLogs = [];
         if (is_dir($logDir)) {
@@ -297,14 +294,14 @@ class SystemHealthService
     {
         $total = 0;
         $count = 0;
-        
+
         foreach ($components as $component) {
             if (isset($component['score'])) {
                 $total += $component['score'];
                 $count++;
             }
         }
-        
+
         return $count > 0 ? round($total / $count, 2) : 0;
     }
 
@@ -326,7 +323,7 @@ class SystemHealthService
     private function generateRecommendations(array $components): array
     {
         $recommendations = [];
-        
+
         foreach ($components as $name => $component) {
             if (isset($component['score']) && $component['score'] < 80) {
                 switch ($name) {
@@ -348,7 +345,7 @@ class SystemHealthService
                 }
             }
         }
-        
+
         return $recommendations;
     }
 
@@ -427,23 +424,53 @@ class SystemHealthService
         if (!is_dir($cacheDir)) {
             return 0;
         }
-        
+
         $size = 0;
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($cacheDir)
         );
-        
+
         foreach ($iterator as $file) {
             $size += $file->getSize();
         }
-        
+
         return round($size / 1024 / 1024, 2); // MB
     }
 
     private function getRecentErrorRate(): float
     {
-        // This would analyze recent log entries for error rates
-        return 0.05; // 5% error rate
+        $logFile = BP . '/var/log/exception.log';
+        if (!is_readable($logFile)) {
+            return 0.0;
+        }
+
+        $size = filesize($logFile);
+        if ($size === false || $size === 0) {
+            return 0.0;
+        }
+
+        $readBytes = (int)min($size, 512 * 1024);
+        $handle = fopen($logFile, 'rb');
+        if ($handle === false) {
+            return 0.0;
+        }
+
+        fseek($handle, -$readBytes, SEEK_END);
+        $chunk = (string)fread($handle, $readBytes);
+        fclose($handle);
+
+        $cutoff = time() - 3600;
+        $recent = 0;
+        foreach (explode("\n", $chunk) as $line) {
+            if (preg_match('/^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/', $line, $match)) {
+                $ts = strtotime($match[1]);
+                if ($ts !== false && $ts >= $cutoff) {
+                    $recent++;
+                }
+            }
+        }
+
+        return min(1.0, $recent / 20.0);
     }
 
     private function checkErpIntegration(): array

@@ -32,7 +32,7 @@ class CreditTransactions implements ArgumentInterface
     public function getTransactions(): Collection
     {
         $customerId = (int) $this->request->getParam('customer_id');
-        
+
         $collection = $this->collectionFactory->create();
         $collection->addFieldToFilter('customer_id', $customerId)
             ->setOrder('transaction_id', 'DESC')

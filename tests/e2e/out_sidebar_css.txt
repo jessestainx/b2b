@@ -1,8 +1,0 @@
-{
-  "width": 237,
-  "cssWidth": "237.484px",
-  "cssMaxWidth": "100%",
-  "cssMinWidth": "0px",
-  "padding": "0px",
-  "margin": "0px"
-}

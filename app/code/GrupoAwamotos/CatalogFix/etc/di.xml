@@ -35,6 +35,21 @@
                 sortOrder="100"/>
     </type>
 
+    <!-- Fix: acentua nomes de categoria exibidos na PLP (ex.: Carcacas → Carcaças) -->
+    <type name="Magento\Catalog\Model\Category">
+        <plugin name="grupoawamotos_catalogfix_category_name_normalizer"
+                type="GrupoAwamotos\CatalogFix\Plugin\CategoryNameNormalizerPlugin"
+                sortOrder="100"/>
+    </type>
+
+    <!-- Fix: joinUrlRewrite duplica categorias quando redirect antigo + rewrite canônico
+         compartilham entity_id (ex.: categoria 120 → 500 no menu / b2b dashboard). -->
+    <type name="Magento\Catalog\Model\ResourceModel\Category\Collection">
+        <plugin name="grupoawamotos_catalogfix_category_collection_join_url_rewrite"
+                type="GrupoAwamotos\CatalogFix\Plugin\Catalog\ResourceModel\Category\CollectionJoinUrlRewritePlugin"
+                sortOrder="10"/>
+    </type>
+
     <!-- NAV-001: aria-hidden nos badges do CustomMenu (Quente, Novo, etc.) -->
     <type name="Rokanthemes\CustomMenu\Block\Topmenu">
         <plugin name="grupoawamotos_catalogfix_custommenu_badge_aria"
@@ -52,6 +67,20 @@
     <!-- Fix: CssUrls null pointer during static-content:deploy (email-fonts.css) -->
     <preference for="Magento\Deploy\Package\Processor\PostProcessor\CssUrls"
                 type="GrupoAwamotos\CatalogFix\Deploy\CssUrlsSafe"/>
+
+    <!-- Fix: Area code is not set during setup:static-content:deploy -->
+    <type name="Magento\Setup\Console\Command\DeployStaticContentCommand">
+        <plugin name="grupoawamotos_catalogfix_deploy_static_area_code"
+                type="GrupoAwamotos\CatalogFix\Plugin\Console\DeployStaticContentAreaCodePlugin"
+                sortOrder="10"/>
+    </type>
+
+    <!-- Fix: extensões que chamam getAreaCode() em CLI sem área definida -->
+    <type name="Magento\Framework\App\State">
+        <plugin name="grupoawamotos_catalogfix_state_cli_area_fallback"
+                type="GrupoAwamotos\CatalogFix\Plugin\App\StateAreaCodeCliFallbackPlugin"
+                sortOrder="1"/>
+    </type>
 
 
     <!-- Production: raise debug handler minimum level to WARNING to stop cron INFO/DEBUG
@@ -75,6 +104,13 @@
     <!-- PDP-001: Normaliza <title> ALL CAPS (do ERP via meta_title mágico) para Title Case -->
     <type name="Magento\Framework\View\Page\Title">
         <plugin name="grupoawamotos_catalogfix_title_case_normalization"
+                type="GrupoAwamotos\CatalogFix\Plugin\View\Page\Config\TitleNormalizationPlugin"
+                sortOrder="999"/>
+    </type>
+
+    <!-- PDP-004: Normaliza <meta name="title"> ALL CAPS — intercepta PageConfig::setMetaTitle() -->
+    <type name="Magento\Framework\View\Page\Config">
+        <plugin name="grupoawamotos_catalogfix_metatitle_case_normalization"
                 type="GrupoAwamotos\CatalogFix\Plugin\View\Page\Config\TitleNormalizationPlugin"
                 sortOrder="999"/>
     </type>
@@ -169,14 +205,60 @@
                 sortOrder="999"/>
     </type>
 
+    <!-- SRCH-003: terms aggregations on text attributes (marca_moto, modelo_moto, ano_moto)
+         must use .keyword subfield. Without it OpenSearch returns 400, adapter swallows error,
+         PLP shows toolbar count but empty grid (WHERE NULL). -->
+    <type name="Magento\Elasticsearch\SearchAdapter\Query\Builder\Aggregation">
+        <plugin name="grupoawamotos_catalogfix_aggregation_text_keyword"
+                type="GrupoAwamotos\CatalogFix\Plugin\Search\AggregationTextFieldKeywordPlugin"
+                sortOrder="100"/>
+    </type>
+
+    <!-- SRCH-004: same .keyword aggregation bug as SRCH-003, but for the Instant
+         Search/autocomplete path (Mirasvit\SearchElastic\InstantProvider\EngineProvider).
+         No plugin is registered here because that class is instantiated with `new`
+         outside the ObjectManager lifecycle (see Mirasvit\SearchAutocomplete\InstantProvider\
+         InstantProvider, required directly by Mirasvit/SearchAutocomplete/registration.php
+         during early bootstrap) and therefore cannot be intercepted by DI. The fix is
+         applied as a direct edit documented in EngineProvider.php itself
+         (resolveAggregationField(), marked [AWA][SRCH-004]). -->
+
     <!-- Fix: global.php metadata injects null for formIds (module-captcha defines it only
          in etc/frontend/di.xml). When ObjectManager is initialized in global scope (scripts,
          REST API context) Captcha\Model\Checkout\ConfigProvider throws TypeError.
          Providing a global-scope default array prevents the fatal error. -->
+    <!-- Admin: FPC builtin não deve servir HTML vazio (X-Magento-Cache-Debug: HIT, 0 bytes). -->
+    <type name="Magento\PageCache\Model\App\FrontController\BuiltinPlugin">
+        <plugin name="grupoawamotos_catalogfix_disable_admin_builtin_fpc"
+                type="GrupoAwamotos\CatalogFix\Plugin\PageCache\DisableAdminBuiltinFpcPlugin"
+                sortOrder="1"/>
+    </type>
+
+    <!-- PERF-CACHE: get.php / media storage — Cache-Control >= 30d (Lighthouse uses-long-cache-ttl) -->
+    <type name="Magento\Framework\File\Transfer\Adapter\Http">
+        <plugin name="grupoawamotos_catalogfix_media_file_cache_headers"
+                type="GrupoAwamotos\CatalogFix\Plugin\Media\MediaFileCacheHeadersPlugin"
+                sortOrder="10"/>
+    </type>
+    <type name="Magento\MediaStorage\Model\File\Storage\Response">
+        <plugin name="grupoawamotos_catalogfix_media_storage_response_cache_headers"
+                type="GrupoAwamotos\CatalogFix\Plugin\Media\MediaFileCacheHeadersPlugin"
+                sortOrder="10"/>
+    </type>
+
     <type name="Magento\Captcha\Model\Checkout\ConfigProvider">
         <arguments>
             <argument name="formIds" xsi:type="array">
                 <item name="user_login" xsi:type="string">user_login</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="grupoawamotos_catalog_sync_ofertas"
+                      xsi:type="object">GrupoAwamotos\CatalogFix\Console\Command\SyncOfertasCategoryCommand</item>
             </argument>
         </arguments>
     </type>

@@ -365,6 +365,19 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
     }
 
     /**
+     * Native submenu expand control (a11y: button, not div+role=button).
+     */
+    private function renderOpenChildrenToggle(string $ariaLabel, string $controlsId): string
+    {
+        return '<button type="button" class="open-children-toggle navigation__toggle"'
+            . ' aria-label="' . $this->escapeHtmlAttr($ariaLabel) . '"'
+            . ' aria-expanded="false"'
+            . ' aria-haspopup="true"'
+            . ' aria-controls="' . $this->escapeHtmlAttr($controlsId) . '"'
+            . '></button>';
+    }
+
+    /**
      * Allow only safe css sizes (prevents style injection).
      * Examples allowed: 500px, 80%, 20rem, 10em, 50vw
      */
@@ -572,19 +585,17 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 . '>';
 
             if ($hasChildren) {
-                $html .= '<div class="open-children-toggle navigation__toggle"'
-                    . ' role="button"'
-                    . ' tabindex="0"'
-                    . ' aria-label="' . $this->escapeHtmlAttr(__('Expandir subcategorias de ')) . $this->escapeHtmlAttr($child->getName()) . '"'
-                    . ' aria-expanded="false"'
-                    . ' aria-haspopup="true"'
-                    . ' aria-controls="' . $this->escapeHtmlAttr($childSubmenuId) . '"'
-                    . '></div>';
+                $html .= $this->renderOpenChildrenToggle(
+                    (string) __('Expandir subcategorias de ') . (string) $child->getName(),
+                    $childSubmenuId
+                );
             }
 
             $html .= '<a class="navigation__inner-link title-cat-mega-menu"'
                 . ' href="' . $childUrl . '"'
                 . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                . ' title="' . $this->escapeHtmlAttr($child->getName()) . '"'
+                . ' aria-label="' . $this->escapeHtmlAttr($child->getName()) . '"'
                 . '>';
 
             $iconClass = $this->sanitizeClassList($vcMenuFontIcon);
@@ -625,7 +636,8 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
 
             if ($categoryImageUrl !== '') {
                 $html .= '<li class="navigation__inner-item navigation__inner-item--level1 imagem img-subcategory col-2">';
-                $html .= '<a href="' . $categoryUrl . '" class="navigation__inner-link">';
+                $html .= '<a href="' . $categoryUrl . '" class="navigation__inner-link"'
+                    . ' aria-label="' . $categoryNameAttr . '">';
                 $html .= '<img loading="lazy" src="' . $this->escapeUrl($categoryImageUrl) . '" alt="' . $categoryNameAttr . '" width="400" height="400" />';
                 $html .= '</a>';
                 $html .= '</li>';
@@ -633,8 +645,9 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
         }
 
         $html .= '<li class="navigation__inner-item navigation__inner-item--all navigation__inner-item--level1 hb-strong-title">';
-        $html .= '<a href="' . $categoryUrl . '" class="navigation__inner-link">';
-        $html .= $this->escapeHtml(__('Ver tudo'));
+        $html .= '<a href="' . $categoryUrl . '" class="navigation__inner-link"'
+            . ' aria-label="' . $this->escapeHtmlAttr((string) __('Ver todos: %1', $categoryModel->getName())) . '">';
+        $html .= $this->escapeHtml(__('Ver todos'));
         $html .= '</a>';
         $html .= '</li>';
 
@@ -726,14 +739,10 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                     . '>';
 
                 if ($hasChildren) {
-                    $html .= '<div class="open-children-toggle navigation__toggle"'
-                        . ' role="button"'
-                        . ' tabindex="0"'
-                        . ' aria-label="' . $this->escapeHtmlAttr(__('Expandir subcategorias de ')) . $this->escapeHtmlAttr($child->getName()) . '"'
-                        . ' aria-expanded="false"'
-                        . ' aria-haspopup="true"'
-                        . ' aria-controls="' . $this->escapeHtmlAttr($submenuId) . '"'
-                        . '></div>';
+                    $html .= $this->renderOpenChildrenToggle(
+                        (string) __('Expandir subcategorias de ') . (string) $child->getName(),
+                        $submenuId
+                    );
                 }
 
                 $childUrl = $this->escapeUrl($this->getCategoryUrlCached($child));
@@ -744,6 +753,8 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 $html .= '<a' . $linkClassAttr
                     . ' href="' . $childUrl . '"'
                     . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                    . ' title="' . $childNameAttr . '"'
+                    . ' aria-label="' . $childNameAttr . '"'
                     . '>';
 
                 $iconClass = $this->sanitizeClassList($vc_menu_font_icon);
@@ -879,18 +890,16 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
                 . '>';
 
             if ($hasChildren) {
-                $html .= '<div class="open-children-toggle navigation__toggle"'
-                    . ' role="button"'
-                    . ' tabindex="0"'
-                    . ' aria-label="' . $this->escapeHtmlAttr(__('Expandir subcategorias de ')) . $categoryNameAttr . '"'
-                    . ' aria-expanded="false"'
-                    . ' aria-haspopup="true"'
-                    . ' aria-controls="' . $this->escapeHtmlAttr($submenuId) . '"'
-                    . '></div>';
+                $html .= $this->renderOpenChildrenToggle(
+                    (string) __('Expandir subcategorias de ') . (string) $category->getName(),
+                    $submenuId
+                );
             }
 
             $html .= '<a href="' . $categoryUrl . '" class="level-top navigation__link"'
                 . ' data-menu="' . $this->escapeHtmlAttr($menuToken) . '"'
+                . ' title="' . $categoryNameAttr . '"'
+                . ' aria-label="' . $categoryNameAttr . '"'
                 . '>';
 
             $vc_menu_icon_img = $this->_helper->getVerticalIconimageUrl($cat_model);
@@ -985,7 +994,6 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
     public function getCacheKeyInfo(): array
     {
         $templateFile = (string) $this->getTemplateFile();
-        $templateVersion = $this->getTemplateCacheVersion($templateFile);
 
         return [
             'AWA_VERTICAL_MENU',
@@ -994,22 +1002,32 @@ class SafeVerticalmenu extends \Rokanthemes\VerticalMenu\Block\Verticalmenu
             (string)$this->getNameInLayout(),
             (string)$this->getTemplate(),
             $templateFile,
-            $templateVersion,
+            $this->getBlockDependencyCacheVersion($templateFile),
         ];
     }
 
     /**
-     * Returns a stable cache version derived from the resolved template file.
+     * Cache bust when template, block PHP, or theme i18n change.
      */
-    private function getTemplateCacheVersion(string $templateFile): string
+    private function getBlockDependencyCacheVersion(string $templateFile): string
     {
-        if ($templateFile === '' || !is_file($templateFile)) {
-            return '0';
+        $fingerprints = ['harden-26'];
+        $paths = [
+            $templateFile,
+            __FILE__,
+            BP . '/app/design/frontend/AWA_Custom/ayo_home5_child/i18n/pt_BR.csv',
+        ];
+
+        foreach ($paths as $path) {
+            if ($path === '' || !is_file($path)) {
+                continue;
+            }
+
+            $mtime = filemtime($path);
+            $fingerprints[] = basename($path) . ':' . ($mtime !== false ? (string) $mtime : '0');
         }
 
-        $templateModifiedAt = filemtime($templateFile);
-
-        return $templateModifiedAt === false ? '0' : (string) $templateModifiedAt;
+        return implode('|', $fingerprints);
     }
 
     /**

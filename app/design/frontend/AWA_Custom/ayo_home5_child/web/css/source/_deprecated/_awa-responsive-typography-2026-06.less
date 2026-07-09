@@ -1,0 +1,149 @@
+//
+// AWA Motos - Responsive Typography (B33)
+// 2026-06-28 - Substitui font-sizes fixos por clamp() para responsividade
+//
+// Beneficios:
+// - Mobile (< 480px): font-size menor (legibilidade)
+// - Desktop (> 1280px): font-size maior (presenca)
+// - Entre 480-1280: interpolacao suave
+//
+
+// ============================================
+// H1 - Hero titles
+// ============================================
+h1, .awa-h1 {
+    font-size: clamp(28px, 4.5vw, 48px) !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.02em !important;
+}
+
+// ============================================
+// H2 - Section titles
+// ============================================
+h2, .awa-h2, .awa-section-header__title {
+    font-size: clamp(22px, 3.2vw, 32px) !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.01em !important;
+}
+
+// ============================================
+// H3 - Subsection titles
+// ============================================
+h3, .awa-h3, .awa-shelf__title {
+    font-size: clamp(18px, 2.4vw, 24px) !important;
+    line-height: 1.3 !important;
+}
+
+// ============================================
+// H4 - Card titles
+// ============================================
+h4, .awa-h4 {
+    font-size: clamp(16px, 2vw, 20px) !important;
+    line-height: 1.35 !important;
+}
+
+// ============================================
+// Body text
+// ============================================
+body, .awa-body {
+    font-size: clamp(14px, 1.6vw, 16px) !important;
+    line-height: 1.55 !important;
+}
+
+// ============================================
+// Small text (caption, label)
+// ============================================
+small, .awa-small {
+    font-size: clamp(12px, 1.4vw, 14px) !important;
+    line-height: 1.45 !important;
+}
+
+// ============================================
+// Product card title (B09)
+// ============================================
+.product-item-info .product-name,
+.product-item-info .product-item-link {
+    font-size: clamp(13px, 1.5vw, 15px) !important;
+    line-height: 1.35 !important;
+    min-height: 2.7em !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+// ============================================
+// Product price
+// ============================================
+.price, .awa-price {
+    font-size: clamp(16px, 1.8vw, 18px) !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+}
+
+// ============================================
+// Button text
+// ============================================
+button, .action {
+    font-size: clamp(13px, 1.5vw, 15px) !important;
+}
+
+// ============================================
+// Hero CTA
+// ============================================
+.awa-hero-b2b-cta__text,
+.awa-hero-benefits__item {
+    font-size: clamp(14px, 1.7vw, 16px) !important;
+    line-height: 1.5 !important;
+}
+
+// ============================================
+// Banner text
+// ============================================
+.slide-title, .slide-desc {
+    font-size: clamp(20px, 2.8vw, 32px) !important;
+    line-height: 1.2 !important;
+}
+.slide-desc {
+    font-size: clamp(14px, 1.6vw, 16px) !important;
+}
+
+// ============================================
+// Footer text
+// ============================================
+.awa-footer-static5,
+footer {
+    font-size: clamp(13px, 1.5vw, 15px) !important;
+}
+
+// ============================================
+// Mobile-specific (max 768px)
+// ============================================
+@media (max-width: 768px) {
+    .awa-header-shell,
+    .page-header {
+        font-size: 14px !important;
+    }
+    .awa-product-card,
+    .product-item-info {
+        font-size: 13px !important;
+    }
+    .awa-section-header__title {
+        font-size: 22px !important;
+    }
+    .awa-shelf__title {
+        font-size: 18px !important;
+    }
+}
+
+// ============================================
+// Reduced motion
+// ============================================
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

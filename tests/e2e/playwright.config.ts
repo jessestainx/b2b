@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { resolveBaseUrl } from './helpers/resolve-base-url';
 
 /** Carrega tests/e2e/.env para TEST_USER, TEST_PASS, etc. (sem sobrescrever env do shell). */
 function loadEnvFile(filePath: string): void {
@@ -76,6 +77,8 @@ const chromiumLaunchOptions = {
  * Playwright Config — AWA Motos Header Visual Tests
  * Breakpoints: Tablet (768–1024px), Notebook (1024–1366px)
  */
+const resolvedBaseUrl = resolveBaseUrl('playwright');
+
 export default defineConfig({
   testDir: path.join(__dirname, 'specs'),
   // Evitar conflito entre sessões root (VS Code server) e deploy (terminal).
@@ -87,8 +90,8 @@ export default defineConfig({
       : path.join(__dirname, 'test-results'),
   snapshotDir: path.join(__dirname, 'snapshots'),
 
-  /* Timeout por teste: 120s (Magento B2B com KnockoutJS + login assíncrono) */
-  timeout: 120_000,
+  /* Timeout controlado: evita jobs presos no CI, mantendo margem local para debug. */
+  timeout: process.env.CI ? 60_000 : 120_000,
   expect: {
     timeout: 8_000,
     /* Tolerância para comparação de screenshots: 0.3% de pixels diferentes */
@@ -99,8 +102,8 @@ export default defineConfig({
   },
 
   fullyParallel: false, // serial para comparações visuais consistentes
-  retries: 1,
-  workers: 1,
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 1 : 2,
 
   /* Cleanup garantido ao final — evita processos Chrome órfãos no servidor */
   globalTeardown: path.join(__dirname, 'helpers/global-teardown.ts'),
@@ -112,13 +115,13 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: 'https://awamotos.com',
+    baseURL: resolvedBaseUrl,
     /* Ignora erros TLS caso o certificado seja auto-assinado em staging */
     ignoreHTTPSErrors: true,
     /* Captura evidências automáticas para falhas reais e análise no Trace Viewer */
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    trace: 'retain-on-failure',
+    trace: 'on-first-retry',
     actionTimeout: 10_000,
     navigationTimeout: 20_000,
     /* Locale BR para renderização correta de fontes/datas */
@@ -132,6 +135,16 @@ export default defineConfig({
   },
 
   projects: [
+    /* ── DESKTOP ───────────────────────────────────────────── */
+    {
+      name: 'desktop-1440',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 1000 },
+        launchOptions: chromiumLaunchOptions,
+      },
+    },
+
     /* ── TABLET ────────────────────────────────────────────── */
     {
       name: 'tablet-768',
@@ -171,7 +184,7 @@ export default defineConfig({
       name: 'notebook-1280',
       use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 720 },
+        viewport: { width: 1280, height: 800 },
         launchOptions: chromiumLaunchOptions,
       },
     },

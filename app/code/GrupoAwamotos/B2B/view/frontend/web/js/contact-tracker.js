@@ -14,7 +14,8 @@ define([
         let touchpoint = options.touchpoint || 'b2b_contact';
         let capiUrl = urlBuilder.build('b2b/ajax/trackContact');
 
-        function hasBeenTracked(action) {
+        function hasBeenTracked(action)
+        {
             if (!dedupeBySession || !action) {
                 return false;
             }
@@ -26,7 +27,8 @@ define([
             }
         }
 
-        function markTracked(action) {
+        function markTracked(action)
+        {
             if (!dedupeBySession || !action) {
                 return;
             }
@@ -42,7 +44,8 @@ define([
          * Generates a lightweight unique event ID to allow Meta to deduplicate
          * the browser Pixel event against the server-side CAPI event.
          */
-        function generateEventId(action) {
+        function generateEventId(action)
+        {
             return 'contact-b2b-' + action + '-' + Date.now();
         }
 
@@ -50,7 +53,8 @@ define([
          * Fires CAPI via a lightweight server-side AJAX call so the event is
          * captured even when Meta Pixel is blocked by the browser.
          */
-        function sendCapi(action, channel, eventId) {
+        function sendCapi(action, channel, eventId)
+        {
             let formKey = window.FORM_KEY || '';
 
             if (!formKey) {

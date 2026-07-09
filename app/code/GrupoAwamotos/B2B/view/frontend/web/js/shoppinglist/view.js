@@ -5,14 +5,16 @@ define([
 ], function ($, _cookies, alertModal) {
     'use strict';
 
-    function showAlert(message) {
+    function showAlert(message)
+    {
         alertModal({
             title: 'B2B',
             content: message
         });
     }
 
-    function getFormKey() {
+    function getFormKey()
+    {
         if (window.FORM_KEY) {
             return window.FORM_KEY;
         }

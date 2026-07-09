@@ -6,17 +6,18 @@ $canApprove = $block->canApprove();
 $approvalWidgetConfig = [
     'actionUrl' => $block->getActionUrl(),
     'messages' => [
-        'rejectReasonPrompt' => (string) __('Motivo da rejeição:'),
-        'processError' => (string) __('Erro ao processar. Tente novamente.'),
+        'rejectReasonPrompt' => (string) __('Descreva o motivo da rejeição (obrigatório):'),
+        'processError' => (string) __('Não foi possível registrar a decisão. Tente novamente.'),
     ],
 ];
 ?>
 <div class="b2b-approval-page b2b-page-shell"
      data-mage-init='<?= /* @noEscape */ json_encode(['GrupoAwamotos_B2B/js/account/approval-actions' => $approvalWidgetConfig]) ?>'>
     <div class="b2b-section-header">
-        <h1><?= __('Aprovações de Pedidos') ?></h1>
+        <h1><?= $block->escapeHtml(__('Aprovações de Pedidos')) ?></h1>
+        <p class="section-subtitle"><?= $block->escapeHtml(__('Liberar ou recusar pedidos que exigem aprovação da empresa.')) ?></p>
         <?php if ($canApprove): ?>
-            <span class="badge badge--approver"><?= __('Você pode aprovar pedidos') ?></span>
+            <span class="badge badge--approver"><?= $block->escapeHtml(__('Perfil aprovador')) ?></span>
         <?php endif; ?>
     </div>
 
@@ -111,7 +112,7 @@ $approvalWidgetConfig = [
             </tbody>
         </table>
         <?php else: ?>
-            <p class="empty-message"><?= __('Nenhum pedido aguardando aprovação.') ?></p>
+            <p class="empty-message"><?= $block->escapeHtml(__('Nenhum pedido seu aguarda aprovação no momento.')) ?></p>
         <?php endif; ?>
     </div>
 </div>

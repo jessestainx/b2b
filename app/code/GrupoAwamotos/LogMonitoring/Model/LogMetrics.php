@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Model;
@@ -115,7 +116,7 @@ class LogMetrics extends AbstractModel implements LogMetricsInterface
         if ($data === null) {
             return null;
         }
-        
+
         if (is_string($data)) {
             try {
                 return $this->serializer->unserialize($data);
@@ -123,7 +124,7 @@ class LogMetrics extends AbstractModel implements LogMetricsInterface
                 return null;
             }
         }
-        
+
         return is_array($data) ? $data : null;
     }
 
@@ -132,7 +133,7 @@ class LogMetrics extends AbstractModel implements LogMetricsInterface
         if ($analysisData === null) {
             return $this->setData(self::ANALYSIS_DATA, null);
         }
-        
+
         try {
             $serialized = $this->serializer->serialize($analysisData);
             return $this->setData(self::ANALYSIS_DATA, $serialized);

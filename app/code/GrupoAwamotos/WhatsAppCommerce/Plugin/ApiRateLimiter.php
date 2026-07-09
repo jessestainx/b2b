@@ -48,7 +48,7 @@ class ApiRateLimiter
         }
 
         $token = substr($authHeader, 7);
-        $cacheKey = self::CACHE_PREFIX . md5($token);
+        $cacheKey = self::CACHE_PREFIX . hash('sha256', $token);
         $data = $this->cache->load($cacheKey);
 
         $now = time();

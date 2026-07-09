@@ -1,7 +1,8 @@
 define([], function () {
     'use strict';
 
-    function ensureTrailingSlash(url) {
+    function ensureTrailingSlash(url)
+    {
         if (typeof url !== 'string' || url === '') {
             return '/';
         }

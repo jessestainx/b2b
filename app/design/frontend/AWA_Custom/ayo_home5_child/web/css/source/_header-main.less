@@ -791,7 +791,7 @@ body .page-wrapper .awa-site-header {
 
 // 1280px: departamentos levemente menor — ponto intermediário intencional
 // (entre @awa-breakpoint-lg:1200px e @awa-breakpoint-xl:1400px; sem variável canônica)
-@media (max-width: 1280px) {
+@media (max-inline-size: var(--awa-container-max, 1280px)) {
   .page-wrapper .awa-site-header {
     .header-control.awa-nav-bar .awa-header-categories,
     .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {

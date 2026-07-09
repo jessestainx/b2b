@@ -1,0 +1,19 @@
+<?php
+/**
+ * AWA Motos - Service Worker Registration
+ * Sprint 1 (PWA + Performance).
+ */
+?>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js')
+            .then(function (reg) {
+                console.log('[AWA] Service Worker registered, scope:', reg.scope);
+            })
+            .catch(function (err) {
+                console.warn('[AWA] Service Worker registration failed:', err);
+            });
+    });
+}
+</script>

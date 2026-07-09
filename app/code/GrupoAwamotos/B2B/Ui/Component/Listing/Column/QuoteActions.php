@@ -15,8 +15,8 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 class QuoteActions extends Column
 {
-    const URL_PATH_VIEW = 'grupoawamotos_b2b/quote/view';
-    const URL_PATH_RESPOND = 'grupoawamotos_b2b/quote/respond';
+    public const URL_PATH_VIEW = 'grupoawamotos_b2b/quote/view';
+    public const URL_PATH_RESPOND = 'grupoawamotos_b2b/quote/respond';
 
     /**
      * @var UrlInterface

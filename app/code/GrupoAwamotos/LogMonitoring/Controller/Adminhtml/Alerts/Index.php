@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Controller\Adminhtml\Alerts;
@@ -27,7 +28,7 @@ class Index extends Action implements HttpGetActionInterface
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('GrupoAwamotos_LogMonitoring::alerts');
         $resultPage->getConfig()->getTitle()->prepend(__('Log Monitoring Alerts'));
-        
+
         return $resultPage;
     }
 }

@@ -10,7 +10,8 @@ define(["jquery"], function ($) {
         let tooltipId = (config && config.tooltipId) ? String(config.tooltipId) : "b2b-badge-tooltip";
         var $tooltip = $root.find("#" + tooltipId);
 
-        function setExpanded(state) {
+        function setExpanded(state)
+        {
             let expanded = !!state;
             $root.attr("aria-expanded", expanded ? "true" : "false");
             if ($tooltip.length) {

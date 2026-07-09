@@ -1,0 +1,19 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Adminhtml\Customer\PendingBadge $block */
+$count = $block->getPendingCount();
+if ($count === 0) return;
+?>
+<div style="background:#f57c00;color:#fff;padding:10px 16px;border-radius:4px;margin-bottom:16px;display:flex;align-items:center;gap:12px;font-size:14px;">
+    <strong style="font-size:24px;"><?= (int) $count ?></strong>
+    <span>
+        <?php if ($count === 1): ?>
+            cadastro B2B aguardando sua aprovação.
+        <?php else: ?>
+            cadastros B2B aguardando aprovação.
+        <?php endif; ?>
+    </span>
+    <a href="?status=0"
+       style="margin-left:auto;background:#fff;color:#f57c00;padding:6px 14px;border-radius:3px;font-weight:700;font-size:12px;text-decoration:none;">
+        Ver Pendentes
+    </a>
+</div>

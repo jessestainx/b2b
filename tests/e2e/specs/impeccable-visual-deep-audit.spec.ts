@@ -128,7 +128,7 @@ const ROUTES: RouteTarget[] = [
     path: '/checkout/',
     expectedSelector: '.checkout-container, .opc-wrapper, .checkout-index-index',
     optionalSelectors: ['#shipping, .checkout-shipping-address, .payment-methods'],
-    expectedStatus: 200,
+    expectStatus: 200,
   },
   {
     label: 'b2b-login',
@@ -207,7 +207,7 @@ const ROUTES: RouteTarget[] = [
   {
     label: '404',
     path: '/pagina-inexistente-audit-2026-06',
-    expectedStatus: 404,
+    expectStatus: 404,
     expectNotStatus: 200,
     expectedSelector: '.page-title, .page-main, .error-page',
   },
@@ -658,7 +658,7 @@ async function auditLayout(route: RouteTarget, viewport: DeviceViewport, page: P
     }
   }
 
-  if (route.expectedRoot && page.url() !== `${BASE_URL}/` && !page.url().endsWith('/')) {
+  if (route.expectRoot && page.url() !== `${BASE_URL}/` && !page.url().endsWith('/')) {
     addIssue({
       phase: 'FASE_1',
       severity: 'P1',
@@ -714,7 +714,7 @@ async function auditLayout(route: RouteTarget, viewport: DeviceViewport, page: P
 
 function resolveRouteSeverity(route: RouteTarget, status: number | null): Severity {
   if (status === null) return 'P0';
-  if (route.expectedStatus === 404 && status !== 404) return 'P2';
+  if (route.expectStatus === 404 && status !== 404) return 'P2';
   if ((route.expectNotStatus && status === route.expectNotStatus) || (route.expectStatus && status !== route.expectStatus)) return 'P1';
   if (status >= 500) return 'P1';
   if (status >= 400) return 'P2';
@@ -729,7 +729,7 @@ async function reportRoute(route: RouteTarget, viewport: DeviceViewport, page: P
   const networkCount = filteredNetwork.length;
 
   if (responseStatus !== null) {
-    if (route.expectedStatus && responseStatus !== route.expectedStatus) {
+    if (route.expectStatus && responseStatus !== route.expectStatus) {
       addIssue({
         phase: 'FASE_1',
         severity: resolveRouteSeverity(route, responseStatus),
@@ -737,7 +737,7 @@ async function reportRoute(route: RouteTarget, viewport: DeviceViewport, page: P
         viewport: viewport.label,
         component: 'HTTP',
         step: 'status',
-        description: `Status esperado ${route.expectedStatus}, recebido ${responseStatus}`,
+        description: `Status esperado ${route.expectStatus}, recebido ${responseStatus}`,
         evidence: `final=${page.url()}`,
       });
     }
@@ -896,7 +896,6 @@ test.afterAll(() => {
   const payload = {
     generatedAt: new Date().toISOString(),
     baseUrl: BASE_URL,
-    viewports: VIEWPORTS,
     viewports: VIEWPORTS_TO_AUDIT,
     routes: ROUTES_TO_AUDIT.map(({ label, path }) => ({ label, path })),
     totalIssues: issues.length,

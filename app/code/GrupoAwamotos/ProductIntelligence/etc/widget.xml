@@ -3,7 +3,7 @@
          xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
 
     <widget id="rexisml_recommendations" class="GrupoAwamotos\ProductIntelligence\Block\Widget\Recommendations">
-        <label translate="true">REXIS ML - Recomendações Personalizadas</label>
+        <label translate="true">Product Intelligence - Recomendações Personalizadas</label>
         <description translate="true">Exibe recomendações de produtos baseadas em Machine Learning</description>
         <parameters>
             <parameter name="widget_title" xsi:type="text" required="false" visible="true">

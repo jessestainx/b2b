@@ -7,17 +7,37 @@ declare(strict_types=1);
  * @var \Magento\Framework\View\Element\Template $block
  */
 $layoutHandles = $block->getLayout() ? $block->getLayout()->getUpdate()->getHandles() : [];
+$isCheckoutFocus = in_array('checkout_cart_index', $layoutHandles, true)
+    || in_array('checkout_index_index', $layoutHandles, true)
+    || in_array('onepagecheckout_index_index', $layoutHandles, true);
+if ($isCheckoutFocus) {
+    return;
+}
 $isHomePage = in_array('cms_index_index', $layoutHandles, true);
 $controllerUrl = $block->getViewFileUrl('js/awa-menu-controller.js');
+$floatingCoreUrl = $block->getViewFileUrl('js/vendor/floating-ui.core.umd.js');
+$floatingDomUrl = $block->getViewFileUrl('js/vendor/floating-ui.dom.umd.js');
 $menuConfig = [
     'desktopBreakpoint' => 992,
     'hoverDelay' => 100,
     'limitShow' => 0,
 ];
+$menuCssUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::css/awa-menu-v2-dept-open-fix.css');
 ?>
 <script>
 window.__AWA_MENU_V2 = true;
 </script>
+<script defer src="<?= $block->escapeUrl($floatingCoreUrl) ?>"></script>
+<script defer src="<?= $block->escapeUrl($floatingDomUrl) ?>"></script>
+<?php if (!$isHomePage): ?>
+<link rel="preload" href="<?= $block->escapeUrl($menuCssUrl) ?>" as="style"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($menuCssUrl) ?>" id="awa-menu-v2-dept-open-fix"/>
+<?php endif; ?>
+<style id="awa-menu-v2-mobile-critical">
+<?= $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+    ->setTemplate('GrupoAwamotos_Theme::menu/awa-menu-v2-mobile-critical-fragment.phtml')
+    ->toHtml() ?>
+</style>
 <script>
 (function (w, d) {
     'use strict';
@@ -42,11 +62,15 @@ window.__AWA_MENU_V2 = true;
                     shell.style.removeProperty(prop);
                 });
             }
+            var overlay = d.querySelector('.awa-mobile-drawer-overlay');
+            if (overlay) {
+                overlay.classList.remove('is-active');
+            }
         }
 
         function onNavPreflight(ev) {
             var toggle = ev.target && ev.target.closest
-                ? ev.target.closest('[data-awa-nav-toggle="true"], [data-action="toggle-nav"]')
+                ? ev.target.closest('[data-awa-nav-toggle="true"], [data-action="toggle-nav"], .toggle-nav-footer')
                 : null;
             if (!toggle || d.body.classList.contains('awa-menu-v2-ready')) {
                 return;
@@ -54,6 +78,16 @@ window.__AWA_MENU_V2 = true;
             if (!d.body.classList.contains('nav-open') && !d.body.classList.contains('awa-menu-drawer-open')) {
                 d.body.classList.add('nav-open', 'awa-nav-preflight', 'awa-menu-drawer-open');
                 toggle.setAttribute('aria-expanded', 'true');
+                var shell = d.querySelector('[data-awa-nav-shell="true"]')
+                    || d.getElementById('awa-category-navigation')
+                    || d.getElementById('awa-primary-navigation');
+                if (shell) {
+                    shell.classList.add('is-awa-mobile-open');
+                }
+                var overlay = d.querySelector('.awa-mobile-drawer-overlay');
+                if (overlay) {
+                    overlay.classList.add('is-active');
+                }
             }
         }
 
@@ -75,6 +109,10 @@ window.__AWA_MENU_V2 = true;
     var booted = false;
 
     function applyController() {
+        if (!w.FloatingUIDOM) {
+            w.setTimeout(applyController, 50);
+            return;
+        }
         if (booted || typeof w.require !== 'function') {
             if (!booted && typeof w.require !== 'function') {
                 w.setTimeout(applyController, 150);
@@ -127,9 +165,29 @@ window.__AWA_MENU_V2 = true;
                 deptPanel.setAttribute('data-awa-menu-state', 'open');
                 deptPanel.setAttribute('aria-hidden', 'false');
                 deptPanel.classList.add('vmm-open', 'menu-open');
-                deptPanel.style.setProperty('display', 'block', 'important');
+                deptPanel.style.setProperty('display', 'flex', 'important');
+                deptPanel.style.setProperty('flex-direction', 'column', 'important');
                 deptPanel.style.setProperty('visibility', 'visible', 'important');
                 deptPanel.style.setProperty('opacity', '1', 'important');
+                if (w.matchMedia && w.matchMedia('(min-width: 992px)').matches) {
+                    deptPanel.style.setProperty('height', 'auto', 'important');
+                    deptPanel.style.setProperty('min-height', '120px', 'important');
+                    deptPanel.style.setProperty('max-height', 'min(70vh, 560px)', 'important');
+                    deptPanel.style.setProperty('overflow-x', 'hidden', 'important');
+                    deptPanel.style.setProperty('overflow-y', 'auto', 'important');
+                    var nav = deptPanel.closest('[data-role="awa-vertical-menu"]');
+                    var shell = nav && nav.closest('.menu_left_home1, .awa-header-categories, .sections.nav-sections');
+                    if (nav) {
+                        nav.style.setProperty('height', 'auto', 'important');
+                        nav.style.setProperty('max-height', 'none', 'important');
+                        nav.style.setProperty('overflow', 'visible', 'important');
+                    }
+                    if (shell) {
+                        shell.style.setProperty('height', 'auto', 'important');
+                        shell.style.setProperty('max-height', 'none', 'important');
+                        shell.style.setProperty('overflow', 'visible', 'important');
+                    }
+                }
             }
         }, { capture: true });
     }

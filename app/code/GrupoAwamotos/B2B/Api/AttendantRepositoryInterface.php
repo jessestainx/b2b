@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Api;
 
 use GrupoAwamotos\B2B\Api\Data\AttendantInterface;

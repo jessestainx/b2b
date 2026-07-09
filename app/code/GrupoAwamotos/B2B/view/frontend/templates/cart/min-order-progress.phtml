@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \GrupoAwamotos\B2B\Block\Cart\MinOrderProgress $block */
+
+if (!$block->isEnabled()) {
+    return;
+}
+
+$visible = $block->shouldDisplay();
+$percent = $block->getProgressPercent();
+$isNear = $percent >= 80;
+$percentInt = (int) round($percent);
+$messageId = 'awa-b2b-min-order-message';
+?>
+<section class="awa-b2b-min-order-progress<?= $isNear ? ' awa-b2b-min-order-progress--near' : '' ?>"
+         aria-labelledby="awa-b2b-min-order-label"
+         data-awa-min-order-progress="static"
+         data-min-amount="<?= $block->escapeHtmlAttr((string) $block->getMinOrderAmount()) ?>"
+         <?= $visible ? '' : 'hidden aria-hidden="true"' ?>>
+    <div class="awa-b2b-min-order-progress__header">
+        <span class="awa-b2b-min-order-progress__label" id="awa-b2b-min-order-label"><?= $block->escapeHtml(__('Pedido mínimo B2B')) ?></span>
+        <span class="awa-b2b-min-order-progress__percent" aria-hidden="true"><?= $block->escapeHtml((string) $percentInt) ?>%</span>
+    </div>
+    <div class="awa-b2b-min-order-progress__track"
+         role="progressbar"
+         aria-valuemin="0"
+         aria-valuemax="100"
+         aria-valuenow="<?= $block->escapeHtmlAttr((string) $percentInt) ?>"
+         aria-describedby="<?= $block->escapeHtmlAttr($messageId) ?>"
+         <?= $visible ? '' : 'aria-hidden="true"' ?>>
+        <span class="awa-b2b-min-order-progress__fill" style="width: <?= $block->escapeHtmlAttr((string) $percent) ?>%;"></span>
+    </div>
+    <p class="awa-b2b-min-order-progress__message" id="<?= $block->escapeHtmlAttr($messageId) ?>">
+        <?= $block->escapeHtml($block->getProgressMessage()) ?>
+    </p>
+</section>

@@ -4,8 +4,11 @@ declare(strict_types=1);
 /** @var \Magento\Framework\View\Element\Template $block */
 
 $paymentMethodsImage = $block->getViewFileUrl('images/payment_methods.svg');
-$sslImage = $block->getViewFileUrl('images/awamotos-seguranca-ssl.svg');
-$protectedImage = $block->getViewFileUrl('images/awamotos-compra-protegida.svg');
+$mediaBaseUrl = $block->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+$sslImage = $mediaBaseUrl . 'img/seal-ssl-labs.svg';
+$safeBrowsingImage = $mediaBaseUrl . 'img/seal-google-safe-browsing.svg';
+$sslVerifyUrl = 'https://www.ssllabs.com/ssltest/analyze.html?d=awamotos.com';
+$safeBrowsingVerifyUrl = 'https://transparencyreport.google.com/safe-browsing/search?url=awamotos.com';
 $privacyUrl = $block->getUrl('privacy-policy-cookie-restriction-mode');
 $helpUrl = $block->getUrl('customer-service');
 
@@ -34,21 +37,36 @@ $badges = [
 ?>
 <div class="section" data-awa-home-security="true">
     <div class="security-seals" aria-label="<?= $block->escapeHtmlAttr(__('Selos de segurança e confiança')) ?>">
-        <img loading="lazy"
+        <img class="security-seals__img security-seals__img--payment"
+             loading="lazy"
              src="<?= $block->escapeUrl($paymentMethodsImage) ?>"
              alt="<?= $block->escapeHtmlAttr(__('Formas de pagamento')) ?>"
-             width="280" height="40"
-             style="width:auto;max-width:200px;height:auto" />
-        <img loading="lazy"
-             src="<?= $block->escapeUrl($sslImage) ?>"
-             alt="<?= $block->escapeHtmlAttr(__('Site seguro SSL')) ?>"
-             width="120" height="40"
-             style="width:auto;max-width:120px;height:auto" />
-        <img loading="lazy"
-             src="<?= $block->escapeUrl($protectedImage) ?>"
-             alt="<?= $block->escapeHtmlAttr(__('Compra protegida')) ?>"
-             width="120" height="40"
-             style="width:auto;max-width:120px;height:auto" />
+             width="280"
+             height="40" />
+        <a class="security-seals__link"
+           href="<?= $block->escapeUrl($sslVerifyUrl) ?>"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="<?= $block->escapeHtmlAttr(__('Verificar SSL da AWA Motos no SSL Labs')) ?>">
+            <img class="security-seals__img security-seals__img--ssl"
+                 loading="lazy"
+                 src="<?= $block->escapeUrl($sslImage) ?>"
+                 alt="<?= $block->escapeHtmlAttr(__('SSL 256 bits verificado')) ?>"
+                 width="120"
+                 height="40" />
+        </a>
+        <a class="security-seals__link"
+           href="<?= $block->escapeUrl($safeBrowsingVerifyUrl) ?>"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="<?= $block->escapeHtmlAttr(__('Verificar AWA Motos no Google Safe Browsing')) ?>">
+            <img class="security-seals__img security-seals__img--protected"
+                 loading="lazy"
+                 src="<?= $block->escapeUrl($safeBrowsingImage) ?>"
+                 alt="<?= $block->escapeHtmlAttr(__('Google Safe Browsing verificado')) ?>"
+                 width="120"
+                 height="40" />
+        </a>
         <span class="microcopy">
             <?= $block->escapeHtml(__('Compra segura via SSL • Pagamentos: Pix, Cartões e Boleto.')) ?>
             <a href="<?= $block->escapeUrl($privacyUrl) ?>"><?= $block->escapeHtml(__('Privacidade')) ?></a>

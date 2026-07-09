@@ -20,7 +20,8 @@ class CustomerRegisterWelcome implements ObserverInterface
         private readonly ZApiClient $zapiClient,
         private readonly Helper $helper,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {

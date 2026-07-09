@@ -1,0 +1,111 @@
+<?php
+/**
+ * AWA Motos - Enhanced Ecommerce Analytics
+ *
+ * Sprint 3 (Analytics): tracking completo de ecommerce.
+ * Suporta GA4 + GTM data layer.
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaAnalyticsInit) { return; }
+    w.__awaAnalyticsInit = true;
+
+    var DL = w.dataLayer = w.dataLayer || [];
+
+    function pushEvent(eventName, payload) {
+        var event = Object.assign({ event: eventName }, payload || {});
+        DL.push(event);
+    }
+
+    // Helper para Magento product info (do DOM)
+    function getProductInfo() {
+        var item = d.querySelector('[itemprop="product"]') || d.querySelector('.product-item-info');
+        if (!item) return null;
+        return {
+            item_id: item.getAttribute('data-product-id') || '',
+            item_name: (item.querySelector('.product-item-link') || {}).textContent || '',
+            item_brand: (item.querySelector('.product-item-brand') || {}).textContent || '',
+            price: (item.querySelector('.price') || {}).getAttribute('data-price-amount') || '0',
+        };
+    }
+
+    // 1. View item list (PLP)
+    if (d.body.classList.contains('catalog-category-view')) {
+        var items = d.querySelectorAll('.product-item-info');
+        var impression = [];
+        items.forEach(function (el, i) {
+            impression.push({
+                item_id: el.getAttribute('data-product-id'),
+                item_name: (el.querySelector('.product-item-link') || {}).textContent,
+                index: i,
+                price: (el.querySelector('.price') || {}).getAttribute('data-price-amount'),
+            });
+        });
+        pushEvent('view_item_list', {
+            item_list_name: d.title,
+            items: impression.slice(0, 20),
+        });
+    }
+
+    // 2. View item (PDP)
+    if (d.body.classList.contains('catalog-product-view')) {
+        var product = getProductInfo();
+        if (product) {
+            pushEvent('view_item', { currency: 'BRL', value: parseFloat(product.price || '0'), items: [product] });
+        }
+    }
+
+    // 3. Add to cart
+    d.addEventListener('click', function (e) {
+        var t = e.target.closest('[data-awa-sticky-atc-atc], #product-addtocart-button');
+        if (t) {
+            var product = getProductInfo();
+            if (product) {
+                pushEvent('add_to_cart', { currency: 'BRL', value: parseFloat(product.price || '0'), items: [product] });
+            }
+        }
+    });
+
+    // 4. Remove from cart
+    d.addEventListener('click', function (e) {
+        var t = e.target.closest('.cart.item .action.delete, .action.action-delete');
+        if (t) {
+            pushEvent('remove_from_cart', {});
+        }
+    });
+
+    // 5. Begin checkout
+    if (d.body.classList.contains('checkout-cart-index')) {
+        var cartItems = d.querySelectorAll('.cart.item');
+        if (cartItems.length) {
+            var items = [];
+            var value = 0;
+            cartItems.forEach(function (el) {
+                var priceEl = el.querySelector('.cart-price .price');
+                var price = priceEl ? parseFloat((priceEl.getAttribute('data-price-amount') || '0')) : 0;
+                value += price;
+                items.push({
+                    item_id: el.getAttribute('data-cart-item-id') || '',
+                    item_name: (el.querySelector('.product-item-name a') || {}).textContent || '',
+                    price: price,
+                    quantity: parseInt((el.querySelector('.qty .qty-input') || {}).value || '1', 10),
+                });
+            });
+            pushEvent('begin_checkout', { currency: 'BRL', value: value, items: items });
+        }
+    }
+
+    // 6. Purchase success
+    if (d.body.classList.contains('checkout-onepage-success')) {
+        pushEvent('purchase', {});
+    }
+
+    // 7. Search
+    if (d.body.classList.contains('catalogsearch-result-index')) {
+        var term = new URL(w.location.href).searchParams.get('q') || '';
+        pushEvent('search', { search_term: term });
+    }
+})(window, document);
+</script>

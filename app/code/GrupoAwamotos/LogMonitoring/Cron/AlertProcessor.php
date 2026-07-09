@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Cron;
@@ -28,7 +29,7 @@ class AlertProcessor
         try {
             // Get critical alerts that need immediate attention
             $criticalAlerts = $this->alertRepository->getCriticalAlerts();
-            
+
             foreach ($criticalAlerts as $alert) {
                 $alertData = [
                     'type' => $alert->getAlertType(),
@@ -37,11 +38,11 @@ class AlertProcessor
                     'message' => $alert->getMessage(),
                     'context' => $alert->getContextData()
                 ];
-                
+
                 // Send notification for unacknowledged critical alerts
                 if ($alert->getStatus() === 'open' && $alert->getOccurrences() <= 3) {
                     $result = $this->notificationService->sendAlert($alertData);
-                    
+
                     if (array_filter($result)) { // If any notification method succeeded
                         $this->logger->info('Alert notification sent', [
                             'alert_id' => $alert->getEntityId(),
@@ -51,7 +52,6 @@ class AlertProcessor
                     }
                 }
             }
-            
         } catch (\Throwable $e) {
             $this->logger->error('Error in alert processing: ' . $e->getMessage());
         }

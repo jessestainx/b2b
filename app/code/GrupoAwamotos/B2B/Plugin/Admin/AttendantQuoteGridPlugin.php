@@ -18,7 +18,8 @@ class AttendantQuoteGridPlugin
     public function __construct(
         private readonly CurrentAttendant $currentAttendant,
         private readonly ResourceConnection $resource
-    ) {}
+    ) {
+    }
 
     /**
      * Restringe o grid de cotações aos clientes do atendente logado.

@@ -5,40 +5,219 @@
  *
  * awa-card-enhance:       indicadores de estoque + deduplicação CTA nos cards
  * awa-qty-control:        controles +/- de quantidade (item.phtml, carrosséis)
- * awa-footer-accordion:   stub — delega para awa-mobile-accordion (IIFE global)
  * awa-mobile-nav:         drawer mobile (inline — sem cache de arquivo externo)
- * awa-mobile-minicart:    aria e acessibilidade do minicart mobile
  * awa-nav-cls-fix-reset:  remove inline height:0 do CLS fix no desktop
- * awa-visual-state-sync:  sincroniza estados visuais (stub)
- * awa-b2b-register-wizard: wizard de cadastro B2B (stub)
  * awa-ux-enhancements:    melhorias UX do audit 50 pontos (WhatsApp, trust, filtros, etc.)
+ * awa-search-clear-init:  limpar busca síncrono (AMD deferido na home)
+ *
+ * Footer accordion: IIFE inline acima (não depende de AMD stub).
  *
  * Todos usam DOMContentLoaded internamente.
  */
+$request = $block->getRequest();
+$fullActionName = $request ? (string) $request->getFullActionName() : '';
+$pathInfo = $request ? (string) ($request->getOriginalPathInfo() ?: $request->getPathInfo()) : '';
+$pathSlug = trim($pathInfo, '/');
+$isCmsHomeRoute = $fullActionName === 'cms_index_index' || $pathSlug === '';
+$isCatalogMerchandisingRoute = in_array($fullActionName, [
+    'catalog_category_view',
+    'catalog_product_view',
+    'catalogsearch_result_index',
+], true);
+$isCheckoutFlowRoute = in_array($fullActionName, [
+    'checkout_cart_index',
+    'checkout_index_index',
+    'onepagecheckout_index_index',
+], true) || str_starts_with($fullActionName, 'multishipping_');
+$b2bAuthRoutes = [
+    'b2b_register_index',
+];
+$isB2bAccountSurface = str_starts_with($fullActionName, 'b2b_')
+    && !in_array($fullActionName, $b2bAuthRoutes, true);
+$isCustomerAccountRoute = str_starts_with($fullActionName, 'customer_account_')
+    || str_starts_with($fullActionName, 'b2b_account_')
+    || $isB2bAccountSurface
+    || in_array($fullActionName, [
+        'sales_order_history',
+        'sales_order_view',
+        'customer_address_index',
+        'customer_address_form',
+        'wishlist_index_index',
+        'b2b_register_index',
+        'customer_account_login',
+        'customer_account_create',
+        'customer_account_forgotpassword',
+    ], true);
+$isCartPageOnly = $fullActionName === 'checkout_cart_index';
+$useSlimGlobalScripts = $isCheckoutFlowRoute || $isCustomerAccountRoute;
 ?>
+<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-search-clear-init.min.js')) ?>" defer></script>
+<?php if (!$isCmsHomeRoute && !$isCartPageOnly): ?>
+<script type="text/javascript">
+    require(['rokanthemes/theme']);
+</script>
+<?php endif; ?>
+<?php if ($isCmsHomeRoute): ?>
+<script type="text/javascript">
+(function (d) {
+    /* Visual Autopilot 2026-07-02: fix do hero slider deslocado -5px em desktop/tablet.
+       O full-bleed do hero usa width:100vw + margin-left:calc(50% - 50vw)
+       (awa-home-standardize-terminal-wins-2026-06-09.css). `100vw` inclui a faixa da
+       scrollbar vertical, mas o `left`/`margin` percentual do truque resolve contra o
+       clientWidth do <html> (que a exclui) — a diferença desloca o slider em metade da
+       largura da scrollbar (~5px, medido ao vivo). Expomos a diferença real como custom
+       property para a regra de full-bleed compensar via calc(); fallback 0px preserva o
+       comportamento antigo se JS falhar. Não pode ir em awa-head-preload.phtml: o plugin
+       GrupoAwamotos\Theme\Plugin\Response\OptimizeHeadStylesPlugin reescreve/descarta
+       <script>/<style> ad-hoc injetados no <head> daquele template. */
+    'use strict';
+    var sw = window.innerWidth - d.documentElement.clientWidth;
+    d.documentElement.style.setProperty('--awa-scrollbar-w', Math.max(sw, 0) + 'px');
+    window.addEventListener('resize', function () {
+        var w = window.innerWidth - d.documentElement.clientWidth;
+        d.documentElement.style.setProperty('--awa-scrollbar-w', Math.max(w, 0) + 'px');
+    }, { passive: true });
+})(document);
+</script>
+<script type="text/javascript">
+(function (w) {
+    'use strict';
+
+    function runWhenRequire(loadFn, key) {
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(loadFn, { key: key });
+            return;
+        }
+
+        if (typeof w.require === 'function') {
+            loadFn();
+            return;
+        }
+
+        w.setTimeout(function () {
+            runWhenRequire(loadFn, key);
+        }, 120);
+    }
+
+    runWhenRequire(function () {
+        w.require(['js/awa-nav-cls-fix-reset']);
+    }, 'awa-nav-cls-fix-reset-home');
+
+    function loadHomeDeferredModules() {
+        runWhenRequire(function () {
+            w.require([
+                'js/awa-card-enhance',
+                'js/awa-qty-control',
+                'js/awa-ux-enhancements'
+            ]);
+        }, 'awa-home-deferred-modules');
+    }
+
+    var intentEvents = ['pointerdown', 'keydown', 'touchstart'];
+    var homeDeferStarted = false;
+
+    function onHomeIntent() {
+        if (homeDeferStarted) {
+            return;
+        }
+        homeDeferStarted = true;
+        intentEvents.forEach(function (name) {
+            w.removeEventListener(name, onHomeIntent, true);
+        });
+        loadHomeDeferredModules();
+    }
+
+    intentEvents.forEach(function (name) {
+        w.addEventListener(name, onHomeIntent, { capture: true, passive: name !== 'keydown', once: true });
+    });
+}(window));
+</script>
+<?php elseif ($isCartPageOnly): ?>
+<?php /* Carrinho: nav oculto — sem nav-cls-reset nem ux-enhancements globais */ ?>
+<?php elseif ($useSlimGlobalScripts): ?>
 <script type="text/javascript">
     require([
-        'js/awa-card-enhance',
-        'js/awa-qty-control',
-        'js/awa-footer-accordion',
-        'js/awa-mobile-minicart',
         'js/awa-nav-cls-fix-reset',
-        'js/awa-visual-state-sync',
-        'js/awa-b2b-register-wizard',
         'js/awa-ux-enhancements'
     ]);
 </script>
+<?php elseif ($isCatalogMerchandisingRoute): ?>
 <script type="text/javascript">
-/* awa-mobile-nav inline v3 — drawer da barra inferior mobile */
-require(['jquery'], function ($) {
+(function (w) {
+    'use strict';
+
+    function runWhenRequire(loadFn, key) {
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(loadFn, { key: key });
+            return;
+        }
+        if (typeof w.require === 'function') {
+            loadFn();
+            return;
+        }
+        w.setTimeout(function () {
+            runWhenRequire(loadFn, key);
+        }, 120);
+    }
+
+    runWhenRequire(function () {
+        w.require(['js/awa-nav-cls-fix-reset']);
+    }, 'awa-nav-cls-fix-reset-plp');
+
+    function loadCatalogDeferredModules() {
+        runWhenRequire(function () {
+            w.require([
+                'js/awa-card-enhance',
+                'js/awa-qty-control',
+                'js/awa-ux-enhancements'
+            ]);
+        }, 'awa-catalog-deferred-modules');
+    }
+
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(loadCatalogDeferredModules, { timeout: 3800 });
+    } else {
+        w.setTimeout(loadCatalogDeferredModules, 2800);
+    }
+}(window));
+</script>
+<?php else: ?>
+<script type="text/javascript">
+    require([
+        'js/awa-card-enhance',
+        'js/awa-nav-cls-fix-reset',
+        'js/awa-ux-enhancements'
+    ]);
+</script>
+<?php endif; ?>
+<?php if (false): ?>
+<script type="text/javascript">
+/* awa-mobile-nav inline v10 — drawer mobile unificado header/footer (somente viewport mobile) */
+(function (w, d) {
+    'use strict';
+
+    function isMobileViewport() {
+        return w.innerWidth < 992;
+    }
+
+    function bootMobileNav() {
+        if (!isMobileViewport() || w.__awaMobileNavInit) {
+            return;
+        }
+
+        var startNav = function () {
+            w.require(['jquery'], function ($) {
     'use strict';
     if (window.__awaMobileNavInit) { return; }
     window.__awaMobileNavInit = true;
     var PANEL_SEL='.section-items.nav-sections.category-dropdown-items.awa-header-primary-nav';
     var OUTER_SEL='.sections.nav-sections.category-dropdown';
     var CONTENT_SEL='.section-item-content.nav-sections';
+    var HOST_SEL='.header-control.header-nav.awa-nav-bar, .awa-header-categories, .awa-nav-categories';
     var OPEN_CLS='is-awa-mobile-open',BODY_OPEN_CLS='awa-mobile-drawer-open';
-    var isDrawerOpen=false,overlay=null;
+    var TOGGLE_SEL='.toggle-nav-footer, [data-awa-nav-toggle="true"]';
+    var FOCUSABLE_SEL='a[href], button:not([disabled]), [role="button"]:not([aria-disabled="true"]), [tabindex="0"], input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
+    var isDrawerOpen=false,overlay=null,previousFocus=null,trapHandler=null,focusTimer=null,originalOuterParent=null,originalOuterNext=null;
     function isMobile(){return window.innerWidth<992;}
     function getOverlay(){
         if(!overlay){
@@ -49,12 +228,98 @@ require(['jquery'], function ($) {
         }
         return overlay;
     }
+    function syncToggleAria(isOpen){
+        document.querySelectorAll(TOGGLE_SEL).forEach(function(btn){
+            btn.setAttribute('aria-expanded',isOpen?'true':'false');
+            if(btn.matches('[data-awa-nav-toggle="true"]')){
+                btn.setAttribute('aria-label',isOpen?'Fechar menu de navegação':'Abrir menu de navegação');
+            }
+        });
+    }
+    function clearLegacyNavState(){
+        document.body.classList.remove('nav-open');
+        document.documentElement.classList.remove('nav-open');
+    }
+    function getFocusable(panel){
+        if(!panel){return[];}
+        return Array.prototype.slice.call(panel.querySelectorAll(FOCUSABLE_SEL)).filter(function(el){
+            var style=window.getComputedStyle(el);
+            return style.display!=='none'&&style.visibility!=='hidden';
+        });
+    }
+    function getDrawerHosts(panel){
+        var hosts=[];
+        if(!panel){return hosts;}
+        var node=panel.parentElement;
+        while(node&&node!==document.body){
+            if(node.matches&&node.matches(HOST_SEL)){hosts.push(node);}
+            node=node.parentElement;
+        }
+        return hosts;
+    }
+    function showDrawerHosts(panel){
+        getDrawerHosts(panel).forEach(function(host){
+            host.style.setProperty('display','block','important');
+            host.style.setProperty('visibility','visible','important');
+            host.style.setProperty('opacity','1','important');
+            host.style.setProperty('overflow','visible','important');
+        });
+    }
+    function detachDrawerShell(outer){
+        if(!outer||outer.parentElement===document.body){return;}
+        originalOuterParent=outer.parentElement;
+        originalOuterNext=outer.nextSibling;
+        document.body.appendChild(outer);
+    }
+    function restoreDrawerShell(outer){
+        if(!outer||!originalOuterParent){return;}
+        originalOuterParent.insertBefore(outer,originalOuterNext);
+        originalOuterParent=null;
+        originalOuterNext=null;
+    }
+    function activateFocusTrap(panel){
+        var focusables=getFocusable(panel);
+        previousFocus=document.activeElement;
+        function focusFirst(){
+            if(!isDrawerOpen){return;}
+            focusables=getFocusable(panel);
+            if(focusables.length){
+                try{focusables[0].focus({preventScroll:true});}catch(e){focusables[0].focus();}
+            }
+        }
+        focusFirst();
+        if(focusTimer){window.clearTimeout(focusTimer);}
+        focusTimer=window.setTimeout(focusFirst,60);
+        trapHandler=function(e){
+            if(e.key==='Escape'){
+                e.preventDefault();
+                closeDrawer();
+                return;
+            }
+            if(e.key!=='Tab'){return;}
+            var list=getFocusable(panel);
+            if(!list.length){e.preventDefault();return;}
+            var first=list[0],last=list[list.length-1];
+            if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+            if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+        };
+        document.addEventListener('keydown',trapHandler);
+    }
+    function deactivateFocusTrap(){
+        if(focusTimer){window.clearTimeout(focusTimer);focusTimer=null;}
+        if(trapHandler){document.removeEventListener('keydown',trapHandler);trapHandler=null;}
+        if(previousFocus&&typeof previousFocus.focus==='function'){
+            try{previousFocus.focus({preventScroll:true});}catch(e){previousFocus.focus();}
+        }
+        previousFocus=null;
+    }
     function openDrawer(){
         if(!isMobile()){return;}
         var panel=document.querySelector(PANEL_SEL);
         var outer=document.querySelector(OUTER_SEL);
-        var content=document.querySelector(CONTENT_SEL);
         if(!panel){return;}
+        var content=panel.querySelector(CONTENT_SEL)||document.querySelector(CONTENT_SEL);
+        detachDrawerShell(outer);
         if(outer){
             outer.style.setProperty('display','block','important');
             outer.style.setProperty('visibility','visible','important');
@@ -87,6 +352,7 @@ require(['jquery'], function ($) {
         }
         panel.classList.add(OPEN_CLS);
         document.body.classList.add(BODY_OPEN_CLS);
+        document.body.classList.add('nav-before-open');
         var ov=getOverlay();
         ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:block;';
         ov.addEventListener('click',closeDrawer,{once:true});
@@ -97,30 +363,74 @@ require(['jquery'], function ($) {
             closeEl.setAttribute('aria-label','Fechar menu');
             closeEl.setAttribute('type','button');
             closeEl.innerHTML='<span aria-hidden="true">&times;</span>';
-            closeEl.style.cssText='position:absolute;top:12px;right:12px;background:none;border:none;font-size:28px;line-height:1;cursor:pointer;padding:4px 8px;color:#333;';
+            closeEl.style.cssText='position:absolute;top:12px;right:12px;min-width:44px;min-height:44px;align-items:center;justify-content:center;background:#fff;border:1px solid #e5e5e5;border-radius:999px;font-size:28px;line-height:1;cursor:pointer;padding:4px 8px;color:#333;';
             panel.insertBefore(closeEl,panel.firstChild);
         }
         if(closeEl){closeEl.style.setProperty('display','flex','important');closeEl.style.setProperty('visibility','visible','important');closeEl.style.setProperty('z-index','10002','important');}
-        var btn=document.querySelector('.toggle-nav-footer');
-        if(btn){btn.setAttribute('aria-expanded','true');}
+        var dialog=outer||panel;
+        dialog.setAttribute('role','dialog');
+        dialog.setAttribute('aria-modal','true');
+        dialog.setAttribute('aria-label','Menu de navegação');
+        syncToggleAria(true);
         isDrawerOpen=true;
+        activateFocusTrap(dialog);
     }
     function closeDrawer(){
         var panel=document.querySelector(PANEL_SEL);
         var outer=document.querySelector(OUTER_SEL);
-        var content=document.querySelector(CONTENT_SEL);
+        var content=panel?(panel.querySelector(CONTENT_SEL)||document.querySelector(CONTENT_SEL)):document.querySelector(CONTENT_SEL);
+        getDrawerHosts(panel).forEach(function(el){el.removeAttribute('style');});
         [outer,panel,content].forEach(function(el){if(el){el.removeAttribute('style');}});
-        if(panel){panel.classList.remove(OPEN_CLS);}
+        if(panel){
+            panel.classList.remove(OPEN_CLS);
+            panel.removeAttribute('role');
+            panel.removeAttribute('aria-modal');
+            panel.removeAttribute('aria-label');
+        }
+        if(outer){
+            outer.removeAttribute('role');
+            outer.removeAttribute('aria-modal');
+            outer.removeAttribute('aria-label');
+        }
         document.body.classList.remove(BODY_OPEN_CLS);
+        document.body.classList.remove('nav-before-open');
+        clearLegacyNavState();
         if(overlay){overlay.style.display='none';}
         var closeEl=document.querySelector('.awa-nav-close');
         if(closeEl){closeEl.style.removeProperty('z-index');}
-        var btn=document.querySelector('.toggle-nav-footer');
-        if(btn){btn.setAttribute('aria-expanded','false');}
+        syncToggleAria(false);
         isDrawerOpen=false;
+        deactivateFocusTrap();
+        restoreDrawerShell(outer);
     }
-    $(document).on('click','.toggle-nav-footer',function(e){
+    function toggleDrawerFromEvent(e){
         e.preventDefault();
+        e.stopPropagation();
+        if(typeof e.stopImmediatePropagation==='function'){e.stopImmediatePropagation();}
+        if(isDrawerOpen){closeDrawer();}else{openDrawer();}
+    }
+    document.addEventListener('click',function(e){
+        var trigger=e.target.closest?e.target.closest(TOGGLE_SEL):null;
+        if(!trigger||!isMobile()){return;}
+        toggleDrawerFromEvent(e);
+    },true);
+    document.addEventListener('keydown',function(e){
+        var key=e.key||e.code;
+        if(key==='Escape'&&isDrawerOpen){
+            e.preventDefault();
+            e.stopPropagation();
+            if(typeof e.stopImmediatePropagation==='function'){e.stopImmediatePropagation();}
+            closeDrawer();
+            return;
+        }
+        if(key!=='Enter'&&key!==' '&&key!=='Spacebar'){return;}
+        var trigger=e.target.closest?e.target.closest(TOGGLE_SEL):null;
+        if(!trigger||!isMobile()){return;}
+        toggleDrawerFromEvent(e);
+    },true);
+    $(document).on('click',TOGGLE_SEL,function(e){
+        e.preventDefault();
+        e.stopImmediatePropagation();
         if(!isMobile()){return;}
         if(isDrawerOpen){closeDrawer();}else{openDrawer();}
     });
@@ -133,5 +443,77 @@ require(['jquery'], function ($) {
     $(window).on('resize',function(){
         if(!isMobile()&&isDrawerOpen){closeDrawer();}
     });
-});
+            });
+        };
+
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(startNav, { key: 'awa-mobile-nav-inline' });
+            return;
+        }
+
+        if (typeof w.require === 'function') {
+            startNav();
+            return;
+        }
+
+        w.setTimeout(bootMobileNav, 200);
+    }
+
+    if (isMobileViewport()) {
+        if (d.readyState === 'loading') {
+            d.addEventListener('DOMContentLoaded', bootMobileNav, { once: true });
+        } else {
+            bootMobileNav();
+        }
+    }
+
+    w.addEventListener('resize', function () {
+        if (isMobileViewport()) {
+            bootMobileNav();
+        }
+    }, { passive: true });
+}(window, document));
+</script>
+<?php endif; ?>
+<script type="text/javascript">
+(function (w) {
+    'use strict';
+
+    var queued = false;
+
+    function isMobileViewport() {
+        return w.innerWidth < 992;
+    }
+
+    function loadMobileNav() {
+        if (w.__AWA_MENU_V2 || queued || !isMobileViewport() || w.__awaMobileNavInit) {
+            return;
+        }
+
+        function start() {
+            queued = true;
+            w.require(['js/awa-mobile-nav-v2'], function () {});
+        }
+
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(start, { key: 'awa-mobile-nav-v2' });
+            return;
+        }
+
+        if (typeof w.require === 'function') {
+            start();
+            return;
+        }
+
+        w.setTimeout(loadMobileNav, 200);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadMobileNav, { once: true });
+    } else {
+        loadMobileNav();
+    }
+
+    w.addEventListener('resize', loadMobileNav, { passive: true });
+}(window));
 </script>

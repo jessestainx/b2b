@@ -1,19 +1,8 @@
 /* global define, window, setTimeout, clearTimeout */
 define([
-    'jquery',
-    'rokanthemes/owl'
+    'jquery'
 ], function ($) {
     'use strict';
-
-    function resolveBoolean(value, fallback) {
-        if (value === undefined || value === null || value === '') {
-            return fallback;
-        }
-        if (typeof value === 'string') {
-            return !(value === 'false' || value === '0');
-        }
-        return !!value;
-    }
 
     function debounce(fn, wait) {
         let timer;
@@ -147,19 +136,33 @@ define([
 
     function findTargetPanel($scope, tabsSelector, contentSelector, $tab) {
         let targetId = $tab.attr('rel');
+        var escapedId;
         var $panels = $scope.find(contentSelector);
         var $target = $();
 
         if (targetId) {
+            targetId = $.trim(String(targetId));
+            if (targetId.charAt(0) === '#') {
+                targetId = targetId.substring(1);
+            }
             if (typeof $.escapeSelector === 'function') {
-                $target = $scope.find('#' + $.escapeSelector(targetId));
+                escapedId = $.escapeSelector(targetId);
+                $target = $scope.find('#' + escapedId);
+            } else if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+                escapedId = CSS.escape(targetId);
+                $target = $scope.find('#' + escapedId);
             } else {
-                $target = $scope.find('#' + targetId);
+                $target = $scope.find('[id="' + targetId + '"]');
             }
         }
 
         if (!$target.length) {
-            $target = $panels.first();
+            let tabIndex = $scope.find(tabsSelector).index($tab);
+            if (tabIndex >= 0 && tabIndex < $panels.length) {
+                $target = $panels.eq(tabIndex);
+            } else {
+                $target = $panels.first();
+            }
         }
 
         return $target;
@@ -233,10 +236,49 @@ define([
         activateAndNotify($active, true);
     }
 
+    /**
+     * @param {jQuery} $container
+     * @returns {boolean}
+     */
+    function scanShelfRuntime($container) {
+        var shelfRuntime = window.AWA_SHELF_CAROUSEL;
+
+        if (!shelfRuntime || typeof shelfRuntime.scan !== 'function' || !$container || !$container.length) {
+            return false;
+        }
+
+        shelfRuntime.scan($container[0]);
+
+        try {
+            document.dispatchEvent(new CustomEvent('awa:carousel:refresh', { bubbles: true }));
+        } catch (ignore) {
+            /* noop */
+        }
+
+        return true;
+    }
+
+    function scheduleShelfRetry($container) {
+        if ($container.data('awaTabCarouselShelfRetry')) {
+            return;
+        }
+
+        $container.data('awaTabCarouselShelfRetry', 1);
+
+        function retry() {
+            if (scanShelfRuntime($container)) {
+                $container.removeData('awaTabCarouselShelfRetry');
+            }
+        }
+
+        document.addEventListener('awa-bootstrap-ready', retry, { once: true });
+        document.addEventListener('awa:carousel-runtime-ready', retry, { once: true });
+        window.setTimeout(retry, 250);
+        window.setTimeout(retry, 1200);
+    }
+
     function initCarousel(config) {
         let carouselSelector = config.carouselSelector;
-        let owlConfig = config.owl || {};
-        let baseOptions;
         let manager = {
             ensureIn: function () {}
         };
@@ -245,72 +287,16 @@ define([
             return manager;
         }
 
-        baseOptions = {
-            lazyLoad: resolveBoolean(owlConfig.lazyLoad, true),
-            autoPlay: resolveBoolean(owlConfig.autoPlay, false),
-            navigation: resolveBoolean(owlConfig.navigation, false),
-            pagination: resolveBoolean(owlConfig.pagination, false),
-            stopOnHover: resolveBoolean(owlConfig.stopOnHover, true),
-            scrollPerPage: resolveBoolean(owlConfig.scrollPerPage, true),
-            items: parseInt(owlConfig.items, 10) || 3,
-            itemsDesktop: owlConfig.itemsDesktop || [1366, 3],
-            itemsDesktopSmall: owlConfig.itemsDesktopSmall || [1199, 2],
-            itemsTablet: owlConfig.itemsTablet || [991, 2],
-            itemsMobile: owlConfig.itemsMobile || [680, 1],
-            slideSpeed: parseInt(owlConfig.slideSpeed, 10) || 500,
-            paginationSpeed: parseInt(owlConfig.paginationSpeed, 10) || 500,
-            rewindSpeed: parseInt(owlConfig.rewindSpeed, 10) || 500,
-            afterAction: function () {
-                if (this.$owlItems && this.$owlItems.length) {
-                    this.$owlItems.removeClass('first-active');
-                    this.$owlItems.eq(this.currentItem).addClass('first-active');
-                }
-            }
-        };
-
-        function reinitCarousel($carousel) {
-            let owl = $carousel.data('owlCarousel');
-
-            if (!owl) {
-                return;
-            }
-
-            if (typeof owl.reinit === 'function') {
-                owl.reinit(baseOptions);
-                return;
-            }
-
-            $carousel.trigger('owl.update');
-        }
-
         function ensureIn($container) {
             if (!$container || !$container.length) {
                 return;
             }
 
-            $container.find(carouselSelector).each(function () {
-                var $carousel = $(this);
+            if (scanShelfRuntime($container)) {
+                return;
+            }
 
-                if ($carousel.data('owlCarousel') || $carousel.hasClass('owl-loaded')) {
-                    reinitCarousel($carousel);
-                    return;
-                }
-
-                if ($carousel.data('awaTabCarouselInit')) {
-                    return;
-                }
-
-                if (typeof $carousel.owlCarousel !== 'function') {
-                    return;
-                }
-
-                $carousel.data('awaTabCarouselInit', 1);
-                try {
-                    $carousel.owlCarousel(baseOptions);
-                } catch (error) {
-                    $carousel.removeData('awaTabCarouselInit');
-                }
-            });
+            scheduleShelfRetry($container);
         }
 
         manager.ensureIn = ensureIn;

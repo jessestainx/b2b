@@ -28,6 +28,12 @@ define([], function () {
             return;
         }
 
+        let footerRoot = document.querySelector('.page-footer, footer.footer, .footer.content');
+
+        if (!footerRoot) {
+            return;
+        }
+
         new MutationObserver(function (mutations) {
             mutations.forEach(function (mutation) {
                 mutation.addedNodes.forEach(function (node) {
@@ -36,7 +42,7 @@ define([], function () {
                     }
                 });
             });
-        }).observe(document.body, { childList: true, subtree: true });
+        }).observe(footerRoot, { childList: true, subtree: true });
     }
 
     if (document.readyState === 'loading') {

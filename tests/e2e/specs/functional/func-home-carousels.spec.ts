@@ -14,7 +14,7 @@ async function activateAsyncCss(page: Page): Promise<void> {
   await Promise.race([
     page.evaluate(() => {
       document.querySelectorAll('link[rel="stylesheet"][media="print"]').forEach((link) => {
-        link.media = 'all';
+        (link as HTMLLinkElement).media = 'all';
       });
     }),
     page.waitForTimeout(12_000),

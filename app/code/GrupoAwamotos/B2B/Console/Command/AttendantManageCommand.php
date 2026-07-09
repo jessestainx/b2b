@@ -43,12 +43,26 @@ class AttendantManageCommand extends Command
             )
             ->addOption('department', 'd', InputOption::VALUE_OPTIONAL, 'Filtrar por departamento')
             ->addOption('batch', 'b', InputOption::VALUE_OPTIONAL, 'Batch para assign-unassigned', '500')
-            ->addOption('buffer', null, InputOption::VALUE_OPTIONAL,
-                'Margem acima do volume real para calibrate (ex: 0.30 = 30%)', '0.30')
-            ->addOption('min-max', null, InputOption::VALUE_OPTIONAL,
-                'Minimo de max_customers para atendentes novos sem clientes em calibrate', '50')
-            ->addOption('dry-run', null, InputOption::VALUE_NONE,
-                'Exibe o que seria feito pelo calibrate sem salvar');
+            ->addOption(
+                'buffer',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Margem acima do volume real para calibrate (ex: 0.30 = 30%)',
+                '0.30'
+            )
+            ->addOption(
+                'min-max',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Minimo de max_customers para atendentes novos sem clientes em calibrate',
+                '50'
+            )
+            ->addOption(
+                'dry-run',
+                null,
+                InputOption::VALUE_NONE,
+                'Exibe o que seria feito pelo calibrate sem salvar'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -276,7 +290,9 @@ class AttendantManageCommand extends Command
             if ($assigned > 0) {
                 $output->writeln(sprintf(
                     '  Batch %d: %d clientes atribuidos, %d restantes',
-                    $iterations, $assigned, $remaining
+                    $iterations,
+                    $assigned,
+                    $remaining
                 ));
             }
         } while ($assigned > 0 && $remaining > 0 && $iterations < 100);

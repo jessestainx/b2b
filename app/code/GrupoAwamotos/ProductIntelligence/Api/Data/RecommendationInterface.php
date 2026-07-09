@@ -1,25 +1,25 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Interface de dados para Recomendação
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Api\Data;
 
 interface RecommendationInterface
 {
-    const CHAVE_GLOBAL = 'chave_global';
-    const CUSTOMER_ID = 'identificador_cliente';
-    const PRODUCT_SKU = 'identificador_produto';
-    const CLASSIFICACAO = 'classificacao_produto';
-    const PRED_SCORE = 'pred';
-    const PROBABILIDADE = 'probabilidade_compra';
-    const PREVISAO_GASTO = 'previsao_gasto_round_up';
-    const RECENCIA = 'recencia';
-    const FREQUENCIA = 'frequencia';
-    const VALOR_MONETARIO = 'valor_monetario';
+    public const CHAVE_GLOBAL = 'chave_global';
+    public const CUSTOMER_ID = 'identificador_cliente';
+    public const PRODUCT_SKU = 'identificador_produto';
+    public const CLASSIFICACAO = 'classificacao_produto';
+    public const PRED_SCORE = 'pred';
+    public const PROBABILIDADE = 'probabilidade_compra';
+    public const PREVISAO_GASTO = 'previsao_gasto_round_up';
+    public const RECENCIA = 'recencia';
+    public const FREQUENCIA = 'frequencia';
+    public const VALOR_MONETARIO = 'valor_monetario';
 
     /**
      * @return string

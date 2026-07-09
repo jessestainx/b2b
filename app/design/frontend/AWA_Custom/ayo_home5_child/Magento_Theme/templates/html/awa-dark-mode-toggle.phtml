@@ -1,0 +1,187 @@
+<?php
+/**
+ * AWA Motos - Dark Mode Toggle (2026-06-28)
+ *
+ * Botao flutuante no header para alternar entre light/dark mode.
+ * Persiste escolha do usuario em localStorage.
+ */
+declare(strict_types=1);
+?>
+<button type="button"
+        class="awa-dark-mode-toggle"
+        data-awa-dark-mode-toggle
+        aria-label="<?= $block->escapeHtmlAttr(__('Alternar modo escuro')) ?>"
+        title="<?= $block->escapeHtmlAttr(__('Modo escuro')) ?>">
+    <span class="awa-dark-mode-toggle__icon-light" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+    </span>
+    <span class="awa-dark-mode-toggle__icon-dark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </span>
+</button>
+
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaDarkModeInit) return;
+    w.__awaDarkModeInit = true;
+
+    var STORAGE_KEY = 'awa-dark-mode';
+    var btn = null;
+
+    function isProductPage() {
+        return d.body && d.body.classList.contains('catalog-product-view');
+    }
+
+    function isCatalogListPage() {
+        return d.body && (
+            d.body.classList.contains('catalog-category-view')
+            || d.body.classList.contains('catalogsearch-result-index')
+        );
+    }
+
+    function shouldHideFloatingToggle() {
+        if (isProductPage()) {
+            return true;
+        }
+        return isCatalogListPage()
+            && w.matchMedia
+            && w.matchMedia('(max-width: 767px)').matches;
+    }
+
+    function getPreference() {
+        if (isProductPage()) {
+            return 'light';
+        }
+        try {
+            var stored = localStorage.getItem(STORAGE_KEY);
+            if (stored === 'true') return 'dark';
+            if (stored === 'false') return 'light';
+        } catch (e) {}
+        if (w.matchMedia && w.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        return 'light';
+    }
+
+    function applyTheme(theme) {
+        if (isProductPage()) {
+            theme = 'light';
+        }
+        d.body.classList.toggle('awa-dark-mode', theme === 'dark');
+        d.body.classList.toggle('awa-light-mode', theme === 'light');
+        if (btn) {
+            btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+            if (shouldHideFloatingToggle()) {
+                btn.hidden = true;
+                btn.setAttribute('aria-hidden', 'true');
+                btn.setAttribute('tabindex', '-1');
+                btn.style.setProperty('display', 'none', 'important');
+                btn.style.setProperty('pointer-events', 'none', 'important');
+            } else {
+                btn.hidden = false;
+                btn.removeAttribute('aria-hidden');
+                btn.removeAttribute('tabindex');
+                btn.style.removeProperty('display');
+                btn.style.removeProperty('pointer-events');
+            }
+        }
+    }
+
+    function savePreference(theme) {
+        try { localStorage.setItem(STORAGE_KEY, String(theme === 'dark')); } catch (e) {}
+    }
+
+    function init() {
+        btn = d.querySelector('[data-awa-dark-mode-toggle]');
+        if (!btn) return;
+        applyTheme(getPreference());
+        btn.addEventListener('click', function () {
+            if (isProductPage()) {
+                applyTheme('light');
+                return;
+            }
+            var current = d.body.classList.contains('awa-dark-mode') ? 'dark' : 'light';
+            var next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            savePreference(next);
+        });
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+})(window, document);
+</script>
+
+<style>
+.awa-dark-mode-toggle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    color: #6b7280 !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+}
+body.catalog-product-view .awa-dark-mode-toggle {
+    display: none !important;
+}
+
+@layer awa-visual-priority {
+    @media (max-width: 767px) {
+        body.catalog-category-view .awa-dark-mode-toggle,
+        body.catalogsearch-result-index .awa-dark-mode-toggle {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+    }
+}
+.awa-dark-mode-toggle:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #111827 !important;
+}
+.awa-dark-mode-toggle:focus-visible {
+    outline: 3px solid #2563eb !important;
+    outline-offset: 2px !important;
+}
+.awa-dark-mode-toggle__icon-light,
+.awa-dark-mode-toggle__icon-dark {
+    position: absolute !important;
+    inset: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+.awa-dark-mode-toggle__icon-light { opacity: 1; transform: rotate(0); }
+.awa-dark-mode-toggle__icon-dark { opacity: 0; transform: rotate(-90deg); }
+
+body.awa-dark-mode .awa-dark-mode-toggle { color: #fbbf24; }
+body.awa-dark-mode .awa-dark-mode-toggle:hover { background: rgba(255, 255, 255, 0.1) !important; }
+body.awa-dark-mode .awa-dark-mode-toggle__icon-light { opacity: 0; transform: rotate(90deg); }
+body.awa-dark-mode .awa-dark-mode-toggle__icon-dark { opacity: 1; transform: rotate(0); }
+</style>

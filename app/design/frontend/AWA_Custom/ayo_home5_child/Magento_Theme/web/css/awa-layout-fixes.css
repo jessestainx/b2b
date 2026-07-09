@@ -1,0 +1,678 @@
+/**
+ * AWA Motos - Layout Fixes (Onda 15)
+ *
+ * Correcoes de problemas REAIS de layout encontrados na auditoria:
+ * - Espacamento inconsistente (margins, paddings)
+ * - Aspect ratios (CLS prevention)
+ * - Z-index conflicts
+ * - Line-height < 1.0 (corta descenders)
+ * - Alinhamentos verticais
+ * - Cards com heights desiguais
+ * - Texto desalinhado
+ * - Border-radius inconsistente
+ *
+ * 2026-06-28
+ */
+
+/* ============================================
+   1. ASPECT RATIO - prevenir CLS
+   ============================================ */
+img[width][height] {
+    aspect-ratio: attr(width) / attr(height) !important;
+}
+.awa-image-aspect-1x1 { aspect-ratio: 1 / 1 !important; }
+.awa-image-aspect-4x3 { aspect-ratio: 4 / 3 !important; }
+.awa-image-aspect-16x9 { aspect-ratio: 16 / 9 !important; }
+.awa-image-aspect-21x9 { aspect-ratio: 21 / 9 !important; }
+
+/* Categoria carousel - aspect ratio consistente */
+.awa-category-carousel__icon img,
+.awa-category-carousel__image {
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Logo */
+.awa-logo img,
+header img[alt*="AWA"] {
+    aspect-ratio: auto !important;
+    width: auto !important;
+    max-height: 60px !important;
+}
+
+/* Banner slider */
+.wrapper_slider .banner_item img,
+.awa-hero-swiper .banner_item img {
+    aspect-ratio: 16 / 6 !important;
+    object-fit: cover !important;
+    object-position: center !important;
+}
+@media (max-width: 991px) {
+    .wrapper_slider .banner_item img,
+    .awa-hero-swiper .banner_item img {
+        aspect-ratio: 4 / 3 !important;
+    }
+}
+
+/* Product card image */
+.awa-product-card .product-image-container img,
+.product-item-info .product-image-container img {
+    aspect-ratio: 1 / 1 !important;
+    object-fit: contain !important;
+    object-position: center !important;
+}
+
+/* ============================================
+   2. Z-INDEX - sistema organizado
+   ============================================ */
+:root {
+    --awa-z-base: 1;
+    --awa-z-dropdown: 100;
+    --awa-z-sticky: 200;
+    --awa-z-header: 300;
+    --awa-z-modal-backdrop: 9000;
+    --awa-z-modal: 9100;
+    --awa-z-toast: 9200;
+    --awa-z-tooltip: 9300;
+    --awa-z-push-prompt: 9500;
+    --awa-z-pwa-install: 9600;
+    --awa-z-bottom-nav: 9800;
+    --awa-z-whatsapp: 9900;
+    --awa-z-exit-popup: 9999;
+}
+
+/* Aplicar z-index organizado nos componentes */
+.awa-site-header { z-index: var(--awa-z-header) !important; }
+.awa-mobile-bottom-nav { z-index: var(--awa-z-bottom-nav) !important; }
+.awa-whatsapp-float { z-index: var(--awa-z-whatsapp) !important; }
+.awa-exit-popup,
+.awa-newsletter-popup { z-index: var(--awa-z-exit-popup) !important; }
+.awa-pwa-install-prompt { z-index: var(--awa-z-pwa-install) !important; }
+.awa-push-prompt { z-index: var(--awa-z-push-prompt) !important; }
+.awa-toast-container { z-index: var(--awa-z-toast) !important; }
+
+/* ============================================
+   3. LINE-HEIGHT - corrigir < 1.0
+   ============================================ */
+[style*="line-height: 0"],
+[style*="line-height:0"] {
+    line-height: 1.4 !important;
+}
+
+/* Inputs e forms - minimo 1.5 */
+input, select, textarea,
+button, .action {
+    line-height: 1.4 !important;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2 !important;
+}
+
+/* Body text */
+body, p, li, dd, dt, blockquote {
+    line-height: 1.55 !important;
+}
+
+/* ============================================
+   4. CONSISTÊNCIA DE BORDER-RADIUS
+   ============================================ */
+:root {
+    --awa-radius-xs: 2px;
+    --awa-radius-sm: 4px;
+    --awa-radius-md: 6px;
+    --awa-radius-lg: 8px;
+    --awa-radius-xl: 12px;
+    --awa-radius-2xl: 16px;
+    --awa-radius-pill: 999px;
+}
+
+/* Aplicar radius consistente */
+.awa-button,
+.action,
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="tel"],
+select,
+textarea {
+    border-radius: var(--awa-radius-md) !important;
+}
+.awa-card,
+.product-item-info {
+    border-radius: var(--awa-radius-lg) !important;
+}
+.awa-modal,
+.fancybox-content {
+    border-radius: var(--awa-radius-xl) !important;
+}
+
+/* ============================================
+   5. ALINHAMENTO VERTICAL
+   ============================================ */
+.awa-flex-center {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.awa-flex-between {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+.awa-flex-align-end {
+    display: flex !important;
+    align-items: flex-end !important;
+}
+.awa-flex-align-baseline {
+    display: flex !important;
+    align-items: baseline !important;
+}
+
+/* Buttons com icone - alinhar corretamente */
+button > svg,
+button > img,
+.action > svg,
+.action > img {
+    flex: 0 0 auto !important;
+    vertical-align: middle !important;
+}
+
+/* Product card info - baseline alignment */
+.awa-product-card .product-info,
+.product-item-info .product-info {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    flex: 1 1 auto !important;
+    min-height: 100% !important;
+}
+
+/* ============================================
+   6. CARDS - height consistente (evitar "wall of cards")
+   ============================================ */
+.awa-products-grid {
+    display: grid !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+}
+.awa-products-grid > * {
+    display: flex !important;
+}
+.awa-products-grid > * > * {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Product cards - mesmo height para imagem */
+.awa-product-card,
+.product-item-info {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.awa-product-card .product-image-container,
+.product-item-info .product-image-container {
+    flex: 0 0 auto !important;
+}
+.awa-product-card .product-info,
+.product-item-info .product-info {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+.awa-product-card .actions-primary,
+.product-item-info .actions-primary {
+    margin-top: auto !important;
+}
+
+/* ============================================
+   7. TEXT-ALIGN CORRETO
+   ============================================ */
+.awa-text-center { text-align: center !important; }
+.awa-text-left { text-align: left !important; }
+.awa-text-right { text-align: right !important; }
+.awa-text-justify { text-align: justify !important; }
+
+.awa-section-header {
+    text-align: center !important;
+}
+.awa-section-header__link {
+    text-align: right !important;
+}
+
+/* Center product prices */
+.price-box,
+.info-price {
+    text-align: center !important;
+}
+.price-box .price,
+.info-price .price {
+    display: inline-block !important;
+}
+
+/* ============================================
+   8. SPACING CONSISTENTE (8pt grid)
+   ============================================ */
+:root {
+    --awa-space-0: 0;
+    --awa-space-1: 4px;
+    --awa-space-2: 8px;
+    --awa-space-3: 12px;
+    --awa-space-4: 16px;
+    --awa-space-5: 24px;
+    --awa-space-6: 32px;
+    --awa-space-7: 48px;
+    --awa-space-8: 64px;
+}
+
+.awa-mt-0 { margin-top: var(--awa-space-0) !important; }
+.awa-mt-1 { margin-top: var(--awa-space-1) !important; }
+.awa-mt-2 { margin-top: var(--awa-space-2) !important; }
+.awa-mt-3 { margin-top: var(--awa-space-3) !important; }
+.awa-mt-4 { margin-top: var(--awa-space-4) !important; }
+.awa-mt-5 { margin-top: var(--awa-space-5) !important; }
+.awa-mt-6 { margin-top: var(--awa-space-6) !important; }
+
+.awa-mb-0 { margin-bottom: var(--awa-space-0) !important; }
+.awa-mb-1 { margin-bottom: var(--awa-space-1) !important; }
+.awa-mb-2 { margin-bottom: var(--awa-space-2) !important; }
+.awa-mb-3 { margin-bottom: var(--awa-space-3) !important; }
+.awa-mb-4 { margin-bottom: var(--awa-space-4) !important; }
+.awa-mb-5 { margin-bottom: var(--awa-space-5) !important; }
+.awa-mb-6 { margin-bottom: var(--awa-space-6) !important; }
+
+.awa-p-2 { padding: var(--awa-space-2) !important; }
+.awa-p-3 { padding: var(--awa-space-3) !important; }
+.awa-p-4 { padding: var(--awa-space-4) !important; }
+.awa-p-5 { padding: var(--awa-space-5) !important; }
+.awa-p-6 { padding: var(--awa-space-6) !important; }
+
+/* ============================================
+   9. MAX WIDTHS para textos
+   ============================================ */
+.awa-text-narrow { max-width: 65ch !important; }
+.awa-text-medium { max-width: 75ch !important; }
+.awa-text-wide { max-width: 85ch !important; }
+
+.awa-section-header__desc,
+.awa-feature-desc {
+    max-width: 65ch !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* ============================================
+   10. CORREÇÕES DE INLINE STYLES
+   ============================================ */
+/* Sobrescrever estilos inline problematicos */
+[style*="line-height: 0"]:not(svg) {
+    line-height: 1.4 !important;
+}
+[style*="font-size: 0"]:not(svg):not([aria-hidden]) {
+    font-size: 14px !important;
+}
+
+/* ============================================
+   11. HEADER - alinhamento de elementos
+   ============================================ */
+.awa-header-shell {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    min-height: 80px !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+    padding: 0 16px !important;
+}
+.awa-header-brand {
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+}
+.awa-header-primary-nav {
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+    justify-content: center !important;
+}
+.awa-header-cart {
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    gap: 8px !important;
+}
+
+/* Mobile: header mais compacto */
+@media (max-width: 768px) {
+    .awa-header-shell {
+        min-height: 56px !important;
+        padding: 0 12px !important;
+        gap: 8px !important;
+    }
+}
+
+/* ============================================
+   12. FOOTER - grid consistente
+   ============================================ */
+.awa-footer-static5__grid {
+    display: grid !important;
+    gap: 24px !important;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+}
+@media (min-width: 768px) {
+    .awa-footer-static5__grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+}
+
+/* ============================================
+   13. RESPONSIVIDADE
+   ============================================ */
+@media (max-width: 480px) {
+    .awa-section-header__title {
+        font-size: 20px !important;
+    }
+    .awa-product-card {
+        font-size: 13px !important;
+    }
+}
+@media (max-width: 768px) {
+    .awa-header-primary-nav,
+    .awa-nav-desktop {
+        display: none !important;
+    }
+    .awa-header-mobile-toggle {
+        display: inline-flex !important;
+    }
+}
+@media (min-width: 769px) {
+    .awa-header-mobile-toggle {
+        display: none !important;
+    }
+    .awa-nav-mobile {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   14. CORREÇÕES DE OVERFLOW
+   ============================================ */
+.awa-overflow-hidden { overflow: hidden !important; }
+.awa-overflow-x-hidden { overflow-x: hidden !important; }
+.awa-overflow-y-auto { overflow-y: auto !important; }
+.awa-text-ellipsis {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+.awa-text-ellipsis-2 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+.awa-text-ellipsis-3 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* ============================================
+   15. CONTAINERS MAX-WIDTH CORRETOS
+   ============================================ */
+.awa-container,
+.awa-section,
+.awa-footer-static5__container {
+    max-width: 1280px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    width: 100% !important;
+}
+
+/* ============================================
+   16. CORREÇÕES ESPECÍFICAS DO LAYOUT
+   ============================================ */
+
+/* Hero benefits - alinhar icones */
+.awa-hero-benefits__item {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+}
+.awa-hero-benefits__icon {
+    flex: 0 0 auto !important;
+    width: 48px !important;
+    height: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Carousel - alinhar items */
+.awa-category-carousel__item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+/* Carousel - botoes de nav */
+.awa-category-carousel__nav,
+.awa-hero-swiper__nav {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 10 !important;
+    width: 44px !important;
+    height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: white !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+.awa-category-carousel__nav:hover,
+.awa-hero-swiper__nav:hover {
+    background: #b73337 !important;
+    color: white !important;
+    transform: translateY(-50%) scale(1.05) !important;
+}
+
+/* Quick view modal - centralizar */
+.awa-quick-view-modal__panel {
+    position: relative !important;
+    background: white !important;
+    border-radius: 16px !important;
+    max-width: 960px !important;
+    width: calc(100% - 32px) !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    padding: 24px !important;
+    margin: auto !important;
+}
+
+/* ============================================
+   17. CORREÇÕES DE BREADCRUMBS
+   ============================================ */
+.breadcrumbs,
+.awa-breadcrumbs {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    padding: 12px 16px !important;
+    font-size: 13px !important;
+    color: #6b7280 !important;
+    list-style: none !important;
+    margin: 0 !important;
+}
+.breadcrumbs li,
+.awa-breadcrumbs li {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+.breadcrumbs li:not(:last-child)::after,
+.awa-breadcrumbs li:not(:last-child)::after {
+    content: "/" !important;
+    margin-left: 4px !important;
+    color: #d1d5db !important;
+}
+.breadcrumbs a,
+.awa-breadcrumbs a {
+    color: #6b7280 !important;
+    text-decoration: none !important;
+    padding: 4px 0 !important;
+}
+.breadcrumbs a:hover,
+.awa-breadcrumbs a:hover {
+    color: #b73337 !important;
+    text-decoration: underline !important;
+}
+.breadcrumbs li[aria-current="page"] span,
+.awa-breadcrumbs li[aria-current="page"] span {
+    color: #111827 !important;
+    font-weight: 600 !important;
+}
+
+/* ============================================
+   18. CORREÇÕES DE HEADER STICKY
+   ============================================ */
+.awa-site-header.is-sticky {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: var(--awa-z-header) !important;
+    background: white !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+    animation: awa-header-slide-down 0.3s ease;
+}
+@keyframes awa-header-slide-down {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+.awa-site-header.is-hidden {
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+}
+
+/* ============================================
+   19. CORREÇÕES DE PRINT
+   ============================================ */
+@media print {
+    .awa-site-header,
+    .awa-mobile-bottom-nav,
+    .awa-whatsapp-float,
+    .awa-toast-container,
+    .awa-push-prompt,
+    .awa-pwa-install-prompt,
+    .awa-exit-popup,
+    .awa-newsletter-popup,
+    .awa-back-to-top,
+    .awa-toast {
+        display: none !important;
+    }
+    body {
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
+    }
+    a {
+        color: #000 !important;
+        text-decoration: underline !important;
+    }
+    img {
+        max-width: 100% !important;
+        page-break-inside: avoid !important;
+    }
+}
+
+/* ============================================
+   20. ESTADOS DE FOCO MELHORADOS
+   ============================================ */
+.awa-focusable,
+a,
+button,
+input,
+select,
+textarea,
+[tabindex]:not([tabindex="-1"]) {
+    outline: none !important;
+}
+.awa-focusable:focus-visible,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 3px solid #2563eb !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 1px white inset !important;
+    border-radius: 2px !important;
+}
+
+/* Focus visivel em links do footer (melhor contraste) */
+footer a:focus-visible {
+    outline-color: #fbbf24 !important;
+}
+
+/* Focus em botoes primarios */
+.awa-action-primary:focus-visible,
+button.primary:focus-visible {
+    outline-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* ============================================
+   21. UTILITIES DE VISIBILIDADE
+   ============================================ */
+.awa-sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+.awa-hidden { display: none !important; }
+.awa-visible { display: block !important; }
+.awa-invisible { visibility: hidden !important; }
+
+/* ============================================
+   22. REDUCED MOTION - tudo respeitado
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .awa-site-header.is-sticky,
+    .awa-site-header.is-hidden {
+        animation: none !important;
+        transition: none !important;
+    }
+}

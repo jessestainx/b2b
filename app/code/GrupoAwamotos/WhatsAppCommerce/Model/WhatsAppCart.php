@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
@@ -33,7 +34,8 @@ class WhatsAppCart implements CartInterface
         private readonly CacheInterface $cache,
         private readonly Config $config,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc

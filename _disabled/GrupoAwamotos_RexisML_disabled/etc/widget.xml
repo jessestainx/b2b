@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+
+    <widget id="rexisml_recommendations" class="GrupoAwamotos\RexisML\Block\Widget\Recommendations">
+        <label translate="true">REXIS ML - Recomendações Personalizadas</label>
+        <description translate="true">Exibe recomendações de produtos baseadas em Machine Learning</description>
+        <parameters>
+            <parameter name="widget_title" xsi:type="text" required="false" visible="true">
+                <label translate="true">Título do Widget</label>
+                <description translate="true">Título exibido acima das recomendações (deixe vazio para usar título padrão)</description>
+            </parameter>
+
+            <parameter name="classificacao" xsi:type="select" required="false" visible="true">
+                <label translate="true">Tipo de Recomendação</label>
+                <description translate="true">Filtrar por tipo de classificação</description>
+                <options>
+                    <option name="all" value="" selected="true">
+                        <label translate="true">Todas</label>
+                    </option>
+                    <option name="churn" value="churn">
+                        <label translate="true">Churn (Produtos que o cliente parou de comprar)</label>
+                    </option>
+                    <option name="crosssell" value="crosssell">
+                        <label translate="true">Cross-sell (Produtos complementares)</label>
+                    </option>
+                </options>
+            </parameter>
+
+            <parameter name="limit" xsi:type="text" required="false" visible="true">
+                <label translate="true">Quantidade de Produtos</label>
+                <description translate="true">Número de produtos a exibir (padrão: 4)</description>
+                <value>4</value>
+            </parameter>
+
+            <parameter name="show_for_guest" xsi:type="select" required="false" visible="true">
+                <label translate="true">Exibir para Visitantes</label>
+                <description translate="true">Mostrar widget mesmo se o usuário não estiver logado (exibirá mensagem de login)</description>
+                <options>
+                    <option name="no" value="0" selected="true">
+                        <label translate="true">Não</label>
+                    </option>
+                    <option name="yes" value="1">
+                        <label translate="true">Sim</label>
+                    </option>
+                </options>
+            </parameter>
+
+            <parameter name="custom_class" xsi:type="text" required="false" visible="true">
+                <label translate="true">Classe CSS Customizada</label>
+                <description translate="true">Adicionar classe CSS customizada ao container do widget</description>
+            </parameter>
+
+            <parameter name="template" xsi:type="select" visible="true">
+                <label translate="true">Template</label>
+                <options>
+                    <option name="default" value="GrupoAwamotos_RexisML::widget/recommendations.phtml" selected="true">
+                        <label translate="true">Padrão (Grid Responsivo)</label>
+                    </option>
+                    <option name="simple" value="GrupoAwamotos_RexisML::widget/recommendations_simple.phtml">
+                        <label translate="true">Simples (Lista)</label>
+                    </option>
+                    <option name="carousel" value="GrupoAwamotos_RexisML::widget/recommendations_carousel.phtml">
+                        <label translate="true">Carrossel</label>
+                    </option>
+                </options>
+            </parameter>
+        </parameters>
+    </widget>
+
+</widgets>

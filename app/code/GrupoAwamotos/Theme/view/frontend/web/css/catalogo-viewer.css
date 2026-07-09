@@ -25,6 +25,11 @@ body.catalogo-revista-index .column.main {
     max-width: none;
 }
 
+body.catalogo-index-index .page-main,
+body.catalogo-revista-index .page-main {
+    padding-top: 12px;
+}
+
 .awa-catalog-nav {
     background: var(--awa-bg-surface, #fff);
     border: 1px solid var(--awa-border, #e6e6e6);
@@ -211,6 +216,15 @@ body.catalogo-revista-index .column.main {
     flex-shrink: 0;
 }
 
+.awa-catalogo-page__cta-hint {
+    color: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    opacity: 0.78;
+    text-transform: lowercase;
+}
+
 .awa-catalog-revista-header {
     display: grid;
     gap: 8px;
@@ -347,7 +361,15 @@ body.catalogo-revista-index .column.main {
     }
 
     .awa-catalogo-page__frame {
-        min-height: 55vh;
+        /* Viewport mobile + bottom nav (~72px) + cookie reserve: evita iframe
+           de 78vh ocupar a dobra útil e forçar scroll excessivo. */
+        height: min(58vh, 520px);
+        min-height: 280px;
+        max-height: calc(100dvh - var(--awa-catalog-mobile-reserve, 85px) - 180px);
+    }
+
+    .awa-catalogo-page__viewer {
+        padding: 8px;
     }
 }
 

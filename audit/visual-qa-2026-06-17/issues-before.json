@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "startedAt": "2026-06-18T00:48:48.286Z",
+    "finishedAt": "2026-06-18T00:49:34.665Z",
+    "mode": "audit",
+    "baseUrl": "https://awamotos.com",
+    "pages": [
+      "home",
+      "plp",
+      "pdp",
+      "cart",
+      "b2b-login",
+      "b2b-register",
+      "login",
+      "contact",
+      "404"
+    ],
+    "viewports": [
+      390,
+      768,
+      1366,
+      1920
+    ],
+    "issueTypes": [
+      "duplicated-borders",
+      "inconsistent-spacing",
+      "excessive-white-spaces",
+      "broken-grid-alignment",
+      "elements-outside-container",
+      "overflow-x",
+      "misaligned-icons",
+      "inconsistent-button-heights",
+      "inconsistent-card-spacing",
+      "responsive-layout-failures",
+      "different-paddings-between-pages",
+      "typography-inconsistencies",
+      "overlapping-elements",
+      "inconsistent-header-widths",
+      "different-container-sizes",
+      "carousels-breaking-layout",
+      "css-conflicts",
+      "unexpected-margin-padding",
+      "visual-hierarchy-issues"
+    ]
+  },
+  "issues": [],
+  "summary": {
+    "duplicated-borders": 0,
+    "inconsistent-spacing": 0,
+    "excessive-white-spaces": 0,
+    "broken-grid-alignment": 0,
+    "elements-outside-container": 0,
+    "overflow-x": 0,
+    "misaligned-icons": 0,
+    "inconsistent-button-heights": 0,
+    "inconsistent-card-spacing": 0,
+    "responsive-layout-failures": 0,
+    "different-paddings-between-pages": 0,
+    "typography-inconsistencies": 0,
+    "overlapping-elements": 0,
+    "inconsistent-header-widths": 0,
+    "different-container-sizes": 0,
+    "carousels-breaking-layout": 0,
+    "css-conflicts": 0,
+    "unexpected-margin-padding": 0,
+    "visual-hierarchy-issues": 0
+  }
+}

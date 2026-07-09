@@ -74,7 +74,7 @@ class StockSync implements StockSyncInterface
      */
     private function generateCacheKeys(string $sku, array $filiais): array
     {
-        $suffix = md5($sku . '_' . implode(',', $filiais));
+        $suffix = hash('xxh128', $sku . '_' . implode(',', $filiais));
         return [
             'positive' => self::CACHE_PREFIX . $suffix,
             'negative' => self::CACHE_NEGATIVE_PREFIX . $suffix,
@@ -522,8 +522,8 @@ class StockSync implements StockSyncInterface
     public function invalidateCache(string $sku): void
     {
         $filiais = $this->helper->getStockFiliais();
-        $cacheKey = self::CACHE_PREFIX . md5($sku . '_' . implode(',', $filiais));
-        $negativeCacheKey = self::CACHE_NEGATIVE_PREFIX . md5($sku . '_' . implode(',', $filiais));
+        $cacheKey = self::CACHE_PREFIX . hash('xxh128', $sku . '_' . implode(',', $filiais));
+        $negativeCacheKey = self::CACHE_NEGATIVE_PREFIX . hash('xxh128', $sku . '_' . implode(',', $filiais));
 
         // Remove both positive and negative cache
         $this->cache->remove($cacheKey);
@@ -531,8 +531,8 @@ class StockSync implements StockSyncInterface
 
         // Also invalidate single-branch cache key for backwards compatibility
         if (count($filiais) === 1) {
-            $singleKey = self::CACHE_PREFIX . md5($sku . '_' . $filiais[0]);
-            $singleNegativeKey = self::CACHE_NEGATIVE_PREFIX . md5($sku . '_' . $filiais[0]);
+            $singleKey = self::CACHE_PREFIX . hash('xxh128', $sku . '_' . $filiais[0]);
+            $singleNegativeKey = self::CACHE_NEGATIVE_PREFIX . hash('xxh128', $sku . '_' . $filiais[0]);
             $this->cache->remove($singleKey);
             $this->cache->remove($singleNegativeKey);
         }
@@ -929,7 +929,6 @@ class StockSync implements StockSyncInterface
 
         // Send admin notification
         $this->emailSender->sendStockAnomalyAlert($total, $this->anomalySamples);
-
     }
 
     private function logInternalCodeResolutionSummary(): void
@@ -959,7 +958,7 @@ class StockSync implements StockSyncInterface
         $basePath = defined('BP') ? BP : sys_get_temp_dir();
         $lockDir = rtrim($basePath, '/') . '/var/locks';
 
-        if (!is_dir($lockDir) && !@mkdir($lockDir, 0777, true) && !is_dir($lockDir)) {
+        if (!is_dir($lockDir) && !@mkdir($lockDir, 0775, true) && !is_dir($lockDir)) {
             return true;
         }
 
@@ -1159,7 +1158,8 @@ class StockSync implements StockSyncInterface
         $currentQty = (float) $stockItem->getQty();
 
         // Pula somente se qty igual E já configurado como infinite stock
-        if (abs($currentQty - $qty) < 0.001
+        if (
+            abs($currentQty - $qty) < 0.001
             && !$stockItem->getManageStock()
             && !$stockItem->getUseConfigManageStock()
             && (bool) $stockItem->getIsInStock()

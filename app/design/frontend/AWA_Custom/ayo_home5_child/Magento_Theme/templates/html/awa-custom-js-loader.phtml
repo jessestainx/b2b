@@ -58,6 +58,8 @@ $isCartOrCheckoutRoute = in_array('checkout_cart_index', $layoutHandles, true)
     ], true)
     || str_starts_with($pathSlug, 'checkout/cart')
     || str_starts_with($pathSlug, 'checkout');
+$isCartPageOnly = $fullActionName === 'checkout_cart_index'
+    || in_array('checkout_cart_index', $layoutHandles, true);
 $shouldInitScrollReveal = $isCmsHomeRoute || $isCatalogMerchandisingRoute;
 $globalMagentoInitModules = [
     'js/cart-simplified-header' => new stdClass(),
@@ -65,6 +67,15 @@ $globalMagentoInitModules = [
     'js/awa-toast' => new stdClass(),
     'js/awa-messages-interceptor' => new stdClass(),
 ];
+if ($isCartPageOnly) {
+    $globalMagentoInitModules = [
+        'js/awa-toast' => new stdClass(),
+        'js/awa-messages-interceptor' => new stdClass(),
+    ];
+    $loadSearchCompatJs = false;
+    $loadB2bCheckoutCompatJs = false;
+    $loadHomeCategoryCompatJs = false;
+}
 $pageMagentoInit = [
     '*' => $globalMagentoInitModules,
 ];
@@ -78,12 +89,11 @@ $homeStrictPerfDefer = $isCmsHomeRoute;
 $shouldSkipMinicartDeferInit = $skipMinicartDeferInit || $isCmsHomeRoute;
 $shouldEagerLoadHeaderA11y = $isDemoStagePreview;
 
-// Home demo routes should stay close to Ayo base and avoid observer-heavy compat scripts.
+// Home/preview routes should stay close to Ayo base and avoid observer-heavy compat scripts.
 if ($isCmsHomeRoute || $isDemoStagePreview) {
     $loadSearchCompatJs = false;
     $loadB2bCheckoutCompatJs = false;
-    // We NEED Category Compat JS (tab-carousel-init) on the Homepage for Rokanthemes modules to work!
-    $loadHomeCategoryCompatJs = true;
+    // Category compat for home is habilitado apenas pelo layout quando realmente necessário.
 }
 
 $shouldLoadCompatBootstrap = $loadSearchCompatJs || $loadB2bCheckoutCompatJs || $loadHomeCategoryCompatJs;
@@ -259,6 +269,21 @@ HTML;
 };
 
 ?>
+<?php if ($loadHeaderJs && !$isCartOrCheckoutRoute): ?>
+<script>
+(function (w) {
+    var runtime = w.__awaHeaderMinicartRuntime = w.__awaHeaderMinicartRuntime || {};
+    if (!runtime.owner) {
+        runtime.owner = 'v2';
+        runtime.ownerSource = 'awa-custom-js-loader';
+        runtime.ownerClaimedAt = Date.now();
+    } else if (runtime.owner === 'v2') {
+        runtime.ownerClaimedAt = runtime.ownerClaimedAt || Date.now();
+    }
+})(window);
+</script>
+<?php endif; ?>
+
 <?php if ($loadHeaderJs): ?>
 <?php if (!$isCartOrCheckoutRoute): ?>
 <?= /* @noEscape */ $renderIntentScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-minicart-ui-v2.js')), [
@@ -295,9 +320,18 @@ HTML;
     }
 
     src = <?= json_encode($block->getViewFileUrl('js/awa-minicart-defer-init.js'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
-    if (w.__awaMinicartDeferInit || d.querySelector('script[src="' + src + '"], script[data-awa-defer-init="' + src + '"]')) {
+    var runtime = w.__awaHeaderMinicartRuntime = w.__awaHeaderMinicartRuntime || {};
+    if (runtime.owner && runtime.owner !== 'defer') {
         return;
     }
+    if (w.__awaMinicartDeferClaim || w.__awaMinicartDeferInit || d.querySelector('script[src="' + src + '"], script[data-awa-defer-init="' + src + '"]')) {
+        return;
+    }
+
+    runtime.owner = 'defer';
+    runtime.ownerSource = runtime.ownerSource || 'awa-custom-js-loader';
+    runtime.ownerClaimedAt = runtime.ownerClaimedAt || Date.now();
+    w.__awaMinicartDeferClaim = true;
 
     script = d.createElement('script');
     script.src = src;
@@ -309,7 +343,7 @@ HTML;
 <?php endif; ?>
 <?php if (!$isCartOrCheckoutRoute): ?>
 <?php if ($shouldEagerLoadHeaderA11y): ?>
-<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-header-a11y-performance.js')) ?>" defer></script>
+<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-header-a11y-performance.min.js')) ?>" defer></script>
 <?php else: ?>
 <script>
 (function (w, d) {
@@ -362,7 +396,7 @@ HTML;
     d.addEventListener('pointerdown', onNavPreflight, { capture: true, passive: true });
 }(window, document));
 </script>
-<?= /* @noEscape */ $renderIntentScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-a11y-performance.js')), [
+<?= /* @noEscape */ $renderIntentScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-a11y-performance.min.js')), [
     '.header .nav-toggle',
     '[data-awa-nav-toggle]',
     '.header .top-search',
@@ -464,12 +498,47 @@ HTML;
     });
 }(window));
 </script>
+<?php elseif ($isCartPageOnly): ?>
+<script>
+/* Carrinho: toast/messages após idle curto — evita mage/apply no parse inicial */
+(function (w, d) {
+    'use strict';
+    var done = false;
+    var payload = <?= /* @noEscape */ json_encode($pageMagentoInit, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+
+    function boot() {
+        if (done) {
+            return;
+        }
+        done = true;
+        if (typeof w.require !== 'function') {
+            w.setTimeout(boot, 120);
+            return;
+        }
+        var s = d.createElement('script');
+        s.type = 'text/x-magento-init';
+        s.textContent = JSON.stringify(payload);
+        d.body.appendChild(s);
+        w.require(['mage/apply/main']);
+    }
+
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (name) {
+        w.addEventListener(name, boot, { capture: true, passive: name !== 'keydown', once: true });
+    });
+
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(boot, { timeout: 1000 });
+    } else {
+        w.setTimeout(boot, 1000);
+    }
+}(window, document));
+</script>
 <?php else: ?>
 <script type="text/x-magento-init">
 <?= /* @noEscape */ json_encode($pageMagentoInit, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_PRETTY_PRINT) ?>
 </script>
 <?php endif; ?>
-<?php if ($shouldInitScrollReveal && !$isCmsHomeRoute): ?>
+<?php if ($shouldInitScrollReveal && !$isCmsHomeRoute && !$isCartPageOnly): ?>
 <script>
 (function (w) {
     'use strict';

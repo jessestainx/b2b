@@ -1,0 +1,10 @@
+{
+  "plugins": {
+    "app-builder": {
+      "enabled": true
+    },
+    "ui-ux-pro-max-skill/ui-ux-pro-max": {
+      "enabled": true
+    }
+  }
+}

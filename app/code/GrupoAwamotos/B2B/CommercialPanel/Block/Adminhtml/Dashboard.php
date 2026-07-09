@@ -134,8 +134,21 @@ class Dashboard extends Template
         }
 
         $own = $this->goalProgressService->getOwnProgress();
+        if ($own === null || !$this->hasConfiguredGoal($own)) {
+            return [];
+        }
 
-        return $own !== null ? [$own] : [];
+        return [$own];
+    }
+
+    /**
+     * @param array<string, mixed> $goal
+     */
+    private function hasConfiguredGoal(array $goal): bool
+    {
+        return (float) ($goal['revenue_goal'] ?? 0) > 0
+            || (int) ($goal['contacts_goal'] ?? 0) > 0
+            || (int) ($goal['reactivated_goal'] ?? 0) > 0;
     }
 
     public function getGoalsUrl(): string

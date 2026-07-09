@@ -1,27 +1,31 @@
 <?php
 declare(strict_types=1);
 
-/** @var \GrupoAwamotos\RexisML\Block\Product\CrossSell $block */
+/** @var \GrupoAwamotos\ProductIntelligence\Block\Product\CrossSell $block */
 $items = $block->getCrossSellProducts();
-if (empty($items)) { return; }
+if (empty($items)) {
+    return;
+}
 $formKey = $block->getFormKey();
+$itemCount = count($items);
+$canShowPrice = $block->canShowPrice();
+$loginUrl = $block->escapeUrl($block->getUrl('b2b/account/login'));
 ?>
 
-<div class="rx-pdp-crosssell">
-    <div class="rx-pdp-header">
-        <h3 class="rx-pdp-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+<div class="rx-pdp-crosssell awa-shelf awa-pdp-shelf" data-item-count="<?= (int) $itemCount ?>">
+    <header class="awa-shelf__header rx-pdp-header">
+        <h2 class="awa-shelf__title rx-pdp-title">
             <?= $block->escapeHtml(__('Clientes que compraram este produto também compraram')) ?>
-        </h3>
-        <span class="rx-pdp-powered">REXIS ML</span>
-    </div>
+        </h2>
+    </header>
 
-    <div class="rx-pdp-grid">
+    <div class="rx-pdp-grid" data-item-count="<?= (int) $itemCount ?>">
         <?php foreach ($items as $item):
             $product = $item['product'];
             $imageUrl = $block->getProductImageUrl($product);
             $badge = $item['badge'];
             $price = $product->getFinalPrice();
+            $showPrice = $canShowPrice && $price > 0;
         ?>
         <div class="rx-pdp-card">
             <?php if ($badge): ?>
@@ -43,14 +47,21 @@ $formKey = $block->getFormKey();
                 <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>" class="rx-pdp-name">
                     <?= $block->escapeHtml($product->getName()) ?>
                 </a>
-                <?php if ($price > 0): ?>
+                <?php if ($showPrice): ?>
                 <div class="rx-pdp-price">
                     <?= /* @noEscape */ $block->formatProductPrice($product) ?>
+                </div>
+                <?php elseif (!$canShowPrice): ?>
+                <div class="rx-pdp-price rx-pdp-price--hidden b2b-login-to-see-price">
+                    <a class="rx-pdp-login-link" href="<?= /* @noEscape */ $loginUrl ?>">
+                        <?= $block->escapeHtml(__('Faça login')) ?>
+                    </a>
+                    <span class="rx-pdp-login-suffix"><?= $block->escapeHtml(__('para ver preços')) ?></span>
                 </div>
                 <?php endif; ?>
             </div>
 
-            <?php if ($product->isSaleable()): ?>
+            <?php if ($canShowPrice && $product->isSaleable()): ?>
             <form action="<?= $block->escapeUrl($block->getUrl('checkout/cart/add')) ?>" method="post" class="rx-pdp-form">
                 <input type="hidden" name="product" value="<?= (int)$product->getId() ?>">
                 <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($formKey) ?>">

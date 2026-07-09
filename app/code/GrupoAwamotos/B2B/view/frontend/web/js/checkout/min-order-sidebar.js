@@ -6,17 +6,22 @@
  */
 define([
     'jquery',
+    'mage/translate',
     'Magento_Customer/js/customer-data',
     'Magento_Checkout/js/model/quote',
     'Magento_Checkout/js/model/totals'
-], function ($, customerData, quote, totalsModel) {
+], function ($, $t, customerData, quote, totalsModel) {
     'use strict';
 
     var ROOT_SELECTOR = '.awa-b2b-min-order-progress[data-awa-component="checkout-sidebar-min-order"]';
     var cartSection = customerData.get('cart');
     var scheduledSync = false;
+    var syncDebounceTimer = null;
+    var observerDebounceTimer = null;
+    var SYNC_DEBOUNCE_MS = 100;
 
-    function scheduleSync() {
+    function scheduleSync()
+    {
         if (scheduledSync) {
             return;
         }
@@ -29,7 +34,31 @@ define([
         });
     }
 
-    function formatCurrency(amount) {
+    function scheduleSyncDebounced()
+    {
+        window.clearTimeout(syncDebounceTimer);
+        syncDebounceTimer = window.setTimeout(function () {
+            syncDebounceTimer = null;
+            scheduleSync();
+        }, SYNC_DEBOUNCE_MS);
+    }
+
+    /**
+     * @param {jQuery} $root
+     * @param {number} percent
+     * @returns {void}
+     */
+    function applyFillProgress($root, percent)
+    {
+        var scale = Math.max(0, Math.min(1, (parseFloat(percent) || 0) / 100));
+
+        $root.find('[data-role="fill"]').each(function () {
+            this.style.setProperty('--awa-min-order-scale', String(scale));
+        });
+    }
+
+    function formatCurrency(amount)
+    {
         var value = Math.max(0, parseFloat(amount) || 0);
 
         return 'R$ ' + value.toLocaleString('pt-BR', {
@@ -38,28 +67,31 @@ define([
         });
     }
 
-    function getConfig() {
+    function getConfig()
+    {
         var cfg = window.checkoutConfig || {};
 
         return cfg.b2bMinOrder || null;
     }
 
-    function buildHtml() {
+    function buildHtml()
+    {
         return '<section class="awa-b2b-min-order-progress awa-b2b-min-order-progress--checkout" ' +
-            'role="status" aria-live="polite" aria-label="Progresso do pedido mínimo" ' +
+            'role="status" aria-live="polite" aria-label="' + $t('Progresso do pedido mínimo B2B') + '" ' +
             'data-awa-component="checkout-sidebar-min-order" hidden aria-hidden="true">' +
             '<div class="awa-b2b-min-order-progress__header">' +
-            '<span class="awa-b2b-min-order-progress__label">Pedido mínimo B2B</span>' +
+            '<span class="awa-b2b-min-order-progress__label">' + $t('Pedido mínimo B2B') + '</span>' +
             '<span class="awa-b2b-min-order-progress__percent" data-role="percent">0%</span>' +
             '</div>' +
             '<div class="awa-b2b-min-order-progress__track" aria-hidden="true">' +
-            '<span class="awa-b2b-min-order-progress__fill" data-role="fill" style="width:0%"></span>' +
+            '<span class="awa-b2b-min-order-progress__fill" data-role="fill" style="--awa-min-order-scale:0"></span>' +
             '</div>' +
             '<p class="awa-b2b-min-order-progress__message" data-role="message"></p>' +
             '</section>';
     }
 
-    function findTarget() {
+    function findTarget()
+    {
         var $summary = $('#opc-sidebar .opc-block-summary, .opc-sidebar .opc-block-summary').first();
 
         if ($summary.length) {
@@ -69,7 +101,8 @@ define([
         return $('.opc-sidebar, #opc-sidebar').first();
     }
 
-    function render($root, minAmount, subtotal) {
+    function render($root, minAmount, subtotal)
+    {
         var remaining = Math.max(0, minAmount - subtotal);
         var percent = minAmount > 0 ? Math.min(100, Math.round((subtotal / minAmount) * 100)) : 100;
 
@@ -78,17 +111,19 @@ define([
             return;
         }
 
-        var message = 'Faltam ' + formatCurrency(remaining) +
-            ' para atingir o pedido mínimo de ' + formatCurrency(minAmount) + '.';
+        var message = $t('Faltam %1 para atingir o pedido mínimo de %2.')
+            .replace('%1', formatCurrency(remaining))
+            .replace('%2', formatCurrency(minAmount));
 
         $root.removeAttr('hidden').removeAttr('aria-hidden');
         $root.toggleClass('awa-b2b-min-order-progress--near', percent >= 80);
         $root.find('[data-role="percent"]').text(percent + '%');
-        $root.find('[data-role="fill"]').css('width', percent + '%');
+        applyFillProgress($root, percent);
         $root.find('[data-role="message"]').text(message);
     }
 
-    function ensureRoot() {
+    function ensureRoot()
+    {
         var $target = findTarget();
 
         if (!$target.length) {
@@ -128,7 +163,8 @@ define([
         return $(ROOT_SELECTOR);
     }
 
-    function getCheckoutSubtotal() {
+    function getCheckoutSubtotal()
+    {
         var segment = totalsModel.getSegment('subtotal');
 
         if (segment && segment.value !== undefined && segment.value !== null) {
@@ -158,7 +194,8 @@ define([
         return 0;
     }
 
-    function sync() {
+    function sync()
+    {
         var config = getConfig();
 
         if (!config || !config.enabled || !(parseFloat(config.minAmount) > 0)) {
@@ -176,7 +213,8 @@ define([
         render($root, minAmount, getCheckoutSubtotal());
     }
 
-    function isCheckoutPage() {
+    function isCheckoutPage()
+    {
         if (!document.body) {
             return false;
         }
@@ -195,24 +233,31 @@ define([
 
         if (!window.__awaB2bMinOrderSidebarCartSubscribed) {
             window.__awaB2bMinOrderSidebarCartSubscribed = true;
-            cartSection.subscribe(scheduleSync);
+            cartSection.subscribe(scheduleSyncDebounced);
         }
 
         if (!window.__awaB2bMinOrderSidebarTotalsSubscribed) {
             window.__awaB2bMinOrderSidebarTotalsSubscribed = true;
-            quote.totals.subscribe(scheduleSync);
+            quote.totals.subscribe(scheduleSyncDebounced);
         }
 
         if (window.MutationObserver && !window.__awaB2bMinOrderSidebarObserver) {
-            var target = document.querySelector('#opc-sidebar, .opc-sidebar') ||
-                document.querySelector('.checkout-container, #checkout') ||
-                document.body;
+            var target = document.querySelector('#opc-sidebar .opc-block-summary, .opc-sidebar .opc-block-summary') ||
+                document.querySelector('#opc-sidebar, .opc-sidebar');
 
-            window.__awaB2bMinOrderSidebarObserver = new window.MutationObserver(scheduleSync);
-            window.__awaB2bMinOrderSidebarObserver.observe(target, {
-                childList: true,
-                subtree: true
-            });
+            if (target) {
+                window.__awaB2bMinOrderSidebarObserver = new window.MutationObserver(function () {
+                    window.clearTimeout(observerDebounceTimer);
+                    observerDebounceTimer = window.setTimeout(function () {
+                        observerDebounceTimer = null;
+                        scheduleSyncDebounced();
+                    }, SYNC_DEBOUNCE_MS);
+                });
+                window.__awaB2bMinOrderSidebarObserver.observe(target, {
+                    childList: true,
+                    subtree: false
+                });
+            }
         }
     };
 });

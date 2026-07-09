@@ -76,11 +76,13 @@ class OrderPullManagement implements OrderPullInterface
             try {
                 // Skip orders that are explicitly blocked — they need manual resolution
                 $importStatus = $order->getData('sectra_import_status');
-                if (in_array($importStatus, [
+                if (
+                    in_array($importStatus, [
                     'order_blocked_product_not_registered',
                     'order_cancelled_before_erp_import',
                     'imported',
-                ], true)) {
+                    ], true)
+                ) {
                     continue;
                 }
 

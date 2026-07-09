@@ -9,7 +9,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
@@ -24,7 +24,7 @@ class Search implements ObserverInterface
 {
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly LoggerInterface $logger,
         private readonly RequestInterface $request,
         private readonly B2BHelper $b2bHelper,
@@ -89,14 +89,7 @@ class Search implements ObserverInterface
                 $capiEvent['event_source_url'] = $eventSourceUrl;
             }
 
-            $result = $this->graphApi->sendEvents($pixelId, [$capiEvent], $storeId);
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] Search API error', [
-                    'store_id' => $storeId,
-                    'query' => $searchQuery,
-                    'error' => $result['error'],
-                ]);
-            }
+            $this->capiDispatcher->sendEvents($pixelId, [$capiEvent], $storeId, 'Search');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] Search event failed', [
                 'error' => $e->getMessage(),

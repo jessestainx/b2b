@@ -26,10 +26,10 @@ interface WhatsappSenderInterface
      * @return array Result with success status and message
      */
     public function sendMessage(string $phoneNumber, string $message): array;
-    
+
     /**
      * Queue message for later sending (asynchronous)
-     * 
+     *
      * @param string $phoneNumber
      * @param string $message
      * @param int $priority

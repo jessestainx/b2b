@@ -9,10 +9,24 @@
   "baseline": {
     "file": "snapshots/mcp-visual-baseline/firefox-desktop-1366/pdp-ret-biz.png",
     "changed": false,
-    "baselineMissing": false,
-    "diffRatio": 0.000035268728648121036,
+    "baselineMissing": true,
     "updateMode": false
   },
-  "findings": [],
-  "generatedAt": "2026-05-08T10:03:26.585Z"
+  "findings": [
+    {
+      "id": "pdp-ret-biz-domcontentloaded-timeout",
+      "severity": "minor",
+      "page": "PDP Ret BIZ",
+      "component": "Navigation",
+      "title": "Page remained in loading state",
+      "description": "Page reached commit but did not fire DOMContentLoaded within timeout.",
+      "expected": "DOMContentLoaded should fire to enable stable visual capture.",
+      "actual": "https://awamotos.com/ret-biz-100-cr-redondo-universal-2220.html stayed in loading state after 8s timeout.",
+      "browser": "firefox",
+      "device": "firefox-desktop-1366",
+      "evidence": [],
+      "autofixRuleId": "manual-review-required"
+    }
+  ],
+  "generatedAt": "2026-07-08T18:36:55.376Z"
 }

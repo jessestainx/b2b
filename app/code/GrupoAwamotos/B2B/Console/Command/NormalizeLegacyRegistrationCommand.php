@@ -53,6 +53,7 @@ class NormalizeLegacyRegistrationCommand extends Command
         try {
             $this->appState->setAreaCode(Area::AREA_ADMINHTML);
         } catch (\Exception) {
+            // Area code já definido pelo bootstrap do CLI — seguro ignorar.
         }
 
         $output->writeln('');

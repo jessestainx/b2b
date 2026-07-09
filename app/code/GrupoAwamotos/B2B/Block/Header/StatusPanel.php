@@ -59,14 +59,6 @@ class StatusPanel extends Template
     }
 
     /**
-     * Check if guest should see registration CTA
-     */
-    public function shouldShowRegistrationCTA(): bool
-    {
-        return $this->b2bHelper->isEnabled() && !$this->customerSession->isLoggedIn();
-    }
-
-    /**
      * Check if current customer is B2B
      */
     public function isB2BCustomer(): bool
@@ -98,10 +90,10 @@ class StatusPanel extends Template
         $fullName = trim($firstName . ' ' . $lastName);
 
         return [
-            'first_name' => $firstName,
-            'full_name' => $fullName,
+            'first_name' => $this->b2bHelper->formatDisplayName($firstName),
+            'full_name' => $this->b2bHelper->formatDisplayName($fullName),
             'email' => $customer ? (string) $customer->getEmail() : '',
-            'company' => $this->getCompanyName(),
+            'company' => $this->b2bHelper->formatDisplayName($this->getCompanyName()),
             'group_id' => $customerGroupId,
             'group_name' => $this->getGroupName($customerGroupId),
             'group_badge' => $this->getGroupBadge($customerGroupId),
@@ -266,14 +258,6 @@ class StatusPanel extends Template
         }
 
         return $actions;
-    }
-
-    /**
-     * Get B2B registration URL
-     */
-    public function getRegistrationUrl(): string
-    {
-        return $this->getUrl('b2b/register');
     }
 
     /**

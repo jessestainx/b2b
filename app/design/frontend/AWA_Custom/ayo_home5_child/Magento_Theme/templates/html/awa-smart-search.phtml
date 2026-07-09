@@ -1,0 +1,355 @@
+<?php
+/**
+ * AWA Motos - Smart Search Dropdown (2026-06-28)
+ *
+ * Dropdown melhorado com:
+ * - Search history (localStorage, max 5 termos)
+ * - Popular searches
+ * - Recent products
+ * - Trending categories
+ * - Recent searches destaque visual
+ */
+?>
+<div class="awa-smart-search-dropdown"
+     data-awa-smart-search
+     role="listbox"
+     aria-label="<?= $block->escapeHtmlAttr(__('Sugestoes de busca')) ?>"
+     hidden>
+
+    <!-- Secao 1: Buscas recentes -->
+    <section class="awa-smart-search__section" data-awa-section="history">
+        <header class="awa-smart-search__header">
+            <h3 class="awa-smart-search__title">
+                <span aria-hidden="true">🕐</span>
+                <?= $block->escapeHtml(__('Buscas recentes')) ?>
+            </h3>
+            <button type="button"
+                    class="awa-smart-search__clear"
+                    data-awa-clear-history
+                    aria-label="<?= $block->escapeHtmlAttr(__('Limpar historico de buscas')) ?>">
+                <?= $block->escapeHtml(__('Limpar')) ?>
+            </button>
+        </header>
+        <ul class="awa-smart-search__list" data-awa-history-list role="list">
+            <!-- JS popula -->
+        </ul>
+    </section>
+
+    <!-- Secao 2: Sugestoes populares -->
+    <section class="awa-smart-search__section" data-awa-section="popular">
+        <header class="awa-smart-search__header">
+            <h3 class="awa-smart-search__title">
+                <span aria-hidden="true">🔥</span>
+                <?= $block->escapeHtml(__('Populares')) ?>
+            </h3>
+        </header>
+        <ul class="awa-smart-search__list" data-awa-popular-list role="list">
+            <li role="option" tabindex="-1"><a href="/catalogsearch/result/?q=bauleto">bauleto</a></li>
+            <li role="option" tabindex="-1"><a href="/catalogsearch/result/?q=retrovisor">retrovisor</a></li>
+            <li role="option" tabindex="-1"><a href="/catalogsearch/result/?q=carcaca">carcaca</a></li>
+            <li role="option" tabindex="-1"><a href="/catalogsearch/result/?q=pisca">pisca</a></li>
+            <li role="option" tabindex="-1"><a href="/catalogsearch/result/?q=manete">manete</a></li>
+        </ul>
+    </section>
+
+    <!-- Secao 3: Categorias trending -->
+    <section class="awa-smart-search__section" data-awa-section="categories">
+        <header class="awa-smart-search__header">
+            <h3 class="awa-smart-search__title">
+                <span aria-hidden="true">📂</span>
+                <?= $block->escapeHtml(__('Categorias em alta')) ?>
+            </h3>
+        </header>
+        <ul class="awa-smart-search__list" data-awa-categories-list role="list">
+            <li role="option" tabindex="-1"><a href="/bauletos.html">Bauletos</a></li>
+            <li role="option" tabindex="-1"><a href="/retrovisores.html">Retrovisores</a></li>
+            <li role="option" tabindex="-1"><a href="/carcacas.html">Carcaças</a></li>
+        </ul>
+    </section>
+
+    <div class="awa-smart-search__empty" data-awa-empty hidden>
+        <p><?= $block->escapeHtml(__('Nenhuma sugestao. Comece a digitar para buscar.')) ?></p>
+    </div>
+</div>
+
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaSmartSearchInit) return;
+    w.__awaSmartSearchInit = true;
+
+    var STORAGE_KEY = 'awa-search-history';
+    var MAX_HISTORY = 5;
+    var dropdown, searchInput, historyList, clearBtn, sections;
+
+    function init() {
+        dropdown = d.querySelector('[data-awa-smart-search]');
+        searchInput = d.getElementById('search');
+        if (!dropdown || !searchInput) return;
+
+        historyList = dropdown.querySelector('[data-awa-history-list]');
+        clearBtn = dropdown.querySelector('[data-awa-clear-history]');
+        sections = {
+            history: dropdown.querySelector('[data-awa-section="history"]'),
+            popular: dropdown.querySelector('[data-awa-section="popular"]'),
+            categories: dropdown.querySelector('[data-awa-section="categories"]')
+        };
+
+        renderHistory();
+        bindEvents();
+    }
+
+    function getHistory() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        } catch (e) { return []; }
+    }
+
+    function saveHistory(terms) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(terms)); } catch (e) {}
+    }
+
+    function addToHistory(term) {
+        if (!term || term.length < 2) return;
+        var history = getHistory();
+        history = history.filter(function (t) { return t !== term; });
+        history.unshift(term);
+        if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+        saveHistory(history);
+    }
+
+    function renderHistory() {
+        var history = getHistory();
+        if (history.length === 0) {
+            sections.history.hidden = true;
+            return;
+        }
+        sections.history.hidden = false;
+        historyList.innerHTML = history.map(function (term, i) {
+            return '<li role="option" tabindex="-1" data-awa-history-item data-term="' + escapeHtml(term) + '">' +
+                '<a href="/catalogsearch/result/?q=' + encodeURIComponent(term) + '">' +
+                    '<span class="awa-smart-search__term">' + escapeHtml(term) + '</span>' +
+                    '<button type="button" class="awa-smart-search__remove" data-awa-remove-history="' + i + '" aria-label="' + escapeHtml(window.AWA_JS_I18N.remove) + ' ' + escapeHtml(term) + '">' +
+                        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>' +
+                '</a></li>';
+        }).join('');
+    }
+
+    function bindEvents() {
+        var debounceTimer;
+        searchInput.addEventListener('focus', showDropdown);
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(handleInput, 200);
+        });
+        // Submit - save to history
+        var form = searchInput.closest('form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                addToHistory(searchInput.value.trim());
+            });
+        }
+        // Clear history
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                saveHistory([]);
+                renderHistory();
+                if (w.AWA && w.AWA.toast) {
+                    w.AWA.toast.info('Historico de buscas limpo');
+                }
+            });
+        }
+        // Remove item
+        if (historyList) {
+            historyList.addEventListener('click', function (e) {
+                var rm = e.target.closest('[data-awa-remove-history]');
+                if (rm) {
+                    e.preventDefault();
+                    var history = getHistory();
+                    history.splice(parseInt(rm.getAttribute('data-awa-remove-history'), 10), 1);
+                    saveHistory(history);
+                    renderHistory();
+                }
+            });
+        }
+        // Click fora
+        d.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                hideDropdown();
+            }
+        });
+        // Escape
+        d.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') hideDropdown();
+        });
+    }
+
+    function handleInput() {
+        var q = searchInput.value.trim();
+        if (q.length < 2) {
+            // Mostrar history
+            sections.popular.hidden = false;
+            sections.categories.hidden = false;
+            renderHistory();
+            showDropdown();
+            return;
+        }
+        // Esconder popular/categories quando ha query
+        sections.popular.hidden = true;
+        sections.categories.hidden = true;
+        showDropdown();
+        // (Aqui poderia chamar endpoint AJAX para sugestoes)
+    }
+
+    function showDropdown() {
+        if (dropdown) dropdown.hidden = false;
+    }
+
+    function hideDropdown() {
+        if (dropdown) dropdown.hidden = true;
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    // Public API
+    w.AWA = w.AWA || {};
+    w.AWA.search = {
+        addHistory: addToHistory,
+        clearHistory: function () { saveHistory([]); renderHistory(); },
+        getHistory: getHistory
+    };
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+})(window, document);
+</script>
+
+<style>
+.awa-smart-search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e5e7eb;
+    z-index: 100;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: 8px;
+}
+.awa-smart-search-dropdown[hidden] { display: none; }
+.awa-smart-search__section {
+    padding: 8px 0;
+}
+.awa-smart-search__section[hidden] { display: none; }
+.awa-smart-search__section + .awa-smart-search__section {
+    border-top: 1px solid #f3f4f6;
+}
+.awa-smart-search__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px 8px;
+}
+.awa-smart-search__title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.awa-smart-search__title span[aria-hidden="true"] {
+    font-size: 14px;
+}
+.awa-smart-search__clear {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 12px;
+    padding: 4px 8px;
+    min-height: 28px;
+    border-radius: 4px;
+    text-decoration: underline;
+}
+.awa-smart-search__clear:hover {
+    background: #f3f4f6;
+}
+.awa-smart-search__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.awa-smart-search__list li {
+    margin: 0;
+}
+.awa-smart-search__list a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    min-height: 36px;
+    color: #111827;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.15s ease;
+}
+.awa-smart-search__list a:hover,
+.awa-smart-search__list a:focus,
+.awa-smart-search__list li:focus-within a {
+    background: #f3f4f6;
+    color: #b73337;
+}
+.awa-smart-search__term {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.awa-smart-search__remove {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 4px;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: 4px;
+    color: #9ca3af;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+.awa-smart-search__remove:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+.awa-smart-search__empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+}
+.awa-smart-search__empty[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+    .awa-smart-search-dropdown,
+    .awa-smart-search__list a { transition: none; }
+}
+</style>

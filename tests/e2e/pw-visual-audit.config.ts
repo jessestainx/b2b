@@ -4,6 +4,9 @@
  */
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
+import { resolveBaseUrl } from './helpers/resolve-base-url';
+
+const resolvedBaseUrl = resolveBaseUrl('pw-visual-audit');
 
 export default defineConfig({
   testDir: path.join(__dirname, 'specs'),
@@ -26,7 +29,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: 'https://awamotos.com',
+    baseURL: resolvedBaseUrl,
     ignoreHTTPSErrors: true,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

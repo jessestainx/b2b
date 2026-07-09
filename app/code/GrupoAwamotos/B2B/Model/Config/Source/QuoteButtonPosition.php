@@ -12,10 +12,10 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 class QuoteButtonPosition implements OptionSourceInterface
 {
-    const POSITION_NONE = 'none';
-    const POSITION_PRODUCT = 'product';
-    const POSITION_CART = 'cart';
-    const POSITION_BOTH = 'both';
+    public const POSITION_NONE = 'none';
+    public const POSITION_PRODUCT = 'product';
+    public const POSITION_CART = 'cart';
+    public const POSITION_BOTH = 'both';
 
     /**
      * Get options

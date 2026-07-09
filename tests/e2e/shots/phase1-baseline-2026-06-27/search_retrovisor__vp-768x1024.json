@@ -1,0 +1,21 @@
+{
+  "route": "search_retrovisor",
+  "viewport": "vp-768x1024",
+  "requestedUrl": "https://awamotos.com/catalogsearch/result/?q=retrovisor",
+  "screenshot": "shots/phase1-baseline-2026-06-27/search_retrovisor__vp-768x1024.png",
+  "startedAt": "2026-06-27T03:52:13.680Z",
+  "httpStatus": 200,
+  "finalUrl": "https://awamotos.com/retrovisores.html",
+  "navError": null,
+  "consoleErrorCount": 0,
+  "httpErrorCount": 0,
+  "metrics": {
+    "scrollWidth": 768,
+    "clientWidth": 768,
+    "overflow": false,
+    "owlAll": 0,
+    "owlLoaded": 0,
+    "searchVisible": true
+  },
+  "finishedAt": "2026-06-27T03:52:15.201Z"
+}

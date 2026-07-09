@@ -7,7 +7,12 @@
         <css src="GrupoAwamotos_Theme::css/awa-catalog-flipbook.css"/>
     </head>
     <body>
-        <attribute name="class" value="catalogo-revista-index awa-catalog-flipbook-page awa-catalog-page"/>
+        <!-- BUG-CORE-2026-07-04: um único <attribute name="class"> com espaço interno
+             vira uma classe só (Config::addBodyClass converte espaço em hífen). Dividido
+             em nós separados para preservar cada classe isoladamente. -->
+        <attribute name="class" value="catalogo-revista-index"/>
+        <attribute name="class" value="awa-catalog-flipbook-page"/>
+        <attribute name="class" value="awa-catalog-page"/>
         <referenceBlock name="page.main.title" remove="true"/>
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
         <referenceContainer name="sidebar.main">

@@ -51,7 +51,11 @@ class PreloadCustomerPrices implements ObserverInterface
 
     public function execute(Observer $observer): void
     {
-        if (!$this->b2bConfig->isEnabled() || !$this->customerSession->isLoggedIn()) {
+        if (
+            !$this->b2bConfig->isEnabled()
+            || !isset($_COOKIE[session_name()])
+            || !$this->customerSession->isLoggedIn()
+        ) {
             return;
         }
 

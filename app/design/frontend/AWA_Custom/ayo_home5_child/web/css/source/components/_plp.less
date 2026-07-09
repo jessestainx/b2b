@@ -11,398 +11,261 @@
 @import (once) '../_awa-variables';
 
 // ── Variáveis de escopo ───────────────────────────────────────────────────────
-@c3-plp-scope: ~'.catalog-category-view, .catalogsearch-result-index';
+// FIX 2026-07-06: lista sem escape (~'...') faz o LESS interpolar @{scope} .child
+// como texto puro, distribuindo o "espaço + seletor filho" só ao ÚLTIMO item da
+// lista — o primeiro item (.catalog-category-view) fica "solto" antes da vírgula
+// e passa a casar com o <body> inteiro (bug real em produção: clip-path/visually
+// -hidden aplicado à página inteira em PLP). Padrão correto = mesmo usado nos
+// arquivos irmãos (_awa-plp-refine-terminal-2026-06.less, _awa-plp-polish-*,
+// _awa-plp-grid-mobile-*): string escapada com :is() nativo do CSS4.
+@c3-plp-scope: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
 @c3-card:      ~'.item-product, .product-item, .content-item-product';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // § 1 — Grid container gap (padroniza o espaçamento entre cards)
-// Complementa _awa-product-card-contract-2026-06.less que define o card
-// individual mas não o gap do grid container.
 // ─────────────────────────────────────────────────────────────────────────────
-@{c3-plp-scope} .page-wrapper {
-    :is(.products.wrapper.grid.products-grid,
-        .wrapper.grid.products-grid,
-        .products-grid) {
-        // gap: 12px vertical, 10px horizontal — ritmo 4px consistente
-        .product.items,
-        ol.products.list.items.product-items {
-            display: grid;
-            gap: 12px 10px;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+@{c3-plp-scope} {
+    .page-wrapper {
+        :is(.products.wrapper.grid.products-grid,
+            .wrapper.grid.products-grid,
+            .products-grid) {
+            // gap: 12px vertical, 10px horizontal — ritmo 4px consistente
+            .product.items,
+            ol.products.list.items.product-items {
+                display: grid;
+                gap: 12px 10px;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
         }
     }
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// § 2 — Card hover: image scale suave (non-motion-safe guard incluído)
-// Complementa a borda/shadow do card contract — adiciona o movimento da imagem.
-// ─────────────────────────────────────────────────────────────────────────────
-@media (hover: hover) and (pointer: fine) {
-    @{c3-plp-scope} .page-wrapper @{c3-card} {
-        // Transition no card para border/shadow (card contract usa box-shadow)
-        transition: box-shadow var(--awa-transition-base, 200ms ease),
-                    border-color var(--awa-transition-base, 200ms ease);
+    // ─────────────────────────────────────────────────────────────────────────────
+    // § 2 — Card hover: image scale suave (non-motion-safe guard incluído)
+    // ─────────────────────────────────────────────────────────────────────────────
+    @media (hover: hover) and (pointer: fine) {
+        .page-wrapper @{c3-card} {
+            transition: box-shadow var(--awa-transition-base, 200ms ease),
+                        border-color var(--awa-transition-base, 200ms ease);
 
+            :is(.product-thumb, .product-image-container, .product-item-photo) {
+                overflow: hidden;
+            }
+
+            :is(.product-thumb img, .product-image-photo) {
+                transition: transform 300ms ease;
+                will-change: transform;
+            }
+
+            &:hover :is(.product-thumb img, .product-image-photo) {
+                transform: scale(1.04);
+            }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .page-wrapper @{c3-card} {
+            :is(.product-thumb img, .product-image-photo) {
+                transition: none !important;
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // § 3 — Image skeleton
+    // ─────────────────────────────────────────────────────────────────────────────
+    .page-wrapper @{c3-card} {
         :is(.product-thumb, .product-image-container, .product-item-photo) {
-            overflow: hidden; // garante clip no scale
-        }
+            background-color: var(--awa-gray-100, #f5f5f5);
 
-        :is(.product-thumb img, .product-image-photo) {
-            transition: transform 300ms ease;
-            will-change: transform;
-        }
-
-        &:hover :is(.product-thumb img, .product-image-photo) {
-            transform: scale(1.04);
+            img:not([src]),
+            img[src=""],
+            img[loading="lazy"]:not(.loaded) {
+                background: var(--awa-gray-100, #f5f5f5);
+                min-height: clamp(140px, 15vw, 180px);
+            }
         }
     }
-}
 
-// Respeita prefers-reduced-motion — sem animações para quem pediu menos movimento
-@media (prefers-reduced-motion: reduce) {
-    @{c3-plp-scope} .page-wrapper @{c3-card} {
-        :is(.product-thumb img, .product-image-photo) {
-            transition: none !important; // !important: vence regra acima
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// § 3 — Image skeleton (estado de carregamento antes de onload)
-// Evita CLS e flicker de imagens enquanto lazy-load processa.
-// ─────────────────────────────────────────────────────────────────────────────
-@{c3-plp-scope} .page-wrapper @{c3-card} {
-    :is(.product-thumb, .product-image-container, .product-item-photo) {
-        background-color: var(--awa-gray-100, #f5f5f5);
-
-        img:not([src]),
-        img[src=""],
-        img[loading="lazy"]:not(.loaded) {
-            // placeholder cinza enquanto carrega — sem layout shift
-            background: var(--awa-gray-100, #f5f5f5);
-            min-height: clamp(140px, 15vw, 180px);
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// § 4 — Badge de produto (Novo, Mais Vendido, Promoção)
-// Os badges do tema AYO não têm padding/radius consistente; corrige aqui.
-// ─────────────────────────────────────────────────────────────────────────────
-@{c3-plp-scope} .page-wrapper @{c3-card} {
-    :is(.product-label, .awk-label, .item-label, .label-new, .label-sale, .onsale) {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2px 7px;
-        border-radius: var(--awa-radius-sm, 8px);
-        font-size: var(--awa-text-xs, 11px);
-        font-weight: var(--awa-weight-semibold, 600);
-        line-height: 1.4;
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
-    .label-new,
-    .item-label-new {
-        background: var(--awa-red, #b73337);
-        color: #fff;
-    }
-
-    .label-sale,
-    .item-label-sale,
-    .onsale {
-        background: var(--awa-red, #b73337);
-        color: #fff;
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// § 5 — Filtros ativos (active filter pills + clear button)
-// O _awa-plp-sidebar-modern-2026-06.less cobre o painel de filtros;
-// estes são os filtros ATIVOS no topo da listagem.
-// ─────────────────────────────────────────────────────────────────────────────
-@{c3-plp-scope} .page-wrapper {
-    .filter-current {
-        margin-block-end: 12px;
-
-        .filter-label {
-            font-size: var(--awa-text-sm, 13px);
-            font-weight: var(--awa-weight-semibold, 600);
-            color: var(--awa-gray-700, #374151);
-            display: block;
-            margin-block-end: 6px;
-        }
-
-        .items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .item {
+    // ─────────────────────────────────────────────────────────────────────────────
+    // § 4 — Badge de produto
+    // ─────────────────────────────────────────────────────────────────────────────
+    .page-wrapper @{c3-card} {
+        :is(.product-label, .awk-label, .item-label, .label-new, .label-sale, .onsale) {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: var(--awa-gray-100, #f5f5f5);
-            border: 1px solid var(--awa-gray-200, #e5e7eb);
-            border-radius: 999px; // pill
-            padding: 3px 10px 3px 8px;
+            justify-content: center;
+            padding: 2px 7px;
+            border-radius: var(--awa-radius-sm, 8px);
             font-size: var(--awa-text-xs, 11px);
-            font-weight: var(--awa-weight-medium, 500);
+            font-weight: var(--awa-weight-semibold, 600);
             line-height: 1.4;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
 
-            .remove {
+        .label-new, .item-label-new {
+            background: var(--awa-red, #b73337);
+            color: #fff;
+        }
+
+        .label-sale, .item-label-sale, .onsale {
+            background: var(--awa-red, #b73337);
+            color: #fff;
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // § 5 — Filtros ativos
+    // ─────────────────────────────────────────────────────────────────────────────
+    .page-wrapper {
+        .filter-current {
+            margin-block-end: 12px;
+
+            .filter-label {
+                font-size: var(--awa-text-sm, 13px);
+                font-weight: var(--awa-weight-semibold, 600);
+                color: var(--awa-gray-700, #374151);
+                display: block;
+                margin-block-end: 6px;
+            }
+
+            .items {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .item {
                 display: inline-flex;
                 align-items: center;
-                justify-content: center;
-                width: 14px;
-                height: 14px;
-                border-radius: 50%;
-                background: var(--awa-gray-200, #e5e7eb);
+                gap: 4px;
+                background: var(--awa-gray-100, #f3f4f6);
+                border: 1px solid var(--awa-gray-200, #e5e7eb);
+                padding: 4px 10px;
+                border-radius: var(--awa-radius-pill, 20px);
+                font-size: var(--awa-text-xs, 12px);
                 color: var(--awa-gray-700, #374151);
-                text-decoration: none;
-                font-size: 10px;
-                line-height: 1;
-                flex-shrink: 0;
-                transition: background var(--awa-transition-fast, 150ms ease);
 
-                &:hover {
-                    background: var(--awa-red, #b73337);
-                    color: #fff;
+                .label { font-weight: var(--awa-weight-semibold, 600); }
+                .action.remove {
+                    color: var(--awa-gray-400, #9ca3af);
+                    text-decoration: none;
+                    font-size: 14px;
+                    line-height: 1;
+                    &:hover { color: var(--awa-red, #b73337); }
                 }
             }
         }
     }
 
-    .filter-actions {
-        margin-block-end: 16px;
-
-        .action.clear {
-            font-size: var(--awa-text-sm, 13px);
-            color: var(--awa-red, #b73337);
-            font-weight: var(--awa-weight-medium, 500);
-            text-decoration: underline;
-            cursor: pointer;
-
-            &:hover {
-                color: var(--awa-red-dark, #8e2629);
-            }
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// § 6 — Paginação
-// Estilo base para .pages (Magento pager) — ritmo e tokens AWA.
-// ─────────────────────────────────────────────────────────────────────────────
-@{c3-plp-scope} .page-wrapper {
-    .pages {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        padding-block: 24px;
-        flex-wrap: wrap;
-
-        .pages-items {
+    // ─────────────────────────────────────────────────────────────────────────────
+    // § 6 — Paginação
+    // ─────────────────────────────────────────────────────────────────────────────
+    .page-wrapper {
+        .pages {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 4px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
+            padding-block: 24px;
+            flex-wrap: wrap;
 
-        .item {
-            &.current .page,
-            strong.page {
-                display: inline-flex;
+            .pages-items {
+                display: flex;
                 align-items: center;
-                justify-content: center;
-                min-width: 36px;
-                height: 36px;
-                border-radius: var(--awa-radius-sm, 8px);
-                background: var(--awa-red, #b73337);
-                color: #fff;
-                font-weight: var(--awa-weight-semibold, 600);
-                font-size: var(--awa-text-sm, 13px);
+                gap: 4px;
+                list-style: none;
+                margin: 0;
+                padding: 0;
             }
 
-            .page,
-            a.page {
+            .item {
+                &.current .page, strong.page {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 36px;
+                    height: 36px;
+                    border-radius: var(--awa-radius-sm, 8px);
+                    background: var(--awa-red, #b73337);
+                    color: #fff;
+                    font-weight: var(--awa-weight-semibold, 600);
+                    font-size: var(--awa-text-sm, 13px);
+                }
+
+                .page, a.page {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 36px;
+                    height: 36px;
+                    border-radius: var(--awa-radius-sm, 8px);
+                    border: 1px solid var(--awa-gray-200, #e5e7eb);
+                    background: transparent;
+                    color: var(--awa-gray-700, #374151);
+                    font-size: var(--awa-text-sm, 13px);
+                    text-decoration: none;
+                    transition: border-color var(--awa-transition-fast, 150ms ease),
+                                background var(--awa-transition-fast, 150ms ease);
+
+                    &:hover {
+                        border-color: var(--awa-red, #b73337);
+                        color: var(--awa-red, #b73337);
+                    }
+                }
+            }
+
+            .action.next, .action.previous {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                min-width: 36px;
+                width: 36px;
                 height: 36px;
                 border-radius: var(--awa-radius-sm, 8px);
                 border: 1px solid var(--awa-gray-200, #e5e7eb);
-                background: transparent;
-                color: var(--awa-gray-700, #374151);
-                font-size: var(--awa-text-sm, 13px);
                 text-decoration: none;
+                color: var(--awa-gray-700, #374151);
                 transition: border-color var(--awa-transition-fast, 150ms ease),
                             background var(--awa-transition-fast, 150ms ease);
 
                 &:hover {
                     border-color: var(--awa-red, #b73337);
-                    color: var(--awa-red, #b73337);
+                    background: var(--awa-gray-100, #f5f5f5);
                 }
+
+                span.label { .visually-hidden(); }
             }
         }
+    }
 
-        .action.next,
-        .action.previous {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: var(--awa-radius-sm, 8px);
-            border: 1px solid var(--awa-gray-200, #e5e7eb);
-            text-decoration: none;
+    // ─────────────────────────────────────────────────────────────────────────────
+    // § 7 — Estado vazio de categoria
+    // ─────────────────────────────────────────────────────────────────────────────
+    .page-wrapper {
+        .no-results-message,
+        .message.notice[data-ui-id="message-notice"] {
+            text-align: center;
+            padding: 40px 24px;
             color: var(--awa-gray-700, #374151);
-            transition: border-color var(--awa-transition-fast, 150ms ease),
-                        background var(--awa-transition-fast, 150ms ease);
-
-            &:hover {
-                border-color: var(--awa-red, #b73337);
-                background: var(--awa-gray-100, #f5f5f5);
-            }
-
-            span.label { .visually-hidden(); }
+            font-size: var(--awa-text-base, 15px);
         }
     }
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// § 7 — Estado vazio de categoria (zero produtos)
-// Evita página em branco sem contexto.
-// ─────────────────────────────────────────────────────────────────────────────
-@{c3-plp-scope} .page-wrapper {
-    .catalog-topnav + .columns .column.main:empty,
-    .category-cms:only-child,
-    .products.wrapper:empty + .toolbar {
-        // se a grid está vazia, mostra mensagem suave
-    }
-
-    .no-results-message,
-    .message.notice[data-ui-id="message-notice"] {
-        text-align: center;
-        padding: 40px 24px;
-        color: var(--awa-gray-700, #374151);
-        font-size: var(--awa-text-base, 15px);
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// § 8 — Mobile grid (≤575px: 2 colunas; 576-767px: 2 colunas; 768+: 3+)
-// Complementa _awa-plp-grid-mobile-2026-06.less que pode usar breakpoints rem.
-// Usa px explícitos para consistência com o restante da base de fase3B.
-// ─────────────────────────────────────────────────────────────────────────────
-@media (max-width: 575px) {
-    @{c3-plp-scope} .page-wrapper {
-        :is(.products.wrapper.grid.products-grid,
-            .wrapper.grid.products-grid,
-            .products-grid) {
-            .product.items,
-            ol.products.list.items.product-items {
-                grid-template-columns: repeat(2, 1fr) !important; // !important: override do template legado
-                gap: 8px !important;
-            }
-        }
-    }
-}
-
-@media (min-width: 576px) and (max-width: 767px) {
-    @{c3-plp-scope} .page-wrapper {
-        :is(.products.wrapper.grid.products-grid,
-            .wrapper.grid.products-grid,
-            .products-grid) {
-            .product.items,
-            ol.products.list.items.product-items {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 10px !important;
-            }
-        }
-    }
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-    @{c3-plp-scope} .page-wrapper {
-        :is(.products.wrapper.grid.products-grid,
-            .wrapper.grid.products-grid,
-            .products-grid) {
-            .product.items,
-            ol.products.list.items.product-items {
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 12px !important;
-            }
-        }
-    }
-}
-
-@media (min-width: 992px) {
-    @{c3-plp-scope} .page-wrapper {
-        :is(.products.wrapper.grid.products-grid,
-            .wrapper.grid.products-grid,
-            .products-grid) {
-            .product.items,
-            ol.products.list.items.product-items {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 12px 10px;
-            }
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// § 9 — Breadcrumb na PLP
-// Garante visibilidade e espaçamento adequado.
-// ─────────────────────────────────────────────────────────────────────────────
-@{c3-plp-scope} .page-wrapper {
-    .breadcrumbs {
-        padding-block: 12px;
-        font-size: var(--awa-text-sm, 13px);
-
-        .items {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 2px 4px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .item {
-            display: flex;
-            align-items: center;
-
-            &:not(:last-child)::after {
-                content: '/';
-                margin-inline-start: 4px;
-                color: var(--awa-gray-500, #6b7280);
-            }
-
-            a {
-                color: var(--awa-gray-500, #6b7280);
-                text-decoration: none;
-                transition: color var(--awa-transition-fast, 150ms ease);
-
-                &:hover {
-                    color: var(--awa-red, #b73337);
+    // ─────────────────────────────────────────────────────────────────────────────
+    // § 8 — Grid Mobile (Compactação para telas pequenas)
+    // ─────────────────────────────────────────────────────────────────────────────
+    @media (max-width: 480px) {
+        .page-wrapper {
+            :is(.products.wrapper.grid.products-grid, .products-grid) {
+                .product.items, ol.product-items {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 8px 6px;
+                    padding-inline: 4px;
                 }
-            }
-
-            strong {
-                color: var(--awa-gray-700, #374151);
-                font-weight: var(--awa-weight-normal, 400);
             }
         }
     }

@@ -121,5 +121,4 @@ class Data extends AbstractHelper
             $storeId
         );
     }
-
 }

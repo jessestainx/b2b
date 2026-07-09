@@ -1,0 +1,18 @@
+# Reduz carga do fileWatcher do Cursor Remote-SSH
+.git/
+vendor/
+generated/
+var/
+pub/static/
+pub/media/
+node_modules/
+backups/
+artifacts/
+.playwright-mcp/
+lib/
+docs/
+scripts/
+tests/
+app/code/Rokanthemes/
+app/code/Mirasvit/
+app/design/frontend/ayo/

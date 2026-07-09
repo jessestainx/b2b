@@ -14,7 +14,8 @@ define([
             return;
         }
 
-        function loadSuggestions() {
+        function loadSuggestions()
+        {
             if (loaded) {
                 return;
             }

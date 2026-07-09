@@ -9,7 +9,7 @@
 // AWA MOTOS — FINAL POLISH & GRID STANDARDIZATION
 // ============================================================================
 
-@awa-max-width: 1440px;
+@awa-max-inline-size: var(--awa-container-wide-max, 1440px);
 @awa-container-padding: 24px;
 @awa-gap-md: 24px;
 @awa-gap-sm: 16px;
@@ -72,7 +72,7 @@ html body .awa-site-header .awa-header-search-col input {
     flex: 1 1 auto !important;
     height: 100% !important;
     border: none !important;
-    padding: 0 16px !important;
+    padding-inline: var(--awa-page-pad-mobile, 16px); padding-block: 0 !important;
     font-size: 16px !important;
 }
 
@@ -219,7 +219,7 @@ html body .swiper-slide .product-item {
 @media (max-width: 991px) {
     html body .awa-site-header .awa-main-header__inner {
         flex-wrap: wrap !important;
-        padding: 0 16px !important;
+        padding-inline: var(--awa-page-pad-mobile, 16px); padding-block: 0 !important;
         gap: 16px !important;
         height: auto !important;
         min-height: 80px !important;

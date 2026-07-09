@@ -42,10 +42,11 @@ if ($isHomeDemoCms) {
             </div>
             <form class="form subscribe"
                 novalidate
-                action="<?php /* @escapeNotVerified */ echo $block->getFormActionUrl() ?>"
+                action="<?= $block->escapeUrl($block->getFormActionUrl()) ?>"
                 method="post"
                 data-mage-init='{"validation": {"errorClass": "mage-error"}}'
                 id="newsletter-validate-popup">
+                  <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
                 <div class="field newsletter">
                     <div class="control">
                         <input name="email" type="email" id="newsletter-popup"
@@ -55,7 +56,10 @@ if ($isHomeDemoCms) {
                     </div>
                 </div>
                 <div class="actions">
-                    <button class="action subscribe primary" title="<?php /* @escapeNotVerified */ echo __('Inscrever-se') ?>" type="submit">
+                    <button class="action subscribe primary"
+                            title="<?php /* @escapeNotVerified */ echo __('Inscrever-se') ?>"
+                            type="submit"
+                            aria-label="<?php echo __('Inscrever-se na newsletter AWA Motos para receber promoções'); ?>">
                         <span><?php echo __('Inscreva-se e receba promoções!'); ?></span>
                     </button>
                 </div>

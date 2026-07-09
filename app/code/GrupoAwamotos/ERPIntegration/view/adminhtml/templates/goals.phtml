@@ -345,11 +345,8 @@ function getStatusLabel($status) {
 }
 ?>
 
-<!-- ApexCharts -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
 <script>
-require(['jquery'], function($) {
+require(['jquery', 'apexcharts'], function ($, ApexCharts) {
     'use strict';
 
     var goalsData = <?= /* @noEscape */ $block->getGoalsChartJson() ?>;

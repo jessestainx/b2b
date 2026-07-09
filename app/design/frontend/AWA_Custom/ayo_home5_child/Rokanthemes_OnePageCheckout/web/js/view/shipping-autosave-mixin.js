@@ -57,7 +57,7 @@ define([
                     setShippingInformationAction().fail(function () {
                         // errorProcessor no processor default
                     });
-                }, 300);
+                }, 600);
 
                 return result;
             }

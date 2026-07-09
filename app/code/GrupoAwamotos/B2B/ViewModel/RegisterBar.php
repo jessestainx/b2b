@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\ViewModel;
@@ -15,7 +16,8 @@ class RegisterBar implements ArgumentInterface
 {
     public function __construct(
         private readonly Config $b2bConfig
-    ) {}
+    ) {
+    }
 
     public function isEnabled(): bool
     {

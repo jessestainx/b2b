@@ -18,6 +18,8 @@ class PurchaseHistory
 {
     private const CACHE_PREFIX = 'erp_purchase_history_';
     private const CACHE_TTL = 3600; // 1 hour
+    private const CACHE_TTL_CNPJ_NEGATIVE = 900; // 15 minutes — shorter so new ERP mappings surface reasonably fast
+    private const CACHE_TTL_ORDERS_LIST = 120; // 2 minutes — short-lived so status changes still surface quickly
 
     private ConnectionInterface $connection;
     private Helper $helper;
@@ -42,6 +44,22 @@ class PurchaseHistory
     public function getCustomerCodeByCnpj(string $cnpj): ?int
     {
         $cleanCnpj = preg_replace('/[^0-9]/', '', $cnpj);
+        $cacheKey = self::CACHE_PREFIX . 'cnpj_code_' . $cleanCnpj;
+
+        // PERF-2026-07-04: esta query usa REPLACE() aninhado na cláusula WHERE
+        // (FN_FORNECEDORES.CGC), o que impede o uso de índice no ERP e força
+        // varredura completa da tabela a cada chamada (~1.8s medido em produção).
+        // Sem cache, todo cliente sem código ERP mapeado paga esse custo em TODA
+        // página que renderiza o dashboard/recomendações B2B (Suggestions block
+        // é usado como provedor de dados via chamadas diretas de método, não via
+        // toHtml(), então o cache de bloco declarado em Suggestions::getCacheLifetime()
+        // nunca chega a proteger esta chamada). Cache positivo e negativo separados
+        // para não esconder por muito tempo um mapeamento novo feito pelo sync ERP.
+        $cached = $this->cache->load($cacheKey);
+        if ($cached !== false) {
+            $decoded = json_decode($cached, true);
+            return $decoded['code'] ?? null;
+        }
 
         try {
             $customer = $this->connection->fetchOne("
@@ -51,7 +69,11 @@ class PurchaseHistory
                 AND CKCLIENTE = 'S'
             ", [$cleanCnpj]);
 
-            return $customer ? (int)$customer['CODIGO'] : null;
+            $code = $customer ? (int)$customer['CODIGO'] : null;
+            $ttl = $code !== null ? self::CACHE_TTL : self::CACHE_TTL_CNPJ_NEGATIVE;
+            $this->cache->save(json_encode(['code' => $code]), $cacheKey, [], $ttl);
+
+            return $code;
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting customer code: ' . $e->getMessage());
             return null;
@@ -242,6 +264,12 @@ class PurchaseHistory
      */
     public function getPurchaseFrequency(int $customerCode): array
     {
+        $cacheKey = self::CACHE_PREFIX . 'frequency_' . $customerCode;
+        $cached = $this->cache->load($cacheKey);
+        if ($cached) {
+            return json_decode($cached, true) ?: [];
+        }
+
         try {
             // Get average days between purchases
             $frequency = $this->connection->fetchOne("
@@ -262,12 +290,15 @@ class PurchaseHistory
                 WHERE prev_date IS NOT NULL
             ", [$customerCode]);
 
-            return [
+            $result = [
                 'avg_days_between_orders' => (int)($frequency['avg_days_between'] ?? 0),
                 'min_days' => (int)($frequency['min_days'] ?? 0),
                 'max_days' => (int)($frequency['max_days'] ?? 0),
                 'total_orders' => (int)($frequency['total_orders'] ?? 0),
             ];
+            $this->cache->save(json_encode($result), $cacheKey, [], self::CACHE_TTL);
+
+            return $result;
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting purchase frequency: ' . $e->getMessage());
             return [];
@@ -282,8 +313,19 @@ class PurchaseHistory
     public function getMonthlyTrend(int $customerCode, int $months = 12): array
     {
         $safeMonths = max(1, min(60, $months));
+        // PERF-2026-07-04: join + GROUP BY sobre VE_PEDIDO/VE_PEDIDOITENS no ERP
+        // remoto medido em ~1.7s. Chamado a cada carregamento do fragmento de
+        // inteligência do dashboard B2B (via AJAX), sem cache — mesma classe de
+        // problema do getCustomerCodeByCnpj. Segue o mesmo padrão de cache já
+        // usado por getPurchaseFrequency()/getLastOrders() nesta classe.
+        $cacheKey = self::CACHE_PREFIX . 'monthly_trend_' . $customerCode . '_' . $safeMonths;
+        $cached = $this->cache->load($cacheKey);
+        if ($cached) {
+            return json_decode($cached, true) ?: [];
+        }
+
         try {
-            return $this->connection->query("
+            $result = $this->connection->query("
                 SELECT
                     FORMAT(p.DTPEDIDO, 'yyyy-MM') AS month,
                     COUNT(DISTINCT p.CODIGO) AS order_count,
@@ -297,6 +339,10 @@ class PurchaseHistory
                 GROUP BY FORMAT(p.DTPEDIDO, 'yyyy-MM')
                 ORDER BY FORMAT(p.DTPEDIDO, 'yyyy-MM') ASC
             ", [$customerCode, -$safeMonths]);
+
+            $this->cache->save(json_encode($result), $cacheKey, [], self::CACHE_TTL);
+
+            return $result;
         } catch (\Exception $e) {
             $this->logger->error('[ERP] Error getting monthly trend: ' . $e->getMessage());
             return [];
@@ -421,8 +467,146 @@ class PurchaseHistory
         $this->cache->remove(self::CACHE_PREFIX . 'customer_' . $customerCode);
         $this->cache->remove(self::CACHE_PREFIX . 'summary_' . $customerCode);
         $this->cache->remove(self::CACHE_PREFIX . 'products_' . $customerCode);
-        foreach ([5, 10, 20] as $limit) {
+        $this->cache->remove(self::CACHE_PREFIX . 'frequency_' . $customerCode);
+        foreach ([5, 10, 20, 50, 100] as $limit) {
             $this->cache->remove(self::CACHE_PREFIX . 'orders_' . $customerCode . '_' . $limit);
         }
+        foreach ([1, 3, 6, 12, 24, 36, 60] as $months) {
+            $this->cache->remove(self::CACHE_PREFIX . 'monthly_trend_' . $customerCode . '_' . $months);
+        }
+    }
+
+    /**
+     * @return array{items: array<int, array<string, mixed>>, total_count: int}
+     */
+    public function getPaginatedOrders(int $customerCode, int $page = 1, int $pageSize = 20): array
+    {
+        $page = max(1, $page);
+        $pageSize = min(max($pageSize, 1), 50);
+        $offset = ($page - 1) * $pageSize;
+
+        // PERF-2026-07-04: 2 round-trips ao ERP (COUNT + SELECT paginado) medidos
+        // em 1-2.5s. TTL curto (2min) porque status de pedido muda com frequência,
+        // mas ainda elimina o custo em cliques repetidos de paginação/refresh.
+        $cacheKey = self::CACHE_PREFIX . 'paginated_' . $customerCode . '_' . $page . '_' . $pageSize;
+        $cached = $this->cache->load($cacheKey);
+        if ($cached) {
+            return json_decode($cached, true) ?: ['items' => [], 'total_count' => 0];
+        }
+
+        try {
+            $countRow = $this->connection->fetchOne("
+                SELECT COUNT(*) AS total
+                FROM VE_PEDIDO
+                WHERE CLIENTE = ?
+            ", [$customerCode]);
+            $total = (int) ($countRow['total'] ?? 0);
+
+            $orders = $this->connection->query("
+                SELECT
+                    p.CODIGO AS pedido_id,
+                    p.DTPEDIDO AS data_pedido,
+                    p.STATUS AS status,
+                    p.VLRTOTAL AS valor_total,
+                    (SELECT COUNT(*) FROM VE_PEDIDOITENS i WHERE i.PEDIDO = p.CODIGO) AS qtd_itens
+                FROM VE_PEDIDO p
+                WHERE p.CLIENTE = ?
+                ORDER BY p.DTPEDIDO DESC
+                OFFSET {$offset} ROWS FETCH NEXT {$pageSize} ROWS ONLY
+            ", [$customerCode]);
+
+            $result = [
+                'items' => $orders,
+                'total_count' => $total,
+            ];
+            $this->cache->save(json_encode($result), $cacheKey, [], self::CACHE_TTL_ORDERS_LIST);
+
+            return $result;
+        } catch (\Exception $e) {
+            $this->logger->error('[ERP] Error getting paginated orders: ' . $e->getMessage());
+            return ['items' => [], 'total_count' => 0];
+        }
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getOrderDetail(int $customerCode, int $erpOrderId): ?array
+    {
+        try {
+            $order = $this->connection->fetchOne("
+                SELECT
+                    p.CODIGO AS pedido_id,
+                    p.DTPEDIDO AS data_pedido,
+                    p.STATUS AS status,
+                    p.VLRTOTAL AS valor_total
+                FROM VE_PEDIDO p
+                WHERE p.CLIENTE = ?
+                  AND p.CODIGO = ?
+            ", [$customerCode, $erpOrderId]);
+
+            if (!$order) {
+                return null;
+            }
+
+            $items = $this->connection->query("
+                SELECT
+                    i.MATERIAL AS sku,
+                    i.DESCRICAO AS nome,
+                    i.QTDE AS qty,
+                    i.VLRUNITARIO AS preco_unitario,
+                    i.VLRTOTAL AS total
+                FROM VE_PEDIDOITENS i
+                WHERE i.PEDIDO = ?
+                ORDER BY i.CODIGO ASC
+            ", [$erpOrderId]);
+
+            $order['items'] = $items;
+            $order['timeline'] = $this->buildStatusTimeline((string) ($order['status'] ?? ''), (string) ($order['data_pedido'] ?? ''));
+
+            return $order;
+        } catch (\Exception $e) {
+            $this->logger->error('[ERP] Error getting order detail: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * @return list<array{label: string, state: string, date: string}>
+     */
+    private function buildStatusTimeline(string $status, string $orderDate): array
+    {
+        $steps = [
+            ['key' => 'created', 'label' => 'Pedido criado', 'states' => ['A', 'P', 'W', 'B', 'L', 'V', 'S', 'F', 'E']],
+            ['key' => 'approved', 'label' => 'Liberado', 'states' => ['L', 'V', 'S', 'F', 'E']],
+            ['key' => 'invoiced', 'label' => 'Faturado', 'states' => ['F', 'E']],
+            ['key' => 'shipped', 'label' => 'Enviado', 'states' => ['S', 'E']],
+            ['key' => 'delivered', 'label' => 'Entregue', 'states' => ['E']],
+        ];
+
+        $statusIndex = 0;
+        foreach ($steps as $index => $step) {
+            if (in_array($status, $step['states'], true)) {
+                $statusIndex = $index;
+            }
+        }
+
+        $timeline = [];
+        foreach ($steps as $index => $step) {
+            $state = 'pending';
+            if ($index < $statusIndex) {
+                $state = 'done';
+            } elseif ($index === $statusIndex) {
+                $state = in_array($status, ['C', 'X'], true) ? 'failed' : 'current';
+            }
+
+            $timeline[] = [
+                'label' => $step['label'],
+                'state' => $state,
+                'date' => $index === 0 && $orderDate !== '' ? substr($orderDate, 0, 10) : '',
+            ];
+        }
+
+        return $timeline;
     }
 }

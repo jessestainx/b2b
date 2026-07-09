@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\Block\Html;
@@ -15,6 +16,9 @@ use Magento\Store\Model\StoreManagerInterface;
  *
  * Renderiza ANTES do <body>, garantindo que o browser descubra a imagem
  * imediatamente e possa resolver o LCP.
+ *
+ * Links: awa-hero-preload-links.phtml (início de head.additional).
+ * CSS crítico: awa-hero-preload.phtml (fim de head.additional).
  *
  * Registrado em cms_index_index.xml no container head.additional.
  */
@@ -91,15 +95,26 @@ class HeroPreload extends Template
     {
         try {
             $conn = $this->resource->getConnection();
+            /*
+             * JOIN com rokanthemes_slider para garantir que o slide preloaded
+             * pertence ao slider principal (status=1). Sem o JOIN, slides de
+             * sliders mobile ou inativos com position=0 eram retornados primeiro,
+             * gerando um <link rel="preload"> para a imagem errada.
+             */
             $select = $conn->select()
                 ->from(
                     ['s' => $this->resource->getTableName('rokanthemes_slide')],
                     ['slide_image_mobile', 'slide_image']
                 )
+                ->join(
+                    ['sl' => $this->resource->getTableName('rokanthemes_slider')],
+                    'sl.slider_id = s.slider_id AND sl.slider_status = 1',
+                    []
+                )
                 ->where('s.slide_status = ?', 1)
                 ->where('s.slide_image IS NOT NULL')
                 ->where('s.slide_image != ?', '')
-                ->order('s.slide_position ASC')
+                ->order(['sl.slider_id ASC', 's.slide_position ASC'])
                 ->limit(1);
 
             $row = $conn->fetchRow($select);

@@ -18,7 +18,8 @@ class CurrentAttendant
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly ResourceConnection $resource
-    ) {}
+    ) {
+    }
 
     /**
      * Retorna true se o usuário admin logado é um atendente ativo.

@@ -1,0 +1,77 @@
+<?php
+/**
+ * AWA Motos - PDP Add to Cart safety net (2026-07-03)
+ *
+ * Causa raiz (Fase 8 / P1, ligada ao bug P0 de "Adicionar ao Carrinho" silencioso):
+ * o template Magento_Catalog::product/view/addtocart.phtml (core, nao customizado
+ * pela AWA) renderiza o botao "#product-addtocart-button" com o atributo
+ * "disabled" fixo no HTML. Isso e intencional no Magento: o botao so deve ficar
+ * clicavel depois que "Magento_Catalog/js/validate-product" inicializa via
+ * x-magento-init e chama $('.action.tocart').attr('disabled', false) dentro do
+ * seu metodo _create(). Ou seja, o carrinho inteiro depende de jQuery + RequireJS
+ * + essa cadeia de modulos carregarem sem erro ANTES do cliente clicar.
+ *
+ * Esta pagina carrega dezenas de scripts customizados (awa-*.js) no
+ * before.body.end. Se qualquer modulo requerido antes dessa inicializacao
+ * falhar (erro de sintaxe, 404, timeout de rede), o botao pode permanecer
+ * clicavel apenas visualmente mas com "disabled" nunca removido — o clique
+ * simplesmente nao dispara o submit do form, sem NENHUM feedback (exatamente
+ * o sintoma relatado: cliques sem efeito, carrinho permanece vazio).
+ *
+ * Correcao (defesa em profundidade, nao substitui a inicializacao normal):
+ * script standalone, sem dependencia de jQuery/RequireJS, que apenas GARANTE
+ * que o botao nao fique preso desabilitado por tempo indefinido. Nao ha
+ * nenhuma regra de negocio no tema que precise manter esse botao desabilitado
+ * apos o carregamento da pagina (grep confirmado: nenhum outro script
+ * reaplica disabled=true nele por estoque/B2B/configuravel). Se o fallback
+ * disparar, reporta ao dataLayer (mesmo canal do awa-rum.phtml) para dar
+ * visibilidade real de producao — não mascara o problema, apenas evita que o
+ * cliente fique irremediavelmente travado por uma falha de terceiro/rede.
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaAddToCartSafetyInit) return;
+    w.__awaAddToCartSafetyInit = true;
+
+    var GRACE_MS = 2500;
+
+    function reportStuckButton(button) {
+        if (typeof w.dataLayer === 'undefined') {
+            w.dataLayer = w.dataLayer || [];
+        }
+        w.dataLayer.push({
+            event: 'awa_js_error',
+            message: 'add-to-cart button stuck disabled — safety fallback enabled it',
+            filename: 'awa-pdp-addtocart-safety.phtml',
+            page_path: w.location.pathname
+        });
+        if (w.console && w.console.warn) {
+            w.console.warn('[AWA] #product-addtocart-button seguia desabilitado após ' + GRACE_MS + 'ms; habilitado pelo fallback de segurança.');
+        }
+    }
+
+    function checkButton() {
+        var button = d.getElementById('product-addtocart-button');
+        if (!button || !button.disabled) {
+            return;
+        }
+        // Ainda desabilitado apos a janela de graca: o caminho normal
+        // (Magento_Catalog/js/validate-product) nao rodou. Libera o botao
+        // para nao bloquear a compra, e registra o evento para monitoramento.
+        button.disabled = false;
+        reportStuckButton(button);
+    }
+
+    function schedule() {
+        w.setTimeout(checkButton, GRACE_MS);
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', schedule);
+    } else {
+        schedule();
+    }
+})(window, document);
+</script>

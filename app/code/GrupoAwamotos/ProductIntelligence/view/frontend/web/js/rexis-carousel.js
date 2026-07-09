@@ -29,7 +29,8 @@ define([
         $root.data('rexisCarouselInit', true);
         $root.attr('tabindex', $root.attr('tabindex') || '0');
 
-        function getVisibleSlides() {
+        function getVisibleSlides()
+        {
             let width = $root.outerWidth();
 
             if (width <= mobileBreakpoint) {
@@ -47,13 +48,15 @@ define([
             return 4;
         }
 
-        function clampPosition(pos) {
+        function clampPosition(pos)
+        {
             let max = Math.max(0, snapOffsets.length - 1);
 
             return Math.max(0, Math.min(max, pos));
         }
 
-        function buildSnapOffsets() {
+        function buildSnapOffsets()
+        {
             let maxTranslate = Math.max(0, $track.get(0).scrollWidth - $viewport.get(0).clientWidth + 2); // +2 buffer
             let visibleSlides = getVisibleSlides();
             let rawOffsets = [];
@@ -76,7 +79,8 @@ define([
             });
         }
 
-        function updateNavState() {
+        function updateNavState()
+        {
             let max = Math.max(0, snapOffsets.length - 1);
 
             if ($prev.length) {
@@ -92,7 +96,8 @@ define([
             }
         }
 
-        function render() {
+        function render()
+        {
             let offset = snapOffsets[position] || 0;
 
             position = clampPosition(position);
@@ -109,7 +114,8 @@ define([
             updateNavState();
         }
 
-        function move(direction) {
+        function move(direction)
+        {
             position = clampPosition(position + direction);
             render();
         }

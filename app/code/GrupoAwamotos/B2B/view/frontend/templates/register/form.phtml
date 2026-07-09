@@ -5,21 +5,12 @@
  * @var \Magento\Framework\Escaper $escaper
  */
 $validateCnpjUrl = $block->escapeUrl($block->getUrl('b2b/register/validateCnpj'));
+$cepLookupUrl = $block->escapeUrl($block->getCepLookupUrl());
 $termsUrl = $block->escapeUrl($block->getUrl('terms'));
 $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-restriction-mode'));
 ?>
 <div id="b2b-register-shell" class="b2b-login-page b2b-register-shell">
-    <div class="b2b-login-logo">
-        <a href="<?= $escaper->escapeUrl($block->getHomeUrl()) ?>">
-            <img src="<?= $escaper->escapeUrl($block->getLogoSrc()) ?>"
-                 alt="<?= $escaper->escapeHtmlAttr($block->getLogoAlt()) ?>"
-                 loading="eager" />
-        </a>
-    </div>
-
-    <div class="b2b-login-header">
-        <div class="b2b-login-bar"></div>
-    </div>
+    <?= $block->getChildHtml('auth_logo') ?>
 
     <div class="b2b-register-shell-content">
 <div class="b2b-register-page">
@@ -36,138 +27,72 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
         <div class="b2b-register-container">
             <!-- Header -->
             <div class="register-header">
-                <p class="b2b-register-login-link">
-                    <?= $block->escapeHtml(__('Já tem conta?')) ?>
-                    <a href="<?= $escaper->escapeUrl($block->getUrl('b2b/account/login')) ?>"><?= $block->escapeHtml(__('Faça login')) ?></a>
-                </p>
-                <h1 class="register-title" id="b2b-register-title"><?= $block->escapeHtml(__('Cadastro B2B - Pessoa Jurídica')) ?></h1>
-                <p class="subtitle"><?= $block->escapeHtml(__('Crie sua conta empresarial e tenha acesso a preços especiais, crédito e cotações personalizadas.')) ?></p>
-                <p class="register-trust-note"><?= $block->escapeHtml(__('Análise em até 1 dia útil. Você receberá o retorno no e-mail cadastrado.')) ?></p>
-                <div class="register-meta" aria-label="<?= $block->escapeHtmlAttr(__('Resumo do cadastro B2B')) ?>">
-                    <span class="register-meta__item">
-                        <strong><?= $block->escapeHtml(__('100% PJ')) ?></strong>
-                        <span><?= $block->escapeHtml(__('Cadastro empresarial com CNPJ')) ?></span>
-                    </span>
-                    <span class="register-meta__item">
-                        <strong><?= $block->escapeHtml(__('Validação')) ?></strong>
-                        <span><?= $block->escapeHtml(__('Receita Federal + ERP')) ?></span>
-                    </span>
-                    <span class="register-meta__item">
-                        <strong><?= $block->escapeHtml(__('Ativação')) ?></strong>
-                        <span><?= $block->escapeHtml(__('Retorno por e-mail e WhatsApp')) ?></span>
-                    </span>
-                </div>
-            </div>
+                <h1 class="b2b-login-title register-title" id="b2b-register-title">
+                    <?= $block->escapeHtml(__('Cadastro B2B')) ?><span class="register-title__suffix"><?= $block->escapeHtml(__(' (Pessoa Jurídica)')) ?></span>
+                </h1>
+                <p class="register-trust-note b2b-login-subtitle"><?= $block->escapeHtml(__('Análise em até 1 dia útil. Retorno no e-mail cadastrado.')) ?></p>
 
-            <button type="button"
-                    class="b2b-benefits-toggle"
-                    data-b2b-toggle="benefits"
-                    data-target="#b2b-register-benefits"
-                    aria-controls="b2b-register-benefits"
-                    aria-expanded="false">
-                <span class="b2b-benefits-toggle__label"><?= $block->escapeHtml(__('Vantagens do cadastro B2B')) ?></span>
-                <span class="b2b-benefits-toggle__meta"><?= $block->escapeHtml(__('Descontos, crédito e cotações')) ?></span>
-                <span class="b2b-benefits-toggle__icon" aria-hidden="true"></span>
-            </button>
+                <div class="b2b-login-messages" role="status" aria-live="polite" aria-atomic="true">
+                    <?= $block->getChildHtml('b2b_register_messages') ?>
+                </div>
 
-            <!-- Benefits -->
-            <div class="b2b-benefits is-hidden" id="b2b-register-benefits" aria-hidden="true">
-                <div class="benefit-item benefit-animate" data-animate-delay="0">
-                    <div class="benefit-icon benefit-icon-discount">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
-                            <defs>
-                                <linearGradient id="discountGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:var(--b2b-reg-form-c5);stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:var(--b2b-reg-form-c1);stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <circle cx="12" cy="12" r="10" fill="url(#discountGrad)" opacity="0.2"/>
-                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" stroke="url(#discountGrad)" stroke-width="2" fill="none"/>
-                            <circle cx="7" cy="7" r="1.5" fill="url(#discountGrad)"/>
-                            <text x="14" y="15" font-size="8" font-weight="bold" fill="url(#discountGrad)">%</text>
-                        </svg>
-                    </div>
-                    <div class="benefit-text">
-                        <strong><?= $block->escapeHtml(__('Descontos Exclusivos')) ?></strong>
-                        <span><?= $block->escapeHtml(__('Até 20% de desconto em todos os produtos')) ?></span>
-                    </div>
-                </div>
-                <div class="benefit-item benefit-animate" data-animate-delay="100">
-                    <div class="benefit-icon benefit-icon-credit">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
-                            <defs>
-                                <linearGradient id="creditGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:var(--b2b-reg-form-c3);stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:var(--b2b-reg-form-c6);stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <rect x="2" y="5" width="20" height="14" rx="2" fill="url(#creditGrad)" opacity="0.2"/>
-                            <rect x="2" y="5" width="20" height="14" rx="2" stroke="url(#creditGrad)" stroke-width="2" fill="none"/>
-                            <line x1="2" y1="10" x2="22" y2="10" stroke="url(#creditGrad)" stroke-width="2"/>
-                            <circle cx="6" cy="15" r="1" fill="url(#creditGrad)"/>
-                            <line x1="10" y1="15" x2="18" y2="15" stroke="url(#creditGrad)" stroke-width="1.5" opacity="0.6"/>
-                        </svg>
-                    </div>
-                    <div class="benefit-text">
-                        <strong><?= $block->escapeHtml(__('Crédito Empresarial')) ?></strong>
-                        <span><?= $block->escapeHtml(__('Limite de crédito para faturamento')) ?></span>
-                    </div>
-                </div>
-                <div class="benefit-item benefit-animate" data-animate-delay="200">
-                    <div class="benefit-icon benefit-icon-quote">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
-                            <defs>
-                                <linearGradient id="quoteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:var(--b2b-reg-form-c2);stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:var(--b2b-reg-form-c4);stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="url(#quoteGrad)" opacity="0.2"/>
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="url(#quoteGrad)" stroke-width="2" fill="none"/>
-                            <polyline points="14 2 14 8 20 8" stroke="url(#quoteGrad)" stroke-width="2" fill="none"/>
-                            <line x1="16" y1="13" x2="8" y2="13" stroke="url(#quoteGrad)" stroke-width="1.5"/>
-                            <line x1="16" y1="17" x2="8" y2="17" stroke="url(#quoteGrad)" stroke-width="1.5"/>
-                            <line x1="12" y1="9" x2="8" y2="9" stroke="url(#quoteGrad)" stroke-width="1.5" opacity="0.6"/>
-                        </svg>
-                    </div>
-                    <div class="benefit-text">
-                        <strong><?= $block->escapeHtml(__('Cotações Personalizadas')) ?></strong>
-                        <span><?= $block->escapeHtml(__('Solicite orçamentos sob medida')) ?></span>
-                    </div>
-                </div>
+                <ul class="b2b-register-trust" role="list" aria-label="<?= $block->escapeHtmlAttr(__('Informações do cadastro B2B')) ?>">
+                    <li><?= $block->escapeHtml(__('Descontos no catálogo')) ?></li>
+                    <li><?= $block->escapeHtml(__('Crédito para faturamento')) ?></li>
+                    <li><?= $block->escapeHtml(__('Cotações sob medida')) ?></li>
+                </ul>
             </div>
 
             <!-- Form -->
-            <form class="b2b-register-form" action="<?= $block->escapeUrl($block->getFormAction()) ?>" method="post" id="b2b-register-form" aria-labelledby="b2b-register-title" data-mage-init='{"validation":{}}'>
+            <form class="b2b-register-form" action="<?= $block->escapeUrl($block->getFormAction()) ?>" method="post" id="b2b-register-form" aria-labelledby="b2b-register-title" novalidate>
                 <?= $block->getChildHtml('b2b_form_key') ?>
-                <input type="text" name="b2b_website" id="b2b_website" class="b2b-ht" tabindex="-1" autocomplete="off" aria-hidden="true" style="opacity:0;position:absolute;height:0;width:0;overflow:hidden;pointer-events:none;">
+                <div id="b2b-register-form-status" class="b2b-register-form-status" role="status" aria-live="polite" aria-atomic="true"></div>
+                <input type="text" name="b2b_website" id="b2b_website" class="b2b-ht" tabindex="-1" autocomplete="off" aria-hidden="true">
 
                 <nav class="b2b-register-progress" aria-label="<?= $block->escapeHtmlAttr(__('Etapas do cadastro')) ?>">
-                    <button type="button" class="progress-step is-active" data-step-number="1" data-step-target="#register-step-company" aria-controls="register-step-company" aria-current="step">
-                        <span class="progress-step__num">1</span><?= $block->escapeHtml(__('Empresa')) ?>
+                    <button type="button" class="progress-step is-active" data-step-number="1" data-step-target="#register-step-company" aria-controls="register-step-company" aria-current="step" aria-label="<?= $block->escapeHtmlAttr(__('Etapa 1: Empresa')) ?>">
+                        <span class="progress-step__num" aria-hidden="true">1</span><span class="progress-step__label"><?= $block->escapeHtml(__('Empresa')) ?></span>
                     </button>
-                    <button type="button" class="progress-step" data-step-number="2" data-step-target="#address-section" aria-controls="address-section">
-                        <span class="progress-step__num">2</span><?= $block->escapeHtml(__('Endereço')) ?>
+                    <button type="button" class="progress-step" data-step-number="2" data-step-target="#address-section" aria-controls="address-section" aria-label="<?= $block->escapeHtmlAttr(__('Etapa 2: Endereço')) ?>">
+                        <span class="progress-step__num" aria-hidden="true">2</span><span class="progress-step__label"><?= $block->escapeHtml(__('Endereço')) ?></span>
                     </button>
-                    <button type="button" class="progress-step" data-step-number="3" data-step-target="#register-step-contact" aria-controls="register-step-contact">
-                        <span class="progress-step__num">3</span><?= $block->escapeHtml(__('Contato')) ?>
+                    <button type="button" class="progress-step" data-step-number="3" data-step-target="#register-step-contact" aria-controls="register-step-contact" aria-label="<?= $block->escapeHtmlAttr(__('Etapa 3: Contato')) ?>">
+                        <span class="progress-step__num" aria-hidden="true">3</span><span class="progress-step__label"><?= $block->escapeHtml(__('Contato')) ?></span>
                     </button>
-                    <button type="button" class="progress-step" data-step-number="4" data-step-target="#register-step-security" aria-controls="register-step-security">
-                        <span class="progress-step__num">4</span><?= $block->escapeHtml(__('Segurança')) ?>
+                    <button type="button" class="progress-step" data-step-number="4" data-step-target="#register-step-security" aria-controls="register-step-security" aria-label="<?= $block->escapeHtmlAttr(__('Etapa 4: Segurança')) ?>">
+                        <span class="progress-step__num" aria-hidden="true">4</span><span class="progress-step__label"><?= $block->escapeHtml(__('Segurança')) ?></span>
                     </button>
                 </nav>
 
+                <div class="b2b-register-step-nav" data-register-step-nav aria-label="<?= $block->escapeHtmlAttr(__('Navegação entre etapas')) ?>">
+                    <button type="button"
+                            class="b2b-register-step-prev b2b-btn-claim"
+                            disabled
+                            aria-label="<?= $block->escapeHtmlAttr(__('Voltar para etapa anterior')) ?>">
+                        <span><?= $block->escapeHtml(__('Voltar')) ?></span>
+                    </button>
+                    <p class="b2b-register-step-indicator" aria-live="polite">
+                        <span class="b2b-register-step-indicator__text"><?= $block->escapeHtml(__('Etapa %1 de %2', 1, 4)) ?></span>
+                    </p>
+                    <button type="button"
+                            class="b2b-register-step-next b2b-btn-entrar"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Continuar para próxima etapa')) ?>">
+                        <span><?= $block->escapeHtml(__('Continuar')) ?></span>
+                    </button>
+                </div>
+
                 <!-- Dados da Empresa -->
                 <div class="form-section form-section--company" data-step="1" id="register-step-company">
-                    <h3><?= $block->escapeHtml(__('Dados da Empresa')) ?></h3>
+                    <h2 class="form-section__heading"><?= $block->escapeHtml(__('Dados da Empresa')) ?></h2>
 
                     <div class="field required">
                         <label for="cnpj" class="label"><span><?= $block->escapeHtml(__('CNPJ')) ?></span></label>
                         <div class="control cnpj-control">
                             <input type="text" name="cnpj" id="cnpj" title="<?= $block->escapeHtmlAttr(__('CNPJ')) ?>"
-                                   class="input-text" data-validate="{required:true}"
-                                   placeholder="00.000.000/0000-00" maxlength="18"
+                                   class="input-text" data-validate="{required:true}" required aria-required="true"
+                                   placeholder="<?= $block->escapeHtmlAttr(__('00.000.000/0000-00')) ?>" maxlength="18"
                                    inputmode="numeric" spellcheck="false" autocomplete="off"
+                                   value="<?= $escaper->escapeHtmlAttr($block->getFormValue('cnpj')) ?>"
                                    aria-describedby="cnpj-status cnpj-feedback">
                             <div id="cnpj-status" class="cnpj-status" role="status" aria-live="polite" aria-atomic="true"></div>
                         </div>
@@ -178,29 +103,33 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                     <div id="cnpj-company-data" class="cnpj-company-data is-hidden" aria-live="polite" aria-hidden="true">
                         <div class="company-info-card">
                             <div class="company-info-header">
-                                <span class="company-info-badge" id="cnpj-source-badge">Dados da Receita Federal</span>
+                                <span class="company-info-badge" id="cnpj-source-badge"><?= $block->escapeHtml(__('Dados da Receita Federal')) ?></span>
                                 <span id="cnae-profile-badge" class="cnae-profile-badge is-hidden" aria-hidden="true"></span>
                                 <span id="cnpj-situacao" class="cnpj-situacao"></span>
                             </div>
                             <div class="company-info-grid">
                                 <div class="company-info-item">
-                                    <span class="info-label">Atividade Principal</span>
+                                    <span class="info-label"><?= $block->escapeHtml(__('Atividade principal')) ?></span>
                                     <span id="cnpj-atividade" class="info-value"></span>
                                 </div>
                                 <div class="company-info-item is-hidden" id="cnpj-rf-telefone-row" aria-hidden="true">
-                                    <span class="info-label">Telefone (Receita Federal)</span>
+                                    <span class="info-label"><?= $block->escapeHtml(__('Telefone (Receita Federal)')) ?></span>
                                     <span id="cnpj-rf-telefone" class="info-value info-value-muted"></span>
                                 </div>
                                 <div class="company-info-item is-hidden" id="cnpj-rf-email-row" aria-hidden="true">
-                                    <span class="info-label">E-mail (Receita Federal)</span>
+                                    <span class="info-label"><?= $block->escapeHtml(__('E-mail (Receita Federal)')) ?></span>
                                     <span id="cnpj-rf-email" class="info-value info-value-muted"></span>
                                 </div>
                             </div>
                             <div class="company-info-alert is-hidden" id="cnpj-rf-contact-note" aria-hidden="true">
                                 <span class="alert-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>
                                 <div class="alert-content">
-                                    <strong>Importante:</strong> Os dados de contato da Receita Federal podem ser do <strong>contador ou escritório de contabilidade</strong>.
-                                    <br>Nos campos abaixo, use <strong>seu e-mail e telefone pessoais</strong> para receber o acesso à conta.
+                                    <p class="company-info-alert__lead">
+                                        <?= $block->escapeHtml(__('Os dados de contato da Receita Federal podem ser do contador ou escritório de contabilidade.')) ?>
+                                    </p>
+                                    <p class="company-info-alert__action">
+                                        <?= $block->escapeHtml(__('Nos campos abaixo, use o e-mail e telefone do responsável pelo cadastro.')) ?>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -210,8 +139,9 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                         <label for="razao_social" class="label"><span><?= $block->escapeHtml(__('Razão Social')) ?></span></label>
                         <div class="control">
                             <input type="text" name="razao_social" id="razao_social" title="<?= $block->escapeHtmlAttr(__('Razão Social')) ?>"
-                                   class="input-text" data-validate="{required:true}" placeholder="Nome empresarial completo"
-                                   autocomplete="organization">
+                                   class="input-text" data-validate="{required:true}" required aria-required="true" placeholder="<?= $block->escapeHtmlAttr(__('Nome empresarial completo')) ?>"
+                                   maxlength="255" autocomplete="organization"
+                                   value="<?= $escaper->escapeHtmlAttr($block->getFormValue('razao_social')) ?>">
                         </div>
                     </div>
 
@@ -219,18 +149,32 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                         <label for="nome_fantasia" class="label"><span><?= $block->escapeHtml(__('Nome Fantasia')) ?></span></label>
                         <div class="control">
                             <input type="text" name="nome_fantasia" id="nome_fantasia" title="<?= $block->escapeHtmlAttr(__('Nome Fantasia')) ?>"
-                                   class="input-text" placeholder="Nome comercial (opcional)"
-                                   autocomplete="organization-title">
+                                   class="input-text" placeholder="<?= $block->escapeHtmlAttr(__('Nome comercial (opcional)')) ?>"
+                                   maxlength="255" autocomplete="organization-title"
+                                   value="<?= $escaper->escapeHtmlAttr($block->getFormValue('nome_fantasia')) ?>">
                         </div>
                     </div>
 
-                    <div class="field">
-                        <label for="inscricao_estadual" class="label"><span><?= $block->escapeHtml(__('Inscrição Estadual')) ?></span></label>
-                        <div class="control">
-                            <input type="text" name="inscricao_estadual" id="inscricao_estadual"
-                                   title="<?= $block->escapeHtmlAttr(__('Inscrição Estadual')) ?>"
-                                   class="input-text" placeholder="Deixe em branco se isento"
-                                   spellcheck="false" autocomplete="off">
+                    <div class="field field-ie">
+                        <div class="field-row field-row--ie">
+                            <div class="field field-ie-input<?= $block->getFormValue('ie_isento') === '1' ? ' is-disabled' : '' ?>">
+                                <label for="inscricao_estadual" class="label"><span><?= $block->escapeHtml(__('Inscrição Estadual')) ?></span></label>
+                                <div class="control">
+                                    <input type="text" name="inscricao_estadual" id="inscricao_estadual"
+                                           title="<?= $block->escapeHtmlAttr(__('Inscrição Estadual')) ?>"
+                                           class="input-text" placeholder="<?= $block->escapeHtmlAttr(__('Número da IE')) ?>"
+                                           spellcheck="false" autocomplete="off"
+                                           value="<?= $escaper->escapeHtmlAttr($block->getFormValue('inscricao_estadual')) ?>"
+                                           <?= $block->getFormValue('ie_isento') === '1' ? ' disabled="disabled"' : '' ?>>
+                                </div>
+                            </div>
+                            <div class="field choice field-ie-isento">
+                                <input type="checkbox" name="ie_isento" id="ie_isento" value="1" class="checkbox"
+                                    <?= $block->getFormValue('ie_isento') === '1' ? ' checked="checked"' : '' ?>>
+                                <label for="ie_isento" class="label">
+                                    <span><?= $block->escapeHtml(__('Isento de IE')) ?></span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -238,23 +182,28 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                         <label for="phone" class="label"><span><?= $block->escapeHtml(__('Telefone / WhatsApp')) ?></span></label>
                         <div class="control">
                             <input type="tel" name="phone" id="phone" title="<?= $block->escapeHtmlAttr(__('Telefone')) ?>"
-                                   class="input-text" data-validate="{required:true}" placeholder="(00) 00000-0000"
-                                   inputmode="tel" autocomplete="tel">
+                                   class="input-text" data-validate="{required:true}" required aria-required="true" placeholder="<?= $block->escapeHtmlAttr(__('(00) 00000-0000')) ?>"
+                                   inputmode="tel" autocomplete="tel"
+                                   value="<?= $escaper->escapeHtmlAttr($block->getFormValue('phone')) ?>">
                         </div>
-                        <div class="note"><?= $block->escapeHtml(__('Informe seu número direto, não o do contador.')) ?></div>
+                        <div class="note b2b-field-note"><?= $block->escapeHtml(__('Informe seu número direto, não o do contador.')) ?></div>
                     </div>
                 </div>
 
                 <!-- Endereço Comercial (auto-preenchido) -->
-                <div class="form-section form-section--address" id="address-section" data-step="2" style="display:none">
-                    <h3><?= $block->escapeHtml(__('Endereço Comercial')) ?></h3>
+                <div class="form-section form-section--address" id="address-section" data-step="2">
+                    <h2 class="form-section__heading"><?= $block->escapeHtml(__('Endereço Comercial')) ?></h2>
 
                     <div class="field required">
                         <label for="cep" class="label"><span><?= $block->escapeHtml(__('CEP')) ?></span></label>
-                        <div class="control">
+                        <div class="control control--cep">
                             <input type="text" name="cep" id="cep" title="<?= $block->escapeHtmlAttr(__('CEP')) ?>"
-                                   class="input-text" data-validate="{required:true}" placeholder="00000-000" maxlength="9"
-                                   inputmode="numeric" autocomplete="postal-code" spellcheck="false">
+                                   class="input-text input-text--cep" data-validate="{required:true}" required aria-required="true"
+                                   placeholder="<?= $block->escapeHtmlAttr(__('00000-000')) ?>" maxlength="9"
+                                   inputmode="numeric" autocomplete="postal-code" spellcheck="false"
+                                   value="<?= $escaper->escapeHtmlAttr($block->getFormValue('cep')) ?>"
+                                   aria-describedby="cep-feedback">
+                            <span id="cep-feedback" class="cep-loading" role="status" aria-live="polite"></span>
                         </div>
                     </div>
 
@@ -263,8 +212,9 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                             <label for="logradouro" class="label"><span><?= $block->escapeHtml(__('Logradouro')) ?></span></label>
                             <div class="control">
                                 <input type="text" name="logradouro" id="logradouro" title="<?= $block->escapeHtmlAttr(__('Logradouro')) ?>"
-                                       class="input-text" data-validate="{required:true}" placeholder="Rua, Avenida..."
-                                       autocomplete="address-line1">
+                                       class="input-text" data-validate="{required:true}" required aria-required="true" placeholder="<?= $block->escapeHtmlAttr(__('Rua, Avenida...')) ?>"
+                                       autocomplete="address-line1"
+                                       value="<?= $escaper->escapeHtmlAttr($block->getFormValue('logradouro')) ?>">
                             </div>
                         </div>
 
@@ -272,8 +222,9 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                             <label for="numero" class="label"><span><?= $block->escapeHtml(__('Número')) ?></span></label>
                             <div class="control">
                                 <input type="text" name="numero" id="numero" title="<?= $block->escapeHtmlAttr(__('Número')) ?>"
-                                       class="input-text" data-validate="{required:true}" placeholder="Nº"
-                                       autocomplete="address-line2">
+                                       class="input-text" data-validate="{required:true}" required aria-required="true" placeholder="<?= $block->escapeHtmlAttr(__('Nº')) ?>"
+                                       autocomplete="address-line2"
+                                       value="<?= $escaper->escapeHtmlAttr($block->getFormValue('numero')) ?>">
                             </div>
                         </div>
                     </div>
@@ -282,16 +233,18 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                         <label for="complemento" class="label"><span><?= $block->escapeHtml(__('Complemento')) ?></span></label>
                         <div class="control">
                             <input type="text" name="complemento" id="complemento" title="<?= $block->escapeHtmlAttr(__('Complemento')) ?>"
-                                   class="input-text" placeholder="Sala, Andar, Bloco...">
+                                   class="input-text" placeholder="<?= $block->escapeHtmlAttr(__('Sala, Andar, Bloco...')) ?>"
+                                   value="<?= $escaper->escapeHtmlAttr($block->getFormValue('complemento')) ?>">
                         </div>
                     </div>
 
-                    <div class="field-row">
+                    <div class="field-row field-row--locality">
                         <div class="field required">
                             <label for="bairro" class="label"><span><?= $block->escapeHtml(__('Bairro')) ?></span></label>
                             <div class="control">
                                 <input type="text" name="bairro" id="bairro" title="<?= $block->escapeHtmlAttr(__('Bairro')) ?>"
-                                       class="input-text" data-validate="{required:true}" autocomplete="address-level3">
+                                       class="input-text" data-validate="{required:true}" required aria-required="true" autocomplete="address-level3"
+                                       value="<?= $escaper->escapeHtmlAttr($block->getFormValue('bairro')) ?>">
                             </div>
                         </div>
 
@@ -299,24 +252,33 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                             <label for="municipio" class="label"><span><?= $block->escapeHtml(__('Cidade')) ?></span></label>
                             <div class="control">
                                 <input type="text" name="municipio" id="municipio" title="<?= $block->escapeHtmlAttr(__('Cidade')) ?>"
-                                       class="input-text" data-validate="{required:true}" autocomplete="address-level2">
+                                       class="input-text" data-validate="{required:true}" required aria-required="true" autocomplete="address-level2"
+                                       value="<?= $escaper->escapeHtmlAttr($block->getFormValue('municipio')) ?>">
                             </div>
                         </div>
 
-                        <div class="field field-narrow required">
+                        <div class="field field-uf field-narrow required">
                             <label for="uf" class="label"><span><?= $block->escapeHtml(__('UF')) ?></span></label>
                             <div class="control">
-                                <input type="text" name="uf" id="uf" title="<?= $block->escapeHtmlAttr(__('UF')) ?>"
-                                       class="input-text" data-validate="{required:true}" maxlength="2" placeholder="SP"
-                                       autocomplete="address-level1" autocapitalize="characters" spellcheck="false">
+                                <select name="uf" id="uf" title="<?= $block->escapeHtmlAttr(__('UF')) ?>"
+                                        class="select" data-validate="{required:true}" required aria-required="true"
+                                        autocomplete="address-level1">
+                                    <option value=""><?= $block->escapeHtml(__('UF')) ?></option>
+                                    <?php foreach ($block->getBrazilianRegionOptions() as $regionOption): ?>
+                                        <option value="<?= $escaper->escapeHtmlAttr($regionOption['code']) ?>"
+                                            <?= $block->isFormValueSelected('uf', $regionOption['code']) ? ' selected="selected"' : '' ?>>
+                                            <?= $escaper->escapeHtml($regionOption['label']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Dados de Contato -->
-                <div class="form-section form-section--contact" data-step="3" id="register-step-contact" style="display:none">
-                    <h3><?= $block->escapeHtml(__('Dados de Contato')) ?></h3>
+                <div class="form-section form-section--contact" data-step="3" id="register-step-contact">
+                    <h2 class="form-section__heading"><?= $block->escapeHtml(__('Dados de Contato')) ?></h2>
 
                     <div class="field-row">
                         <div class="field required">
@@ -324,7 +286,8 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                             <div class="control">
                                 <input type="text" name="firstname" id="firstname"
                                        title="<?= $block->escapeHtmlAttr(__('Nome')) ?>"
-                                       class="input-text" data-validate="{required:true}" autocomplete="given-name">
+                                       class="input-text" data-validate="{required:true}" required aria-required="true" autocomplete="given-name"
+                                       value="<?= $escaper->escapeHtmlAttr($block->getFormValue('firstname')) ?>">
                             </div>
                         </div>
 
@@ -333,7 +296,8 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                             <div class="control">
                                 <input type="text" name="lastname" id="lastname"
                                        title="<?= $block->escapeHtmlAttr(__('Sobrenome')) ?>"
-                                       class="input-text" data-validate="{required:true}" autocomplete="family-name">
+                                       class="input-text" data-validate="{required:true}" required aria-required="true" autocomplete="family-name"
+                                       value="<?= $escaper->escapeHtmlAttr($block->getFormValue('lastname')) ?>">
                             </div>
                         </div>
                     </div>
@@ -343,18 +307,19 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                         <div class="control">
                             <input type="email" name="email" id="email"
                                    title="<?= $block->escapeHtmlAttr(__('E-mail')) ?>"
-                                   class="input-text" data-validate="{required:true, 'validate-email':true}"
-                                   placeholder="seuemail@empresa.com.br"
-                                   autocomplete="email" autocapitalize="none" spellcheck="false">
+                                   class="input-text" data-validate="{required:true, 'validate-email':true}" required aria-required="true"
+                                   placeholder="<?= $block->escapeHtmlAttr(__('seuemail@empresa.com.br')) ?>"
+                                   autocomplete="email" autocapitalize="none" spellcheck="false"
+                                   value="<?= $escaper->escapeHtmlAttr($block->getFormValue('email')) ?>">
                         </div>
-                        <div class="note"><?= $block->escapeHtml(__('Use seu e-mail pessoal. Será usado para login e recuperação de senha.')) ?></div>
+                        <div class="note b2b-field-note"><?= $block->escapeHtml(__('E-mail do responsável pelo cadastro — usado para login e recuperação de senha.')) ?></div>
                         <div id="erp-email-alert" class="erp-email-alert is-hidden" aria-hidden="true"></div>
                     </div>
                 </div>
 
                 <!-- Segurança -->
-                <div class="form-section form-section--security" data-step="4" id="register-step-security" style="display:none">
-                    <h3><?= $block->escapeHtml(__('Segurança')) ?></h3>
+                <div class="form-section form-section--security" data-step="4" id="register-step-security">
+                    <h2 class="form-section__heading"><?= $block->escapeHtml(__('Segurança')) ?></h2>
 
                     <div class="field required">
                         <label for="password" class="label"><span><?= $block->escapeHtml(__('Senha')) ?></span></label>
@@ -363,8 +328,8 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                                 <input type="password" name="password" id="password"
                                        title="<?= $block->escapeHtmlAttr(__('Senha')) ?>"
                                        class="input-text"
-                                       minlength="8"
-                                       data-validate="{required:true, minlength:8}"
+                                   minlength="<?= (int) $block->getMinimumPasswordLength() ?>"
+                                   data-validate="{required:true, minlength:<?= (int) $block->getMinimumPasswordLength() ?>}" required aria-required="true"
                                        autocomplete="new-password">
                                 <button type="button"
                                         class="b2b-register-password-toggle"
@@ -377,7 +342,7 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                                 </button>
                             </div>
                         </div>
-                        <div class="note"><?= $block->escapeHtml(__('Mínimo 8 caracteres com letras e números')) ?></div>
+                        <div class="note b2b-field-note" id="password-requirements-note"><?= $block->escapeHtml($block->getPasswordRequirementHint()) ?></div>
                         <div class="password-strength-meter" id="password-strength-meter" role="progressbar" aria-label="<?= $block->escapeHtmlAttr(__('Força da senha')) ?>" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                         <div class="b2b-password-strength-label" id="password-strength-label" aria-live="polite"></div>
                     </div>
@@ -388,7 +353,7 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                             <div class="b2b-register-password-wrap">
                                 <input type="password" name="password_confirmation" id="password_confirmation"
                                        title="<?= $block->escapeHtmlAttr(__('Confirmar Senha')) ?>"
-                                       class="input-text" data-validate="{required:true, equalTo:'#password'}"
+                                       class="input-text" data-validate="{required:true, equalTo:'#password'}" required aria-required="true"
                                        autocomplete="new-password">
                                 <button type="button"
                                         class="b2b-register-password-toggle"
@@ -408,45 +373,49 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
 
                 <!-- Termos -->
                 <div class="form-section terms-section form-section--terms">
-                    <div class="field choice required">
-                        <input type="checkbox" name="terms" id="terms" value="1" class="checkbox" data-validate="{required:true}">
+                    <div class="field choice required b2b-register-terms">
+                        <input type="checkbox" name="terms" id="terms" value="1" class="checkbox" data-validate="{required:true}" required aria-required="true"
+                            <?= $block->getFormValue('terms') === '1' ? ' checked="checked"' : '' ?>>
                         <label for="terms" class="label">
                             <span><?= /* @noEscape */ __('Li e aceito os <a href="%1" target="_blank" rel="noopener noreferrer">Termos de Uso</a> e <a href="%2" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>', $termsUrl, $privacyPolicyUrl) ?></span>
                         </label>
                     </div>
                 </div>
 
-                <div class="actions-toolbar">
+                <div class="actions-toolbar b2b-login-actions">
                     <div class="primary">
-                        <button type="submit" class="action submit primary create-b2b-account" title="<?= $block->escapeHtmlAttr(__('Criar Conta B2B')) ?>">
+                        <button type="submit" class="b2b-btn-entrar create-b2b-account" title="<?= $block->escapeHtmlAttr(__('Criar Conta B2B')) ?>">
                             <span><?= $block->escapeHtml(__('Criar conta B2B')) ?></span>
                         </button>
-                        <div class="actions-primary-note"><?= $block->escapeHtml(__('Após enviar, sua conta entra em análise e você será notificado por e-mail.')) ?></div>
-                    </div>
-                    <div class="secondary">
-                        <span><?= $block->escapeHtml(__('Já tem uma conta?')) ?></span>
-                        <a href="<?= $block->escapeUrl($block->getLoginUrl()) ?>" class="action secondary b2b-login-link" aria-label="<?= $block->escapeHtmlAttr(__('Já possui cadastro? Faça login')) ?>">
-                            <?= $block->escapeHtml(__('Faça login')) ?>
-                        </a>
+                        <p class="actions-primary-note b2b-field-note"><?= $block->escapeHtml(__('Após enviar, sua conta entra em análise e você será notificado por e-mail.')) ?></p>
                     </div>
                 </div>
             </form>
+
+            <div class="b2b-login-divider">
+                <span><?= $block->escapeHtml(__('ou')) ?></span>
+            </div>
+
+            <div class="b2b-login-ctas b2b-register-secondary-ctas">
+                <a href="<?= $escaper->escapeUrl($block->getUrl('b2b/account/login')) ?>"
+                   class="b2b-btn-claim">
+                    <?= $block->escapeHtml(__('Já tem conta? Faça login')) ?>
+                </a>
+            </div>
         </div>
     <?php endif; ?>
 </div>
     </div>
 
     <div class="b2b-login-footer">
-          <a href="https://wa.me/5516997367588?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20para%20cadastro%20B2B"
+        <a href="https://wa.me/5516997367588?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20para%20cadastro%20B2B"
            class="b2b-login-whatsapp"
-              data-b2b-contact-track="register_help_whatsapp"
-              data-b2b-contact-channel="whatsapp"
+           data-b2b-contact-track="register_help_whatsapp"
+           data-b2b-contact-channel="whatsapp"
            target="_blank"
            rel="noopener noreferrer">
-            Precisa de ajuda? Fale conosco pelo <strong>WhatsApp</strong>
+            <?= $escaper->escapeHtml(__('Precisa de ajuda?')) ?> <strong><?= $escaper->escapeHtml(__('WhatsApp')) ?></strong>
         </a>
-        <p class="b2b-login-footer-brand">Grupo AWA Motos</p>
-        <p class="b2b-login-footer-contact">contato@awamotos.com.br</p>
     </div>
 </div>
 
@@ -464,10 +433,17 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
         "validation": {},
         "GrupoAwamotos_B2B/js/register-form": {
             "cnpjValidateUrl": "<?= $block->escapeJs($validateCnpjUrl) ?>",
+            "cepLookupUrl": "<?= $block->escapeJs($cepLookupUrl) ?>",
             "loginUrl": "<?= $block->escapeJs($block->getLoginUrl()) ?>",
             "sendingLabel": "<?= $block->escapeJs((string) __('Enviando cadastro...')) ?>",
             "leadStorageKey": "b2b_register_lead_fired",
-            "leadEventName": "Lead"
+            "leadEventName": "Lead",
+            "passwordMinLength": <?= (int) $block->getMinimumPasswordLength() ?>,
+            "passwordMinClasses": <?= (int) $block->getRequiredCharacterClassesNumber() ?>,
+            "stepBackLabel": "<?= $block->escapeJs((string) __('Voltar')) ?>",
+            "stepContinueLabel": "<?= $block->escapeJs((string) __('Continuar')) ?>",
+            "stepFinalHint": "<?= $block->escapeJs((string) __('Revise e envie')) ?>",
+            "totalSteps": 4
         }
     }
 }

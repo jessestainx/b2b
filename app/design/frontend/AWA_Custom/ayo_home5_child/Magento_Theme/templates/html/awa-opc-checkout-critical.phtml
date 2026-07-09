@@ -23,7 +23,7 @@ declare(strict_types=1);
 $premiumUrl  = $block->getViewFileUrl('css/b2b/pages/cart-checkout-premium.min.css');
 $layerUrl    = $block->getViewFileUrl('css/layers/pages/cart-checkout.min.css');
 $headerUrl   = $block->getViewFileUrl('css/b2b/pages/checkout-simplified-header.min.css');
-$polishUrl   = $block->getViewFileUrl('css/awa-checkout-polish.min.css');
+$polishUrl   = $block->getViewFileUrl('css/awa-checkout-polish.min.css') . '?v=20260619-checkout-b2b-address-v17';
 $layoutLockUrl = $block->getViewFileUrl('css/awa-checkout-layout-lock.css');
 $layoutProbeUrl = $block->getViewFileUrl('js/awa-opc-layout-probe.js');
 $asyncInit = json_encode(
@@ -32,6 +32,9 @@ $asyncInit = json_encode(
 );
 ?>
 <style id="awa-opc-checkout-critical">
+/* Typeset: Luma html{62.5%}→10px root; checkout usa 16px para body e rem legíveis */
+html{font-size:100%}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index){font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 :root{--awa-csh-c1:#fff}
 body.rokanthemes-onepagecheckout,body.checkout-index-index{
   --awa-cc-surface-1:#fff;
@@ -51,7 +54,7 @@ body.rokanthemes-onepagecheckout,body.checkout-index-index{
   --awa-checkout-shadow-sm:0 2px 8px rgb(15 23 42/6%);
   --awa-checkout-shadow-md:0 4px 14px rgb(15 23 42/8%);
   --awa-checkout-focus:0 0 0 3px rgb(183 51 55/16%);
-  --awa-checkout-shell-max:min(1440px,calc(100vw - 40px));
+  --awa-checkout-shell-max:min(1440px,calc(100vw - (2 * clamp(12px,3vw,20px))));
   --awa-checkout-sidebar-min:300px;
   --awa-checkout-sidebar-max:340px;
   --awa-checkout-gap:24px
@@ -69,7 +72,7 @@ body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header_main,
 body.rokanthemes-onepagecheckout .page-wrapper .awa-site-header .header-main{padding:0!important;margin:0!important;min-height:auto!important}
 body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-shell{border-bottom:1px solid var(--awa-checkout-border);background:var(--awa-csh-c1);box-shadow:var(--awa-cc-shadow-subtle)}
 body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-bar{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;align-items:center!important;gap:clamp(12px,2vw,20px)!important}
-body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-back-cart{display:inline-flex!important;align-items:center!important;min-height:44px!important;padding:0 16px!important;border:1px solid var(--awa-cc-border-strong,var(--awa-checkout-border-strong));border-radius:10px!important;background:var(--awa-checkout-surface)!important;color:var(--awa-checkout-text)!important;font-size:14px!important;font-weight:600!important;text-decoration:none!important;white-space:nowrap!important;max-width:100%;box-sizing:border-box}
+body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-back-cart{display:inline-flex!important;align-items:center!important;min-height:44px!important;padding-inline: var(--awa-page-pad-mobile, 16px); padding-block: 0!important;border:1px solid var(--awa-cc-border-strong,var(--awa-checkout-border-strong));border-radius:10px!important;background:var(--awa-checkout-surface)!important;color:var(--awa-checkout-text)!important;font-size:14px!important;font-weight:600!important;text-decoration:none!important;white-space:nowrap!important;max-width:100%;box-sizing:border-box}
 @media (max-width:429px){
 body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-header-bar{grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}
 body.rokanthemes-onepagecheckout .page-wrapper .awa-checkout-back-cart{padding:0 12px!important;font-size:13px!important}
@@ -81,13 +84,28 @@ body.checkout-index-index .page-wrapper,
 body.onepagecheckout-index-index .page-wrapper{overflow-x:clip;max-width:100%}
 body.rokanthemes-onepagecheckout .page-wrapper .page-main,
 body.checkout-index-index .page-wrapper .page-main,
-body.onepagecheckout-index-index .page-wrapper .page-main{background:var(--awa-checkout-surface-soft)!important;padding-inline:clamp(12px,3vw,20px)!important}
+body.onepagecheckout-index-index .page-wrapper .page-main{background:var(--awa-checkout-surface-soft)!important;padding-inline:clamp(12px,3vw,20px)!important;max-width:none!important}
+body.rokanthemes-onepagecheckout .page-wrapper .page-main.container,
+body.checkout-index-index .page-wrapper .page-main.container,
+body.onepagecheckout-index-index .page-wrapper .page-main.container{padding-inline:clamp(12px,3vw,20px)!important;max-width:none!important}
 body.rokanthemes-onepagecheckout .page-wrapper .checkout-container,
 body.checkout-index-index .page-wrapper .checkout-container,
 body.onepagecheckout-index-index .page-wrapper .checkout-container{
-  max-width:var(--awa-checkout-shell-max)!important;
-  margin-inline:auto!important;
+  max-width:100%!important;
+  margin-inline:0!important;
   width:100%!important;
+  box-sizing:border-box!important;
+  padding-inline:0!important
+}
+body.rokanthemes-onepagecheckout .page-wrapper .page-main>.columns,
+body.checkout-index-index .page-wrapper .page-main>.columns,
+body.onepagecheckout-index-index .page-wrapper .page-main>.columns,
+body.rokanthemes-onepagecheckout .page-wrapper .page-main>.columns>.column.main,
+body.checkout-index-index .page-wrapper .page-main>.columns>.column.main,
+body.onepagecheckout-index-index .page-wrapper .page-main>.columns>.column.main{
+  padding-inline:0!important;
+  width:100%!important;
+  max-width:100%!important;
   box-sizing:border-box!important
 }
 body.rokanthemes-onepagecheckout .opc-wrapper #checkoutSteps,
@@ -149,8 +167,12 @@ body.onepagecheckout-index-index .opc-wrapper #checkoutSteps>li{padding:16px;bor
 @media (min-width:1024px){
 body.rokanthemes-onepagecheckout .opc-wrapper #checkoutSteps>li,
 body.checkout-index-index .opc-wrapper #checkoutSteps>li,
-body.onepagecheckout-index-index .opc-wrapper #checkoutSteps>li{padding:18px;border:1px solid var(--awa-checkout-border);border-radius:14px;background:var(--awa-checkout-surface);box-shadow:var(--awa-checkout-shadow-sm)}
+body.onepagecheckout-index-index .opc-wrapper #checkoutSteps>li{padding:16px;border:1px solid var(--awa-checkout-border);border-radius:14px;background:var(--awa-checkout-surface);box-shadow:var(--awa-checkout-shadow-sm)}
 }
+/* v7/v8 síncrono — OPC omite impeccable-refine terminal; inset único em .page-main */
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .page-wrapper :is(#header .header-container,#header.header-container,.awa-checkout-header-shell .awa-checkout-header-content,.awa-checkout-header-content,.header-content.awa-checkout-header-content){max-width:min(1440px,calc(100vw - (2 * clamp(12px,3vw,20px))))!important;width:100%!important;margin-inline:auto!important;padding-inline:0!important;box-sizing:border-box!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .page-wrapper .awa-checkout-header-bar{padding-inline:0!important}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .page-wrapper .opc-wrapper #checkoutSteps>li{padding:16px!important}
 @media (max-width:1023px){
 body.rokanthemes-onepagecheckout .page-wrapper .checkout-container,
 body.checkout-index-index .page-wrapper .checkout-container{display:flex!important;flex-direction:column!important;gap:16px!important;align-items:stretch!important}
@@ -158,11 +180,39 @@ body.rokanthemes-onepagecheckout .page-wrapper .checkout-container>:is(.opc-wrap
 body.checkout-index-index .page-wrapper .checkout-container>:is(.opc-wrapper,#opc-sidebar,.opc-sidebar){width:100%!important;max-width:100%!important;min-width:0!important;float:none!important;margin:0!important;position:static!important}
 }
 @media (max-width:767px){
-body.rokanthemes-onepagecheckout .page-main,body.checkout-index-index .page-main,body.onepagecheckout-index-index .page-main{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}
-body.rokanthemes-onepagecheckout .opc-sidebar .actions-toolbar,
-body.checkout-index-index .opc-sidebar .actions-toolbar{position:sticky!important;bottom:0!important;z-index:4;background:var(--awa-checkout-surface)!important;border-top:1px solid var(--awa-checkout-border)!important;padding:12px 16px max(12px,env(safe-area-inset-bottom,0px))!important;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))!important}
+body.rokanthemes-onepagecheckout .page-main,body.checkout-index-index .page-main,body.onepagecheckout-index-index .page-main{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))!important}
 body.rokanthemes-onepagecheckout .opc-wrapper .awa-opc-step-indicator,
 body.checkout-index-index .opc-wrapper .awa-opc-step-indicator{display:flex!important;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:10px 14px;border:1px solid var(--awa-checkout-border);border-radius:10px;background:var(--awa-checkout-surface);font-size:13px;font-weight:600;color:var(--awa-checkout-text)}
+}
+	/* Impeccable v9 — síncrono: agreements modal shell + close visível + scroll content */
+	body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .b2b-terms-status{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;min-height:44px;box-sizing:border-box;border-radius:999px}
+	body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modals-overlay{background:rgb(15 23 42 / 48%)}
+	body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal:not(._show){display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;position:absolute!important;inset:auto!important;width:0!important;height:0!important;min-width:0!important;min-height:0!important;margin:0!important;overflow:hidden!important}
+	body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll.modal-slide .modal-inner-wrap,
+	body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-inner-wrap,
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-header{overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll._show .modal-inner-wrap{background:var(--awa-checkout-surface,#fff);border:1px solid var(--awa-checkout-border,#e5e7eb);border-radius:16px;box-shadow:0 4px 14px rgb(15 23 42 / 9%);max-width:min(560px,calc(100vw - 32px))}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--awa-checkout-border,#e5e7eb);background:var(--awa-checkout-bg-muted,#f7f7f7)}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-title{margin:0;flex:1;min-width:0;font-size:18px;font-weight:700;line-height:1.35;color:var(--awa-checkout-text,#333)}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-content{overflow-y:auto!important;overscroll-behavior:contain;max-height:min(70vh,520px)!important;padding:20px;font-size:15px;line-height:1.6;color:var(--awa-checkout-text-muted,#666)}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-header .action-close{position:relative!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0!important;margin:0!important;overflow:visible!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;flex-shrink:0!important;border:0;border-radius:999px;background:transparent;color:var(--awa-checkout-text-muted,#666);cursor:pointer}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-header .action-close::before{content:'\00d7';display:block;font-size:22px;line-height:1;color:inherit}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-header .action-close:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(183 51 55 / 28%)}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-header .action-close>span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap;border:0;pointer-events:none}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show{position:fixed!important;inset:0!important;z-index:10010!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100vh!important;height:100dvh!important;min-height:100vh!important;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))!important;box-sizing:border-box!important;overflow:auto!important;transform:none!important;will-change:auto!important}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-inner-wrap{position:relative!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;width:min(720px,calc(100vw - 32px))!important;max-width:min(720px,calc(100vw - 32px))!important;max-height:calc(100vh - 32px)!important;max-height:calc(100dvh - 32px)!important;margin:auto!important;overflow:auto!important;transform:none!important;box-sizing:border-box!important}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-header .action-close{position:relative!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;margin:0!important;overflow:visible!important;flex-shrink:0!important}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modals-overlay{position:fixed!important;inset:0!important;width:100%!important;height:100vh!important;height:100dvh!important;z-index:10000!important}
+@media (max-width:767px){
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal.modal-slide._show .modal-inner-wrap{max-width:100%;width:min(100%,420px);border-radius:16px 0 0 16px;box-shadow:-8px 0 32px rgb(15 23 42 / 14%)}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) .modal-popup.agreements-modal._inner-scroll .modal-content{max-height:min(65vh,480px);padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show{align-items:flex-start!important;padding:max(10px,env(safe-area-inset-top,0px)) 10px max(10px,env(safe-area-inset-bottom,0px))!important}
+body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-inner-wrap{width:100%!important;max-width:100%!important;max-height:calc(100vh - 20px)!important;max-height:calc(100dvh - 20px)!important;margin-block:auto!important}
 }
 </style>
 <link rel="stylesheet" href="<?= $block->escapeUrl($layoutLockUrl) ?>" media="all" id="awa-opc-layout-lock"/>

@@ -1,1 +1,105 @@
-<?php declare(strict_types=1); /** * Home: adia section-config + customer-data (~3,4 KB mage-init) até interação ou 2,5s. * * @var \Magento\Customer\Block\SectionConfig $block */ use Magento\Customer\Block\CustomerData; use Magento\Customer\Block\SectionNamesProvider; use Magento\Customer\ViewModel\CookieSettings; use Magento\Customer\ViewModel\Customer\Auth; /** @var SectionNamesProvider|null $sectionNamesProvider */ $sectionNamesProvider = $block->getData('sectionNamesProvider') ?? $block->getData('section_names_provider'); /** @var Auth|null $auth */ $auth = $block->getData('auth'); /** @var CookieSettings|null $cookieSettings */ $cookieSettings = $block->getData('cookie_settings'); /** @var CustomerData|null $customerDataBlock */ $customerDataBlock = $block->getLayout()->createBlock(CustomerData::class); $sectionOptions = [ 'sections' => $block->getSections(), 'clientSideSections' => $block->getClientSideSections(), 'baseUrls' => array_values(array_unique([ $block->getUrl(null, ['_secure' => true]), $block->getUrl(null, ['_secure' => false]), ])), 'sectionNames' => $sectionNamesProvider ? $sectionNamesProvider->getSectionNames() : [], ]; $customerOptions = [ 'sectionLoadUrl' => $block->getUrl('customer/section/load', ['_secure' => $block->getRequest()->isSecure()]), 'expirableSectionLifetime' => $customerDataBlock ? (int) $customerDataBlock->getExpirableSectionLifetime() : 60, 'expirableSectionNames' => $customerDataBlock ? $customerDataBlock->getExpirableSectionNames() : [], 'cookieLifeTime' => $customerDataBlock ? (string) $customerDataBlock->getCookieLifeTime() : '', 'cookieDomain' => $cookieSettings ? (string) $cookieSettings->getCookieDomain() : '', 'updateSessionUrl' => $block->getUrl('customer/account/updateSession', ['_secure' => $block->getRequest()->isSecure()]), 'isLoggedIn' => $auth && $auth->isLoggedIn() ? '1' : '', ]; $payload = json_encode( ['section' => $sectionOptions, 'customer' => $customerOptions], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); $payload = preg_replace('#</(\s*)script#i', '<\\/\\1script', (string) $payload); ?> <script type="application/json" id="awa-customer-sections-defer-json"><?= /* @noEscape */ $payload ?></script>
+<?php
+declare(strict_types=1);
+/**
+ * Adia section-config + customer-data (~3,4 KB mage-init) até interação ou timeout.
+ * Carrinho: boot imediato — shipping-estimation depende de checkout-data/customer-data.
+ *
+ * @var \Magento\Customer\Block\SectionConfig $block
+ */
+use Magento\Customer\Block\CustomerData;
+use Magento\Customer\Block\SectionNamesProvider;
+use Magento\Customer\ViewModel\CookieSettings;
+use Magento\Customer\ViewModel\Customer\Auth;
+
+/** @var SectionNamesProvider|null $sectionNamesProvider */
+$sectionNamesProvider = $block->getData('sectionNamesProvider') ?? $block->getData('section_names_provider');
+/** @var Auth|null $auth */
+$auth = $block->getData('auth');
+/** @var CookieSettings|null $cookieSettings */
+$cookieSettings = $block->getData('cookie_settings');
+/** @var CustomerData|null $customerDataBlock */
+$customerDataBlock = $block->getLayout()->createBlock(CustomerData::class);
+
+$sectionOptions = [
+    'sections' => $block->getSections(),
+    'clientSideSections' => $block->getClientSideSections(),
+    'baseUrls' => array_values(array_unique([
+        $block->getUrl(null, ['_secure' => true]),
+        $block->getUrl(null, ['_secure' => false]),
+    ])),
+    'sectionNames' => $sectionNamesProvider ? $sectionNamesProvider->getSectionNames() : [],
+];
+
+$customerOptions = [
+    'sectionLoadUrl' => $block->getUrl('customer/section/load', ['_secure' => $block->getRequest()->isSecure()]),
+    'expirableSectionLifetime' => $customerDataBlock ? (int) $customerDataBlock->getExpirableSectionLifetime() : 60,
+    'expirableSectionNames' => $customerDataBlock ? $customerDataBlock->getExpirableSectionNames() : [],
+    'cookieLifeTime' => $customerDataBlock ? (string) $customerDataBlock->getCookieLifeTime() : '',
+    'cookieDomain' => $cookieSettings ? (string) $cookieSettings->getCookieDomain() : '',
+    'updateSessionUrl' => $block->getUrl('customer/account/updateSession', ['_secure' => $block->getRequest()->isSecure()]),
+    'isLoggedIn' => $auth && $auth->isLoggedIn() ? '1' : '',
+];
+
+$payload = json_encode(
+    ['section' => $sectionOptions, 'customer' => $customerOptions],
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+);
+$payload = preg_replace('#</(\s*)script#i', '<\\/\\1script', (string) $payload);
+
+$bootImmediate = (bool) $block->getData('boot_immediate')
+    || $block->getRequest()->getFullActionName() === 'checkout_cart_index';
+?>
+<script type="application/json" id="awa-customer-sections-defer-json"><?= /* @noEscape */ $payload ?></script>
+<script>
+(function (w) {
+    'use strict';
+
+    var body = document.body;
+    var bootImmediate = <?= $bootImmediate ? 'true' : 'false' ?>
+        || !!(body && body.classList.contains('checkout-cart-index'));
+
+    if (!bootImmediate) {
+        return;
+    }
+
+    var started = false;
+
+    function boot() {
+        if (started) {
+            return;
+        }
+
+        var node = document.getElementById('awa-customer-sections-defer-json');
+        if (!node || !node.textContent) {
+            return;
+        }
+
+        started = true;
+
+        var run = function () {
+            w.require(['js/awa-customer-sections-bootstrap'], function (bootstrapCustomerSections) {
+                var payload;
+
+                try {
+                    payload = JSON.parse(node.textContent);
+                } catch (e) {
+                    return;
+                }
+
+                bootstrapCustomerSections(payload, { immediate: true });
+            });
+        };
+
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(run, { key: 'cart-customer-defer-inline' });
+            return;
+        }
+
+        if (typeof w.require === 'function') {
+            run();
+        }
+    }
+
+    boot();
+}(window));
+</script>

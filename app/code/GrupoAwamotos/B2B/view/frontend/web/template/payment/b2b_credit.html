@@ -24,7 +24,6 @@
             <!-- /ko -->
         </div>
 
-        <!-- Terms: select (multiple) or single display -->
         <!-- ko if: hasMultipleTerms() -->
         <div class="field b2b-payment-terms--select">
             <label class="label" for="b2b-payment-term">
@@ -42,6 +41,12 @@
             </div>
         </div>
         <!-- /ko -->
+        <!-- ko if: getPaymentTerms().length === 1 -->
+        <div class="b2b-payment-terms--single" role="status">
+            <span class="label" data-bind="i18n: 'Condição de Pagamento'"></span>
+            <strong data-bind="text: getPaymentTerms()[0].label"></strong>
+        </div>
+        <!-- /ko -->
 
         <!-- Credit info: sufficient (green) -->
         <!-- ko if: isCreditSufficient() -->
@@ -50,7 +55,7 @@
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
             <span>
-                <span data-bind="i18n: 'Crédito restante após este pedido:'"></span>
+                <span data-bind="text: $t('Crédito restante após este pedido:')"></span>
                 <strong data-bind="text: remainingCreditFormatted()"></strong>
             </span>
         </div>

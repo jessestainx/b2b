@@ -8,13 +8,50 @@
         });
     }
 
+    function syncFooterCategoriesShell() {
+        var mobile = w.matchMedia('(max-width: 767px)').matches;
+
+        d.querySelectorAll('[data-awa-categories-toggle]').forEach(function (btn) {
+            var panelId = btn.getAttribute('aria-controls');
+            var panel = panelId ? d.getElementById(panelId) : null;
+
+            if (!panel) {
+                return;
+            }
+
+            if (mobile) {
+                if (btn.getAttribute('aria-expanded') !== 'true') {
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.classList.remove('is-expanded');
+                    panel.hidden = true;
+                    panel.setAttribute('aria-hidden', 'true');
+                    panel.setAttribute('inert', '');
+                }
+                return;
+            }
+
+            btn.setAttribute('aria-expanded', 'true');
+            btn.classList.add('is-expanded');
+            panel.hidden = false;
+            panel.removeAttribute('inert');
+            panel.setAttribute('aria-hidden', 'false');
+        });
+    }
+
     syncFooterToggleAria();
+    syncFooterCategoriesShell();
     if (typeof w.matchMedia === 'function') {
         var mq = w.matchMedia('(max-width: 767px)');
         if (typeof mq.addEventListener === 'function') {
-            mq.addEventListener('change', syncFooterToggleAria);
+            mq.addEventListener('change', function () {
+                syncFooterToggleAria();
+                syncFooterCategoriesShell();
+            });
         } else if (typeof mq.addListener === 'function') {
-            mq.addListener(syncFooterToggleAria);
+            mq.addListener(function () {
+                syncFooterToggleAria();
+                syncFooterCategoriesShell();
+            });
         }
     }
 

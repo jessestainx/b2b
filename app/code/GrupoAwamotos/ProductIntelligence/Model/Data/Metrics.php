@@ -8,7 +8,7 @@ use GrupoAwamotos\ProductIntelligence\Api\Data\MetricsInterface;
 use Magento\Framework\DataObject;
 
 /**
- * Concrete DTO for REXIS ML metrics exposed via REST API.
+ * Concrete DTO for Product Intelligence metrics exposed via REST API.
  */
 class Metrics extends DataObject implements MetricsInterface
 {

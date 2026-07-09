@@ -23,7 +23,8 @@
         // Bookmark navigation
         "alefragnani.bookmarks",
         // Remote SSH
-        "ms-vscode-remote.remote-ssh"
+        "ms-vscode-remote.remote-ssh",
+        "openai.chatgpt"
     ],
     "unwantedRecommendations": [
         // Formatadores que QUEBRAM Layout XML do Magento
@@ -41,7 +42,6 @@
         // Antigravity — evitar concorrência entre agentes/chat inline no mesmo workspace
         "GitHub.copilot",
         "GitHub.copilot-chat",
-        "Continue.continue",
-        "openai.chatgpt"
-    ]
+        "Continue.continue"
+      ]
 }

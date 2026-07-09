@@ -40,6 +40,8 @@ use Psr\Log\LoggerInterface;
 
 class Save implements HttpPostActionInterface
 {
+    private const SESSION_FORM_DATA_KEY = 'b2b_register_form_data';
+
     /**
      * @var RequestInterface
      */
@@ -270,7 +272,7 @@ class Save implements HttpPostActionInterface
             // Validar CNPJ
             if (!$this->cnpjValidator->validateLocal($data['cnpj'])) {
                 $this->messageManager->addErrorMessage(__('CNPJ inválido. Por favor, verifique e tente novamente.'));
-                return $resultRedirect->setPath('*/*/');
+                return $this->redirectWithPersistedForm($resultRedirect);
             }
 
             // Enrich with API data (best-effort — does not block registration)
@@ -296,7 +298,7 @@ class Save implements HttpPostActionInterface
                 $existingCustomer = $this->customerRepository->get($data['email']);
                 if ($existingCustomer->getId()) {
                     $this->messageManager->addErrorMessage(__('Já existe uma conta com este e-mail. Por favor, faça login ou use outro e-mail.'));
-                    return $resultRedirect->setPath('*/*/');
+                    return $this->redirectWithPersistedForm($resultRedirect);
                 }
             } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
                 // Email não existe, pode continuar
@@ -316,8 +318,10 @@ class Save implements HttpPostActionInterface
                 $this->messageManager->addErrorMessage(
                     __('Este CNPJ já está vinculado a uma conta existente. Faça login ou use a opção de vinculação de conta.')
                 );
-                return $resultRedirect->setPath('*/*/');
+                return $this->redirectWithPersistedForm($resultRedirect);
             }
+
+            $this->clearPersistedRegisterFormData();
 
             // Criar cliente
             $customer = $this->customerFactory->create();
@@ -377,14 +381,59 @@ class Save implements HttpPostActionInterface
             return $resultRedirect->setPath('b2b/register/success');
         } catch (LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
-            return $resultRedirect->setPath('*/*/');
+            return $this->redirectWithPersistedForm($resultRedirect);
         } catch (\Exception $e) {
             $this->logger->error('B2B Registration Error: ' . $e->getMessage());
             $this->messageManager->addErrorMessage(
                 __('Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.')
             );
-            return $resultRedirect->setPath('*/*/');
+            return $this->redirectWithPersistedForm($resultRedirect);
         }
+    }
+
+    /**
+     * @param \Magento\Framework\Controller\Result\Redirect $resultRedirect
+     * @return \Magento\Framework\Controller\Result\Redirect
+     */
+    private function redirectWithPersistedForm($resultRedirect)
+    {
+        $this->persistRegisterFormData();
+
+        return $resultRedirect->setPath('*/*/');
+    }
+
+    private function persistRegisterFormData(): void
+    {
+        $cepDigits = preg_replace('/\D/', '', (string) $this->request->getParam('cep', ''));
+        $cepFormatted = $cepDigits;
+        if (strlen($cepDigits) === 8) {
+            $cepFormatted = substr($cepDigits, 0, 5) . '-' . substr($cepDigits, 5);
+        }
+
+        $this->customerSession->setData(self::SESSION_FORM_DATA_KEY, [
+            'cnpj' => (string) $this->request->getParam('cnpj', ''),
+            'razao_social' => trim((string) $this->request->getParam('razao_social', '')),
+            'nome_fantasia' => trim((string) $this->request->getParam('nome_fantasia', '')),
+            'inscricao_estadual' => trim((string) $this->request->getParam('inscricao_estadual', '')),
+            'phone' => trim((string) $this->request->getParam('phone', '')),
+            'cep' => $cepFormatted,
+            'logradouro' => trim((string) $this->request->getParam('logradouro', '')),
+            'numero' => trim((string) $this->request->getParam('numero', '')),
+            'complemento' => trim((string) $this->request->getParam('complemento', '')),
+            'bairro' => trim((string) $this->request->getParam('bairro', '')),
+            'municipio' => trim((string) $this->request->getParam('municipio', '')),
+            'uf' => strtoupper(trim((string) $this->request->getParam('uf', ''))),
+            'firstname' => trim((string) $this->request->getParam('firstname', '')),
+            'lastname' => trim((string) $this->request->getParam('lastname', '')),
+            'email' => trim((string) $this->request->getParam('email', '')),
+            'terms' => (string) (int) $this->request->getParam('terms', 0),
+            'ie_isento' => (string) (int) $this->request->getParam('ie_isento', 0),
+        ]);
+    }
+
+    private function clearPersistedRegisterFormData(): void
+    {
+        $this->customerSession->unsetData(self::SESSION_FORM_DATA_KEY);
     }
 
     /**
@@ -484,6 +533,7 @@ class Save implements HttpPostActionInterface
         }
 
         if (!empty($errors)) {
+            $this->persistRegisterFormData();
             foreach ($errors as $error) {
                 $this->messageManager->addErrorMessage($error);
             }

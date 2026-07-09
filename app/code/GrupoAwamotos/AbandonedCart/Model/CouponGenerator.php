@@ -156,7 +156,7 @@ class CouponGenerator implements CouponGeneratorInterface
     private function generateUniqueCode(int $quoteId): string
     {
         $prefix = 'VOLTA';
-        $random = strtoupper(substr(md5((string) microtime(true)), 0, 6));
+        $random = strtoupper(substr(hash('sha256', uniqid('', true)), 0, 6));
         return $prefix . $random . $quoteId;
     }
 

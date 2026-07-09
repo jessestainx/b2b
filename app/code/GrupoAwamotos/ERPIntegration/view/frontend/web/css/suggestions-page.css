@@ -1,6 +1,6 @@
 :root {
     /* ── erp-sug — design tokens ─── */
-    --erp-sug-c1: #ef6c00;
+    --erp-sug-c1: #b35200; /* darkened from #ef6c00 — WCAG AA on warm/light bg */
     --erp-sug-c2: #f0f0f0;
     --erp-sug-c3: #ffebee;
     --erp-sug-c4: #9c27b0;
@@ -64,7 +64,8 @@
     text-decoration: none;
     border-radius: 8px;
     background: var(--awa-primary);
-    color: var(--erp-sug-c30);
+    /* !important: mesmo motivo do .erp-btn-primary acima (regra global do admin) */
+    color: var(--erp-sug-c30) !important;
 }
 
 .erp-suggestions-wrapper {
@@ -177,7 +178,7 @@
     border-radius: 18px;
     box-shadow: 0 2px 12px rgb(0 0 0 / 8%);
     margin-bottom: 0;
-    overflow: hidden;
+    overflow: clip;
 }
 
 .erp-cart-header {
@@ -187,6 +188,7 @@
     padding: clamp(20px, 2.8vw, 28px) clamp(20px, 3vw, 32px);
     background: linear-gradient(135deg, var(--erp-sug-c19) 0%, var(--erp-sug-c15) 100%);
     color: white;
+    border-radius: 18px 18px 0 0;
 }
 
 .erp-cart-title h3 {
@@ -290,7 +292,7 @@
 
 .erp-item-sku {
     display: inline-block;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--awa-text-muted);
     background: var(--awa-border);
@@ -319,7 +321,7 @@
 }
 
 .erp-meta-item {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--erp-sug-c27);
 }
 
@@ -329,7 +331,7 @@
 
 .erp-reorder-badge {
     display: inline-block;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     padding: 3px 8px;
     border-radius: 10px;
@@ -371,7 +373,7 @@
 
 .erp-qty-label {
     display: block;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--awa-text-light);
     margin-bottom: 4px;
 }
@@ -420,6 +422,7 @@
     padding: clamp(20px, 3vw, 28px);
     background: var(--erp-sug-c13);
     border-top: 2px solid var(--erp-sug-c26);
+    border-radius: 0 0 18px 18px;
 }
 
 .erp-cart-totals {
@@ -477,7 +480,12 @@
 
 .erp-btn-primary {
     background: var(--awa-primary);
-    color: white;
+    /* !important necessario: vence "a, a:focus{color:#b73337!important}" injetado via
+       painel admin (Rokanthemes Theme Options -> pub/media/rokanthemes/theme_option/custom_default.css),
+       que nao pode ser editado diretamente (gerado/sobrescrito pelo admin). Sem isto o
+       texto do botao (ex: "Voltar para Minha Conta") fica vermelho sobre fundo vermelho
+       (contraste ~0:1, invisivel). Mesma estrategia do BUG-01 (404) e busca sem resultados. */
+    color: white !important;
 }
 
 .erp-btn-primary:hover {
@@ -618,13 +626,14 @@
     border-radius: 18px;
     box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
     margin-bottom: 0;
-    overflow: hidden;
+    overflow: clip;
 }
 
 .erp-filter-header {
     padding: 18px clamp(18px, 2.5vw, 28px);
     cursor: pointer;
     transition: background 0.2s;
+    border-radius: 18px 18px 0 0;
 }
 
 .erp-filter-header:hover {
@@ -807,7 +816,7 @@
 
 .erp-fh-unavailable-badge {
     display: inline-block;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 10px;
@@ -863,7 +872,7 @@
 /* Opportunity Badges */
 .erp-opp-badge {
     display: inline-block;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     padding: 2px 8px;
     border-radius: 10px;

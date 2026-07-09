@@ -1,0 +1,627 @@
+{
+  "390x844": {
+    "scrollWidth": 390,
+    "clientWidth": 390,
+    "hasHorizontalOverflow": false,
+    "overflowers": [
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 508,
+        "width": 117
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 486,
+        "width": 72
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 485,
+        "width": 70
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__count",
+        "right": 485,
+        "width": 70
+      },
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 633,
+        "width": 117
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 611,
+        "width": 72
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 618,
+        "width": 86
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__count",
+        "right": 610,
+        "width": 70
+      },
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 758,
+        "width": 117
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 736,
+        "width": 72
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 733,
+        "width": 67
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__count",
+        "right": 731,
+        "width": 63
+      },
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 883,
+        "width": 117
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 861,
+        "width": 72
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 872,
+        "width": 95
+      }
+    ],
+    "ratingSpans": [
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      },
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      }
+    ],
+    "hexOffendersNote": "computed values are always rgb(); hex-source scan done via stylesheet inspection separately",
+    "emptySections": [],
+    "brokenImgs": [],
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "failedRequests": []
+  },
+  "768x1024": {
+    "scrollWidth": 768,
+    "clientWidth": 768,
+    "hasHorizontalOverflow": false,
+    "overflowers": [
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 848,
+        "width": 160
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 804,
+        "width": 72
+      },
+      {
+        "tag": "PICTURE",
+        "cls": "",
+        "right": 794,
+        "width": 52
+      },
+      {
+        "tag": "IMG",
+        "cls": "",
+        "right": 794,
+        "width": 52
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 808,
+        "width": 81
+      },
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 1016,
+        "width": 160
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 972,
+        "width": 72
+      },
+      {
+        "tag": "PICTURE",
+        "cls": "",
+        "right": 962,
+        "width": 52
+      },
+      {
+        "tag": "IMG",
+        "cls": "",
+        "right": 962,
+        "width": 52
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 967,
+        "width": 63
+      },
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 1184,
+        "width": 160
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 1140,
+        "width": 72
+      },
+      {
+        "tag": "PICTURE",
+        "cls": "",
+        "right": 1130,
+        "width": 52
+      },
+      {
+        "tag": "IMG",
+        "cls": "",
+        "right": 1130,
+        "width": 52
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 1163,
+        "width": 117
+      }
+    ],
+    "ratingSpans": [
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      },
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      }
+    ],
+    "hexOffendersNote": "computed values are always rgb(); hex-source scan done via stylesheet inspection separately",
+    "emptySections": [],
+    "brokenImgs": [],
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "failedRequests": []
+  },
+  "1024x768": {
+    "scrollWidth": 1024,
+    "clientWidth": 1024,
+    "hasHorizontalOverflow": false,
+    "overflowers": [
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 1184,
+        "width": 160
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 1148,
+        "width": 88
+      },
+      {
+        "tag": "PICTURE",
+        "cls": "",
+        "right": 1136,
+        "width": 64
+      },
+      {
+        "tag": "IMG",
+        "cls": "",
+        "right": 1136,
+        "width": 64
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 1163,
+        "width": 117
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__count",
+        "right": 1138,
+        "width": 67
+      },
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 1352,
+        "width": 160
+      },
+      {
+        "tag": "DIV",
+        "cls": "awa-category-carousel__icon",
+        "right": 1316,
+        "width": 88
+      },
+      {
+        "tag": "svg",
+        "cls": "[object SVGAnimatedString]",
+        "right": 1304,
+        "width": 64
+      },
+      {
+        "tag": "path",
+        "cls": "[object SVGAnimatedString]",
+        "right": 1296,
+        "width": 48
+      },
+      {
+        "tag": "circle",
+        "cls": "[object SVGAnimatedString]",
+        "right": 1277,
+        "width": 10
+      },
+      {
+        "tag": "rect",
+        "cls": "[object SVGAnimatedString]",
+        "right": 1258,
+        "width": 6
+      },
+      {
+        "tag": "rect",
+        "cls": "[object SVGAnimatedString]",
+        "right": 1292,
+        "width": 6
+      },
+      {
+        "tag": "path",
+        "cls": "[object SVGAnimatedString]",
+        "right": 1264,
+        "width": 6
+      },
+      {
+        "tag": "path",
+        "cls": "[object SVGAnimatedString]",
+        "right": 1286,
+        "width": 6
+      }
+    ],
+    "ratingSpans": [
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      },
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      }
+    ],
+    "hexOffendersNote": "computed values are always rgb(); hex-source scan done via stylesheet inspection separately",
+    "emptySections": [],
+    "brokenImgs": [],
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "failedRequests": []
+  },
+  "1366x768": {
+    "scrollWidth": 1366,
+    "clientWidth": 1366,
+    "hasHorizontalOverflow": false,
+    "overflowers": [
+      {
+        "tag": "A",
+        "cls": "awa-category-carousel__item",
+        "right": 1395,
+        "width": 160
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-category-carousel__label",
+        "right": 1374,
+        "width": 117
+      },
+      {
+        "tag": "LI",
+        "cls": "item bestsellerslider-item awa-carousel__slide",
+        "right": 1559,
+        "width": 240
+      },
+      {
+        "tag": "DIV",
+        "cls": "item-product awa-carousel-card-slot",
+        "right": 1559,
+        "width": 240
+      },
+      {
+        "tag": "DIV",
+        "cls": "content-item-product awa-product-card",
+        "right": 1551,
+        "width": 224
+      },
+      {
+        "tag": "DIV",
+        "cls": "product-thumb",
+        "right": 1542,
+        "width": 206
+      },
+      {
+        "tag": "A",
+        "cls": "product-thumb-link",
+        "right": 1534,
+        "width": 189
+      },
+      {
+        "tag": "SPAN",
+        "cls": "first-thumb",
+        "right": 1533,
+        "width": 188
+      },
+      {
+        "tag": "SPAN",
+        "cls": "product-image-container product-image-container-182 awa-image-container--fluid",
+        "right": 1533,
+        "width": 188
+      },
+      {
+        "tag": "SPAN",
+        "cls": "product-image-wrapper",
+        "right": 1525,
+        "width": 172
+      },
+      {
+        "tag": "IMG",
+        "cls": "product-image-photo awa-loaded",
+        "right": 1525,
+        "width": 171
+      },
+      {
+        "tag": "DIV",
+        "cls": "product-info",
+        "right": 1542,
+        "width": 206
+      },
+      {
+        "tag": "H3",
+        "cls": "product-name",
+        "right": 1542,
+        "width": 206
+      },
+      {
+        "tag": "A",
+        "cls": "product-item-link",
+        "right": 1542,
+        "width": 206
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-b2b-sku",
+        "right": 1542,
+        "width": 206
+      }
+    ],
+    "ratingSpans": [
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      },
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      }
+    ],
+    "hexOffendersNote": "computed values are always rgb(); hex-source scan done via stylesheet inspection separately",
+    "emptySections": [],
+    "brokenImgs": [],
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "failedRequests": []
+  },
+  "1920x1080": {
+    "scrollWidth": 1920,
+    "clientWidth": 1920,
+    "hasHorizontalOverflow": false,
+    "overflowers": [
+      {
+        "tag": "LI",
+        "cls": "item bestsellerslider-item awa-carousel__slide",
+        "right": 2088,
+        "width": 240
+      },
+      {
+        "tag": "DIV",
+        "cls": "item-product awa-carousel-card-slot",
+        "right": 2088,
+        "width": 240
+      },
+      {
+        "tag": "DIV",
+        "cls": "content-item-product awa-product-card",
+        "right": 2080,
+        "width": 224
+      },
+      {
+        "tag": "DIV",
+        "cls": "product-thumb",
+        "right": 2071,
+        "width": 206
+      },
+      {
+        "tag": "A",
+        "cls": "product-thumb-link",
+        "right": 2063,
+        "width": 189
+      },
+      {
+        "tag": "SPAN",
+        "cls": "first-thumb",
+        "right": 2062,
+        "width": 188
+      },
+      {
+        "tag": "SPAN",
+        "cls": "product-image-container product-image-container-204 awa-image-container--fluid",
+        "right": 2062,
+        "width": 188
+      },
+      {
+        "tag": "SPAN",
+        "cls": "product-image-wrapper",
+        "right": 2054,
+        "width": 172
+      },
+      {
+        "tag": "IMG",
+        "cls": "product-image-photo awa-loaded",
+        "right": 2054,
+        "width": 171
+      },
+      {
+        "tag": "DIV",
+        "cls": "product-info",
+        "right": 2071,
+        "width": 206
+      },
+      {
+        "tag": "H3",
+        "cls": "product-name",
+        "right": 2071,
+        "width": 206
+      },
+      {
+        "tag": "A",
+        "cls": "product-item-link",
+        "right": 2071,
+        "width": 206
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-b2b-sku",
+        "right": 2071,
+        "width": 206
+      },
+      {
+        "tag": "SPAN",
+        "cls": "awa-b2b-sku__value",
+        "right": 1931,
+        "width": 33
+      },
+      {
+        "tag": "DIV",
+        "cls": "product-rating",
+        "right": 2071,
+        "width": 206
+      }
+    ],
+    "ratingSpans": [
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      },
+      {
+        "text": "93% of 100",
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "clip": "auto",
+        "clipPath": "none",
+        "width": "auto",
+        "overflow": "visible"
+      }
+    ],
+    "hexOffendersNote": "computed values are always rgb(); hex-source scan done via stylesheet inspection separately",
+    "emptySections": [],
+    "brokenImgs": [],
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "failedRequests": []
+  }
+}

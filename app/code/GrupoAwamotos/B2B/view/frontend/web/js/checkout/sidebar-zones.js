@@ -32,7 +32,8 @@ define([
         '[class*="whatsapp"]'
     ];
 
-    function isCheckoutPage() {
+    function isCheckoutPage()
+    {
         if (!document.body) {
             return false;
         }
@@ -46,7 +47,8 @@ define([
      * @param {jQuery} $sidebar
      * @returns {jQuery}
      */
-    function findSummary($sidebar) {
+    function findSummary($sidebar)
+    {
         return $sidebar.find(SUMMARY_SELECTOR).first();
     }
 
@@ -54,7 +56,8 @@ define([
      * @param {jQuery} $summary
      * @returns {jQuery}
      */
-    function findTotalsAnchor($summary) {
+    function findTotalsAnchor($summary)
+    {
         var $totals = $summary.find('.table-totals, .opc-block-summary-totals').last();
 
         if ($totals.length) {
@@ -69,7 +72,8 @@ define([
      * @param {jQuery} $summary
      * @returns {jQuery[]}
      */
-    function collectExtraBlocks($sidebar, $summary) {
+    function collectExtraBlocks($sidebar, $summary)
+    {
         var $blocks = $();
         var seen = {};
 
@@ -116,7 +120,8 @@ define([
     /**
      * @param {jQuery} $sidebar
      */
-    function applyZones($sidebar) {
+    function applyZones($sidebar)
+    {
         var $summary = findSummary($sidebar);
 
         if (!$summary.length) {
@@ -171,7 +176,8 @@ define([
         $sidebar.attr(ZONED_ATTR, '1');
     }
 
-    function sync() {
+    function sync()
+    {
         $(SIDEBAR_SELECTOR).each(function () {
             applyZones($(this));
         });

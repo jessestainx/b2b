@@ -123,6 +123,10 @@ class FooterExperiment extends AbstractHelper
 
     private function resolveVisitorSeed(): string
     {
+        if (($_COOKIE[session_name()] ?? null) === null) {
+            return 'guest:anonymous';
+        }
+
         $customerId = (int) $this->customerSession->getCustomerId();
         if ($customerId > 0) {
             return 'customer:' . $customerId;

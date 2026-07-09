@@ -16,8 +16,14 @@ use Magento\Framework\App\Action\Action;
 	$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::DEFAULT_VIEW;
 	$rows = 2;
 	$newLabelHelper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel');
+	$isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
+	$scopeSuffix = preg_replace('/[^a-zA-Z0-9_-]+/', '-', (string) $block->getNameInLayout());
+	if ($scopeSuffix === '') {
+		$scopeSuffix = 'widget';
+	}
+	$b2bPriceGate = $this->helper('GrupoAwamotos\B2B\Helper\Data');
 	?>
-<div class="list-tab-product common-tab-system-fixed">
+<div class="list-tab-product common-tab-system-fixed producttab-<?php echo $scopeSuffix; ?>">
 	<div class="rokan-product-heading clearfix">
     	<h2><?php echo $block->escapeHtml(__('Os Principais')) ?><span class="sup-title"> <?php echo $block->escapeHtml(__('Produtos %1', date('Y'))) ?></span></h2>
     </div>
@@ -29,15 +35,16 @@ use Magento\Framework\App\Action\Action;
 		        $tabIdx = 0;
 		        foreach($tab_contents as $tab) {
 		          ?>
-		          <?php $tabId = 'tab_' . $block->escapeHtmlAttr($tab['id']) . '_tab'; ?>
+		          <?php $scopedTabId = 'tab_' . $block->escapeHtmlAttr($scopeSuffix . '_' . $tab['id']); ?>
+		          <?php $tabId = $scopedTabId . '_tab'; ?>
 		          <li
 		              id="<?php echo $tabId; ?>"
-		              rel="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>"
+		              rel="<?php echo $scopedTabId; ?>"
 		              class="<?php echo $block->escapeHtmlAttr($tab['class']); ?>"
 		              role="tab"
 		              tabindex="0"
 		              aria-selected="<?php echo ($tabIdx++ === 0) ? 'true' : 'false'; ?>"
-		              aria-controls="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>"
+		              aria-controls="<?php echo $scopedTabId; ?>"
 		          >
 		              <span class="awa-tab-button"><?php echo $block->escapeHtml($tab['name']);?></span>
 		          </li>
@@ -52,11 +59,12 @@ use Magento\Framework\App\Action\Action;
 		   <?php
 			foreach($tab_contents as $tab) {
 			?>
-			 <div id="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>" class="product-tab-slider tab_content <?php echo $block->escapeHtmlAttr($tab['class']); ?>" role="tabpanel" aria-labelledby="tab_<?php echo $block->escapeHtmlAttr($tab['id']);?>_tab">
+			 <div id="<?php echo $scopedTabId; ?>" class="product-tab-slider tab_content <?php echo $block->escapeHtmlAttr($tab['class']); ?>" role="tabpanel" aria-labelledby="<?php echo $tabId; ?>">
 			 	<div class="productTabContent">
 				<?php
 					$i=0;
 					$productItems =  $tab['productInfo'];
+					$productTabImgIdx = 0;
 					foreach($productItems as $_item) {
 							$productImage = $block->getImage($_item, $image);
 					?>
@@ -65,23 +73,42 @@ use Magento\Framework\App\Action\Action;
 							<div class="item-product listview">
 								<div class="product-thumb">
 									<a href="<?php echo $block->escapeUrl($_item->getProductUrl()); ?>" class="product-thumb-link">
-										<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');
+										<?php
+										$productImageThumb = $block->getImage($_item, 'category_image_second_small');
 										$productImageThumbUrl = (string)$productImageThumb->getImageUrl();
 										$productImagePrimaryUrl = (string)$productImage->getImageUrl();
+										$tabMainImgHtml = (string) $productImage->toHtml();
+										$tabThumbImgHtml = (string) $productImageThumb->toHtml();
+										if ($isHomePage) {
+											$tabMainImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $tabMainImgHtml);
+											$tabThumbImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $tabThumbImgHtml);
+										} elseif ($productTabImgIdx < 2) {
+											$tabMainImgHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $tabMainImgHtml);
+											$tabThumbImgHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $tabThumbImgHtml);
+										} else {
+											$tabMainImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $tabMainImgHtml);
+											$tabThumbImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $tabThumbImgHtml);
+										}
+										if (strpos($tabMainImgHtml, 'decoding=') === false) {
+											$tabMainImgHtml = str_replace('<img ', '<img decoding="async" ', $tabMainImgHtml);
+										}
+										if (strpos($tabThumbImgHtml, 'decoding=') === false) {
+											$tabThumbImgHtml = str_replace('<img ', '<img decoding="async" ', $tabThumbImgHtml);
+										}
 										?>
 										<span class="first-thumb">
-											<?php echo $productImage->toHtml(); ?>
+											<?php echo /* @noEscape */ $tabMainImgHtml; ?>
 										</span>
 										<?php $productType = $_item->getTypeID();
 										if ($productType === 'simple' && strpos($productImageThumbUrl, '/placeholder/') === false && $productImageThumbUrl !== $productImagePrimaryUrl): ?>
 											<span class="second-thumb">
-												<?php echo $productImageThumb->toHtml(); ?>
+												<?php echo /* @noEscape */ $tabThumbImgHtml; ?>
 											</span>
 				                		<?php endif; ?>
 									</a>
 									<div class="hot-onsale">
 										<?php if ( $_item->getFinalPrice() < $_item->getPrice() ): ?>
-											
+
 												<span class="onsale">
 												<span class="sale-bg"></span>
 												<span class="sale-text"><?php /* @noEscape */ echo $block->showLableSalePrice($_item); ?>
@@ -93,7 +120,7 @@ use Magento\Framework\App\Action\Action;
 										    <?php echo $block->escapeHtml(__('New')); ?>
 											</div>
 										<?php endif; ?>
-									</div>					
+									</div>
 							    </div>
 							    <div class="product-info">
 									<h3 class="product-name">
@@ -113,7 +140,14 @@ use Magento\Framework\App\Action\Action;
 										<?php endif; ?>
 									</div>
 									<div class="info-price">
-										<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+										<?php if ($b2bPriceGate->canViewPrices()): ?>
+											<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+										<?php else: ?>
+											<div class="b2b-login-to-see-price">
+												<span class="b2b-login-to-see-price__title"><?php echo $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()); ?></span>
+												<span class="b2b-login-to-see-price__message"><?php echo $block->escapeHtml($b2bPriceGate->getPriceGateDescription()); ?></span>
+											</div>
+										<?php endif; ?>
 									</div>
 									<div class="product-info-cart">
 						                <?php if ($showCart): ?>
@@ -150,6 +184,7 @@ use Magento\Framework\App\Action\Action;
 						</div>
 						 <?php if($i%$rows==0 || $i == count($productItems)) { ?> </div> <?php }?>
 					<?php
+					$productTabImgIdx++;
 					}
 					?>
 				</div>
@@ -160,33 +195,17 @@ use Magento\Framework\App\Action\Action;
 		</div>
 	</div>
 </div>
+<?php
+$productTabMageInit = [
+	'.producttab-<?php echo $scopeSuffix; ?>' => [
+		'js/tab-carousel-init' => [
+			'tabsSelector' => 'ul.tabs li',
+			'contentSelector' => '.tab_content',
+			'carouselSelector' => '.productTabContent',
+		],
+	],
+];
+?>
 <script type="text/x-magento-init">
-{
-	"[data-role=tocart-form]": {
-		"catalogAddToCart": {}
-	},
-	".list-tab-product": {
-		"js/tab-carousel-init": {
-			"tabsSelector": "ul.tabs li",
-			"contentSelector": ".tab_content",
-			"carouselSelector": ".productTabContent",
-			"owl": {
-				"lazyLoad": true,
-				"autoPlay": <?php echo ($auto) ? 'true' : 'false'; ?>,
-				"items": <?php echo (int)$items ?: 3; ?>,
-				"itemsDesktop": [1366, 3],
-				"itemsDesktopSmall": [1199, 2],
-				"itemsTablet": [991, 2],
-				"itemsMobile": [680, 1],
-				"slideSpeed": <?php echo (int)$speed ?: 500; ?>,
-				"paginationSpeed": 500,
-				"rewindSpeed": 500,
-				"navigation": <?php echo ($show_navigation) ? 'true' : 'false'; ?>,
-				"stopOnHover": true,
-				"pagination": <?php echo ($show_pagination) ? 'true' : 'false'; ?>,
-				"scrollPerPage": true
-			}
-		}
-	}
-}
+<?= /* @noEscape */ json_encode($productTabMageInit, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
 </script>

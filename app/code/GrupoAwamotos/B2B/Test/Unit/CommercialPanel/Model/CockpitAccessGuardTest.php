@@ -32,6 +32,12 @@ class CockpitAccessGuardTest extends TestCase
         $this->assertTrue($this->guard->isRequestAllowed($request));
     }
 
+    public function testAllowsAdminDeniedPage(): void
+    {
+        $request = $this->createRequest('admin', 'denied', 'index');
+        $this->assertTrue($this->guard->isRequestAllowed($request));
+    }
+
     public function testDeniesTechnicalCatalogRoute(): void
     {
         $request = $this->createRequest('catalog', 'product', 'index');
@@ -41,6 +47,12 @@ class CockpitAccessGuardTest extends TestCase
     public function testDeniesLegacyAttendantDashboardRoute(): void
     {
         $request = $this->createRequest('grupoawamotos_b2b', 'attendant', 'dashboard');
+        $this->assertFalse($this->guard->isRequestAllowed($request));
+    }
+
+    public function testDeniesLegacyPlatformRoute(): void
+    {
+        $request = $this->createRequest('awa_b2b', 'dashboard', 'index');
         $this->assertFalse($this->guard->isRequestAllowed($request));
     }
 

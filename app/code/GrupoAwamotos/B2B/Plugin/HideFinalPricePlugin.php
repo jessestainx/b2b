@@ -37,9 +37,17 @@ class HideFinalPricePlugin
     {
         try {
             if (!$this->priceVisibility->canViewPrices()) {
+                $replacementMessage = $this->priceVisibility->getPriceReplacementMessage();
+
+                if ($this->isHomeCompactPriceMessage($replacementMessage)) {
+                    return '<div class="b2b-login-to-see-price price-box">'
+                        . $replacementMessage
+                        . '</div>';
+                }
+
                 return '<div class="b2b-login-to-see-price price-box">'
                     . '<span class="price-label">'
-                    . $this->priceVisibility->getPriceReplacementMessage()
+                    . $replacementMessage
                     . '</span></div>';
             }
 
@@ -52,5 +60,11 @@ class HideFinalPricePlugin
             // Fail-open para não bloquear preço em caso de erro de sessão/contexto.
             return $proceed();
         }
+    }
+
+    private function isHomeCompactPriceMessage(string $message): bool
+    {
+        return str_contains($message, 'class="b2b-login-link"')
+            && str_contains($message, 'aria-describedby="awa-home-pricing-notice"');
     }
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <!-- GET /rest/V1/rexis/recommendations/:customerId -->
+    <route url="/V1/rexis/recommendations/:customerId" method="GET">
+        <service class="GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface" method="getByCustomer"/>
+        <resources>
+            <resource ref="GrupoAwamotos_RexisML::recommendations"/>
+        </resources>
+    </route>
+
+    <!-- GET /rest/V1/rexis/crosssell/:sku -->
+    <route url="/V1/rexis/crosssell/:sku" method="GET">
+        <service class="GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface" method="getCrosssellBySku"/>
+        <resources>
+            <resource ref="GrupoAwamotos_RexisML::recommendations"/>
+        </resources>
+    </route>
+
+    <!-- GET /rest/V1/rexis/rfm/:customerId -->
+    <route url="/V1/rexis/rfm/:customerId" method="GET">
+        <service class="GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface" method="getRfmByCustomer"/>
+        <resources>
+            <resource ref="GrupoAwamotos_RexisML::recommendations"/>
+        </resources>
+    </route>
+
+    <!-- POST /rest/V1/rexis/convert -->
+    <route url="/V1/rexis/convert" method="POST">
+        <service class="GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface" method="registerConversion"/>
+        <resources>
+            <resource ref="GrupoAwamotos_RexisML::recommendations"/>
+        </resources>
+    </route>
+
+    <!-- GET /rest/V1/rexis/metrics -->
+    <route url="/V1/rexis/metrics" method="GET">
+        <service class="GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface" method="getMetrics"/>
+        <resources>
+            <resource ref="GrupoAwamotos_RexisML::dashboard"/>
+        </resources>
+    </route>
+
+</routes>

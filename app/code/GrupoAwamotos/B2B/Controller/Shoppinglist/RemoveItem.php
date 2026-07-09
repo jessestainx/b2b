@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Shoppinglist;
 
 use GrupoAwamotos\B2B\Model\ShoppingListService;
@@ -17,7 +19,8 @@ class RemoveItem implements HttpPostActionInterface
         private readonly RequestInterface $request,
         private readonly FormKeyValidator $formKeyValidator,
         private readonly ShoppingListService $shoppingListService
-    ) {}
+    ) {
+    }
 
     public function execute()
     {

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\CspFix\Plugin\Csp\SubresourceIntegrity\Storage;
 
+use GrupoAwamotos\CspFix\Model\SubresourceIntegrity\DiskHashVerifier;
 use Magento\Csp\Model\SubresourceIntegrity\Storage\File as Subject;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem;
@@ -23,13 +24,16 @@ class FileAtomicPlugin
 
     private Filesystem $filesystem;
     private LoggerInterface $logger;
+    private DiskHashVerifier $diskHashVerifier;
 
     public function __construct(
         Filesystem $filesystem,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DiskHashVerifier $diskHashVerifier
     ) {
         $this->filesystem = $filesystem;
         $this->logger = $logger;
+        $this->diskHashVerifier = $diskHashVerifier;
     }
 
     /**
@@ -37,6 +41,8 @@ class FileAtomicPlugin
      */
     public function aroundSave(Subject $subject, callable $proceed, string $data, ?string $context): bool
     {
+        $data = $this->diskHashVerifier->reconcileSerialized($data);
+
         $staticDir = $this->filesystem->getDirectoryWrite(DirectoryList::STATIC_VIEW);
         $path      = $this->resolveFilePath($context);
         $absBase   = rtrim($staticDir->getAbsolutePath(''), '/');
@@ -45,23 +51,15 @@ class FileAtomicPlugin
         $absDest   = $absBase . '/' . $path;
 
         try {
-            // Garante diretório do contexto (frontend/adminhtml) quando aplicável
             if ($context) {
                 $staticDir->create($context);
             }
 
-            // Escreve em arquivo temporário
             $staticDir->writeFile($tmpRel, $data, 'w');
 
-            // Rename atômico via PHP nativo — evita o chmod() interno do Magento
-            // que falha quando o processo não é dono do arquivo destino.
             $renameError = null;
             $writeError   = null;
             if (!$this->safeRename($absTmp, $absDest, $renameError)) {
-
-                // Fallback sem passar pelo Driver\File do Magento. Em cenários com
-                // owner/grupo corretos, sobrescrever o arquivo diretamente evita o
-                // chmod() interno que gerava FileSystemException no deploy.
                 if (!$this->safeWrite($absDest, $data, $writeError)) {
                     throw new \RuntimeException(sprintf(
                         '[CspFix] Falha ao persistir %s (rename: %s | write: %s)',
@@ -76,7 +74,6 @@ class FileAtomicPlugin
 
             return true;
         } catch (\Throwable $e) {
-            // Limpa o arquivo temporário se sobrou no disco
             if (file_exists($absTmp)) {
                 $this->safeUnlink($absTmp);
             }
@@ -109,7 +106,6 @@ class FileAtomicPlugin
             return $raw;
         }
 
-        // Retry rápido: pode ter pego o arquivo no meio do rename/write
         try {
             $raw2 = $proceed($context);
             if ($raw2 && $this->isValidJson($raw2)) {
@@ -119,13 +115,11 @@ class FileAtomicPlugin
             $this->logger->warning('[CspFix] Retry de leitura do sri-hashes.json falhou: ' . $e->getMessage());
         }
 
-        // Evita quebrar o frontend/admin por JSON inválido.
         return null;
     }
 
     private function isValidJson(string $raw): bool
     {
-        // sri-hashes.json é um JSON (map path => hash)
         json_decode($raw, true);
         return json_last_error() === JSON_ERROR_NONE;
     }

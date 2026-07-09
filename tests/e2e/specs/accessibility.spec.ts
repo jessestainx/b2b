@@ -3,6 +3,9 @@
  */
 
 import { test, expect, Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import * as fs from 'fs';
+import * as path from 'path';
 
 async function goHome(page: Page): Promise<void> {
   let ok = false;
@@ -356,5 +359,58 @@ test.describe('A11Y — ARIA e roles', () => {
     );
 
     expect(hasActiveIndicator, 'Tab ativa deve indicar estado via class ou aria').toBe(true);
+  });
+});
+
+/* ════════════════════════════════════════════════════════════════════════
+   SUITE 6 — axe-core (WCAG 2.x automated scan)
+   ════════════════════════════════════════════════════════════════════════ */
+const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+const AXE_REPORT_DIR = path.join(__dirname, '..', 'reports', 'axe');
+
+function formatAxeViolations(violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violations']): string {
+  if (!violations.length) return 'Nenhuma violação axe-core';
+  return violations
+    .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} nó(s))`)
+    .join('\n');
+}
+
+function writeAxeReport(slug: string, results: Awaited<ReturnType<AxeBuilder['analyze']>>): void {
+  fs.mkdirSync(AXE_REPORT_DIR, { recursive: true });
+  fs.writeFileSync(
+    path.join(AXE_REPORT_DIR, `${slug}.json`),
+    JSON.stringify(results, null, 2),
+    'utf8'
+  );
+}
+
+async function runAxeScan(page: Page, slug: string): Promise<void> {
+  const results = await new AxeBuilder({ page })
+    .withTags(AXE_TAGS)
+    .disableRules(['color-contrast'])
+    .analyze();
+
+  writeAxeReport(slug, results);
+
+  expect(
+    results.violations,
+    `axe-core encontrou ${results.violations.length} violação(ões) em ${slug}:\n${formatAxeViolations(results.violations)}`
+  ).toEqual([]);
+}
+
+test.describe('A11Y — axe-core WCAG scan', () => {
+  test('Homepage sem violações críticas axe @axe', async ({ page }) => {
+    await goHome(page);
+    await runAxeScan(page, 'homepage');
+  });
+
+  test('Categoria sem violações críticas axe @axe', async ({ page }) => {
+    await goCategoryPage(page);
+    await runAxeScan(page, 'category');
+  });
+
+  test('PDP sem violações críticas axe @axe', async ({ page }) => {
+    await goPDP(page);
+    await runAxeScan(page, 'pdp');
   });
 });

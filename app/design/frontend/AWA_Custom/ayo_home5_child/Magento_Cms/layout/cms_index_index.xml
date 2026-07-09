@@ -52,7 +52,7 @@
              cms_page_view à homepage CMS, então removemos aqui o CSS + loader (regras escopadas
              a body.cms-page-view — só desperdiçavam requests na home) -->
         <remove src="css/awa-cms-shell-final.css"/>
-        <css src="css/awa-home-shell-final.css"/>
+        <!-- awa-home-shell-final.css REMOVIDO 2026-06-25: arquivo placeholder (home funciona sem shell CSS separada). -->
     </head>
     <body>
         <attribute name="data-mage-init">{}</attribute>
@@ -88,14 +88,15 @@
                    name="awa.cls.nav.fix.home"
                    template="Magento_Theme::html/awa-cls-nav-fix-home.phtml"
                    after="awa.critical.inline.home"/>
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.header.home.hotfix"
-                   template="Magento_Theme::html/awa-header-home-hotfix-home.phtml"
-                   after="awa.cls.nav.fix.home"/>
+            <!-- awa.header.home.hotfix REMOVIDO 2026-06-25: bloco nunca renderizou no HTML (file sempre 404; plugin descarta). -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.cookie.consent.fix.css.home"
                    template="Magento_Theme::html/awa-cookie-consent-home-head.phtml"
                    after="awa.search.autocomplete.head.css"/>
+            <!-- Phase 3D.2.6 — bugfixes visuais como ULTIMATE TERMINAL-WINS
+                 before="-" garante último carregamento (CSS inline vence tudo),
+                 que pelo order de render do Magento vira o ÚLTIMO CSS carregado.
+                 Contém !important para sobrescrever 5658 !important do tema Ayo. -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.footer.accordion.inline.home"
                    template="Magento_Theme::html/awa-mobile-accordion-loader.phtml"
@@ -165,6 +166,10 @@
 
         <!-- Benefits bar: CSS final após custom_default (ui-ux-pro-max H11) -->
         <referenceContainer name="before.body.end">
+            <!-- AWA ULTIMATE TERMINAL-WINS: injetado no FINAL do body (após tudo) -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.home.visual.fixes.css"
+                   template="Magento_Theme::html/awa-home-visual-fixes-inline.phtml"/>
             <!-- CSS estático inline — sem dados dinâmicos, seguro cachear. -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.home.benefits.final.inline"
@@ -215,15 +220,16 @@
                    name="awa.custom.home.owl.tabs.js"
                    template="Magento_Theme::html/awa-custom-js-loader.phtml">
                 <arguments>
-                    <argument name="is_primary_loader" xsi:type="boolean">true</argument>
+                   <argument name="is_primary_loader" xsi:type="boolean">true</argument>
                     <argument name="load_header_js" xsi:type="boolean">true</argument>
                     <argument name="skip_minicart_defer_init" xsi:type="boolean">true</argument>
-                    <argument name="load_home_owl_tabs_js" xsi:type="boolean">true</argument>
+                    <argument name="load_home_owl_tabs_js" xsi:type="boolean">false</argument>
                     <argument name="load_footer_ux_js" xsi:type="boolean">false</argument>
                     <argument name="load_pdp_sticky_cta_js" xsi:type="boolean">false</argument>
                     <argument name="load_search_compat_js" xsi:type="boolean">false</argument>
                     <argument name="load_b2b_checkout_compat_js" xsi:type="boolean">false</argument>
-                    <argument name="load_home_category_compat_js" xsi:type="boolean">true</argument>
+                    <!-- Compat no CMS home mantido apenas no necessário para evitar disputa no carrossel -->
+                    <argument name="load_home_category_compat_js" xsi:type="boolean">false</argument>
                 </arguments>
             </block>
             <block class="Magento\Framework\View\Element\Template"

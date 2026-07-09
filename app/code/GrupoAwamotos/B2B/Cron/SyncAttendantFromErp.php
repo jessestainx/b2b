@@ -175,7 +175,10 @@ class SyncAttendantFromErp
 
         $this->logger->info(sprintf(
             '[B2B AttendantSync] Done: %d new, %d re-assigned, %d no ERP match, %d chunk errors',
-            $assigned, $updated, $noMatch, $errors
+            $assigned,
+            $updated,
+            $noMatch,
+            $errors
         ));
     }
 }

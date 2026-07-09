@@ -424,14 +424,17 @@
    Corrige: scrollbars na sidebar, desalinhamento topo, nav nowrap
    ========================================================================== */
 
-body.account .columns,
-body.account .page-main > .columns,
-body[class*="b2b-"] .columns,
-body[class*="b2b-"] .page-main > .columns {
-    align-items: start !important;
-    display: grid !important;
-    gap: var(--b2b-dashboard-gap, var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem))) !important;
-    grid-template-columns: minmax(12.5rem, 14rem) minmax(0, 1fr) !important;
+/* Dashboard B2B usa SSOT §122/§126 (account-b2b + refinements) — não forçar 200px aqui */
+@media (min-width: 992px) {
+    body.account:not(.b2b-account-dashboard) .columns,
+    body.account:not(.b2b-account-dashboard) .page-main > .columns,
+    body[class*="b2b-"]:not(.b2b-account-dashboard) .columns,
+    body[class*="b2b-"]:not(.b2b-account-dashboard) .page-main > .columns {
+        align-items: start !important;
+        display: grid !important;
+        gap: var(--b2b-dashboard-gap, var(--size-sm-md, clamp(1rem, 0.8rem + 1vw, 1.88rem))) !important;
+        grid-template-columns: minmax(12.5rem, 14rem) minmax(0, 1fr) !important;
+    }
 }
 
 body.account .columns > .sidebar,

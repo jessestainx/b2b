@@ -1,8 +1,0 @@
-Navigating to catalog search...
-Screenshot saved to plp_desktop.png
-
-Layout Info:
-Sidebar width: 254px, padding: 0px
-Main content width: 1280px, padding: 16px 16px 48px
-Product list display: grid, flex-wrap: nowrap, gap: 16px
-First product item width: 243px, padding: 0px, margin: 0px

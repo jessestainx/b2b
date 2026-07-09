@@ -1,0 +1,70 @@
+---
+description: Governança CSS AWA — impede acumulação de arquivos patch e garante minificação em produção
+globs: app/design/frontend/AWA_Custom/ayo_home5_child/**/*.css,app/design/frontend/AWA_Custom/ayo_home5_child/**/*.less,app/design/frontend/AWA_Custom/ayo_home5_child/**/*.xml
+alwaysApply: false
+---
+
+# AWA CSS — Governança Anti-Acumulação
+
+## Regra #1: NUNCA criar arquivo CSS com data ou sufixo de patch no nome
+
+```
+❌ awa-alguma-coisa-2026-07-08.css
+❌ awa-fix-header-terminal-v3.css
+❌ awa-bugfix-round9.css
+
+✅ Editar o bundle existente do domínio:
+   - Header → awa-header-contract-grid-20260626.min.css (ou _awa-header-*.less)
+   - Home → awa-home-corporate-density-grid-2026-06.min.css
+   - PLP → awa-layout-bundle-20260611m.min.css
+   - Carrinho → awa-cart-stack.min.css
+   - Checkout → awa-checkout-shell-final.min.css
+```
+
+## Regra #2: CSS novo SEMPRE deve ter versão minificada
+
+Antes de qualquer deploy, gerar o `.min.css`:
+
+```bash
+cleancss -o web/css/nome-do-arquivo.min.css web/css/nome-do-arquivo.css
+```
+
+## Regra #3: OPcache com validate_timestamps=0 — mudanças em phtml precisam de ação especial
+
+O PHP-FPM desta instalação tem `opcache.validate_timestamps=0`. Mudanças em PHTML **nunca** são
+percebidas automaticamente. Para forçar a atualização:
+
+1. Copiar o phtml para `var/view_preprocessed/...` (caminho espelhado)
+2. Substituir o conteúdo do arquivo .css pelo conteúdo minificado (não mudar `getViewFileUrl`)
+3. Regenerar sidecars: `bash scripts/precompress-static.sh --pub-only`
+4. Flush: `redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 1 FLUSHDB && redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB`
+
+## Regra #4: Arquivos mortos (não servidos em nenhuma rota)
+
+Os 61 arquivos listados abaixo NUNCA são servidos em produção. Não editar, não criar derivados.
+Candidatos à deleção na Fase 6:
+
+- `awa-flex-grid-flow.css` / `.min.css` (273KB + 244KB — NUNCA carregado)
+- `awa-home-flex-grid-flow.css` / `.min.css` (204KB + 140KB — NUNCA carregado)
+- `awa-super-home.min.css` (388KB — NUNCA carregado via link tag)
+- `awa-checkout-polish.css` / `.min.css` (205KB + 162KB — NUNCA carregado)
+- `awa-plp-distill.css` / `.min.css` (169KB + 137KB — NUNCA carregado)
+- `awa-home-standardize-terminal-wins-2026-06-09.css` / `.min.css` — NUNCA carregado
+- `awa-vertical-menu-modern.css` / `.min.css` — NUNCA carregado
+- E mais 47 arquivos (ver auditoria completa em `CSS_INVENTORY.md`)
+
+## Regra #5: Deploy correto após qualquer mudança CSS
+
+```bash
+# 1. Editar .unmin.css ou .less
+# 2. Gerar .min.css
+cleancss -o web/css/arquivo.min.css web/css/arquivo.css
+# 3. Copiar para pub/static
+cp web/css/arquivo.min.css pub/static/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/arquivo.min.css
+# 4. Regenerar sidecars .br/.gz (OBRIGATÓRIO — nginx serve sidecars pré-gerados)
+bash scripts/precompress-static.sh --pub-only
+# 5. Limpar cache
+redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 1 FLUSHDB
+redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB
+sudo nginx -t && sudo systemctl reload nginx
+```

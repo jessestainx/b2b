@@ -64,7 +64,8 @@ class B2BPriceWarmObserver implements ObserverInterface
     public function execute(Observer $observer): void
     {
         // Avoid session_start() for guests: check cookie before calling isLoggedIn().
-        if (!$this->config->isEnabled()
+        if (
+            !$this->config->isEnabled()
             || !isset($_COOKIE[session_name()])
             || !$this->customerSession->isLoggedIn()
         ) {
@@ -106,7 +107,7 @@ class B2BPriceWarmObserver implements ObserverInterface
             $skus = array_slice($skus, 0, 300);
         }
 
-        $warmKey = $erpCode . ':' . md5(implode('|', array_values($skus)));
+        $warmKey = $erpCode . ':' . hash('xxh128', implode('|', array_values($skus)));
         if (isset($this->warmedCollections[$warmKey])) {
             return;
         }

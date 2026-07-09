@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Comando CLI para testar envio de WhatsApp
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Console\Command;
 
@@ -45,7 +45,7 @@ class TestWhatsAppCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('');
-        $output->writeln('<fg=cyan;options=bold>REXIS ML - Teste de WhatsApp</>');
+        $output->writeln('<fg=cyan;options=bold>Product Intelligence - Teste de WhatsApp</>');
         $output->writeln('');
 
         $phone = $input->getArgument('phone');

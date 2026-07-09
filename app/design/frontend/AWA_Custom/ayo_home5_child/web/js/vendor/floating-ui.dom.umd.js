@@ -1,8 +1,6 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@floating-ui/core')) :
-  typeof define === 'function' && define.amd ? define(['exports', '@floating-ui/core'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.FloatingUIDOM = {}, global.FloatingUICore));
-})(this, (function (exports, core) { 'use strict';
+  factory(global.FloatingUIDOM = {}, global.FloatingUICore);
+})(typeof globalThis !== 'undefined' ? globalThis : this, (function (exports, core) { 'use strict';
 
   /**
    * Custom positioning reference element.

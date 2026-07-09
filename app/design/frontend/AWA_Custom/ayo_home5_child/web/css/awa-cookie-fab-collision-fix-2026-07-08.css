@@ -1,0 +1,26 @@
+/*
+ * AWA — Fix isolado: FAB de modo escuro sobrepondo o botão "Permitir cookies" (mobile)
+ *
+ * Bug confirmado via CDP em checkout/cart/ (390x844):
+ *   - .awa-dark-mode-toggle fixo em bottom:142px (regra em
+ *     awa-visual-fixes-2026-06-29-final.css, @media max-width:991px)
+ *   - #awa-cookie-banner com 2 botões empilhados ocupa ~230px de altura quando ativo
+ *   - Resultado: overlap real de ~35x44px no canto superior direito do
+ *     botão #awa-cookie-accept (evidência em .cursor/debug-d1ec6c.log)
+ *
+ * Resolução: reutiliza a mesma variável --awa-cookie-banner-height já setada via JS
+ * (GrupoAwamotos_CookieConsent/web/js/cookie-consent.js:65, banner.offsetHeight) e já
+ * consumida pelo padrão existente em web/css/source/_awa-visual-fixes.less para
+ * .awa-whatsapp-float e #awaBackToTop. Sem overlap em desktop (>=992px) — não alterado.
+ *
+ * Arquivo isolado (não edita awa-visual-fixes-2026-06-29-final.css nem
+ * _awa-visual-fixes.less) para não conflitar com sessão concorrente em andamento
+ * nesses arquivos (estado MM/M não commitado, mesmo timestamp 2026-07-08 19:12).
+ * Especificidade do seletor > regra original para vencer o cascade
+ * independente da ordem de carregamento.
+ */
+@media (max-width: 991px) {
+    html body#html-body.awa-cookie-banner-active .page-wrapper .awa-dark-mode-toggle {
+        bottom: calc(var(--awa-cookie-banner-height, 230px) + 20px) !important;
+    }
+}

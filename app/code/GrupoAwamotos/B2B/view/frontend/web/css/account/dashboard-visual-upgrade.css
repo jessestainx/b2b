@@ -1,395 +1,300 @@
-:root {
-    /* ── b2b-dash-vup — design tokens ─── */
-    --b2b-dash-vup-c1: #fafbfc;
-    --b2b-dash-vup-bg-faint: #f0f0f0;
-    --b2b-dash-vup-c2: #f7f8fa;
-    --b2b-dash-vup-c3: #9ca3af;
-    --b2b-dash-vup-c4: #6b7280;
-    --b2b-dash-vup-c5: #f3f4f6;
-    --b2b-dash-vup-bg: #f9fafb;
-    --b2b-dash-vup-c6: #059669;
-    --b2b-dash-vup-c7: #10b981;
-    --b2b-dash-vup-c8: #d97706;
-    --b2b-dash-vup-c9: #f59e0b;
-    --b2b-dash-vup-bg-light: #f5f5f5;
-    --b2b-dash-vup-border-mid: #d1d5db;
-    --b2b-dash-vup-dark: #333;
-    --b2b-dash-vup-light-gray: #ccc;
-}
-
 /**
  * B2B Dashboard — Visual Upgrade Layer
  *
  * Carrega APÓS dashboard-refinement.css.
- * Melhora grid de produtos, micro-interações, animações de entrada,
- * e consistência visual desktop/mobile.
+ * Adiciona micro-interações, animações de entrada, polimento visual
+ * e suporte a dark mode sem alterar a estrutura existente.
+ *
+ * Melhorias:
+ *   1. Entrance animations (fade-in staggered)
+ *   2. Glassmorphism sutil nos cards de resumo
+ *   3. Icon hover colorization em ações rápidas
+ *   4. Gradient accent borders
+ *   5. Better focus rings (acessibilidade)
+ *   6. Pulse animation para badges pendentes
+ *   7. Smooth scroll-snap em mobile
+ *   8. Subtle gradient separators
+ *   9. Loading skeleton shimmer
+ *  10. Dark mode (prefers-color-scheme: dark)
  */
 
 /* =================================================================
    §1 — ENTRANCE ANIMATIONS
    ================================================================= */
 
-@keyframes b2b-fade-up {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* Product register: motion conveys state, not presence.
+   Stagger is legitimate only for actual lists/grids of siblings.
+   Structural sections (header, company-info, etc.) appear immediately
+   — no page-load choreography. */
 
 @keyframes b2b-scale-in {
-    from { opacity: 0; transform: scale(0.96); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
-.b2b-dashboard-header,
-.b2b-company-info,
-.b2b-summary-cards,
-.b2b-onboarding-section,
-.b2b-suggestions-section,
-.b2b-quick-actions,
-.b2b-section,
-.b2b-rexis-section,
-.erp-suggestions-section,
-.erp-reorder-section,
-.categories-section {
-    animation: b2b-fade-up 0.4s ease-out both;
+/* Summary cards: list stagger — 3 siblings, tight 50ms steps.
+   fill-mode: backwards ensures the from-keyframe holds only during
+   the delay, never after the animation ends. */
+/* Entrance animations disabled — SSOT flat dashboard (§141) */
+.summary-card,
+.action-item {
+    animation: none;
 }
 
-.b2b-dashboard-header { animation-delay: 0ms; }
-.b2b-company-info { animation-delay: 60ms; }
-.b2b-summary-cards { animation-delay: 120ms; }
-.b2b-onboarding-section { animation-delay: 100ms; }
-.erp-suggestions-section { animation-delay: 160ms; }
-.erp-reorder-section { animation-delay: 200ms; }
-.b2b-suggestions-section { animation-delay: 240ms; }
-.b2b-quick-actions { animation-delay: 280ms; }
-.b2b-section.attendant-section { animation-delay: 320ms; }
-.b2b-rexis-section { animation-delay: 260ms; }
-.categories-section { animation-delay: 300ms; }
+/* =================================================================
+   §2 — SUMMARY CARDS: hover polish (sem glassmorphism)
+   ================================================================= */
 
 .summary-card {
-    animation: b2b-scale-in 0.35s ease-out both;
-}
-.summary-card:nth-child(1) { animation-delay: 140ms; }
-.summary-card:nth-child(2) { animation-delay: 200ms; }
-.summary-card:nth-child(3) { animation-delay: 260ms; }
-
-/* =================================================================
-   §2 — ERP PRODUCT GRID: Structural Fix
-   Problemas corrigidos:
-   - Cards esticados em telas largas (max column width)
-   - Gap inconsistente entre breakpoints
-   - Altura desigual entre cards com/sem imagem
-   - Alinhamento vertical do conteúdo (price/name/sku)
-   - Mobile: 1col muito largo, 2col apertado
-   ================================================================= */
-
-/* Grid container: auto-fill com min/max para controlar largura */
-.erp-products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-    align-items: stretch;
+    background: var(--awa-bg, #fff);
 }
 
-/* Force all cards same height structure */
-.erp-product-card {
-    display: flex;
-    flex-direction: column;
-    min-height: 0; /* prevent overflow */
-    height: 100%; /* fill grid cell */
-}
-
-/* Image area: fixed aspect ratio for consistency */
-.erp-product-image {
-    aspect-ratio: 4 / 3;
-    height: auto;
-    min-height: 100px;
-    max-height: 160px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px;
-    background: var(--b2b-dash-vup-c1);
-    border-bottom: 1px solid var(--b2b-dash-vup-bg-faint);
-}
-
-.erp-product-image img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-}
-
-.erp-product-image.placeholder {
-    background: var(--b2b-dash-vup-c2);
-}
-
-.erp-product-image.placeholder svg {
-    opacity: 0.5;
-}
-
-/* Info section: flex-grow pushes price to bottom */
-.erp-product-info {
-    padding: 14px 16px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex: 1;
-}
-
-/* Name: fixed 2 lines clamp, consistent height */
-.erp-product-name {
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.45;
-    min-height: calc(2 * 13px * 1.45); /* reserve 2 lines */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin: 0;
-}
-
-/* SKU */
-.erp-product-sku {
-    font-size: 11px;
-    color: var(--b2b-dash-vup-c3);
-    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
-    letter-spacing: 0.02em;
-}
-
-/* Price: pushed to bottom via auto margin */
-.erp-product-price {
-    margin-top: auto;
-    padding-top: 8px;
-}
-
-/* Meta info (XX empresas compraram) */
-.erp-product-meta {
-    font-size: 11px;
-    color: var(--b2b-dash-vup-c4);
-    margin-top: 2px;
-}
-
-/* =================================================================
-   §3 — ERP PRODUCT GRID: Desktop breakpoints
-   ================================================================= */
-
-/* Large screens: cap at 3 columns, cards don't stretch beyond 280px */
-@media (width >= 1200px) {
-    .erp-products-grid {
-        grid-template-columns: repeat(3, 1fr);
-        max-width: 100%;
-    }
-}
-
-/* Medium screens: 2 columns with comfortable gaps */
-@media (width >= 641px) and (width <= 1199px) {
-    .erp-products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
-    }
-
-    .erp-product-image {
-        max-height: 140px;
-    }
-}
-
-/* =================================================================
-   §4 — ERP PRODUCT GRID: Mobile
-   ================================================================= */
-
-@media (width <= 640px) {
-    /* 2-column compact grid on mobile (not 1-col) */
-    .erp-products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    /* Compact cards for mobile */
-    .erp-product-card {
-        border-radius: 10px;
-    }
-
-    .erp-product-image {
-        aspect-ratio: 1 / 1;
-        max-height: 110px;
-        min-height: 80px;
-        padding: 8px;
-    }
-
-    .erp-product-info {
-        padding: 10px 12px 12px;
-        gap: 4px;
-    }
-
-    .erp-product-name {
-        font-size: 12px;
-        min-height: calc(2 * 12px * 1.45);
-    }
-
-    .erp-product-sku {
-        font-size: 10px;
-    }
-
-    .erp-product-price {
-        font-size: 14px;
-        padding-top: 6px;
-    }
-
-    .erp-product-meta {
-        font-size: 10px;
-    }
-
-    .erp-price-badge {
-        font-size: 9px;
-        padding: 1px 5px;
-    }
-}
-
-/* Very small screens: still 2-col but tighter */
-@media (width <= 380px) {
-    .erp-products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .erp-product-image {
-        max-height: 90px;
-        padding: 6px;
-    }
-
-    .erp-product-info {
-        padding: 8px 10px 10px;
-    }
-
-    .erp-product-name {
-        font-size: 11px;
-        min-height: calc(2 * 11px * 1.45);
-    }
-}
-
-/* =================================================================
-   §5 — ERP REORDER LIST: Vertical alignment fix
-   ================================================================= */
-
-.erp-reorder-item {
-    display: grid;
-    grid-template-columns: 60px 1fr auto auto;
-    gap: 14px;
-    align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--b2b-dash-vup-c5);
-}
-
-.erp-reorder-item:last-child {
-    border-bottom: none;
-}
-
-.reorder-image {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: var(--b2b-dash-vup-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.reorder-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.reorder-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0; /* allow text truncation */
-}
-
-.reorder-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--b2b-dash-vup-dark);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.reorder-name a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.reorder-name a:hover {
-    color: var(--b2b-ayo-primary, #A33B3B);
-}
-
-.reorder-sku {
-    font-size: 11px;
-    color: var(--b2b-dash-vup-c3);
-    font-family: ui-monospace, monospace;
-}
-
-.reorder-stats {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    font-size: 12px;
-    color: var(--b2b-dash-vup-c4);
-    white-space: nowrap;
-}
-
-.reorder-price {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--b2b-dash-vup-c6);
-    white-space: nowrap;
-    text-align: right;
-}
-
-/* Reorder list: mobile stack */
-@media (width <= 640px) {
-    .erp-reorder-item {
-        grid-template-columns: 50px 1fr;
-        grid-template-rows: auto auto;
-        gap: 8px 12px;
-    }
-
-    .reorder-image {
-        width: 50px;
-        height: 50px;
-        grid-row: span 2;
-    }
-
-    .reorder-info {
-        grid-column: 2;
-    }
-
-    .reorder-stats {
-        grid-column: 2;
-        font-size: 11px;
-        gap: 8px;
-    }
-
-    .reorder-price {
-        grid-column: 2;
-        text-align: left;
-        font-size: 14px;
-    }
-}
-
-/* =================================================================
-   §6 — HOVER POLISH: Product cards + action items
-   ================================================================= */
-
-/* Product card hover: gradient accent bottom */
-.erp-product-card {
+.summary-card {
     position: relative;
+    overflow: hidden;
+}
+
+/* Hover: border feedback only — SSOT flat (terminal layers reinforce) */
+.summary-card:hover {
+    box-shadow: none;
+}
+
+/* Tipo crédito: leve tint vermelho no hover */
+.credit-card:hover {
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 30%, #e5e7eb);
+}
+
+/* Tipo compras: leve tint verde no hover */
+.purchases-card:hover {
+    border-color: color-mix(in srgb, #059669 25%, #e5e7eb);
+}
+
+/* Tipo cotações: leve tint âmbar no hover */
+.quotes-card:hover {
+    border-color: color-mix(in srgb, #d97706 25%, #e5e7eb);
+}
+
+/* =================================================================
+   §3 — ICON HOVER: Quick Actions
+   ================================================================= */
+
+.action-item svg {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+}
+
+.action-item:hover svg {
+    transform: scale(1.15);
+    color: var(--b2b-ayo-primary);
+}
+
+/* Highlight action item (carrinho sugerido): tint sólido, sem gradiente */
+.action-item.action-highlight {
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 20%, #e5e7eb);
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, var(--awa-bg, #fff));
+}
+
+.action-item.action-highlight svg {
+    color: var(--b2b-ayo-primary);
+}
+
+.action-item.action-highlight:hover {
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 40%, #e5e7eb);
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 7%, var(--awa-bg, #fff));
+}
+
+/* =================================================================
+   §4 — ACCENT BORDERS (sections)
+   ================================================================= */
+
+.b2b-dashboard-header {
+    border-top: 3px solid var(--awa-primary, #b73337);
+    border-bottom: 1px solid var(--awa-border, #e5e7eb);
+}
+
+.b2b-onboarding-section {
+    border-top: 2px solid color-mix(in srgb, #059669 60%, transparent);
+}
+
+/* =================================================================
+   §5 — FOCUS RINGS: Enhanced accessibility
+   ================================================================= */
+
+.action-item:focus-visible,
+.suggestion-action:focus-visible,
+.checklist-action:focus-visible,
+.category-chip:focus-visible,
+.view-all:focus-visible,
+.contact-link:focus-visible {
+    outline: 2px solid var(--b2b-ayo-primary);
+    outline-offset: 3px;
+    border-radius: 4px;
+    box-shadow: 0 0 0 4px rgb(183 51 55 / 12%);
+}
+
+/* Remove default outline when focus-visible is supported */
+.action-item:focus:not(:focus-visible),
+.suggestion-action:focus:not(:focus-visible),
+.checklist-action:focus:not(:focus-visible),
+.category-chip:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* =================================================================
+   §6 — PULSE: Pending status badges
+   ================================================================= */
+
+@keyframes b2b-pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.b2b-group-badge.pending {
+    animation: b2b-pulse-soft 2s ease-in-out infinite;
+}
+
+.b2b-erp-pending-banner {
+    animation: b2b-fade-up 0.5s ease-out both;
+    animation-delay: 80ms;
+}
+
+.b2b-erp-pending-banner .erp-pending-icon svg {
+    animation: b2b-pulse-soft 2.5s ease-in-out infinite;
+}
+
+/* =================================================================
+   §7 — MOBILE: Scroll-snap for summary cards
+   ================================================================= */
+
+@media (width <= 640px) {
+    .b2b-summary-cards {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .summary-card {
+        min-width: 85vw;
+        scroll-snap-align: center;
+        flex-shrink: 0;
+    }
+
+    /* Scroll indicator dots */
+    .b2b-summary-cards::after {
+        content: '';
+        min-width: 1px;
+        flex-shrink: 0;
+    }
+
+    /* Suggestion cards: stack with visual separation */
+    .suggestions-grid {
+        gap: 12px;
+    }
+
+    .suggestion-card {
+        padding: 16px;
+    }
+
+    /* Action items: bigger touch target */
+    .action-item {
+        min-height: 90px;
+        padding: 14px 10px;
+    }
+
+    .action-item svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .action-item span {
+        font-size: 12px;
+    }
+
+    /* Attendant: vertical card */
+    .attendant-card {
+        gap: 16px;
+    }
+
+    .attendant-contact .contact-link {
+        padding: 12px 16px;
+        min-height: 44px;
+    }
+}
+
+/* =================================================================
+   §8 — SUBTLE GRADIENT SEPARATORS
+   ================================================================= */
+
+.b2b-company-info::after,
+.b2b-summary-cards + .b2b-section::before,
+.b2b-quick-actions::before {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e5e7eb 20%, #e5e7eb 80%, transparent);
+    margin: 0 auto;
+    width: 90%;
+}
+
+.b2b-company-info::after {
+    position: relative;
+    top: calc(var(--b2b-dashboard-section-gap, 16px) / 2 + 8px);
+}
+
+/* =================================================================
+   §9 — LOADING SKELETON SHIMMER
+   ================================================================= */
+
+@keyframes b2b-shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+}
+
+.b2b-dashboard[aria-busy="true"] .summary-card .card-value,
+.b2b-dashboard[aria-busy="true"] .data-table tbody td {
+    color: transparent;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: b2b-shimmer 1.5s infinite linear;
+    border-radius: 4px;
+    min-height: 1em;
+}
+
+/* =================================================================
+   §10 — SCROLLBAR STYLING (data tables)
+   ================================================================= */
+
+.data-table::-webkit-scrollbar {
+    height: 6px;
+}
+
+.data-table::-webkit-scrollbar-track {
+    background: #f9fafb;
+    border-radius: 3px;
+}
+
+.data-table::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.data-table::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* =================================================================
+   §11 — ERP PRODUCT CARDS: Polish
+   ================================================================= */
+
+.erp-product-card {
     overflow: hidden;
 }
 
@@ -400,37 +305,72 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--b2b-ayo-primary, #A33B3B), transparent);
+    background: linear-gradient(90deg, var(--b2b-ayo-primary), transparent);
     opacity: 0;
     transition: opacity 0.25s ease;
+}
+
+.erp-product-card {
+    position: relative;
 }
 
 .erp-product-card:hover::after {
     opacity: 1;
 }
 
-/* Unavailable: de-emphasize */
+/* Unavailable card: de-emphasize */
 .erp-product-card.unavailable {
-    filter: grayscale(20%);
+    filter: grayscale(30%);
 }
 
 .erp-product-card.unavailable:hover {
     filter: grayscale(0%);
 }
 
-/* Action items: icon scale on hover */
-.action-item svg {
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+/* =================================================================
+   §12 — ONBOARDING CHECKLIST: Polish
+   ================================================================= */
+
+.checklist-item {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.action-item:hover svg {
-    transform: scale(1.12);
-    color: var(--b2b-ayo-primary, #A33B3B);
+.checklist-item.pending:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
 }
 
-/* Suggestion cards: lift on hover */
+.checklist-item.done {
+    opacity: 0.85;
+}
+
+.checklist-item.done .checklist-icon svg {
+    filter: drop-shadow(0 1px 2px rgb(16 185 129 / 30%));
+}
+
+/* =================================================================
+   §13 — CATEGORY CHIPS: Polish
+   ================================================================= */
+
+.category-chip {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 6%);
+}
+
+.category-chip:active {
+    transform: translateY(0);
+}
+
+/* =================================================================
+   §14 — SUGGESTION CARDS: Interaction polish
+   ================================================================= */
+
 .suggestion-card {
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .suggestion-card:hover {
@@ -446,48 +386,58 @@
     transform: translateX(3px);
 }
 
-/* Category chips */
-.category-chip {
+/* =================================================================
+   §15 — ATTENDANT SECTION: Avatar glow
+   ================================================================= */
+
+.attendant-avatar {
+    transition: box-shadow 0.3s ease;
+}
+
+.attendant-section:hover .attendant-avatar {
+    box-shadow: 0 0 0 4px rgb(183 51 55 / 8%), 0 4px 12px rgb(183 51 55 / 12%);
+}
+
+.contact-link {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.category-chip:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgb(0 0 0 / 6%);
+.contact-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
 }
 
 /* =================================================================
-   §7 — FOCUS RINGS (accessibility)
+   §16 — PROGRESS BAR: Animated fill + glow
    ================================================================= */
 
-.action-item:focus-visible,
-.suggestion-action:focus-visible,
-.checklist-action:focus-visible,
-.category-chip:focus-visible,
-.view-all:focus-visible,
-.contact-link:focus-visible,
-.erp-product-card a:focus-visible {
-    outline: 2px solid var(--b2b-ayo-primary, #A33B3B);
-    outline-offset: 3px;
-    border-radius: 8px;
+.progress-fill {
+    position: relative;
+    overflow: hidden;
 }
 
-/* =================================================================
-   §8 — PROGRESS BAR SHINE
-   ================================================================= */
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 40%), transparent);
+    animation: b2b-progress-shine 2s ease-in-out infinite;
+}
 
 @keyframes b2b-progress-shine {
     0% { left: -100%; }
     100% { left: 100%; }
 }
 
-.progress-fill,
+/* Credit bar: similar shine */
 .credit-bar-fill {
     position: relative;
     overflow: hidden;
 }
 
-.progress-fill::after,
 .credit-bar-fill::after {
     content: '';
     position: absolute;
@@ -495,107 +445,129 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 35%), transparent);
-    animation: b2b-progress-shine 2.5s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 30%), transparent);
+    animation: b2b-progress-shine 3s ease-in-out infinite;
 }
 
 /* =================================================================
-   §9 — PENDING BADGE PULSE
+   §17 — DARK MODE (prefers-color-scheme: dark)
    ================================================================= */
 
-@keyframes b2b-pulse-soft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
+@media (prefers-color-scheme: dark) {
+    .b2b-dashboard {
+        --b2b-dark-bg: #1a1a2e;
+        --b2b-dark-card: #16213e;
+        --b2b-dark-border: #2a2a4a;
+        --b2b-dark-text: #e2e8f0;
+        --b2b-dark-text-muted: #94a3b8;
+    }
 
-.b2b-group-badge.pending {
-    animation: b2b-pulse-soft 2s ease-in-out infinite;
-}
+    .b2b-dashboard-header,
+    .b2b-company-info,
+    .summary-card,
+    .b2b-section,
+    .b2b-quick-actions,
+    .b2b-onboarding-section,
+    .erp-product-card,
+    .suggestion-card,
+    .checklist-item {
+        background: var(--b2b-dark-card);
+        border-color: var(--b2b-dark-border);
+        color: var(--b2b-dark-text);
+    }
 
-/* =================================================================
-   §10 — SUMMARY CARDS: Glassmorphism + accent
-   ================================================================= */
+    .b2b-welcome h1,
+    .section-header :is(h2, h3),
+    .b2b-company-info :is(h2, h3),
+    .b2b-quick-actions :is(h2, h3),
+    .card-content .card-value,
+    .detail-item .value,
+    .attendant-name,
+    .erp-product-name,
+    .erp-product-name a,
+    .suggestion-content h4 {
+        color: var(--b2b-dark-text);
+    }
 
-.summary-card {
-    position: relative;
-    overflow: hidden;
-    background: rgb(255 255 255 / 85%);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
+    .b2b-welcome-sub,
+    .card-content :is(h3, h4),
+    .detail-item .label,
+    .credit-row .credit-label,
+    .data-table td,
+    .suggestion-content p,
+    .attendant-department,
+    .checklist-label,
+    .erp-product-sku {
+        color: var(--b2b-dark-text-muted);
+    }
 
-.summary-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--b2b-ayo-primary, #A33B3B), var(--b2b-ayo-primary-dark, #8b1a1e));
-    opacity: 0;
-    transition: opacity 0.25s ease;
-}
+    .data-table th {
+        background: rgb(255 255 255 / 4%);
+        color: var(--b2b-dark-text-muted);
+    }
 
-.summary-card:hover::before {
-    opacity: 1;
-}
+    .data-table th,
+    .data-table td {
+        border-bottom-color: var(--b2b-dark-border);
+    }
 
-.credit-card::before {
-    background: linear-gradient(90deg, var(--b2b-ayo-primary, #A33B3B), #f87171);
-}
+    .action-item {
+        background: var(--b2b-dark-card);
+        border-color: var(--b2b-dark-border);
+        color: var(--b2b-dark-text);
+    }
 
-.purchases-card::before {
-    background: linear-gradient(90deg, var(--b2b-dash-vup-c6), var(--b2b-dash-vup-c7));
-}
+    .action-item:hover {
+        background: rgb(255 255 255 / 5%);
+        border-color: var(--b2b-ayo-primary);
+    }
 
-.quotes-card::before {
-    background: linear-gradient(90deg, var(--b2b-dash-vup-c8), var(--b2b-dash-vup-c9));
-}
+    .category-chip {
+        background: var(--b2b-dark-card);
+        border-color: var(--b2b-dark-border);
+        color: var(--b2b-dark-text);
+    }
 
-/* =================================================================
-   §11 — MOBILE: Scroll-snap summary cards
-   ================================================================= */
+    .category-chip:hover {
+        background: rgb(183 51 55 / 10%);
+        border-color: var(--b2b-ayo-primary);
+    }
 
-@media (width <= 640px) {
-    .b2b-summary-cards {
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        gap: 12px;
-        padding-bottom: 8px;
-        -webkit-overflow-scrolling: touch;
+    .contact-link {
+        background: var(--b2b-dark-card);
+        border-color: var(--b2b-dark-border);
+        color: var(--b2b-dark-text-muted);
     }
 
     .summary-card {
-        min-width: 80vw;
-        scroll-snap-align: center;
-        flex-shrink: 0;
+        background: rgb(22 33 62 / 90%);
+    }
+
+    /* Progress/credit bars in dark */
+    .progress-bar,
+    .credit-bar {
+        background: var(--b2b-dark-border);
+    }
+
+    /* Scrollbar dark */
+    .data-table::-webkit-scrollbar-track {
+        background: var(--b2b-dark-card);
+    }
+
+    .data-table::-webkit-scrollbar-thumb {
+        background: var(--b2b-dark-border);
+    }
+
+    /* Separator gradient in dark */
+    .b2b-company-info::after,
+    .b2b-summary-cards + .b2b-section::before,
+    .b2b-quick-actions::before {
+        background: linear-gradient(to right, transparent, var(--b2b-dark-border) 20%, var(--b2b-dark-border) 80%, transparent);
     }
 }
 
 /* =================================================================
-   §12 — SCROLLBAR (tables & horizontal scroll)
-   ================================================================= */
-
-.data-table::-webkit-scrollbar,
-.b2b-summary-cards::-webkit-scrollbar {
-    height: 5px;
-}
-
-.data-table::-webkit-scrollbar-track,
-.b2b-summary-cards::-webkit-scrollbar-track {
-    background: var(--b2b-dash-vup-bg-light);
-    border-radius: 3px;
-}
-
-.data-table::-webkit-scrollbar-thumb,
-.b2b-summary-cards::-webkit-scrollbar-thumb {
-    background: var(--b2b-dash-vup-border-mid);
-    border-radius: 3px;
-}
-
-/* =================================================================
-   §13 — PREFERS REDUCED MOTION
+   §18 — PREFERS REDUCED MOTION: Disable all animations
    ================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
@@ -611,11 +583,13 @@
     .erp-reorder-section,
     .categories-section,
     .summary-card,
-    .action-item {
+    .action-item,
+    .b2b-erp-pending-banner {
         animation: none;
     }
 
-    .b2b-group-badge.pending {
+    .b2b-group-badge.pending,
+    .b2b-erp-pending-banner .erp-pending-icon svg {
         animation: none;
     }
 
@@ -628,16 +602,22 @@
     .action-item:hover,
     .suggestion-card:hover,
     .erp-product-card:hover,
-    .category-chip:hover {
+    .category-chip:hover,
+    .checklist-item.pending:hover,
+    .contact-link:hover {
         transform: none;
     }
 }
 
 /* =================================================================
-   §14 — PRINT
+   §19 — PRINT STYLES
    ================================================================= */
 
 @media print {
+    .b2b-dashboard {
+        padding: 0;
+    }
+
     .b2b-quick-actions,
     .b2b-onboarding-section,
     .b2b-suggestions-section,
@@ -649,15 +629,679 @@
     .b2b-dashboard-header,
     .summary-card,
     .b2b-section,
-    .b2b-company-info,
-    .erp-product-card {
+    .b2b-company-info {
         break-inside: avoid;
         box-shadow: none;
-        border: 1px solid var(--b2b-dash-vup-light-gray);
+        border: 1px solid var(--awa-gray-300, #ccc);
     }
 
     .summary-card::before,
     .erp-product-card::after {
         display: none;
+    }
+}
+
+/* =================================================================
+   §20 — LAYOUT CORRECTIONS: Header, Nav, Sidebar, Grids
+   Scoped to body.b2b-account-dashboard to avoid global side effects.
+   Uses higher specificity to override awa-bundle-refinements.css.
+   ================================================================= */
+
+/* --- 20.1 Header: reduce height, compact logo, center elements --- */
+body.b2b-account-dashboard .header.awa-main-header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: auto;
+    min-height: 88px;
+    max-height: 110px;
+    display: flex;
+    align-items: center;
+}
+
+body.b2b-account-dashboard .logo img {
+    max-height: 65px;
+    width: auto;
+    height: auto;
+}
+
+body.b2b-account-dashboard .header.content {
+    max-height: 34px;
+}
+
+/* Vertical-align search, account and cart icons */
+body.b2b-account-dashboard .header.awa-main-header .block-search,
+body.b2b-account-dashboard .header.awa-main-header .header.links,
+body.b2b-account-dashboard .header.awa-main-header .minicart-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+/* --- 20.2 Navigation menu: consistent alignment --- */
+body.b2b-account-dashboard .header-control.header-nav {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    min-height: 48px;
+    max-height: 56px;
+}
+
+body.b2b-account-dashboard .header-nav .navigation,
+body.b2b-account-dashboard .header-nav .custommenu,
+body.b2b-account-dashboard .header-nav .nav-sections {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+/* --- 20.3 Breadcrumbs: reduce top gap --- */
+body.b2b-account-dashboard .breadcrumbs {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+/* --- 20.4 Page main: reduce excessive top padding --- */
+body.b2b-account-dashboard .page-main {
+    padding-top: 20px;
+}
+
+/* --- 20.5 Account container: consistent max-width --- */
+body.b2b-account-dashboard .columns {
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+/* --- 20.6 Sidebar: stable width, aligned top, better spacing --- */
+body.b2b-account-dashboard .sidebar.sidebar-main-1 {
+    flex: 0 0 248px;
+    width: 248px;
+    min-width: 220px;
+    max-width: 260px;
+    position: sticky;
+    top: 80px;
+}
+
+body.b2b-account-dashboard .sidebar .block-collapsible-nav .content {
+    border-radius: 4px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    overflow: hidden;
+    background: var(--awa-bg, #fff);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+}
+
+body.b2b-account-dashboard .sidebar .block-collapsible-nav .item a,
+body.b2b-account-dashboard .sidebar .block-collapsible-nav .item strong {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--awa-text, #333);
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    border-bottom: 1px solid var(--awa-bg-muted, #f5f5f5);
+    text-decoration: none;
+    transition: background-color 0.15s ease-out, color 0.15s ease-out;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.b2b-account-dashboard .sidebar .block-collapsible-nav .item:last-child a,
+body.b2b-account-dashboard .sidebar .block-collapsible-nav .item:last-child strong {
+    border-bottom: none;
+}
+
+body.b2b-account-dashboard .sidebar .block-collapsible-nav .item a:hover {
+    background: rgb(183 51 55 / 4%);
+    color: var(--awa-primary, #b73337);
+}
+
+body.b2b-account-dashboard .sidebar .block-collapsible-nav .item.current a,
+body.b2b-account-dashboard .sidebar .block-collapsible-nav .item.current strong {
+    background: rgb(183 51 55 / 10%);
+    color: var(--awa-primary, #b73337);
+    font-weight: 700;
+    border-left: 0;
+}
+
+/* --- 20.7 B2B Dashboard card: header alignment --- */
+body.b2b-account-dashboard .b2b-dashboard-header {
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    background: var(--awa-bg, #fff);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+body.b2b-account-dashboard .b2b-dashboard-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--awa-text, #333);
+    margin: 0 0 6px;
+    line-height: 1.2;
+}
+
+body.b2b-account-dashboard .b2b-welcome-sub {
+    font-size: 14px;
+    color: var(--awa-text-secondary, #666);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+body.b2b-account-dashboard .b2b-member-since {
+    font-size: 11px;
+    color: var(--awa-gray-430, #999);
+    background: var(--awa-bg-subtle, #f7f7f7);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+body.b2b-account-dashboard .trigger-b2b-tour {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    background: var(--awa-bg, #fff);
+    color: var(--awa-text, #333);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    white-space: nowrap;
+}
+
+body.b2b-account-dashboard .trigger-b2b-tour:hover {
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
+    background: rgb(183 51 55 / 4%);
+}
+
+/* Badges standardization */
+body.b2b-account-dashboard .b2b-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+body.b2b-account-dashboard .b2b-group-badge,
+body.b2b-account-dashboard .b2b-rfm-badge,
+body.b2b-account-dashboard .b2b-price-list-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    height: 24px;
+}
+
+/* --- 20.8 Onboarding section: header inline with progress --- */
+body.b2b-account-dashboard .b2b-onboarding-section {
+    padding: 20px 24px;
+    border-radius: 4px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    background: var(--awa-bg, #fff);
+    margin-bottom: 20px;
+}
+
+body.b2b-account-dashboard .onboarding-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+body.b2b-account-dashboard .onboarding-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.b2b-account-dashboard .onboarding-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+body.b2b-account-dashboard .onboarding-progress .progress-bar {
+    width: 140px;
+    height: 8px;
+    background: var(--awa-border, #e5e5e5);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+body.b2b-account-dashboard .onboarding-progress .progress-fill {
+    width: 100%;
+    height: 100%;
+    transform: scaleX(calc(var(--b2b-bar-width, 0) / 100));
+    transform-origin: left center;
+    background: var(--awa-primary, #b73337);
+    border-radius: 999px;
+    transition: transform 0.3s ease-out;
+}
+
+body.b2b-account-dashboard .onboarding-progress .progress-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--awa-text-secondary, #666);
+    white-space: nowrap;
+}
+
+/* Checklist: compact, better visual hierarchy */
+body.b2b-account-dashboard .onboarding-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+body.b2b-account-dashboard .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: var(--awa-bg-subtle, #f7f7f7);
+    min-height: 44px;
+}
+
+body.b2b-account-dashboard .checklist-item.done {
+    background: var(--awa-success-bg, #f0fdf4);
+}
+
+body.b2b-account-dashboard .checklist-item.done .checklist-label {
+    color: var(--awa-text-secondary, #666);
+    text-decoration: line-through;
+    text-decoration-color: var(--awa-gray-300, #ccc);
+}
+
+body.b2b-account-dashboard .checklist-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.b2b-account-dashboard .checklist-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--awa-text, #333);
+    flex: 1;
+}
+
+body.b2b-account-dashboard .checklist-action {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--awa-primary, #b73337);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body.b2b-account-dashboard .checklist-action:hover {
+    text-decoration: underline;
+}
+
+/* --- 20.9 Summary cards: balanced grid --- */
+body.b2b-account-dashboard .b2b-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+/* --- 20.10 Suggestions grid: 2x2 for 4 items --- */
+body.b2b-account-dashboard .suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+body.b2b-account-dashboard .suggestion-card {
+    padding: 16px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: 4px;
+    background: var(--awa-bg, #fff);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+body.b2b-account-dashboard .suggestion-card:hover {
+    border-color: var(--awa-primary, #b73337);
+    box-shadow: 0 2px 12px rgb(183 51 55 / 8%);
+}
+
+body.b2b-account-dashboard .suggestion-card h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--awa-text, #333);
+    margin: 0;
+}
+
+body.b2b-account-dashboard .suggestion-card .suggestion-content p {
+    font-size: 13px;
+    color: var(--awa-text-secondary, #666);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* --- 20.11 Quick Actions grid: max 3 columns desktop --- */
+body.b2b-account-dashboard .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+body.b2b-account-dashboard .action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: 4px;
+    background: var(--awa-bg, #fff);
+    text-decoration: none;
+    color: var(--awa-text, #333);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    min-height: 100px;
+    justify-content: center;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+body.b2b-account-dashboard .action-item:hover {
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
+    box-shadow: 0 2px 8px rgb(183 51 55 / 8%);
+    transform: translateY(-2px);
+}
+
+body.b2b-account-dashboard .action-item svg {
+    color: var(--awa-primary, #b73337);
+    width: 24px;
+    height: 24px;
+}
+
+/* --- 20.12 Categories section: clean spacing --- */
+body.b2b-account-dashboard .categories-section {
+    margin-bottom: 20px;
+}
+
+body.b2b-account-dashboard .categories-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+body.b2b-account-dashboard .category-chip {
+    padding: 8px 16px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--awa-text, #333);
+    background: var(--awa-bg, #fff);
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+body.b2b-account-dashboard .category-chip:hover {
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
+    background: rgb(183 51 55 / 4%);
+}
+
+/* --- 20.13 Attendant section: compact --- */
+body.b2b-account-dashboard .attendant-section {
+    margin-bottom: 20px;
+}
+
+body.b2b-account-dashboard .attendant-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--awa-bg-subtle, #f7f7f7);
+    border-radius: 4px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+}
+
+/* --- 20.14 Floating attendant button: position control --- */
+body.b2b-account-dashboard .fixed-right {
+    z-index: 99;
+}
+
+/* =================================================================
+   §21 — RESPONSIVE: Desktop 1366px (notebook)
+   ================================================================= */
+@media (max-width: 1399px) {
+    body.b2b-account-dashboard .columns {
+        max-width: 100%;
+        padding-left: 16px;
+        padding-right: 16px;
+        gap: 20px;
+    }
+
+    body.b2b-account-dashboard .sidebar.sidebar-main-1 {
+        flex: 0 0 220px;
+        width: 220px;
+    }
+
+    body.b2b-account-dashboard .suggestions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    body.b2b-account-dashboard .actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* =================================================================
+   §22 — RESPONSIVE: Tablet (768px – 1100px)
+   ================================================================= */
+@media (max-width: 1100px) {
+    body.b2b-account-dashboard .columns {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    body.b2b-account-dashboard .sidebar.sidebar-main-1 {
+        flex: none;
+        width: 100%;
+        max-width: 100%;
+        position: static;
+    }
+
+    body.b2b-account-dashboard .sidebar .block-collapsible-nav .content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+    }
+
+    body.b2b-account-dashboard .sidebar .block-collapsible-nav .item {
+        flex: 0 0 auto;
+    }
+
+    body.b2b-account-dashboard .sidebar .block-collapsible-nav .item a,
+    body.b2b-account-dashboard .sidebar .block-collapsible-nav .item strong {
+        white-space: nowrap;
+        padding: 8px 14px;
+        font-size: 12px;
+        min-height: 44px;
+        border-bottom: none;
+        border-right: 1px solid var(--awa-bg-muted, #f5f5f5);
+    }
+
+    body.b2b-account-dashboard .b2b-dashboard {
+        width: 100%;
+    }
+
+    body.b2b-account-dashboard .suggestions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    body.b2b-account-dashboard .actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* =================================================================
+   §23 — RESPONSIVE: Mobile (max-width: 767px)
+   ================================================================= */
+@media (max-width: 767px) {
+    body.b2b-account-dashboard .page-main {
+        padding-top: 12px;
+    }
+
+    body.b2b-account-dashboard .breadcrumbs {
+        margin-top: 8px;
+        margin-bottom: 4px;
+    }
+
+    body.b2b-account-dashboard .columns {
+        padding-left: 12px;
+        padding-right: 12px;
+        gap: 12px;
+    }
+
+    body.b2b-account-dashboard .b2b-dashboard-header {
+        padding: 16px;
+        flex-direction: column;
+    }
+
+    body.b2b-account-dashboard .b2b-dashboard-header h1 {
+        font-size: 20px;
+    }
+
+    body.b2b-account-dashboard .b2b-onboarding-section {
+        padding: 16px;
+    }
+
+    body.b2b-account-dashboard .onboarding-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    body.b2b-account-dashboard .onboarding-progress .progress-bar {
+        width: 100px;
+    }
+
+    body.b2b-account-dashboard .b2b-summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    body.b2b-account-dashboard .suggestions-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    body.b2b-account-dashboard .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    body.b2b-account-dashboard .action-item {
+        min-height: 80px;
+        padding: 12px 8px;
+    }
+
+    body.b2b-account-dashboard .attendant-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+
+    body.b2b-account-dashboard .attendant-contact {
+        justify-content: center;
+    }
+
+    /* Prevent floating button from blocking content */
+    body.b2b-account-dashboard .fixed-right {
+        bottom: 16px;
+        right: 12px;
+    }
+}
+
+/* =================================================================
+   §24 — RESPONSIVE: Small mobile (max-width: 390px)
+   ================================================================= */
+@media (max-width: 390px) {
+    body.b2b-account-dashboard .columns {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    body.b2b-account-dashboard .b2b-dashboard-header {
+        padding: 12px;
+    }
+
+    body.b2b-account-dashboard .b2b-dashboard-header h1 {
+        font-size: 18px;
+    }
+
+    body.b2b-account-dashboard .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    body.b2b-account-dashboard .action-item {
+        min-height: 72px;
+        font-size: 12px;
+        padding: 10px 6px;
+    }
+
+    body.b2b-account-dashboard .trigger-b2b-tour {
+        width: 100%;
+        min-height: 44px;
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+
+    body.b2b-account-dashboard .onboarding-progress {
+        width: 100%;
+    }
+
+    body.b2b-account-dashboard .onboarding-progress .progress-bar {
+        flex: 1;
+        width: auto;
+        max-width: none;
+    }
+
+    body.b2b-account-dashboard .b2b-dashboard,
+    body.b2b-account-dashboard .page-main .columns {
+        overflow-x: clip;
+        max-width: 100%;
     }
 }

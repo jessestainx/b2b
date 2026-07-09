@@ -5,7 +5,8 @@ define([], function () {
     const COOKIE_NAME = 'awa_cookies_accepted';
     const COOKIE_DAYS = 365;
 
-    function setCookie(name, value, days) {
+    function setCookie(name, value, days)
+    {
         let expires = '';
         if (days) {
             const date = new Date();
@@ -15,7 +16,8 @@ define([], function () {
         document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/; SameSite=Lax';
     }
 
-    function getCookie(name) {
+    function getCookie(name)
+    {
         const nameEQ = name + '=';
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
@@ -27,7 +29,8 @@ define([], function () {
         return null;
     }
 
-    function hasConsented() {
+    function hasConsented()
+    {
         try {
             if (localStorage.getItem(STORAGE_KEY)) {
                 return true;
@@ -38,7 +41,8 @@ define([], function () {
         return getCookie(COOKIE_NAME) !== null;
     }
 
-    function saveConsent(value) {
+    function saveConsent(value)
+    {
         try {
             localStorage.setItem(STORAGE_KEY, value);
         } catch (e) {
@@ -47,7 +51,8 @@ define([], function () {
         setCookie(COOKIE_NAME, value, COOKIE_DAYS);
     }
 
-    function syncBannerHeight() {
+    function syncBannerHeight()
+    {
         const banner = document.getElementById('awa-cookie-banner');
         if (!banner || !banner.classList.contains('awa-cookie-banner--visible')) {
             document.documentElement.style.removeProperty('--awa-cookie-banner-height');
@@ -62,7 +67,8 @@ define([], function () {
         });
     }
 
-    function setBannerActive(isActive) {
+    function setBannerActive(isActive)
+    {
         if (document.body) {
             document.body.classList.toggle('awa-cookie-banner-active', isActive);
         }
@@ -75,7 +81,8 @@ define([], function () {
         document.documentElement.style.removeProperty('--awa-cookie-banner-height');
     }
 
-    function hideBanner() {
+    function hideBanner()
+    {
         const banner = document.getElementById('awa-cookie-banner');
         if (banner) {
             let cleaned = false;
@@ -94,7 +101,8 @@ define([], function () {
         }
     }
 
-    function showBanner() {
+    function showBanner()
+    {
         const banner = document.getElementById('awa-cookie-banner');
         if (!banner) {
             return;
@@ -109,7 +117,8 @@ define([], function () {
         });
     }
 
-    function bindEvents() {
+    function bindEvents()
+    {
         const acceptBtn = document.getElementById('awa-cookie-accept');
         const declineBtn = document.getElementById('awa-cookie-decline');
 

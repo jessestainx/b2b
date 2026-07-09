@@ -29,12 +29,13 @@ class SectraSyncLogger
         ?int $sectraChave = null,
         string $level = 'info'
     ): void {
+        $maskedCnpj = $cnpj !== null ? $this->maskCnpj($cnpj) : null;
         $fullMessage = sprintf('[%s] %s', $eventType, $message);
         if ($sectraChave !== null) {
             $fullMessage .= sprintf(' (CHAVE Sectra: %d)', $sectraChave);
         }
-        if ($cnpj !== null) {
-            $fullMessage .= sprintf(' (CNPJ: %s)', $cnpj);
+        if ($maskedCnpj !== null) {
+            $fullMessage .= sprintf(' (CNPJ: %s)', $maskedCnpj);
         }
 
         $logLevel = $level === 'error' ? 'error' : ($level === 'success' ? 'success' : 'info');
@@ -53,7 +54,7 @@ class SectraSyncLogger
             $message,
             $customerId,
             $orderId,
-            $cnpj,
+            $maskedCnpj,
             $sectraChave,
             $level
         );
@@ -69,5 +70,15 @@ class SectraSyncLogger
             $magentoId,
             1
         );
+    }
+
+    private function maskCnpj(string $cnpj): string
+    {
+        $digits = preg_replace('/\D/', '', $cnpj);
+        if (strlen($digits) !== 14) {
+            return '***';
+        }
+
+        return substr($digits, 0, 2) . '********' . substr($digits, -4);
     }
 }

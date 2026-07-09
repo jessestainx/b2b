@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <!-- Criar cotação automática quando pedido for concluído -->
+    <event name="sales_order_place_after">
+        <observer name="rexisml_auto_create_quote"
+                  instance="GrupoAwamotos\RexisML\Observer\AutoCreateQuoteObserver"/>
+        <observer name="rexisml_track_conversion"
+                  instance="GrupoAwamotos\RexisML\Observer\TrackConversionObserver"/>
+    </event>
+
+</config>

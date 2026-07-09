@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Model de Recomendação
  * Representa um registro da tabela rexis_dataset_recomendacao
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Model;
 

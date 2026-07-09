@@ -1,0 +1,107 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Finance\PrintBoleto $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+$boleto = $block->getBoleto();
+if ($boleto === null) {
+    return;
+}
+
+$supported = !empty($boleto['supported']);
+?>
+<div id="b2b-print-boleto-root"
+     class="b2b-print-boleto"
+     data-mage-init='{"GrupoAwamotos_B2B/js/finance/print-boleto-page": {}}'>
+    <div class="b2b-print-boleto__toolbar">
+        <button type="button" class="b2b-print-boleto__btn" data-action="print-boleto">
+            <?= $escaper->escapeHtml(__('Imprimir')) ?>
+        </button>
+    </div>
+
+    <?php if ($supported && !empty($boleto['linha_digitavel'])): ?>
+        <div class="b2b-print-boleto__brand">
+            <div>
+                <p class="b2b-print-boleto__brand-name"><?= $escaper->escapeHtml(__('Boleto bancário')) ?></p>
+                <h2 class="b2b-print-boleto__doc-title"><?= $escaper->escapeHtml($boleto['nro_documento']) ?></h2>
+            </div>
+        </div>
+
+        <div class="b2b-print-boleto__card">
+            <section class="b2b-print-boleto__header">
+                <h1><?= $escaper->escapeHtml($boleto['beneficiario_nome']) ?></h1>
+                <p><?= $escaper->escapeHtml($boleto['beneficiario_cnpj']) ?></p>
+                <p><?= $escaper->escapeHtml($boleto['beneficiario_endereco']) ?></p>
+            </section>
+
+            <dl class="b2b-print-boleto__meta">
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Documento')) ?></dt>
+                    <dd><?= $escaper->escapeHtml($boleto['nro_documento']) ?></dd>
+                </div>
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Vencimento')) ?></dt>
+                    <dd><?= $escaper->escapeHtml($boleto['data_vencimento_fmt']) ?></dd>
+                </div>
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Valor do documento')) ?></dt>
+                    <dd class="is-value"><?= $escaper->escapeHtml($boleto['valor_devido_fmt']) ?></dd>
+                </div>
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Pagador')) ?></dt>
+                    <dd>
+                        <?= $escaper->escapeHtml($boleto['sacado_nome']) ?><br>
+                        <?= $escaper->escapeHtml($boleto['sacado_cnpj']) ?>
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
+        <section class="b2b-print-boleto__linha">
+            <p class="b2b-print-boleto__linha-label"><?= $escaper->escapeHtml(__('Linha digitável (use para pagar via internet banking ou app do banco)')) ?></p>
+            <div class="b2b-print-boleto__linha-valor"><?= $escaper->escapeHtml($boleto['linha_digitavel']) ?></div>
+        </section>
+
+        <section class="b2b-print-boleto__barcode">
+            <div id="b2b-boleto-barcode" data-barcode="<?= $escaper->escapeHtmlAttr($boleto['barcode']) ?>"></div>
+        </section>
+
+        <p class="b2b-print-boleto__footer-note">
+            <?= $escaper->escapeHtml(__('Documento gerado eletronicamente a partir dos dados do título financeiro. Confira sempre o valor e o vencimento antes de efetuar o pagamento.')) ?>
+        </p>
+
+        <script type="text/x-magento-init">
+        {
+            "#b2b-boleto-barcode": {
+                "GrupoAwamotos_B2B/js/finance/render-boleto-barcode": {}
+            }
+        }
+        </script>
+    <?php else: ?>
+        <div class="b2b-print-boleto__card">
+            <section class="b2b-print-boleto__header">
+                <h1><?= $escaper->escapeHtml(__('Dados do título')) ?></h1>
+            </section>
+            <dl class="b2b-print-boleto__meta">
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Documento')) ?></dt>
+                    <dd><?= $escaper->escapeHtml($boleto['nro_documento'] ?? '') ?></dd>
+                </div>
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Vencimento')) ?></dt>
+                    <dd><?= $escaper->escapeHtml($boleto['data_vencimento_fmt'] ?? '') ?></dd>
+                </div>
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Valor')) ?></dt>
+                    <dd class="is-value"><?= $escaper->escapeHtml($boleto['valor_devido_fmt'] ?? '') ?></dd>
+                </div>
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Beneficiário')) ?></dt>
+                    <dd><?= $escaper->escapeHtml($boleto['beneficiario_nome'] ?? '') ?></dd>
+                </div>
+            </dl>
+        </div>
+        <p class="b2b-print-boleto__aviso">
+            <?= $escaper->escapeHtml(__('Impressão do código de barras ainda não disponível para este banco/filial. Entre em contato com o financeiro para receber o boleto.')) ?>
+        </p>
+    <?php endif; ?>
+</div>

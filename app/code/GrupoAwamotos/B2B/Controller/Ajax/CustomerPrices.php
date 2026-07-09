@@ -133,7 +133,8 @@ class CustomerPrices implements HttpGetActionInterface
         $approvalStatus = $approvalAttr ? (string) $approvalAttr->getValue() : '';
         $erpCode = $this->erpCodeResolver->resolveForCustomerId($customerId, $customer);
 
-        if ($approvalStatus === '' || $approvalStatus === ApprovalStatus::STATUS_APPROVED) {
+        // Fail-closed: sem status explícito não deve liberar preços B2B.
+        if ($approvalStatus === ApprovalStatus::STATUS_APPROVED) {
             if ($this->config->hidePriceForNoErp() && $erpCode === null) {
                 return ['allowed' => false, 'erp_code' => null];
             }

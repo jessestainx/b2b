@@ -83,5 +83,40 @@
             "PRIMARY": true,
             "UNQ_ERP_IMG_HASH_SKU_IDX": true
         }
+    },
+    "grupoawamotos_erp_customer_price_state": {
+        "column": {
+            "state_id": true,
+            "customer_id": true,
+            "erp_code": true,
+            "price_list_code": true,
+            "synced_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "IDX_ERP_CUSTOMER_PRICE_STATE_PRICE_LIST": true,
+            "IDX_ERP_CUSTOMER_PRICE_STATE_SYNCED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "UNQ_ERP_CUSTOMER_PRICE_STATE_CUSTOMER": true,
+            "UNQ_ERP_CUSTOMER_PRICE_STATE_ERP_CODE": true
+        }
+    },
+    "grupoawamotos_erp_price_sync_state": {
+        "column": {
+            "state_id": true,
+            "sync_key": true,
+            "sync_value": true,
+            "updated_at": true,
+            "created_at": true
+        },
+        "index": {
+            "IDX_ERP_PRICE_SYNC_STATE_UPDATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "UNQ_ERP_PRICE_SYNC_STATE_KEY": true
+        }
     }
 }

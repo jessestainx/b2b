@@ -4,7 +4,8 @@ define([
 ], function ($) {
     'use strict';
 
-    function maskCnpj(value) {
+    function maskCnpj(value)
+    {
         let digits = String(value || '').replace(/\D/g, '');
 
         if (!digits) {
@@ -39,7 +40,8 @@ define([
             return;
         }
 
-        function schedule(callback) {
+        function schedule(callback)
+        {
             if (window.requestAnimationFrame) {
                 window.requestAnimationFrame(callback);
                 return;
@@ -48,7 +50,8 @@ define([
             window.setTimeout(callback, 0);
         }
 
-        function syncFieldAriaInvalidState() {
+        function syncFieldAriaInvalidState()
+        {
             $form.find('input, select, textarea').each(function () {
                 var $field = $(this);
                 let hasError = $field.hasClass('mage-error');
@@ -57,7 +60,8 @@ define([
             });
         }
 
-        function scrollToField($field) {
+        function scrollToField($field)
+        {
             let topOffset;
             let prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -75,7 +79,8 @@ define([
             $('html, body').stop(true).animate({ scrollTop: topOffset }, 220);
         }
 
-        function focusFirstInvalidField() {
+        function focusFirstInvalidField()
+        {
             var $firstInvalid = $form.find('input.mage-error, select.mage-error, textarea.mage-error').filter(':visible').first();
 
             if (!$firstInvalid.length) {
@@ -89,7 +94,30 @@ define([
             }, 40);
         }
 
-        function applyCnpjOrEmailMask() {
+        function syncUsernameInputMode()
+        {
+            let current;
+            let digits;
+            let nextMode;
+
+            if (!$cnpjOrEmailField.length) {
+                return;
+            }
+
+            current = String($cnpjOrEmailField.val() || '');
+
+            if (current.indexOf('@') !== -1 || /[a-z]/i.test(current)) {
+                nextMode = 'email';
+            } else {
+                digits = current.replace(/\D/g, '');
+                nextMode = digits.length > 0 ? 'numeric' : 'email';
+            }
+
+            $cnpjOrEmailField.attr('inputmode', nextMode);
+        }
+
+        function applyCnpjOrEmailMask()
+        {
             let current;
 
             if (!$cnpjOrEmailField.length) {
@@ -97,6 +125,7 @@ define([
             }
 
             current = String($cnpjOrEmailField.val() || '');
+            syncUsernameInputMode();
 
             // If user is typing email, don't force a mask.
             if (current.indexOf('@') !== -1 || /[a-z]/i.test(current)) {
@@ -106,13 +135,23 @@ define([
             $cnpjOrEmailField.val(maskCnpj(current));
         }
 
-        function updatePasswordToggleButton($toggle, isVisible) {
+        function updatePasswordToggleButton($toggle, isVisible)
+        {
+            let nextLabel = isVisible ? passwordHideAriaLabel : passwordShowAriaLabel;
+            let nextText = isVisible ? passwordHideText : passwordShowText;
+            var $textTarget = $toggle.find('[data-password-toggle-label]');
+
             $toggle.attr('aria-pressed', isVisible ? 'true' : 'false');
-            $toggle.attr('aria-label', isVisible ? passwordHideAriaLabel : passwordShowAriaLabel);
-            $toggle.text(isVisible ? passwordHideText : passwordShowText);
+            $toggle.attr('aria-label', nextLabel);
+            $toggle.attr('title', nextLabel);
+
+            if ($textTarget.length) {
+                $textTarget.text(nextText);
+            }
         }
 
-        function initPasswordToggles() {
+        function initPasswordToggles()
+        {
             $passwordToggles.each(function () {
                 var $toggle = $(this);
                 let targetSelector = $toggle.attr('data-target');
@@ -136,7 +175,8 @@ define([
             });
         }
 
-        function setSubmitLoadingState($button) {
+        function setSubmitLoadingState($button)
+        {
             var $label = $button.find('span').first();
             let originalLabel;
             var $overlay;
@@ -191,6 +231,7 @@ define([
                 applyCnpjOrEmailMask();
             });
 
+            syncUsernameInputMode();
             applyCnpjOrEmailMask();
         }
 

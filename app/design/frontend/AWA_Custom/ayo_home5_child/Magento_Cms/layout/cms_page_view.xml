@@ -1,11 +1,22 @@
 <?xml version="1.0"?>
 <!--
-    AWA Motos — CMS pages (About, Contact, FAQ, Terms, etc.)
-    Loads: awa-cms-404.css (prose styling + contact form)
+    AWA Motos — CMS pages (About, FAQ, Terms, políticas, atacado, etc.)
+    SSOT shell: awa-cms-shell-final.css (container 1280px, prose 800px, spacing 4–16px)
+    Final-wins sobre awa-institutional.css carregado pelo tema pai.
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <head>
-        <!-- AWA Design System — CMS prose styling -->
-    </head>
+    <head/>
+    <body>
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.cms.shell.final"
+                   template="Magento_Theme::html/awa-cms-shell-final-loader.phtml"
+                   after="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.align.grid.terminal.cms"
+                   template="Magento_Theme::html/awa-align-grid-terminal-loader.phtml"
+                   after="awa.cms.shell.final"/>
+        </referenceBlock>
+    </body>
 </page>

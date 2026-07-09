@@ -45,22 +45,28 @@ class SyncSectraProspectCommand extends Command
         $customerId = $input->getOption('customer-id');
         if ($customerId !== null) {
             $result = $this->prospectPipeline->processApprovedCustomer((int) $customerId);
+            $released = $this->orderImportGate->backfillOrderImportStatus();
+            $imported = $this->orderImportGate->syncImportedOrderFlags();
             $output->writeln(sprintf(
-                'Cliente #%d: %s (status: %s)',
+                'Cliente #%d: %s (status: %s) | Pedidos liberados: %d | Pedidos importados marcados: %d',
                 $result['customer_id'],
                 $result['message'],
-                $result['erp_customer_sync_status']
+                $result['erp_customer_sync_status'],
+                $released,
+                $imported
             ));
             return $result['success'] ? Command::SUCCESS : Command::FAILURE;
         }
 
         if ($input->getOption('poll')) {
             $validation = $this->prospectPipeline->pollPendingValidations();
+            $released = $this->orderImportGate->backfillOrderImportStatus();
             $imported = $this->orderImportGate->syncImportedOrderFlags();
             $output->writeln(sprintf(
-                'Validados: %d | Pendentes: %d | Pedidos importados marcados: %d',
+                'Validados: %d | Pendentes: %d | Pedidos liberados: %d | Pedidos importados marcados: %d',
                 $validation['validated'],
                 $validation['still_pending'],
+                $released,
                 $imported
             ));
             return Command::SUCCESS;

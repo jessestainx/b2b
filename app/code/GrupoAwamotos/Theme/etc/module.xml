@@ -3,8 +3,13 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
     <module name="GrupoAwamotos_Theme" setup_version="1.0.0">
         <sequence>
+            <module name="GrupoAwamotos_B2B"/>
             <module name="Magento_Cookie"/>
             <module name="Magento_Customer"/>
+            <module name="Magento_Sales"/>
+            <module name="Rokanthemes_RokanBase"/>
+            <module name="Rokanthemes_Themeoption"/>
+            <module name="Rokanthemes_QuickView"/>
             <module name="Rokanthemes_VerticalMenu"/>
             <module name="Rokanthemes_BestsellerProduct"/>
         </sequence>

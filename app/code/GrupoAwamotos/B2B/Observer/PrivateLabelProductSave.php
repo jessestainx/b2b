@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -19,7 +20,8 @@ class PrivateLabelProductSave implements ObserverInterface
     public function __construct(
         private readonly PrivateLabelDetector $detector,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {

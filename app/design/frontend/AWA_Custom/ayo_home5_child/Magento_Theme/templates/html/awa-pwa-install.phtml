@@ -1,0 +1,388 @@
+<?php
+/**
+ * AWA Motos - PWA Install Prompt (2026-06-28)
+ *
+ * Mostra um botão flutuante "Instalar App" quando o browser
+ * suporta PWA installation.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<div class="awa-pwa-install-prompt"
+     data-awa-pwa-install
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="awa-pwa-install-title"
+     hidden>
+
+    <div class="awa-pwa-install-prompt__backdrop" data-awa-pwa-install-close></div>
+
+    <div class="awa-pwa-install-prompt__card">
+        <button type="button"
+                class="awa-pwa-install-prompt__close"
+                data-awa-pwa-install-close
+                aria-label="<?= $block->escapeHtmlAttr(__('Fechar prompt de instalação')) ?>">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+
+        <div class="awa-pwa-install-prompt__header">
+            <div class="awa-pwa-install-prompt__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                    <line x1="12" y1="18" x2="12" y2="18.01"/>
+                </svg>
+            </div>
+
+            <h2 id="awa-pwa-install-title" class="awa-pwa-install-prompt__title">
+                <?= $block->escapeHtml(__('Instale o app da AWA Motos')) ?>
+            </h2>
+        </div>
+
+        <p class="awa-pwa-install-prompt__desc">
+            <?= $block->escapeHtml(__('Acesso rápido, navegação offline e ofertas exclusivas direto na tela inicial.')) ?>
+        </p>
+
+        <div class="awa-pwa-install-prompt__features">
+            <div class="awa-pwa-install-prompt__feature">
+                <span aria-hidden="true">📱</span>
+                <span><?= $block->escapeHtml(__('Rápido como app nativo')) ?></span>
+            </div>
+            <div class="awa-pwa-install-prompt__feature">
+                <span aria-hidden="true">🔌</span>
+                <span><?= $block->escapeHtml(__('Funciona offline')) ?></span>
+            </div>
+            <div class="awa-pwa-install-prompt__feature">
+                <span aria-hidden="true">🔔</span>
+                <span><?= $block->escapeHtml(__('Notificações de ofertas')) ?></span>
+            </div>
+        </div>
+
+        <div class="awa-pwa-install-prompt__actions">
+            <button type="button"
+                    class="awa-pwa-install-prompt__cta action primary"
+                    data-awa-pwa-install-accept
+                    aria-label="<?= $block->escapeHtmlAttr(__('Instalar app agora')) ?>">
+                <?= $block->escapeHtml(__('Instalar')) ?>
+            </button>
+            <button type="button"
+                    class="awa-pwa-install-prompt__decline"
+                    data-awa-pwa-install-close
+                    aria-label="<?= $block->escapeHtmlAttr(__('Agora não')) ?>">
+                <?= $block->escapeHtml(__('Agora não')) ?>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaPwaInstallInit) return;
+    w.__awaPwaInstallInit = true;
+
+    var STORAGE_KEY = 'awa-pwa-install-dismissed';
+    var DISMISS_DAYS = 7;
+    var MIN_SESSION_MS = 45000;
+    var promptEl = null;
+    var deferredPrompt = null;
+    var previousFocus = null;
+    var scrollLockClass = 'awa-pwa-install-open';
+
+    function ensureHomeModalScheduler() {
+        if (w.__awaRequestHomeModal) return;
+
+        var VISIT_KEY = 'awa-home-visited-before';
+        var SESSION_KEY = 'awa-home-modal-shown';
+        var visitType = 'first';
+
+        try {
+            visitType = localStorage.getItem(VISIT_KEY) ? 'returning' : 'first';
+        } catch (e) {}
+
+        w.__awaHomeVisitType = visitType;
+
+        function markVisited() {
+            try {
+                localStorage.setItem(VISIT_KEY, '1');
+            } catch (e) {}
+        }
+
+        if (d.readyState === 'complete') {
+            setTimeout(markVisited, 0);
+        } else {
+            w.addEventListener('load', function () {
+                setTimeout(markVisited, 0);
+            }, { once: true });
+        }
+
+        w.__awaRequestHomeModal = function (type, callback) {
+            try {
+                if (sessionStorage.getItem(SESSION_KEY) === '1') return false;
+            } catch (e) {}
+
+            if (w.__awaHomeModalPending) return false;
+            if (visitType === 'first' && type !== 'notification') return false;
+            if (visitType === 'returning' && type !== 'install') return false;
+
+            w.__awaHomeModalPending = type;
+
+            var run = function () {
+                try {
+                    if (sessionStorage.getItem(SESSION_KEY) === '1') return;
+                    sessionStorage.setItem(SESSION_KEY, '1');
+                } catch (e) {}
+                callback();
+            };
+
+            var schedule = function () {
+                setTimeout(run, MIN_SESSION_MS);
+            };
+
+            if (d.readyState === 'complete') {
+                schedule();
+            } else {
+                w.addEventListener('load', schedule, { once: true });
+            }
+
+            return true;
+        };
+    }
+
+    ensureHomeModalScheduler();
+
+    function isReturningVisitor() {
+        return w.__awaHomeVisitType === 'returning';
+    }
+
+    function shouldShow() {
+        if (!isReturningVisitor()) return false;
+        try {
+            var dismissed = localStorage.getItem(STORAGE_KEY);
+            if (!dismissed) return true;
+            var ts = parseInt(dismissed, 10);
+            if (!ts) return true;
+            return (Date.now() - ts) > (DISMISS_DAYS * 24 * 60 * 60 * 1000);
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function dismiss() {
+        try {
+            localStorage.setItem(STORAGE_KEY, String(Date.now()));
+        } catch (e) {}
+    }
+
+    function show() {
+        if (!promptEl) promptEl = d.querySelector('[data-awa-pwa-install]');
+        if (promptEl) {
+            previousFocus = d.activeElement;
+            promptEl.hidden = false;
+            d.documentElement.classList.add(scrollLockClass);
+            d.body.classList.add(scrollLockClass);
+            var cta = promptEl.querySelector('[data-awa-pwa-install-accept]');
+            if (cta) setTimeout(function () { cta.focus(); }, 100);
+        }
+    }
+
+    function hide() {
+        if (promptEl) {
+            promptEl.hidden = true;
+            d.documentElement.classList.remove(scrollLockClass);
+            d.body.classList.remove(scrollLockClass);
+            if (previousFocus && typeof previousFocus.focus === 'function') {
+                previousFocus.focus();
+            }
+        }
+    }
+
+    // Bind close handlers
+    d.addEventListener('click', function (e) {
+        var t = e.target.closest('[data-awa-pwa-install-close]');
+        if (t) { hide(); dismiss(); }
+    });
+
+    d.addEventListener('keydown', function (e) {
+        if ((e.key === 'Escape' || e.keyCode === 27) && promptEl && !promptEl.hidden) {
+            hide();
+            dismiss();
+        }
+    });
+
+    // Bind accept
+    d.addEventListener('click', function (e) {
+        var t = e.target.closest('[data-awa-pwa-install-accept]');
+        if (t) {
+            e.preventDefault();
+            hide();
+            dismiss();
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function (choice) {
+                    deferredPrompt = null;
+                });
+            }
+        }
+    });
+
+    // Capturar beforeinstallprompt
+    w.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (shouldShow()) {
+            w.__awaRequestHomeModal('install', show);
+        }
+    });
+
+    // iOS - detectar
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !w.MSStream;
+    if (isIOS && shouldShow() && !w.navigator.standalone) {
+        w.__awaRequestHomeModal('install', show);
+    }
+})(window, document);
+</script>
+
+<style>
+.awa-pwa-install-prompt {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99998 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.awa-pwa-install-prompt[hidden] { display: none !important; }
+html.awa-pwa-install-open,
+body.awa-pwa-install-open {
+    overflow: hidden !important;
+}
+.awa-pwa-install-prompt__backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px) !important;
+}
+.awa-pwa-install-prompt__card {
+    position: relative !important;
+    max-width: 400px !important;
+    width: calc(100% - 32px) !important;
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 28px 24px 24px !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4) !important;
+    text-align: center !important;
+    animation: awa-pwa-install-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+@keyframes awa-pwa-install-enter {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.awa-pwa-install-prompt__close {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    background: transparent !important;
+    border: 0 !important;
+    cursor: pointer !important;
+    padding: 8px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    border-radius: 6px !important;
+    color: #6b7280 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.awa-pwa-install-prompt__close:hover { background: #f3f4f6 !important; }
+/* Ícone ao lado do título (não empilhado) — evita o padrão "AI tell" de tile
+   64px centralizado acima do heading. Ref: achado Impeccable 2026-07-08. */
+.awa-pwa-install-prompt__header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    margin: 0 0 8px !important;
+    text-align: left !important;
+}
+.awa-pwa-install-prompt__icon {
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    width: 48px !important;
+    height: 48px !important;
+    background: linear-gradient(135deg, var(--awa-primary, #b73337) 0%, var(--awa-primary-hover, #a12d30) 100%) !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+}
+.awa-pwa-install-prompt__icon svg { width: 26px; height: 26px; }
+.awa-pwa-install-prompt__title {
+    margin: 0 !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    text-align: left !important;
+}
+.awa-pwa-install-prompt__desc {
+    margin: 0 0 16px !important;
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    line-height: 1.5 !important;
+}
+.awa-pwa-install-prompt__features {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+    padding: 12px !important;
+    background: #f9fafb !important;
+    border-radius: 8px !important;
+}
+.awa-pwa-install-prompt__feature {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+    color: #374151 !important;
+}
+.awa-pwa-install-prompt__feature span:first-child {
+    width: 24px;
+    text-align: center;
+}
+.awa-pwa-install-prompt__actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+.awa-pwa-install-prompt__cta {
+    background: #b73337 !important;
+    color: white !important;
+    border: 0 !important;
+    padding: 14px 24px !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    min-height: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.awa-pwa-install-prompt__cta:hover { background: #a12d30 !important; }
+.awa-pwa-install-prompt__decline {
+    background: transparent !important;
+    color: #6b7280 !important;
+    border: 0 !important;
+    padding: 8px !important;
+    cursor: pointer !important;
+    text-decoration: underline !important;
+    font-size: 12px !important;
+    min-height: 32px !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .awa-pwa-install-prompt__card { animation: none !important; }
+}
+</style>

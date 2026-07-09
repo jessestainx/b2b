@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
@@ -20,7 +21,8 @@ class WhatsAppCampaign implements CampaignInterface
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly Config $config,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc
@@ -167,7 +169,9 @@ class WhatsAppCampaign implements CampaignInterface
                 'b2b' => $b2b,
                 'message' => sprintf(
                     "Segmentos: Todos opt-in=%d | Compraram 90d=%d | B2B=%d",
-                    $allOptin, $recent90d, $b2b
+                    $allOptin,
+                    $recent90d,
+                    $b2b
                 ),
             ];
         } catch (\Exception $e) {

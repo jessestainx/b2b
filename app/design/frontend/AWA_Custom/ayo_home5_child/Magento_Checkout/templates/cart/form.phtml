@@ -9,6 +9,7 @@ declare(strict_types=1);
 // phpcs:disable Magento2.Templates.ThisInTemplate
 
 $mergedCells = ($this->helper(Magento\Tax\Helper\Data::class)->displayCartBothPrices() ? 2 : 1);
+$cartItems = $block->getItems();
 ?>
 <?= $block->getChildHtml('form_before') ?>
 <form action="<?= $block->escapeUrl($block->getUrl('checkout/cart/updatePost')) ?>"
@@ -52,7 +53,7 @@ $mergedCells = ($this->helper(Magento\Tax\Helper\Data::class)->displayCartBothPr
                     </th>
                 </tr>
             </thead>
-            <?php foreach ($block->getItems() as $_item): ?>
+            <?php foreach ($cartItems as $_item): ?>
                 <?= $block->getItemHtml($_item) ?>
             <?php endforeach ?>
         </table>
@@ -72,7 +73,7 @@ $mergedCells = ($this->helper(Magento\Tax\Helper\Data::class)->displayCartBothPr
             <a class="action continue awa-cart-action-continue"
                href="<?= $block->escapeUrl($block->getContinueShoppingUrl()) ?>"
                title="<?= $block->escapeHtml(__('Continue Shopping')) ?>">
-                <span><?= $block->escapeHtml(__('Continue Shopping')) ?></span>
+                <span><?= $block->escapeHtml(__('Continuar comprando')) ?></span>
             </a>
         <?php endif; ?>
         <?php if ($block->getViewModel()->isClearShoppingCartEnabled()): ?>

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <!-- REXIS ML section under Grupo Awamotos -->
+        <add id="GrupoAwamotos_RexisML::main"
+             title="REXIS ML"
+             module="GrupoAwamotos_RexisML"
+             parent="GrupoAwamotos_ERPIntegration::grupo_awamotos"
+             sortOrder="20"
+             resource="GrupoAwamotos_RexisML::rexisml"/>
+
+        <add id="GrupoAwamotos_RexisML::dashboard"
+             title="Dashboard ML"
+             module="GrupoAwamotos_RexisML"
+             sortOrder="10"
+             action="rexisml/dashboard/index"
+             resource="GrupoAwamotos_RexisML::dashboard"
+             parent="GrupoAwamotos_RexisML::main"/>
+
+        <add id="GrupoAwamotos_RexisML::recommendations"
+             title="Recomendacoes"
+             module="GrupoAwamotos_RexisML"
+             sortOrder="20"
+             action="rexisml/recommendations/index"
+             resource="GrupoAwamotos_RexisML::recommendations"
+             parent="GrupoAwamotos_RexisML::main"/>
+    </menu>
+</config>

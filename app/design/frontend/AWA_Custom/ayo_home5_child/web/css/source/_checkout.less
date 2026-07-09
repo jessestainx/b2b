@@ -47,7 +47,7 @@ body.checkout-index-index {
         .page-title {
             font-size: clamp(20px, 3vw, 28px);
             font-weight: @awa-weight-bold;
-            color: var(--awa-text, #333333);
+            color: var(--awa-text, @awa-color-text-primary);
             line-height: 1.15;
             margin: 0;
         }
@@ -62,7 +62,7 @@ body.checkout-index-index {
 .checkout-cart-index {
 
     .cart.table-wrapper {
-        border: 1px solid var(--awa-border, #e2e2e2);
+        border: 1px solid var(--awa-border, @awa-color-gray-soft);
         border-radius: @awa-border-radius-lg;
         overflow: hidden;
         margin-bottom: @awa-space-6;
@@ -74,13 +74,13 @@ body.checkout-index-index {
 
         thead th {
             padding: @awa-space-3 @awa-space-4;
-            background: var(--awa-bg-soft, #f7f7f7);
-            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+            background: var(--awa-bg-soft, @awa-color-bg-soft);
+            border-bottom: 1px solid var(--awa-border, @awa-color-gray-soft);
             font-size: var(--awa-fs-xs3);
             font-weight: @awa-weight-bold;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--awa-text-muted, #666666);
+            color: var(--awa-text-muted, @awa-color-text-muted);
             text-align: left;
 
             &.col.price,
@@ -91,7 +91,7 @@ body.checkout-index-index {
         }
 
         tbody tr.item-info {
-            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+            border-bottom: 1px solid var(--awa-border, @awa-color-gray-soft);
 
             &:last-child { border-bottom: none; }
 
@@ -109,7 +109,7 @@ body.checkout-index-index {
             .product-image-container {
                 width: var(--cart-photo-size, 80px);
                 height: var(--cart-photo-size, 80px);
-                border: 1px solid var(--awa-border, #e2e2e2);
+                border: 1px solid var(--awa-border, @awa-color-gray-soft);
                 border-radius: @awa-radius-xs;
                 overflow: hidden;
                 display: flex;
@@ -131,20 +131,20 @@ body.checkout-index-index {
             .product-item-name {
                 font-size: var(--awa-fs-xs);
                 font-weight: @awa-weight-semibold;
-                color: var(--awa-text, #333333);
+                color: var(--awa-text, @awa-color-text-primary);
                 line-height: 1.4;
                 margin-bottom: @awa-space-1;
 
                 a {
                     color: inherit;
                     text-decoration: none;
-                    &:hover { color: var(--awa-primary, #A33B3B); }
+                    &:hover { color: var(--awa-primary, @awa-color-primary-mid); }
                 }
             }
 
             .item-options {
                 font-size: var(--awa-fs-xs3);
-                color: var(--awa-text-muted, #666666);
+                color: var(--awa-text-muted, @awa-color-text-muted);
             }
         }
 
@@ -153,7 +153,7 @@ body.checkout-index-index {
         .col.subtotal {
             text-align: right;
             font-size: var(--awa-fs-xs);
-            color: var(--awa-text, #333333);
+            color: var(--awa-text, @awa-color-text-primary);
             font-weight: @awa-weight-semibold;
             white-space: nowrap;
         }
@@ -166,15 +166,15 @@ body.checkout-index-index {
                 width: 54px;
                 height: @awa-control-height-sm;
                 padding: 0 8px;
-                border: 1px solid var(--awa-border, #e2e2e2);
+                border: 1px solid var(--awa-border, @awa-color-gray-soft);
                 border-radius: @awa-radius-sm;
                 text-align: center;
                 font-size: var(--awa-font-sm);
-                color: var(--awa-text, #333333);
+                color: var(--awa-text, @awa-color-text-primary);
 
                 &:focus {
                     outline: none;
-                    border-color: var(--awa-primary, #A33B3B);
+                    border-color: var(--awa-primary, @awa-color-primary-mid);
                     box-shadow: @awa-focus-ring;
                 }
             }
@@ -188,16 +188,16 @@ body.checkout-index-index {
             justify-content: center;
             width: 28px;
             height: 28px;
-            border: 1px solid var(--awa-border, #e2e2e2);
+            border: 1px solid var(--awa-border, @awa-color-gray-soft);
             border-radius: @awa-radius-xs;
-            color: var(--awa-text-muted, #666666);
+            color: var(--awa-text-muted, @awa-color-text-muted);
             background: transparent;
             transition: border-color @awa-transition, color @awa-transition;
             cursor: pointer;
 
             &:hover {
-                border-color: var(--awa-primary, #A33B3B);
-                color: var(--awa-primary, #A33B3B);
+                border-color: var(--awa-primary, @awa-color-primary-mid);
+                color: var(--awa-primary, @awa-color-primary-mid);
             }
         }
     }
@@ -216,10 +216,10 @@ body.checkout-index-index {
             gap: @awa-space-2;
             min-height: @awa-control-height;
             padding: 0 @awa-space-4;
-            border: var(--awa-border-width) solid var(--awa-primary, #A33B3B);
+            border: var(--awa-border-width) solid var(--awa-primary, @awa-color-primary-mid);
             border-radius: @awa-radius-sm;
             background: transparent;
-            color: var(--awa-primary, #A33B3B);
+            color: var(--awa-primary, @awa-color-primary-mid);
             font-size: var(--awa-font-sm);
             font-weight: @awa-weight-semibold;
             text-decoration: none;
@@ -227,12 +227,12 @@ body.checkout-index-index {
             transition: background @awa-transition, color @awa-transition;
 
             &:hover {
-                background: var(--awa-primary, #A33B3B);
+                background: var(--awa-primary, @awa-color-primary-mid);
                 color: @awa-color-white;
             }
 
             &:focus-visible {
-                outline: var(--awa-border-width-strong) solid var(--awa-primary, #A33B3B);
+                outline: var(--awa-border-width-strong) solid var(--awa-primary, @awa-color-primary-mid);
                 outline-offset: 2px;
             }
         }
@@ -242,18 +242,18 @@ body.checkout-index-index {
             align-items: center;
             min-height: @awa-control-height;
             padding: 0 @awa-space-4;
-            border: 1px solid var(--awa-border, #e2e2e2);
+            border: 1px solid var(--awa-border, @awa-color-gray-soft);
             border-radius: @awa-radius-sm;
             background: @awa-color-white;
-            color: var(--awa-text-muted, #666666);
+            color: var(--awa-text-muted, @awa-color-text-muted);
             font-size: var(--awa-font-sm);
             font-weight: @awa-weight-medium;
             cursor: pointer;
             transition: border-color @awa-transition, color @awa-transition;
 
             &:hover {
-                border-color: var(--awa-text, #333333);
-                color: var(--awa-text, #333333);
+                border-color: var(--awa-text, @awa-color-text-primary);
+                color: var(--awa-text, @awa-color-text-primary);
             }
         }
     }
@@ -275,8 +275,8 @@ body.checkout-index-index {
     }
 
     .cart-summary {
-        background: var(--awa-bg-soft, #f7f7f7);
-        border: 1px solid var(--awa-border, #e2e2e2);
+        background: var(--awa-bg-soft, @awa-color-bg-soft);
+        border: 1px solid var(--awa-border, @awa-color-gray-soft);
         border-radius: @awa-border-radius-lg;
         padding: 24px;
         position: sticky;
@@ -285,10 +285,10 @@ body.checkout-index-index {
         .summary.title {
             font-size: var(--awa-fs-base);
             font-weight: @awa-weight-bold;
-            color: var(--awa-text, #333333);
+            color: var(--awa-text, @awa-color-text-primary);
             margin: 0 0 @awa-space-5;
             padding-bottom: @awa-space-3;
-            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+            border-bottom: 1px solid var(--awa-border, @awa-color-gray-soft);
         }
 
         .cart-totals {
@@ -306,7 +306,7 @@ body.checkout-index-index {
 
                 td, th {
                     font-size: var(--awa-font-sm);
-                    color: var(--awa-text, #333333);
+                    color: var(--awa-text, @awa-color-text-primary);
                     padding: @awa-space-2 0;
                 }
 
@@ -314,7 +314,7 @@ body.checkout-index-index {
                 td { text-align: right; font-weight: @awa-weight-medium; }
 
                 &.grand.totals {
-                    border-top: 1px solid var(--awa-border, #e2e2e2);
+                    border-top: 1px solid var(--awa-border, @awa-color-gray-soft);
 
                     th, td {
                         padding-top: 12px;
@@ -323,7 +323,7 @@ body.checkout-index-index {
                         font-weight: @awa-weight-bold;
                     }
 
-                    td { color: var(--awa-primary, #A33B3B); }
+                    td { color: var(--awa-primary, @awa-color-primary-mid); }
                 }
             }
         }
@@ -340,7 +340,7 @@ body.checkout-index-index {
             margin-top: @awa-space-5;
             border-radius: @awa-radius-sm;
             border: none;
-            background: var(--awa-primary, #A33B3B); // sobrescreve gradiente do tema pai
+            background: var(--awa-primary, @awa-color-primary-mid); // sobrescreve gradiente do tema pai
             color: @awa-color-white;
             font-size: var(--awa-font-md);
             font-weight: 700;
@@ -350,12 +350,12 @@ body.checkout-index-index {
             box-shadow: 0 4px 14px fade(@awa-color-primary, 25%);
 
             &:hover {
-                background: var(--awa-primary-dark, #8e2629);
+                background: var(--awa-primary-dark, @awa-color-primary-dark);
                 box-shadow: 0 6px 20px fade(@awa-color-primary, 30%);
             }
 
             &:focus-visible {
-                outline: var(--awa-border-width-strong) solid var(--awa-primary, #A33B3B);
+                outline: var(--awa-border-width-strong) solid var(--awa-primary, @awa-color-primary-mid);
                 outline-offset: 2px;
             }
         }
@@ -363,13 +363,13 @@ body.checkout-index-index {
         // Cupom de desconto
         .block.discount {
             margin-top: @awa-space-5;
-            border-top: 1px solid var(--awa-border, #e2e2e2);
+            border-top: 1px solid var(--awa-border, @awa-color-gray-soft);
             padding-top: @awa-space-4;
 
             .title {
                 font-size: var(--awa-font-sm);
                 font-weight: @awa-weight-semibold;
-                color: var(--awa-text, #333333);
+                color: var(--awa-text, @awa-color-text-primary);
                 cursor: pointer;
                 user-select: none;
             }
@@ -383,14 +383,14 @@ body.checkout-index-index {
                     flex: 1;
                     height: @awa-control-height-sm;
                     padding: 0 @awa-space-3;
-                    border: 1px solid var(--awa-border, #e2e2e2);
+                    border: 1px solid var(--awa-border, @awa-color-gray-soft);
                     border-radius: @awa-radius-sm;
                     font-size: var(--awa-font-sm);
-                    color: var(--awa-text, #333333);
+                    color: var(--awa-text, @awa-color-text-primary);
 
                     &:focus {
                         outline: none;
-                        border-color: var(--awa-primary, #A33B3B);
+                        border-color: var(--awa-primary, @awa-color-primary-mid);
                         box-shadow: @awa-focus-ring;
                     }
                 }
@@ -399,9 +399,9 @@ body.checkout-index-index {
                     min-height: @awa-control-height-sm;
                     padding: 0 @awa-space-4;
                     border-radius: @awa-radius-sm;
-                    border: var(--awa-border-width) solid var(--awa-primary, #A33B3B);
+                    border: var(--awa-border-width) solid var(--awa-primary, @awa-color-primary-mid);
                     background: transparent;
-                    color: var(--awa-primary, #A33B3B);
+                    color: var(--awa-primary, @awa-color-primary-mid);
                     font-size: var(--awa-font-sm);
                     font-weight: @awa-weight-semibold;
                     cursor: pointer;
@@ -409,12 +409,12 @@ body.checkout-index-index {
                     white-space: nowrap;
 
                     &:hover {
-                        background: var(--awa-primary, #A33B3B);
+                        background: var(--awa-primary, @awa-color-primary-mid);
                         color: @awa-color-white;
                     }
 
                     &:focus-visible {
-                        outline: var(--awa-border-width-strong) solid var(--awa-primary, #A33B3B);
+                        outline: var(--awa-border-width-strong) solid var(--awa-primary, @awa-color-primary-mid);
                         outline-offset: 2px;
                     }
                 }
@@ -449,7 +449,7 @@ body.checkout-index-index {
         list-style: none;
         padding: 0;
         margin: 0 0 @awa-space-7;
-        border-bottom: 2px solid var(--awa-border, #e2e2e2);
+        border-bottom: 2px solid var(--awa-border, @awa-color-gray-soft);
 
         .opc-progress-bar-item {
             flex: 1;
@@ -460,11 +460,11 @@ body.checkout-index-index {
             span {
                 font-size: var(--awa-font-sm);
                 font-weight: @awa-weight-semibold;
-                color: var(--awa-text-muted, #666666);
+                color: var(--awa-text-muted, @awa-color-text-muted);
             }
 
             &._active span {
-                color: var(--awa-primary, #A33B3B);
+                color: var(--awa-primary, @awa-color-primary-mid);
             }
 
             &._active::after,
@@ -475,7 +475,7 @@ body.checkout-index-index {
                 left: 0;
                 width: 100%;
                 height: 2px;
-                background: var(--awa-primary, #A33B3B);
+                background: var(--awa-primary, @awa-color-primary-mid);
             }
         }
     }
@@ -486,8 +486,8 @@ body.checkout-index-index {
         .step-title {
             font-size: var(--awa-font-lg);
             font-weight: @awa-weight-bold;
-            color: var(--awa-text, #333333);
-            border-bottom: 1px solid var(--awa-border, #e2e2e2);
+            color: var(--awa-text, @awa-color-text-primary);
+            border-bottom: 1px solid var(--awa-border, @awa-color-gray-soft);
             padding-bottom: @awa-space-3;
             margin-bottom: @awa-space-5;
         }
@@ -502,7 +502,7 @@ body.checkout-index-index {
                     display: block;
                     font-size: var(--awa-font-sm);
                     font-weight: @awa-weight-semibold;
-                    color: var(--awa-text, #333333);
+                    color: var(--awa-text, @awa-color-text-primary);
                     margin-bottom: 4px;
                 }
 
@@ -512,21 +512,21 @@ body.checkout-index-index {
                     width: 100%;
                     height: var(--form-input-height, @awa-control-height);
                     padding: 0 12px;
-                    border: 1px solid var(--awa-border, #e2e2e2);
+                    border: 1px solid var(--awa-border, @awa-color-gray-soft);
                     border-radius: @awa-radius-sm;
                     font-size: var(--awa-font-sm);
-                    color: var(--awa-text, #333333);
+                    color: var(--awa-text, @awa-color-text-primary);
                     background: @awa-color-white;
                     transition: border-color @awa-transition;
 
                     &:focus {
                         outline: none;
-                        border-color: var(--awa-primary, #A33B3B);
+                        border-color: var(--awa-primary, @awa-color-primary-mid);
                         box-shadow: @awa-focus-ring;
                     }
 
                     &._error {
-                        border-color: var(--awa-primary, #A33B3B);
+                        border-color: var(--awa-primary, @awa-color-primary-mid);
                     }
                 }
 
@@ -538,7 +538,7 @@ body.checkout-index-index {
 
                 .mage-error {
                     font-size: var(--awa-fs-xs3);
-                    color: var(--awa-primary, #A33B3B);
+                    color: var(--awa-primary, @awa-color-primary-mid);
                     margin-top: 4px;
                 }
             }
@@ -554,7 +554,7 @@ body.checkout-index-index {
             padding: @awa-space-3 @awa-space-7;
             border-radius: @awa-radius-sm;
             border: none;
-            background: var(--awa-primary, #A33B3B);
+            background: var(--awa-primary, @awa-color-primary-mid);
             color: @awa-color-white;
             font-size: var(--awa-font-md);
             font-weight: 700;
@@ -562,7 +562,7 @@ body.checkout-index-index {
             transition: background-color @awa-transition;
 
             &:hover {
-                background: var(--awa-primary-dark, #8e2629);
+                background: var(--awa-primary-dark, @awa-color-primary-dark);
             }
 
             &[disabled],
@@ -576,8 +576,8 @@ body.checkout-index-index {
 
     // Resumo do pedido (sidebar direita)
     .opc-summary-wrapper {
-        background: var(--awa-bg-soft, #f7f7f7);
-        border: 1px solid var(--awa-border, #e2e2e2);
+        background: var(--awa-bg-soft, @awa-color-bg-soft);
+        border: 1px solid var(--awa-border, @awa-color-gray-soft);
         border-radius: @awa-border-radius-lg;
         padding: 24px;
         position: sticky;
@@ -587,10 +587,10 @@ body.checkout-index-index {
             .title {
                 font-size: var(--awa-font-md);
                 font-weight: @awa-weight-bold;
-                color: var(--awa-text, #333333);
+                color: var(--awa-text, @awa-color-text-primary);
                 margin: 0 0 @awa-space-5;
                 padding-bottom: @awa-space-3;
-                border-bottom: 1px solid var(--awa-border, #e2e2e2);
+                border-bottom: 1px solid var(--awa-border, @awa-color-gray-soft);
             }
 
             .items-in-cart {
@@ -598,13 +598,13 @@ body.checkout-index-index {
                     display: flex;
                     gap: @awa-space-3;
                     padding: @awa-space-3 0;
-                    border-bottom: 1px solid var(--awa-border, #e2e2e2);
+                    border-bottom: 1px solid var(--awa-border, @awa-color-gray-soft);
 
                     .product-image-container {
                         width: var(--checkout-photo-size, 56px);
                         height: var(--checkout-photo-size, 56px);
                         flex-shrink: 0;
-                        border: 1px solid var(--awa-border, #e2e2e2);
+                        border: 1px solid var(--awa-border, @awa-color-gray-soft);
                         border-radius: @awa-radius-xs;
                         overflow: hidden;
                         background: @awa-color-white;
@@ -625,7 +625,7 @@ body.checkout-index-index {
                         .product-item-name {
                             font-size: var(--awa-font-sm);
                             font-weight: @awa-weight-semibold;
-                            color: var(--awa-text, #333333);
+                            color: var(--awa-text, @awa-color-text-primary);
                             overflow: hidden;
                             display: -webkit-box;
                             -webkit-line-clamp: 2;
@@ -635,7 +635,7 @@ body.checkout-index-index {
                         .subtotal .price {
                             font-size: var(--awa-font-sm);
                             font-weight: @awa-weight-bold;
-                            color: var(--awa-primary, #A33B3B);
+                            color: var(--awa-primary, @awa-color-primary-mid);
                         }
                     }
                 }
@@ -651,14 +651,14 @@ body.checkout-index-index {
                     td, th {
                         padding: @awa-space-1 0;
                         font-size: var(--awa-font-sm);
-                        color: var(--awa-text, #333333);
+                        color: var(--awa-text, @awa-color-text-primary);
                     }
 
                     th { font-weight: @awa-weight-normal; }
                     td { text-align: right; font-weight: @awa-weight-medium; }
 
                     &.grand.totals {
-                        border-top: 1px solid var(--awa-border, #e2e2e2);
+                        border-top: 1px solid var(--awa-border, @awa-color-gray-soft);
 
                         th, td {
                             padding-top: @awa-space-3;
@@ -666,7 +666,7 @@ body.checkout-index-index {
                             font-weight: @awa-weight-bold;
                         }
 
-                        td { color: var(--awa-primary, #A33B3B); }
+                        td { color: var(--awa-primary, @awa-color-primary-mid); }
                     }
                 }
             }

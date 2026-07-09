@@ -1,0 +1,21 @@
+application:
+  actions: actions
+  runtimeManifest:
+    packages:
+      awa-whatsapp:
+        license: Apache-2.0
+        actions:
+          notify-order:
+            function: actions/notify-order/index.js
+            web: 'raw'
+            runtime: nodejs:22
+            limits:
+              timeout: 30000
+            inputs:
+              LOG_LEVEL: info
+              WEBHOOK_SHARED_SECRET: $WEBHOOK_SHARED_SECRET
+              WHATSAPP_TOKEN: $WHATSAPP_TOKEN
+              WHATSAPP_PHONE_ID: $WHATSAPP_PHONE_ID
+            annotations:
+              require-adobe-auth: false
+              final: true

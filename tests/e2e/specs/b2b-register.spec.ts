@@ -1,12 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { targetUrl, withCacheBuster } from '../helpers/target-url';
+import { blockOptionalThirdParty } from '../helpers/third-party-block';
 
-const REGISTER_URL = process.env.B2B_REGISTER_URL || 'https://awamotos.com/b2b/register/';
+const REGISTER_URL = targetUrl(process.env.B2B_REGISTER_URL || '/b2b/register/', 'b2b-register');
 
 test.describe('B2B register — auth shell e wizard', () => {
   test.describe.configure({ timeout: 60_000 });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${REGISTER_URL}?register-smoke=${Date.now()}`, {
+    await blockOptionalThirdParty(page.context());
+    await page.goto(withCacheBuster(REGISTER_URL, 'register-smoke'), {
       waitUntil: 'domcontentloaded',
       timeout: 60_000,
     });

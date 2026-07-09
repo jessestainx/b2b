@@ -1,8 +1,0 @@
-{
-  "width": 309,
-  "gridTemplateColumns": "308.641px",
-  "gridGap": "16px",
-  "padding": "0px",
-  "firstItemWidth": 309
-}
-Sidebar: { display: 'block', width: 237 }

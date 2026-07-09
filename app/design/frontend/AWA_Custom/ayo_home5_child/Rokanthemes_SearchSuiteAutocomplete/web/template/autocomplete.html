@@ -68,8 +68,8 @@
                             <div class="awa-ac-product-sku" data-bind="visible: sku">
                                 SKU: <span data-bind="text: sku"></span>
                             </div>
-                            <!-- ko if: fitment -->
-                            <div class="awa-ac-product-fitment" data-bind="text: fitment"
+                            <!-- ko if: ($data && $data.fitment) -->
+                            <div class="awa-ac-product-fitment" data-bind="text: $data.fitment"
                                  title="Compatibilidade" aria-label="Compatibilidade do produto"></div>
                             <!-- /ko -->
                             <div class="awa-ac-product-price" data-bind="html: price, visible: price"></div>

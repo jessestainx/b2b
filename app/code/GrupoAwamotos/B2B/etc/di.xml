@@ -5,38 +5,18 @@
     <preference for="GrupoAwamotos\B2B\CommercialPanel\Api\PortfolioScopeInterface"
                 type="GrupoAwamotos\B2B\CommercialPanel\Model\PortfolioScope"/>
 
-    <!-- Filtrar grid de pedidos no admin: atendente vê apenas pedidos dos seus clientes -->
-    <type name="Magento\Sales\Model\ResourceModel\Order\Grid\Collection">
-        <plugin name="grupoawamotos_b2b_attendant_order_grid"
-                type="GrupoAwamotos\B2B\Plugin\Admin\AttendantOrderGridPlugin"/>
-    </type>
-
-    <!-- Filtrar grid de clientes no admin: atendente vê apenas seus clientes -->
-    <type name="Magento\Customer\Model\ResourceModel\Grid\Collection">
-        <plugin name="grupoawamotos_b2b_attendant_customer_grid"
-                type="GrupoAwamotos\B2B\Plugin\Admin\AttendantCustomerGridPlugin"/>
-    </type>
-
-    <!-- Redirecionar atendentes para o painel pessoal após login no admin -->
-    <type name="Magento\Backend\Controller\Adminhtml\Auth\Login">
-        <plugin name="grupoawamotos_b2b_attendant_login_redirect"
-                type="GrupoAwamotos\B2B\Plugin\Admin\AttendantLoginRedirectPlugin"/>
-    </type>
-
-    <!-- Filtrar grid de cotações B2B no admin -->
-    <type name="GrupoAwamotos\B2B\Model\ResourceModel\QuoteRequest\Collection">
-        <plugin name="grupoawamotos_b2b_attendant_quote_grid"
-                type="GrupoAwamotos\B2B\Plugin\Admin\AttendantQuoteGridPlugin"/>
-    </type>
-
     <!-- Data sources para UI Components (CollectionFactory) -->
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="grupoawamotos_b2b_attendant_listing_data_source" xsi:type="string">GrupoAwamotos\B2B\Model\ResourceModel\Attendant\Grid\Collection</item>
+                <item name="grupoawamotos_b2b_customer_listing_data_source" xsi:type="string">Magento\Customer\Model\ResourceModel\Grid\Collection</item>
                 <item name="grupoawamotos_b2b_company_listing_data_source" xsi:type="string">GrupoAwamotos\B2B\Model\ResourceModel\Company\Grid\Collection</item>
                 <item name="grupoawamotos_b2b_credit_listing_data_source" xsi:type="string">GrupoAwamotos\B2B\Model\ResourceModel\CreditLimit\Grid\Collection</item>
                 <item name="grupoawamotos_b2b_quote_listing_data_source" xsi:type="string">GrupoAwamotos\B2B\Model\ResourceModel\QuoteRequest\Grid\Collection</item>
+                <item name="grupoawamotos_b2b_notification_listing_data_source" xsi:type="string">GrupoAwamotos\B2B\Model\ResourceModel\NotificationLog\Grid\Collection</item>
+                <item name="grupoawamotos_b2b_approval_listing_data_source" xsi:type="string">GrupoAwamotos\B2B\Model\ResourceModel\OrderApproval\Grid\Collection</item>
+                <item name="b2b_carrier_listing_data_source" xsi:type="string">GrupoAwamotos\B2B\Model\ResourceModel\Carrier\Grid\Collection</item>
             </argument>
         </arguments>
     </type>
@@ -47,6 +27,13 @@
 
     <preference for="GrupoAwamotos\B2B\Api\PriceVisibilityInterface"
                 type="GrupoAwamotos\B2B\Model\PriceVisibility"/>
+
+    <type name="GrupoAwamotos\B2B\Model\PriceVisibility">
+        <arguments>
+            <argument name="erpCodeResolver" xsi:type="object">GrupoAwamotos\B2B\Model\ErpCodeResolver</argument>
+            <argument name="purchaseHistory" xsi:type="object">GrupoAwamotos\ERPIntegration\Model\PurchaseHistory</argument>
+        </arguments>
+    </type>
 
     <preference for="GrupoAwamotos\B2B\Api\AttendantRepositoryInterface"
                 type="GrupoAwamotos\B2B\Model\AttendantRepository"/>
@@ -59,6 +46,10 @@
 
     <preference for="GrupoAwamotos\B2B\Api\Data\WhatsAppMessageInterface"
                 type="GrupoAwamotos\B2B\Model\Notification\WhatsAppMessage"/>
+
+    <!-- Sectra manual import gate must use real B2B customer payload rules -->
+    <preference for="GrupoAwamotos\ERPIntegration\Api\B2bOrderPullCustomerDataInterface"
+                type="GrupoAwamotos\B2B\Model\Erp\OrderPullCustomerData"/>
 
     <!-- CLI Commands Registration -->
     <type name="Magento\Framework\Console\CommandListInterface">
@@ -90,6 +81,38 @@
                 <item name="b2b_sectra_cancel_stuck_orders" xsi:type="object">GrupoAwamotos\B2B\Console\Command\CancelStuckOrdersCommand</item>
             </argument>
         </arguments>
+    </type>
+
+    <!-- Checkout REST (webapi_rest) usa area global — billing fallback precisa estar aqui -->
+    <type name="Magento\Checkout\Api\PaymentInformationManagementInterface">
+        <plugin name="grupoawamotos_b2b_ensure_billing_address"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\EnsureBillingAddressPlugin"
+                sortOrder="1"/>
+    </type>
+
+    <type name="Magento\Checkout\Api\GuestPaymentInformationManagementInterface">
+        <plugin name="grupoawamotos_b2b_ensure_billing_address_guest"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\EnsureBillingAddressGuestPlugin"
+                sortOrder="1"/>
+    </type>
+
+    <type name="Magento\Checkout\Api\ShippingInformationManagementInterface">
+        <plugin name="grupoawamotos_b2b_ensure_shipping_address"
+                type="GrupoAwamotos\B2B\Plugin\Checkout\EnsureShippingAddressPlugin"
+                sortOrder="1"/>
+    </type>
+
+    <!-- Fase 7 (2026-07-03): remove filtro/ordenação de preço quando o preço real está escondido (gate B2B) -->
+    <type name="Magento\Catalog\Model\Layer\FilterList">
+        <plugin name="grupoawamotos_b2b_hide_price_layered_filter"
+                type="GrupoAwamotos\B2B\Plugin\Catalog\HidePriceLayeredFilterPlugin"
+                sortOrder="10"/>
+    </type>
+
+    <type name="Magento\Catalog\Block\Product\ProductList\Toolbar">
+        <plugin name="grupoawamotos_b2b_hide_price_sort_order"
+                type="GrupoAwamotos\B2B\Plugin\Catalog\HidePriceSortOrderPlugin"
+                sortOrder="10"/>
     </type>
 
 </config>

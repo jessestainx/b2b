@@ -22,22 +22,13 @@
         }
     }
 
-    function ensureShelfHeaderNavSlots() {
-        document.querySelectorAll('.awa-carousel-section > .container').forEach(function (container) {
-            var header = container.querySelector(':scope > .awa-section-header, :scope > header.awa-section-header');
-            var placeholder;
+    function cleanupLegacyHeaderNavState() {
+        document.querySelectorAll('.awa-owl-nav--header-slot').forEach(function (slot) {
+            slot.remove();
+        });
 
-            if (!header || header.querySelector('.awa-owl-nav')) {
-                return;
-            }
-
-            placeholder = document.createElement('div');
-            placeholder.className = 'awa-owl-nav awa-owl-nav--header-slot';
-            placeholder.setAttribute('aria-hidden', 'true');
-            placeholder.innerHTML =
-                '<span class="awa-owl-nav__btn awa-owl-nav__btn--prev" aria-hidden="true"></span>' +
-                '<span class="awa-owl-nav__btn awa-owl-nav__btn--next" aria-hidden="true"></span>';
-            header.appendChild(placeholder);
+        document.querySelectorAll('.awa-carousel-nav-host').forEach(function (header) {
+            header.classList.remove('awa-carousel-nav-host', 'has-carousel-autoplay-toggle', 'is-awa-not-scrollable');
         });
     }
 
@@ -90,7 +81,7 @@
         return true;
     }
 
-    function runHomeBootstrapDefer(reason) {
+    function runHomeBootstrapDefer() {
         if (typeof window.__awaHomeBootstrapBoot !== 'function') {
             return;
         }
@@ -119,17 +110,17 @@
         booted = true;
         appendShelfScript();
         if (reason === 'intent') {
-            runHomeBootstrapDefer(reason);
+            runHomeBootstrapDefer();
         }
     }
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
-            ensureShelfHeaderNavSlots();
+            cleanupLegacyHeaderNavState();
             boot('dom-ready');
         }, { once: true });
     } else {
-        ensureShelfHeaderNavSlots();
+        cleanupLegacyHeaderNavState();
         boot('already-ready');
     }
 

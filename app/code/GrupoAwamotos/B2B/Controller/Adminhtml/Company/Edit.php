@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Company;
 
 use GrupoAwamotos\B2B\Model\CompanyFactory;
@@ -18,7 +20,8 @@ class Edit extends Action implements HttpGetActionInterface
         private readonly PageFactory $resultPageFactory,
         private readonly CompanyFactory $companyFactory,
         private readonly CompanyResource $companyResource
-    ) { parent::__construct($context); }
+    ) { parent::__construct($context);
+    }
 
     public function execute()
     {

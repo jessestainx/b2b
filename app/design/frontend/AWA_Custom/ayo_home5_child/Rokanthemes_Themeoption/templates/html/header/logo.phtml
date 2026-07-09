@@ -12,15 +12,20 @@ $logoUrl = $block->getUrl('');
 $logoSrc = $block->getLogoSrc();
 $logoAlt = $block->getLogoAlt();
 
-// CLS: atributos = tamanho renderizado (não dimensões do PNG 161×92 — evita shift ~0.31 no LH)
-$logoWidth = 70;
-$logoHeight = 40;
+// CLS: atributos = dimensões naturais do PNG (161×92, ratio 1.75) — coincidem com a
+// largura aplicada via CSS (.logo img { width:161px; height:auto }). O navegador deriva
+// o aspect-ratio dos atributos e reserva a altura correta em todos os breakpoints (desktop
+// 161×92, mobile 132×~75), eliminando o conflito atributo↔CSS e o layout shift.
+$logoWidth = 161;
+$logoHeight = 92;
 $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 // Home: LCP é o hero slider — logo sem fetchpriority=high (evita competição de bandwidth/prioridade)
 $logoFetchPriority = $isHomePage ? '' : ' fetchpriority="high"';
 ?>
 <div class="logo">
-    <a href="<?= $escaper->escapeUrl($logoUrl) ?>" title="<?= $escaper->escapeHtmlAttr($storeName) ?>">
+    <a href="<?= $escaper->escapeUrl($logoUrl) ?>"
+       title="<?= $escaper->escapeHtmlAttr($storeName) ?>"
+       aria-label="<?= $escaper->escapeHtmlAttr(__('Ir para a página inicial da AWA Motos')) ?>">
         <img src="<?= $escaper->escapeUrl($logoSrc) ?>"
              alt="<?= $escaper->escapeHtmlAttr($logoAlt) ?>"
              width="<?= $escaper->escapeHtmlAttr($logoWidth) ?>"

@@ -19,6 +19,17 @@ function addIssue(step: string, severity: string, description: string, impact: s
   issues.push({ step, severity, description, impact });
 }
 
+// Ruido nativo do navegador (Cross-Document View Transitions API), nao relacionado
+// ao codigo da aplicacao: o Chromium rejeita a promise "ready"/"finished" da
+// pagina de origem sempre que uma navegacao cross-document interrompe uma
+// view transition em andamento. Nao e um bug do Magento/AWA - ver
+// https://github.com/w3c/csswg-drafts/issues/13726 (comportamento esperado da spec).
+const BENIGN_PAGE_ERROR_PATTERNS = [/Transition was skipped/i];
+
+function isBenignPageError(message: string): boolean {
+  return BENIGN_PAGE_ERROR_PATTERNS.some((re) => re.test(message));
+}
+
 async function screenshot(page: Page, name: string) {
   fs.mkdirSync(SS_DIR, { recursive: true });
   await page.screenshot({ path: path.join(SS_DIR, `${name}.png`), fullPage: false, timeout: 8_000 }).catch((e: Error) => {
@@ -76,7 +87,10 @@ test.describe('UX Audit B2B', () => {
 
   test('01 | Homepage — Header guest', async ({ page }) => {
     const jsErrors: string[] = [];
-    page.on('pageerror', (e) => jsErrors.push(e.message));
+    page.on('pageerror', (e) => {
+      const stack = (e.stack || '').split('\n').slice(0, 8).join('\n');
+      if (!isBenignPageError(e.message)) jsErrors.push(stack || e.message);
+    });
     await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
     await page.waitForTimeout(2000);
     await screenshot(page, '01-homepage-guest');
@@ -91,7 +105,7 @@ test.describe('UX Audit B2B', () => {
         const els = document.querySelectorAll('a.awa-header-account-prompt__link');
         return Array.from(els).map((el, i) => {
             let hiddenAncestors = [];
-            let curr = el;
+            let curr: Element | null = el;
             while(curr && curr !== document.body) {
                 const style = window.getComputedStyle(curr);
                 if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
@@ -99,7 +113,7 @@ test.describe('UX Audit B2B', () => {
                 }
                 curr = curr.parentElement;
             }
-            return `el[${i}]: hidden_by=[${hiddenAncestors.join(' | ')}] text="${el.textContent.trim()}"`;
+            return `el[${i}]: hidden_by=[${hiddenAncestors.join(' | ')}] text="${el.textContent?.trim() ?? ''}"`;
         }).join(' || ');
     });
     console.log('DEBUG LOGIN LINK ANCESTORS:', debugLoginLk);
@@ -126,7 +140,10 @@ test.describe('UX Audit B2B', () => {
 
   test('02 | Login B2B', async ({ page }) => {
     const jsErrors: string[] = [];
-    page.on('pageerror', (e) => jsErrors.push(e.message));
+    page.on('pageerror', (e) => {
+      const stack = (e.stack || '').split('\n').slice(0, 8).join('\n');
+      if (!isBenignPageError(e.message)) jsErrors.push(stack || e.message);
+    });
     await page.goto(`${BASE_URL}/customer/account/login/`, { waitUntil: 'domcontentloaded' });
     await waitReady(page);
     await screenshot(page, '02a-login-page');
@@ -143,6 +160,7 @@ test.describe('UX Audit B2B', () => {
       await page.locator('.b2b-btn-entrar').first().click({ force: true, timeout: 30_000 }).catch(() => {});
       await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => {});
       await page.waitForTimeout(2000);
+
       const url = page.url();
       const errVisible = await page.locator('.message-error, .messages .error').first().isVisible().catch(() => false);
       await screenshot(page, '02c-post-login');
@@ -162,7 +180,7 @@ test.describe('UX Audit B2B', () => {
 
   test('03 | Busca — retrovisor', async ({ page }) => {
     const jsErrors: string[] = [];
-    page.on('pageerror', (e) => jsErrors.push(e.message));
+    page.on('pageerror', (e) => { if (!isBenignPageError(e.message)) jsErrors.push(e.message); });
     await doLogin(page);
     await page.goto(`${BASE_URL}/catalogsearch/result/?q=retrovisor`, { waitUntil: 'domcontentloaded' });
     await waitReady(page);
@@ -194,7 +212,10 @@ test.describe('UX Audit B2B', () => {
 
   test('04 | Categoria — Bagageiros', async ({ page }) => {
     const jsErrors: string[] = [];
-    page.on('pageerror', (e) => jsErrors.push(e.message));
+    page.on('pageerror', (e) => {
+      const stack = (e.stack || '').split('\n').slice(0, 8).join('\n');
+      if (!isBenignPageError(e.message)) jsErrors.push(stack || e.message);
+    });
     await doLogin(page);
     await page.goto(`${BASE_URL}/bagageiros.html`, { waitUntil: 'domcontentloaded' });
     await waitReady(page);
@@ -215,11 +236,42 @@ test.describe('UX Audit B2B', () => {
 
     // Testar abertura de filtro
     if (filterOpt > 0) {
-      await page.locator('.filter-options-title').first().click();
-      await page.waitForTimeout(800);
-      const opened = await page.locator('.filter-options-content').first().isVisible().catch(() => false);
-      if (!opened) addIssue('Categoria', 'MÉDIA', 'Filtro não abre ao clicar', 'Interação quebrada');
-      else { console.log('✅ Filtro abre OK'); await screenshot(page, '04b-filter-open'); }
+      // Alguns temas/estilos deixam o primeiro filtro já expandido por padrão;
+      // clicar nesse caso fecharia o painel e geraria falso negativo no teste.
+      const filterStateBefore = await page.evaluate(() => {
+        const item = document.querySelector('.filter-options-item') as HTMLElement | null;
+        const title = item?.querySelector('.filter-options-title') as HTMLElement | null;
+        const content = item?.querySelector('.filter-options-content') as HTMLElement | null;
+        const contentRect = content?.getBoundingClientRect();
+        return {
+          itemClass: item?.className ?? '',
+          titleAriaExpanded: title?.getAttribute('aria-expanded') ?? null,
+          contentVisible: !!content && contentRect !== undefined && contentRect.height > 0 && contentRect.width > 0,
+        };
+      });
+
+      const alreadyOpen = Boolean(
+        filterStateBefore.contentVisible === true ||
+        filterStateBefore.titleAriaExpanded === 'true' ||
+        String(filterStateBefore.itemClass || '').includes('active')
+      );
+
+      if (alreadyOpen) {
+        console.log('✅ Filtro já aberto por padrão');
+        await screenshot(page, '04b-filter-open');
+      } else {
+        let clickOk = true;
+        try {
+          await page.locator('.filter-options-title').first().click();
+        } catch (error) {
+          clickOk = false;
+        }
+        await page.waitForTimeout(800);
+        const opened = await page.locator('.filter-options-content').first().isVisible().catch(() => false);
+
+        if (!opened) addIssue('Categoria', 'MÉDIA', 'Filtro não abre ao clicar', 'Interação quebrada');
+        else { console.log('✅ Filtro abre OK'); await screenshot(page, '04b-filter-open'); }
+      }
     }
     if (jsErrors.length) addIssue('Categoria', 'MÉDIA', jsErrors[0], 'Filtros AJAX');
     else console.log('✅ Sem erros JS na categoria');
@@ -227,7 +279,7 @@ test.describe('UX Audit B2B', () => {
 
   test('05 | PDP — Página de Produto', async ({ page }) => {
     const jsErrors: string[] = [];
-    page.on('pageerror', (e) => jsErrors.push(e.message));
+    page.on('pageerror', (e) => { if (!isBenignPageError(e.message)) jsErrors.push(e.message); });
     await doLogin(page);
     const href = 'https://awamotos.com/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html';
     await page.goto(href, { waitUntil: 'domcontentloaded', timeout: 60_000 }).catch(() => {});
@@ -273,7 +325,7 @@ test.describe('UX Audit B2B', () => {
 
   test('06 | Carrinho', async ({ page }) => {
     const jsErrors: string[] = [];
-    page.on('pageerror', (e) => jsErrors.push(e.message));
+    page.on('pageerror', (e) => { if (!isBenignPageError(e.message)) jsErrors.push(e.message); });
     await doLogin(page);
     await page.goto('https://awamotos.com/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html', { waitUntil: 'domcontentloaded', timeout: 60_000 }).catch(() => {});
     await waitReady(page);
@@ -313,7 +365,7 @@ test.describe('UX Audit B2B', () => {
 
   test('07 | Checkout — Validar etapas (sem finalizar)', async ({ page }) => {
     const jsErrors: string[] = [];
-    page.on('pageerror', (e) => jsErrors.push(e.message));
+    page.on('pageerror', (e) => { if (!isBenignPageError(e.message)) jsErrors.push(e.message); });
     await doLogin(page);
     await page.goto('https://awamotos.com/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html', { waitUntil: 'domcontentloaded', timeout: 60_000 }).catch(() => {});
     await waitReady(page);
@@ -362,7 +414,177 @@ test.describe('UX Audit B2B', () => {
     else console.log('✅ Sem erros JS no checkout');
   });
 
-  test('08 | Relatório Final', async () => {
+  test('08 | Rating A11y — texto interno oculto (Home + PLP)', async ({ page }) => {
+    const jsErrors: string[] = [];
+    page.on('pageerror', (e) => { if (!isBenignPageError(e.message)) jsErrors.push(e.message); });
+
+    const assertRatingTextHidden = async (url: string, label: string) => {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+      await waitReady(page);
+      await dismissCookieBanner(page);
+      await page.waitForTimeout(1200);
+      await screenshot(page, `08-${label}-rating`);
+
+      const ratingCount = await page.locator('.rating-summary .rating-result > span > span').count().catch(() => 0);
+      if (ratingCount === 0) {
+        addIssue(`Rating ${label}`, 'BAIXA', 'Sem elementos de rating para validar hide do texto interno', 'Evidência incompleta');
+        return;
+      }
+
+      const visibleA11yText = await page.evaluate(() => {
+        const nodes = Array.from(document.querySelectorAll('.rating-summary .rating-result > span > span')).slice(0, 50) as HTMLElement[];
+        return nodes
+          .map((el) => {
+            const style = window.getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            return {
+              text: (el.textContent ?? '').trim(),
+              display: style.display,
+              visibility: style.visibility,
+              opacity: style.opacity,
+              width: rect.width,
+              height: rect.height,
+            };
+          })
+          .filter((entry) => (
+            entry.text.length > 0 &&
+            entry.display !== 'none' &&
+            entry.visibility !== 'hidden' &&
+            entry.opacity !== '0' &&
+            entry.width > 0 &&
+            entry.height > 0
+          ));
+      });
+
+      if (visibleA11yText.length > 0) {
+        addIssue(
+          `Rating ${label}`,
+          'ALTA',
+          `Texto de acessibilidade do rating está visível: "${visibleA11yText[0].text}"`,
+          'Poluição visual e regressão de UX/A11y'
+        );
+      } else {
+        console.log(`✅ Rating ${label}: texto interno oculto corretamente`);
+      }
+    };
+
+    await assertRatingTextHidden(`${BASE_URL}/`, 'home');
+    await assertRatingTextHidden(`${BASE_URL}/retrovisores.html`, 'plp');
+
+    if (jsErrors.length) addIssue('Rating', 'MÉDIA', `Erro JS durante validação: ${jsErrors[0]}`, 'Pode mascarar estado visual');
+  });
+
+  test('09 | Dashboard B2B — RFM mapeado + frequência + fallback de grid', async ({ page }) => {
+    const jsErrors: string[] = [];
+    page.on('pageerror', (e) => { if (!isBenignPageError(e.message)) jsErrors.push(e.message); });
+
+    await doLogin(page);
+    await page.goto(`${BASE_URL}/b2b/account/dashboard/`, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await waitReady(page, 30_000);
+    await page.waitForTimeout(1500);
+    await screenshot(page, '09-dashboard-rfm-intelligence');
+
+    const sectionVisible = await page.locator('.b2b-intelligence-section').first().isVisible().catch(() => false);
+    if (!sectionVisible) {
+      addIssue('Dashboard B2B', 'ALTA', 'Seção "Inteligência de Vendas B2B" não renderizou', 'Sem evidência dos dados RFM');
+      return;
+    }
+
+    const domDiagnostics = await page.evaluate(() => {
+      const section = document.querySelector('.b2b-intelligence-section') as HTMLElement | null;
+      if (!section) {
+        return { exists: false };
+      }
+
+      const cards = Array.from(section.querySelectorAll('.intelligence-card')) as HTMLElement[];
+      const values = Array.from(section.querySelectorAll('.value, .rfm-value, [data-rfm-value]')) as HTMLElement[];
+
+      return {
+        exists: true,
+        cardCount: cards.length,
+        cardClasses: cards.map((el) => el.className.trim()).slice(0, 6),
+        valueCount: values.length,
+        valueSamples: values.map((el) => (el.textContent ?? '').replace(/\s+/g, ' ').trim()).filter(Boolean).slice(0, 8),
+        textSample: (section.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 260),
+      };
+    });
+
+    console.log(`Dashboard DOM diagnostics: ${JSON.stringify(domDiagnostics)}`);
+
+    await page.locator('.b2b-intelligence-section .rfm-item .value').first().waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
+    await page.waitForTimeout(1000);
+
+    const recencyText = (await page.locator('.b2b-intelligence-section .rfm-item .value').nth(0).textContent().catch(() => '') ?? '').trim();
+    const frequencyText = (await page.locator('.b2b-intelligence-section .rfm-item .value').nth(1).textContent().catch(() => '') ?? '').trim();
+    const monetaryText = (await page.locator('.b2b-intelligence-section .rfm-item .value').nth(2).textContent().catch(() => '') ?? '').trim();
+    const recommendationText = (await page.locator('.b2b-intelligence-section .rfm-recommendation p').first().textContent().catch(() => '') ?? '').trim();
+    const emptyCardVisible = await page.locator('.b2b-intelligence-section .intelligence-empty-card').first().isVisible().catch(() => false);
+    const emptyCardText = (await page.locator('.b2b-intelligence-section .intelligence-empty-card').first().textContent().catch(() => '') ?? '').replace(/\s+/g, ' ').trim();
+    const hasRfmValues = !!recencyText || !!frequencyText || !!monetaryText;
+
+    if (hasRfmValues) {
+      if (/^-\d+\s*dias$/i.test(recencyText)) {
+        addIssue('Dashboard B2B', 'ALTA', `Recência negativa inválida após mapeamento RFM: "${recencyText}"`, 'Dados de inteligência quebrados');
+      }
+      if (/^0\s*pedidos$/i.test(frequencyText)) {
+        addIssue('Dashboard B2B', 'ALTA', `Frequência inválida após mapeamento RFM: "${frequencyText}"`, 'Dados de inteligência quebrados');
+      }
+      if (/R\$\s*0,00/i.test(monetaryText)) {
+        addIssue('Dashboard B2B', 'ALTA', `Valor total inválido após mapeamento RFM: "${monetaryText}"`, 'Dados de inteligência quebrados');
+      }
+      if (/Dica do Consultor:\s*$/i.test(recommendationText)) {
+        addIssue('Dashboard B2B', 'ALTA', 'Dica do Consultor está vazia', 'Percepção de funcionalidade quebrada');
+      }
+    } else if (!emptyCardVisible) {
+      addIssue(
+        'Dashboard B2B',
+        'ALTA',
+        'Dashboard sem valores RFM e sem card de estado vazio',
+        'Conta sem vínculo ERP fica sem orientação visual'
+      );
+    } else if (!/painel|historico suficiente|sincronizados/i.test(emptyCardText)) {
+      addIssue('Dashboard B2B', 'MÉDIA', 'Card de estado vazio sem mensagem orientativa', 'Comunicação fraca para conta sem dados ERP');
+    }
+
+    const frequencyCardVisible = await page.locator('.b2b-intelligence-section .frequency-card').first().isVisible().catch(() => false);
+    const gridCheck = await page.evaluate(() => {
+      const grid = document.querySelector('.b2b-intelligence-section .intelligence-grid') as HTMLElement | null;
+      if (!grid) {
+        return { hasGrid: false, cardCount: 0, widthRatio: 0 };
+      }
+
+      const cards = Array.from(grid.querySelectorAll(':scope > .intelligence-card')) as HTMLElement[];
+      if (!cards.length) {
+        return { hasGrid: true, cardCount: 0, widthRatio: 0 };
+      }
+
+      const gridRect = grid.getBoundingClientRect();
+      const firstCardRect = cards[0].getBoundingClientRect();
+      const widthRatio = gridRect.width > 0 ? (firstCardRect.width / gridRect.width) : 0;
+      return { hasGrid: true, cardCount: cards.length, widthRatio };
+    });
+
+    if (gridCheck.cardCount === 0) {
+      addIssue('Dashboard B2B', 'ALTA', 'Intelligence grid sem cards renderizados', 'Seção vazia aparenta quebra funcional');
+    }
+
+    if (!frequencyCardVisible && gridCheck.cardCount === 1 && gridCheck.widthRatio < 0.75) {
+      addIssue(
+        'Dashboard B2B',
+        'MÉDIA',
+        `Grid de inteligência continua em meia largura com 1 card (ratio=${gridCheck.widthRatio.toFixed(2)})`,
+        'Layout com espaço vazio desproporcional'
+      );
+    }
+
+    console.log(
+      `Dashboard intelligence: recency="${recencyText}" frequency="${frequencyText}" monetary="${monetaryText}" emptyCard=${emptyCardVisible} frequencyCard=${frequencyCardVisible} cardCount=${gridCheck.cardCount} ratio=${gridCheck.widthRatio.toFixed(2)}`
+    );
+
+    if (jsErrors.length) addIssue('Dashboard B2B', 'MÉDIA', `Erro JS: ${jsErrors[0]}`, 'Pode impactar render dos cards');
+  });
+
+  test('10 | Relatório Final', async () => {
     const alta  = issues.filter(i => i.severity === 'ALTA');
     const media = issues.filter(i => i.severity === 'MÉDIA');
     const baixa = issues.filter(i => i.severity === 'BAIXA');

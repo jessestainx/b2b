@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-08T12:00:00.000Z",
+  "title": "Design System: AWA Motos",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "AWA Counter Red",
+        "canonical": "oklch(52% 0.16 25)",
+        "tonalRamp": ["#5c1a1d", "#7a2328", "#8e2629", "#b73337", "#c44a4e", "#d86a6d", "#e8a0a2", "#fde8e8"]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Deep Shelf Red",
+        "canonical": "oklch(42% 0.14 25)",
+        "tonalRamp": ["#3d1215", "#5c1a1d", "#6e1f24", "#8e2629", "#a32f35", "#b73337", "#c44a4e", "#e8a0a2"]
+      },
+      "bg-soft": {
+        "role": "neutral",
+        "displayName": "Parts Gray",
+        "canonical": "oklch(97% 0.002 0)",
+        "tonalRamp": ["#1a1a1a", "#4d4d4d", "#737373", "#999999", "#b3b3b3", "#d4d4d4", "#e8e8e8", "#f7f7f7"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Catalog Text",
+        "canonical": "oklch(32% 0.01 0)",
+        "tonalRamp": ["#1a1a1a", "#262626", "#333333", "#4d4d4d", "#666666", "#808080", "#999999", "#cccccc"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Section heroes and primary shelf titles on home."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Product copy, prices, form fields. Max 65–75ch in long text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase buttons and compact UI labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-sm",
+        "value": "0 1px 3px rgba(0, 0, 0, 0.08)",
+        "purpose": "Resting product cards and subtle shelf separation."
+      },
+      {
+        "name": "shadow-md",
+        "value": "0 4px 12px rgba(0, 0, 0, 0.10)",
+        "purpose": "Dropdowns and elevated panels."
+      },
+      {
+        "name": "shadow-primary-hover",
+        "value": "0 6px 18px rgba(183, 51, 55, 0.36)",
+        "purpose": "Primary button hover only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default UI transitions (@awa-ease)."
+      },
+      {
+        "name": "dur-fast",
+        "value": "120ms",
+        "purpose": "Micro feedback (opacity, color)."
+      },
+      {
+        "name": "dur-base",
+        "value": "200ms",
+        "purpose": "Buttons and shelf chrome."
+      },
+      {
+        "name": "dur-slow",
+        "value": "350ms",
+        "purpose": "Large panel reveals."
+      }
+    ],
+    "breakpoints": [
+      { "name": "bp-576", "value": "576px", "purpose": "Large phone / small tablet." },
+      { "name": "bp-768", "value": "768px", "purpose": "Tablet; 3-col trust strip; shelf nav below track." },
+      { "name": "bp-992", "value": "992px", "purpose": "Desktop nav bar; PDP two-column flex." },
+      { "name": "bp-1200", "value": "1200px", "purpose": "Legacy content container reference." },
+      { "name": "catalog-max", "value": "1440px", "purpose": "PLP / PDP / search / cart shell max-width (@awa-page-catalog)." }
+    ],
+    "implementation": {
+      "theme": "AWA_Custom/ayo_home5_child",
+      "entry": "web/css/source/_extend.less",
+      "tokenChain": [
+        "_awa-tokens.less",
+        "_design-system.less",
+        "_awa-page-containers.less",
+        "_awa-typography-system.less",
+        "_awa-color-system.less",
+        "_awa-effects-system.less",
+        "_tokens.less",
+        "_awa-forms.less",
+        "_awa-cards.less",
+        "_awa-buttons.less"
+      ],
+      "finalWinsPartials": [
+        "_awa-consolidated.less",
+        "_awa-account-layout.less",
+        "_awa-home-hero-trust-layout.less",
+        "_awa-pdp-shell-unify-2026-06.less",
+        "_awa-pdp-polish-2026-06.less",
+        "_awa-pdp-distill-2026-06.less"
+      ],
+      "finalWinsRuntime": [
+        "awa-head-preload.phtml (critical inline)",
+        "awa-bundle-refinements.min.css (async)",
+        "awa-ui-simplify-terminal.min.css (async, last link bundle)",
+        "awa-pdp-ultra-hardfix.phtml (PDP only, before.body.end)"
+      ],
+      "forbidden": [
+        "create standalone .css files in web/css/ for routine visual work",
+        "display: grid on .main-detail > .row",
+        "HTML/PHP/XML for token-only changes",
+        "Rokanthemes vendor edits"
+      ],
+      "legacyDebt": [
+        "awa-bundle-refinements.css",
+        "awa-commerce-impeccable-refine.css",
+        "awa-head-preload.phtml critical blocks",
+        "HeaderImpeccableCascadeLockCss.php"
+      ],
+      "legacyDebtPolicy": "Edit legacy only to retire duplicates or fix production blockers; migrate durable rules into LESS partials."
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main commerce CTA: add to cart, checkout, B2B submit.",
+      "html": "<button type=\"button\" class=\"ds-btn-primary\">COMPRAR</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 24px; font-size: clamp(14px, calc(13.33px + 0.208vw), 16px); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; line-height: 1; color: #ffffff; background: #b73337; border: 1.5px solid #b73337; border-radius: 8px; box-shadow: 0 2px 8px rgba(183, 51, 55, 0.24); cursor: pointer; transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: #8e2629; border-color: #8e2629; box-shadow: 0 6px 18px rgba(183, 51, 55, 0.36); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid #8e2629; outline-offset: 2px; }"
+    },
+    {
+      "name": "PDP Two-Column Shell",
+      "kind": "custom",
+      "refersTo": "button-primary",
+      "description": "Desktop PDP: gallery 54% + buy-box 46% inside 1440px centered shell.",
+      "html": "<div class=\"ds-pdp-shell\"><div class=\"ds-pdp-row\"><div class=\"ds-pdp-col ds-pdp-col--media\"><div class=\"ds-pdp-media\"></div></div><div class=\"ds-pdp-col ds-pdp-col--info\"><div class=\"ds-pdp-buybox\"><h1 class=\"ds-pdp-title\">Manete Embreagem CG Titan</h1><p class=\"ds-pdp-meta\">CÓD: 6000 · Em estoque</p></div></div></div></div>",
+      "css": ".ds-pdp-shell { max-width: 1440px; margin-inline: auto; padding-inline: 20px; box-sizing: border-box; } .ds-pdp-row { display: flex; flex-wrap: nowrap; align-items: flex-start; gap: clamp(24px, 2.5vw, 40px); width: 100%; } .ds-pdp-col { min-width: 0; box-sizing: border-box; } .ds-pdp-col--media { flex: 1 1 54%; max-width: 54%; } .ds-pdp-col--info { flex: 1 1 46%; max-width: 46%; } .ds-pdp-media { width: 100%; aspect-ratio: 1; background: #f7f7f7; border: 1px solid #e5e5e5; border-radius: 8px; } .ds-pdp-buybox { display: flex; flex-direction: column; gap: 16px; width: 100%; } .ds-pdp-title { margin: 0; font-size: clamp(18px, calc(17.33px + 0.208vw), 20px); font-weight: 700; line-height: 1.35; color: #333333; } .ds-pdp-meta { margin: 0; font-size: clamp(14px, calc(13.33px + 0.208vw), 16px); color: #666666; } @media (max-width: 991px) { .ds-pdp-row { flex-direction: column; gap: 20px; } .ds-pdp-col--media, .ds-pdp-col--info { flex: 1 1 100%; max-width: 100%; } }"
+    },
+    {
+      "name": "B2B Hero Trust Item",
+      "kind": "custom",
+      "refersTo": "hero-trust-item",
+      "description": "Home B2B diferencial: 48px icon + label. Grid 3 col ≥768px, stack mobile.",
+      "html": "<ul class=\"ds-hero-trust-strip\"><li class=\"ds-hero-trust-item\"><svg class=\"ds-hero-trust-icon\" aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/></svg><span class=\"ds-hero-trust-text\">CNPJ · Araraquara, SP</span></li></ul>",
+      "css": ".ds-hero-trust-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; list-style: none; margin: 16px 0 0; padding: 0; } .ds-hero-trust-item { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px 16px; text-align: center; background: #ffffff; border: 1px solid #e5e5e5; border-radius: 8px; } .ds-hero-trust-icon { display: block; width: 48px; height: 48px; flex: 0 0 48px; color: #b73337; } .ds-hero-trust-text { font-size: clamp(12px, calc(11.33px + 0.208vw), 14px); font-weight: 600; line-height: 1.35; color: #333333; max-width: 22ch; } @media (max-width: 767px) { .ds-hero-trust-strip { grid-template-columns: minmax(0, 1fr); gap: 16px; } }"
+    },
+    {
+      "name": "Shelf Carousel Nav",
+      "kind": "custom",
+      "refersTo": "shelf-nav-btn",
+      "description": "44px circular prev/next on product shelves (scroll-snap).",
+      "html": "<div class=\"ds-shelf-nav\"><button type=\"button\" class=\"ds-shelf-nav-btn\" aria-label=\"Anterior\">‹</button><button type=\"button\" class=\"ds-shelf-nav-btn\" aria-label=\"Próximo\">›</button></div>",
+      "css": ".ds-shelf-nav { display: flex; gap: 10px; justify-content: flex-end; } .ds-shelf-nav-btn { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #e5e5e5; border-radius: 9999px; background: #ffffff; color: #333333; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1), color 200ms cubic-bezier(0.4, 0, 0.2, 1), border-color 200ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-shelf-nav-btn:hover { background: #b73337; border-color: #b73337; color: #ffffff; } .ds-shelf-nav-btn:focus-visible { outline: 2px solid #b73337; outline-offset: 2px; }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "button-primary",
+      "description": "Standard PLP/home product tile: white surface, soft border.",
+      "html": "<article class=\"ds-product-card\"><div class=\"ds-product-card__thumb\"></div><h3 class=\"ds-product-card__title\">Retrovisor CB 300</h3><p class=\"ds-product-card__price\">R$ 89,90</p></article>",
+      "css": ".ds-product-card { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: #ffffff; border: 1px solid #e5e5e5; border-radius: 8px; box-sizing: border-box; } .ds-product-card__thumb { aspect-ratio: 1; background: #f7f7f7; border-radius: 8px; } .ds-product-card__title { margin: 0; font-size: clamp(14px, calc(13.33px + 0.208vw), 16px); font-weight: 600; color: #333333; line-height: 1.3; } .ds-product-card__price { margin: 0; font-size: clamp(14px, calc(13.33px + 0.208vw), 16px); font-weight: 700; color: #b73337; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Reliable Parts Counter",
+    "overview": "B2B motorcycle parts Magento storefront on AWA_Custom/ayo_home5_child. Restrained AWA red (#b73337), 8px spacing, fluid clamp() typography, catalog axis 1440px. LESS-first via _extend.less; legacy async bundles for final-wins only.",
+    "keyCharacteristics": [
+      "Restrained AWA red accent (#b73337)",
+      "8px spacing scale (@awa-s-*)",
+      "Fluid typography via clamp()",
+      "Breakpoints 576/768/992/1200",
+      "Catalog shell 1440px (@awa-page-catalog)",
+      "PDP flex 54/46 gallery + buy-box",
+      "LESS-first via _extend.less"
+    ],
+    "rules": [
+      {
+        "name": "The LESS-First Law",
+        "body": "Express durable styling in LESS partials imported from _extend.less. Legacy async bundles are for final-wins retirement or production hotfixes only.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Accent Rule",
+        "body": "AWA red appears on primary actions, active navigation, carousel progress, and focus. It must not flood backgrounds.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Hex-in-Theme Rule",
+        "body": "Use @awa-* or var(--awa-*) in LESS; never new hardcoded hex in partials.",
+        "section": "colors"
+      },
+      {
+        "name": "The PDP Flex Rule",
+        "body": "Never set display: grid on .main-detail > .row. Desktop PDP uses flex 54/46 with Bootstrap pseudos disabled.",
+        "section": "components"
+      },
+      {
+        "name": "The Fluid Type Rule",
+        "body": "Prefer var(--awa-fs-*) or _design-system mixins over fixed px font sizes.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Catalog Rule",
+        "body": "Product grids stay flat at rest; shadows only on interaction.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do import tokens via _extend.less → _awa-tokens.less → _design-system.less",
+      "Do add final-wins partials after _awa-consolidated.less when needed",
+      "Do use @awa-page-catalog (1440px) for PDP/PLP shell alignment",
+      "Do use breakpoints @awa-bp-576, @awa-bp-768, @awa-bp-992, @awa-bp-1200",
+      "Do use @awa-s-1 through @awa-s-9 for structural spacing",
+      "Do validate after static-content deploy for ayo_home5_child"
+    ],
+    "donts": [
+      "Don't use display: grid on .main-detail > .row",
+      "Don't create new standalone .css files in web/css/ for routine visual work",
+      "Don't edit HTML, PHP, or XML for visual-token-only tasks",
+      "Don't edit Rokanthemes or parent theme",
+      "Don't use hardcoded hex in LESS",
+      "Don't use colored side-stripe borders on cards",
+      "Don't apply glassmorphism, gradient text, or hero-metric templates",
+      "Don't add bounce or elastic easing"
+    ]
+  }
+}

@@ -9,7 +9,7 @@
 
 html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
     // Nav/progress SSR: visíveis no 1º paint (JS só liga scrollBy)
-    .awa-shelf--carousel .awa-carousel-chrome-ssr.awa-owl-nav,
+    .awa-shelf--carousel .awa-carousel-chrome-ssr.awa-owl-nav:not([data-awa-nav-anchor='viewport']),
     .awa-shelf--carousel .awa-carousel-chrome-ssr.awa-owl-progress {
         display: flex;
         visibility: visible;

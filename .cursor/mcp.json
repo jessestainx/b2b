@@ -1,0 +1,18 @@
+{
+  "_comment": "Perfil serial Hostinger — Remote-SSH workspace AWA Motos. Recarregue: Settings → MCP → Reload",
+  "concurrency": 1,
+  "browserInstances": 1,
+  "parallelJobs": 1,
+  "timeoutSeconds": 45,
+  "retries": 1,
+  "enableQueue": true,
+  "mcpServers": {
+    "hostinger-mcp": {
+      "command": "/home/deploy/.cursor/bin/hostinger-mcp.sh",
+      "args": [],
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=128"
+      }
+    }
+  }
+}

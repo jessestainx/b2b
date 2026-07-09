@@ -71,7 +71,7 @@ html body#html-body.cms-page-view .column.main h2 {
 
 html body#html-body.cms-page-view .awa-inst h2 {
     padding-bottom: var(--awa-cms-gap-xs) !important;
-    border-bottom: 2px solid var(--awa-red, #b73337) !important;
+    border-bottom: 2px solid var(--awa-red, var(--awa-primary)) !important;
 }
 
 html body#html-body.cms-page-view .column.main h3 {
@@ -123,7 +123,7 @@ html body#html-body.cms-page-view .awa-inst :is(.awa-card, .awa-faq-item) h3 {
 
 /* CTA — flat, sem gradiente */
 html body#html-body.cms-page-view .awa-inst .awa-cta {
-    background: var(--awa-red, #b73337) !important;
+    background: var(--awa-red, var(--awa-primary)) !important;
     padding: var(--awa-cms-gap-lg) !important;
     margin-block: var(--awa-cms-gap-lg) !important;
     border-radius: 8px !important;
@@ -156,7 +156,7 @@ html body#html-body.cms-page-view .awa-inst :is(.awa-table, table) {
 
 html body#html-body.cms-page-view .awa-inst :is(.awa-table, table) :is(th, td) {
     padding: var(--awa-cms-gap-sm) var(--awa-cms-gap-md) !important;
-    border-color: var(--awa-border, #e5e5e5) !important;
+    border-color: var(--awa-border, var(--awa-border)) !important;
 }
 
 /* FAQ — itens compactos */

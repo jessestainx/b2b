@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Observer para criar automaticamente cotacoes para oportunidades de Cross-sell
  * Dispara quando um pedido e concluido (sales_order_place_after)
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Observer;
 
@@ -104,7 +104,7 @@ class AutoCreateQuoteObserver implements ObserverInterface
 
             if ($addedProducts > 0) {
                 $quote->setCustomerNote(
-                    'Cotacao automatica gerada pelo REXIS ML baseada em analise preditiva. ' .
+                    'Cotacao automatica gerada pelo Product Intelligence baseada em analise preditiva. ' .
                     'Produtos recomendados com alta probabilidade de compra.'
                 );
                 $quote->collectTotals();

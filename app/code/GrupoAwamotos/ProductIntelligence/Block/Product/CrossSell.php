@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\ProductIntelligence\Block\Product;
 
 use GrupoAwamotos\ProductIntelligence\Model\Product\BulkSkuProductLoader;
+use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\Registry;
@@ -23,6 +24,7 @@ class CrossSell extends Template
     private ScopeConfigInterface $scopeConfig;
     private PriceCurrencyInterface $priceCurrency;
     private LoggerInterface $logger;
+    private PriceVisibilityInterface $priceVisibility;
     private ?array $cachedItems = null;
 
     public function __construct(
@@ -34,6 +36,7 @@ class CrossSell extends Template
         ScopeConfigInterface $scopeConfig,
         PriceCurrencyInterface $priceCurrency,
         LoggerInterface $logger,
+        PriceVisibilityInterface $priceVisibility,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -44,6 +47,23 @@ class CrossSell extends Template
         $this->scopeConfig = $scopeConfig;
         $this->priceCurrency = $priceCurrency;
         $this->logger = $logger;
+        $this->priceVisibility = $priceVisibility;
+    }
+
+    /**
+     * Whether prices can be shown to the current customer (B2B gate).
+     */
+    public function canShowPrice(): bool
+    {
+        return $this->priceVisibility->canViewPrices();
+    }
+
+    /**
+     * Message to display in place of the price for non-approved customers.
+     */
+    public function getPriceReplacementMessage(): string
+    {
+        return $this->priceVisibility->getPriceReplacementMessage();
     }
 
     /**

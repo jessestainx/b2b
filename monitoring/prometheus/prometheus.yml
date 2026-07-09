@@ -1,0 +1,46 @@
+# AWA Motos — Prometheus config
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    monitor: 'awa-motos-prod'
+
+scrape_configs:
+  # AWA Motos metrics
+  - job_name: 'awa-motos'
+    metrics_path: '/metrics-exporter.php'
+    scheme: 'https'
+    static_configs:
+      - targets: ['awamotos.com']
+    scrape_timeout: 10s
+    metrics_path: '/metrics-exporter.php'
+
+  # Node exporter (host metrics)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # PHP-FPM exporter
+  - job_name: 'php-fpm'
+    static_configs:
+      - targets: ['php-fpm-exporter:9253']
+
+  # Redis exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # MySQL exporter
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['mysqld-exporter:9104']
+
+  # Nginx exporter
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

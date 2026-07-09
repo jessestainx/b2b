@@ -7,6 +7,7 @@
             <module name="Magento_Elasticsearch"/>
             <module name="GrupoAwamotos_Theme"/>
             <module name="Rokanthemes_VerticalMenu"/>
+            <module name="Mirasvit_Report"/>
         </sequence>
     </module>
 </config>

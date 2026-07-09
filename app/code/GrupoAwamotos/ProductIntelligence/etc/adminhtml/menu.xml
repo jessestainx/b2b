@@ -2,9 +2,9 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <!-- REXIS ML section under Grupo Awamotos -->
+        <!-- Product Intelligence section under Grupo Awamotos -->
         <add id="GrupoAwamotos_ProductIntelligence::main"
-             title="REXIS ML"
+             title="Product Intelligence"
              module="GrupoAwamotos_ProductIntelligence"
              parent="GrupoAwamotos_ERPIntegration::grupo_awamotos"
              sortOrder="20"

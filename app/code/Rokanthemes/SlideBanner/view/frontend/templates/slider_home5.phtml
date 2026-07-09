@@ -159,7 +159,7 @@ if ($banners = $block->getBannerCollection()):
         <?php endforeach; ?>
     </div>
 </div>
-<div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile">
+<div class="wrapper_slider visible-xs slider_<?php echo (int) $sliderId; ?>_mobile" aria-hidden="true" data-rk-desktop-mirror="1">
     <div class="owl owl-carousel">
         <?php foreach ($mobileSlides as $slideIndex => $slide): ?>
             <?php

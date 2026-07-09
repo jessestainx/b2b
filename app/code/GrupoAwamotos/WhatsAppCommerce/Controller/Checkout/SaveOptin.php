@@ -23,7 +23,8 @@ class SaveOptin implements HttpPostActionInterface
         private readonly CustomerSession $customerSession,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function execute(): Json
     {

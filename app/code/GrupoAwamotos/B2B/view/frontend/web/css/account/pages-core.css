@@ -1,44 +1,6 @@
-/** pages-core.css — tokens, shell, nav (§70 optimize + §148 AWA SSOT) */
-:root {
-    /* Legacy --b2b-pg-* aliases → paleta AWA (folhas por rota continuam compatíveis) */
-    --b2b-pg-border-main: var(--awa-border, #e5e7eb);
-    --b2b-pg-border-mid: var(--awa-border, #e5e7eb);
-    --b2b-pg-bg: var(--awa-b2b-bg-soft, #f8fafc);
-    --b2b-pg-bg-ultra: var(--awa-bg-muted, #f8fafc);
-    --b2b-pg-white: var(--awa-bg-surface, #ffffff);
-    --b2b-pg-c1: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #ffffff);
-    --b2b-pg-c2: var(--awa-primary, #b73337);
-    --b2b-pg-c3: var(--awa-bg-muted, #f8fafc);
-    --b2b-pg-c4: var(--awa-text-muted, #666666);
-    --b2b-pg-c5: color-mix(in srgb, var(--awa-primary, #b73337) 8%, #ffffff);
-    --b2b-pg-c6: var(--awa-primary, #b73337);
-    --b2b-pg-c7: var(--awa-bg-muted, #f3f4f6);
-    --b2b-pg-c8: var(--awa-text-primary, #333333);
-    --b2b-pg-c9: var(--awa-success, #16a34a);
-    --b2b-pg-c10: var(--awa-text-muted, #888888);
-    --b2b-pg-c11: var(--awa-primary, #b73337);
-    --b2b-pg-c12: var(--awa-primary-hover, #8e2629);
-    --b2b-pg-c13: var(--awa-primary-hover, #8e2629);
-    --b2b-pg-c14: var(--awa-success, #16a34a);
-    --b2b-pg-c15: color-mix(in srgb, var(--awa-success, #16a34a) 85%, #000000);
-    --b2b-pg-c16: var(--awa-warning-bg, #fef3c7);
-    --b2b-pg-c17: #92400e;
-    --b2b-pg-c18: color-mix(in srgb, var(--awa-success, #16a34a) 10%, #ffffff);
-    --b2b-pg-c19: color-mix(in srgb, var(--awa-primary, #b73337) 8%, #ffffff);
-    --b2b-pg-c20: color-mix(in srgb, var(--awa-primary, #b73337) 18%, #ffffff);
-    --b2b-pg-c21: var(--awa-primary, #b73337);
-    --b2b-pg-c22: color-mix(in srgb, var(--awa-success, #16a34a) 8%, #ffffff);
-    --b2b-pg-c23: color-mix(in srgb, var(--awa-success, #16a34a) 22%, #ffffff);
-    --b2b-pg-c24: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #ffffff);
-    --b2b-pg-c25: var(--awa-primary-hover, #8e2629);
-    --b2b-pg-c26: var(--awa-success, #16a34a);
-    --b2b-pg-c27: var(--awa-success, #16a34a);
-    --b2b-pg-c28: color-mix(in srgb, var(--awa-primary, #b73337) 4%, #ffffff);
-    --b2b-pg-c29: var(--awa-primary, #b73337);
-    --b2b-pg-c30: var(--awa-bg-muted, #f8fafc);
-    --b2b-pg-c31: color-mix(in srgb, var(--awa-success, #16a34a) 85%, #000000);
-    --b2b-pg-c32: color-mix(in srgb, var(--awa-primary, #b73337) 28%, #ffffff);
-}
+/** pages-core.css — shell, nav (§70 optimize + §148 AWA SSOT)
+ * Aliases --b2b-pg-* removidos em 2026-06-15: todos os consumers foram
+ * migrados para tokens --awa-* diretos. */
 
 .b2b-page-shell {
     --awa-b2b-primary: var(--awa-primary, #b73337);
@@ -53,7 +15,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--awa-s-1, 8px);
     margin-bottom: clamp(16px, 2vw, 24px);
 }
 
@@ -88,7 +50,7 @@
 .b2b-page-shell .empty-message {
     color: var(--awa-b2b-muted);
     text-align: center;
-    padding: 36px 16px;
+    padding: 40px 16px; /* @awa-s-5 = 40px, passo mais próximo na escala 8px */
 }
 
 #html-body:is(.account, [class*='b2b-']) .account-nav-item.current .account-nav-text,

@@ -94,19 +94,28 @@
     }
 
     function shelfJsUrl() {
-        var link = d.querySelector('link[href*="awa-shelf-carousel"]');
+        var link = d.querySelector('link[data-awa-shelf-js]');
 
-        if (!link) {
+        if (link) {
+            return link.getAttribute('data-awa-shelf-js') || '';
+        }
+
+        link = d.querySelector('link[href*="awa-scroll-carousel"]');
+
+        if (link && link.href) {
+            return link.href;
+        }
+
+        link = d.querySelector('link[href*="awa-shelf-carousel"]');
+
+        if (!link || !link.href) {
             return '';
         }
 
-        var dataSrc = link.getAttribute('data-awa-shelf-js');
-
-        if (dataSrc) {
-            return dataSrc;
-        }
-
-        return link.href.replace(/\.min\.css(\?.*)?$/, '.min.js$1').replace('/css/', '/js/');
+        return link.href
+            .replace(/awa-shelf-carousel\.min\.css/, 'awa-scroll-carousel.js')
+            .replace(/awa-shelf-carousel\.css/, 'awa-scroll-carousel.js')
+            .replace('/css/', '/js/');
     }
 
     function loadShelfCarouselScript(source) {
@@ -172,6 +181,61 @@
         (d.body || d.documentElement).appendChild(script);
     }
 
+    function syncHeroA11y() {
+        var mobile = w.innerWidth < 768;
+        d.querySelectorAll('[data-awa-hero-variant]').forEach(function (el) {
+            var active = el.getAttribute('data-awa-hero-variant') === (mobile ? 'mobile' : 'desktop');
+            el.setAttribute('aria-hidden', active ? 'false' : 'true');
+            if (active) {
+                el.removeAttribute('inert');
+            } else {
+                el.setAttribute('inert', '');
+            }
+        });
+    }
+
+    function syncHeroLcp() {
+        var mobile = w.innerWidth < 768;
+        var variant = mobile ? 'mobile' : 'desktop';
+        var root = d.querySelector('.wrapper_slider[data-awa-hero-variant="' + variant + '"]');
+        if (!root) {
+            return;
+        }
+        var img = root.querySelector('.swiper-slide:first-child picture img, .swiper-slide:first-child img');
+        if (!img) {
+            return;
+        }
+        img.loading = 'eager';
+        img.setAttribute('fetchpriority', 'high');
+        img.decoding = 'async';
+    }
+
+    function syncHeroA11yAndLcp() {
+        syncHeroA11y();
+        syncHeroLcp();
+    }
+
+    function installHeroViewportSync() {
+        var scheduled = false;
+
+        if (d.__awaHeroA11yViewportSyncInstalled) {
+            syncHeroA11yAndLcp();
+            return;
+        }
+
+        d.__awaHeroA11yViewportSyncInstalled = true;
+        d.addEventListener('resize', function () {
+            if (scheduled) {
+                return;
+            }
+            scheduled = true;
+            w.setTimeout(function () {
+                scheduled = false;
+                syncHeroA11yAndLcp();
+            }, 50);
+        }, { passive: true });
+    }
+
     function initHeroSliders() {
         function runHeroInit() {
             if (typeof w.require !== 'function' || w.require._awaStub) {
@@ -184,7 +248,7 @@
                 return false;
             }
 
-            w.require(['js/awa-hero-slider-home5'], function (initHero) {
+            w.require(['awaHeroSlider'], function (initHero) {
                 configs.forEach(function (node) {
                     try {
                         var payload = JSON.parse(node.textContent || '');
@@ -196,6 +260,8 @@
                         /* ignore malformed config */
                     }
                 });
+                installHeroViewportSync();
+                syncHeroA11yAndLcp();
             }, function () {
                 initHeroSliders._failed = true;
             });
@@ -207,16 +273,21 @@
             return;
         }
 
-        waitForRealRequire(function () {
-            if (!d.querySelector('.awa-hero-owl-ready')) {
-                runHeroInit();
+        // Sem require-stub na home, waitForRealRequire degrada para timeout cego de 4s;
+        // se o require.js real demorar mais, o hero ficava sem init permanente.
+        // Retry com polling até o require real aparecer (cap 30s).
+        var heroAttempts = 120;
+        var heroTimer = w.setInterval(function () {
+            heroAttempts -= 1;
+            if (d.querySelector('.awa-hero-swiper-ready') || runHeroInit() || heroAttempts <= 0) {
+                w.clearInterval(heroTimer);
             }
-        });
+        }, 250);
     }
 
     d.addEventListener('awa:carousel-runtime-ready', function () {
         loadShelfCarouselScript('awa:carousel-runtime-ready');
-        if (!d.querySelector('.awa-hero-owl-ready')) {
+        if (!d.querySelector('.awa-hero-swiper-ready')) {
             initHeroSliders();
         }
     });
@@ -260,6 +331,8 @@
         w.__awaBootstrapReady = true;
         d.dispatchEvent(new CustomEvent('awa-bootstrap-ready'));
         cleanup();
+        syncHeroA11yAndLcp();
+        installHeroViewportSync();
         runInline();
         appendMerged(function () {
             initRokanTheme(initHeroSliders);
@@ -296,12 +369,14 @@
         }, { passive: true, capture: true, once: true });
     });
 
-    if (w.requestIdleCallback) {
-        w.requestIdleCallback(function () {
-            bootNow();
-        }, { timeout: 3500 });
-    } else {
-        w.setTimeout(bootNow, 3500);
+    if (!disableAutoBoot) {
+        if (w.requestIdleCallback) {
+            w.requestIdleCallback(function () {
+                bootNow();
+            }, { timeout: 3500 });
+        } else {
+            w.setTimeout(bootNow, 3500);
+        }
     }
 
     /*
@@ -337,6 +412,18 @@
 
     function hasHeroSlider() {
         return !!d.querySelector('.wrapper_slider, script[id^="awa-hero-slider-config-"]');
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', function () {
+            if (hasHeroSlider()) {
+                syncHeroA11yAndLcp();
+                installHeroViewportSync();
+            }
+        }, { once: true });
+    } else if (hasHeroSlider()) {
+        syncHeroA11yAndLcp();
+        installHeroViewportSync();
     }
 
     /**

@@ -8,7 +8,26 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    
+
+    <!-- Admin: PageFactory deve criar Backend Page (setActiveMenu). Sem isto → 500 no cockpit. -->
+    <type name="Magento\Framework\View\Result\PageFactory">
+        <arguments>
+            <argument name="instanceName" xsi:type="string">Magento\Backend\Model\View\Result\Page</argument>
+        </arguments>
+    </type>
+
+    <type name="GrupoAwamotos\B2B\Controller\Adminhtml\CommercialDashboard\Index">
+        <arguments>
+            <argument name="resultPageFactory" xsi:type="object">GrupoAwamotos\B2B\Adminhtml\View\BackendPageFactory</argument>
+        </arguments>
+    </type>
+
+    <!-- Garante ACL do admin: app/etc/di.xml usa DefaultRoleLocator (role vazio → 403 denied). -->
+    <preference for="Magento\Framework\Authorization\RoleLocatorInterface"
+                type="Magento\Backend\Model\Authorization\RoleLocator"/>
+    <preference for="Magento\Framework\Authorization\PolicyInterface"
+                type="Magento\Framework\Authorization\Policy\Acl"/>
+
     <!-- Data Provider para Grid de Transportadoras -->
     <virtualType name="B2BCarrierGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
         <arguments>
@@ -69,7 +88,7 @@
     <type name="Magento\Backend\Model\Url">
         <plugin name="grupoawamotos_b2b_commercial_startup_page"
                 type="GrupoAwamotos\B2B\CommercialPanel\Plugin\CockpitStartupPagePlugin"
-                sortOrder="5"/>
+                sortOrder="20"/>
         <plugin name="grupoawamotos_b2b_attendant_startup_page"
                 type="GrupoAwamotos\B2B\Plugin\AttendantStartupPagePlugin"
                 sortOrder="10"/>
@@ -98,6 +117,12 @@
         <plugin name="grupoawamotos_b2b_commercial_access_guard"
                 type="GrupoAwamotos\B2B\CommercialPanel\Plugin\CockpitAccessGuardPlugin"
                 sortOrder="5"/>
+    </type>
+
+    <type name="Magento\Backend\Controller\Adminhtml\Denied\Index">
+        <plugin name="grupoawamotos_b2b_commercial_denied_redirect"
+                type="GrupoAwamotos\B2B\CommercialPanel\Plugin\DeniedPageDebugPlugin"
+                sortOrder="1"/>
     </type>
 
 </config>

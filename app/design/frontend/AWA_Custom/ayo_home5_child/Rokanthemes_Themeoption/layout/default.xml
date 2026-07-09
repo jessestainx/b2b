@@ -108,7 +108,6 @@
                 <container name="page.breadcrumbs"/>
                 <container name="page.formkey"/>
                 <container name="main.top"/>
-                <container name="page.messages"/>
                 <container name="page.main.actions"/>
                 <container name="footer"/>
             </container>

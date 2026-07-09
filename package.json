@@ -1,71 +1,26 @@
 {
-  "name": "grupo-awamotos-ayo-theme",
+  "name": "awa-motos",
   "version": "1.0.0",
-  "description": "Magento 2.4.8-p3 Rokanthemes Ayo - JS Bundle Optimization",
+  "description": "AWA Motos \u2014 Magento 2 storefront",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
-    "build": "webpack --mode production",
-    "build:dev": "webpack --mode development",
-    "build:watch": "webpack --mode development --watch",
-    "analyze": "webpack --mode production --profile --json > stats.json && webpack-bundle-analyzer stats.json",
-    "optimize": "./scripts/build-optimize.sh",
-    "deploy": "./scripts/deploy-optimized.sh",
     "lighthouse": "lhci autorun",
-    "lighthouse:ci": "lhci autorun --config=.lighthouserc.js",
-    "validate": "./scripts/build-optimize.sh",
-    "lint:css:b2b-tokens": "bash ./.github/css-tools/check-b2b-color-tokens.sh",
-    "lint:css": "node node_modules/stylelint/bin/stylelint.mjs \"app/design/frontend/ayo/ayo_home5/web/css/{awa-core.css,awa-layout.css,awa-components.css,awa-fixes.css,awa-grid-unified.css,awa-consistency.css,awa-consistency-home5.css,awa-checkout-home5.css}\"",
-    "lint:css:fix": "node node_modules/stylelint/bin/stylelint.mjs \"app/design/frontend/ayo/ayo_home5/web/css/{awa-core.css,awa-layout.css,awa-components.css,awa-fixes.css,awa-grid-unified.css,awa-consistency.css,awa-consistency-home5.css,awa-checkout-home5.css}\" --fix",
-    "lint:css:parse": "node node_modules/stylelint/bin/stylelint.mjs \"app/design/frontend/ayo/ayo_home5/web/css/**/*.css\" \"app/design/frontend/AWA_Custom/ayo_home5_child/web/css/**/*.css\" \"app/code/GrupoAwamotos/B2B/view/frontend/web/css/**/*.css\" --config .stylelintrc.css-parse.json --allow-empty-input",
-    "lint:css:architecture": "bash ./.github/css-tools/check-css-layer-architecture.sh",
-    "lint:css:governance": "bash ./.github/css-tools/check-css-governance.sh",
-    "lint:css:ci": "npm run -s lint:css:parse && npm run -s lint:css:architecture && npm run -s lint:css:b2b-tokens && npm run -s lint:css:governance",
-    "test:header": "playwright test --config=tests/e2e/playwright.config.ts",
-    "test:header:tablet": "playwright test --config=tests/e2e/playwright.config.ts --project='tablet-768' --project='tablet-960' --project='tablet-1024'",
-    "test:header:notebook": "playwright test --config=tests/e2e/playwright.config.ts --project='notebook-1024' --project='notebook-1280' --project='notebook-1366'",
-    "test:header:screenshots": "playwright test --config=tests/e2e/playwright.config.ts --grep='@screenshot'",
-    "test:header:ci": "playwright test --config=tests/e2e/playwright.config.ts --project='tablet-768' --project='notebook-1280' --project='notebook-1366' --reporter=list",
-    "test:mcp-visual": "npm --prefix tests/e2e run test:mcp-visual",
-    "test:mcp-visual:safe": "npm --prefix tests/e2e run test:mcp-visual:safe",
-    "test:mcp-visual:update-baseline": "npm --prefix tests/e2e run test:mcp-visual:update-baseline",
-    "report:mcp-visual": "node tests/e2e/scripts/mcp-visual-report.mjs",
-    "autofix:mcp-visual:dry": "node tests/e2e/scripts/mcp-visual-autofix.mjs",
-    "autofix:mcp-visual:apply": "MCP_AUTOFIX_MODE=apply node tests/e2e/scripts/mcp-visual-autofix.mjs",
-    "pipeline:mcp-visual": "npm run test:mcp-visual && npm run report:mcp-visual && npm run autofix:mcp-visual:dry",
-    "pipeline:mcp-visual:safe": "npm run test:mcp-visual:safe && npm --prefix tests/e2e run report:mcp-visual && npm --prefix tests/e2e run autofix:mcp-visual:dry",
-    "mcp:visual:safe:preflight": "bash scripts/mcp/visual-safe.sh preflight",
-    "mcp:visual:safe:investigate": "bash scripts/mcp/visual-safe.sh investigate",
-    "mcp:visual:safe:publish-css": "bash scripts/mcp/visual-safe.sh publish-css"
+    "lighthouse:collect": "lhci collect",
+    "lighthouse:assert": "lhci assert",
+    "audit:home": "lhci autorun --collect.url=https://awamotos.com/ --collect.numberOfRuns=1",
+    "audit:pwa": "lhci autorun --collect.url=https://pwa.awamotos.com/ --collect.numberOfRuns=1",
+    "deploy:check": "bash scripts/deploy/pre-deploy.sh",
+    "health": "bash scripts/monitoring/health-check.sh",
+    "backup": "bash scripts/backup/magento-backup.sh",
+    "warm": "bash scripts/warmup/warm-cache.sh",
+    "pw:qa-safe": "bash scripts/playwright-qa-safe.sh"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
-    "@lhci/cli": "^0.12.0",
-    "@playwright/test": "^1.59.1",
-    "@types/node": "^25.6.2",
-    "babel-loader": "^9.2.1",
-    "core-js": "^3.39.0",
-    "less": "^4.6.4",
-    "lighthouse": "^12.8.2",
-    "puppeteer": "^24.40.0",
-    "stylelint": "^16.26.1",
-    "stylelint-config-standard": "^37.0.0",
-    "terser-webpack-plugin": "^5.3.10",
-    "webpack": "^5.97.0",
-    "webpack-bundle-analyzer": "^4.10.2",
-    "webpack-cli": "^5.1.4"
+    "@lhci/cli": "^0.13.0",
+    "lighthouse": "^11.0.0"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ],
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
-  "sideEffects": false,
-  "dependencies": {
-    "swiper": "^12.1.2"
+    "node": ">=18.0.0"
   }
 }

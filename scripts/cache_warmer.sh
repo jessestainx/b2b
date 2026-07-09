@@ -6,7 +6,17 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Pausar warm-up enquanto Cursor IDE está ativo (dev remoto)
+if [[ -f "$ROOT_DIR/var/tmp/cursor-dev-active" && "${AWA_FORCE_CACHE_WARM:-0}" != "1" ]]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Cache warmer adiado — Cursor dev ativo" >> var/log/cache_warmer.log
+    exit 0
+fi
+
 CONCURRENCY="${1:-5}"
+# Limitar paralelismo para não saturar CPU com Cursor aberto
+if pgrep -u deploy -f 'cursor-server|extensionHost' >/dev/null 2>&1; then
+    CONCURRENCY=1
+fi
 LOG="var/log/cache_warmer.log"
 UA='AwaMotos-CacheWarmer/3.0'
 
@@ -36,6 +46,31 @@ if command -v brotli &>/dev/null; then
     find "$ROOT_DIR/pub/static/_cache/merged" -name "*.min.css" ! -name "*.br" 2>/dev/null | while read -r css; do
         brotli -q 6 -f "$css" -o "${css}.br" 2>/dev/null || true
     done || true
+
+    # Tema AWA: regenerar .br stale (min.css mais novo OU tamanho descomprimido diverge)
+    STATIC_CSS="$ROOT_DIR/pub/static/frontend/AWA_Custom/ayo_home5_child/pt_BR/css"
+    if [[ -d "$STATIC_CSS" ]]; then
+        find "$STATIC_CSS" -maxdepth 1 -name '*.min.css' 2>/dev/null | while read -r css; do
+            br="${css}.br"
+            need=0
+            if [[ ! -f "$br" ]]; then
+                need=1
+            elif [[ "$css" -nt "$br" ]]; then
+                need=1
+            else
+                orig_size=$(wc -c < "$css" | tr -d ' ')
+                br_size=$(brotli -d -c "$br" 2>/dev/null | wc -c | tr -d ' ' || echo 0)
+                if [[ "$orig_size" != "$br_size" ]]; then
+                    need=1
+                fi
+            fi
+            if [[ "$need" -eq 1 ]]; then
+                brotli -q 6 -f "$css" -o "$br" 2>/dev/null || true
+                chown www-data:www-data "$br" 2>/dev/null || true
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Brotli regen: $(basename "$css")" >> "$LOG"
+            fi
+        done || true
+    fi
 fi
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -84,16 +119,17 @@ DB_URLS=$(mysql -u "$DB_USER" -p"$DB_PASS" \
      AND (LENGTH(ur.request_path) - LENGTH(REPLACE(ur.request_path, '/', ''))) <= 1
      ORDER BY cce.level ASC, ur.request_path ASC LIMIT 80)
     UNION ALL
-    -- Top 150 produtos mais recentes (com estoque)
+    -- Top 50 produtos ativos COM estoque
     (SELECT CONCAT('https://awamotos.com/', ur.request_path)
      FROM url_rewrite ur
      JOIN catalog_product_entity_int cpes ON cpes.entity_id = ur.entity_id
          AND cpes.attribute_id = (SELECT attribute_id FROM eav_attribute WHERE attribute_code='status' AND entity_type_id=4)
          AND cpes.store_id = 0 AND cpes.value = 1
+     JOIN cataloginventory_stock_status css ON css.product_id = ur.entity_id AND css.stock_status = 1
      WHERE ur.entity_type='product'
      AND ur.store_id=1 AND ur.redirect_type=0
      AND ur.request_path NOT LIKE '%-erp-%'
-     ORDER BY ur.entity_id DESC LIMIT 150);" 2>/dev/null || true)
+     ORDER BY ur.entity_id DESC LIMIT 50);" 2>/dev/null || true)
 
 TMPF=$(mktemp)
 printf '%s\n' "${STATIC_URLS[@]}" > "$TMPF"
@@ -110,7 +146,7 @@ warm_one() {
     local code
     code=$(curl -sk -L -o /dev/null -w '%{http_code}' "$url" \
         --max-time 20 --user-agent "$UA" 2>/dev/null || echo "000")
-    if [[ "$code" == "200" ]]; then
+    if [[ "$code" == "200" || "$code" == "301" || "$code" == "302" ]]; then
         echo "[OK] $url" >> "$LOG"
     else
         echo "[FAIL $code] $url" >> "$LOG"
@@ -123,7 +159,7 @@ export UA LOG
 RESULTS=$(cat "$TMPF" | xargs -P "$CONCURRENCY" -I{} bash -c 'warm_one "$@"' _ {})
 rm -f "$TMPF"
 
-OK=$(echo "$RESULTS" | grep -c "^200$" || true)
+OK=$(echo "$RESULTS" | grep -cE '^(200|301|302)$' || true)
 FAIL=$(( TOTAL - OK ))
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Warmer concluido: ${OK}/${TOTAL} OK, ${FAIL} falhas" >> "$LOG"

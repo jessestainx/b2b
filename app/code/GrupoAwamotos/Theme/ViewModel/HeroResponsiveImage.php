@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\ViewModel;
@@ -47,6 +48,11 @@ class HeroResponsiveImage implements ArgumentInterface
         return ltrim($slideImagePath, '/') . '.webp';
     }
 
+    public function getOriginalUrl(string $slideImagePath): string
+    {
+        return $this->getMediaUrl(ltrim($slideImagePath, '/'));
+    }
+
     public function getMediaUrl(string $relativePath): string
     {
         $mediaUrl = $this->storeManager->getStore()->getBaseUrl(
@@ -67,14 +73,19 @@ class HeroResponsiveImage implements ArgumentInterface
 
         $mediaDir = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA);
         $fullWebp = $this->getFullWebpRelativePath($slideImagePath);
-        $fallbackUrl = $this->getMediaUrl($fullWebp);
+        $hasFullWebp = $mediaDir->isExist($fullWebp);
         $urls = [];
 
         foreach (self::WIDTHS as $width) {
             $variant = $this->getVariantRelativePath($slideImagePath, $width);
-            $urls[$width] = $mediaDir->isExist($variant)
-                ? $this->getMediaUrl($variant)
-                : $fallbackUrl;
+            if ($mediaDir->isExist($variant)) {
+                $urls[$width] = $this->getMediaUrl($variant);
+                continue;
+            }
+
+            if ($hasFullWebp) {
+                $urls[$width] = $this->getMediaUrl($fullWebp);
+            }
         }
 
         return $urls;
@@ -94,7 +105,7 @@ class HeroResponsiveImage implements ArgumentInterface
     {
         $urls = $this->resolveVariantUrls($slideImagePath);
         if ($urls === []) {
-            return '';
+            return $this->getOriginalUrl($slideImagePath);
         }
 
         return $mobile ? ($urls[768] ?? $urls[480] ?? reset($urls)) : ($urls[1920] ?? end($urls));
@@ -120,24 +131,23 @@ class HeroResponsiveImage implements ArgumentInterface
 
         $srcset = $this->buildSrcset($slideImagePath);
         $urls = $this->resolveVariantUrls($slideImagePath);
-        $fallbackWebp = $this->getMediaUrl($this->getFullWebpRelativePath($slideImagePath));
         $sizes = $this->getSizesAttribute($mobileSlider);
-        $defaultSrc = $mobileSlider
-            ? ($urls[768] ?? $urls[480] ?? $fallbackWebp)
-            : ($urls[1920] ?? $fallbackWebp);
+        $defaultSrc = $urls === []
+            ? $this->getOriginalUrl($slideImagePath)
+            : ($mobileSlider ? ($urls[768] ?? $urls[480] ?? reset($urls)) : ($urls[1920] ?? end($urls)));
 
         $loading = $isLcpCandidate ? 'eager' : 'lazy';
         // fetchpriority só no slider mobile visível — desktop usa <link rel=preload> (P9 dedup)
         $priority = ($isLcpCandidate && $mobileSlider) ? ' fetchpriority="high"' : '';
         $width = $mobileSlider ? 768 : 1920;
-        $height = $mobileSlider ? 400 : 600;
-        // Mobile LCP (~15 KB WebP): sync decode pinta mais cedo que async sob CPU throttle do LH
-        $decoding = ($isLcpCandidate && $mobileSlider) ? 'sync' : 'async';
+        $height = $mobileSlider ? 400 : 470;
+        // async: preload no início do head traz o recurso cedo; sync bloqueia main thread (TBT/INP).
+        $decoding = 'async';
 
         $altEsc = htmlspecialchars(strip_tags($alt), ENT_QUOTES, 'UTF-8');
 
         return '<picture>'
-            . '<source type="image/webp" srcset="' . htmlspecialchars($srcset, ENT_QUOTES, 'UTF-8') . '" sizes="' . $sizes . '">'
+            . ($srcset !== '' ? '<source type="image/webp" srcset="' . htmlspecialchars($srcset, ENT_QUOTES, 'UTF-8') . '" sizes="' . $sizes . '">' : '')
             . '<img src="' . htmlspecialchars($defaultSrc, ENT_QUOTES, 'UTF-8') . '"'
             . ' alt="' . $altEsc . '"'
             . ' loading="' . $loading . '"'

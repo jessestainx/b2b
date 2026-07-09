@@ -37,7 +37,7 @@ define([
                         'input[data-index="taxvat"]'
                     ]
                 }
-            },
+        },
             {
                 key: 'order_billing',
                 documentType: 'cpf_or_cnpj',
@@ -57,7 +57,7 @@ define([
                     regionId: ['#order-billing_address_region_id'],
                     countryId: ['#order-billing_address_country_id']
                 }
-            },
+        },
             {
                 key: 'order_shipping',
                 documentType: 'cpf_or_cnpj',
@@ -77,7 +77,7 @@ define([
                     regionId: ['#order-shipping_address_region_id'],
                     countryId: ['#order-shipping_address_country_id']
                 }
-            }
+        }
         ];
 
         let ufToRegionName = {
@@ -110,15 +110,18 @@ define([
             TO: 'Tocantins'
         };
 
-        function cleanDigits(value) {
+        function cleanDigits(value)
+        {
             return (value || '').replace(/\D+/g, '');
         }
 
-        function toUpperText(value) {
+        function toUpperText(value)
+        {
             return (value || '').toString().toUpperCase();
         }
 
-        function normalizeText(value) {
+        function normalizeText(value)
+        {
             let text = (value || '').toString();
             if (text.normalize) {
                 text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -127,7 +130,8 @@ define([
             return text.toUpperCase();
         }
 
-        function formatCnpj(digits) {
+        function formatCnpj(digits)
+        {
             let value = cleanDigits(digits).slice(0, 14);
             if (value.length <= 2) {
                 return value;
@@ -141,7 +145,8 @@ define([
             return value;
         }
 
-        function formatCep(cep) {
+        function formatCep(cep)
+        {
             let digits = cleanDigits(cep).slice(0, 8);
             if (digits.length <= 5) {
                 return digits;
@@ -150,11 +155,13 @@ define([
             return digits.slice(0, 5) + '-' + digits.slice(5);
         }
 
-        function formatPhone(phone) {
+        function formatPhone(phone)
+        {
             return (phone || '').toString().trim();
         }
 
-        function formatFieldInput(value, documentType) {
+        function formatFieldInput(value, documentType)
+        {
             let digits = cleanDigits(value);
             if (!digits) {
                 return '';
@@ -171,7 +178,8 @@ define([
             return value;
         }
 
-        function getFieldFromSelectors(fieldSelectors, rootElement) {
+        function getFieldFromSelectors(fieldSelectors, rootElement)
+        {
             if (!fieldSelectors || !fieldSelectors.length) {
                 return $();
             }
@@ -197,7 +205,8 @@ define([
             return $();
         }
 
-        function collectFields(fieldSelectors) {
+        function collectFields(fieldSelectors)
+        {
             let found = [];
             let unique = [];
 
@@ -214,7 +223,8 @@ define([
             return unique;
         }
 
-        function upsertHelperElements($cnpjField, contextKey) {
+        function upsertHelperElements($cnpjField, contextKey)
+        {
             var $control = $cnpjField.closest('.admin__field-control');
             if (!$control.length) {
                 $control = $cnpjField.parent();
@@ -246,7 +256,8 @@ define([
             return $wrapper;
         }
 
-        function showMessage($wrapper, type, text) {
+        function showMessage($wrapper, type, text)
+        {
             var $message = $wrapper.find('.ga-b2b-cnpj-message');
             if (!$message.length) {
                 return;
@@ -269,7 +280,8 @@ define([
             $message.text(text).css('color', color).show();
         }
 
-        function syncUiComponent($field, value) {
+        function syncUiComponent($field, value)
+        {
             let fieldName = $field.attr('name') || '';
             let dataIndex = $field.attr('data-index') || $field.data('index') || '';
 
@@ -300,7 +312,8 @@ define([
             }
         }
 
-        function fillField($field, value, force) {
+        function fillField($field, value, force)
+        {
             if (!$field.length || !value) {
                 return;
             }
@@ -317,7 +330,8 @@ define([
             $field.addClass('ga-b2b-cnpj-autofilled');
         }
 
-        function setCountryToBr($countryField, force) {
+        function setCountryToBr($countryField, force)
+        {
             if (!$countryField.length || !force) {
                 return;
             }
@@ -329,7 +343,8 @@ define([
             }
         }
 
-        function setRegionByUf(uf, $regionIdField, $regionTextField) {
+        function setRegionByUf(uf, $regionIdField, $regionTextField)
+        {
             let ufUpper = toUpperText(uf);
             if (!ufUpper) {
                 return;
@@ -372,7 +387,8 @@ define([
             }
         }
 
-        function applyResponse(context, cnpj, response, $cnpjField) {
+        function applyResponse(context, cnpj, response, $cnpjField)
+        {
             let rootElement = $cnpjField.closest('.admin__fieldset, .admin__field, .admin__page-section, #order-billing_address, #order-shipping_address');
             let selectors = context.fieldSelectors || {};
 
@@ -408,7 +424,8 @@ define([
             }
         }
 
-        function executeLookup(context, cnpj, $wrapper, $cnpjField, forceRefresh) {
+        function executeLookup(context, cnpj, $wrapper, $cnpjField, forceRefresh)
+        {
             if ($cnpjField.data('gaB2bCnpjInFlight')) {
                 return;
             }
@@ -461,7 +478,8 @@ define([
             });
         }
 
-        function executeClearCache(cnpj, $wrapper) {
+        function executeClearCache(cnpj, $wrapper)
+        {
             if (!clearCacheUrl) {
                 showMessage($wrapper, 'error', 'URL de limpeza de cache não configurada.');
                 return;
@@ -498,7 +516,8 @@ define([
             });
         }
 
-        function bindContext(context) {
+        function bindContext(context)
+        {
             let foundAny = false;
             let cnpjFields = collectFields(context.cnpjSelectors || []);
 
@@ -577,7 +596,8 @@ define([
             return foundAny;
         }
 
-        function bindAllContexts() {
+        function bindAllContexts()
+        {
             let found = false;
             for (let i = 0; i < contexts.length; i++) {
                 if (bindContext(contexts[i])) {

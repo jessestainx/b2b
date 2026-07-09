@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Comandos CLI -->
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="rexis_sync" xsi:type="object">GrupoAwamotos\RexisML\Console\Command\SyncCommand</item>
+                <item name="rexis_test_email" xsi:type="object">GrupoAwamotos\RexisML\Console\Command\TestEmailCommand</item>
+                <item name="rexis_test_whatsapp" xsi:type="object">GrupoAwamotos\RexisML\Console\Command\TestWhatsAppCommand</item>
+                <item name="rexis_stats" xsi:type="object">GrupoAwamotos\RexisML\Console\Command\StatsCommand</item>
+                <item name="rexis_cleanup" xsi:type="object">GrupoAwamotos\RexisML\Console\Command\CleanupCommand</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- API Preferences -->
+    <preference for="GrupoAwamotos\RexisML\Api\RecommendationRepositoryInterface"
+                type="GrupoAwamotos\RexisML\Model\RecommendationRepository"/>
+    <preference for="GrupoAwamotos\RexisML\Api\Data\RecommendationInterface"
+                type="GrupoAwamotos\RexisML\Model\DatasetRecomendacao"/>
+    <preference for="GrupoAwamotos\RexisML\Api\Data\CrosssellInterface"
+                type="GrupoAwamotos\RexisML\Model\NetworkRules"/>
+    <preference for="GrupoAwamotos\RexisML\Api\Data\RfmInterface"
+                type="GrupoAwamotos\RexisML\Model\CustomerClassification"/>
+    <preference for="GrupoAwamotos\RexisML\Api\Data\MetricsInterface"
+                type="Magento\Framework\DataObject"/>
+
+    <!-- RecommendationRepository Logger -->
+    <type name="GrupoAwamotos\RexisML\Model\RecommendationRepository">
+        <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- UI Component Grid Data Source -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="rexisml_recommendations_listing_data_source" xsi:type="string">GrupoAwamotos\RexisML\Model\ResourceModel\DatasetRecomendacao\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="GrupoAwamotos\RexisML\Model\ResourceModel\DatasetRecomendacao\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">rexis_dataset_recomendacao</argument>
+            <argument name="resourceModel" xsi:type="string">GrupoAwamotos\RexisML\Model\ResourceModel\DatasetRecomendacao</argument>
+        </arguments>
+    </virtualType>
+
+</config>

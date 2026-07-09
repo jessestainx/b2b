@@ -1,7 +1,7 @@
 <?php
 /**
- * REXIS ML Dashboard - Professional Layout
- * @var $block \GrupoAwamotos\RexisML\Block\Adminhtml\Dashboard
+ * Product Intelligence Dashboard - Professional Layout
+ * @var $block \GrupoAwamotos\ProductIntelligence\Block\Adminhtml\Dashboard
  */
 $stats = $block->getGeneralStats();
 $conversion = $block->getConversionMetrics();
@@ -23,7 +23,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
 
 <style>
 /* ============================================================
-   REXIS ML DASHBOARD — PROFESSIONAL THEME
+  PRODUCT INTELLIGENCE DASHBOARD — PROFESSIONAL THEME
    ============================================================ */
 :root {
     --rx-bg: #0f172a;
@@ -326,7 +326,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
         <div class="rx-header-left">
             <h1>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                REXIS ML
+                Product Intelligence
             </h1>
             <p>Sistema de Inteligencia Artificial &mdash; Recomendacoes &amp; Analytics</p>
         </div>
@@ -590,7 +590,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
         d.textContent = 'Erro: ' + err;
         el.innerHTML = '';
         el.appendChild(d);
-        console.error('[RexisML Chart]', err);
+        console.error('[ProductIntelligence Chart]', err);
     }
 
     function initCharts(AC) {
@@ -790,33 +790,6 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
         } catch(e) { showError(document.querySelector('#chart-products'), e.message); }
     }
 
-    // Load ApexCharts bypassing RequireJS AMD detection
-    // ApexCharts UMD detects define.amd and tries AMD mode which fails in Magento
-    // Solution: temporarily hide window.define, load as global, restore define
-    function loadScript(src, onSuccess, onError) {
-        var _define = window.define;
-        window.define = undefined;
-
-        var s = document.createElement('script');
-        s.src = src;
-        s.onload = function() {
-            window.define = _define;
-            if (window.ApexCharts) {
-                console.log('[RexisML] ApexCharts loaded from: ' + src);
-                onSuccess(window.ApexCharts);
-            } else {
-                console.warn('[RexisML] ApexCharts loaded but not on window from: ' + src);
-                onError();
-            }
-        };
-        s.onerror = function() {
-            window.define = _define;
-            console.warn('[RexisML] Failed to load: ' + src);
-            onError();
-        };
-        document.head.appendChild(s);
-    }
-
     function onFail() {
         ['#chart-tipo','#chart-monthly','#chart-rfm','#chart-scores','#chart-products'].forEach(function(id) {
             var el = document.querySelector(id);
@@ -824,18 +797,9 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
         });
     }
 
-    // Strategy: local file first (fast), CDN fallback (reliable)
-    var localUrl = '<?= /* @noEscape */ $block->getViewFileUrl('GrupoAwamotos_ERPIntegration::js/apexcharts.min.js') ?>';
-    var cdnUrl = 'https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js';
-
-    loadScript(localUrl, function(AC) {
-        initCharts(AC);
-    }, function() {
-        console.log('[RexisML] Local failed, trying CDN fallback...');
-        loadScript(cdnUrl, function(AC) {
-            initCharts(AC);
-        }, onFail);
-    });
+    require(['apexcharts'], function (ApexCharts) {
+        initCharts(ApexCharts);
+    }, onFail);
 })();
 </script>
 
@@ -872,7 +836,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
                     label.textContent = 'Erro!';
                     btn.style.borderColor = '#ef4444';
                     btn.style.color = '#ef4444';
-                    console.error('[RexisML Sync]', resp.message);
+                    console.error('[ProductIntelligence Sync]', resp.message);
                     alert('Erro no sync: ' + resp.message);
                     setTimeout(function() {
                         btn.disabled = false;
@@ -884,7 +848,7 @@ $percConversao = !empty($conversion['perc_conversao_cliente']) ? (float)$convers
                 }
             } catch (e) {
                 label.textContent = 'Erro!';
-                console.error('[RexisML Sync] Parse error:', e);
+                console.error('[ProductIntelligence Sync] Parse error:', e);
                 btn.disabled = false;
                 btn.style.opacity = '1';
             }

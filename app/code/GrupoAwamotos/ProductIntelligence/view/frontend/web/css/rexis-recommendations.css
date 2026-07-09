@@ -1,5 +1,5 @@
 /**
- * RexisML — Consolidated Recommendations CSS
+ * Product Intelligence - Consolidated Recommendations CSS
  *
  * Extraído de 6 templates PHTML para arquivo de asset único.
  * Carregado via default.xml (widgets), customer_account.xml e catalog_product_view.xml.
@@ -14,7 +14,7 @@
  */
 
 :root {
-  /* RexisML module tokens — semantic colors for RFM/churn/crosssell segments */
+  /* Product Intelligence module tokens - semantic colors for RFM/churn/crosssell segments */
   --rx-white:         var(--awa-bg, #ffffff);
   --rx-bg-subtle:     var(--awa-bg-subtle, #fafafa);
   --rx-border:        var(--awa-border, #e5e5e5);
@@ -593,17 +593,17 @@
 .b2b-rexis-card {
     background: var(--rx-bg-subtle);
     border: 1px solid var(--rx-border, #e5e5e5);
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 12px;
     display: flex;
     flex-direction: column;
-    transition: box-shadow 0.2s, transform 0.2s;
+    transition: border-color 0.18s ease-out, background-color 0.18s ease-out;
 }
 
 .b2b-rexis-card:hover {
-    border-color: rgb(183 51 55 / 16%);
-    box-shadow: 0 4px 12px rgb(183 51 55 / 8%);
-    transform: translateY(-2px);
+    border-color: rgb(183 51 55 / 22%);
+    box-shadow: none;
+    transform: none;
 }
 
 .b2b-rexis-card-churn { border-top: 3px solid var(--rx-churn-dot); }
@@ -689,14 +689,15 @@
 .b2b-rexis-btn {
     display: block;
     width: 100%;
+    min-height: 44px;
     padding: 8px 12px;
     border: none;
-    border-radius: 6px;
-    font-size: 12px;
+    border-radius: 4px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--rx-white);
     cursor: pointer;
-    transition: opacity 0.2s, box-shadow 0.2s;
+    transition: opacity 0.18s ease-out, background-color 0.18s ease-out;
     text-align: center;
 }
 
@@ -725,25 +726,24 @@
 .rx-pdp-crosssell {
     --rx-ayo-primary: var(--aw-primary, var(--awa-primary));
     --rx-ayo-primary-dark: var(--aw-primary-dark, var(--awa-primary-hover));
-    --rx-ayo-border: #eadedf;
-    --rx-ayo-soft: #fbf7f7;
+    --rx-ayo-border: var(--awa-border, #e5e5e5);
 
-    margin: 2rem 0;
-    padding: 1.25rem;
-    background: linear-gradient(180deg, #fff 0%, var(--rx-ayo-soft) 100%);
-    border-radius: 12px;
-    border: 1px solid var(--rx-ayo-border);
-    box-shadow: 0 4px 18px rgb(183 51 55 / 6%);
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
 }
 
 .rx-pdp-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.75rem;
+    margin-bottom: 12px;
+    padding-bottom: 0;
     gap: 0.5rem;
-    border-bottom: 1px solid var(--rx-ayo-border);
+    border-bottom: 0;
 }
 
 .rx-pdp-title {
@@ -771,9 +771,15 @@
 
 .rx-pdp-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1rem;
 }
+
+/* Poucos itens: limita colunas p/ não esticar cards (auto-fit deixaria 1-3 gigantes) */
+.rx-pdp-grid[data-item-count="1"] { grid-template-columns: minmax(160px, 240px); }
+.rx-pdp-grid[data-item-count="2"] { grid-template-columns: repeat(2, minmax(160px, 280px)); }
+.rx-pdp-grid[data-item-count="3"] { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
+.rx-pdp-grid[data-item-count="4"] { grid-template-columns: repeat(4, minmax(160px, 1fr)); }
 
 .rx-pdp-card {
     position: relative;
@@ -788,9 +794,9 @@
 }
 
 .rx-pdp-card:hover {
-    border-color: rgb(183 51 55 / 25%);
-    box-shadow: 0 8px 18px rgb(183 51 55 / 10%);
-    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 28%, var(--awa-border, #e5e5e5));
+    box-shadow: none;
+    transform: none;
 }
 
 .rx-pdp-badge {
@@ -847,6 +853,30 @@
     margin-bottom: 0.5rem;
 }
 
+/* B2B: aviso "Faça login para ver preços" — paridade com produtos relacionados */
+.rx-pdp-price--hidden {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--rx-text-muted);
+    line-height: 1.3;
+}
+
+.rx-pdp-login-link {
+    color: var(--rx-ayo-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.rx-pdp-login-link:hover,
+.rx-pdp-login-link:focus-visible {
+    text-decoration: underline;
+}
+
+.rx-pdp-login-suffix {
+    display: block;
+    color: var(--rx-text-muted);
+}
+
 .rx-pdp-form { margin-top: auto; }
 
 .rx-pdp-addtocart {
@@ -854,21 +884,23 @@
     align-items: center;
     gap: 0.3rem;
     width: 100%;
+    min-height: 44px;
     justify-content: center;
     padding: 0.5rem 0.75rem;
-    background: var(--rx-ayo-primary);
-    color: var(--rx-white);
-    border: none;
-    border-radius: 6px;
+    background: transparent;
+    color: var(--rx-ayo-primary);
+    border: 1px solid var(--rx-ayo-primary);
+    border-radius: 8px;
     font-size: 0.8rem;
     font-weight: 600;
+    text-transform: none;
     cursor: pointer;
-    transition: background 0.15s, box-shadow 0.15s;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
 .rx-pdp-addtocart:hover {
-    background: var(--rx-ayo-primary-dark);
-    box-shadow: 0 4px 12px rgb(183 51 55 / 25%);
+    background: color-mix(in srgb, var(--rx-ayo-primary) 8%, #fff);
+    box-shadow: none;
 }
 
 .rx-pdp-addtocart:focus-visible {

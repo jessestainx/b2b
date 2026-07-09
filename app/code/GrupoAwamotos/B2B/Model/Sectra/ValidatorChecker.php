@@ -22,6 +22,16 @@ class ValidatorChecker
 
     public function resolveSectraChave(int $magentoCustomerId): ?int
     {
+        if ($magentoCustomerId <= 0) {
+            return null;
+        }
+
+        // Prefer definitive ERP code when available; fallback to legacy bridge id.
+        $erpCode = $this->getCustomerErpCode($magentoCustomerId);
+        if ($erpCode !== null && $erpCode > 0) {
+            return $erpCode;
+        }
+
         $connection = $this->resourceConnection->getConnection();
         $chave = $connection->fetchOne(
             'SELECT old_oc_customer_id FROM oc_customer_id_map WHERE magento_customer_id = ?',
@@ -41,8 +51,10 @@ class ValidatorChecker
     public function isCustomerValidatedInSectra(int $magentoCustomerId): bool
     {
         $sectraChave = $this->resolveSectraChave($magentoCustomerId);
+        $inB2bConfirmed = $this->isInB2bConfirmedTable($sectraChave);
+        $inCadastroValidator = $this->isSectraChaveRegistered($sectraChave);
 
-        return $this->isInB2bConfirmedTable($sectraChave);
+        return $inB2bConfirmed && $inCadastroValidator;
     }
 
     /**
@@ -62,7 +74,7 @@ class ValidatorChecker
 
     public function isSectraChaveRegistered(int $sectraChave): bool
     {
-        return $this->b2bClientRegistration->isClientRegistered($sectraChave);
+        return $this->b2bClientRegistration->isClientReadyForSectraOrderImport($sectraChave);
     }
 
     public function isErpCodeRegistered(int $erpCode): bool
@@ -71,7 +83,7 @@ class ValidatorChecker
             return false;
         }
 
-        return $this->b2bClientRegistration->isClientRegistered($erpCode);
+        return $this->b2bClientRegistration->isClientReadyForSectraOrderImport($erpCode);
     }
 
     public function isInB2bConfirmedTable(int $sectraChave): bool

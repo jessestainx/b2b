@@ -17,7 +17,8 @@ class AttendantOrderGridPlugin
     public function __construct(
         private readonly CurrentAttendant $currentAttendant,
         private readonly ResourceConnection $resource
-    ) {}
+    ) {
+    }
 
     /**
      * Restringe o grid de pedidos aos clientes do atendente logado.

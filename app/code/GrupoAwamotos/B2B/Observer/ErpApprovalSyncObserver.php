@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Observer;
 
 use GrupoAwamotos\B2B\Model\ErpIntegration;
+use GrupoAwamotos\B2B\Model\CreditService;
 use GrupoAwamotos\B2B\Helper\Data as B2BHelper;
 use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -22,19 +23,22 @@ class ErpApprovalSyncObserver implements ObserverInterface
     private CustomerRepositoryInterface $customerRepository;
     private B2BClientRegistration $b2bClientRegistration;
     private LoggerInterface $logger;
+    private ?CreditService $creditService;
 
     public function __construct(
         ErpIntegration $erpIntegration,
         B2BHelper $b2bHelper,
         CustomerRepositoryInterface $customerRepository,
         B2BClientRegistration $b2bClientRegistration,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ?CreditService $creditService = null
     ) {
         $this->erpIntegration = $erpIntegration;
         $this->b2bHelper = $b2bHelper;
         $this->customerRepository = $customerRepository;
         $this->b2bClientRegistration = $b2bClientRegistration;
         $this->logger = $logger;
+        $this->creditService = $creditService;
     }
 
     /**
@@ -201,8 +205,17 @@ class ErpApprovalSyncObserver implements ObserverInterface
             $creditLimit = $this->erpIntegration->getCreditLimitFromErp((string) $erpCode);
 
             if ($creditLimit !== null && $creditLimit > 0) {
-                $customer->setCustomAttribute('credit_limit', $creditLimit);
-                $this->customerRepository->save($customer);
+                if ($this->creditService !== null) {
+                    $this->creditService->setLimit(
+                        $customerId,
+                        (float) $creditLimit,
+                        null,
+                        'Sincronizado do ERP no observer de aprovação.'
+                    );
+                } else {
+                    $customer->setCustomAttribute('credit_limit', $creditLimit);
+                    $this->customerRepository->save($customer);
+                }
 
                 $this->logger->info(sprintf(
                     'ErpApprovalSyncObserver: Set credit limit %.2f for customer %d',

@@ -10,6 +10,7 @@ use GrupoAwamotos\B2B\Model\CustomerApproval;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\Api\AttributeInterface;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Event\Manager as EventManager;
@@ -36,6 +37,7 @@ class CustomerApprovalTest extends TestCase
     private DateTime&MockObject $dateTime;
     private LoggerInterface&MockObject $logger;
     private EventManager&MockObject $eventManager;
+    private CacheInterface&MockObject $cache;
 
     protected function setUp(): void
     {
@@ -47,11 +49,27 @@ class CustomerApprovalTest extends TestCase
         $this->dateTime = $this->createMock(DateTime::class);
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->eventManager = $this->createMock(EventManager::class);
+        $this->cache = $this->createMock(CacheInterface::class);
 
-        // Default: mock ResourceConnection to prevent errors in logAction
+        // Default: mock ResourceConnection to prevent errors in logAction and in the
+        // best-effort internal helpers (syncLegacyB2bCustomerStatus,
+        // recalibratePendingAlertCounter), which build a fluent Select query.
         $connection = $this->createMock(AdapterInterface::class);
         $this->resourceConnection->method('getConnection')->willReturn($connection);
         $this->resourceConnection->method('getTableName')->willReturnArgument(0);
+
+        $select = $this->createMock(\Magento\Framework\DB\Select::class);
+        $select->method('from')->willReturnSelf();
+        $select->method('where')->willReturnSelf();
+        $select->method('limit')->willReturnSelf();
+        $select->method('joinInner')->willReturnSelf();
+
+        $connection->method('select')->willReturn($select);
+        $connection->method('getTableName')->willReturnArgument(0);
+        // No legacy row found by default: syncLegacyB2bCustomerStatus() returns early.
+        $connection->method('fetchRow')->willReturn(false);
+        $connection->method('fetchOne')->willReturn(0);
+        $connection->method('insertOnDuplicate')->willReturn(1);
 
         $this->approval = new CustomerApproval(
             $this->customerRepository,
@@ -61,7 +79,8 @@ class CustomerApprovalTest extends TestCase
             $this->storeManager,
             $this->dateTime,
             $this->logger,
-            $this->eventManager
+            $this->eventManager,
+            $this->cache
         );
     }
 
@@ -317,13 +336,14 @@ class CustomerApprovalTest extends TestCase
         $this->assertTrue($this->approval->isApproved(42));
     }
 
-    public function testIsApprovedReturnsTrueWhenNoStatus(): void
+    public function testIsApprovedReturnsFalseWhenNoStatus(): void
     {
-        // Backward compatibility: null status = approved
+        // Fail-closed: customers without an explicit approval status must not
+        // be treated as approved B2B buyers (see CustomerApproval::isApproved()).
         $customer = $this->createCustomerMock(null);
         $this->customerRepository->method('getById')->willReturn($customer);
 
-        $this->assertTrue($this->approval->isApproved(42));
+        $this->assertFalse($this->approval->isApproved(42));
     }
 
     public function testIsApprovedReturnsFalseWhenPending(): void

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Service\LogAnalyzer;
@@ -46,22 +47,22 @@ class ErpAnalyzer implements AnalyzerInterface
         ];
 
         $analysis = [];
-        
+
         foreach ($logFiles as $logFile) {
             if ($logDir->isExist($logFile)) {
                 $analysis[$logFile] = $this->analyzeLogFile($logDir, $logFile);
             }
         }
-        
+
         $this->generateErpAlerts($analysis);
-        
+
         return $analysis;
     }
 
     public function getSpecificMetrics(): array
     {
         $metrics = $this->logMetricsRepository->getMetricsByType('erp', 10);
-        
+
         $erpMetrics = [
             'sync_rate' => $this->calculateSyncRate($metrics),
             'error_rate' => $this->calculateErrorRate($metrics),
@@ -74,7 +75,7 @@ class ErpAnalyzer implements AnalyzerInterface
 
         // Calculate overall health score
         $erpMetrics['health_score'] = $this->calculateHealthScore($erpMetrics);
-        
+
         return $erpMetrics;
     }
 
@@ -85,15 +86,15 @@ class ErpAnalyzer implements AnalyzerInterface
             'issues' => [],
             'score' => 100
         ];
-        
+
         // Check recent ERP errors
         $recentMetrics = $this->logMetricsRepository->getMetricsByType('erp', 5);
         $errorCount = 0;
-        
+
         foreach ($recentMetrics as $metric) {
             $errorCount += $metric->getErrorEntries();
         }
-        
+
         if ($errorCount > 50) {
             $health['status'] = 'critical';
             $health['issues'][] = 'High error rate in ERP synchronization';
@@ -103,7 +104,7 @@ class ErpAnalyzer implements AnalyzerInterface
             $health['issues'][] = 'Moderate error rate in ERP synchronization';
             $health['score'] -= 15;
         }
-        
+
         // Check sync frequency
         $lastSync = $this->getLastSyncTime();
         if (strtotime($lastSync) < strtotime('-1 hour')) {
@@ -111,7 +112,7 @@ class ErpAnalyzer implements AnalyzerInterface
             $health['issues'][] = 'ERP sync appears to be delayed';
             $health['score'] -= 10;
         }
-        
+
         return $health;
     }
 
@@ -119,7 +120,7 @@ class ErpAnalyzer implements AnalyzerInterface
     {
         $alerts = [];
         $metrics = $this->getSpecificMetrics();
-        
+
         // High error rate alert
         if ($metrics['error_rate'] > 0.1) { // More than 10% errors
             $alerts[] = $this->createAlert(
@@ -130,7 +131,7 @@ class ErpAnalyzer implements AnalyzerInterface
                 ['error_rate' => $metrics['error_rate']]
             );
         }
-        
+
         // Low sync rate alert
         if ($metrics['sync_rate'] < 0.8) { // Less than 80% sync rate
             $alerts[] = $this->createAlert(
@@ -141,7 +142,7 @@ class ErpAnalyzer implements AnalyzerInterface
                 ['sync_rate' => $metrics['sync_rate']]
             );
         }
-        
+
         return $alerts;
     }
 
@@ -163,7 +164,7 @@ class ErpAnalyzer implements AnalyzerInterface
             }
 
             $lines = explode("\n", $content);
-            
+
             $analysis = [
                 'total_lines' => count($lines),
                 'error_lines' => 0,
@@ -178,7 +179,7 @@ class ErpAnalyzer implements AnalyzerInterface
                 'file_size' => $fileSize,
                 'patterns' => []
             ];
-            
+
             foreach ($lines as $line) {
                 // General log level analysis
                 if (stripos($line, '[ERROR]') !== false) {
@@ -190,7 +191,7 @@ class ErpAnalyzer implements AnalyzerInterface
                 if (stripos($line, '[CRITICAL]') !== false) {
                     $analysis['critical_lines']++;
                 }
-                
+
                 // ERP specific patterns
                 if (stripos($line, 'NoSuchEntityException') !== false) {
                     $analysis['erp_specific']['nosuchentity_errors']++;
@@ -205,7 +206,7 @@ class ErpAnalyzer implements AnalyzerInterface
                     $analysis['erp_specific']['integration_failures']++;
                 }
             }
-            
+
             // Save metrics
             $logMetrics = $this->logMetricsFactory->create();
             $logMetrics->setLogType('erp');
@@ -216,11 +217,10 @@ class ErpAnalyzer implements AnalyzerInterface
             $logMetrics->setCriticalEntries($analysis['critical_lines']);
             $logMetrics->setFileSizeBytes($analysis['file_size']);
             $logMetrics->setAnalysisData($analysis);
-            
+
             $this->logMetricsRepository->save($logMetrics);
-            
+
             return $analysis;
-            
         } catch (\Throwable $e) {
             $this->logger->error('Error analyzing ERP log file: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
@@ -233,27 +233,33 @@ class ErpAnalyzer implements AnalyzerInterface
             if (isset($data['error'])) {
                 continue;
             }
-            
+
             // Alert on high NoSuchEntityException count
             if ($data['erp_specific']['nosuchentity_errors'] > 10) {
                 $this->createAndSaveAlert(
                     'nosuchentity_spike',
                     'high',
                     'High NoSuchEntityException Count',
-                    sprintf('Detected %d NoSuchEntityException errors in %s', 
-                        $data['erp_specific']['nosuchentity_errors'], $file),
+                    sprintf(
+                        'Detected %d NoSuchEntityException errors in %s',
+                        $data['erp_specific']['nosuchentity_errors'],
+                        $file
+                    ),
                     ['file' => $file, 'count' => $data['erp_specific']['nosuchentity_errors']]
                 );
             }
-            
+
             // Alert on sync errors
             if ($data['erp_specific']['sync_errors'] > 5) {
                 $this->createAndSaveAlert(
                     'erp_sync_errors',
                     'critical',
                     'ERP Sync Errors Detected',
-                    sprintf('Found %d ERP sync errors in %s', 
-                        $data['erp_specific']['sync_errors'], $file),
+                    sprintf(
+                        'Found %d ERP sync errors in %s',
+                        $data['erp_specific']['sync_errors'],
+                        $file
+                    ),
                     ['file' => $file, 'count' => $data['erp_specific']['sync_errors']]
                 );
             }
@@ -285,7 +291,7 @@ class ErpAnalyzer implements AnalyzerInterface
             $alert->setOccurrences(1);
             $alert->setFirstOccurrence(date('Y-m-d H:i:s'));
             $alert->setLastOccurrence(date('Y-m-d H:i:s'));
-            
+
             $this->alertRepository->save($alert);
         } catch (\Exception $e) {
             $this->logger->error('Error creating alert: ' . $e->getMessage());
@@ -297,18 +303,18 @@ class ErpAnalyzer implements AnalyzerInterface
         if (empty($metrics)) {
             return 1.0;
         }
-        
+
         $totalOperations = 0;
         $successfulOperations = 0;
-        
+
         foreach ($metrics as $metric) {
             $total = $metric->getTotalEntries();
             $errors = $metric->getErrorEntries();
-            
+
             $totalOperations += $total;
             $successfulOperations += ($total - $errors);
         }
-        
+
         return $totalOperations > 0 ? $successfulOperations / $totalOperations : 1.0;
     }
 
@@ -317,15 +323,15 @@ class ErpAnalyzer implements AnalyzerInterface
         if (empty($metrics)) {
             return 0.0;
         }
-        
+
         $totalEntries = 0;
         $totalErrors = 0;
-        
+
         foreach ($metrics as $metric) {
             $totalEntries += $metric->getTotalEntries();
             $totalErrors += $metric->getErrorEntries();
         }
-        
+
         return $totalEntries > 0 ? $totalErrors / $totalEntries : 0.0;
     }
 
@@ -334,34 +340,34 @@ class ErpAnalyzer implements AnalyzerInterface
         // Based on error rate and sync frequency
         $errorRate = $this->calculateErrorRate($metrics);
         $baseScore = 100;
-        
+
         // Reduce score based on error rate
         $baseScore -= ($errorRate * 100 * 0.5);
-        
+
         return max(0, $baseScore);
     }
 
     private function calculateHealthScore(array $metrics): float
     {
         $score = 100;
-        
+
         // Reduce score based on various factors
         if ($metrics['error_rate'] > 0.1) {
             $score -= 30;
         } elseif ($metrics['error_rate'] > 0.05) {
             $score -= 15;
         }
-        
+
         if ($metrics['sync_rate'] < 0.8) {
             $score -= 25;
         } elseif ($metrics['sync_rate'] < 0.9) {
             $score -= 10;
         }
-        
+
         if ($metrics['performance_score'] < 70) {
             $score -= 20;
         }
-        
+
         return max(0, $score);
     }
 
@@ -383,7 +389,7 @@ class ErpAnalyzer implements AnalyzerInterface
     private function getCriticalIssues(): array
     {
         $criticalAlerts = $this->alertRepository->getCriticalAlerts();
-        return array_map(function($alert) {
+        return array_map(function ($alert) {
             return [
                 'type' => $alert->getAlertType(),
                 'message' => $alert->getMessage(),

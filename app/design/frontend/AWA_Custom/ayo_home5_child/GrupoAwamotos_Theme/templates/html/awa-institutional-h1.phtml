@@ -16,6 +16,14 @@ if ($fullAction === 'cms_page_view') {
     $page = $block->getLayout()->getBlock('cms_page');
     if ($page && method_exists($page, 'getPage')) {
         $cmsPage = $page->getPage();
+        // Quando content_heading esta preenchido, o bloco padrao page.main.title
+        // ja renderiza um <h1 class="page-title"> com esse texto. Renderizar este
+        // H1 tambem gera duplicacao visual e dois H1 na mesma pagina (fix: este
+        // fallback deve atuar SOMENTE quando page.main.title nao renderiza nada,
+        // conforme o comentario original do layout XML).
+        if ($cmsPage && method_exists($cmsPage, 'getContentHeading') && $cmsPage->getContentHeading()) {
+            return;
+        }
         if ($cmsPage && method_exists($cmsPage, 'getTitle')) {
             $pageTitle = $cmsPage->getTitle();
         }

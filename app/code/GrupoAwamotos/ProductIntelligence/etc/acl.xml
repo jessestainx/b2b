@@ -4,7 +4,7 @@
     <acl>
         <resources>
             <resource id="Magento_Backend::admin">
-                <resource id="GrupoAwamotos_ProductIntelligence::rexisml" title="REXIS ML" sortOrder="100">
+                <resource id="GrupoAwamotos_ProductIntelligence::rexisml" title="Product Intelligence" sortOrder="100">
                     <resource id="GrupoAwamotos_ProductIntelligence::dashboard" title="Dashboard" sortOrder="10"/>
                     <resource id="GrupoAwamotos_ProductIntelligence::recommendations" title="Recomendações" sortOrder="20"/>
                     <resource id="GrupoAwamotos_ProductIntelligence::sync" title="Sincronização" sortOrder="30"/>

@@ -15,15 +15,18 @@ define([
             return;
         }
 
-        function getFormKey() {
+        function getFormKey()
+        {
             return $.mage && $.mage.cookies ? $.mage.cookies.get('form_key') : null;
         }
 
-        function reloadCartData() {
+        function reloadCartData()
+        {
             customerData.reload(['cart'], true);
         }
 
-        function addBySku($button, sku, qty) {
+        function addBySku($button, sku, qty)
+        {
             return $.ajax({
                 url: addBySkuUrl,
                 type: 'POST',

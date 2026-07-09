@@ -76,18 +76,50 @@ class CompanyService
 
     public function getCompanyForCustomer(int $customerId): ?Company
     {
-        $userCollection = $this->userCollectionFactory->create();
-        $userCollection->addFieldToFilter('customer_id', $customerId);
-        $userCollection->addFieldToFilter('is_active', 1);
-        $user = $userCollection->getFirstItem();
-
-        if (!$user->getId()) {
+        $companyIds = $this->getCompanyIdsForCustomer($customerId);
+        if ($companyIds === []) {
             return null;
         }
 
+        if (count($companyIds) > 1) {
+            $this->logger->warning(
+                'B2B CompanyService::getCompanyForCustomer: cliente pertence a múltiplas empresas '
+                . 'ativas (multi-empresa); retornando a vinculação mais antiga. Para lógica '
+                . 'sensível (ex: autorização), use getCompanyIdsForCustomer() e compare o conjunto.',
+                ['customer_id' => $customerId, 'company_ids' => $companyIds]
+            );
+        }
+
         $company = $this->companyFactory->create();
-        $this->companyResource->load($company, $user->getData('company_id'));
+        $this->companyResource->load($company, $companyIds[0]);
         return $company->getId() ? $company : null;
+    }
+
+    /**
+     * Get all active company IDs a customer belongs to.
+     *
+     * A customer may be linked to more than one company (multi-empresa). Unlike
+     * getCompanyForCustomer()/getUserRole(), which resolve a single "best guess"
+     * company for simple display contexts, this returns the full set so that
+     * security-sensitive checks (e.g. "do these two customers share a company?")
+     * don't silently compare against an arbitrary company.
+     *
+     * @param int $customerId
+     * @return int[]
+     */
+    public function getCompanyIdsForCustomer(int $customerId): array
+    {
+        $userCollection = $this->userCollectionFactory->create();
+        $userCollection->addFieldToFilter('customer_id', $customerId);
+        $userCollection->addFieldToFilter('is_active', 1);
+        $userCollection->setOrder('user_id', 'ASC');
+
+        $companyIds = [];
+        foreach ($userCollection as $user) {
+            $companyIds[] = (int) $user->getData('company_id');
+        }
+
+        return array_values(array_unique($companyIds));
     }
 
     public function getCompanyUsers(int $companyId): \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
@@ -135,15 +167,48 @@ class CompanyService
     }
 
     /**
-     * Get user role in company
+     * Get user role in company.
+     *
+     * If the customer belongs to more than one active company (multi-empresa)
+     * and no $companyId is given to disambiguate, the role from the earliest
+     * membership is returned and a warning is logged — callers that need the
+     * role within a specific company (e.g. after the user picks a company in
+     * a switcher) should pass $companyId explicitly.
+     *
+     * @param int $customerId
+     * @param int|null $companyId
      */
-    public function getUserRole(int $customerId): ?string
+    public function getUserRole(int $customerId, ?int $companyId = null): ?string
     {
         $userCollection = $this->userCollectionFactory->create();
         $userCollection->addFieldToFilter('customer_id', $customerId);
         $userCollection->addFieldToFilter('is_active', 1);
-        $user = $userCollection->getFirstItem();
-        return $user->getId() ? $user->getData('role') : null;
+        $userCollection->setOrder('user_id', 'ASC');
+
+        if ($companyId !== null) {
+            $userCollection->addFieldToFilter('company_id', $companyId);
+            $user = $userCollection->getFirstItem();
+            return $user->getId() ? $user->getData('role') : null;
+        }
+
+        $users = array_values($userCollection->getItems());
+        if (count($users) > 1) {
+            $this->logger->warning(
+                'B2B CompanyService::getUserRole: cliente pertence a múltiplas empresas ativas '
+                . '(multi-empresa); retornando o papel da vinculação mais antiga. Passe $companyId '
+                . 'para desambiguar.',
+                [
+                    'customer_id' => $customerId,
+                    'company_ids' => array_map(
+                        static fn ($user) => (int) $user->getData('company_id'),
+                        $users
+                    ),
+                ]
+            );
+        }
+
+        $user = $users[0] ?? null;
+        return $user ? $user->getData('role') : null;
     }
 
     private function getUserInCompany(int $companyId, int $customerId): ?CompanyUser

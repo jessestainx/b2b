@@ -13,6 +13,8 @@
                 type="GrupoAwamotos\ERPIntegration\Model\CustomerSync"/>
     <preference for="GrupoAwamotos\ERPIntegration\Api\OrderSyncInterface"
                 type="GrupoAwamotos\ERPIntegration\Model\OrderSync"/>
+    <preference for="GrupoAwamotos\ERPIntegration\Api\BoletoSyncInterface"
+                type="GrupoAwamotos\ERPIntegration\Model\BoletoSync"/>
     <preference for="GrupoAwamotos\ERPIntegration\Api\PriceSyncInterface"
                 type="GrupoAwamotos\ERPIntegration\Model\PriceSync"/>
     <preference for="GrupoAwamotos\ERPIntegration\Api\ImageSyncInterface"
@@ -307,6 +309,11 @@
             <argument name="logger" xsi:type="object">GrupoAwamotos\ERPIntegration\Logger\VirtualLogger</argument>
         </arguments>
     </type>
+    <type name="GrupoAwamotos\ERPIntegration\Cron\SyncPriceDeltas">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotos\ERPIntegration\Logger\VirtualLogger</argument>
+        </arguments>
+    </type>
 
     <!-- Order Status Observers (Z-API WhatsApp) -->
     <type name="GrupoAwamotos\ERPIntegration\Observer\OrderStatusChange">
@@ -350,6 +357,7 @@
                 <item name="erp_sync_stock" xsi:type="object">GrupoAwamotos\ERPIntegration\Console\Command\SyncStockCommand</item>
                 <item name="erp_sync_customers" xsi:type="object">GrupoAwamotos\ERPIntegration\Console\Command\SyncCustomersCommand</item>
                 <item name="erp_sync_prices" xsi:type="object">GrupoAwamotos\ERPIntegration\Console\Command\SyncPricesCommand</item>
+                <item name="erp_sync_price_deltas" xsi:type="object">GrupoAwamotos\ERPIntegration\Console\Command\SyncPriceDeltasCommand</item>
                 <item name="erp_sync_logs" xsi:type="object">GrupoAwamotos\ERPIntegration\Console\Command\SyncLogsCommand</item>
                 <item name="erp_sync_images" xsi:type="object">GrupoAwamotos\ERPIntegration\Console\Command\SyncImagesCommand</item>
                 <item name="erp_circuit_breaker" xsi:type="object">GrupoAwamotos\ERPIntegration\Console\Command\CircuitBreakerCommand</item>

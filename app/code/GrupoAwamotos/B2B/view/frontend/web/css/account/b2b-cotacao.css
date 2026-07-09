@@ -1,0 +1,189 @@
+/**
+ * B2B legacy cotacao pages — AWA tokens, no inline styles.
+ */
+.b2b-cotacao-page {
+    max-width: 100%;
+}
+
+.b2b-cotacao-page .block-title {
+    margin-bottom: 16px;
+}
+
+.b2b-cotacao-empty {
+    padding: 28px 24px;
+    text-align: center;
+    border: 1px dashed var(--awa-border, #e5e5e5);
+    border-radius: 4px;
+    background: var(--awa-b2b-bg-soft, #f9fafb);
+}
+
+.b2b-cotacao-empty p {
+    margin: 0 0 14px;
+    color: var(--awa-text-secondary, #666);
+}
+
+.b2b-cotacao-table-wrap {
+    overflow-x: auto;
+    margin-top: 16px;
+}
+
+.b2b-cotacao-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.b2b-cotacao-table thead tr {
+    background: var(--awa-b2b-bg-soft, #f5f5f5);
+}
+
+.b2b-cotacao-table th,
+.b2b-cotacao-table td {
+    padding: 10px 12px;
+    font-size: 0.8125rem;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5);
+    text-align: left;
+}
+
+.b2b-cotacao-table th {
+    font-weight: 600;
+    border-bottom-width: 2px;
+}
+
+.b2b-cotacao-table .col-qty,
+.b2b-cotacao-table .col-actions {
+    text-align: center;
+}
+
+.b2b-cotacao-table .col-price,
+.b2b-cotacao-table .col-total {
+    text-align: right;
+}
+
+.b2b-cotacao-table .col-notes {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--awa-text-secondary, #666);
+}
+
+.b2b-cotacao-link {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--awa-primary, #b73337);
+    text-decoration: none;
+}
+
+.b2b-cotacao-link:hover {
+    text-decoration: underline;
+}
+
+.b2b-cotacao-footer-link {
+    margin-top: 20px;
+}
+
+.b2b-cotacao-status {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.b2b-cotacao-status--pending {
+    background: rgb(245 124 0 / 12%);
+    color: #b45309;
+}
+
+.b2b-cotacao-status--quoted {
+    background: rgb(183 51 55 / 12%);
+    color: var(--awa-primary, #b73337);
+}
+
+.b2b-cotacao-status--accepted {
+    background: rgb(16 185 129 / 12%);
+    color: #047857;
+}
+
+.b2b-cotacao-status--rejected {
+    background: rgb(183 51 55 / 15%);
+    color: #991b1b;
+}
+
+.b2b-cotacao-status--expired {
+    background: var(--awa-b2b-bg-soft, #f3f4f6);
+    color: var(--awa-text-secondary, #666);
+}
+
+.b2b-cotacao-meta {
+    font-size: 0.8125rem;
+    color: var(--awa-text-secondary, #666);
+}
+
+.b2b-cotacao-notice {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 4px;
+    font-size: 0.8125rem;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    background: var(--awa-b2b-bg-soft, #f9fafb);
+}
+
+.b2b-cotacao-notice--info {
+    border-color: rgb(183 51 55 / 18%);
+    background: rgb(183 51 55 / 6%);
+}
+
+.b2b-cotacao-notice--success {
+    border-color: rgb(16 185 129 / 25%);
+    background: rgb(16 185 129 / 8%);
+}
+
+.b2b-cotacao-notice--warning {
+    border-color: rgb(245 124 0 / 25%);
+    background: rgb(245 124 0 / 8%);
+}
+
+.b2b-cotacao-actions {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: 4px;
+    background: var(--awa-b2b-bg-soft, #f9fafb);
+}
+
+.b2b-cotacao-actions__title {
+    margin: 0 0 14px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.b2b-cotacao-actions__forms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.b2b-cotacao-price--quoted {
+    color: #047857;
+    font-weight: 600;
+}
+
+.b2b-cotacao-price--waiting {
+    color: var(--awa-text-muted, #999);
+}
+
+.b2b-cotacao-back {
+    margin-bottom: 20px;
+}
+
+@media (max-width: 767px) {
+    .b2b-cotacao-actions__forms {
+        flex-direction: column;
+    }
+
+    .b2b-cotacao-actions__forms .action {
+        width: 100%;
+        min-height: 44px;
+    }
+}

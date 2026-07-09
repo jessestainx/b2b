@@ -1,9 +1,10 @@
 /**
- * OPC place-order: billing por método + CTA sidebar + placeOrder direto no renderer.
+ * OPC place-order: billing sync, CTA sidebar e conclusão via renderer de pagamento.
  */
 define([
     'ko',
     'jquery',
+    'mage/translate',
     'uiRegistry',
     'Magento_Checkout/js/model/quote',
     'Magento_Checkout/js/action/select-billing-address',
@@ -16,6 +17,7 @@ define([
 ], function (
     ko,
     $,
+    $t,
     registry,
     quote,
     selectBillingAddressAction,
@@ -27,6 +29,9 @@ define([
     _
 ) {
     'use strict';
+
+    var PLACE_ORDER_AJAX_RE = /payment-information|place-order|set-payment-information/i;
+    var PLACE_ORDER_AJAX_TIMEOUT_MS = 90000;
 
     /**
      * @param {Object|null} address
@@ -71,6 +76,9 @@ define([
         }
     }
 
+    /**
+     * @returns {void}
+     */
     function ensureShippingMethodFromRates() {
         var shippingMethod = quote.shippingMethod();
         var rates;
@@ -114,8 +122,6 @@ define([
     }
 
     /**
-     * Alinhado ao OPC original (billing != null), com sync prévia shipping → billing.
-     *
      * @returns {boolean}
      */
     function canPlaceOrder() {
@@ -123,6 +129,89 @@ define([
         ensureShippingMethodFromRates();
 
         return readCanPlaceOrder();
+    }
+
+    /**
+     * @param {boolean} isBusy
+     * @returns {void}
+     */
+    function setPlaceOrderBusyState(isBusy) {
+        $('.btn-placeorder')
+            .attr('aria-busy', isBusy ? 'true' : 'false')
+            .toggleClass('is-processing', isBusy);
+    }
+
+    /**
+     * @returns {jQuery}
+     */
+    function findPlaceOrderToolbar() {
+        return $('.awa-place-order-toolbar, #opc-sidebar .actions-toolbar, .opc-sidebar .actions-toolbar').first();
+    }
+
+    /**
+     * @param {string} message
+     * @returns {void}
+     */
+    function showInlinePlaceOrderError(message) {
+        var text = $.trim(message || '');
+
+        if (!text) {
+            $('#awa-place-order-inline-error').attr('hidden', 'hidden').empty();
+            return;
+        }
+
+        var $toolbar = findPlaceOrderToolbar();
+        var $region = $('#awa-place-order-inline-error');
+
+        if (!$region.length) {
+            $region = $(
+                '<div id="awa-place-order-inline-error" class="awa-b2b-place-order-error message message-error error" ' +
+                'role="alert" aria-live="assertive"></div>'
+            );
+            $toolbar.before($region);
+        }
+
+        $region
+            .removeAttr('hidden')
+            .html('<div>' + $('<span/>').text(text).html() + '</div>');
+
+        if ($region[0] && typeof $region[0].scrollIntoView === 'function') {
+            $region[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    /**
+     * Feedback visível quando validadores adicionais bloqueiam o CTA.
+     *
+     * @returns {void}
+     */
+    function showValidatorBlockFeedback() {
+        var $checkbox = $('#b2b-terms-checkbox');
+        var $terms = $('.b2b-terms-container[data-awa-component="b2b-terms"]');
+
+        if ($checkbox.length && !$checkbox.prop('checked')) {
+            $terms.addClass('b2b-terms-container--error');
+
+            if ($terms.length && typeof $terms[0].scrollIntoView === 'function') {
+                $terms[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            showInlinePlaceOrderError(
+                $t('Aceite os termos B2B na etapa Pagamento para concluir o pedido.')
+            );
+
+            return;
+        }
+
+        var $firstError = $('.field._error:visible, .message-error:visible, .mage-error:visible').first();
+
+        if ($firstError.length && typeof $firstError[0].scrollIntoView === 'function') {
+            $firstError[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        showInlinePlaceOrderError(
+            $t('Revise os campos destacados antes de concluir o pedido.')
+        );
     }
 
     /**
@@ -154,16 +243,6 @@ define([
     }
 
     /**
-     * @param {boolean} isBusy
-     * @returns {void}
-     */
-    function setPlaceOrderBusyState(isBusy) {
-        $('.btn-placeorder')
-            .attr('aria-busy', isBusy ? 'true' : 'false')
-            .toggleClass('is-processing', isBusy);
-    }
-
-    /**
      * @returns {Object|null}
      */
     function resolvePaymentRenderer() {
@@ -180,12 +259,114 @@ define([
         }
     }
 
+    /**
+     * @param {Object} component
+     * @param {string} [message]
+     * @returns {void}
+     */
+    function finalizePlaceOrderAttempt(component, message) {
+        fullScreenLoader.stopLoader();
+        setPlaceOrderBusyState(false);
+        component._placeOrderContinueStarted = false;
+        component.releasePlaceOrderLock();
+
+        if (message) {
+            showInlinePlaceOrderError(message);
+        }
+    }
+
+    /**
+     * @param {Object} component
+     * @returns {void}
+     */
+    function bindPlaceOrderAjaxCompletion(component) {
+        var completed = false;
+
+        /**
+         * @returns {void}
+         */
+        var finish = function () {
+            if (completed) {
+                return;
+            }
+
+            completed = true;
+            $(document).off('ajaxComplete.awaOpcPlaceOrder');
+            window.clearTimeout(component._placeOrderAjaxTimeout);
+            finalizePlaceOrderAttempt(component);
+        };
+
+        $(document).on('ajaxComplete.awaOpcPlaceOrder', function (event, xhr, settings) {
+            if (!settings || !settings.url || String(settings.type || '').toUpperCase() !== 'POST') {
+                return;
+            }
+
+            if (PLACE_ORDER_AJAX_RE.test(settings.url)) {
+                finish();
+            }
+        });
+
+        component._placeOrderAjaxTimeout = window.setTimeout(finish, PLACE_ORDER_AJAX_TIMEOUT_MS);
+    }
+
+    /**
+     * @param {Object} component
+     * @param {Object|null} paymentRenderer
+     * @param {*} rendererResult
+     * @returns {void}
+     */
+    function bindRendererCompletion(component, paymentRenderer, rendererResult) {
+        var deferred;
+
+        if (rendererResult && typeof rendererResult.always === 'function') {
+            deferred = rendererResult;
+        } else if (rendererResult === false || rendererResult == null) {
+            finalizePlaceOrderAttempt(
+                component,
+                $t('Não foi possível iniciar o pedido. Verifique pagamento e termos, depois tente novamente.')
+            );
+
+            return;
+        } else {
+            bindPlaceOrderAjaxCompletion(component);
+
+            return;
+        }
+
+        deferred.done(function () {
+            component._placeOrderRedirectPending = true;
+        });
+
+        deferred.always(function () {
+            if (component._placeOrderRedirectPending) {
+                component._isPlacingOrder = false;
+                component._placeOrderContinueStarted = false;
+                component._placeOrderRedirectPending = false;
+
+                return;
+            }
+
+            finalizePlaceOrderAttempt(component);
+        });
+
+        if (typeof deferred.fail === 'function') {
+            deferred.fail(function () {
+                component._placeOrderRedirectPending = false;
+                showInlinePlaceOrderError(
+                    $t('Não foi possível finalizar o pedido. Tente novamente ou recarregue a página.')
+                );
+            });
+        }
+    }
+
     return function (Component) {
         return Component.extend({
             /** @inheritdoc */
             initialize: function () {
                 this._super();
                 this._isPlacingOrder = false;
+                this._placeOrderContinueStarted = false;
+                this._placeOrderAjaxTimeout = null;
 
                 var forceHidden = ko.observable(false);
                 var previousVisible = this.isVisible;
@@ -222,15 +403,38 @@ define([
              * @returns {void}
              */
             releasePlaceOrderLock: function () {
+                var paymentRenderer = resolvePaymentRenderer();
+
                 this._isPlacingOrder = false;
+                this._placeOrderContinueStarted = false;
+
+                if (this._placeOrderAjaxTimeout) {
+                    window.clearTimeout(this._placeOrderAjaxTimeout);
+                    this._placeOrderAjaxTimeout = null;
+                }
+
+                $(document).off('ajaxComplete.awaOpcPlaceOrder');
+                fullScreenLoader.stopLoader();
                 setPlaceOrderBusyState(false);
                 syncPlaceOrderAllowed(this.isPlaceOrderActionAllowed);
+
+                if (paymentRenderer) {
+                    if (ko.isObservable(paymentRenderer.isPlaceOrderInProgress)) {
+                        paymentRenderer.isPlaceOrderInProgress(false);
+                    }
+
+                    if (ko.isObservable(paymentRenderer.isPlaceOrderActionAllowed)) {
+                        paymentRenderer.isPlaceOrderActionAllowed(true);
+                    }
+                }
             },
 
             /** @inheritdoc */
             placeOrder: function (data, event) {
                 var self = this;
                 var shippingAddressComponent;
+                var canPlace;
+                var validatorsOk;
 
                 if (self._isPlacingOrder) {
                     return false;
@@ -239,44 +443,56 @@ define([
                 ensureBillingFromShipping();
                 ensureShippingMethodFromRates();
 
-                if (!canPlaceOrder()) {
+                canPlace = canPlaceOrder();
+
+                if (!canPlace) {
                     return false;
                 }
 
-                if (!additionalValidators.validate()) {
+                validatorsOk = additionalValidators.validate();
+
+                if (!validatorsOk) {
+                    showValidatorBlockFeedback();
                     return false;
                 }
 
-                self._isPlacingOrder = true;
-                self.isPlaceOrderActionAllowed(false);
-                setPlaceOrderBusyState(true);
-                fullScreenLoader.startLoader();
+                showInlinePlaceOrderError('');
 
                 if (event) {
                     event.preventDefault();
                 }
 
+                self._isPlacingOrder = true;
+                self.isPlaceOrderActionAllowed(false);
+                setPlaceOrderBusyState(true);
+
                 if (quote.isVirtual()) {
-                    return self._super(data, event);
+                    bindPlaceOrderAjaxCompletion(self);
+                    self._super(data, event);
+                    return false;
                 }
 
                 if (typeof window.shippingAddress !== 'undefined' && !$.isEmptyObject(window.shippingAddress)) {
-                    return self._super(data, event);
+                    bindPlaceOrderAjaxCompletion(self);
+                    self._super(data, event);
+                    return false;
                 }
 
                 try {
                     shippingAddressComponent = registry.get('checkout.steps.shipping-step.shippingAddress');
                 } catch (ignore) {
-                    fullScreenLoader.stopLoader();
-                    setPlaceOrderBusyState(false);
-                    self.releasePlaceOrderLock();
+                    finalizePlaceOrderAttempt(
+                        self,
+                        $t('Etapa de entrega indisponível. Recarregue a página e tente novamente.')
+                    );
                     return false;
                 }
 
                 if (!shippingAddressComponent.validateShippingInformation()) {
-                    fullScreenLoader.stopLoader();
-                    setPlaceOrderBusyState(false);
-                    self.releasePlaceOrderLock();
+                    finalizePlaceOrderAttempt(
+                        self,
+                        $t('Revise o endereço de entrega antes de concluir o pedido.')
+                    );
                     return false;
                 }
 
@@ -305,31 +521,40 @@ define([
                 if (billingAddressComponent &&
                     typeof billingAddressComponent.isAddressSameAsShipping === 'function' &&
                     billingAddressComponent.isAddressSameAsShipping()) {
-                    fullScreenLoader.startLoader();
                     selectBillingAddressAction(quote.shippingAddress());
                 }
 
                 validateShippingInformationAction().done(function () {
                     var paymentRenderer = resolvePaymentRenderer();
-                    var invoked = false;
+                    var rendererResult = null;
+                    var paymentCode = quote.paymentMethod() && quote.paymentMethod().method;
 
                     if (paymentRenderer && typeof paymentRenderer.placeOrder === 'function') {
-                        paymentRenderer.placeOrder(null, null);
-                        invoked = true;
+                        rendererResult = paymentRenderer.placeOrder(null, null);
+                        bindRendererCompletion(self, paymentRenderer, rendererResult);
+                        return;
                     }
 
-                    if (!invoked) {
-                        $('input#' + self.getCode())
-                            .closest('.payment-method')
-                            .find('.payment-method-content .actions-toolbar button.action.checkout')
-                            .first()
-                            .trigger('click');
+                    var $fallbackBtn = $('input#' + paymentCode)
+                        .closest('.payment-method')
+                        .find('.payment-method-content .actions-toolbar button.action.checkout')
+                        .first();
+
+                    if ($fallbackBtn.length) {
+                        $fallbackBtn.trigger('click');
+                        bindPlaceOrderAjaxCompletion(self);
+                        return;
                     }
+
+                    finalizePlaceOrderAttempt(
+                        self,
+                        $t('Forma de pagamento indisponível. Recarregue a página e tente novamente.')
+                    );
                 }).fail(function () {
-                    fullScreenLoader.stopLoader();
-                    setPlaceOrderBusyState(false);
-                    self._placeOrderContinueStarted = false;
-                    self.releasePlaceOrderLock();
+                    finalizePlaceOrderAttempt(
+                        self,
+                        $t('Não foi possível validar o frete. Revise a transportadora e tente novamente.')
+                    );
                 });
             }
         });

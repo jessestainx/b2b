@@ -1,10 +1,17 @@
 <script>
-(function (w) {
+(function (w, d) {
     'use strict';
 
+    /* Home PSI: require-stub — requirejs ainda não existe; poller 25ms congela o Chrome. */
+    if ((d.body && d.body.classList.contains('cms-index-index')) ||
+        (typeof w.require === 'function' && w.require._awaStub)) {
+        return;
+    }
+
     var attempts = 0;
-    var maxAttempts = 200;
+    var maxAttempts = 40;
     var timer = null;
+    var pollMs = 200;
 
     function installFallback() {
         var context;
@@ -39,6 +46,6 @@
         if (installFallback() || attempts >= maxAttempts) {
             w.clearInterval(timer);
         }
-    }, 25);
-}(window));
+    }, pollMs);
+}(window, document));
 </script>

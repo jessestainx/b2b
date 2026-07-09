@@ -15,7 +15,7 @@
   letter-spacing: 0.12em;
   line-height: 1.2;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--awa-primary, #b73337) 72%, var(--awa-text-primary, #333333));
+  color: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 72%, var(--awa-text-primary, var(--awa-text)));
 }
 
 #html-body h1.awa-category-hero__title {
@@ -23,7 +23,7 @@
   font-weight: 800 !important;
   letter-spacing: -0.02em;
   line-height: 1.15 !important;
-  color: var(--awa-text-primary, #333333) !important;
+  color: var(--awa-text-primary, var(--awa-text)) !important;
 }
 
 #html-body.catalog-category-view .page-wrapper .awa-category-hero__count,
@@ -32,7 +32,7 @@
   font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
   font-weight: 500;
   line-height: 1.35;
-  color: var(--awa-text-secondary, #666666);
+  color: var(--awa-text-secondary, var(--awa-text-secondary));
 }
 
 #html-body.catalog-category-view .page-wrapper .breadcrumbs,
@@ -43,14 +43,14 @@
 
 #html-body.catalog-category-view .page-wrapper .breadcrumbs a,
 #html-body.catalogsearch-result-index .page-wrapper .breadcrumbs a {
-  color: var(--awa-text-secondary, #666666);
+  color: var(--awa-text-secondary, var(--awa-text-secondary));
   text-decoration: none;
   transition: color var(--awa-dur-base, 200ms) ease;
 }
 
 #html-body.catalog-category-view .page-wrapper .breadcrumbs a:hover,
 #html-body.catalogsearch-result-index .page-wrapper .breadcrumbs a:hover {
-  color: var(--awa-primary, #b73337);
+  color: var(--awa-primary, var(--awa-primary));
 }
 
 /* Search results: page title fallback */
@@ -59,7 +59,7 @@
   font-weight: 800 !important;
   letter-spacing: -0.02em;
   line-height: 1.15 !important;
-  color: var(--awa-text-primary, #333333) !important;
+  color: var(--awa-text-primary, var(--awa-text)) !important;
 }
 
 /* ─── Product cards: name → REF → price/login ───────────────────────────── */
@@ -74,7 +74,7 @@
   font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
   font-weight: 600;
   line-height: 1.35;
-  color: var(--awa-text-primary, #333333);
+  color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body.catalog-category-view .page-wrapper .wrapper.grid.products-grid .item-product :is(.product-name a, .product-item-name a),
@@ -86,7 +86,7 @@
 
 #html-body.catalog-category-view .page-wrapper .wrapper.grid.products-grid .item-product :is(.product-name a, .product-item-name a):hover,
 #html-body.catalogsearch-result-index .page-wrapper .wrapper.grid.products-grid .item-product :is(.product-name a, .product-item-name a):hover {
-  color: var(--awa-primary, #b73337);
+  color: var(--awa-primary, var(--awa-primary));
 }
 
 #html-body.catalog-category-view .page-wrapper .wrapper.grid.products-grid .item-product :is(.awa-b2b-sku, .product-sku, .sku),
@@ -94,7 +94,7 @@
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: color-mix(in srgb, var(--awa-text-primary, #333333) 55%, var(--awa-border, #e5e5e5));
+  color: color-mix(in srgb, var(--awa-text-primary, var(--awa-text)) 55%, var(--awa-border, var(--awa-border)));
 }
 
 /* B2B login chip — vence audit FIX 27 (PDP pill) + plp-final inline-flex column */
@@ -112,9 +112,9 @@
   padding: 0.5rem 0.75rem !important;
   margin-top: 4px !important;
   border-radius: 6px !important;
-  border: 1px solid var(--awa-border, #e5e5e5) !important;
-  background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, var(--awa-bg, #ffffff)) !important;
-  color: var(--awa-text-secondary, #666666) !important;
+  border: 1px solid var(--awa-border, var(--awa-border)) !important;
+  background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-bg, var(--awa-bg))) !important;
+  color: var(--awa-text-secondary, var(--awa-text-secondary)) !important;
   font-size: clamp(0.6875rem, 0.65rem + 0.2vw, 0.8125rem) !important;
   font-weight: 400 !important;
   line-height: 1.25 !important;
@@ -141,7 +141,7 @@
   font-size: inherit !important;
   font-weight: 400 !important;
   line-height: inherit !important;
-  color: color-mix(in srgb, var(--awa-text-primary, #333333) 62%, var(--awa-border, #e5e5e5)) !important;
+  color: color-mix(in srgb, var(--awa-text-primary, var(--awa-text)) 62%, var(--awa-border, var(--awa-border))) !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -156,7 +156,7 @@
   border: none !important;
   border-radius: 0 !important;
   background: transparent !important;
-  color: var(--awa-primary, #b73337) !important;
+  color: var(--awa-primary, var(--awa-primary)) !important;
   font-size: inherit !important;
   font-weight: 700 !important;
   line-height: inherit !important;
@@ -169,7 +169,7 @@
 
 #html-body.catalog-category-view .page-wrapper .wrapper.grid.products-grid .item-product .info-price .b2b-login-to-see-price a:hover,
 #html-body.catalogsearch-result-index .page-wrapper .wrapper.grid.products-grid .item-product .info-price .b2b-login-to-see-price a:hover {
-  color: var(--awa-primary-hover, var(--awa-primary-dark, #8e2629)) !important;
+  color: var(--awa-primary-hover, var(--awa-primary-dark, var(--awa-primary-hover))) !important;
   text-decoration: underline !important;
   transform: none !important;
   box-shadow: none !important;

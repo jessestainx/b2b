@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\ViewModel;
@@ -33,15 +34,25 @@ class HeroSliderPreload implements ArgumentInterface
     {
         try {
             $conn = $this->resource->getConnection();
+            /*
+             * JOIN com rokanthemes_slider para garantir que o slide pertence
+             * a um slider ativo. Sem o JOIN, sliders inativos com slides na
+             * posição 0 seriam retornados antes dos sliders ativos.
+             */
             $select = $conn->select()
                 ->from(
                     ['s' => $this->resource->getTableName('rokanthemes_slide')],
                     ['slide_image']
                 )
+                ->join(
+                    ['sl' => $this->resource->getTableName('rokanthemes_slider')],
+                    'sl.slider_id = s.slider_id AND sl.slider_status = 1',
+                    []
+                )
                 ->where('s.slide_status = ?', 1)
                 ->where('s.slide_image IS NOT NULL')
                 ->where('s.slide_image != ?', '')
-                ->order('s.slide_position ASC')
+                ->order(['sl.slider_id ASC', 's.slide_position ASC'])
                 ->limit(1);
 
             $slideImage = (string) $conn->fetchOne($select);

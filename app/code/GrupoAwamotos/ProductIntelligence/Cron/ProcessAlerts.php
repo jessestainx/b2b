@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Cron para processar alertas automaticos de Churn e Cross-sell
  * Executa diariamente as 9h (configurado em crontab.xml)
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Cron;
 

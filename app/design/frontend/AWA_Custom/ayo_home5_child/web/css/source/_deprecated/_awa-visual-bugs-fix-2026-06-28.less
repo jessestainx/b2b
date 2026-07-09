@@ -1,0 +1,567 @@
+// =============================================================================
+// §VB-FIX-2026-06-28 — AWA Visual Bugs Comprehensive Fix
+//
+// Consolida correções para os 24 problemas visuais reportados pelo auditor
+// (PLANO_BUGS_VISUAIS / Visual bugs probe 2026-06-28):
+//
+//   P1 (5) — horizontal-overflow
+//   P2 (19) — button-height-inconsistency (6), text-clipping (6),
+//             mobile-touch-targets (7).
+//
+// Princípios:
+//   1. Especificidade progressiva (html body#html-body .x .y).
+//   2. Tokens semânticos @awa-* quando disponíveis.
+//   3. Touch targets ≥44px (WCAG 2.5.5).
+//   4. Container único 1280px com padding fluido.
+//   5. Cascata: styles-m/l → awa-impeccable-layout → este arquivo (terminal).
+//
+// Carregamento: awa-head-preload.phtml (global, async após impeccable-layout).
+// =============================================================================
+
+@import (once) '_awa-variables';
+
+// =============================================================================
+// §1  HORIZONTAL-OVERFLOW (P1) — skip-links offscreen até receberem foco
+// =============================================================================
+
+html body#html-body .page-wrapper :is(.skip-link, .awa-skip-link, .skip-to-main-content, a.action.skip) {
+    position: fixed !important;
+    inset-block-start: -100px !important;
+    inset-inline-start: 12px !important;
+    z-index: 9999 !important;
+    display: inline-block !important;
+    width: auto !important;
+    max-width: ~"min(280px, calc(100vw - 24px))" !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 44px !important;
+    padding: 8px 14px !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    text-decoration: none !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    transform: translateY(-150%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: transform 180ms ease, opacity 180ms ease !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body .page-wrapper :is(.skip-link, .awa-skip-link, .skip-to-main-content, a.action.skip):is(:focus, :focus-visible) {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    outline: 2px solid @awa-color-primary !important;
+    outline-offset: 2px !important;
+}
+
+html body#html-body .page-wrapper :is(.skip-link, .awa-skip-link, a.action.skip) > span {
+    display: inline-block !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+// =============================================================================
+// §2  HORIZONTAL-OVERFLOW (P1) — B2B promo bar
+// =============================================================================
+
+@media (min-width: 768px) {
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding-inline: 16px !important;
+        overflow: hidden !important;
+        position: relative !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__inner,
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__layout {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        flex-wrap: nowrap !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__lead {
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    // Versão curta (mobile-only) escondida em desktop — remove a duplicação
+    // "Vendas corporativas B2B Vendas B2B" reportada pelo auditor.
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__lead-short {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: absolute !important;
+        inset-inline-start: -9999px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__lead-long {
+        display: inline-block !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        min-width: 0 !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) strong.awa-b2b-promo-bar__cta-short {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: absolute !important;
+        inset-inline-start: -9999px !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__cta {
+        flex: 0 0 auto !important;
+        max-width: 200px !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-close {
+        position: absolute !important;
+        inset-inline-end: 4px !important;
+        inset-block-start: 50% !important;
+        transform: translateY(-50%) !important;
+        flex: 0 0 32px !important;
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        margin-inline-start: auto !important;
+        box-sizing: border-box !important;
+    }
+}
+
+// =============================================================================
+// §3  HORIZONTAL-OVERFLOW (P1) — JS-disabled warning + Newsletter popup
+// =============================================================================
+
+html body#html-body :is(.message.message-error.error.message-global, .notice-global, .cookie-notice) {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+
+    :is(strong, span, p, div) {
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        box-sizing: border-box !important;
+    }
+}
+
+// Newsletter popup fixo no viewport.
+html body#html-body #newsletter_pop_up,
+html body#html-body .newsletterpopup,
+html body#html-body .modal-popup.newsletter-popup-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body #newsletter_pop_up .modal-inner-wrap,
+html body#html-body .newsletterpopup .modal-inner-wrap,
+html body#html-body .modal-popup.newsletter-popup-modal .modal-inner-wrap {
+    position: absolute !important;
+    inset-block-start: 50% !important;
+    inset-inline-start: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: ~"min(560px, calc(100vw - 24px))" !important;
+    max-width: ~"calc(100vw - 24px)" !important;
+    max-height: ~"calc(100vh - 24px)" !important;
+    box-sizing: border-box !important;
+    overflow: auto !important;
+}
+
+html body#html-body #newsletter_pop_up .content-popup,
+html body#html-body .newsletterpopup .content-popup {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+}
+
+html body#html-body #newsletter_pop_up .btn-close,
+html body#html-body #newsletter_pop_up .newletter_popup_close,
+html body#html-body .newsletterpopup .action.close,
+html body#html-body .newsletterpopup button.newletter_popup_close {
+    position: absolute !important;
+    inset-block-start: 8px !important;
+    inset-inline-end: 8px !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    z-index: 10 !important;
+}
+
+// =============================================================================
+// §4  HORIZONTAL-OVERFLOW (P1) — home mobile product promo banners
+// =============================================================================
+
+@media (max-width: 767px) {
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
+        .awa-product-promo-banners {
+            max-width: 100% !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+            padding-inline: 16px !important;
+        }
+
+        .awa-product-promo-banners__grid {
+            max-width: 100% !important;
+            width: 100% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            overscroll-behavior-x: contain !important;
+            scrollbar-width: none !important;
+            box-sizing: border-box !important;
+
+            &::-webkit-scrollbar {
+                display: none !important;
+            }
+        }
+
+        .awa-product-promo-banners__item {
+            max-width: ~"min(82vw, 320px)" !important;
+            flex: 0 0 ~"min(82vw, 320px)" !important;
+            box-sizing: border-box !important;
+        }
+    }
+
+    html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper :is(.awa-hero-swiper, .awa-hero-swiper__slide, .hero-section, [class*="hero-"]) {
+        svg {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        :is(circle, path, rect, line, polygon) {
+            max-width: 100% !important;
+        }
+    }
+}
+
+// =============================================================================
+// §5  HORIZONTAL-OVERFLOW —根 (sentinela global)
+// =============================================================================
+
+html, html body#html-body {
+    overflow-x: clip !important;
+}
+
+// =============================================================================
+// §6  BUTTON-HEIGHT-INSTABILITY (P2) — padronização 44px
+// =============================================================================
+
+html body#html-body .page-wrapper {
+    :is(
+        button,
+        .action,
+        .action.primary,
+        .action.secondary,
+        .action.tocart,
+        .action.checkout,
+        .action.viewcart,
+        .action.subscribe,
+        .action.search,
+        .action.nav-toggle,
+        .awa-header-mobile-toggle,
+        .awa-minicart-continue,
+        .awa-b2b-promo-close,
+        .title-category-dropdown,
+        .awa-footer-section__toggle,
+        .awa-footer-quem-somos-toggle,
+        .awa-footer-suporte-toggle,
+        .awa-footer-atendimento-toggle
+    ) {
+        min-height: 44px !important;
+        height: auto !important;
+        max-height: none !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1.2 !important;
+        padding-block: 8px !important;
+    }
+}
+
+html body#html-body .page-wrapper :is(.awa-hero-swiper__nav, .swiper-button-prev, .swiper-button-next) {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+// =============================================================================
+// §7  TEXT-CLIPPING (P2) — product names e campos relacionados
+// =============================================================================
+
+html body#html-body .page-wrapper :is(.products-grid, .block-products-list, .product-items, .owl-carousel) {
+    :is(h2.product-name, .product-name, .product-item-name) {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        display: block !important;
+        -webkit-line-clamp: 3 !important;
+        line-clamp: 3 !important;
+        -webkit-box-orient: vertical !important;
+        display: -webkit-box !important;
+    }
+
+    :is(a.product-item-link, .product-name a, .product-item-name a) {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 3 !important;
+        line-clamp: 3 !important;
+        -webkit-box-orient: vertical !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: normal !important;
+        text-overflow: clip !important;
+    }
+}
+
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper :is(.products-grid, .block-products-list, .product-items) {
+        :is(h2.product-name, .product-name, .product-item-name) {
+            -webkit-line-clamp: 2 !important;
+            line-clamp: 2 !important;
+        }
+
+        :is(a.product-item-link, .product-name a, .product-item-name a) {
+            -webkit-line-clamp: 2 !important;
+            line-clamp: 2 !important;
+        }
+    }
+}
+
+html body#html-body .page-wrapper :is(button.action.subscribe, .action.subscribe.primary, button[type="submit"].action.subscribe) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 44px !important;
+    max-height: none !important;
+    padding: 10px 16px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    line-height: 1.3 !important;
+    word-break: keep-all !important;
+}
+
+html body#html-body .page-wrapper :is(.awa-footer-section__toggle, .velaFooterTitle, button.footer-block-title) {
+    height: auto !important;
+    min-height: 44px !important;
+    max-height: none !important;
+    padding: 10px 0 !important;
+    line-height: 1.3 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    box-sizing: border-box !important;
+    align-items: center !important;
+}
+
+html body#html-body .page-wrapper h2.awa-newsletter-title,
+html body#html-body .page-wrapper .awa-newsletter-title {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 0 !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+
+// =============================================================================
+// §8  MOBILE-TOUCH-TARGETS (P2) — WCAG 2.5.5 (≥44×44px)
+// =============================================================================
+
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper .awa-site-header {
+        .awa-header-account-prompt {
+            min-height: 44px !important;
+            height: 44px !important;
+            max-height: 44px !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        :is(.awa-header-account-prompt__mobile-link, .awa-header-account-prompt__icon, .awa-header-account-prompt__link) {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 44px !important;
+            width: 44px !important;
+            max-width: 44px !important;
+            min-height: 44px !important;
+            height: 44px !important;
+            max-height: 44px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+            flex: 0 0 44px !important;
+        }
+    }
+
+    html body#html-body .page-wrapper :is(.block-minicart, .minicart-wrapper) {
+        :is(.awa-minicart-continue, button.awa-minicart-continue) {
+            min-height: 44px !important;
+            height: 44px !important;
+            max-height: 44px !important;
+            padding: 10px 14px !important;
+            box-sizing: border-box !important;
+            line-height: 1.2 !important;
+        }
+    }
+
+    html body#html-body .page-wrapper :is(.action.showcart, .header-mini-cart, a.showcart) {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        padding: 0 12px !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
+    html body#html-body :is(#newsletter_popup_dont_show_again, input[type="checkbox"].dont-show-again) {
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+        min-height: 22px !important;
+        flex: 0 0 22px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__cta {
+        min-height: 44px !important;
+        height: 44px !important;
+        max-height: 44px !important;
+        padding: 8px 14px !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    html body#html-body .page-wrapper :is(button.action.subscribe, .action.subscribe.primary) {
+        min-height: 44px !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 12px 18px !important;
+        line-height: 1.2 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+html body#html-body .page-wrapper a.b2b-auth-back-link,
+html body#html-body .page-wrapper :is(.b2b-auth-shell, .b2b-account-login, .b2b-account-forgotpassword, .b2b-account-claim, .b2b-register-index) a[class*="back-link"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 10px 14px !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    line-height: 1.2 !important;
+    text-decoration: none !important;
+}
+
+// =============================================================================
+// §9  REGRAS DE SUPORTE (evitam regressões)
+// =============================================================================
+
+html body#html-body :is(.modals-wrapper, .modal-popup, .newsletterpopup, [class*="popup"]) {
+    contain: layout !important;
+    overflow: clip !important;
+}
+
+html body#html-body .page-wrapper :is(h1, h2, h3, h4, h5, h6, .page-title, .section-title) {
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+}
+
+// =============================================================================
+// §10  PREFERS-REDUCED-MOTION
+// =============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body .page-wrapper *,
+    html body#html-body .page-wrapper *::before,
+    html body#html-body .page-wrapper *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

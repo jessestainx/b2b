@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
@@ -14,7 +15,8 @@ class WhatsAppTracking implements TrackingInterface
     public function __construct(
         private readonly ResourceConnection $resource,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc

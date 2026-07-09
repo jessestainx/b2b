@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Api\Data;
@@ -36,52 +37,52 @@ interface AlertInterface
 
     public function getEntityId(): ?int;
     public function setEntityId(mixed $entityId): self;
-    
+
     public function getAlertType(): ?string;
     public function setAlertType(string $alertType): self;
-    
+
     public function getSeverity(): ?string;
     public function setSeverity(string $severity): self;
-    
+
     public function getTitle(): ?string;
     public function setTitle(string $title): self;
-    
+
     public function getMessage(): ?string;
     public function setMessage(?string $message): self;
-    
+
     public function getContextData(): ?array;
     public function setContextData(?array $contextData): self;
-    
+
     public function getSource(): ?string;
     public function setSource(string $source): self;
-    
+
     public function getStatus(): ?string;
     public function setStatus(string $status): self;
-    
+
     public function getOccurrences(): int;
     public function setOccurrences(int $occurrences): self;
-    
+
     public function getFirstOccurrence(): ?string;
     public function setFirstOccurrence(string $firstOccurrence): self;
-    
+
     public function getLastOccurrence(): ?string;
     public function setLastOccurrence(string $lastOccurrence): self;
-    
+
     public function getAcknowledgedAt(): ?string;
     public function setAcknowledgedAt(?string $acknowledgedAt): self;
-    
+
     public function getAcknowledgedBy(): ?string;
     public function setAcknowledgedBy(?string $acknowledgedBy): self;
-    
+
     public function getResolvedAt(): ?string;
     public function setResolvedAt(?string $resolvedAt): self;
-    
+
     public function getResolvedBy(): ?string;
     public function setResolvedBy(?string $resolvedBy): self;
-    
+
     public function getCreatedAt(): ?string;
     public function setCreatedAt(string $createdAt): self;
-    
+
     public function getUpdatedAt(): ?string;
     public function setUpdatedAt(string $updatedAt): self;
 }

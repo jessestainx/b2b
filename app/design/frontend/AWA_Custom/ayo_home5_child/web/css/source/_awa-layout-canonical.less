@@ -423,7 +423,7 @@ body .page-wrapper .products-grid ul.product-grid.container-products-switch > li
 
 @media (min-width: @_canon-bp-sm) and (max-width: (@_canon-bp-md - 1)) {
     body .page-wrapper .page-main {
-        padding-left: 16px !important;
+        padding-inline-start: var(--awa-page-pad-mobile, 16px) !important;
         padding-right: 16px !important;
     }
 }
@@ -431,6 +431,6 @@ body .page-wrapper .products-grid ul.product-grid.container-products-switch > li
 @media (min-width: @_canon-bp-md) {
     body .page-wrapper .page-main {
         padding-left: 24px !important;
-        padding-right: 24px !important;
+        padding-inline-end: var(--awa-page-pad-desktop, 24px) !important;
     }
 }

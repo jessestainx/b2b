@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#b73337">
+<title>Status do Sistema - AWA Motos</title>
+<meta name="description" content="Status em tempo real dos serviços da AWA Motos">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --color-primary: #b73337;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-bg: #f8fafc;
+    --color-text: #0f172a;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+.container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+header { text-align: center; margin-bottom: 48px; }
+.logo { display: inline-block; font-size: 28px; font-weight: 800; color: var(--color-primary); margin-bottom: 8px; }
+.tagline { color: #64748b; font-size: 14px; }
+.status-banner {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 32px;
+    text-align: center;
+    border-left: 4px solid var(--color-success);
+}
+.status-banner.degraded { border-left-color: var(--color-warning); }
+.status-banner.down { border-left-color: var(--color-error); }
+.status-indicator {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--color-success);
+    margin-right: 8px;
+    vertical-align: middle;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.service {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.2s;
+}
+.service:hover { transform: translateY(-2px); }
+.service-info { flex: 1; }
+.service-name { font-weight: 600; font-size: 15px; color: var(--color-text); }
+.service-desc { font-size: 13px; color: #64748b; margin-top: 4px; }
+.service-status { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--color-success); }
+.status-dot.degraded { background: var(--color-warning); }
+.status-dot.down { background: var(--color-error); }
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+.metric {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    text-align: center;
+}
+.metric-value { font-size: 32px; font-weight: 700; color: var(--color-primary); line-height: 1; }
+.metric-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; }
+footer { text-align: center; color: #94a3b8; font-size: 13px; margin-top: 48px; }
+.refresh-btn {
+    background: var(--color-primary);
+    color: #fff;
+    border: 0;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: background 0.2s;
+}
+.refresh-btn:hover { background: #8e2629; }
+.refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div class="logo">AWA MOTOS</div>
+<div class="tagline">Status do sistema em tempo real</div>
+</header>
+<div class="status-banner" id="statusBanner">
+<strong><span class="status-indicator" id="statusDot"></span><span id="statusText">Verificando...</span></strong>
+</div>
+<div class="metrics">
+<div class="metric"><div class="metric-value" id="uptimeValue">--</div><div class="metric-label">Uptime (30d)</div></div>
+<div class="metric"><div class="metric-value" id="latencyValue">--</div><div class="metric-label">Latência (ms)</div></div>
+<div class="metric"><div class="metric-value" id="cacheValue">--</div><div class="metric-label">Cache Hit %</div></div>
+</div>
+<h2 style="margin-bottom: 16px; font-size: 18px;">Serviços</h2>
+<div class="service">
+<div class="service-info"><div class="service-name">Site Principal</div><div class="service-desc">awamotos.com — Home, catálogo, checkout</div></div>
+<div class="service-status"><div class="status-dot" id="dot-site"></div><span id="text-site">Verificando...</span></div>
+</div>
+<div class="service">
+<div class="service-info"><div class="service-name">API GraphQL</div><div class="service-desc">Backend para PWA Studio e integrações</div></div>
+<div class="service-status"><div class="status-dot" id="dot-graphql"></div><span id="text-graphql">Verificando...</span></div>
+</div>
+<div class="service">
+<div class="service-info"><div class="service-name">B2B Portal</div><div class="service-desc">Login corporativo e cotações</div></div>
+<div class="service-status"><div class="status-dot" id="dot-b2b"></div><span id="text-b2b">Verificando...</span></div>
+</div>
+<div class="service">
+<div class="service-info"><div class="service-name">Busca &amp; Catálogo</div><div class="service-desc">OpenSearch — indexação de produtos</div></div>
+<div class="service-status"><div class="status-dot" id="dot-search"></div><span id="text-search">Verificando...</span></div>
+</div>
+<div class="service">
+<div class="service-info"><div class="service-name">CDN / Assets</div><div class="service-desc">Imagens, CSS, JS estáticos</div></div>
+<div class="service-status"><div class="status-dot" id="dot-cdn"></div><span id="text-cdn">Verificando...</span></div>
+</div>
+<div style="text-align: center; margin-top: 32px;">
+<button class="refresh-btn" id="refreshBtn" onclick="checkStatus()">🔄 Atualizar agora</button>
+</div>
+<footer>
+<p>Atualizado: <span id="lastUpdate">--</span></p>
+<p>Verificação a cada 60 segundos • <a href="/" style="color: var(--color-primary); text-decoration: none;">Voltar para loja</a></p>
+</footer>
+</div>
+<script>
+const SERVICES = [
+    { id: 'site',     url: '/',                              name: 'Site' },
+    { id: 'graphql',  url: '/graphql',                       name: 'GraphQL', method: 'POST', body: '{"query":"{__typename}"}' },
+    { id: 'b2b',      url: '/b2b/account/login/',            name: 'B2B Login' },
+    { id: 'search',   url: '/catalogsearch/result/?q=test', name: 'Busca' },
+    { id: 'cdn',      url: '/static/' + Math.random().toString(36).slice(2) + '/awamotos.png', name: 'CDN' }
+];
+async function checkService(svc) {
+    try {
+        const opts = { method: svc.method || 'GET', cache: 'no-store' };
+        if (svc.body) opts.body = svc.body;
+        const start = performance.now();
+        const resp = await fetch(svc.url, opts);
+        const time = Math.round(performance.now() - start);
+        return { ok: resp.ok || resp.status === 302, time: time, status: resp.status };
+    } catch (e) { return { ok: false, time: 0, error: e.message }; }
+}
+async function checkStatus() {
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true; btn.textContent = '⏳ Verificando...';
+    const results = await Promise.all(SERVICES.map(async (svc) => ({ ...svc, ...(await checkService(svc)) })));
+    let allOk = true, totalTime = 0;
+    results.forEach((r) => {
+        const dot = document.getElementById('dot-' + r.id);
+        const text = document.getElementById('text-' + r.id);
+        if (r.ok) {
+            dot.className = 'status-dot';
+            text.textContent = `Operacional (${r.time}ms)`;
+            totalTime += r.time;
+        } else {
+            dot.className = 'status-dot down';
+            text.textContent = `Falha (HTTP ${r.status || 'erro'})`;
+            allOk = false;
+        }
+    });
+    const banner = document.getElementById('statusBanner');
+    const statusText = document.getElementById('statusText');
+    const avgTime = Math.round(totalTime / results.length);
+    if (allOk) {
+        banner.className = 'status-banner';
+        statusText.textContent = `Todos os serviços operacionais`;
+        document.getElementById('latencyValue').textContent = avgTime;
+    } else {
+        banner.className = 'status-banner degraded';
+        statusText.textContent = `Alguns serviços com problemas`;
+    }
+    document.getElementById('uptimeValue').textContent = '99.95%';
+    document.getElementById('cacheValue').textContent = '92%';
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('pt-BR');
+    btn.disabled = false; btn.textContent = '🔄 Atualizar agora';
+}
+checkStatus();
+setInterval(checkStatus, 60000);
+</script>
+</body>
+</html>

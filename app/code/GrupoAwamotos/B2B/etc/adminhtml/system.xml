@@ -392,6 +392,35 @@
             </group>
 
             <!-- Sistema de Crédito -->
+            <group id="finance" translate="label" type="text" sortOrder="61" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Financeiro (Boletos)</label>
+                <comment><![CDATA[Parametros de convenio bancario usados para montar o codigo de barras/linha
+                digitavel do boleto na area "Financeiro" do Portal B2B. Ver app/code/GrupoAwamotos/B2B/BOLETOS_NFE_IMPLEMENTACAO.md
+                (Fase 4) para o detalhamento da validacao. Escopo atual: somente FILIAL=2 (Boomerang),
+                Banco do Brasil (001), carteira 017 -- demais combinacoes exibem apenas os dados do titulo,
+                sem codigo de barras.]]></comment>
+
+                <field id="bb_convenio_filial_2" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Código de Convênio BB - Filial 2 (Boomerang)</label>
+                    <validate>required-entry validate-digits validate-length minimum-length-7 maximum-length-7</validate>
+                    <backend_model>GrupoAwamotos\B2B\Model\Config\Backend\BbConvenioFilial2</backend_model>
+                    <comment>Codigo de convenio Banco do Brasil usado no campo livre do codigo de barras. Validado
+                    em 2026-07-07 contra boleto real (FN_RECEBER.CODIGO=247091).</comment>
+                </field>
+
+                <field id="print_rate_limit_max_requests" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Rate Limit de Impressão - Máximo de Requisições</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Quantidade máxima de tentativas de impressão de boleto por cliente dentro da janela configurada.</comment>
+                </field>
+
+                <field id="print_rate_limit_window_seconds" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Rate Limit de Impressão - Janela (segundos)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Duração da janela de controle para limite de impressão de boletos.</comment>
+                </field>
+            </group>
+
             <group id="credit" translate="label" type="text" sortOrder="62" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Sistema de Crédito</label>
                 <comment><![CDATA[Configure limites de crédito e pagamento por faturamento para clientes B2B]]></comment>

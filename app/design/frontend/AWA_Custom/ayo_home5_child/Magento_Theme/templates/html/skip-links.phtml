@@ -10,10 +10,27 @@
  * Template original: app/design/frontend/ayo/ayo_default/Magento_Theme/templates/html/skip-links.phtml
  */
 declare(strict_types=1);
+
+$fullActionName = (string) $block->getRequest()->getFullActionName();
+$isB2bAuthLightShell = in_array($fullActionName, [
+    'b2b_account_login',
+    'b2b_account_forgotpassword',
+    'b2b_account_claim',
+    'b2b_register_index',
+    'b2b_register_success',
+], true);
+
+$mainContentTarget = match ($fullActionName) {
+    'cms_index_index', 'cms_home' => '#awa-main-content',
+    'b2b_account_login', 'b2b_account_forgotpassword', 'b2b_account_claim', 'b2b_register_index', 'b2b_register_success' => '#maincontent',
+    default => '#maincontent',
+};
 ?>
-<a class="action skip content awa-skip-link" href="#maincontent">
+<a class="action skip content awa-skip-link skip-to-main-content" href="<?= $block->escapeHtmlAttr($mainContentTarget) ?>">
     <span><?= $block->escapeHtml(__('Ir para o conteúdo principal')) ?></span>
 </a>
+<?php if (!$isB2bAuthLightShell): ?>
 <a class="action skip nav awa-skip-link" href="#awa-primary-navigation">
     <span><?= $block->escapeHtml(__('Ir para a navegação')) ?></span>
 </a>
+<?php endif; ?>

@@ -52,7 +52,12 @@ if ($category !== null && $product === null):
 <?php endif; ?>
     }
 
-    if ('requestIdleCallback' in w) {
+    var isHome = d.body && d.body.classList.contains('cms-index-index');
+    if (isHome) {
+        ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+            w.addEventListener(ev, bootPixel, { capture: true, passive: ev !== 'keydown', once: true });
+        });
+    } else if ('requestIdleCallback' in w) {
         w.requestIdleCallback(bootPixel, { timeout: 2500 });
     } else {
         w.addEventListener('load', function () {
@@ -62,7 +67,7 @@ if ($category !== null && $product === null):
 })(window, document);
 </script>
 <noscript>
-<img height="1" width="1" style="display:none"
+<img height="1" width="1" style="display:none" alt="" aria-hidden="true"
      src="https://www.facebook.com/tr?id=<?= $block->escapeHtmlAttr($block->getPixelId()) ?>&ev=PageView&noscript=1"/>
 </noscript>
 <?php endif; ?>

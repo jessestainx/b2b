@@ -222,36 +222,35 @@ class RegisterB2BClientCommand extends Command
 
     private function getClientCodesFromPendingOrders(): array
     {
-        // Get synced order IDs
         $connection = $this->syncLogResource->getConnection();
         $select = $connection->select()
-            ->from('grupoawamotos_erp_entity_map', ['magento_entity_id'])
-            ->where('entity_type = ?', 'order');
-        $syncedIds = array_map('intval', $connection->fetchCol($select));
+            ->from(['so' => 'sales_order'], ['customer_erp_code'])
+            ->where('so.state IN (?)', ['new', 'pending_payment', 'processing'])
+            ->where('so.customer_erp_code IS NOT NULL')
+            ->where('so.customer_erp_code != ?', '')
+            ->where('so.customer_erp_code != ?', '0')
+            ->where(
+                'so.sectra_import_status IS NULL'
+                . ' OR so.sectra_import_status IN (?)',
+                [
+                    'awaiting_customer_validation',
+                    'order_blocked_customer_not_validated',
+                    'order_blocked_product_not_registered',
+                    'order_cancelled_before_erp_import',
+                    'ready_for_import',
+                    'import_failed',
+                ]
+            )
+            ->where(
+                'NOT EXISTS ('
+                . 'SELECT 1 FROM oc_order_imported oi '
+                . 'WHERE oi.order_id = so.entity_id + 200000'
+                . ')'
+            );
 
-        // Get pending orders
-        $this->searchCriteriaBuilder->addFilter('state', ['new', 'pending_payment', 'processing'], 'in');
-        $searchCriteria = $this->searchCriteriaBuilder->create();
-        $orders = $this->orderRepository->getList($searchCriteria)->getItems();
+        $codes = array_map('intval', $connection->fetchCol($select));
+        $codes = array_filter($codes, static fn (int $code): bool => $code > 0);
 
-        $codes = [];
-        foreach ($orders as $order) {
-            if (in_array((int) $order->getEntityId(), $syncedIds, true)) {
-                continue;
-            }
-
-            // Get ERP code from entity_map
-            $selectErp = $connection->select()
-                ->from('grupoawamotos_erp_entity_map', ['erp_code'])
-                ->where('entity_type = ?', 'customer')
-                ->where('magento_entity_id = ?', (int) $order->getCustomerId());
-            $erpCode = $connection->fetchOne($selectErp);
-
-            if ($erpCode && is_numeric($erpCode)) {
-                $codes[] = (int) $erpCode;
-            }
-        }
-
-        return array_unique($codes);
+        return array_values(array_unique($codes));
     }
 }

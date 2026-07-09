@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\ViewModel;
@@ -24,13 +25,25 @@ class CatalogViewer implements ArgumentInterface
     public function getCoverImageUrl(): string
     {
         return $this->urlBuilder->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA])
-            . 'import/catalog/banners/catalogo.jpg';
+            . 'import/catalog/banners/catalogo-2026.jpg';
     }
 
     public function getMobileCoverImageUrl(): string
     {
         return $this->urlBuilder->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA])
-            . 'import/catalog/banners/banner-mobile-catalogo.jpg';
+            . 'import/catalog/banners/banner-mobile-catalogo-2026.jpg';
+    }
+
+    public function getHomeB2bBannerUrl(): string
+    {
+        return $this->urlBuilder->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA])
+            . 'import/catalog/banners/home-b2b-atacado-2026.jpg';
+    }
+
+    public function getHomeB2bBannerMobileUrl(): string
+    {
+        return $this->urlBuilder->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA])
+            . 'import/catalog/banners/home-b2b-atacado-2026-mobile.jpg';
     }
 
     public function getB2bRegisterUrl(): string

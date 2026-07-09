@@ -17,7 +17,8 @@ class AttendantLoginRedirectPlugin
 {
     public function __construct(
         private readonly CurrentAttendant $currentAttendant
-    ) {}
+    ) {
+    }
 
     /**
      * Após login bem-sucedido, redireciona atendentes para o painel pessoal.
@@ -29,7 +30,7 @@ class AttendantLoginRedirectPlugin
     public function afterExecute(Login $subject, ResultInterface $result): ResultInterface
     {
         if ($result instanceof Redirect && $this->currentAttendant->isAttendant()) {
-            $result->setPath('grupoawamotos_b2b/attendant/dashboard');
+            $result->setPath('awa_commercial/commercialdashboard/index');
         }
 
         return $result;

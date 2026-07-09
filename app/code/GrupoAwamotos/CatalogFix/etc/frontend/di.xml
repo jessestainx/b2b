@@ -13,4 +13,40 @@
     </type>
     <preference for="Rokanthemes\Brand\Block\Brand\View"
                 type="GrupoAwamotos\CatalogFix\Block\Brand\View"/>
+
+    <type name="Mirasvit\SearchAutocomplete\Model\ConfigProvider">
+        <plugin name="grupoawamotos_catalogfix_mirasvit_searchautocomplete_customer_group"
+                type="GrupoAwamotos\CatalogFix\Plugin\Mirasvit\SearchAutocompleteConfigProviderPlugin"
+                sortOrder="1"/>
+    </type>
+
+    <type name="Magento\Customer\Model\Session">
+        <plugin name="grupoawamotos_catalogfix_customer_session_fpc_guard"
+                type="GrupoAwamotos\CatalogFix\Plugin\Customer\SessionFpcGuardPlugin"
+                sortOrder="1"/>
+    </type>
+
+    <type name="Magento\Checkout\Model\Session">
+        <plugin name="grupoawamotos_catalogfix_checkout_session_fpc_guard"
+                type="GrupoAwamotos\CatalogFix\Plugin\Customer\SessionFpcGuardPlugin"
+                sortOrder="1"/>
+    </type>
+
+    <type name="Magento\Framework\Session\SessionStartChecker">
+        <plugin name="grupoawamotos_catalogfix_guest_fpc_session_start_checker"
+                type="GrupoAwamotos\CatalogFix\Plugin\Session\GuestFpcSessionStartCheckerPlugin"
+                sortOrder="100"/>
+    </type>
+
+    <type name="Magento\Catalog\Block\Category\Plugin\PriceBoxTags">
+        <plugin name="grupoawamotos_catalogfix_pricebox_tags_fpc"
+                type="GrupoAwamotos\CatalogFix\Plugin\Catalog\PriceBoxTagsFpcPlugin"
+                sortOrder="1"/>
+    </type>
+
+    <type name="Magento\PageCache\Model\App\Response\HttpPlugin">
+        <plugin name="grupoawamotos_catalogfix_pagecache_http_vary_guard"
+                type="GrupoAwamotos\CatalogFix\Plugin\PageCache\HttpPluginFpcGuardPlugin"
+                sortOrder="1"/>
+    </type>
 </config>

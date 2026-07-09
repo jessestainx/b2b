@@ -1,44 +1,59 @@
 <?php
+
+declare(strict_types=1);
+
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * AWA account sidebar — grouped navigation with AWA class contract.
  *
- * AWA CUSTOMIZATION (OF-001):
- * Updated to use simplified CSS classes from awa-bundle-optimization-of001.css
- * - Old: class="block account-nav" → New: class="account-nav-wrapper"
- * - Old: class="title" → New: class="account-nav-title"
- * - Old: class="nav items" → New: class="account-nav-items"
- * - Old: class="nav item" → New: class="account-nav-item"
- * - Old: <a> → New: class="account-nav-link"
- *
- * Benefit: -70% selector depth, -8% CSS parse time
+ * @var \Magento\Customer\Block\Account\Navigation $block
  */
-?>
-<?php
-/** @var \Magento\Framework\View\Element\Template $block */
-?>
-<?php
-$links = $block->getLinks();
-if (empty($links)) {
+
+use GrupoAwamotos\B2B\Block\Account\NavSection;
+use Magento\Customer\Block\Account\Delimiter;
+use Magento\Framework\View\Element\Html\Link\Current;
+
+$childBlocks = $block->getLinks();
+if ($childBlocks === []) {
     return;
 }
 ?>
-<div class="account-nav-wrapper" role="navigation" aria-label="<?= $block->escapeHtmlAttr(__('Account Navigation')) ?>">
+<div class="account-nav-wrapper" role="navigation" aria-label="<?= $block->escapeHtmlAttr(__('Navegação da conta')) ?>">
     <div class="account-nav-title">
-        <strong><?= $block->escapeHtml(__('Account')) ?></strong>
+        <strong><?= $block->escapeHtml(__('Portal B2B')) ?></strong>
     </div>
-    <ul class="account-nav-items" role="menubar">
-        <?php foreach ($links as $link): ?>
-            <li class="account-nav-item<?= $link['active'] ? ' current' : '' ?>" role="none">
-                <?php if ($link['current']): ?>
-                    <strong class="account-nav-text" role="menuitem" aria-current="page">
-                        <?= $block->escapeHtml($link['label']) ?>
-                    </strong>
-                <?php else: ?>
-                    <a href="<?= $block->escapeUrl($link['href']) ?>" class="account-nav-link" role="menuitem" tabindex="0">
-                        <?= $block->escapeHtml($link['label']) ?>
-                    </a>
-                <?php endif; ?>
+    <ul class="account-nav-items">
+        <?php foreach ($childBlocks as $child): ?>
+            <?php if ($child instanceof NavSection): ?>
+                <?= /* @noEscape */ $block->getLayout()->renderElement($child->getNameInLayout()) ?>
+                <?php continue; ?>
+            <?php endif; ?>
+
+            <?php if ($child instanceof Delimiter): ?>
+                <?php continue; ?>
+            <?php endif; ?>
+
+            <?php if ($child instanceof Current): ?>
+                <?php
+                $isCurrent = $child->isCurrent();
+                $itemClass = 'account-nav-item' . ($isCurrent ? ' current' : '');
+                ?>
+                <li class="<?= $block->escapeHtmlAttr($itemClass) ?>">
+                    <?php if ($isCurrent): ?>
+                        <strong class="account-nav-text" aria-current="page">
+                            <?= $block->escapeHtml($child->getLabel()) ?>
+                        </strong>
+                    <?php else: ?>
+                        <a href="<?= $block->escapeUrl($child->getHref()) ?>"
+                           class="account-nav-link">
+                            <?= $block->escapeHtml($child->getLabel()) ?>
+                        </a>
+                    <?php endif; ?>
+                </li>
+                <?php continue; ?>
+            <?php endif; ?>
+
+            <li class="account-nav-item account-nav-item--legacy">
+                <?= /* @noEscape */ $block->renderLink($child) ?>
             </li>
         <?php endforeach; ?>
     </ul>

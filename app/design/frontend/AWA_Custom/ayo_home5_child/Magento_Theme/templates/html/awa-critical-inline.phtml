@@ -1,13 +1,30 @@
 <?php
 /**
- * M08: Inline critical CSS for above-the-fold rendering
- * Eliminates render-blocking CSS for initial paint
+ * M08: Inline critical CSS for above-the-fold rendering.
+ * Home: awa-critical-fold.css (header + vitrines).
+ * Demais páginas: awa-critical-fold-site.css (header only — −~2KB HTML/FPC).
  */
 declare(strict_types=1);
-$criticalFile = BP . '/app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-critical-fold.css';
-if (file_exists($criticalFile)):
+
+/** @var \Magento\Framework\View\Element\Template $block */
+$handles = $block->getLayout()->getUpdate()->getHandles();
+$request = $block->getRequest();
+$fullAction = $request ? (string) $request->getFullActionName() : '';
+$isHomePage = in_array('cms_index_index', $handles, true) || $fullAction === 'cms_index_index';
+
+$criticalBasename = $isHomePage ? 'awa-critical-fold.css' : 'awa-critical-fold-site.css';
+$criticalFile = BP . '/app/design/frontend/AWA_Custom/ayo_home5_child/web/css/' . $criticalBasename;
+
+if (!is_readable($criticalFile)) {
+    $criticalFile = BP . '/app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-critical-fold.css';
+}
+
+if (is_readable($criticalFile)) {
     $css = file_get_contents($criticalFile);
-    if ($css !== false && $css !== ''): ?>
-<style id="awa-critical-inline"><?= /* @noEscape */ $css ?></style>
-<?php endif;
-endif; ?>
+    if ($css !== false && $css !== '') {
+        $styleId = $isHomePage ? 'awa-critical-inline' : 'awa-critical-inline-site';
+        ?>
+<style id="<?= $block->escapeHtmlAttr($styleId) ?>"><?= /* @noEscape */ $css ?></style>
+<?php
+    }
+}

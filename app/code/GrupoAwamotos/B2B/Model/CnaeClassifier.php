@@ -15,19 +15,19 @@ use Psr\Log\LoggerInterface;
 
 class CnaeClassifier
 {
-    const PROFILE_DIRECT = 'direct';
-    const PROFILE_ADJACENT = 'adjacent';
-    const PROFILE_OFF = 'off_profile';
+    public const PROFILE_DIRECT = 'direct';
+    public const PROFILE_ADJACENT = 'adjacent';
+    public const PROFILE_OFF = 'off_profile';
 
-    const XML_PATH_CNAE_ENABLED = 'grupoawamotos_b2b/cnae_profiling/enabled';
-    const XML_PATH_CNAE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/direct_cnaes';
-    const XML_PATH_CNAE_ADJACENT = 'grupoawamotos_b2b/cnae_profiling/adjacent_cnaes';
-    const XML_PATH_CNAE_AUTO_APPROVE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/auto_approve_direct';
+    public const XML_PATH_CNAE_ENABLED = 'grupoawamotos_b2b/cnae_profiling/enabled';
+    public const XML_PATH_CNAE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/direct_cnaes';
+    public const XML_PATH_CNAE_ADJACENT = 'grupoawamotos_b2b/cnae_profiling/adjacent_cnaes';
+    public const XML_PATH_CNAE_AUTO_APPROVE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/auto_approve_direct';
 
     /**
      * Default CNAE codes for motorcycle-related businesses (direct target)
      */
-    const DEFAULT_DIRECT_CNAES = [
+    public const DEFAULT_DIRECT_CNAES = [
         '4541-2/01', // Comércio por atacado de motocicletas e motonetas
         '4541-2/02', // Comércio por atacado de peças e acessórios para motocicletas e motonetas
         '4541-2/03', // Comércio a varejo de motocicletas e motonetas novas
@@ -40,7 +40,7 @@ class CnaeClassifier
     /**
      * Default CNAE codes for adjacent businesses (related but not core)
      */
-    const DEFAULT_ADJACENT_CNAES = [
+    public const DEFAULT_ADJACENT_CNAES = [
         '4530-7/01', // Comércio por atacado de peças e acessórios novos para veículos automotores
         '4530-7/02', // Comércio por atacado de pneumáticos e câmaras-de-ar
         '4530-7/03', // Comércio a varejo de peças e acessórios novos para veículos automotores

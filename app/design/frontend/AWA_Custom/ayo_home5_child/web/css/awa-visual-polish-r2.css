@@ -4,9 +4,9 @@
  * Carregado por último (após awa-audit-bundle.css) — máxima prioridade no cascade
  *
  * FIXES APLICADOS:
- *   VP-1 : Footer border 3px solid #b73337 → 1px solid #E5E5E5 (todas páginas/viewports)
+ *   VP-1 : Footer border 3px solid var(--awa-primary) → 1px solid var(--awa-border) (todas páginas/viewports)
  *   VP-2 : Home product cards — adicionar shadow para igualar category
- *   VP-3 : PDP related products — normalizar border color rgba(15,23,42,0.1) → #E5E5E5
+ *   VP-3 : PDP related products — normalizar border color rgba(15,23,42,0.1) → var(--awa-border)
  *   VP-4 : Hover state nos cards — shadow elevado + translateY (todas páginas)
  *   VP-5 : Breadcrumb padding — normalizar category(6px) + PDP(12px) → 12px
  *   VP-6 : Filter title — consistência tipográfica no layered nav
@@ -17,29 +17,29 @@
 
 /* =============================================================================
  * VP-1: Footer border
- * Problema: border-top: 3px solid #b73337 (vibrante e espesso em todas páginas)
+ * Problema: border-top: 3px solid var(--awa-primary) (vibrante e espesso em todas páginas)
  * Origem:   _qa-visual-fixes.less → compilado em styles-m.css
- * Fix:      1px solid #E5E5E5 — neutro, profissional, sem !important se possível
+ * Fix:      1px solid var(--awa-border) — neutro, profissional, sem !important se possível
  * Necessita !important por ser override de regra compilada no LESS (alta especificidade)
  * =========================================================================== */
 /* Higher specificity (0,2,1) to beat bundle-refinements compound selectors */
 body .page-wrapper .page-footer,
 body .page-wrapper .page_footer {
-  border-top: 1px solid #E5E5E5 !important; /* era 3px solid var(--awa-primary) — visual pollution */
+  border-top: 1px solid var(--awa-border) !important; /* era 3px solid var(--awa-primary) — visual pollution */
 }
 
 /* =============================================================================
  * VP-2 & VP-3: Product card shadow normalization
  * Problema: home cards têm shadow=none, category cards têm shadow consistente,
  *           PDP related cards têm border-color diferente (rgba(15,23,42,0.1))
- * Fix:      shadow uniforme em todos os product-items e border-color #E5E5E5
+ * Fix:      shadow uniforme em todos os product-items e border-color var(--awa-border)
  * =========================================================================== */
 .product-item,
 .item-product {
   box-shadow:
     0 1px 3px rgb(0 0 0 / 8%),
     0 1px 2px rgb(0 0 0 / 6%);
-  border-color: #E5E5E5;
+  border-color: var(--awa-border);
   /* Não usar !important aqui para permitir override em contextos específicos */
 }
 
@@ -53,7 +53,7 @@ html body.catalog-product-view .awa-pdp-related .products-swiper--related .swipe
   box-shadow:
     0 1px 3px rgb(0 0 0 / 8%),
     0 1px 2px rgb(0 0 0 / 6%) !important;
-  border: 1px solid #E5E5E5 !important;
+  border: 1px solid var(--awa-border) !important;
 }
 html body.catalog-product-view :is(.block.related, .block.upsell) .products-grid .product-item:hover,
 html body.catalog-product-view .awa-pdp-related .products-swiper--related .swiper-slide > .product-item:hover {
@@ -106,13 +106,13 @@ body .page-wrapper .breadcrumbs {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #333333;
+  color: var(--awa-text);
   padding: 12px 16px;
-  border-bottom: 1px solid #E5E5E5;
+  border-bottom: 1px solid var(--awa-border);
 }
 
 .filter-options-title:hover {
-  color: #b73337;
+  color: var(--awa-primary);
 }
 
 /* =============================================================================
@@ -122,7 +122,7 @@ body .page-wrapper .breadcrumbs {
  * =========================================================================== */
 .cms-index-index .page-main .column.main > .block.widget:nth-child(even),
 .cms-index-index .page-main .column.main > .home-section:nth-child(even) {
-  background: #FAFAFA;
+  background: var(--awa-bg-subtle);
   border-radius: 8px;
   padding-left: 16px;
   padding-right: 16px;
@@ -150,7 +150,7 @@ body .page-wrapper .breadcrumbs {
 .catalog-product-view .price-box .price {
   font-size: 28px;
   font-weight: 700;
-  color: #b73337;
+  color: var(--awa-primary);
   line-height: 1;
 }
 
@@ -190,7 +190,7 @@ body.catalog-category-view .filter-options select,
 body.catalogsearch-result-index .filter-options input[type="text"],
 body.catalogsearch-result-index .filter-options input[type="search"],
 body.catalogsearch-result-index .filter-options select {
-  border-color: #E5E5E5 !important;
+  border-color: var(--awa-border) !important;
 }
 
 body.catalog-category-view .toolbar select:focus,
@@ -201,7 +201,7 @@ body.catalog-category-view .filter-options select:focus,
 body.catalogsearch-result-index .filter-options input[type="text"]:focus,
 body.catalogsearch-result-index .filter-options input[type="search"]:focus,
 body.catalogsearch-result-index .filter-options select:focus {
-  border-color: #b73337;
+  border-color: var(--awa-primary);
   outline: none;
   box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.1);
 }
@@ -212,29 +212,29 @@ body.catalogsearch-result-index .filter-options select:focus {
  * =========================================================================== */
 .pages .item a,
 .pages .item a:visited {
-  color: #333333;
-  border: 1px solid #E5E5E5;
+  color: var(--awa-text);
+  border: 1px solid var(--awa-border);
   border-radius: 6px;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .pages .item a:hover {
-  background-color: #F7F7F7;
+  background-color: var(--awa-bg-subtle);
   border-color: #D0D0D0;
-  color: #b73337;
+  color: var(--awa-primary);
 }
 
 .pages .item.current,
 .pages-item-selected {
-  background-color: #b73337;
-  border-color: #b73337;
-  color: #FFFFFF;
+  background-color: var(--awa-primary);
+  border-color: var(--awa-primary);
+  color: var(--awa-bg);
   border-radius: 6px;
 }
 
 .pages .item.current span,
 .pages-item-selected span {
-  color: #FFFFFF;
+  color: var(--awa-bg);
 }
 
 /* =============================================================================
@@ -310,9 +310,9 @@ body.curriculo-index-index .form.curriculo .field:not(.choice):not(.consent) :is
   height: 48px;
   min-height: 48px;
   padding: 0 var(--awa-space-4, 16px);
-  border: 1px solid var(--awa-color-border, #e5e5e5);
+  border: 1px solid var(--awa-color-border, var(--awa-border));
   border-radius: var(--awa-radius-md, 12px);
-  background: var(--awa-white, #ffffff);
+  background: var(--awa-white, var(--awa-bg));
   font-size: var(--awa-text-sm, 13px);
   font-weight: var(--awa-weight-normal, 400);
   color: var(--awa-gray-700, #374151);
@@ -329,9 +329,9 @@ body.curriculo-index-index .form.curriculo .field.message textarea {
   width: 100%;
   min-height: 120px;
   padding: var(--awa-space-3, 12px) var(--awa-space-4, 16px);
-  border: 1px solid var(--awa-color-border, #e5e5e5);
+  border: 1px solid var(--awa-color-border, var(--awa-border));
   border-radius: var(--awa-radius-md, 12px);
-  background: var(--awa-white, #ffffff);
+  background: var(--awa-white, var(--awa-bg));
   font-size: var(--awa-text-sm, 13px);
   font-weight: var(--awa-weight-normal, 400);
   line-height: 1.5;
@@ -351,13 +351,13 @@ body.curriculo-index-index .form.curriculo .field:not(.choice):not(.consent) :is
   select,
   textarea
 ):focus {
-  border-color: var(--awa-red, #b73337);
+  border-color: var(--awa-red, var(--awa-primary));
   box-shadow: 0 0 0 3px rgb(183 51 55 / 12%);
   outline: none;
 }
 
 body.curriculo-index-index .form.curriculo a {
-  color: var(--awa-red, #b73337);
+  color: var(--awa-red, var(--awa-primary));
   font-weight: var(--awa-weight-semibold, 600);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -365,14 +365,14 @@ body.curriculo-index-index .form.curriculo a {
 
 body.curriculo-index-index .form.curriculo a:hover,
 body.curriculo-index-index .form.curriculo a:focus-visible {
-  color: var(--awa-red-dark, #8e2629);
+  color: var(--awa-red-dark, var(--awa-primary-hover));
 }
 
 body.curriculo-index-index .form.curriculo .form-error-summary:not(:empty) {
   margin-bottom: var(--awa-space-4, 16px);
   padding: var(--awa-space-3, 12px) var(--awa-space-4, 16px);
   border: 1px solid var(--awa-red-20, rgb(183 51 55 / 20%));
-  border-left: 4px solid var(--awa-red, #b73337);
+  border-left: 4px solid var(--awa-red, var(--awa-primary));
   border-radius: var(--awa-radius-md, 12px);
   background: var(--awa-red-4, rgb(183 51 55 / 4%));
   color: var(--awa-error-color, #b91c1c);
@@ -415,7 +415,7 @@ body.curriculo-index-index .form.curriculo .actions-toolbar .action.submit.prima
 }
 
 body.curriculo-index-index .form.curriculo .actions-toolbar .action.submit.primary:hover {
-  background: var(--awa-red-dark, #8e2629);
+  background: var(--awa-red-dark, var(--awa-primary-hover));
   box-shadow: 0 12px 28px rgb(183 51 55 / 24%);
   transform: translateY(-1px);
 }
@@ -453,7 +453,7 @@ body.curriculo-index-index .page-wrapper .curriculo-wrapper .form.curriculo .fie
   height: 48px !important;
   min-height: 48px !important;
   padding: 0 var(--awa-space-4, 16px) !important;
-  border: 1px solid var(--awa-color-border, #e5e5e5) !important;
+  border: 1px solid var(--awa-color-border, var(--awa-border)) !important;
   border-radius: var(--awa-radius-md, 12px) !important;
   font-size: var(--awa-text-sm, 13px) !important;
   color: var(--awa-gray-700, #374151) !important;
@@ -466,7 +466,7 @@ body.curriculo-index-index .page-wrapper .curriculo-wrapper .form.curriculo .fie
 body.curriculo-index-index .page-wrapper .curriculo-wrapper .form.curriculo .field.message .control textarea {
   min-height: 120px !important;
   padding: var(--awa-space-3, 12px) var(--awa-space-4, 16px) !important;
-  border: 1px solid var(--awa-color-border, #e5e5e5) !important;
+  border: 1px solid var(--awa-color-border, var(--awa-border)) !important;
   border-radius: var(--awa-radius-md, 12px) !important;
   font-size: var(--awa-text-sm, 13px) !important;
   line-height: 1.5 !important;
@@ -482,12 +482,12 @@ body.curriculo-index-index .page-wrapper .curriculo-wrapper .form.curriculo .fie
   select,
   textarea
 ):focus {
-  border-color: var(--awa-red, #b73337) !important;
+  border-color: var(--awa-red, var(--awa-primary)) !important;
   box-shadow: 0 0 0 3px rgb(183 51 55 / 12%) !important;
 }
 
 body.curriculo-index-index .page-wrapper .curriculo-wrapper .form.curriculo .form-error-summary:not(:empty) {
-  border-left: 4px solid var(--awa-red, #b73337) !important;
+  border-left: 4px solid var(--awa-red, var(--awa-primary)) !important;
   border-radius: var(--awa-radius-md, 12px) !important;
   background: var(--awa-red-4, rgb(183 51 55 / 4%)) !important;
 }
@@ -500,7 +500,7 @@ body.curriculo-index-index .page-wrapper .curriculo-wrapper .form.curriculo .act
 }
 
 body.curriculo-index-index .page-wrapper .curriculo-wrapper .form.curriculo .actions-toolbar .action.submit.primary:hover {
-  background: var(--awa-red-dark, #8e2629) !important;
+  background: var(--awa-red-dark, var(--awa-primary-hover)) !important;
   box-shadow: 0 12px 28px rgb(183 51 55 / 24%) !important;
   transform: translateY(-1px) !important;
 }

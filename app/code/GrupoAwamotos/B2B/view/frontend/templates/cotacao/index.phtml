@@ -1,0 +1,71 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \GrupoAwamotos\B2B\Block\Account\Cotacao\Index $block */
+$cotacoes = $block->getCotacoes();
+?>
+<div class="b2b-account-block b2b-cotacao-page">
+    <div class="block-title">
+        <strong><span><?= $block->escapeHtml(__('Minhas Cotações')) ?></span></strong>
+    </div>
+
+    <?php if (empty($cotacoes)): ?>
+        <div class="b2b-cotacao-empty" role="status">
+            <p><?= $block->escapeHtml(__('Você ainda não possui cotações.')) ?></p>
+            <a href="<?= $block->escapeUrl($block->getNewQuoteUrl()) ?>" class="action primary">
+                <?= $block->escapeHtml(__('Ir para o carrinho e solicitar cotação')) ?>
+            </a>
+        </div>
+    <?php else: ?>
+        <div class="b2b-cotacao-table-wrap">
+            <table class="data table b2b-cotacao-table">
+                <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('#')) ?></th>
+                        <th><?= $block->escapeHtml(__('Data')) ?></th>
+                        <th><?= $block->escapeHtml(__('Status')) ?></th>
+                        <th><?= $block->escapeHtml(__('Observação')) ?></th>
+                        <th class="col-actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($cotacoes as $cotacao): ?>
+                        <?php
+                        $status = (string) $cotacao->getStatus();
+                        $statusClass = match ($status) {
+                            'quoted' => 'b2b-cotacao-status--quoted',
+                            'accepted' => 'b2b-cotacao-status--accepted',
+                            'rejected' => 'b2b-cotacao-status--rejected',
+                            'expired' => 'b2b-cotacao-status--expired',
+                            default => 'b2b-cotacao-status--pending',
+                        };
+                        ?>
+                        <tr>
+                            <td>#<?= (int) $cotacao->getId() ?></td>
+                            <td><?= $block->escapeHtml(substr((string) $cotacao->getData('created_at'), 0, 10)) ?></td>
+                            <td>
+                                <span class="b2b-cotacao-status <?= $block->escapeHtmlAttr($statusClass) ?>">
+                                    <?= $block->escapeHtml($cotacao->getStatusLabel()) ?>
+                                </span>
+                            </td>
+                            <td class="col-notes"><?= $block->escapeHtml($cotacao->getNotes() ?: '—') ?></td>
+                            <td class="col-actions">
+                                <a href="<?= $block->escapeUrl($block->getViewUrl((int) $cotacao->getId())) ?>"
+                                   class="b2b-cotacao-link">
+                                    <?= $block->escapeHtml(__('Ver')) ?> →
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+
+    <div class="b2b-cotacao-footer-link">
+        <a href="<?= $block->escapeUrl($block->getUrl('b2b/quote/history')) ?>" class="b2b-cotacao-link">
+            <?= $block->escapeHtml(__('Ver propostas comerciais (novo fluxo)')) ?> →
+        </a>
+    </div>
+</div>

@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Controller do Dashboard Admin
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Controller\Adminhtml\Dashboard;
 
@@ -15,7 +15,7 @@ use Magento\Framework\App\Action\HttpGetActionInterface;
 
 class Index extends Action implements HttpGetActionInterface
 {
-    const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::dashboard';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::dashboard';
 
     protected $resultPageFactory;
 
@@ -31,7 +31,7 @@ class Index extends Action implements HttpGetActionInterface
     {
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('GrupoAwamotos_ProductIntelligence::dashboard');
-        $resultPage->getConfig()->getTitle()->prepend(__('REXIS ML - Dashboard'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Product Intelligence - Dashboard'));
 
         return $resultPage;
     }

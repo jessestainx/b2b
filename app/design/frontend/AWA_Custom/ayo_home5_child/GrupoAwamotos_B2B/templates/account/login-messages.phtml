@@ -1,0 +1,17 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Mensagens de sessão (erro/sucesso) dentro do shell auth B2B.
+ *
+ * @var \Magento\Framework\View\Element\Messages $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$groupedHtml = trim((string) $block->getGroupedHtml());
+if ($groupedHtml === '') {
+    return;
+}
+?>
+<div class="b2b-login-messages__inner">
+    <?= /* @noEscape */ $groupedHtml ?>
+</div>

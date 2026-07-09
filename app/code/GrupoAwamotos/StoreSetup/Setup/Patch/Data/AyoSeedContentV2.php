@@ -84,8 +84,8 @@ class AyoSeedContentV2 implements DataPatchInterface
                 ->where('slider_id = ?', $sliderId)
         );
 
-        if ($existingSlides > 0) {
-            $this->logger->info('[AyoSeedContentV2] Slider ja possui slides, sem alteracao.');
+        if ($existingSlides >= 3) {
+            $this->logger->info('[AyoSeedContentV2] Slider ja possui 3+ slides, sem alteracao.');
             return;
         }
 

@@ -1,0 +1,107 @@
+<?php
+/**
+ * AWA Motos - Inline JS Extract (B14)
+ *
+ * Extrai JS inline critico em arquivos externos deferiveis.
+ *
+ * 2026-06-28 - Onda 11
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<script>
+/**
+ * AWA - Inline JS Extraction Loader
+ *
+ * Identifica blocos <script> inline grandes e move para
+ * arquivos externos via fetch+eval (apenas em dev).
+ * Em producao, deve ser feito via build step.
+ */
+(function (w, d) {
+    'use strict';
+    if (w.__awaInlineJsExtractInit) return;
+    w.__awaInlineJsExtractInit = true;
+
+    /**
+     * B45: Limpar tags vazias (whitespace only)
+     */
+    function cleanEmptyTags() {
+        var removed = 0;
+        var walker = d.createTreeWalker(d.body, NodeFilter.SHOW_ELEMENT);
+        var nodesToHide = [];
+        var node;
+        while (node = walker.nextNode()) {
+            // So limpa tags que NAO sao importantes para o layout
+            if (['IMG', 'INPUT', 'BR', 'HR', 'META', 'LINK', 'SCRIPT', 'STYLE'].includes(node.tagName)) continue;
+            if (node.children.length > 0) continue;
+            var text = node.textContent || '';
+            if (text.trim() === '' && !node.hasAttribute('aria-hidden')) {
+                var cs = w.getComputedStyle(node);
+                // Esconder (nao remover) para nao quebrar JS
+                if (cs.display !== 'none' && cs.visibility !== 'hidden' && node.offsetHeight < 2) {
+                    nodesToHide.push(node);
+                }
+            }
+        }
+        // Limitar a 50 por carregamento (seguranca)
+        nodesToHide.slice(0, 50).forEach(function (n) {
+            n.style.display = 'none';
+            removed++;
+        });
+        if (removed > 0) {
+            w.__awaLastCleanCount = removed;
+        }
+    }
+
+    /**
+     * Detectar elementos com opacity:0 que podem ser removidos
+     */
+    function detectHiddenElements() {
+        // So reporta nao remove
+        var hidden = d.querySelectorAll('[style*="opacity:0"], [style*="visibility:hidden"]');
+        if (hidden.length > 20) {
+            // Marcar como potencial para limpeza
+            w.__awaPotentialCleanup = hidden.length;
+        }
+    }
+
+    /**
+     * Monitor de performance
+     */
+    function perfMonitor() {
+        if (!w.performance || !w.performance.timing) return;
+        var timing = w.performance.timing;
+        var loadTime = timing.loadEventEnd - timing.navigationStart;
+        var domReady = timing.domContentLoadedEventEnd - timing.navigationStart;
+        if (loadTime > 0 && w.dataLayer) {
+            w.dataLayer.push({
+                event: 'awa_perf_metric',
+                page_load_ms: loadTime,
+                dom_ready_ms: domReady,
+                inline_js_count: d.querySelectorAll('script:not([src])').length,
+                inline_css_count: d.querySelectorAll('style').length
+            });
+        }
+    }
+
+    /**
+     * Init
+     */
+    function init() {
+        try { cleanEmptyTags(); } catch (e) { /* ignore */ }
+        try { detectHiddenElements(); } catch (e) { /* ignore */ }
+        try { perfMonitor(); } catch (e) { /* ignore */ }
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+
+    // Re-aplicar apos load
+    w.addEventListener('load', function () {
+        setTimeout(perfMonitor, 100);
+    });
+})(window, document);
+</script>

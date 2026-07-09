@@ -22,16 +22,20 @@
                 <?= $block->escapeHtml(__('Política de Privacidade')) ?>
             </a>.
         </p>
-        <div class="awa-cookie-banner__actions">
+        <div class="awa-cookie-banner__actions"
+             role="group"
+             aria-label="<?= $block->escapeHtmlAttr(__('Escolha de cookies')) ?>">
             <button type="button"
                     id="awa-cookie-accept"
-                    class="awa-cookie-banner__btn awa-cookie-banner__btn--accept">
-                <?= $block->escapeHtml(__('Permitir cookies')) ?>
+                    class="awa-cookie-banner__btn awa-cookie-banner__btn--accept"
+                    title="<?= $block->escapeHtmlAttr(__('Permitir cookies')) ?>">
+                <span><?= $block->escapeHtml(__('Permitir cookies')) ?></span>
             </button>
             <button type="button"
                     id="awa-cookie-decline"
-                    class="awa-cookie-banner__btn awa-cookie-banner__btn--decline">
-                <?= $block->escapeHtml(__('Apenas essenciais')) ?>
+                    class="awa-cookie-banner__btn awa-cookie-banner__btn--decline"
+                    title="<?= $block->escapeHtmlAttr(__('Apenas essenciais')) ?>">
+                <span><?= $block->escapeHtml(__('Apenas essenciais')) ?></span>
             </button>
         </div>
     </div>

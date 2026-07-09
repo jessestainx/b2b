@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Setup\Patch\Data;
@@ -40,7 +41,7 @@ class CreateB2BLandingUrlRewrite implements DataPatchInterface
         $this->moduleDataSetup->startSetup();
 
         $urlRewriteModel = $this->urlRewriteFactory->create();
-        
+
         // Check if exists
         $existing = $urlRewriteModel->getCollection()
             ->addFieldToFilter('request_path', 'seja-revendedor')

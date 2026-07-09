@@ -296,7 +296,8 @@
         started = true;
         w.__awaHeaderAccountPromptBooted = true;
         removeIntentListeners();
-        w.require(['Magento_Customer/js/customer-data'], toggleFactory);
+        w.require(['Magento_Customer/js/customer-data'], toggleFactory, function (err) {
+        });
     }
 
     function onIntent(event) {
@@ -359,6 +360,7 @@
     }
 
     schedule();
+
 
     d.addEventListener('awa:customer-data-ready', function () {
         if (!started) {

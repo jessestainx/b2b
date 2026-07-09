@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Comando CLI para limpeza de dados antigos do REXIS ML
+ * Comando CLI para limpeza de dados antigos do Product Intelligence
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Console\Command;
 
@@ -29,7 +29,7 @@ class CleanupCommand extends Command
     protected function configure()
     {
         $this->setName('rexis:cleanup')
-            ->setDescription('Limpar dados antigos do REXIS ML')
+            ->setDescription('Limpar dados antigos do Product Intelligence')
             ->addOption('months', 'm', InputOption::VALUE_OPTIONAL, 'Manter apenas os ultimos N meses', '6')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Apenas simular (nao excluir)');
         parent::configure();
@@ -42,7 +42,7 @@ class CleanupCommand extends Command
         $conn = $this->resource->getConnection();
 
         $output->writeln('');
-        $output->writeln('<fg=cyan;options=bold>REXIS ML - Limpeza de Dados</>');
+        $output->writeln('<fg=cyan;options=bold>Product Intelligence - Limpeza de Dados</>');
         $output->writeln('');
 
         if ($dryRun) {

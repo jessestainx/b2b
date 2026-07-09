@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * GrupoAwamotos Social Proof
  *
@@ -10,6 +8,8 @@ declare(strict_types=1);
  * - "Últimas X unidades em estoque"
  * - Badge "MAIS VENDIDO"
  */
+
+declare(strict_types=1);
 
 \Magento\Framework\Component\ComponentRegistrar::register(
     \Magento\Framework\Component\ComponentRegistrar::MODULE,

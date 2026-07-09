@@ -11,6 +11,8 @@ use Magento\Framework\Stdlib\Cookie\PhpCookieManager;
 
 class ExpressEmptyCartFlagManager
 {
+    private bool $cookieQueued = false;
+
     public function __construct(
         private readonly CheckoutSession $checkoutSession,
         private readonly PhpCookieManager $cookieManager,
@@ -39,7 +41,17 @@ class ExpressEmptyCartFlagManager
 
     private function setCookie(): void
     {
+        if ($this->cookieQueued) {
+            return;
+        }
+
         try {
+            if ($this->cookieManager->getCookie(EmptyCartContext::COOKIE_KEY_EXPRESS_REDIRECT) === '1') {
+                $this->cookieQueued = true;
+
+                return;
+            }
+
             $metadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
             $metadata->setDuration(300);
             $metadata->setPath('/');
@@ -51,6 +63,7 @@ class ExpressEmptyCartFlagManager
                 '1',
                 $metadata
             );
+            $this->cookieQueued = true;
         } catch (\Exception) {
             // Cookie opcional; sessão checkout é o fallback principal.
         }

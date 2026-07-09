@@ -8,9 +8,9 @@ use Magento\Framework\Model\AbstractModel;
 
 class Company extends AbstractModel
 {
-    const ROLE_ADMIN = 'admin';
-    const ROLE_MANAGER = 'manager';
-    const ROLE_BUYER = 'buyer';
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_MANAGER = 'manager';
+    public const ROLE_BUYER = 'buyer';
 
     protected function _construct()
     {

@@ -11,12 +11,14 @@ define(['jquery'], function ($) {
         var $wrapper = $(element);
         var $quoteBox = $wrapper.find('.b2b-cart-quote-box').first();
 
-        function finalizePlacement() {
+        function finalizePlacement()
+        {
             $quoteBox.show();
             $wrapper.remove();
         }
 
-        function placeInTarget() {
+        function placeInTarget()
+        {
             var placed = false;
             var attempt;
 

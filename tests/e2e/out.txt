@@ -1,9 +1,0 @@
-Navigating to category page...
-Status: 200
-Screenshot saved to plp_desktop.png
-
-Layout Info:
-Sidebar not found.
-Main content not found.
-Product list not found.
-No product items found.

@@ -44,7 +44,7 @@ class OrderNotesValidatorPlugin
         PaymentInterface $paymentMethod,
         ?AddressInterface $billingAddress = null
     ): array {
-        $this->validateAndSaveOrderNotes($cartId);
+        $this->validateAndSaveOrderNotes($cartId, $paymentMethod);
         return [$cartId, $paymentMethod, $billingAddress];
     }
 
@@ -64,7 +64,7 @@ class OrderNotesValidatorPlugin
         PaymentInterface $paymentMethod,
         ?AddressInterface $billingAddress = null
     ): array {
-        $this->validateAndSaveOrderNotes($cartId);
+        $this->validateAndSaveOrderNotes($cartId, $paymentMethod);
         return [$cartId, $paymentMethod, $billingAddress];
     }
 
@@ -72,10 +72,11 @@ class OrderNotesValidatorPlugin
      * Extract order notes from payment extension attributes and save to quote
      *
      * @param int $cartId
+     * @param PaymentInterface $paymentMethod
      * @return void
      * @throws LocalizedException
      */
-    private function validateAndSaveOrderNotes(int $cartId): void
+    private function validateAndSaveOrderNotes(int $cartId, PaymentInterface $paymentMethod): void
     {
         try {
             $quote = $this->cartRepository->getActive($cartId);
@@ -90,13 +91,9 @@ class OrderNotesValidatorPlugin
                 }
             }
 
-            // Validate the data
-            $this->validationService->validateCheckoutData($quote, null);
+            $this->validationService->validateCheckoutData($quote, $paymentMethod);
 
-            // Save if validation passed
-            $this->cartRepository->save($quote);
-
-            $this->logger->info('[B2B] Order notes validated and saved', [
+            $this->logger->info('[B2B] Order notes validated', [
                 'quote_id' => $cartId,
             ]);
         } catch (LocalizedException $e) {

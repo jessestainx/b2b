@@ -44,7 +44,7 @@ class DashboardDataProvider
         $customerIds = $this->portfolioScope->getVisibleCustomerIds();
         $attendant = $this->currentAttendant->get();
 
-        return [
+        $result = [
             'customer_count' => count($customerIds),
             'attendant_name' => $attendant['name'] ?? null,
             'can_view_all' => $this->portfolioScope->canViewAllPortfolios(),
@@ -56,6 +56,8 @@ class DashboardDataProvider
             'contacts_month_count' => $this->countContactsThisMonth(),
             'orders_30d_count' => $this->countRecentOrders(30),
         ];
+
+        return $result;
     }
 
     /**
@@ -256,7 +258,7 @@ class DashboardDataProvider
         $collection = $this->customerCollectionFactory->create();
         $collection->addAttributeToFilter(
             'b2b_approval_status',
-            ['in' => [ApprovalStatus::STATUS_PENDING, ApprovalStatus::STATUS_DATA_REVIEW]]
+            ['in' => [ApprovalStatus::STATUS_PENDING, 'data_review']]
         );
 
         return (int) $collection->getSize();
@@ -317,18 +319,18 @@ class DashboardDataProvider
 
         $days = $this->taskConfig->getDaysNoPurchase();
         $since = (new \DateTimeImmutable())->modify(sprintf('-%d days', $days))->format('Y-m-d H:i:s');
-        $count = 0;
+        $connection = $this->resourceConnection->getConnection();
+        $orderTable = $this->resourceConnection->getTableName('sales_order');
 
-        foreach ($customerIds as $customerId) {
-            $orders = $this->orderCollectionFactory->create();
-            $orders->addFieldToFilter('customer_id', $customerId);
-            $orders->addFieldToFilter('created_at', ['gteq' => $since]);
-            if ($orders->getSize() === 0) {
-                $count++;
-            }
-        }
+        $withRecentOrders = $connection->fetchCol(
+            $connection->select()
+                ->from($orderTable, ['customer_id'])
+                ->where('customer_id IN (?)', $customerIds)
+                ->where('created_at >= ?', $since)
+                ->group('customer_id')
+        );
 
-        return $count;
+        return count($customerIds) - count(array_unique(array_map('intval', $withRecentOrders)));
     }
 
     private function countAbandonedCarts(): int

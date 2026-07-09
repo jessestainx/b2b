@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Whatsapp;
@@ -12,6 +13,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
+use Magento\Store\Model\StoreManagerInterface;
 use GrupoAwamotos\B2B\Model\ResourceModel\CreditLimit\CollectionFactory as CreditCollectionFactory;
 use GrupoAwamotos\ERPIntegration\Helper\Data as ErpHelper;
 use GrupoAwamotos\ERPIntegration\Model\WhatsApp\ZApiClient;
@@ -19,7 +21,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * WhatsApp Webhook Controller
- * 
+ *
  * Handles incoming messages from Z-API (WhatsApp Gateway)
  * Provides automated responses for B2B customers.
  */
@@ -32,6 +34,7 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
     private ZApiClient $zapiClient;
     private ErpHelper $erpHelper;
     private LoggerInterface $logger;
+    private StoreManagerInterface $storeManager;
 
     public function __construct(
         Context $context,
@@ -41,7 +44,8 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
         CreditCollectionFactory $creditCollectionFactory,
         ZApiClient $zapiClient,
         ErpHelper $erpHelper,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->resultJsonFactory = $resultJsonFactory;
@@ -51,6 +55,7 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
         $this->zapiClient = $zapiClient;
         $this->erpHelper = $erpHelper;
         $this->logger = $logger;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -110,7 +115,9 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
      */
     private function identifyCustomer($phone)
     {
-        if (empty($phone)) return null;
+        if (empty($phone)) {
+            return null;
+        }
 
         // Clean phone (keep only digits)
         $cleanPhone = preg_replace('/\D/', '', $phone);
@@ -157,7 +164,7 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
             $response .= "Status: *{$status}*\n";
             $response .= "Total: R$ {$total}\n\n";
         }
-        $response .= "Acesse o portal para mais detalhes: https://awa.com.br/b2b/account/dashboard";
+        $response .= "Acesse o portal para mais detalhes: " . $this->getDashboardUrl();
 
         return $response;
     }
@@ -189,6 +196,19 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
     }
 
     /**
+     * Build the B2B account dashboard URL using the current store's base URL.
+     */
+    private function getDashboardUrl(): string
+    {
+        try {
+            return rtrim($this->storeManager->getStore()->getBaseUrl(), '/') . '/b2b/account/dashboard';
+        } catch (\Exception $e) {
+            $this->logger->error('[WhatsApp Bot] Failed to resolve store base URL: ' . $e->getMessage());
+            return '';
+        }
+    }
+
+    /**
      * Get help response
      */
     private function getHelpResponse($customer)
@@ -201,7 +221,8 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
     }
 
     /**
-     * Z-API envia Client-Token no header; fallback para X-Webhook-Token ou ?token=.
+     * Z-API envia Client-Token no header.
+     * Aceitamos X-Webhook-Token apenas por compatibilidade de proxy legado.
      */
     private function verifyWebhookToken(): bool
     {
@@ -216,8 +237,10 @@ class Webhook extends Action implements HttpPostActionInterface, CsrfAwareAction
         if ($token === '') {
             $token = (string) $request->getHeader('X-Webhook-Token');
         }
+
+        // Security: never accept token via query string (leaks in logs/proxies/referers).
         if ($token === '') {
-            $token = (string) $request->getParam('token', '');
+            return false;
         }
 
         return hash_equals($expected, $token);

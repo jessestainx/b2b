@@ -1,0 +1,92 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Account\ErpOrders $block */
+$order = $block->getOrderDetail();
+if (!$order) {
+    ?>
+    <div class="b2b-erp-order-view b2b-page-shell">
+        <div class="awa-empty-state" role="status">
+            <p class="awa-empty-state__title"><?= $block->escapeHtml(__('Pedido não encontrado')) ?></p>
+            <p class="awa-empty-state__hint"><?= $block->escapeHtml(__('Este pedido ERP não existe ou não está disponível para sua conta.')) ?></p>
+            <div class="awa-empty-state__actions">
+                <a class="action primary" href="<?= $block->escapeUrl($block->getListUrl()) ?>">
+                    <?= $block->escapeHtml(__('Voltar para pedidos ERP')) ?>
+                </a>
+            </div>
+        </div>
+    </div>
+    <?php
+    return;
+}
+$items = $order['items'] ?? [];
+$timeline = $order['timeline'] ?? [];
+$status = (string) ($order['status'] ?? '');
+?>
+<div class="b2b-erp-order-view b2b-page-shell">
+    <div class="b2b-section-header">
+        <h1><?= $block->escapeHtml(__('Pedido ERP #%1', $order['pedido_id'] ?? '')) ?></h1>
+        <a class="action back" href="<?= $block->escapeUrl($block->getListUrl()) ?>">
+            <?= $block->escapeHtml(__('Voltar para pedidos ERP')) ?>
+        </a>
+    </div>
+
+    <div class="b2b-erp-order-view__meta">
+        <div>
+            <span class="label"><?= $block->escapeHtml(__('Data')) ?></span>
+            <strong><?= $block->escapeHtml($block->formatErpDate($order['data_pedido'] ?? null)) ?></strong>
+        </div>
+        <div>
+            <span class="label"><?= $block->escapeHtml(__('Status')) ?></span>
+            <span class="status-badge <?= $block->escapeHtmlAttr($block->getStatusClass($status)) ?>">
+                <?= $block->escapeHtml($block->getStatusLabel($status)) ?>
+            </span>
+        </div>
+        <div>
+            <span class="label"><?= $block->escapeHtml(__('Total')) ?></span>
+            <strong><?= /* @noEscape */ $block->formatPrice((float) ($order['valor_total'] ?? 0)) ?></strong>
+        </div>
+    </div>
+
+    <?php if ($timeline !== []): ?>
+    <section class="b2b-erp-order-view__timeline" aria-label="<?= $block->escapeHtmlAttr(__('Timeline do pedido')) ?>">
+        <h2><?= $block->escapeHtml(__('Acompanhamento')) ?></h2>
+        <ol class="b2b-order-timeline">
+            <?php foreach ($timeline as $step): ?>
+            <li class="b2b-order-timeline__item b2b-order-timeline__item--<?= $block->escapeHtmlAttr((string) ($step['state'] ?? 'pending')) ?>">
+                <span class="b2b-order-timeline__label"><?= $block->escapeHtml((string) ($step['label'] ?? '')) ?></span>
+                <?php if (($step['date'] ?? '') !== ''): ?>
+                <time class="b2b-order-timeline__date"><?= $block->escapeHtml((string) $step['date']) ?></time>
+                <?php endif; ?>
+            </li>
+            <?php endforeach; ?>
+        </ol>
+    </section>
+    <?php endif; ?>
+
+    <section class="b2b-erp-order-view__items">
+        <h2><?= $block->escapeHtml(__('Itens do pedido')) ?></h2>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                        <th><?= $block->escapeHtml(__('Produto')) ?></th>
+                        <th><?= $block->escapeHtml(__('Qtd')) ?></th>
+                        <th><?= $block->escapeHtml(__('Preço')) ?></th>
+                        <th><?= $block->escapeHtml(__('Total')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($items as $item): ?>
+                    <tr>
+                        <td data-th="<?= $block->escapeHtmlAttr(__('SKU')) ?>"><?= $block->escapeHtml((string) ($item['sku'] ?? '')) ?></td>
+                        <td data-th="<?= $block->escapeHtmlAttr(__('Produto')) ?>"><?= $block->escapeHtml((string) ($item['nome'] ?? '')) ?></td>
+                        <td data-th="<?= $block->escapeHtmlAttr(__('Qtd')) ?>"><?= (int) ($item['qty'] ?? 0) ?></td>
+                        <td data-th="<?= $block->escapeHtmlAttr(__('Preço')) ?>"><?= /* @noEscape */ $block->formatPrice((float) ($item['preco_unitario'] ?? 0)) ?></td>
+                        <td data-th="<?= $block->escapeHtmlAttr(__('Total')) ?>"><?= /* @noEscape */ $block->formatPrice((float) ($item['total'] ?? 0)) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

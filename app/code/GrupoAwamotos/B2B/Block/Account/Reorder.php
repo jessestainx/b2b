@@ -48,4 +48,30 @@ class Reorder extends Template
     {
         return $this->getUrl('b2b/reorder/index');
     }
+
+    public function getAddUrl(): string
+    {
+        return $this->getUrl('b2b/reorder/add');
+    }
+
+    public function getPricesUrl(): string
+    {
+        return $this->getUrl('b2b/reorder/prices');
+    }
+
+    public function getCatalogUrl(): string
+    {
+        return $this->getUrl('');
+    }
+
+    /**
+     * @return array{pricesUrl: string, addUrl: string}
+     */
+    public function getReorderWidgetConfig(): array
+    {
+        return [
+            'pricesUrl' => $this->getPricesUrl(),
+            'addUrl' => $this->getAddUrl(),
+        ];
+    }
 }

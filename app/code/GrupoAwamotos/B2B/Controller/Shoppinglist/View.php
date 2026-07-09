@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Shoppinglist;
 
 use Magento\Customer\Model\Session as CustomerSession;
@@ -15,7 +17,8 @@ class View implements HttpGetActionInterface
         private readonly PageFactory $resultPageFactory,
         private readonly RedirectFactory $resultRedirectFactory,
         private readonly RequestInterface $request
-    ) {}
+    ) {
+    }
 
     public function execute()
     {

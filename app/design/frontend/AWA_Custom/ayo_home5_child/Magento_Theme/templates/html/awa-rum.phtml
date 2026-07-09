@@ -1,0 +1,193 @@
+<?php
+/**
+ * AWA Motos - Real User Monitoring (RUM) (2026-06-28)
+ *
+ * Coleta Core Web Vitals (LCP, FID, CLS, INP, FCP, TTFB)
+ * e envia para dataLayer para analytics.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaRumInit) return;
+    w.__awaRumInit = true;
+
+    function sendMetric(name, value, id) {
+        if (typeof w.dataLayer === 'undefined') {
+            w.dataLayer = w.dataLayer || [];
+        }
+        w.dataLayer.push({
+            event: 'awa_web_vital',
+            metric_name: name,
+            value: Math.round(value),
+            metric_id: id || '',
+            page_path: w.location.pathname,
+            timestamp: Date.now()
+        });
+        // Log em dev
+        if (w.location.hostname === 'localhost' || w.location.hostname.indexOf('dev') === 0) {
+            console.log('[AWA RUM]', name, Math.round(value) + 'ms', id || '');
+        }
+    }
+
+    function observeWebVitals() {
+        if (!w.PerformanceObserver) return;
+
+        // LCP - Largest Contentful Paint
+        try {
+            var lcpObserver = new PerformanceObserver(function (entryList) {
+                var entries = entryList.getEntries();
+                var lastEntry = entries[entries.length - 1];
+                sendMetric('LCP', lastEntry.renderTime || lastEntry.loadTime, lastEntry.id);
+            });
+            lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+        } catch (e) {}
+
+        // FID - First Input Delay
+        try {
+            var fidObserver = new PerformanceObserver(function (entryList) {
+                for (var i = 0; i < entryList.getEntries().length; i++) {
+                    var entry = entryList.getEntries()[i];
+                    sendMetric('FID', entry.processingStart - entry.startTime, entry.name);
+                }
+            });
+            fidObserver.observe({ type: 'first-input', buffered: true });
+        } catch (e) {}
+
+        // CLS - Cumulative Layout Shift
+        try {
+            var clsValue = 0;
+            var clsObserver = new PerformanceObserver(function (entryList) {
+                for (var i = 0; i < entryList.getEntries().length; i++) {
+                    if (!entryList.getEntries()[i].hadRecentInput) {
+                        clsValue += entryList.getEntries()[i].value;
+                    }
+                }
+                sendMetric('CLS', clsValue * 1000);
+            });
+            clsObserver.observe({ type: 'layout-shift', buffered: true });
+        } catch (e) {}
+
+        // FCP - First Contentful Paint
+        try {
+            var fcpObserver = new PerformanceObserver(function (entryList) {
+                var entries = entryList.getEntries();
+                if (entries.length > 0) {
+                    var fcp = entries[0];
+                    sendMetric('FCP', fcp.startTime, fcp.name);
+                }
+            });
+            fcpObserver.observe({ type: 'paint', buffered: true });
+        } catch (e) {}
+
+        // TTFB - Time to First Byte
+        try {
+            var navEntry = w.performance.getEntriesByType('navigation')[0];
+            if (navEntry) {
+                var ttfb = navEntry.responseStart - navEntry.requestStart;
+                sendMetric('TTFB', ttfb, navEntry.name);
+            }
+        } catch (e) {}
+
+        // INP - Interaction to Next Paint (novo)
+        try {
+            var inpValue = 0;
+            var inpObserver = new PerformanceObserver(function (entryList) {
+                for (var i = 0; i < entryList.getEntries().length; i++) {
+                    var entry = entryList.getEntries()[i];
+                    if (entry.duration > inpValue) {
+                        inpValue = entry.duration;
+                    }
+                }
+                if (inpValue > 0) sendMetric('INP', inpValue);
+            });
+            inpObserver.observe({ type: 'event', buffered: true, durationThreshold: 16 });
+        } catch (e) {}
+
+        // Navigation Timing
+        try {
+            w.addEventListener('load', function () {
+                setTimeout(function () {
+                    var timing = w.performance.timing;
+                    if (timing) {
+                        var pageLoad = timing.loadEventEnd - timing.navigationStart;
+                        var domReady = timing.domContentLoadedEventEnd - timing.navigationStart;
+                        var responseEnd = timing.responseEnd - timing.requestStart;
+                        if (pageLoad > 0) sendMetric('page_load', pageLoad);
+                        if (domReady > 0) sendMetric('dom_ready', domReady);
+                        if (responseEnd > 0) sendMetric('response_end', responseEnd);
+                    }
+                    // Recursos por tipo
+                    var resources = w.performance.getEntriesByType('resource');
+                    var byType = {};
+                    for (var i = 0; i < resources.length; i++) {
+                        var t = resources[i].initiatorType || 'other';
+                        byType[t] = (byType[t] || 0) + 1;
+                    }
+                    if (typeof w.dataLayer !== 'undefined') {
+                        w.dataLayer.push({
+                            event: 'awa_resources_loaded',
+                            total: resources.length,
+                            by_type: byType,
+                            slow_resources: resources
+                                .filter(function (r) { return r.duration > 1000; })
+                                .map(function (r) { return { name: r.name.split('/').pop(), duration: Math.round(r.duration) }; })
+                                .slice(0, 10)
+                        });
+                    }
+                }, 0);
+            });
+        } catch (e) {}
+
+        // Long Tasks (> 50ms bloqueando thread)
+        try {
+            var longTaskObserver = new PerformanceObserver(function (entryList) {
+                for (var i = 0; i < entryList.getEntries().length; i++) {
+                    var task = entryList.getEntries()[i];
+                    if (task.duration > 50) {
+                        sendMetric('long_task', task.duration);
+                    }
+                }
+            });
+            longTaskObserver.observe({ type: 'longtask', buffered: true });
+        } catch (e) {}
+    }
+
+    function trackErrors() {
+        w.addEventListener('error', function (e) {
+            if (typeof w.dataLayer !== 'undefined') {
+                w.dataLayer.push({
+                    event: 'awa_js_error',
+                    message: e.message,
+                    filename: e.filename,
+                    lineno: e.lineno,
+                    colno: e.colno,
+                    page_path: w.location.pathname
+                });
+            }
+        });
+        w.addEventListener('unhandledrejection', function (e) {
+            if (typeof w.dataLayer !== 'undefined') {
+                w.dataLayer.push({
+                    event: 'awa_promise_rejection',
+                    reason: String(e.reason),
+                    page_path: w.location.pathname
+                });
+            }
+        });
+    }
+
+    function init() {
+        observeWebVitals();
+        trackErrors();
+    }
+
+    if (d.readyState === 'complete') {
+        init();
+    } else {
+        w.addEventListener('load', init);
+    }
+})(window, document);
+</script>

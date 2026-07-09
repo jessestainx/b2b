@@ -1,21 +1,62 @@
 /**
- * AWA B2B Header — auth prompt visibility
- * Hides .awa-header-auth-prompt when customer is logged in (FPC-safe via customerData).
+ * AWA B2B Header — legacy shim (superseded by inline awa-header-account-prompt script).
+ * Kept for RequireJS map compatibility; no-op when inline boot already ran.
  */
 define(['Magento_Customer/js/customer-data'], function (customerData) {
     'use strict';
 
-    function updateAuthPrompt(data) {
-        let el = document.querySelector('[data-awa-header-auth]');
-        if (!el) { return; }
-        if (data && data.fullname) {
-            el.style.setProperty('display', 'none', 'important');
+    if (window.__awaHeaderAccountPromptBooted) {
+        return;
+    }
+
+    var promptSelector = '.awa-header-account-prompt';
+
+    function isLoggedIn(data) {
+        if (!data || typeof data !== 'object') {
+            return false;
+        }
+
+        return !!(
+            data.firstname
+            || data.fullname
+            || data.email
+            || data.id
+            || data.entity_id
+            || (data.websiteId !== undefined && data.websiteId !== null && data.websiteId !== '')
+        );
+    }
+
+    function syncAuthPrompt(data) {
+        var el = document.querySelector(promptSelector);
+        if (!el) {
+            return;
+        }
+
+        var loggedIn = isLoggedIn(data);
+        el.setAttribute('data-awa-auth-state', loggedIn ? 'customer' : 'guest');
+        el.removeAttribute('data-awa-auth-pending');
+
+        var guest = el.querySelector('.awa-header-account-prompt__guest');
+        var cust = el.querySelector('.awa-header-account-prompt__customer');
+
+        if (loggedIn) {
+            if (guest) {
+                guest.style.setProperty('display', 'none', 'important');
+            }
+            if (cust) {
+                cust.style.removeProperty('display');
+            }
         } else {
-            el.style.removeProperty('display');
+            if (guest) {
+                guest.style.removeProperty('display');
+            }
+            if (cust) {
+                cust.style.setProperty('display', 'none', 'important');
+            }
         }
     }
 
-    let customer = customerData.get('customer');
-    updateAuthPrompt(customer());
-    customer.subscribe(updateAuthPrompt);
+    var customer = customerData.get('customer');
+    syncAuthPrompt(customer());
+    customer.subscribe(syncAuthPrompt);
 });

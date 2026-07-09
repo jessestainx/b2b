@@ -1,0 +1,120 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \GrupoAwamotos\B2B\Block\Account\Cotacao\View $block */
+$cotacao = $block->getCotacao();
+$items = $block->getItems();
+if (!$cotacao) {
+    return;
+}
+
+$status = (string) $cotacao->getStatus();
+$statusClass = match ($status) {
+    'quoted' => 'b2b-cotacao-status--quoted',
+    'accepted' => 'b2b-cotacao-status--accepted',
+    'rejected' => 'b2b-cotacao-status--rejected',
+    'expired' => 'b2b-cotacao-status--expired',
+    default => 'b2b-cotacao-status--pending',
+};
+?>
+<div class="b2b-account-block b2b-cotacao-page">
+    <div class="b2b-cotacao-back">
+        <a href="<?= $block->escapeUrl($block->getUrl('b2b/quote/history')) ?>" class="b2b-cotacao-link">
+            ← <?= $block->escapeHtml(__('Minhas Cotações')) ?>
+        </a>
+    </div>
+
+    <div class="block-title">
+        <strong><span><?= $block->escapeHtml(__('Cotação #%1', $cotacao->getId())) ?></span></strong>
+        <span class="b2b-cotacao-status <?= $block->escapeHtmlAttr($statusClass) ?>">
+            <?= $block->escapeHtml($cotacao->getStatusLabel()) ?>
+        </span>
+    </div>
+
+    <p class="b2b-cotacao-meta">
+        <?= $block->escapeHtml(__('Solicitado em: %1', substr((string) $cotacao->getData('created_at'), 0, 10))) ?>
+        <?php if ($cotacao->getNotes()): ?>
+            | <?= $block->escapeHtml(__('Observação:')) ?> <em><?= $block->escapeHtml($cotacao->getNotes()) ?></em>
+        <?php endif; ?>
+    </p>
+
+    <div class="b2b-cotacao-table-wrap">
+        <table class="data table b2b-cotacao-table">
+            <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                    <th><?= $block->escapeHtml(__('Produto')) ?></th>
+                    <th class="col-qty"><?= $block->escapeHtml(__('Qtd')) ?></th>
+                    <th class="col-price"><?= $block->escapeHtml(__('Preço Catálogo')) ?></th>
+                    <th class="col-price"><?= $block->escapeHtml(__('Preço Cotado')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($items as $item): ?>
+                    <tr>
+                        <td><?= $block->escapeHtml($item['sku']) ?></td>
+                        <td><?= $block->escapeHtml($item['name']) ?></td>
+                        <td class="col-qty"><?= (float) $item['qty'] ?></td>
+                        <td class="col-price">
+                            R$ <?= $block->escapeHtml(number_format((float) $item['price_catalog'], 2, ',', '.')) ?>
+                        </td>
+                        <td class="col-price">
+                            <?php if ($item['price_quoted'] !== null): ?>
+                                <span class="b2b-cotacao-price--quoted">
+                                    R$ <?= $block->escapeHtml(number_format((float) $item['price_quoted'], 2, ',', '.')) ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="b2b-cotacao-price--waiting"><?= $block->escapeHtml(__('Aguardando')) ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <?php if ($cotacao->getAdminNotes()): ?>
+        <div class="b2b-cotacao-notice b2b-cotacao-notice--info">
+            <strong><?= $block->escapeHtml(__('Observação da nossa equipe:')) ?></strong><br>
+            <?= $block->escapeHtml($cotacao->getAdminNotes()) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($cotacao->isQuoted()): ?>
+        <div class="b2b-cotacao-actions">
+            <p class="b2b-cotacao-actions__title">
+                <?= $block->escapeHtml(__('Os preços acima foram aprovados pela nossa equipe. O que deseja fazer?')) ?>
+            </p>
+            <div class="b2b-cotacao-actions__forms">
+                <form method="post" action="<?= $block->escapeUrl($block->getRespondUrl()) ?>">
+                    <input type="hidden" name="cotacao_id" value="<?= (int) $cotacao->getId() ?>">
+                    <input type="hidden" name="action" value="accept">
+                    <?= $block->getBlockHtml('formkey') ?>
+                    <button type="submit" class="action primary"
+                            onclick="return confirm('<?= $block->escapeJs(__('Confirma a aceitação desta cotação? Nossa equipe entrará em contato para finalizar o pedido.')) ?>')">
+                        <?= $block->escapeHtml(__('Aceitar Cotação')) ?>
+                    </button>
+                </form>
+                <form method="post" action="<?= $block->escapeUrl($block->getRespondUrl()) ?>">
+                    <input type="hidden" name="cotacao_id" value="<?= (int) $cotacao->getId() ?>">
+                    <input type="hidden" name="action" value="reject">
+                    <?= $block->getBlockHtml('formkey') ?>
+                    <button type="submit" class="action secondary"
+                            onclick="return confirm('<?= $block->escapeJs(__('Recusar esta cotação?')) ?>')">
+                        <?= $block->escapeHtml(__('Recusar')) ?>
+                    </button>
+                </form>
+            </div>
+        </div>
+    <?php elseif ($cotacao->isAccepted()): ?>
+        <div class="b2b-cotacao-notice b2b-cotacao-notice--success">
+            <strong><?= $block->escapeHtml(__('Cotação aceita.')) ?></strong>
+            <?= $block->escapeHtml(__(' Nossa equipe entrará em contato em breve para finalizar o pedido.')) ?>
+        </div>
+    <?php elseif ($cotacao->isPending()): ?>
+        <div class="b2b-cotacao-notice b2b-cotacao-notice--warning">
+            <?= $block->escapeHtml(__('Sua cotação está sendo analisada pela nossa equipe. Você receberá um e-mail quando os preços estiverem disponíveis.')) ?>
+        </div>
+    <?php endif; ?>
+</div>

@@ -9,6 +9,7 @@ use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ErpCustomerSyncStatus;
 use GrupoAwamotos\B2B\Model\CustomerCnpjResolver;
 use GrupoAwamotos\B2B\Model\ErpIntegration;
+use GrupoAwamotos\B2B\Model\Sectra\ProspectPipeline;
 use GrupoAwamotos\ERPIntegration\Helper\Data as ErpHelper;
 use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
@@ -24,6 +25,7 @@ class ApprovedCustomerErpSyncTest extends TestCase
     private CustomerRepositoryInterface&MockObject $customerRepository;
     private ErpIntegration&MockObject $erpIntegration;
     private CustomerCnpjResolver&MockObject $cnpjResolver;
+    private ProspectPipeline&MockObject $prospectPipeline;
     private ApprovedCustomerErpSync $service;
 
     protected function setUp(): void
@@ -31,6 +33,7 @@ class ApprovedCustomerErpSyncTest extends TestCase
         $this->customerRepository = $this->createMock(CustomerRepositoryInterface::class);
         $this->erpIntegration = $this->createMock(ErpIntegration::class);
         $this->cnpjResolver = $this->createMock(CustomerCnpjResolver::class);
+        $this->prospectPipeline = $this->createMock(ProspectPipeline::class);
 
         $scopeConfig = $this->createMock(\Magento\Framework\App\Config\ScopeConfigInterface::class);
         $scopeConfig->method('isSetFlag')->willReturn(true);
@@ -43,6 +46,7 @@ class ApprovedCustomerErpSyncTest extends TestCase
             $scopeConfig,
             $this->createMock(ErpHelper::class),
             $this->createMock(SyncLogResource::class),
+            $this->prospectPipeline,
             $this->createMock(LoggerInterface::class)
         );
     }
@@ -51,7 +55,9 @@ class ApprovedCustomerErpSyncTest extends TestCase
     {
         $customer = $this->createApprovedCustomer(8905);
         $this->customerRepository->method('getById')->willReturn($customer);
-        $this->customerRepository->expects($this->once())->method('save')->with($customer);
+        // Note: persistence for the "pull order" pipeline path now belongs to
+        // ProspectPipeline (mocked below), not to ApprovedCustomerErpSync itself.
+        $this->customerRepository->expects($this->never())->method('save');
 
         $this->cnpjResolver->method('resolveWithSource')->willReturn([
             'digits' => '66437059000150',
@@ -60,6 +66,11 @@ class ApprovedCustomerErpSyncTest extends TestCase
         $this->cnpjResolver->method('isValidCnpj')->willReturn(true);
         $this->erpIntegration->method('getErpCodeForCustomer')->willReturn(null);
         $this->erpIntegration->method('findErpCustomerByCnpj')->willReturn(null);
+        $this->prospectPipeline->method('processApprovedCustomer')->with(8905)->willReturn([
+            'success' => true,
+            'erp_customer_sync_status' => ErpCustomerSyncStatus::NOT_APPLICABLE_PULL_ORDER,
+            'message' => 'Aguardando pedido para integração via pull Sectra.',
+        ]);
 
         $result = $this->service->syncApprovedCustomer(8905);
 

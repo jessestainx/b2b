@@ -6,9 +6,36 @@
         <css src="GrupoAwamotos_B2B::css/account/pages-core.css"/>
     </head>
     <body>
-        <attribute name="class" value="b2b-account-shell awa-account-operational"/>
+        <!-- BUG-CORE-2026-07-04: Magento\Framework\View\Page\Config::addBodyClass()
+             sanitiza cada valor com preg_replace('#[^a-z0-9-_]+#', '-', ...), então um
+             único <attribute name="class"> com espaço interno ("shell operational")
+             tem o espaço convertido em hífen e as duas classes viram uma só
+             ("b2b-account-shell-awa-account-operational"), quebrando todo seletor CSS
+             que dependa de .b2b-account-shell ou .awa-account-operational isoladamente
+             (inclusive o grid do header). Corrigido usando dois nós <attribute>
+             separados: Magento\Framework\View\Page\Config\Reader\Body chama
+             setBodyClass() uma vez por nó, então cada string fica sem espaço interno. -->
+        <attribute name="class" value="b2b-account-shell"/>
+        <attribute name="class" value="awa-account-operational"/>
+        <referenceBlock name="authentication-popup" remove="true"/>
+        <!-- Re-declaração completa: <block> "nuo" reseta template/alias do prompt
+             (_overrideElementWorkaround) e deixava o header sem UI de conta. -->
         <referenceBlock name="toki_header">
-            <block name="awa.header.contact.links" cacheable="false"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.header.contact.links"
+                   as="headerContactLinks"
+                   template="Magento_Theme::html/awa-header-contact-links.phtml"
+                   cacheable="false">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ContactInfo</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+        <referenceBlock name="customer.section.config"
+                        template="Magento_Theme::html/awa-customer-sections-defer.phtml">
+            <arguments>
+                <argument name="boot_immediate" xsi:type="boolean">true</argument>
+            </arguments>
         </referenceBlock>
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
@@ -31,15 +58,19 @@
             <referenceBlock name="customer-account-navigation-account-link" remove="true"/>
             <referenceBlock name="customer-account-navigation-orders-link" remove="true"/>
 
-            <!-- === SEÇÃO B2B (topo da sidebar) — grupos para chunking ≤4 por grupo === -->
+            <!-- === SEÇÃO B2B (topo da sidebar) — grupos para chunking ≤4 por grupo ===
+                 ATENÇÃO: Magento\Customer\Block\Account\Navigation::compare() ordena
+                 SortLinkInterface em ORDEM DESCENDENTE de sortOrder (maior número
+                 aparece primeiro). Os valores abaixo estão calibrados para essa regra
+                 — NÃO inverter para ordem crescente "intuitiva". -->
 
-            <!-- ── Grupo 1: Painel ─────────────────────────────────────── -->
+            <!-- ── Grupo 1: Painel (primeiro grupo, topo da sidebar) ───── -->
             <block class="GrupoAwamotos\B2B\Block\Account\NavSection"
                    name="customer-account-navigation-section-painel"
                    template="GrupoAwamotos_B2B::account/navigation-section.phtml">
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Painel</argument>
-                    <argument name="sortOrder" xsi:type="number">9</argument>
+                    <argument name="sortOrder" xsi:type="number">400</argument>
                     <argument name="visibility" xsi:type="string">b2b_approved</argument>
                 </arguments>
             </block>
@@ -50,7 +81,7 @@
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Painel B2B</argument>
                     <argument name="path" xsi:type="string">b2b/account/dashboard</argument>
-                    <argument name="sortOrder" xsi:type="number">10</argument>
+                    <argument name="sortOrder" xsi:type="number">390</argument>
                 </arguments>
             </block>
 
@@ -63,28 +94,31 @@
                    template="GrupoAwamotos_B2B::account/navigation-section.phtml">
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Compras &amp; Pedidos</argument>
-                    <argument name="sortOrder" xsi:type="number">29</argument>
+                    <argument name="sortOrder" xsi:type="number">370</argument>
                     <argument name="visibility" xsi:type="string">b2b_approved</argument>
                 </arguments>
             </block>
 
-            <!-- Solicitar Cotação -->
-            <block class="Magento\Customer\Block\Account\SortLink"
+            <!-- Solicitar Cotação — feature "quote" ainda não vai ser oferecida (por enquanto);
+                 gate via grupoawamotos_b2b/quote_request/enabled (já em 0). -->
+            <block class="GrupoAwamotos\B2B\Block\Link\B2bAccountLink"
                    name="customer-account-navigation-b2b-quote-request-link">
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Solicitar Cotação</argument>
                     <argument name="path" xsi:type="string">b2b/quote</argument>
-                    <argument name="sortOrder" xsi:type="number">30</argument>
+                    <argument name="sortOrder" xsi:type="number">360</argument>
+                    <argument name="feature" xsi:type="string">quote</argument>
                 </arguments>
             </block>
 
-            <!-- Minhas Cotações -->
-            <block class="Magento\Customer\Block\Account\SortLink"
+            <!-- Minhas Cotações — mesmo gate acima -->
+            <block class="GrupoAwamotos\B2B\Block\Link\B2bAccountLink"
                    name="customer-account-navigation-b2b-quotes-link">
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Minhas Cotações</argument>
                     <argument name="path" xsi:type="string">b2b/quote/history</argument>
-                    <argument name="sortOrder" xsi:type="number">40</argument>
+                    <argument name="sortOrder" xsi:type="number">350</argument>
+                    <argument name="feature" xsi:type="string">quote</argument>
                 </arguments>
             </block>
 
@@ -94,7 +128,7 @@
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Listas de Compras</argument>
                     <argument name="path" xsi:type="string">b2b/shoppinglist</argument>
-                    <argument name="sortOrder" xsi:type="number">50</argument>
+                    <argument name="sortOrder" xsi:type="number">340</argument>
                 </arguments>
             </block>
 
@@ -104,7 +138,7 @@
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Repetir Pedido</argument>
                     <argument name="path" xsi:type="string">b2b/reorder/history</argument>
-                    <argument name="sortOrder" xsi:type="number">52</argument>
+                    <argument name="sortOrder" xsi:type="number">330</argument>
                 </arguments>
             </block>
 
@@ -114,18 +148,19 @@
                    template="GrupoAwamotos_B2B::account/navigation-section.phtml">
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Empresa &amp; Crédito</argument>
-                    <argument name="sortOrder" xsi:type="number">53</argument>
+                    <argument name="sortOrder" xsi:type="number">310</argument>
                     <argument name="visibility" xsi:type="string">b2b_approved</argument>
                 </arguments>
             </block>
 
-            <!-- Meu Crédito -->
-            <block class="Magento\Customer\Block\Account\SortLink"
+            <!-- Meu Crédito — gate via grupoawamotos_b2b/credit/enabled (hoje em 0) -->
+            <block class="GrupoAwamotos\B2B\Block\Link\B2bAccountLink"
                    name="customer-account-navigation-b2b-credit-link">
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Meu Crédito</argument>
                     <argument name="path" xsi:type="string">b2b/credit</argument>
-                    <argument name="sortOrder" xsi:type="number">55</argument>
+                    <argument name="sortOrder" xsi:type="number">300</argument>
+                    <argument name="feature" xsi:type="string">credit</argument>
                 </arguments>
             </block>
 
@@ -135,17 +170,28 @@
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Minhas Faturas</argument>
                     <argument name="path" xsi:type="string">sales/order/history</argument>
-                    <argument name="sortOrder" xsi:type="number">56</argument>
+                    <argument name="sortOrder" xsi:type="number">290</argument>
                 </arguments>
             </block>
 
-            <!-- Aprovações de Pedidos -->
+            <!-- Financeiro: boletos (aberto/vencido/a vencer) + acesso a NF-e por pedido -->
             <block class="Magento\Customer\Block\Account\SortLink"
+                   name="customer-account-navigation-b2b-finance-link">
+                <arguments>
+                    <argument name="label" xsi:type="string" translate="true">Financeiro</argument>
+                    <argument name="path" xsi:type="string">b2b/finance/index</argument>
+                    <argument name="sortOrder" xsi:type="number">285</argument>
+                </arguments>
+            </block>
+
+            <!-- Aprovações de Pedidos — gate via grupoawamotos_b2b/order_approval/enabled (hoje em 1) -->
+            <block class="GrupoAwamotos\B2B\Block\Link\B2bAccountLink"
                    name="customer-account-navigation-b2b-approval-link">
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Aprovações</argument>
                     <argument name="path" xsi:type="string">b2b/approval</argument>
-                    <argument name="sortOrder" xsi:type="number">60</argument>
+                    <argument name="sortOrder" xsi:type="number">280</argument>
+                    <argument name="feature" xsi:type="string">order_approval</argument>
                 </arguments>
             </block>
 
@@ -155,17 +201,20 @@
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Minha Empresa</argument>
                     <argument name="path" xsi:type="string">b2b/company</argument>
-                    <argument name="sortOrder" xsi:type="number">62</argument>
+                    <argument name="sortOrder" xsi:type="number">270</argument>
                 </arguments>
             </block>
 
-            <!-- ── Grupo 4: Dados Pessoais (evita duplicar título "Minha Conta") ─ -->
+            <!-- ── Grupo 4: Dados Pessoais (evita duplicar título "Minha Conta") ─
+                 Fica logo ACIMA dos links nativos "Informações de Conta" (sortOrder
+                 nativo 180) e "Catálogo de Endereços" (sortOrder nativo 190), então
+                 precisa de um valor > 190 para renderizar antes deles. -->
             <block class="GrupoAwamotos\B2B\Block\Account\NavSection"
                    name="customer-account-navigation-section-minha-conta"
                    template="GrupoAwamotos_B2B::account/navigation-section.phtml">
                 <arguments>
                     <argument name="label" xsi:type="string" translate="true">Dados Pessoais</argument>
-                    <argument name="sortOrder" xsi:type="number">170</argument>
+                    <argument name="sortOrder" xsi:type="number">195</argument>
                     <!-- "any" falls through b2b/b2b_approved checks → renders for all logged-in users -->
                     <argument name="visibility" xsi:type="string">any</argument>
                 </arguments>

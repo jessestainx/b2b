@@ -11,6 +11,7 @@
         <referenceBlock name="theme.active.editor" remove="true"/>
         <referenceBlock name="google.maps.api" remove="true"/>
         <referenceBlock name="nav.bar.title" remove="true"/>
+        <referenceBlock name="awa.custom.global.js.loader" remove="true"/>
 
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
@@ -18,7 +19,7 @@
                    template="Magento_Theme::html/awa-custom-js-loader.phtml">
                 <arguments>
                     <argument name="load_header_js" xsi:type="boolean">true</argument>
-                    <argument name="load_home_owl_tabs_js" xsi:type="boolean">true</argument>
+                    <argument name="load_home_owl_tabs_js" xsi:type="boolean">false</argument>
                     <argument name="load_footer_ux_js" xsi:type="boolean">false</argument>
                     <argument name="load_pdp_sticky_cta_js" xsi:type="boolean">false</argument>
                     <argument name="load_search_compat_js" xsi:type="boolean">false</argument>

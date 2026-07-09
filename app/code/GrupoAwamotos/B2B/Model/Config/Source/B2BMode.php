@@ -12,8 +12,8 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 class B2BMode implements OptionSourceInterface
 {
-    const MODE_STRICT = 'strict';
-    const MODE_MIXED = 'mixed';
+    public const MODE_STRICT = 'strict';
+    public const MODE_MIXED = 'mixed';
 
     /**
      * Get options

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<page layout="empty"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <block class="GrupoAwamotos\ProductIntelligence\Block\Recommendations"
+               name="rexisml.b2b.recommendations.fragment"
+               template="GrupoAwamotos_ProductIntelligence::b2b/recommendations-widget.phtml">
+            <arguments>
+                <argument name="limit" xsi:type="number">6</argument>
+            </arguments>
+        </block>
+    </body>
+</page>

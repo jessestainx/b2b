@@ -20,6 +20,12 @@ class Config extends AbstractHelper
     private const XML_PATH_NOTIFY_SHIPPED = 'whatsapp_commerce/notifications/order_shipped';
     private const XML_PATH_NOTIFY_REFUNDED = 'whatsapp_commerce/notifications/order_refunded';
 
+    // App Builder Offload
+    private const XML_PATH_APPBUILDER_ENABLED = 'whatsapp_commerce/app_builder_offload/enabled';
+    private const XML_PATH_APPBUILDER_WEBHOOK_URL = 'whatsapp_commerce/app_builder_offload/webhook_url';
+    private const XML_PATH_APPBUILDER_SHARED_SECRET = 'whatsapp_commerce/app_builder_offload/shared_secret';
+    private const XML_PATH_APPBUILDER_TIMEOUT = 'whatsapp_commerce/app_builder_offload/timeout_seconds';
+
     // Phase 6: Review Request
     private const XML_PATH_REVIEW_ENABLED = 'whatsapp_commerce/review_request/enabled';
     private const XML_PATH_REVIEW_DELAY = 'whatsapp_commerce/review_request/delay_days';
@@ -81,6 +87,28 @@ class Config extends AbstractHelper
     public function isNotifyOrderRefundedEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_REFUNDED, ScopeInterface::SCOPE_STORE);
+    }
+
+    // ==================== App Builder Offload ====================
+
+    public function isAppBuilderOffloadEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_APPBUILDER_ENABLED, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function getAppBuilderWebhookUrl(): string
+    {
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_APPBUILDER_WEBHOOK_URL, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function getAppBuilderSharedSecret(): string
+    {
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_APPBUILDER_SHARED_SECRET, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function getAppBuilderTimeoutSeconds(): int
+    {
+        return (int) $this->scopeConfig->getValue(self::XML_PATH_APPBUILDER_TIMEOUT, ScopeInterface::SCOPE_STORE) ?: 3;
     }
 
     // ==================== Phase 6: Review Request ====================

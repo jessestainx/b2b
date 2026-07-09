@@ -7,6 +7,8 @@
 
 import { test, expect, Page } from '@playwright/test';
 import path from 'path';
+import { targetUrl } from '../helpers/target-url';
+import { blockOptionalThirdParty } from '../helpers/third-party-block';
 
 const SCREENSHOT_DIR = path.join(__dirname, '..', 'screenshots');
 
@@ -33,16 +35,16 @@ const PDP = {
 
 /* ── Produto real para navegação direta ─────────────────────────────── */
 const FALLBACK_PDP_URL = '/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html';
-const BASE = 'https://awamotos.com';
 
 /* ── Página compartilhada por todos os describes ─────────────────── */
 let pdpPage: Page;
 
 test.beforeAll(async ({ browser }) => {
   const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
+  await blockOptionalThirdParty(ctx);
   pdpPage = await ctx.newPage();
   try {
-    await pdpPage.goto(`${BASE}${FALLBACK_PDP_URL}`, { waitUntil: 'commit', timeout: 60_000 });
+    await pdpPage.goto(targetUrl(FALLBACK_PDP_URL, 'pdp-layout'), { waitUntil: 'commit', timeout: 60_000 });
     const cookieBtn = pdpPage.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
     if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await cookieBtn.click();

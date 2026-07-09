@@ -1,9 +1,9 @@
 <?php
 /**
- * Widget de recomendacoes RexisML para o Dashboard B2B
+ * Widget de recomendacoes Product Intelligence para o Dashboard B2B
  * Exibe produtos recomendados com dados reais do pipeline IA
  *
- * @var $block \GrupoAwamotos\RexisML\Block\Recommendations
+ * @var $block \GrupoAwamotos\ProductIntelligence\Block\Recommendations
  */
 declare(strict_types=1);
 
@@ -32,7 +32,7 @@ foreach ($recommendations as $item) {
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
                 <?= $block->escapeHtml(__('Recomendações IA')) ?>
-                <span class="b2b-rexis-ai-badge">REXIS ML</span>
+                <span class="b2b-rexis-ai-badge">Product Intelligence</span>
             </h3>
             <?php if ($rfm && isset($rfm['classificacao_cliente'])): ?>
                 <span class="b2b-rexis-rfm-tag">

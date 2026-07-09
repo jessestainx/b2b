@@ -6,8 +6,18 @@ use Mirasvit\SearchAutocomplete\Model\ConfigProvider;
 
 $config = $block->getJsConfig();
 $nonce  = CspService::getNonce();
+$layoutHandles = $block->getLayout() ? $block->getLayout()->getUpdate()->getHandles() : [];
+$isHomePageLayout = in_array('cms_index_index', $layoutHandles, true);
+$isCheckoutFocusPage = in_array('checkout_cart_index', $layoutHandles, true)
+    || in_array('checkout_index_index', $layoutHandles, true);
+$deferAutocompleteBootstrap = $isHomePageLayout || $isCheckoutFocusPage;
+$deferMirasvitTemplates = $isHomePageLayout || (bool) $block->getData('defer_templates');
+$mirasvitTemplatesUrl = $deferMirasvitTemplates
+    ? $block->getViewFileUrl('html/mirasvit-ac-templates.pt_BR.html') . '?v=20260528-ac-templates'
+    : '';
+$isInPageLayout = $block->getAutocompleteLayout() == ConfigProvider::LAYOUT_IN_PAGE;
 ?>
-<?php if ($block->getAutocompleteLayout() == ConfigProvider::LAYOUT_IN_PAGE): ?>
+<?php if ($isInPageLayout): ?>
     <?php
     $templates = [
         'Mirasvit_SearchAutocomplete::in-page/page.phtml',
@@ -29,118 +39,25 @@ $nonce  = CspService::getNonce();
     <?php foreach ($templates as $template): ?>
         <?= /* @noEscape */ $block->getTemplateScript($template) ?>
     <?php endforeach ?>
-
-    <script<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?>>
-        (function () {
-            var selector = 'input#search, input#mobile_search, .minisearch input[type="text"]';
-            var started = false;
-            var pathName = (window.location && window.location.pathname) ? window.location.pathname : '';
-            var bodyClassName = document.body ? document.body.className : '';
-            var isHomePage = /^\/(?:index\.php\/?)*$/.test(pathName) || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
-
-            function bootstrapInPageAutocomplete() {
-                if (started) {
-                    return;
-                }
-
-                started = true;
-
-                require([
-                    'jquery',
-                    'Mirasvit_SearchAutocomplete/js/in-page'
-                ], function ($, InPage) {
-                    $(document).ready(function () {
-                        $('#search_mini_form').prop('minSearchLength', 10000);
-
-                        var $input = $(selector);
-                        $input.each(function (index, searchInput) {
-                            var $searchInput = $(searchInput);
-                            var hasPanel = $searchInput.nextAll('#search_autocomplete, .search-autocomplete, .searchsuite-autocomplete').length > 0;
-
-                            if (!hasPanel || $searchInput.data('awaMirasvitInPageInit')) {
-                                return;
-                            }
-
-                            $searchInput.data('awaMirasvitInPageInit', 1);
-                            new InPage($searchInput, <?= /* @noEscape */ $block->jsonEncode($config)?>);
-                        });
-                    });
-                });
-            }
-
-            if (isHomePage) {
-                ['pointerdown', 'touchstart', 'keydown'].forEach(function (evtName) {
-                    window.addEventListener(evtName, bootstrapInPageAutocomplete, { once: true, passive: true });
-                });
-                // Timer elevado para 12s: evita que o setTimeout de 5s dispare dentro
-                // da janela de medicao do LH (FCP->TTI ~6s), que empurrava TTI->5.2s e
-                // inflava TBT de ~700ms -> 2590ms. Usuarios reais interagem antes disso.
-                window.setTimeout(bootstrapInPageAutocomplete, 12000);
-            } else {
-                bootstrapInPageAutocomplete();
-            }
-        }());
-    </script>
 <?php else: ?>
-    <script<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?>>
-        (function () {
-            var selector = 'input#search, input#mobile_search, .minisearch input[type="text"]';
-            var started = false;
-            var pathName = (window.location && window.location.pathname) ? window.location.pathname : '';
-            var bodyClassName = document.body ? document.body.className : '';
-            var isHomePage = /^\/(?:index\.php\/?)*$/.test(pathName) || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
-
-            function bootstrapAutocomplete() {
-                if (started) {
-                    return;
-                }
-
-                started = true;
-
-                require([
-                    'jquery',
-                    'Mirasvit_SearchAutocomplete/js/autocomplete',
-                    'Mirasvit_SearchAutocomplete/js/typeahead'
-                ], function ($, autocomplete, typeahead) {
-                    $(document).ready(function () {
-                        $('#search_mini_form').prop('minSearchLength', 10000);
-
-                        var $input = $(selector);
-                        $input.each(function (index, searchInput) {
-                            var $searchInput = $(searchInput);
-                            var hasPanel = $searchInput.nextAll('#search_autocomplete, .search-autocomplete, .searchsuite-autocomplete').length > 0;
-
-                            if (!hasPanel || $searchInput.data('awaMirasvitAutocompleteInit')) {
-                                return;
-                            }
-
-                            $searchInput.data('awaMirasvitAutocompleteInit', 1);
-
-                            <?php if ($config['isTypeaheadEnabled']): ?>
-                            new typeahead($searchInput).init(<?= /* @noEscape */ $block->jsonEncode($config)?>);
-                            <?php endif ?>
-                            new autocomplete($searchInput).init(<?= /* @noEscape */ $block->jsonEncode($config)?>);
-                        });
-                    });
-                });
-            }
-
-            if (isHomePage) {
-                ['pointerdown', 'touchstart', 'keydown'].forEach(function (evtName) {
-                    window.addEventListener(evtName, bootstrapAutocomplete, { once: true, passive: true });
-                });
-                // Timer elevado para 12s: evita que o setTimeout de 5s dispare dentro
-                // da janela de medicao do LH (FCP->TTI ~6s), que empurrava TTI->5.2s e
-                // inflava TBT de ~700ms -> 2590ms. Usuarios reais interagem antes disso.
-                window.setTimeout(bootstrapAutocomplete, 12000);
-            } else {
-                bootstrapAutocomplete();
-            }
-        }());
-    </script>
-
+    <?php if (!$deferMirasvitTemplates): ?>
     <?= /* @noEscape */ $block->fetchView($block->getTemplateFile('Mirasvit_SearchAutocomplete::injection_templates.phtml')) ?>
+    <?php endif; ?>
 <?php endif ?>
+
+<?php
+$awaMirasvitBootstrapConfig = [
+    'isInPageLayout' => $isInPageLayout,
+    'isHomePage' => $isHomePageLayout,
+    'deferBootstrap' => $deferAutocompleteBootstrap,
+    'selector' => 'input#search, input#mobile_search, .minisearch input[type="text"]',
+    'templatesUrl' => $mirasvitTemplatesUrl,
+    'isTypeaheadEnabled' => (bool) ($config['isTypeaheadEnabled'] ?? false),
+    'config' => $config,
+];
+?>
+<script id="awa-mirasvit-ac-bootstrap-config" type="application/json"><?= /* @noEscape */ json_encode($awaMirasvitBootstrapConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?></script>
+<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-mirasvit-autocomplete-init.min.js')) ?>?v=20260704-autopilot-min" defer></script>
 
 <?php if ($block->getCssStyles() != ''): ?>
     <style<?php if ($nonce): ?> nonce="<?= $block->escapeHtml($nonce) ?>"<?php endif; ?>><?= $block->escapeHtml($block->getCssStyles()) ?></style>

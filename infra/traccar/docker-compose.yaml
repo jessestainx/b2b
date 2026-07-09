@@ -11,6 +11,8 @@ services:
     image: postgres:16-alpine
     container_name: awa-traccar-db
     restart: unless-stopped
+    mem_limit: 192m
+    cpus: 0.25
     environment:
       POSTGRES_USER: ${DB_USER:-traccar}
       POSTGRES_PASSWORD: ${DB_PASS}
@@ -27,13 +29,14 @@ services:
     image: traccar/traccar:latest
     container_name: awa-traccar
     restart: unless-stopped
+    mem_limit: 384m
+    cpus: 0.5
     depends_on:
       traccar-db:
         condition: service_healthy
     ports:
-      - "127.0.0.1:8082:8082"     # Web interface (behind Nginx)
-      - "0.0.0.0:5055:5055"       # OsmAnd protocol (Traccar Client app)
-      - "0.0.0.0:5055:5055/udp"   # OsmAnd UDP
+      - "127.0.0.1:8082:8082"      # Web interface (behind Nginx)
+      - "127.0.0.1:15055:5055"     # OsmAnd HTTP interno (Nginx :5055 TLS -> :15055)
     volumes:
       - traccar_data:/opt/traccar/data
       - traccar_logs:/opt/traccar/logs

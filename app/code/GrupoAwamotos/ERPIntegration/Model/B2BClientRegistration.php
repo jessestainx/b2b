@@ -54,11 +54,16 @@ class B2BClientRegistration
     }
 
     /**
-     * Check if a client is registered in Sectra B2B integration
-     * with the correct INTEGRACAOORIGEM (OpenCardB2B - Cadastro de Cliente).
+     * Check if a client is registered in Sectra B2B integration.
      *
-     * Pré-cadastro (753ADB36) or FN_FORNECEDORES alone are not enough for
-     * "Importar Pedidos" — Sectra requires this origin specifically.
+     * Accepts either:
+     * 1. ORIGEM_CLIENTE (7D4C6FBD) — full "Exportar Clientes" registration
+     * 2. ORIGEM_PROSPECT (753ADB36) with CHAVE matching exactly — client was imported
+     *    via "Importar Clientes Prospect" and Sectra assigned that CHAVE directly.
+     *    When oc_order.customer_id matches this CHAVE, Sectra can locate the client.
+     *
+     * Note: ORIGEM_PROSPECT via alias (CHAVEEXTERNA match) is NOT sufficient alone,
+     * because in that scenario oc_order.customer_id would differ from the CHAVE.
      */
     public function isClientRegistered(int $erpClientCode): bool
     {
@@ -67,23 +72,28 @@ class B2BClientRegistration
         }
 
         try {
-            if ($this->hasValidatorEntry(self::ORIGEM_CLIENTE, $erpClientCode)) {
+            $directCadastro = $this->hasValidatorEntry(self::ORIGEM_CLIENTE, $erpClientCode);
+            if ($directCadastro) {
                 return true;
             }
 
             $prospectChave = $this->resolveProspectIntegrationChave($erpClientCode);
-
-            if ($prospectChave !== null
+            $aliasCadastro = $prospectChave !== null
                 && $prospectChave !== $erpClientCode
-                && $this->hasValidatorEntry(self::ORIGEM_CLIENTE, $prospectChave)
-            ) {
+                && $this->hasValidatorEntry(self::ORIGEM_CLIENTE, $prospectChave);
+
+            if ($aliasCadastro) {
                 return true;
             }
 
-            // Fallback: established ERP client with no GR_INTEGRACAOVALIDADOR entry.
-            // OpenCardB2B stopped in 2024-11-01; clients placed before that window
-            // were never registered. FN_FORNECEDORES is authoritative for real clients.
-            return $this->isExistingErpNativeClient($erpClientCode);
+            // H_PROSPECT_DIRECT: client was imported as prospect and Sectra assigned
+            // this exact CHAVE — oc_order.customer_id will match, Sectra can locate client.
+            $prospectByChave = $this->hasValidatorEntry(self::ORIGEM_PROSPECT, $erpClientCode);
+            if ($prospectByChave) {
+                return true;
+            }
+
+            return false;
         } catch (\Exception $e) {
             $this->logger->warning('[B2B Registration] Check failed (fail-closed): ' . $e->getMessage());
             return false;
@@ -177,13 +187,27 @@ class B2BClientRegistration
     /**
      * Whether Magento may release held B2B orders to oc_order for Sectra Importar Pedidos.
      *
-     * Runtime evidence (Sectra desktop): Importar Pedidos fails with "Cliente não foi encontrado"
-     * when GR_INTEGRACAOVALIDADOR Cadastro de Cliente (7D4C6FBD) is missing — FN_FORNECEDORES
-     * and prospect alone are not sufficient.
+     * Runtime evidence from Sectra desktop: native ERP customers still fail
+     * "Cliente não foi encontrado" when the B2B validator origin is missing.
+     * Keep this gate aligned with the desktop import contract.
      */
     public function isClientReadyForSectraOrderImport(int $erpClientCode): bool
     {
-        return $this->isClientRegistered($erpClientCode);
+        if ($erpClientCode <= 0) {
+            return false;
+        }
+        // STRICT gate: only release B2B orders when Sectra has created a full
+        // 'Cadastro de Cliente' entry (7D4C6FBD). Prospect (753ADB36) entries
+        // are created by 'Importar Clientes Prospect' but Sectra still requires
+        // 7D4C6FBD from 'Exportar Clientes' before it can import the order.
+        if ($this->hasValidatorEntry(self::ORIGEM_CLIENTE, $erpClientCode)) {
+            return true;
+        }
+        // Accept alias: when prospect CHAVE was remapped (e.g. 18771 → 19195)
+        $prospectChave = $this->resolveProspectIntegrationChave($erpClientCode);
+        return $prospectChave !== null
+            && $prospectChave !== $erpClientCode
+            && $this->hasValidatorEntry(self::ORIGEM_CLIENTE, $prospectChave);
     }
 
     /**
@@ -225,7 +249,6 @@ class B2BClientRegistration
             }
 
             $code = (int) $chave;
-
             return $code > 0 ? $code : null;
         } catch (\Exception $e) {
             $this->logger->warning('[B2B Registration] Prospect CHAVE lookup failed: ' . $e->getMessage());
@@ -234,10 +257,18 @@ class B2BClientRegistration
     }
 
     /**
-     * Customer_id Sectra reads during Exportar Clientes (prospect CHAVE when aliased).
+     * Customer_id Sectra reads during Exportar Clientes.
+     *
+     * Runtime evidence (2026-06-23): cliente #7 exportou com oc_customer.customer_id=7
+     * (FN CKPROSPECT=N). Aliases com prospect 19195 exportavam stub CKPROSPECT=S em vez
+     * do nativo 18771 — Exportar Clientes não gravava Cadastro 7D4C6FBD para o bridge.
      */
     public function resolveSectraExportCustomerId(int $bridgeKey): int
     {
+        if ($this->isErpNativeB2bClient($bridgeKey)) {
+            return $bridgeKey;
+        }
+
         $prospectChave = $this->resolveProspectIntegrationChave($bridgeKey);
 
         return ($prospectChave !== null && $prospectChave > 0) ? $prospectChave : $bridgeKey;
@@ -450,7 +481,7 @@ class B2BClientRegistration
             return false;
         }
 
-        // Already registered?
+        // Already registered? (Sectra is responsible for registration via 'Exportar Clientes')
         if ($this->isClientRegistered($erpClientCode)) {
             $this->logger->info("[B2B Registration] Client $erpClientCode already registered");
             return true;
@@ -752,7 +783,9 @@ class B2BClientRegistration
             $this->logger->info('[B2B Registration] Write connection established');
             return $this->writeConnection;
         } catch (\Exception $e) {
-            $this->logger->error('[B2B Registration] Write connection failed: ' . $e->getMessage());
+            if ($this->shouldLogWarningWithCooldown('b2b_write_connection_failed')) {
+                $this->logger->error('[B2B Registration] Write connection failed: ' . $e->getMessage());
+            }
             return null;
         }
     }
@@ -857,7 +890,11 @@ class B2BClientRegistration
             ]
         );
 
-        return $result !== null;
+        if (is_array($result)) {
+            $result = reset($result);
+        }
+
+        return $result !== false && $result !== null && trim((string) $result) !== '';
     }
 
     /**
@@ -865,7 +902,7 @@ class B2BClientRegistration
      */
     private function buildValidatorHash(array $payload): string
     {
-        return strtoupper(md5((string) json_encode($payload)));
+        return strtoupper(hash('sha256', (string) json_encode($payload)));
     }
 
     /**
@@ -876,7 +913,7 @@ class B2BClientRegistration
         $basePath = defined('BP') ? BP : sys_get_temp_dir();
         $lockDir = rtrim($basePath, '/') . '/var/locks';
 
-        if (!is_dir($lockDir) && !@mkdir($lockDir, 0777, true) && !is_dir($lockDir)) {
+        if (!is_dir($lockDir) && !@mkdir($lockDir, 0775, true) && !is_dir($lockDir)) {
             return true;
         }
 

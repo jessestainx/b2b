@@ -6,7 +6,8 @@ define([
 ], function ($, $t, _cookies, alertModal) {
     'use strict';
 
-    function escapeHtml(value) {
+    function escapeHtml(value)
+    {
         return String(value)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -15,18 +16,21 @@ define([
             .replace(/'/g, '&#039;');
     }
 
-    function showAlert(message) {
+    function showAlert(message)
+    {
         alertModal({
             title: $t('B2B'),
             content: message
         });
     }
 
-    function normalizeSku(sku) {
+    function normalizeSku(sku)
+    {
         return $.trim(sku || '').toLowerCase();
     }
 
-    function getFormKey() {
+    function getFormKey()
+    {
         if (window.FORM_KEY) {
             return window.FORM_KEY;
         }
@@ -64,19 +68,20 @@ define([
         let searchUrl = config.searchUrl || '/catalogsearch/ajax/suggest';
         let autocompleteDelay = null;
 
-        function initSkuAutocomplete($input) {
+        function initSkuAutocomplete($input)
+        {
             var $row = $input.closest('.quickorder-row');
             var $suggestions = $row.find('.sku-suggestions');
-            
+
             $input.on('input', function () {
                 let query = $.trim($(this).val());
                 clearTimeout(autocompleteDelay);
-                
+
                 if (query.length < 3) {
                     $suggestions.hide().empty();
                     return;
                 }
-                
+
                 autocompleteDelay = setTimeout(function () {
                     $.ajax({
                         url: searchUrl,
@@ -107,7 +112,8 @@ define([
             });
 
             $input.on('blur', function () {
-                setTimeout(function () { $suggestions.hide(); }, 200);
+                setTimeout(function () {
+                    $suggestions.hide(); }, 200);
             });
 
             $suggestions.on('click', '.sku-suggestion', function () {
@@ -118,7 +124,8 @@ define([
             });
         }
 
-        function buttonText(text) {
+        function buttonText(text)
+        {
             if ($submitButtonText.length) {
                 $submitButtonText.text(text);
                 return;
@@ -127,7 +134,8 @@ define([
             $submitButton.text(text);
         }
 
-        function createRow() {
+        function createRow()
+        {
             rowIndex += 1;
 
             return [
@@ -141,14 +149,16 @@ define([
             ].join('');
         }
 
-        function addRow() {
+        function addRow()
+        {
             let html = createRow();
             $rowsContainer.append(html);
             var $lastRow = $rowsContainer.find('.quickorder-row:last');
             initSkuAutocomplete($lastRow.find('.sku-input'));
         }
 
-        function clearStatuses() {
+        function clearStatuses()
+        {
             $rowsContainer.find('.quickorder-row').removeClass('has-error');
         }
 
@@ -157,7 +167,8 @@ define([
          * Supports: SKU,QTY and SKU;QTY formats
          * First line is skipped if it looks like a header
          */
-        function parseCSV(text) {
+        function parseCSV(text)
+        {
             let lines = text.split(/\r?\n/);
             let items = [];
             let separator = ',';
@@ -207,7 +218,8 @@ define([
         /**
          * Clear existing rows and populate from parsed CSV items
          */
-        function populateFromCSV(items) {
+        function populateFromCSV(items)
+        {
             // Remove all existing rows
             $rowsContainer.find('.quickorder-row').remove();
             rowIndex = 0;
@@ -244,7 +256,8 @@ define([
         /**
          * Handle file from input or drag-drop
          */
-        function handleCSVFile(file) {
+        function handleCSVFile(file)
+        {
             if (!file) {
                 return;
             }
@@ -271,7 +284,8 @@ define([
         /**
          * Generate and download a sample CSV file
          */
-        function downloadSampleCSV() {
+        function downloadSampleCSV()
+        {
             let csvContent = 'SKU,Quantidade\n';
             csvContent += 'BAG-CG160-001,2\n';
             csvContent += 'RET-TITAN-003,1\n';
@@ -289,7 +303,8 @@ define([
             URL.revokeObjectURL(url);
         }
 
-        function renderSuccessList(added, message) {
+        function renderSuccessList(added, message)
+        {
             if (!added || !added.length) {
                 $success.empty().hide();
                 return;
@@ -306,7 +321,8 @@ define([
             $success.html(html).show();
         }
 
-        function renderErrorList(errorList) {
+        function renderErrorList(errorList)
+        {
             if (!errorList || !errorList.length) {
                 $errors.empty().hide();
                 return;
@@ -320,7 +336,8 @@ define([
             $errors.html(html).show();
         }
 
-        function collectItems() {
+        function collectItems()
+        {
             let aggregated = {};
             let rowMap = {};
 
@@ -353,11 +370,12 @@ define([
                 items: $.map(aggregated, function (item) {
                     return item;
                 }),
-                rowMap: rowMap
+            rowMap: rowMap
             };
         }
 
-        function markErrorRows(errorsList, rowMap) {
+        function markErrorRows(errorsList, rowMap)
+        {
             $.each(errorsList || [], function (index, item) {
                 let key = normalizeSku(item.sku || '');
                 let rows = rowMap[key] || [];
@@ -368,7 +386,8 @@ define([
             });
         }
 
-        function submitQuickOrder() {
+        function submitQuickOrder()
+        {
             if (!addUrl) {
                 return;
             }

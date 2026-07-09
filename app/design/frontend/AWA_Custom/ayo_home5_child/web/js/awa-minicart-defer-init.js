@@ -1,12 +1,139 @@
 (function () {
     'use strict';
 
+    var runtime = window.__awaHeaderMinicartRuntime = window.__awaHeaderMinicartRuntime || {};
+    var runtimeOwner = 'defer';
+
+    function isDeferOwnerActive() {
+        return runtime.owner === runtimeOwner;
+    }
+
+    function shouldBypassOnHome() {
+        var body = document.body;
+        var path = window.location && typeof window.location.pathname === 'string'
+            ? window.location.pathname
+            : '';
+
+        if (path === '' || path === '/') {
+            return true;
+        }
+
+        if (document.getElementById('awa-home-bootstrap-merged')) {
+            return true;
+        }
+
+        if (!body) {
+            return false;
+        }
+
+        return body.classList.contains('cms-index-index')
+            || body.classList.contains('cms-home')
+            || body.classList.contains('cms-homepage_ayo_home5');
+    }
+
+    // Home uses awa-minicart-ui-bootstrap-home.js; this legacy defer guard can
+    // create observer/RAF churn there and must stay disabled.
+    if (shouldBypassOnHome()) {
+        window.__awaMinicartDeferInit = true;
+        window.__awaMinicartDeferSuperseded = true;
+        return;
+    }
+
+    if (runtime.owner && runtime.owner !== runtimeOwner) {
+        return;
+    }
+
+    runtime.owner = runtimeOwner;
+    runtime.ownerSource = runtime.ownerSource || 'awa-minicart-defer-init';
+    runtime.ownerClaimedAt = runtime.ownerClaimedAt || Date.now();
+
     if (window.__awaMinicartDeferInit) {
         return;
     }
-    window.__awaMinicartDeferInit = true;
 
-    let HEADER_MINICART_SHELL_SELECTOR = '[data-awa-header-minicart-shell="true"], .awa-header-minicart[data-awa-header-cart="true"]';
+    /**
+     * Home com customer-data defer: awa-minicart-ui-bootstrap-home.js inicializa KO.
+     * Mesmo assim precisamos do trigger guard para evitar navegação no 1º clique.
+     */
+    function isHomeDeferBootstrapActive() {
+        var body = document.body;
+
+        return !!(
+            document.getElementById('awa-customer-sections-defer-json') &&
+            body &&
+            (body.classList.contains('cms-index-index') ||
+                body.classList.contains('cms-home') ||
+                body.classList.contains('cms-homepage_ayo_home5'))
+        );
+    }
+
+    function isCheckoutCartPage() {
+        var body = document.body;
+
+        return !!(body && body.classList.contains('checkout-cart-index'));
+    }
+
+    /**
+     * Cart page already renders the full cart + summary — keep header minicart closed.
+     */
+    function closeMinicartOnCartPage() {
+        var parts;
+        var wrappers;
+        var panels;
+        var index;
+
+        if (!isCheckoutCartPage()) {
+            return;
+        }
+
+        parts = getMinicartParts();
+        if (parts.dropdown) {
+            closeDropdown(parts.trigger, parts.dropdown);
+            applyManualDropdownState(parts.trigger, parts.dropdown, false);
+        }
+
+        wrappers = document.querySelectorAll('.minicart-wrapper');
+        for (index = 0; index < wrappers.length; index++) {
+            wrappers[index].classList.remove('active', 'is-open', 'show');
+        }
+
+        panels = document.querySelectorAll('.block-minicart');
+        for (index = 0; index < panels.length; index++) {
+            panels[index].classList.remove('_active');
+            panels[index].setAttribute('aria-hidden', 'true');
+        }
+
+        if (parts.trigger) {
+            setAttributeIfChanged(parts.trigger, 'aria-expanded', 'false');
+        }
+
+        syncShellState(parts.shell, false);
+    }
+
+    var guardsOnlyMode = false;
+
+    if (window.__awaMinicartDeferInit) {
+        return;
+    }
+
+    if (
+        window.__awaMinicartUiInit ||
+        window.__awaMinicartUiBootstrapping ||
+        window.__awaMinicartDeferSuperseded
+    ) {
+        guardsOnlyMode = true;
+    } else if (
+        isHomeDeferBootstrapActive() &&
+        (window.__awaMinicartUiInit || window.__awaMinicartUiBootstrapping)
+    ) {
+        guardsOnlyMode = true;
+    } else if (isHomeDeferBootstrapActive()) {
+        guardsOnlyMode = true;
+    } else {
+        window.__awaMinicartDeferInit = true;
+    }
+
+    let HEADER_MINICART_SHELL_SELECTOR = '[data-awa-header-minicart-shell="true"], .awa-header-minicart[data-awa-header-cart="true"], .awa-header-minicart';
     let HEADER_MINICART_FALLBACK_SELECTOR = '[data-awa-header-minicart-fallback="true"], .awa-header-cart-fallback';
     let HEADER_MINICART_CONTENT_SELECTOR = '[data-awa-header-minicart-content="true"], .mini-carts';
     let MINICART_TRIGGER_SELECTORS = [
@@ -16,6 +143,7 @@
     ];
     let MINICART_TRIGGER_SELECTOR = MINICART_TRIGGER_SELECTORS.join(', ');
     let MINICART_DROPDOWN_SELECTOR = '.minicart-wrapper [data-role="dropdownDialog"]';
+    const MINICART_TRIGGER_GUARD_FLAG = '__awaMinicartTriggerHandled';
 
     function getHeaderMinicartShell() {
         return document.querySelector(HEADER_MINICART_SHELL_SELECTOR);
@@ -39,6 +167,28 @@
         return (root || document).querySelector(MINICART_DROPDOWN_SELECTOR);
     }
 
+    function isRealRequireReady() {
+        return typeof window.require === 'function' && !window.require._awaStub;
+    }
+
+    function whenRequireReady(fn, key) {
+        if (typeof fn !== 'function') {
+            return;
+        }
+
+        if (isRealRequireReady()) {
+            fn();
+            return;
+        }
+
+        if (typeof window.awaRunWhenRequire === 'function') {
+            window.awaRunWhenRequire(fn, { key: key || 'awa-minicart' });
+            return;
+        }
+
+        window.addEventListener('awa-bootstrap-ready', fn, { once: true });
+    }
+
     function getMinicartParts() {
         let shell = getHeaderMinicartShell();
         let root = getHeaderMinicartRoot();
@@ -51,8 +201,48 @@
         };
     }
 
+    function getMinicartPartsForShell(shell) {
+        if (!shell) {
+            return getMinicartParts();
+        }
+
+        let root = shell.querySelector(HEADER_MINICART_CONTENT_SELECTOR) || shell;
+
+        return {
+            shell: shell,
+            root: root,
+            trigger: queryRuntimeTrigger(root) || queryRuntimeTrigger(shell),
+            dropdown: queryDropdown(root) || queryDropdown(shell)
+        };
+    }
+
     function isVisible(element) {
         return !!(element && (element.offsetWidth || element.offsetHeight || element.getClientRects().length));
+    }
+
+    function getFallbackForShell(shell) {
+        return shell ? shell.querySelector(HEADER_MINICART_FALLBACK_SELECTOR) : null;
+    }
+
+    function setAttributeIfChanged(element, name, value) {
+        if (element && element.getAttribute(name) !== value) {
+            element.setAttribute(name, value);
+        }
+    }
+
+    function toggleClassIfChanged(element, className, enabled) {
+        if (element && element.classList.contains(className) !== enabled) {
+            element.classList.toggle(className, enabled);
+        }
+    }
+
+    // Only write the inline style (with !important) when the value actually
+    // changes — otherwise every write mutates the `style` attribute and can
+    // re-trigger a MutationObserver watching `style` (see observeMinicartState).
+    function setStyleIfChanged(element, prop, value) {
+        if (element && element.style.getPropertyValue(prop) !== value) {
+            element.style.setProperty(prop, value, 'important');
+        }
     }
 
     function isDropdownExpanded(dropdown) {
@@ -78,32 +268,35 @@
             isActuallyVisible ||
             (dropdown.getAttribute('aria-hidden') === 'false' && isActuallyVisible) ||
             ((dropdown.classList.contains('active') || dropdown.classList.contains('is-open')) && isActuallyVisible) ||
-            (wrapper && isActuallyVisible && (
+            (wrapper && (
                 wrapper.classList.contains('active') ||
                 wrapper.classList.contains('is-open') ||
                 wrapper.classList.contains('show')
-            ))
+            ) && isActuallyVisible)
         );
     }
 
     function syncFallbackAccessibility(shell, hasRuntimeTrigger) {
-        let fallback = shell ? shell.querySelector(HEADER_MINICART_FALLBACK_SELECTOR) : null;
+        let fallback = getFallbackForShell(shell);
 
         if (!shell || !fallback) {
             return;
         }
 
-        shell.setAttribute('data-awa-minicart-ready', hasRuntimeTrigger ? '1' : '0');
-        shell.classList.toggle('awa-header-minicart--ready', hasRuntimeTrigger);
+        setAttributeIfChanged(shell, 'data-awa-minicart-ready', hasRuntimeTrigger ? '1' : '0');
+        toggleClassIfChanged(shell, 'awa-header-minicart--ready', hasRuntimeTrigger);
+        toggleClassIfChanged(fallback, 'awa-header-cart-fallback--with-trigger', hasRuntimeTrigger);
 
         if (hasRuntimeTrigger) {
-            fallback.setAttribute('aria-hidden', 'true');
-            fallback.setAttribute('tabindex', '-1');
+            setAttributeIfChanged(fallback, 'aria-hidden', 'true');
+            setAttributeIfChanged(fallback, 'tabindex', '-1');
+            setAttributeIfChanged(fallback, 'data-awa-minicart-fallback-state', 'conflict');
             return;
         }
 
         fallback.removeAttribute('aria-hidden');
         fallback.removeAttribute('tabindex');
+        fallback.removeAttribute('data-awa-minicart-fallback-state');
     }
 
     function syncShellState(shell, expanded) {
@@ -111,35 +304,85 @@
             return;
         }
 
-        shell.setAttribute('data-awa-minicart-expanded', expanded ? '1' : '0');
-        shell.classList.toggle('awa-header-minicart--expanded', expanded);
+        setAttributeIfChanged(shell, 'data-awa-minicart-expanded', expanded ? '1' : '0');
+        toggleClassIfChanged(shell, 'awa-header-minicart--expanded', expanded);
+    }
+
+    function resolveMinicartPanel(dropdown, wrapper) {
+        let panel;
+
+        if (!dropdown) {
+            return null;
+        }
+
+        if (dropdown.classList && dropdown.classList.contains('block-minicart')) {
+            return dropdown;
+        }
+
+        panel = wrapper ? wrapper.querySelector('.block-minicart') : null;
+
+        return panel || dropdown;
+    }
+
+    function syncBodyScrollLock(expanded) {
+        let body = document.body;
+        let html = document.documentElement;
+
+        if (!body) {
+            return;
+        }
+
+        body.classList.toggle('awa-minicart-open', expanded);
+        body.classList.toggle('awa-minicart-overlay-active', expanded);
+
+        if (html) {
+            html.classList.toggle('awa-minicart-open', expanded);
+        }
     }
 
     function applyManualDropdownState(trigger, dropdown, expanded) {
         let wrapper = dropdown ? dropdown.closest('[data-block="minicart"], .minicart-wrapper') : null;
         let shell = getHeaderMinicartShell();
+        let panel = resolveMinicartPanel(dropdown, wrapper);
+        let targets = [];
+        let index;
 
         if (!dropdown) {
             return;
         }
 
         if (wrapper) {
+            wrapper.setAttribute('data-awa-minicart-dropdown', '1');
             wrapper.classList.toggle('active', expanded);
             wrapper.classList.toggle('is-open', expanded);
             wrapper.classList.toggle('show', expanded);
         }
 
-        dropdown.classList.toggle('active', expanded);
-        dropdown.classList.toggle('is-open', expanded);
-        dropdown.setAttribute('aria-hidden', expanded ? 'false' : 'true');
-        dropdown.style.display = expanded ? 'block' : 'none';
-        dropdown.style.visibility = expanded ? 'visible' : 'hidden';
+        if (panel && targets.indexOf(panel) === -1) {
+            targets.push(panel);
+        }
+
+        if (dropdown && targets.indexOf(dropdown) === -1) {
+            targets.push(dropdown);
+        }
+
+        for (index = 0; index < targets.length; index += 1) {
+            toggleClassIfChanged(targets[index], 'active', expanded);
+            toggleClassIfChanged(targets[index], 'is-open', expanded);
+            toggleClassIfChanged(targets[index], '_active', expanded);
+            setAttributeIfChanged(targets[index], 'aria-hidden', expanded ? 'false' : 'true');
+            setStyleIfChanged(targets[index], 'display', expanded ? 'flex' : 'none');
+            setStyleIfChanged(targets[index], 'visibility', expanded ? 'visible' : 'hidden');
+            setStyleIfChanged(targets[index], 'opacity', expanded ? '1' : '0');
+            setStyleIfChanged(targets[index], 'pointer-events', expanded ? 'auto' : 'none');
+        }
 
         if (trigger) {
             trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         }
 
         syncShellState(shell, expanded);
+        syncBodyScrollLock(expanded);
     }
 
     function closeDropdown(trigger, dropdown) {
@@ -150,12 +393,13 @@
         }
 
         if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.dropdownDialog === 'function') {
-            $dropdown = window.jQuery(dropdown);
-            if ($dropdown.data('mageDropdownDialog')) {
-                $dropdown.dropdownDialog('close');
-                window.requestAnimationFrame(updateExpandedState);
-                window.setTimeout(updateExpandedState, 120);
-                return;
+                $dropdown = window.jQuery(dropdown);
+                if ($dropdown.data('mageDropdownDialog')) {
+                    $dropdown.dropdownDialog('close');
+                    applyManualDropdownState(trigger, dropdown, false);
+                    window.requestAnimationFrame(updateExpandedState);
+                    window.setTimeout(updateExpandedState, 120);
+                    return;
             }
         }
 
@@ -170,18 +414,40 @@
             return;
         }
 
-        if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.dropdownDialog === 'function') {
-            $dropdown = window.jQuery(dropdown);
-            if ($dropdown.data('mageDropdownDialog')) {
-                $dropdown.dropdownDialog('open');
-                window.requestAnimationFrame(updateExpandedState);
-                window.setTimeout(updateExpandedState, 120);
-                return;
+        function openNow() {
+            if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.dropdownDialog === 'function') {
+                $dropdown = window.jQuery(dropdown);
+                if ($dropdown.length && $dropdown.data('mageDropdownDialog')) {
+                    $dropdown.dropdownDialog('open');
+                    applyManualDropdownState(trigger, dropdown, true);
+                    window.requestAnimationFrame(updateExpandedState);
+                    window.setTimeout(updateExpandedState, 120);
+                    return;
+                }
             }
+
+            applyManualDropdownState(trigger, dropdown, true);
+            window.requestAnimationFrame(updateExpandedState);
         }
 
-        applyManualDropdownState(trigger, dropdown, true);
-        window.requestAnimationFrame(updateExpandedState);
+        if (!isHomeDeferBootstrapActive() && !window.__awaMinicartUiInit && !window.ko) {
+            if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.dropdownDialog === 'function') {
+                $dropdown = window.jQuery(dropdown);
+                if ($dropdown.length && $dropdown.data('mageDropdownDialog')) {
+                    openNow();
+                    ensureCatalogMinicartUi(function () {
+                        initDropdown();
+                        updateExpandedState();
+                    });
+                    return;
+                }
+            }
+
+            ensureCatalogMinicartUi(openNow);
+            return;
+        }
+
+        openNow();
     }
 
     function buildScopedTriggerSelector() {
@@ -194,33 +460,121 @@
         }).join(', ');
     }
 
-    function initDropdown(onReady) {
-        let parts = getMinicartParts();
+    function ensureCatalogMinicartUi(onReady) {
+        var scripts;
+        var i;
+        var parsed;
+        var jsLayout;
+        var loaderUrl;
 
-        if (!window.require) {
+        if (isHomeDeferBootstrapActive() || window.__awaMinicartUiInit || window.ko) {
             if (typeof onReady === 'function') {
-                onReady(null, parts.trigger || null, parts.dropdown || null);
+                onReady();
             }
             return;
         }
 
-        window.require(['jquery', 'dropdownDialog'], function ($) {
+        if (window.__awaMinicartCatalogUiBootstrapping) {
+            if (typeof onReady === 'function') {
+                window.__awaMinicartUiReady = window.__awaMinicartUiReady || Promise.resolve();
+                window.__awaMinicartUiReady.then(onReady);
+            }
+            return;
+        }
+
+        if (typeof window.require !== 'function') {
+            if (typeof onReady === 'function') {
+                onReady();
+            }
+            return;
+        }
+
+        scripts = document.querySelectorAll('script[type="text/x-magento-init"]');
+        jsLayout = null;
+
+        for (i = 0; i < scripts.length; i++) {
+            try {
+                parsed = JSON.parse(scripts[i].textContent || '');
+            } catch (e) {
+                continue;
+            }
+
+            if (parsed["[data-block='minicart']"] && parsed["[data-block='minicart']"]["Magento_Ui/js/core/app"]) {
+                jsLayout = parsed["[data-block='minicart']"]["Magento_Ui/js/core/app"];
+                break;
+            }
+        }
+
+        if (!jsLayout) {
+            if (typeof onReady === 'function') {
+                onReady();
+            }
+            return;
+        }
+
+        loaderUrl = (window.require && window.require.toUrl)
+            ? window.require.toUrl('images/loader-1.gif')
+            : '';
+
+        window.__awaMinicartCatalogUiBootstrapping = true;
+
+        window.require(['js/awa-minicart-ui-bootstrap'], function (bootstrapMinicartUi) {
+            bootstrapMinicartUi({ jsLayout: jsLayout, loaderUrl: loaderUrl }, {}).then(function () {
+                window.__awaMinicartCatalogUiBootstrapping = false;
+                initDropdown();
+                updateExpandedState();
+                if (typeof onReady === 'function') {
+                    onReady();
+                }
+            });
+        }, function () {
+            window.__awaMinicartCatalogUiBootstrapping = false;
+            if (typeof onReady === 'function') {
+                onReady();
+            }
+        });
+    }
+
+    function initDropdown(onReady) {
+        let parts = getMinicartParts();
+
+        function runDropdownInit() {
+            if (!isRealRequireReady()) {
+                if (typeof onReady === 'function') {
+                    onReady(null, parts.trigger || null, parts.dropdown || null);
+                }
+                return;
+            }
+
+            window.require(['jquery', 'dropdownDialog'], function ($) {
             let latestParts = getMinicartParts();
             let trigger = latestParts.trigger;
             let dropdown = latestParts.dropdown;
             var $dropdown = dropdown ? $(dropdown) : null;
 
-            if ($dropdown && $dropdown.length && !$dropdown.data('mageDropdownDialog')) {
-                $dropdown.dropdownDialog({
-                    appendTo: '[data-block=minicart]',
-                    triggerTarget: buildScopedTriggerSelector(),
-                    timeout: '2000',
-                    closeOnMouseLeave: false,
-                    closeOnEscape: true,
-                    triggerClass: 'is-open',
-                    parentClass: 'is-open',
-                    buttons: []
-                });
+            if ($dropdown && $dropdown.length) {
+                var existingWidget = $dropdown.data('mageDropdownDialog');
+                var existingTimeout = existingWidget && existingWidget.options
+                    ? parseInt(String(existingWidget.options.timeout || 0), 10)
+                    : 0;
+
+                if (existingWidget && existingTimeout > 0) {
+                    $dropdown.dropdownDialog('destroy');
+                    existingWidget = null;
+                }
+
+                if (!existingWidget) {
+                    $dropdown.dropdownDialog({
+                        appendTo: '[data-block=minicart]',
+                        triggerTarget: buildScopedTriggerSelector(),
+                        timeout: 0,
+                        closeOnMouseLeave: false,
+                        closeOnEscape: true,
+                        triggerClass: 'is-open',
+                        parentClass: 'is-open',
+                        buttons: []
+                    });
+                }
             }
 
             if (!window.__awaMinicartDropdownSyncBound) {
@@ -243,9 +597,29 @@
             }
             updateExpandedState();
         });
+        }
+
+        whenRequireReady(runDropdownInit, 'awa-minicart-initDropdown');
     }
 
     function toggleDropdown(trigger, dropdown, fallbackUrl) {
+        var $dropdown;
+
+        if (window.jQuery && dropdown) {
+            $dropdown = window.jQuery(dropdown);
+            if ($dropdown.length && $dropdown.data('mageDropdownDialog')) {
+                if (isDropdownExpanded(dropdown)) {
+                    $dropdown.dropdownDialog('close');
+                } else {
+                    openDropdown(trigger, dropdown);
+                }
+
+                window.requestAnimationFrame(updateExpandedState);
+                window.setTimeout(updateExpandedState, 120);
+                return;
+            }
+        }
+
         initDropdown(function ($, latestTrigger, latestDropdown) {
             let resolvedTrigger = latestTrigger || trigger;
             let resolvedDropdown = latestDropdown || dropdown;
@@ -255,7 +629,7 @@
                 if (isDropdownExpanded(resolvedDropdown)) {
                     $dropdown.dropdownDialog('close');
                 } else {
-                    $dropdown.dropdownDialog('open');
+                    openDropdown(resolvedTrigger, resolvedDropdown);
                 }
 
                 window.requestAnimationFrame(updateExpandedState);
@@ -267,6 +641,23 @@
                 if (isDropdownExpanded(resolvedDropdown)) {
                     applyManualDropdownState(resolvedTrigger, resolvedDropdown, false);
                 } else {
+                    if (!isHomeDeferBootstrapActive() && !window.__awaMinicartUiInit && !window.ko) {
+                        if ($dropdown && $dropdown.length && $dropdown.data('mageDropdownDialog')) {
+                            applyManualDropdownState(resolvedTrigger, resolvedDropdown, true);
+                            window.requestAnimationFrame(updateExpandedState);
+                            ensureCatalogMinicartUi(function () {
+                                initDropdown();
+                                updateExpandedState();
+                            });
+                            return;
+                        }
+
+                        ensureCatalogMinicartUi(function () {
+                            applyManualDropdownState(resolvedTrigger, resolvedDropdown, true);
+                            window.requestAnimationFrame(updateExpandedState);
+                        });
+                        return;
+                    }
                     applyManualDropdownState(resolvedTrigger, resolvedDropdown, true);
                 }
 
@@ -280,6 +671,43 @@
         });
     }
 
+    function ensureHomeMinicartBootstrap() {
+        var node;
+        var payload;
+
+        if (!isHomeDeferBootstrapActive() || window.__awaMinicartUiInit || window.__awaMinicartUiBootstrapping) {
+            return;
+        }
+
+        if (typeof window.require !== 'function') {
+            return;
+        }
+
+        node = document.getElementById('awa-minicart-ui-json');
+        if (!node || !node.textContent) {
+            return;
+        }
+
+        try {
+            payload = JSON.parse(node.textContent);
+        } catch (e) {
+            return;
+        }
+
+        window.require(['js/awa-minicart-ui-bootstrap'], function (bootstrapMinicartUi) {
+            function start() {
+                bootstrapMinicartUi(payload, { skipCustomerGate: true });
+            }
+
+            if (window.__awaCustomerSectionsReady && typeof window.__awaCustomerSectionsReady.then === 'function') {
+                window.__awaCustomerSectionsReady.then(start);
+                return;
+            }
+
+            start();
+        });
+    }
+
     function bindCheckoutFallback() {
         if (window.__awaMinicartCheckoutFallbackBound) {
             return;
@@ -287,10 +715,14 @@
 
         window.__awaMinicartCheckoutFallbackBound = true;
 
-        document.addEventListener('click', function (event) {
-            let button = event.target && event.target.closest
-                ? event.target.closest('#top-cart-btn-checkout')
-                : null;
+            document.addEventListener('click', function (event) {
+                if (!isDeferOwnerActive()) {
+                    return;
+                }
+
+                let button = event.target && event.target.closest
+                    ? event.target.closest('#top-cart-btn-checkout')
+                    : null;
             let minicart = window.jQuery
                 ? window.jQuery('[data-block="minicart"]')
                 : null;
@@ -320,17 +752,39 @@
     }
 
     function bindTriggerGuard() {
-        if (window.__awaMinicartTriggerGuardBound) {
-            return;
+        function stopMinicartEvent(event) {
+            if (!event) {
+                return;
+            }
+
+            if (typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+
+            if (typeof event.stopImmediatePropagation === 'function') {
+                event.stopImmediatePropagation();
+            }
+
+            event.stopPropagation();
         }
 
-        window.__awaMinicartTriggerGuardBound = true;
+        function handleTriggerGuardClick(event) {
+            if (!isDeferOwnerActive()) {
+                return;
+            }
 
-        document.addEventListener('click', function (event) {
+            if (event && event[MINICART_TRIGGER_GUARD_FLAG]) {
+                return;
+            }
+
             let target = event.target;
             let trigger;
+            let shell;
             let parts;
             let href;
+            let fallback;
+            let $dropdown;
+            let clickedFallback = null;
 
             if (!target || !target.closest) {
                 return;
@@ -338,23 +792,140 @@
 
             trigger = target.closest(MINICART_TRIGGER_SELECTOR);
             if (!trigger) {
+                shell = target.closest(HEADER_MINICART_SHELL_SELECTOR);
+                if (!shell) {
+                    return;
+                }
+
+                trigger = queryRuntimeTrigger(shell) || queryRuntimeTrigger(document);
+                if (!trigger) {
+                    return;
+                }
+            } else {
+                shell = trigger.closest(HEADER_MINICART_SHELL_SELECTOR) || getHeaderMinicartShell();
+            }
+
+            parts = getMinicartPartsForShell(shell);
+            if (!trigger.closest('.awa-header-minicart, [data-awa-header-minicart-shell="true"]')) {
                 return;
             }
 
-            parts = getMinicartParts();
-            if (!parts.shell || !parts.shell.contains(trigger) || !parts.dropdown) {
+            fallback = parts.shell ? parts.shell.querySelector(HEADER_MINICART_FALLBACK_SELECTOR) : null;
+            clickedFallback = target.closest(HEADER_MINICART_FALLBACK_SELECTOR);
+
+            if (clickedFallback) {
+                event[MINICART_TRIGGER_GUARD_FLAG] = true;
+
+                if (parts.trigger && parts.trigger.isConnected) {
+                    stopMinicartEvent(event);
+                    syncFallbackAccessibility(parts.shell, true);
+                    href = parts.trigger.getAttribute('href') || '';
+                    toggleDropdown(parts.trigger, parts.dropdown, href);
+                    return;
+                }
+
+                if (fallback && fallback.href) {
+                    stopMinicartEvent(event);
+                    window.location.assign(fallback.href);
+                }
+
+                return;
+            }
+
+            event[MINICART_TRIGGER_GUARD_FLAG] = true;
+
+            if (window.__awaMinicartUiInit && parts.dropdown && window.jQuery) {
+                $dropdown = window.jQuery(parts.dropdown);
+                if ($dropdown.length && $dropdown.data('mageDropdownDialog')) {
+                    href = trigger.getAttribute('href') || '';
+                    stopMinicartEvent(event);
+                    toggleDropdown(parts.trigger || trigger, parts.dropdown, href);
+                    return;
+                }
+            }
+
+            if (!parts.dropdown) {
+                stopMinicartEvent(event);
+                initDropdown();
                 return;
             }
 
             href = trigger.getAttribute('href') || '';
 
-            event.preventDefault();
-            if (typeof event.stopImmediatePropagation === 'function') {
-                event.stopImmediatePropagation();
+            stopMinicartEvent(event);
+
+            if (isHomeDeferBootstrapActive()) {
+                ensureHomeMinicartBootstrap();
+
+                if (parts.dropdown) {
+                    if (isDropdownExpanded(parts.dropdown)) {
+                        closeDropdown(parts.trigger || trigger, parts.dropdown);
+                    } else {
+                        applyManualDropdownState(parts.trigger || trigger, parts.dropdown, true);
+                        window.requestAnimationFrame(updateExpandedState);
+                        window.setTimeout(updateExpandedState, 120);
+                    }
+
+                    return;
+                }
             }
-            event.stopPropagation();
+
+            if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.dropdownDialog === 'function') {
+                let $dropdown = window.jQuery(parts.dropdown);
+                if ($dropdown.length && $dropdown.data('mageDropdownDialog')) {
+                    toggleDropdown(parts.trigger || trigger, parts.dropdown, href);
+                    return;
+                }
+            }
 
             toggleDropdown(parts.trigger || trigger, parts.dropdown, href);
+        }
+
+        if (window.__awaMinicartTriggerGuardBound) {
+            return;
+        }
+
+        window.__awaMinicartTriggerGuardBound = true;
+
+        document.addEventListener('click', handleTriggerGuardClick, true);
+    }
+
+    function bindShellFallbackNavigation() {
+        if (window.__awaMinicartShellFallbackBound) {
+            return;
+        }
+
+        window.__awaMinicartShellFallbackBound = true;
+
+        document.addEventListener('click', function (event) {
+            if (!isDeferOwnerActive()) {
+                return;
+            }
+
+            let target = event.target;
+            let shell;
+            let fallback;
+
+            if (!target || !target.closest) {
+                return;
+            }
+
+            shell = target.closest(HEADER_MINICART_SHELL_SELECTOR);
+            if (!shell || target.closest('a[href], button, [role="button"]')) {
+                return;
+            }
+
+            if (queryRuntimeTrigger(shell)) {
+                return;
+            }
+
+            fallback = shell.querySelector(HEADER_MINICART_FALLBACK_SELECTOR);
+            if (!fallback || !fallback.href) {
+                return;
+            }
+
+            event.preventDefault();
+            window.location.assign(fallback.href);
         }, true);
     }
 
@@ -366,6 +937,10 @@
         window.__awaMinicartEscapeCloseBound = true;
 
         document.addEventListener('keydown', function (event) {
+            if (!isDeferOwnerActive()) {
+                return;
+            }
+
             let parts;
 
             if (event.key !== 'Escape') {
@@ -382,17 +957,27 @@
     }
 
     function updateExpandedState() {
+        if (!isDeferOwnerActive()) {
+            return;
+        }
+
         let parts = getMinicartParts();
-        let hasRuntimeTrigger = isVisible(parts.trigger);
+        /*
+         * Do not gate readiness by computed visibility:
+         * several fallback styles hide .showcart while data-awa-minicart-ready="0",
+         * which can create a circular lock (trigger exists but never becomes "ready").
+         */
+        let hasRuntimeTrigger = !!parts.trigger;
         let expanded = hasRuntimeTrigger && isDropdownExpanded(parts.dropdown);
 
         syncFallbackAccessibility(parts.shell, hasRuntimeTrigger);
 
         if (parts.trigger) {
-            parts.trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            setAttributeIfChanged(parts.trigger, 'aria-expanded', expanded ? 'true' : 'false');
         }
 
         syncShellState(parts.shell, expanded);
+        syncBodyScrollLock(expanded);
     }
 
     function scheduleBootstrapPasses() {
@@ -404,8 +989,13 @@
 
         [0, 250, 900, 1800, 3200].forEach(function (delay) {
             window.setTimeout(function () {
+                if (!isDeferOwnerActive()) {
+                    return;
+                }
                 updateExpandedState();
-                initDropdown();
+                if (!isHomeDeferBootstrapActive() || window.__awaMinicartUiInit) {
+                    initDropdown();
+                }
             }, delay);
         });
     }
@@ -418,6 +1008,10 @@
         window.__awaMinicartInteractionSyncBound = true;
 
         document.addEventListener('click', function (event) {
+            if (!isDeferOwnerActive()) {
+                return;
+            }
+
             let target = event.target;
             let parts = getMinicartParts();
             let interactiveSelector = MINICART_TRIGGER_SELECTOR + ', .block-minicart, ' + HEADER_MINICART_SHELL_SELECTOR;
@@ -439,8 +1033,18 @@
         }, true);
 
         document.addEventListener('contentUpdated', function () {
+            if (!isDeferOwnerActive()) {
+                return;
+            }
             window.requestAnimationFrame(updateExpandedState);
         }, true);
+
+        if (isHomeDeferBootstrapActive() && window.__awaMinicartUiReady && typeof window.__awaMinicartUiReady.then === 'function') {
+            window.__awaMinicartUiReady.then(function () {
+                window.requestAnimationFrame(updateExpandedState);
+                initDropdown();
+            });
+        }
     }
 
     function observeMinicartState() {
@@ -458,6 +1062,9 @@
         window.__awaMinicartStateObserverBound = true;
 
         new MutationObserver(function () {
+            if (!isDeferOwnerActive()) {
+                return;
+            }
             window.requestAnimationFrame(updateExpandedState);
         }).observe(target, {
             attributes: true,
@@ -467,7 +1074,71 @@
         });
     }
 
+    function bindContinueClose() {
+        if (window.__awaMinicartContinueCloseBound) {
+            return;
+        }
+
+        window.__awaMinicartContinueCloseBound = true;
+
+        document.addEventListener('click', function (event) {
+            if (!isDeferOwnerActive()) {
+                return;
+            }
+
+            let target = event.target;
+            let button;
+            let parts;
+
+            if (!target || !target.closest) {
+                return;
+            }
+
+            button = target.closest('[data-awa-minicart-close="true"]');
+            if (!button) {
+                return;
+            }
+
+            event.preventDefault();
+            if (typeof event.stopImmediatePropagation === 'function') {
+                event.stopImmediatePropagation();
+            }
+            event.stopPropagation();
+
+            parts = getMinicartParts();
+            closeDropdown(parts.trigger, parts.dropdown);
+        }, true);
+    }
+
     function boot() {
+        bindCheckoutFallback();
+        bindTriggerGuard();
+        bindShellFallbackNavigation();
+        bindEscapeClose();
+        bindContinueClose();
+
+        if (guardsOnlyMode) {
+            window.__awaMinicartDeferInit = true;
+            bindInteractionSync();
+            observeMinicartState();
+            updateExpandedState();
+            scheduleBootstrapPasses();
+            if (!isHomeDeferBootstrapActive() || window.__awaMinicartUiInit) {
+                initDropdown();
+            }
+            if (isHomeDeferBootstrapActive()) {
+                // Home: the full Knockout minicart UI is intentionally booted by
+                // awa-minicart-ui-bootstrap-home.js on cart intent or late fallback.
+                if (window.__awaMinicartUiReady && typeof window.__awaMinicartUiReady.then === 'function') {
+                    window.__awaMinicartUiReady.then(function () {
+                        initDropdown();
+                        updateExpandedState();
+                    });
+                }
+            }
+            return;
+        }
+
         if (window.__awaMinicartDeferBooted) {
             scheduleBootstrapPasses();
             return;
@@ -475,13 +1146,22 @@
 
         window.__awaMinicartDeferBooted = true;
 
-        bindCheckoutFallback();
-        bindTriggerGuard();
-        bindEscapeClose();
         bindInteractionSync();
         observeMinicartState();
         updateExpandedState();
         scheduleBootstrapPasses();
+
+        if (!isHomeDeferBootstrapActive()) {
+            initDropdown();
+            [0, 600, 1800].forEach(function (delay) {
+                window.setTimeout(function () {
+                    ensureCatalogMinicartUi(function () {
+                        initDropdown();
+                        updateExpandedState();
+                    });
+                }, delay);
+            });
+        }
     }
 
     if (document.readyState === 'loading') {

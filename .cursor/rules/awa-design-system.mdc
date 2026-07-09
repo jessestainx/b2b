@@ -1,0 +1,56 @@
+---
+description: AWA Design System — LESS-first, migrate-and-retire CSS, cascata home, QA visual
+globs: app/design/frontend/AWA_Custom/ayo_home5_child/**
+alwaysApply: false
+---
+
+# AWA Design System — Boas práticas (agentes)
+
+Referência completa: `app/design/frontend/AWA_Custom/ayo_home5_child/DESIGN_SYSTEM_STATUS.md`
+
+## Princípios
+
+1. **LESS primeiro** — tokens em `_awa-variables.less`; novos estilos em partials importados por `_extend.less`
+2. **Async é exceção** — body-end/plugin só para bundles legados ou >100KB que não compilam no LESS
+3. **Uma fonte de verdade** — tokens `var(--awa-*)`; padding página 12/16/24; radius cards 8px
+4. **Não editar** `app/code/Rokanthemes/*`, core Magento, nem `_awa-consolidated.less` em massa
+
+## Playbook migrate-and-retire (bundle legado)
+
+1. Migrar regras críticas → LESS ou inline lock mínimo no `<head>`
+2. Gate no `awa-head-preload.phtml` (`$__awaSkip... = true`)
+3. `stripStylesheetFragments` + `HOME_NEVER_GATE_FRAGMENTS` no `OptimizeHeadStylesPlugin`
+4. Injetar no `</body>` com ordem documentada (align-grid **sempre último**)
+5. Remover da fila `awa-css-gate.js` / `.min.js`
+6. Deploy: `setup:static-content:deploy pt_BR -f --theme AWA_Custom/ayo_home5_child`
+7. `cache:flush` + Redis FPC DB2 + copy PHTML → `var/view_preprocessed` + `php-fpm reload`
+8. E2E: `visual-audit-awa`, `site-grid-alignment`, `home-grid-*` com `--workers=1`
+
+## Cascata home `</body>` (ordem de inject)
+
+`super-global` (defer print/onload) → `layout-bundle` → `modern-optimizations` → `impeccable-refine` → `standardize-terminal` → `super-home` → `terminal` → `visual` → `ui-simplify` → `body-end` → `align-grid`
+
+## Performance
+
+- Nunca injetar ~2MB sync no body — usar `buildDeferredBodyStylesheetTag`
+- Home: omitir `defer-global` (minicart não é 1º paint)
+- Fila gate home: apenas `third-party`, `themes`, `styles-m`
+
+## PHP / plugin
+
+- Markers `data-awa-*-body="1"` para evitar duplicata FPC
+- Consolidar injects home em um método com array de layers
+- `injectGlobalRefineStylesheetIfMissing` **não** na home (refine vai no body)
+
+## QA
+
+Viewports: 390 · 768 · 1366 · 1920. Auditoria: `./scripts/awa-css-best-practices-audit.sh` · prune: `./scripts/awa-consolidated-section-audit.sh`
+
+## Prune consolidated (§10)
+
+1. `awa-consolidated-section-audit.sh` → bloco pequeno home-only
+2. Criar `_awa-{area}-{feature}-prune-2026-06.less` **ou** estender SSOT (`_awa-buttons`, `_awa-forms`, `_awa-cards`)
+   - Home-only: `$awa-home-body: html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5);`
+3. `@import` em `_extend.less` após visual-consolidation
+4. Remover bloco do `_awa-consolidated.less` (validar balanceamento de chaves)
+5. static deploy + E2E home

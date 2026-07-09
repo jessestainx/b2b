@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import { resolveBaseUrl } from './helpers/resolve-base-url';
+
+const resolvedBaseUrl = resolveBaseUrl('pw-pdp-quick');
 export default defineConfig({
   testDir: './specs',
   timeout: 180_000,
@@ -7,7 +10,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: {
-    baseURL: 'https://awamotos.com',
+    baseURL: resolvedBaseUrl,
     ignoreHTTPSErrors: true,
     screenshot: 'on',
   },

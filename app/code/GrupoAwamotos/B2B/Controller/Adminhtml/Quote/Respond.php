@@ -17,7 +17,7 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Respond extends Action implements HttpGetActionInterface
 {
-    const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::quotes';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::quotes';
 
     /**
      * @var PageFactory

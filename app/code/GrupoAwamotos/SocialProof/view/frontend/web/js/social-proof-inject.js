@@ -23,14 +23,16 @@ define(['jquery'], function ($) {
         const endpoint = config.baseUrl + 'socialproof/product/data?product_id=' + productId;
 
         fetch(endpoint, { credentials: 'omit' })
-            .then(function (res) { return res.json(); })
+            .then(function (res) {
+                return res.json(); })
             .then(function (data) {
                 /**
                  * Build badges via DOM API to avoid XSS from concatenated HTML.
                  * Numeric values from the API are safe, but label attributes from
                  * data-* are server-rendered strings — DOM textContent handles escaping.
                  */
-                function makeBadge(extraClass, ariaLabel, iconClass, contentEl) {
+                function makeBadge(extraClass, ariaLabel, iconClass, contentEl)
+                {
                     const div = document.createElement('div');
                     div.className = 'social-proof-badge ' + extraClass;
                     div.setAttribute('role', 'note');
@@ -43,7 +45,8 @@ define(['jquery'], function ($) {
                     return div;
                 }
 
-                function makeSpan(strongText, suffixText) {
+                function makeSpan(strongText, suffixText)
+                {
                     const span = document.createElement('span');
                     span.className = 'badge-text';
                     const strong = document.createElement('strong');

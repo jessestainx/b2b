@@ -1,0 +1,190 @@
+<?php
+/**
+ * AWA Motos - Newsletter Popup
+ *
+ * Sprint 3 (Marketing): popup para capturar emails.
+ * Aparece apos 5s de permanencia ou no exit intent.
+ */
+declare(strict_types=1);
+
+$_couponCode = 'NEWSLETTER10';
+$_discountPercent = 10;
+?>
+<aside class="awa-newsletter-popup"
+       data-awa-newsletter-popup
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="awa-newsletter-popup-title"
+       hidden>
+    <div class="awa-newsletter-popup__backdrop" data-awa-newsletter-popup-close></div>
+    <div class="awa-newsletter-popup__card">
+        <button type="button"
+                class="awa-newsletter-popup__close"
+                data-awa-newsletter-popup-close
+                aria-label="<?= $block->escapeHtmlAttr(__('Fechar')) ?>">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+        <h2 id="awa-newsletter-popup-title" class="awa-newsletter-popup__title">
+            <?= $block->escapeHtml(__('Ganhe ' . $_discountPercent . '% OFF')) ?>
+            <span class="awa-newsletter-popup__subtitle">
+                <?= $block->escapeHtml(__('na sua primeira compra')) ?>
+            </span>
+        </h2>
+        <p class="awa-newsletter-popup__desc">
+            <?= $block->escapeHtml(__('Cadastre seu email e receba um cupom exclusivo + novidades sobre pecas para moto.')) ?>
+        </p>
+        <form class="awa-newsletter-popup__form"
+              action="<?= $block->escapeUrl($block->getUrl('newsletter/subscriber/new')) ?>"
+              method="post"
+              data-awa-newsletter-popup-form
+              aria-label="<?= $block->escapeHtmlAttr(__('Cadastro de newsletter')) ?>">
+            <?= $block->getBlockHtml('formkey') ?>
+            <label for="awa-newsletter-popup-email" class="awa-sr-only">
+                <?= $block->escapeHtml(__('Seu e-mail')) ?>
+            </label>
+            <input type="email"
+                   name="email"
+                   id="awa-newsletter-popup-email"
+                   required
+                   autocomplete="email"
+                   inputmode="email"
+                   placeholder="<?= $block->escapeHtmlAttr(__('seu@email.com')) ?>"
+                   aria-label="<?= $block->escapeHtmlAttr(__('Seu e-mail')) ?>" />
+            <button type="submit"
+                    class="awa-newsletter-popup__submit action primary"
+                    aria-label="<?= $block->escapeHtmlAttr(__('Cadastrar e receber cupom')) ?>">
+                <?= $block->escapeHtml(__('Quero o cupom')) ?>
+            </button>
+        </form>
+        <p class="awa-newsletter-popup__coupon">
+            <?= $block->escapeHtml(__('Cupom: ')) ?>
+            <code><?= $block->escapeHtml($_couponCode) ?></code>
+        </p>
+        <button type="button"
+                class="awa-newsletter-popup__decline"
+                data-awa-newsletter-popup-close>
+            <?= $block->escapeHtml(__('Nao, obrigado')) ?>
+        </button>
+    </div>
+</aside>
+<style>
+.awa-newsletter-popup {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.awa-newsletter-popup[hidden] { display: none !important; }
+.awa-newsletter-popup__backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+}
+.awa-newsletter-popup__card {
+    position: relative !important;
+    max-width: 420px !important;
+    width: calc(100% - 32px) !important;
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 28px 24px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
+    text-align: center !important;
+}
+.awa-newsletter-popup__close {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    background: transparent !important;
+    border: 0 !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border-radius: 6px !important;
+    color: #6b7280 !important;
+}
+.awa-newsletter-popup__close:hover { background: #f3f4f6 !important; }
+.awa-newsletter-popup__title {
+    margin: 0 0 4px !important;
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: #b73337 !important;
+}
+.awa-newsletter-popup__subtitle {
+    display: block;
+    font-size: 14px;
+    font-weight: 400;
+    color: #374151;
+    margin-top: 4px;
+}
+.awa-newsletter-popup__desc {
+    margin: 12px 0 16px !important;
+    font-size: 13px !important;
+    color: #4b5563 !important;
+}
+.awa-newsletter-popup__form {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+.awa-newsletter-popup__form input {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+.awa-newsletter-popup__form input:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-color: #2563eb;
+}
+.awa-newsletter-popup__submit {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 18px;
+    background: #b73337;
+    color: white;
+    border: 0;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+}
+.awa-newsletter-popup__submit:hover { background: #a12d30; }
+.awa-newsletter-popup__coupon {
+    margin: 0 0 12px;
+    font-size: 12px;
+    color: #6b7280;
+}
+.awa-newsletter-popup__coupon code {
+    background: #fef9e7;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    color: #92400e;
+    letter-spacing: 1px;
+}
+.awa-newsletter-popup__decline {
+    background: transparent;
+    border: 0;
+    color: #9ca3af;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 11px;
+    padding: 4px 8px;
+    min-height: 28px;
+}
+.awa-newsletter-popup__decline:hover { color: #6b7280; }
+@media (prefers-reduced-motion: reduce) {
+    .awa-newsletter-popup__submit { transition: none !important; }
+}
+</style>

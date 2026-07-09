@@ -5,6 +5,7 @@
 var config = {
     waitSeconds: 30,
     deps: [
+        'js/awa-requirejs-min-fallback',
         'js/awa-requirejs-bootstrap'
     ],
     map: {
@@ -13,8 +14,11 @@ var config = {
             'Magento_Catalog/js/product/breadcrumbs': 'js/awa-pdp-breadcrumbs',
             'AWA_Custom/js/awa-back-to-top': 'js/awa-back-to-top',
             'jquery/ui': 'jquery/compat',
+            'Rokanthemes_LayeredAjax/js/layeredajax': 'GrupoAwamotos_Theme/js/awa-layeredajax-stub',
+            'Rokanthemes_LayeredAjax/js/price/layeredajaxslider': 'GrupoAwamotos_Theme/js/awa-layeredajax-stub',
             'Magento_Checkout/template/billing-address/form.html':
-                'Magento_Checkout/template/billing-address/form.html'
+                'Magento_Checkout/template/billing-address/form.html',
+            'Magento_Catalog/js/product/view/awa-pdp-cep-estimator': 'js/awa-pdp-cep-estimator'
         }
     },
     paths: {
@@ -37,10 +41,10 @@ var config = {
         'awa-b2b-plp-qty': 'js/awa-b2b-plp-qty',
         'awa-nav-cls-fix-reset': 'js/awa-nav-cls-fix-reset',
         'awa-menu-controller': 'js/awa-menu-controller',
-        'js/vendor/floating-ui.amd': 'js/vendor/floating-ui.amd',
-        'js/vendor/floating-ui.core.umd': 'js/vendor/floating-ui.core.umd',
-        'js/vendor/floating-ui.dom.umd': 'js/vendor/floating-ui.dom.umd',
-        '@floating-ui/core': 'js/vendor/floating-ui.core.umd',
+        'js/vendor/floating-ui.amd': 'js/vendor/floating-ui.amd.min',
+        'js/vendor/floating-ui.core.umd': 'js/vendor/floating-ui.core.umd.min',
+        'js/vendor/floating-ui.dom.umd': 'js/vendor/floating-ui.dom.umd.min',
+        '@floating-ui/core': 'js/vendor/floating-ui.core.umd.min',
         'js/vmenu-promo-carousel': 'js/vmenu-promo-carousel'
     },
     shim: {

@@ -8,15 +8,16 @@ $companyManagerConfig = [
     'manageUrl' => $block->getManageUserUrl(),
     'messages' => [
         'emailRequired' => (string) __('Informe o e-mail.'),
-        'confirmRemove' => (string) __('Remover este usuário da empresa?'),
-        'requestError' => (string) __('Erro. Tente novamente.'),
+        'confirmRemove' => (string) __('Remover este usuário? Ele perde o acesso ao portal B2B.'),
+        'requestError' => (string) __('Não foi possível concluir a ação. Tente novamente.'),
     ],
 ];
 ?>
 <div class="b2b-company-page b2b-page-shell"
      data-mage-init='<?= /* @noEscape */ json_encode(['GrupoAwamotos_B2B/js/account/company-manager' => $companyManagerConfig]) ?>'>
     <div class="b2b-section-header">
-        <h1><?= __('Minha Empresa') ?></h1>
+        <h1><?= $block->escapeHtml(__('Minha Empresa')) ?></h1>
+        <p class="section-subtitle"><?= $block->escapeHtml(__('Cadastro, CNPJ e usuários autorizados na conta.')) ?></p>
         <?php if ($isAdmin): ?>
             <span class="badge badge--admin"><?= __('Administrador') ?></span>
         <?php endif; ?>
@@ -132,6 +133,6 @@ $companyManagerConfig = [
         </table>
     </div>
     <?php else: ?>
-        <p class="empty-message"><?= __('Nenhuma empresa vinculada à sua conta. Entre em contato com o suporte.') ?></p>
+        <p class="empty-message"><?= $block->escapeHtml(__('Nenhuma empresa vinculada a esta conta. Fale com o suporte AWA para regularizar o cadastro.')) ?></p>
     <?php endif; ?>
 </div>

@@ -1,16 +1,15 @@
 <?php
 /**
- * B2B Unified Header Status Panel
- * Replaces separate badge + welcome message with a single integrated component.
- *
- * B2B logged-in: Trigger (name + company + tier) + Dropdown (stats, actions, logout)
- * Guest: Registration CTA + top.links kept visible for Login
+ * B2B Header Status Panel — logged-in B2B customers only.
+ * Guest login/register: awa-header-account-prompt (theme header).
  *
  * @var \GrupoAwamotos\B2B\Block\Header\StatusPanel $block
  */
 ?>
 
-<?php if ($block->shouldDisplay()): ?>
+<?php if (!$block->shouldDisplay()): ?>
+    <?php return; ?>
+<?php endif; ?>
 <?php $data = $block->getCustomerData(); ?>
 <?php
     $company = trim((string) ($data['company'] ?? ''));
@@ -135,18 +134,3 @@
         </div>
     </div>
 </div>
-
-<?php elseif ($block->shouldShowRegistrationCTA()): ?>
-<!-- B2B Registration CTA for Guests -->
-<div class="b2b-register-cta">
-    <a href="<?= $block->escapeUrl($block->getRegistrationUrl()) ?>"
-       class="b2b-register-btn"
-       title="<?= $block->escapeHtmlAttr(__('Cadastre-se como cliente B2B e tenha acesso a descontos exclusivos')) ?>">
-        <i class="fa fa-building" aria-hidden="true"></i>
-        <span class="btn-text">
-            <span class="btn-label"><?= $block->escapeHtml(__('Atacado')) ?></span>
-            <span class="btn-sublabel"><?= $block->escapeHtml(__('Cadastre-se')) ?></span>
-        </span>
-    </a>
-</div>
-<?php endif; ?>

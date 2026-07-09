@@ -35,8 +35,8 @@
 }
 
 @{awa-pdp-polish} .awa-b2b-pdp-tier {
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 5%, var(--awa-bg-subtle, #f7f7f7)) !important;
-    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 18%, var(--awa-border, #e5e5e5)) !important;
+    background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 5%, var(--awa-bg-subtle, @awa-color-bg-soft)) !important;
+    border: 1px solid color-mix(in srgb, var(--awa-primary, @awa-color-primary) 18%, var(--awa-border, @awa-color-border)) !important;
     border-inline-start-width: 1px !important;
     border-radius: var(--awa-radius-md, 12px) !important;
     box-shadow: none !important;
@@ -50,14 +50,14 @@
     gap: 8px !important;
     font-size: clamp(14px, 1.4vw, 15px) !important;
     font-weight: 600 !important;
-    color: var(--awa-text, #333) !important;
+    color: var(--awa-text, @awa-color-dark) !important;
 }
 
 @{awa-pdp-polish} .awa-b2b-pdp-tier__copy {
     display: block !important;
     font-size: ~"max(13px, 0.8125rem)" !important;
     line-height: 1.45 !important;
-    color: var(--awa-text-secondary, #666) !important;
+    color: var(--awa-text-secondary, @awa-color-text-muted) !important;
 }
 
 @{awa-pdp-polish} .rx-pdp-crosssell {
@@ -72,7 +72,7 @@
     font-size: clamp(1.125rem, 1rem + 0.45vw, 1.375rem) !important;
     font-weight: 700 !important;
     line-height: 1.25 !important;
-    color: var(--awa-text, #333) !important;
+    color: var(--awa-text, @awa-color-dark) !important;
 }
 
 @{awa-pdp-polish} .rx-pdp-card {
@@ -81,7 +81,7 @@
     transition: border-color 0.2s ease !important;
 
     &:hover {
-        border-color: color-mix(in srgb, var(--awa-primary, #b73337) 28%, var(--awa-border, #e5e5e5)) !important;
+        border-color: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 28%, var(--awa-border, @awa-color-border)) !important;
         box-shadow: none !important;
         transform: none !important;
     }
@@ -91,14 +91,14 @@
     min-height: var(--awa-touch-target, 44px) !important;
     border-radius: var(--awa-radius-sm, 8px) !important;
     background: transparent !important;
-    border: 1px solid var(--awa-primary, #b73337) !important;
-    color: var(--awa-primary, #b73337) !important;
+    border: 1px solid var(--awa-primary, @awa-color-primary) !important;
+    color: var(--awa-primary, @awa-color-primary) !important;
     box-shadow: none !important;
     text-transform: none !important;
     transition: background-color 0.2s ease, border-color 0.2s ease !important;
 
     &:focus-visible {
-        outline: 2px solid var(--awa-primary, #b73337) !important;
+        outline: 2px solid var(--awa-primary, @awa-color-primary) !important;
         outline-offset: 2px !important;
     }
 
@@ -108,7 +108,7 @@
 }
 
 @{awa-pdp-polish} .rx-pdp-name:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline: 2px solid var(--awa-primary, @awa-color-primary) !important;
     outline-offset: 2px !important;
     border-radius: var(--awa-radius-xs, 4px) !important;
 }
@@ -131,18 +131,18 @@
     min-height: var(--awa-touch-target, 44px) !important;
     border-radius: var(--awa-radius-sm, 8px) !important;
     background: transparent !important;
-    border: 1px solid var(--awa-primary, #b73337) !important;
-    color: var(--awa-primary, #b73337) !important;
+    border: 1px solid var(--awa-primary, @awa-color-primary) !important;
+    color: var(--awa-primary, @awa-color-primary) !important;
     box-shadow: none !important;
     text-transform: none !important;
     font-weight: 600 !important;
 
     &:hover:not(:disabled) {
-        background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, #fff) !important;
+        background: color-mix(in srgb, var(--awa-primary, @awa-color-primary) 8%, @awa-color-white) !important;
     }
 
     &:focus-visible {
-        outline: 2px solid var(--awa-primary, #b73337) !important;
+        outline: 2px solid var(--awa-primary, @awa-color-primary) !important;
         outline-offset: 2px !important;
     }
 }
@@ -202,13 +202,19 @@
     margin-bottom: clamp(8px, 1.5vw, 12px) !important;
 }
 
-@media (min-width: 992px) {
-    @{awa-pdp-polish} :is(.col-main, .column.main):has(.b2b-login-to-see-price) > .product.info.detailed {
-        margin-top: clamp(-140px, -10vw, -72px) !important;
-        position: relative !important;
-        z-index: 2 !important;
-    }
-}
+// ============================================================================
+// FIX 2026-07-06 — Overlap real entre buy-box e abas "Detalhes"
+// ----------------------------------------------------------------------------
+// A margem negativa acima (clamp(-140px,-10vw,-72px)) foi calibrada quando a
+// coluna do buy-box era ~301px mais curta que a galeria (produto sem caixa de
+// compatibilidade/prova social/aviso de baixa de preço). Hoje esses blocos
+// extras já preenchem boa parte desse espaço, então o gap real caiu para
+// ~24px — aplicar -140px agora SOBREPÕE o conteúdo do buy-box (QTD +
+// Adicionar ao Carrinho) por 116px, confirmado via Playwright em 3/3 produtos
+// B2B testados (overlap idêntico de 116px em cada um). Removida a
+// sobreposição: a coluna volta a usar a margem positiva padrão (linhas acima),
+// suficiente para o gap atual sem risco de cobrir o botão de compra.
+// ============================================================================
 
 @{awa-pdp-polish} :is(.col-main, .column.main) > .awa-pdp-related {
     margin-top: clamp(16px, 2.5vw, 24px) !important;

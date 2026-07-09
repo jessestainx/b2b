@@ -63,8 +63,8 @@
     border: 0 !important;
     border-radius: 10px !important;
     box-shadow: none !important;
-    background: var(--awa-primary, #b73337) !important;
-    color: var(--awa-white, #ffffff) !important;
+    background: var(--awa-primary, var(--awa-primary)) !important;
+    color: var(--awa-white, var(--awa-bg)) !important;
     position: relative !important;
     top: 0 !important;
     bottom: auto !important;
@@ -91,7 +91,7 @@
     flex: 0 0 18px !important;
     margin: 0 !important;
     padding: 0 !important;
-    color: var(--awa-white, #ffffff) !important;
+    color: var(--awa-white, var(--awa-bg)) !important;
   }
 
   body .page-wrapper .awa-site-header .header-control.awa-nav-bar .menu_left_home1 .our_categories.title-category-dropdown > .awa-vmenu-trigger-icon svg,
@@ -108,7 +108,7 @@
     align-items: center !important;
     min-width: 0 !important;
     margin: 0 !important;
-    color: var(--awa-white, #ffffff) !important;
+    color: var(--awa-white, var(--awa-bg)) !important;
     font-size: 15px !important;
     font-weight: 700 !important;
     letter-spacing: 0 !important;
@@ -127,11 +127,11 @@
   /* Dropdown panel shell */
   body .page-wrapper .awa-site-header .header-control.awa-nav-bar .menu_left_home1 .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
     margin: 0 !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
     border-top: 0 !important;
     border-radius: 0 0 10px 10px !important;
     box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12) !important;
-    background: var(--awa-bg, #ffffff) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     z-index: 9101 !important;
@@ -145,7 +145,7 @@
     right: 0 !important;
     top: calc(100% - 1px) !important;
     height: 1px !important;
-    background: var(--awa-bg, #ffffff) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
     pointer-events: none !important;
     z-index: 9100 !important;
   }

@@ -51,6 +51,11 @@
                 <revendedor_group>6</revendedor_group>
                 <pending_group>7</pending_group>
             </customer_groups>
+            <finance>
+                <bb_convenio_filial_2>2467742</bb_convenio_filial_2>
+                <print_rate_limit_max_requests>20</print_rate_limit_max_requests>
+                <print_rate_limit_window_seconds>60</print_rate_limit_window_seconds>
+            </finance>
             <credit>
                 <enabled>1</enabled>
                 <default_limit>0</default_limit>

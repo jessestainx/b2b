@@ -10,6 +10,7 @@ namespace GrupoAwamotos\B2B\Model;
 
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\Exception\AuthorizationException;
 use Magento\Framework\Exception\LocalizedException;
 use GrupoAwamotos\B2B\Model\OrderApprovalFactory;
 use GrupoAwamotos\B2B\Model\ResourceModel\OrderApproval as OrderApprovalResource;
@@ -54,6 +55,11 @@ class OrderApprovalService
      */
     private $logger;
 
+    /**
+     * @var CompanyService
+     */
+    private $companyService;
+
     public function __construct(
         OrderRepositoryInterface $orderRepository,
         CustomerSession $customerSession,
@@ -61,7 +67,8 @@ class OrderApprovalService
         OrderApprovalResource $approvalResource,
         CollectionFactory $collectionFactory,
         B2BHelper $b2bHelper,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        CompanyService $companyService
     ) {
         $this->orderRepository = $orderRepository;
         $this->customerSession = $customerSession;
@@ -70,6 +77,44 @@ class OrderApprovalService
         $this->collectionFactory = $collectionFactory;
         $this->b2bHelper = $b2bHelper;
         $this->logger = $logger;
+        $this->companyService = $companyService;
+    }
+
+    /**
+     * Ensure the approver belongs to the same company as the order's requester.
+     *
+     * Without this check, any user with a non-buyer role in any company could
+     * approve or reject (and, on rejection, cancel) another company's order
+     * simply by guessing/enumerating the approval ID.
+     *
+     * Uses the full set of active companies for each customer (not a single
+     * "best guess" company) so that multi-empresa customers — who may belong
+     * to more than one company — are compared correctly: authorization is
+     * granted if requester and approver share at least one company, not just
+     * if their (arbitrary) first company happens to match.
+     *
+     * @param OrderApproval $approval
+     * @param int $approverId
+     * @throws AuthorizationException
+     */
+    private function assertApproverBelongsToCompany(OrderApproval $approval, int $approverId): void
+    {
+        $requesterId = (int) $approval->getData('customer_id');
+
+        $requesterCompanyIds = $this->companyService->getCompanyIdsForCustomer($requesterId);
+        $approverCompanyIds = $this->companyService->getCompanyIdsForCustomer($approverId);
+        $sharedCompanyIds = array_intersect($requesterCompanyIds, $approverCompanyIds);
+
+        if ($requesterCompanyIds === [] || $approverCompanyIds === [] || $sharedCompanyIds === []) {
+            $this->logger->warning('B2B Order Approval: cross-company access blocked', [
+                'approval_id' => $approval->getId(),
+                'requester_id' => $requesterId,
+                'requester_company_ids' => $requesterCompanyIds,
+                'approver_id' => $approverId,
+                'approver_company_ids' => $approverCompanyIds,
+            ]);
+            throw new AuthorizationException(__('Você não tem permissão para esta ação.'));
+        }
     }
 
     /**
@@ -127,6 +172,8 @@ class OrderApprovalService
             throw new LocalizedException(__('Solicitação de aprovação não encontrada.'));
         }
 
+        $this->assertApproverBelongsToCompany($approval, $approverId);
+
         if ($approval->getData('status') !== OrderApproval::STATUS_PENDING) {
             throw new LocalizedException(__('Esta solicitação já foi processada.'));
         }
@@ -181,6 +228,8 @@ class OrderApprovalService
         if (!$approval->getId()) {
             throw new LocalizedException(__('Solicitação de aprovação não encontrada.'));
         }
+
+        $this->assertApproverBelongsToCompany($approval, $rejectorId);
 
         $history = json_decode($approval->getData('approval_history') ?: '[]', true);
         $history[] = [

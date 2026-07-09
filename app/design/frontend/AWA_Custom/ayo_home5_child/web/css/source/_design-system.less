@@ -540,7 +540,8 @@
 // Define constantes de grid para referência.
 // Não gera CSS — apenas variáveis para uso em componentes.
 
-@ds-grid-max-width: 1440px;
+@ds-grid-max-inline-size: @awa-container-wide-max-inline-size;
+@ds-grid-max-width: @ds-grid-max-inline-size;
 @ds-grid-columns:   12;
 @ds-grid-gutter:    24px;
 @ds-grid-half-gutter: (@ds-grid-gutter / 2);

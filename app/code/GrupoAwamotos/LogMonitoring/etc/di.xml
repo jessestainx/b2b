@@ -109,6 +109,7 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="awa_agent_termination_diagnose" xsi:type="object">GrupoAwamotos\LogMonitoring\Console\Command\DiagnoseAgentTerminationCommand</item>
+                <item name="awa_health_check" xsi:type="object">GrupoAwamotos\LogMonitoring\Console\Command\HealthCheckCommand</item>
             </argument>
         </arguments>
     </type>

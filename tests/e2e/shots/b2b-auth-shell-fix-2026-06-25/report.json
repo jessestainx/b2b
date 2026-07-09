@@ -1,0 +1,47 @@
+[
+  {
+    "file": "b2b_login__vp-1440x900.png",
+    "size": 80365,
+    "status": "ok"
+  },
+  {
+    "file": "b2b_register__vp-1440x900.png",
+    "size": 94370,
+    "status": "ok"
+  },
+  {
+    "file": "b2b_forgotpw__vp-1440x900.png",
+    "size": 78198,
+    "status": "ok"
+  },
+  {
+    "file": "b2b_login__vp-768x1024.png",
+    "size": 82184,
+    "status": "ok"
+  },
+  {
+    "file": "b2b_register__vp-768x1024.png",
+    "size": 93576,
+    "status": "ok"
+  },
+  {
+    "file": "b2b_forgotpw__vp-768x1024.png",
+    "size": 76622,
+    "status": "ok"
+  },
+  {
+    "file": "b2b_login__vp-390x844.png",
+    "size": 69096,
+    "status": "ok"
+  },
+  {
+    "file": "b2b_register__vp-390x844.png",
+    "size": 71914,
+    "status": "ok"
+  },
+  {
+    "file": "b2b_forgotpw__vp-390x844.png",
+    "size": 65440,
+    "status": "ok"
+  }
+]

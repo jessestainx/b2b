@@ -23,7 +23,8 @@ class SetRecurring implements HttpPostActionInterface
         private readonly ManagerInterface $messageManager,
         private readonly ShoppingListService $shoppingListService,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function execute(): \Magento\Framework\Controller\Result\Redirect
     {

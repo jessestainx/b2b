@@ -1,3 +1,4 @@
+<!-- AWA_DEBUG_TEMPLATE_SOURCE: child_theme_mirasvit_injection_templates -->
 <script id="searchAutocompletePlaceholder" type="text/x-custom-template">
     <div class="mst-searchautocomplete__autocomplete">
         <div class="mst-searchautocomplete__spinner">
@@ -63,7 +64,7 @@
 <script id="magento_catalog_product" type="text/x-custom-template">
     <!-- ko if: (imageUrl && $parents[2].config.isShowImage) -->
     <a rel="noreferrer" data-bind="attr: {href: url}">
-        <div class="mst-product-image-wrapper"><img data-bind="attr: {src: imageUrl}"/></div>
+        <div class="mst-product-image-wrapper"><img data-bind="attr: {src: imageUrl, alt: name || ''}" loading="lazy" decoding="async" alt=""/></div>
     </a>
     <!-- /ko -->
 
@@ -75,8 +76,8 @@
             <span class="sku" data-bind="text: sku, highlight"></span>
             <!-- /ko -->
 
-            <!-- ko if: fitment -->
-            <div class="awa-ac-product-fitment" data-bind="text: fitment"
+            <!-- ko if: ($data && $data.fitment) -->
+            <div class="awa-ac-product-fitment" data-bind="text: $data.fitment"
                  title="<?= $block->escapeHtmlAttr(__('Compatibility')) ?>"
                  aria-label="<?= $block->escapeHtmlAttr(__('Product compatibility')) ?>"></div>
             <!-- /ko -->

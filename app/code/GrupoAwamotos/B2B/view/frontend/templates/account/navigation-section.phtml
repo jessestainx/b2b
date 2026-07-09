@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \GrupoAwamotos\B2B\Block\Account\NavSection $block */
+
+$sectionId = 'nav-' . trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($block->getSectionLabel())), '-');
+?>
+<li class="account-nav-section"
+    role="presentation"
+    data-awa-nav-section-id="<?= $block->escapeHtmlAttr($sectionId) ?>">
+    <span class="account-nav-section__label"><?= $block->escapeHtml($block->getSectionLabel()) ?></span>
+</li>

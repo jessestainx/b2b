@@ -21,25 +21,36 @@
         <p class="b2b-po-number-description"
            data-bind="text: getHelpText(), attr: { id: getDescriptionId() }"></p>
 
-        <div class="field b2b-po-number-field">
+        <div class="field b2b-po-number-field"
+             data-bind="css: { '_error': !!errorMessage() }">
             <div class="control">
                 <input type="text"
                        id="b2b-po-number"
                        name="b2b_po_number"
                        class="input-text"
-                       maxlength="64"
                        autocomplete="off"
                        spellcheck="false"
                        data-bind="
                            value: poNumber,
-                           valueUpdate: 'afterkeydown',
+                           valueUpdate: 'input',
                            attr: {
                                placeholder: getPlaceholder(),
+                               maxlength: getMaxLength(),
                                'aria-label': getLabel(),
-                               'aria-describedby': getAriaDescribedBy()
+                               'aria-describedby': getAriaDescribedBy(),
+                               'aria-invalid': !!errorMessage(),
+                               'aria-errormessage': getErrorId()
                            }
                        " />
             </div>
+            <div class="field-error"
+                 role="status"
+                 aria-live="polite"
+                 data-bind="
+                     text: errorMessage,
+                     visible: !!errorMessage(),
+                     attr: { id: getErrorId() }
+                 "></div>
         </div>
 
         <div class="field-note">

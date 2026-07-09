@@ -10,27 +10,8 @@ use Magento\Framework\Data\Form\FormKey;
 /**
  * Prevents PHP session_start() on FPC HIT paths caused by RegisterFormKeyFromCookie.
  *
- * Problem: Magento\PageCache\Plugin\RegisterFormKeyFromCookie::beforeDispatch() fires for
- * every request that has a `form_key` cookie. It calls FormKey::set() → session->setData()
- * → SessionManager::__construct() → session_start() → Redis read+write overhead for every
- * returning guest, even when the response will be served from Full Page Cache.
- *
- * Fix: Skip FormKey::set() when the PHP session is not yet started AND the request is not
- * a POST (i.e., no form submission needs CSRF validation). On GET FPC HITs, the form_key
- * cookie is sufficient for JavaScript to populate forms. When the user submits a form
- * (POST), RegisterFormKeyFromCookie will run again at that point, the session will start
- * via other means, and the form_key will be properly set then.
- *
- * NOTE: This plugin requires DI compilation to take effect:
- *   bin/magento setup:di:compile
- *
- * Safe scenarios:
- *  - Fresh guest GET, FPC HIT     → no PHPSESSID cookie → session not started → SKIP ✅
- *  - Returning guest GET, FPC HIT → form_key cookie but no PHPSESSID → SKIP ✅
- *  - GET page render (FPC MISS)   → session already active by the time FormKey::set() is
- *                                   called during template rendering → ALLOW ✅
- *  - POST form submission         → request->isPost() → ALLOW → CSRF validation works ✅
- *  - AJAX POST                    → request->isPost() → ALLOW ✅
+ * Skip FormKey::set() only on cacheable GET/HEAD without PHPSESSID and outside
+ * login/checkout/cart routes. Auth and checkout forms must persist form_key server-side.
  */
 class FormKeySessionGuardPlugin
 {
@@ -47,30 +28,58 @@ class FormKeySessionGuardPlugin
      */
     public function aroundSet(FormKey $subject, callable $proceed, ?string $value): void
     {
-        // FlushFormKey (login/logout) may call set(null) to clear the key.
-        // Always allow null through so the core flow is not disrupted.
         if ($value === null) {
             $proceed($value);
             return;
         }
 
-        // If the session is already active, proceed normally.
-        // This handles FPC MISS paths where the session was started during action execution,
-        // as well as POST requests where CustomerSession/other code already started the session.
         if (session_status() === PHP_SESSION_ACTIVE) {
             $proceed($value);
             return;
         }
 
-        // If this is a form submission (POST/PUT/DELETE), allow the session to start so
-        // CSRF validation can compare the submitted form_key against the session value.
         if ($this->request->isPost() || $this->request->isPut() || $this->request->isDelete()) {
             $proceed($value);
             return;
         }
 
-        // GET/HEAD request with no active session: skip FormKey::set() to prevent
-        // session_start() overhead on FPC HIT paths.
-        // The form_key cookie is already set and JS will read it from there.
+        if ($this->shouldPersistFormKeyOnGet()) {
+            $proceed($value);
+            return;
+        }
+    }
+
+    /**
+     * Routes and sessions that render POST forms and require server-side form_key.
+     */
+    private function shouldPersistFormKeyOnGet(): bool
+    {
+        if (isset($_COOKIE[session_name()]) && $_COOKIE[session_name()] !== '') {
+            return true;
+        }
+
+        $path = rtrim($this->request->getPathInfo(), '/') ?: '/';
+
+        foreach (
+            [
+            '/b2b/account/login',
+            '/customer/account/login',
+            '/checkout/cart',
+            '/checkout',
+            '/onepagecheckout',
+            '/expresscheckout.html',
+            ] as $criticalPath
+        ) {
+            if ($path === $criticalPath || str_starts_with($path, $criticalPath . '/')) {
+                return true;
+            }
+        }
+
+        $module = (string) $this->request->getModuleName();
+        if (in_array($module, ['b2b', 'customer', 'checkout'], true)) {
+            return true;
+        }
+
+        return false;
     }
 }

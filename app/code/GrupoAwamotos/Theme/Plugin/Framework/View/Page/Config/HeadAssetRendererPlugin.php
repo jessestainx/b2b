@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\Plugin\Framework\View\Page\Config;
@@ -52,7 +53,6 @@ class HeadAssetRendererPlugin
         $result = $this->removeBlockingCss($result);
         $result = $this->removeStylesLDuplicate($result);
         $result = $this->convertRubikToAsync($result);
-
         return $result;
     }
 
@@ -72,7 +72,8 @@ class HeadAssetRendererPlugin
 
             $html = preg_replace_callback($pattern, static function (array $m): string {
                 $tag = $m[0];
-                if (strpos($tag, 'media="print"') !== false
+                if (
+                    strpos($tag, 'media="print"') !== false
                     || strpos($tag, "media='print'") !== false
                     || strpos($tag, 'data-awa-gate') !== false
                     || strpos($tag, 'onload') !== false
@@ -133,7 +134,8 @@ class HeadAssetRendererPlugin
             static function (array $matches): string {
                 $original = $matches[0];
 
-                if (strpos($original, 'media="print"') !== false
+                if (
+                    strpos($original, 'media="print"') !== false
                     || strpos($original, "media='print'") !== false
                 ) {
                     return $original;

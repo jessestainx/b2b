@@ -79,7 +79,7 @@
     box-shadow:
       0 10px 28px rgba(183, 51, 55, 0.15),
       0 3px 8px rgba(0, 0, 0, 0.06) !important;
-    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 32%, transparent);
+    border-color: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 32%, transparent);
   }
 }
 
@@ -152,7 +152,7 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
     max-height: 68px !important;
     height: 68px !important;
     padding-block: 0 !important;
-    background: #ffffff !important;
+    background: var(--awa-bg) !important;
     border-bottom: 0 !important;
   }
 
@@ -214,7 +214,7 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
 
   #html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form:focus-within,
   #html-body .page-wrapper .awa-site-header form#search_mini_form:focus-within {
-    border-color: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, var(--awa-primary)) !important;
     box-shadow: 0 0 0 3px rgba(183, 51, 55, 0.12) !important;
   }
 
@@ -233,8 +233,8 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
 
   #html-body .page-wrapper .awa-site-header form#search_mini_form button.action.search,
   #html-body .page-wrapper .awa-site-header .block-search .action.search {
-    background: var(--awa-primary, #b73337) !important;
-    color: #ffffff !important;
+    background: var(--awa-primary, var(--awa-primary)) !important;
+    color: var(--awa-bg) !important;
     border: 0 !important;
     border-radius: 0 9px 9px 0 !important;
     min-width: 48px !important;
@@ -246,7 +246,7 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
-    background: var(--awa-primary, #b73337) !important;
+    background: var(--awa-primary, var(--awa-primary)) !important;
     border: 0 !important;
     border-block-start: 0 !important;
     border-block-end: 0 !important;
@@ -289,14 +289,14 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
 
   #html-body .page-wrapper .header-control.awa-nav-bar .awa-header-categories .our_categories,
   #html-body .page-wrapper .header-control.awa-nav-bar button[data-role='awa-vertical-menu-trigger'] {
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 92%, #000) !important;
-    color: #ffffff !important;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 92%, #000) !important;
+    color: var(--awa-bg) !important;
   }
 
   #html-body .page-wrapper .header-control.awa-nav-bar .awa-header-categories .icon-menu,
   #html-body .page-wrapper .header-control.awa-nav-bar .awa-header-categories svg {
-    color: #ffffff !important;
-    stroke: #ffffff !important;
+    color: var(--awa-bg) !important;
+    stroke: var(--awa-bg) !important;
   }
 
   /* Account + register CTA */
@@ -311,8 +311,8 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
   }
 
   #html-body .page-wrapper .awa-site-header .awa-header-account-prompt .awa-header-account-prompt__link--register {
-    color: #ffffff !important;
-    background: var(--awa-primary, #b73337) !important;
+    color: var(--awa-bg) !important;
+    background: var(--awa-primary, var(--awa-primary)) !important;
     border: none !important;
     border-radius: 9999px !important;
     padding: 3px 10px !important;
@@ -322,18 +322,18 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
 
   /* Minicart */
   #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart {
-    background: var(--awa-primary, #b73337) !important;
+    background: var(--awa-primary, var(--awa-primary)) !important;
     border: 0 !important;
     border-radius: 10px !important;
     padding: 8px 12px !important;
     min-height: 44px !important;
-    color: #ffffff !important;
+    color: var(--awa-bg) !important;
   }
 
   #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart svg,
   #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart .awa-minicart-icon {
-    stroke: #ffffff !important;
-    color: #ffffff !important;
+    stroke: var(--awa-bg) !important;
+    color: var(--awa-bg) !important;
   }
 
   #html-body .page-wrapper .awa-site-header .awa-header-brand-cell .logo img {
@@ -346,7 +346,7 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
   #html-body .page-wrapper .awa-site-header .header.awa-main-header {
     min-height: 60px !important;
     padding-block: 8px !important;
-    background: #ffffff !important;
+    background: var(--awa-bg) !important;
   }
 
   #html-body .page-wrapper .awa-site-header .header .header_main .wp-header[data-awa-header-row],
@@ -400,7 +400,7 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
     left: 0 !important;
     width: min(86vw, 360px) !important;
     height: 100dvh !important;
-    background: #ffffff !important;
+    background: var(--awa-bg) !important;
     z-index: 1300 !important;
     transform: translateX(-100%) !important;
     transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -450,7 +450,7 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
 
   html body#html-body .page-wrapper .header-control.header-nav.awa-nav-bar,
   html body#html-body .page-wrapper .header-control.awa-nav-bar {
-    background-color: var(--awa-primary, #b73337) !important;
+    background-color: var(--awa-primary, var(--awa-primary)) !important;
     background-image: none !important;
     height: 48px !important;
     min-height: 48px !important;
@@ -515,7 +515,7 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
   html body#html-body .page-wrapper .header-control.awa-nav-bar .top-menu a.level-top,
   html body#html-body .page-wrapper .header-control.header-nav.awa-nav-bar .navigation .level0 > .level-top,
   html body#html-body .page-wrapper .header-control.awa-nav-bar .awa-nav-quick-links__link {
-    color: #ffffff !important;
+    color: var(--awa-bg) !important;
   }
 
   /* S15 — Departamentos: remove white category-dropdown shell when closed */
@@ -553,11 +553,11 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
-    background: var(--awa-hdr-primary, var(--awa-primary, #b73337)) !important;
+    background: var(--awa-hdr-primary, var(--awa-primary, var(--awa-primary))) !important;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    color: #ffffff !important;
+    color: var(--awa-bg) !important;
   }
 
   html body#html-body .page-wrapper .header-control.awa-nav-bar .awa-header-categories .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown:not([aria-hidden="false"]):not(.vmm-open):not(.menu-open) {
@@ -617,9 +617,9 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
   }
 
   html body#html-body .page-wrapper .awa-site-header .awa-header-account-prompt .awa-header-account-prompt__link--register {
-    color: #ffffff !important;
-    background: var(--awa-primary, #b73337) !important;
-    background-color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-bg) !important;
+    background: var(--awa-primary, var(--awa-primary)) !important;
+    background-color: var(--awa-primary, var(--awa-primary)) !important;
     border: none !important;
     border-radius: 9999px !important;
     padding: 3px 10px !important;
@@ -653,7 +653,7 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
   }
 
   html body#html-body .page-wrapper .awa-site-header form#search_mini_form.minisearch:focus-within {
-    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 45%, #e2e8f0) !important;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 12%, transparent) !important;
+    border-color: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 45%, #e2e8f0) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 12%, transparent) !important;
   }
 }

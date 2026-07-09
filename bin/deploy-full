@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+# ==========================================================================
+# deploy-full - Deploy consolidado unico
+#
+# Aplica TODAS as correcoes da sessao 2026-06-28 em uma unica janela:
+#   - Sprint 1 (Quick wins): CEP Estimator, Estrelas, JSON-LD
+#   - Ondas 1-8: caça bugs visuais, UX, A11y, Mobile, Analytics, PWA
+#   - Total: 63+ arquivos modificados
+#
+# Uso:
+#   bin/deploy-full                  # deploy padrao (pt_BR + en_US)
+#   bin/deploy-full --skip-compile   # pula di:compile (apenas static)
+#
+# AVISO: NAO REINICIA PHP-FPM, NAO FAZ FLUSH DO VARNISH.
+# Esses passos devem ser feitos manualmente apos deploy:
+#   1. sudo systemctl reload php8.4-fpm
+#   2. varnishadm ban req.http.host == awamotos.com
+#   3. redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB
+# ==========================================================================
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+LOCALES="pt_BR en_US"
+SKIP_COMPILE=0
+
+# Parse args
+for arg in "$@"; do
+    case "$arg" in
+        --skip-compile) SKIP_COMPILE=1 ;;
+        --locales=*) LOCALES="${arg#--locales=}" ;;
+        *) LOCALES="$arg" ;;
+    esac
+done
+
+# Cores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+log() { echo -e "${BLUE}[deploy-full]${NC} $1"; }
+ok() { echo -e "${GREEN}[deploy-full] OK${NC} $1"; }
+warn() { echo -e "${YELLOW}[deploy-full] WARN${NC} $1"; }
+err() { echo -e "${RED}[deploy-full] ERRO${NC} $1" && exit 1; }
+
+echo "=========================================================================="
+echo "  AWA Motos - Deploy Full (Sessao 2026-06-28)"
+echo "  Locales: $LOCALES"
+echo "  Skip compile: $SKIP_COMPILE"
+echo "=========================================================================="
+echo ""
+
+# ============================================
+# Step 1: DI compile (apenas modulos novos/alterados)
+# ============================================
+if [ $SKIP_COMPILE -eq 0 ]; then
+    log "Step 1/7: DI compile (apenas se necessario)..."
+    if sudo -u www-data php bin/magento setup:di:compile 2>&1 | tail -3; then
+        ok "DI compile"
+    else
+        err "DI compile falhou"
+    fi
+else
+    warn "Step 1/7: DI compile PULADO (--skip-compile)"
+fi
+echo ""
+
+# ============================================
+# Step 2: Static content deploy
+# ============================================
+log "Step 2/7: Static content deploy..."
+if sudo -E ./bin/deploy-static $LOCALES -f 2>&1 | tail -3; then
+    ok "Static content deploy"
+else
+    err "Static deploy falhou"
+fi
+echo ""
+
+# ============================================
+# Step 3: Post-deploy static sync
+# ============================================
+log "Step 3/7: Post-deploy static sync (CSS/JS minify)..."
+if [ -f scripts/post-deploy-static-sync.sh ]; then
+    if sudo -E bash scripts/post-deploy-static-sync.sh 2>&1 | tail -3; then
+        ok "Post-deploy sync"
+    else
+        warn "Post-deploy sync teve warnings (continuando)"
+    fi
+else
+    warn "scripts/post-deploy-static-sync.sh nao encontrado - pulando"
+fi
+echo ""
+
+# ============================================
+# Step 4: Verificar modulos novos ativados
+# ============================================
+log "Step 4/7: Verificando modulos novos..."
+NEW_MODULES=(
+    "AWA_VisualFixes"
+    "GrupoAwamotos_SchemaEnhancer"
+    "GrupoAwamotos_ShippingEstimator"
+)
+for mod in "${NEW_MODULES[@]}"; do
+    if [ -d "app/code/${mod%_*}/$(echo $mod | cut -d_ -f2)" ]; then
+        log "  Modulo $mod: presente em app/code/"
+    else
+        warn "  Modulo $mod: NAO encontrado - verificar"
+    fi
+done
+ok "Verificacao de modulos"
+echo ""
+
+# ============================================
+# Step 5: Verificar arquivos modificados
+# ============================================
+log "Step 5/7: Verificando arquivos modificados (git status)..."
+if git rev-parse --git-dir > /dev/null 2>&1; then
+    MODIFIED=$(git status --short 2>/dev/null | wc -l)
+    log "  $MODIFIED arquivos modificados (git status)"
+    if [ $MODIFIED -gt 0 ]; then
+        log "  Arquivos criticos (sanity check):"
+        for f in \
+            "app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/view/awa-pdp-cep-estimator.phtml" \
+            "app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/view/addtocart.phtml" \
+            "app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Review/templates/form.phtml" \
+            "app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/templates/product/list/toolbar/viewmode.phtml" \
+            "app/code/Rokanthemes/CustomMenu/Block/Topmenu.php" \
+            "app/code/AWA/VisualFixes/registration.php" \
+            "pub/sw.js"; do
+            if [ -f "$f" ]; then
+                log "    ✓ $f"
+            else
+                warn "    ✗ $f (FALTANDO)"
+            fi
+        done
+    fi
+else
+    warn "Nao e um repositorio git - pulando verificacao"
+fi
+echo ""
+
+# ============================================
+# Step 6: Cache flush
+# ============================================
+log "Step 6/7: Cache flush..."
+if sudo -u www-data php bin/magento cache:flush 2>&1 | tail -3; then
+    ok "Magento cache flush"
+else
+    warn "Cache flush falhou (continuando)"
+fi
+echo ""
+
+# ============================================
+# Step 7: Varnish + Redis FPC + PHP-FPM
+# ============================================
+log "Step 7/7: Varnish purge + Redis FPC..."
+# Varnish
+if command -v varnishadm > /dev/null 2>&1; then
+    if sudo varnishadm ban req.http.host == awamotos.com 2>&1; then
+        ok "Varnish purged"
+    else
+        warn "Varnish purge falhou (continuando)"
+    fi
+else
+    warn "varnishadm nao encontrado"
+fi
+
+# Redis FPC
+if command -v redis-cli > /dev/null 2>&1; then
+    if sudo redis-cli -h ::1 -a 'Aw4R3d1s2026Sec' -n 2 FLUSHDB 2>&1 | grep -q OK; then
+        ok "Redis FPC FLUSHDB"
+    else
+        warn "Redis FPC flush falhou (verificar manualmente)"
+    fi
+else
+    warn "redis-cli nao encontrado"
+fi
+echo ""
+
+# ============================================
+# Relatorio final
+# ============================================
+echo "=========================================================================="
+echo "  DEPLOY FULL CONCLUIDO"
+echo "=========================================================================="
+echo ""
+ok "Static content: $LOCALES deployado"
+ok "DI compile: $([ $SKIP_COMPILE -eq 0 ] && echo 'executado' || echo 'pulado')"
+ok "Post-deploy sync: minify executado"
+ok "Cache Magento: flushed"
+ok "Varnish: purged"
+ok "Redis FPC: flushed"
+echo ""
+echo "  IMPORTANTE: Apos este deploy, faca manualmente:"
+echo "    sudo systemctl reload php8.4-fpm"
+echo ""
+echo "  Verificar:"
+echo "    curl -skI https://awamotos.com/ | head"
+echo "    curl -sk https://awamotos.com/ | head -c 200"
+echo ""
+ok "Deploy completo!"

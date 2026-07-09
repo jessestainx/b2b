@@ -24,28 +24,54 @@
                 <?= $block->escapeHtml(__('Política de Privacidade')) ?>
             </a>.
         </p>
-        <div class="awa-cookie-banner__actions">
+        <div class="awa-cookie-banner__actions"
+             role="group"
+             aria-label="<?= $block->escapeHtmlAttr(__('Escolha de cookies')) ?>">
             <button type="button"
                     id="awa-cookie-accept"
-                    class="awa-cookie-banner__btn awa-cookie-banner__btn--accept">
-                <?= $block->escapeHtml(__('Permitir cookies')) ?>
+                    class="awa-cookie-banner__btn awa-cookie-banner__btn--accept"
+                    title="<?= $block->escapeHtmlAttr(__('Permitir cookies')) ?>">
+                <span><?= $block->escapeHtml(__('Permitir cookies')) ?></span>
             </button>
             <button type="button"
                     id="awa-cookie-decline"
-                    class="awa-cookie-banner__btn awa-cookie-banner__btn--decline">
-                <?= $block->escapeHtml(__('Apenas essenciais')) ?>
+                    class="awa-cookie-banner__btn awa-cookie-banner__btn--decline"
+                    title="<?= $block->escapeHtmlAttr(__('Apenas essenciais')) ?>">
+                <span><?= $block->escapeHtml(__('Apenas essenciais')) ?></span>
             </button>
         </div>
     </div>
 </div>
 <script>
-(function () {
+(function (w, d) {
+    var isHome = d.body && d.body.classList.contains('cms-index-index');
+
+    function runWhenRequire(callback) {
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(callback, { key: 'awa-cookie-consent' });
+            return;
+        }
+
+        if (typeof w.require === 'function' && !w.require._awaStub) {
+            callback();
+            return;
+        }
+
+        w.setTimeout(function () {
+            runWhenRequire(callback);
+        }, 120);
+    }
+
     function loadCookieConsent() {
-        require(['GrupoAwamotos_CookieConsent/js/cookie-consent'], function (cookieConsent) {
-            cookieConsent.init();
+        runWhenRequire(function () {
+            w.require(['GrupoAwamotos_CookieConsent/js/cookie-consent'], function (cookieConsent) {
+                cookieConsent.init();
+            });
         });
     }
+
     var loaded = false;
+
     function loadOnce() {
         if (loaded) {
             return;
@@ -53,15 +79,24 @@
         loaded = true;
         loadCookieConsent();
     }
+
+    function fallbackDelay() {
+        return w.matchMedia && w.matchMedia('(max-width: 767px)').matches ? 6500 : 2500;
+    }
+
     document.addEventListener('pointerdown', loadOnce, { once: true, passive: true });
     document.addEventListener('keydown', loadOnce, { once: true });
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-            window.setTimeout(loadOnce, 1500);
-        }, { once: true });
-    } else {
-        window.setTimeout(loadOnce, 1500);
+    document.addEventListener('touchstart', loadOnce, { once: true, passive: true });
+
+    if (!isHome) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                w.setTimeout(loadOnce, fallbackDelay());
+            }, { once: true });
+        } else {
+            w.setTimeout(loadOnce, fallbackDelay());
+        }
     }
-}());
+}(window, document));
 </script>
 <?php endif; ?>

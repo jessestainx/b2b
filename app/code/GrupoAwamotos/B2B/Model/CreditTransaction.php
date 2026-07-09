@@ -8,10 +8,10 @@ use Magento\Framework\Model\AbstractModel;
 
 class CreditTransaction extends AbstractModel
 {
-    const TYPE_CHARGE = 'charge';
-    const TYPE_REFUND = 'refund';
-    const TYPE_ADJUSTMENT = 'adjustment';
-    const TYPE_PAYMENT = 'payment';
+    public const TYPE_CHARGE = 'charge';
+    public const TYPE_REFUND = 'refund';
+    public const TYPE_ADJUSTMENT = 'adjustment';
+    public const TYPE_PAYMENT = 'payment';
 
     protected function _construct()
     {

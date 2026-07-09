@@ -20,7 +20,7 @@
     body.awa-cookie-banner-active .awa-whatsapp-float {
         bottom: 160px !important;
     }
-    
+
     // Back to top button adjustment
     #awaBackToTop {
         bottom: 85px !important;
@@ -65,11 +65,16 @@ body.awa-cookie-banner-active #awaBackToTop {
 // =============================================
 
 // 5. Smooth Dismiss for B2B Promo Bar (Prevents abrupt CLS)
+// FIX 2026-07-06 (Impeccable "layout property animation"): a transition original
+// animava max-height + padding ao mesmo tempo (dois reflows por frame). O colapso de
+// altura é o efeito desejado (empurra o header para cima ao fechar), então mantemos
+// só max-height na transição; padding/margin/border agora só têm o valor final
+// (!important), sem animar — o fade de opacity já disfarça o corte instantâneo.
 #awa-b2b-promo-bar {
-    transition: max-height 0.35s ease-out, opacity 0.3s ease, padding 0.3s ease;
+    transition: max-height 0.35s ease-out, opacity 0.3s ease;
     max-height: 60px;
     overflow: hidden;
-    
+
     &.is-dismissing {
         max-height: 0 !important;
         opacity: 0 !important;
@@ -98,21 +103,21 @@ body.awa-cookie-banner-active #awaBackToTop {
     display: flex;
     flex-direction: column;
     height: 100%;
-    
+
     .product-item-details {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
     }
-    
-    .price-box, 
+
+    .price-box,
     .product-item-inner {
         margin-top: auto;
     }
 }
 
 // 8. Fix Footer Social & Payment Icons Vertical Alignment
-.footer-static5 .footer-payments img, 
+.footer-static5 .footer-payments img,
 .footer-static5 .social-links li {
     vertical-align: middle;
     display: inline-flex;
@@ -140,12 +145,12 @@ body.awa-cookie-banner-active #awaBackToTop {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
-    
+
     .vmenu-promo-slide {
         grid-area: 1 / 1;
         transition: opacity 0.5s ease-in-out;
         z-index: 0;
-        
+
         &.vmenu-promo-slide--active {
             z-index: 1;
         }

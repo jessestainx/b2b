@@ -1,12 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { targetUrl, withCacheBuster } from '../helpers/target-url';
+import { blockOptionalThirdParty } from '../helpers/third-party-block';
 
-const PLP_URL = process.env.PLP_SMOKE_URL || 'https://awamotos.com/carcacas.html';
+const PLP_URL = targetUrl(process.env.PLP_SMOKE_URL || '/carcacas.html', 'category-plp');
 
 test.describe('PLP smoke — harden regressions', () => {
   test.describe.configure({ timeout: 90_000 });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${PLP_URL}?plp-smoke=${Date.now()}`, {
+    await blockOptionalThirdParty(page.context());
+    await page.goto(withCacheBuster(PLP_URL, 'plp-smoke'), {
       waitUntil: 'commit',
       timeout: 90_000,
     });
@@ -334,9 +337,9 @@ test.describe('PLP smoke — harden regressions', () => {
 test.describe('PLP harden — empty state', () => {
   test('filtered category with zero results shows accessible empty state', async ({ page }) => {
     const emptyUrl =
-      process.env.PLP_EMPTY_URL ||
-      'https://awamotos.com/carcacas.html?price=999999-9999999';
-    await page.goto(`${emptyUrl}&plp-empty=${Date.now()}`, {
+      targetUrl(process.env.PLP_EMPTY_URL || '/carcacas.html?price=999999-9999999', 'category-plp-empty');
+    await blockOptionalThirdParty(page.context());
+    await page.goto(withCacheBuster(emptyUrl, 'plp-empty'), {
       waitUntil: 'commit',
       timeout: 90_000,
     });

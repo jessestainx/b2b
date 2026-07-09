@@ -26,7 +26,8 @@ class WarmB2BPrices
         private readonly CustomerPriceProvider $priceProvider,
         private readonly Helper $helper,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function execute(): void
     {

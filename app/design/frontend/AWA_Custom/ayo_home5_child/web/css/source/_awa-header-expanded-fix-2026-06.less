@@ -9,7 +9,13 @@
 // Espelhado em awa-bundle-refinements.css §HEADER-EXPANDED-FIX (terminal wins).
 // =============================================================================
 
-@awa-expanded-scope: ~'html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]:not(.awa-header-condensed)';
+// AWA fix 2026-07-06: exclui páginas B2B (dashboard/shell) do modo "header expandido".
+// O header do painel B2B usa a classe .awa-account-header (não .awa-header-condensed),
+// então esta regra "expandida" (especificidade alta) forçava display:flex na promo bar
+// e vencia as regras dedicadas de ocultação do painel B2B — a barra ficava
+// visibility:hidden porém com display:flex/height:44px/overflow:hidden, recortando
+// os filhos posicionados (botão fechar, CTA curto). V. relatório Impeccable 2026-07-06.
+@awa-expanded-scope: ~'html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index):not(.b2b-account-dashboard):not(.b2b-account-shell) .page-wrapper .awa-site-header[data-awa-header-mode="default"]:not(.awa-header-condensed)';
 
 // ── P0: Promo bar — 44px clip, CTA inline ───────────────────────────────────
 @{awa-expanded-scope} {

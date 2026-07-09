@@ -14,8 +14,9 @@ import {
   css, cssMultiple, px,
   isVisible, hasNoOverflow, COMMON,
 } from '../helpers/visual-audit.helpers';
+import { targetUrl } from '../helpers/target-url';
+import { blockOptionalThirdParty } from '../helpers/third-party-block';
 
-const BASE = 'https://awamotos.com';
 const HOME_READY_SELECTOR = '#header, .awa-site-header, header[role="banner"], .top-home-content, .top-home-content--above-fold';
 
 let homePage: Page;
@@ -58,6 +59,7 @@ function minLogoWidthByViewport(): number {
 
 test.beforeAll(async ({ browser }) => {
   const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
+  await blockOptionalThirdParty(ctx);
   homePage = await ctx.newPage();
 
   let pageReady = false;
@@ -67,7 +69,7 @@ test.beforeAll(async ({ browser }) => {
     await Promise.race<void>([
       (async () => {
         try {
-          await homePage.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+          await homePage.goto(targetUrl('/', 'visual-audit-home-header-footer'), { waitUntil: 'domcontentloaded', timeout: 60_000 });
           const cookieBtn = homePage.locator('.cookie-btn-accept, #btn-cookie-allow, .allow').first();
           if (await cookieBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
             await cookieBtn.click();

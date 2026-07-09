@@ -12,8 +12,8 @@ use Magento\Eav\Model\Entity\Attribute\Source\AbstractSource;
 
 class PersonType extends AbstractSource
 {
-    const TYPE_PJ = 'pj';
-    const TYPE_PF = 'pf';
+    public const TYPE_PJ = 'pj';
+    public const TYPE_PF = 'pf';
 
     /**
      * Get all options

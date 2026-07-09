@@ -48,6 +48,7 @@ class Suggest extends Action
 
     public function execute()
     {
+
         if (empty($this->_request->getParam('q'))) {
             return $this->getResponse()->setRedirect('/');
         }

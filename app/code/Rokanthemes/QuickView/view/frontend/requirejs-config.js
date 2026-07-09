@@ -10,11 +10,9 @@ var config = {
         },
     },
 	"shim": {
-		"quickview/cloudzoom": ["jquery"],
-		"quickview/bxslider": ["jquery"]
+		"quickview/cloudzoom": ["jquery"]
 	},
 	'paths': {
-		'quickview/cloudzoom': 'Rokanthemes_QuickView/js/cloud-zoom',
-        "quickview/bxslider": "Rokanthemes_QuickView/js/jquery.bxslider"
+		'quickview/cloudzoom': 'Rokanthemes_QuickView/js/cloud-zoom'
     }
 };

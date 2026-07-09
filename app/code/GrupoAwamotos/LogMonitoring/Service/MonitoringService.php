@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Service;
@@ -42,33 +43,32 @@ class MonitoringService implements MonitoringInterface
     {
         try {
             $dashboardData = $this->dashboardDataFactory->create();
-            
+
             // System Health
             $systemHealth = $this->getSystemHealth();
             $dashboardData->setSystemHealth($systemHealth);
-            
+
             // Log Metrics
             $logMetrics = $this->getLogAnalysis();
             $dashboardData->setLogMetrics($logMetrics);
-            
+
             // Active Alerts
             $activeAlerts = $this->getActiveAlertsData();
             $dashboardData->setActiveAlerts($activeAlerts);
-            
+
             // Recent Activity
             $recentActivity = $this->getRecentActivity();
             $dashboardData->setRecentActivity($recentActivity);
-            
+
             // AWA Metrics
             $awamotosMetrics = $this->getAwamotosMetrics();
             $dashboardData->setAwamotosMetrics($awamotosMetrics);
-            
+
             // Performance Data
             $performanceData = $this->getPerformanceMetrics();
             $dashboardData->setPerformanceData($performanceData);
-            
+
             return $dashboardData;
-            
         } catch (\Exception $e) {
             $this->logger->error('Error getting dashboard data: ' . $e->getMessage());
             throw new LocalizedException(__('Unable to load dashboard data: %1', $e->getMessage()));
@@ -90,7 +90,7 @@ class MonitoringService implements MonitoringInterface
                 $metrics = $this->logMetricsRepository->getLatestMetrics(50);
                 $trendData = [];
             }
-            
+
             return [
                 'current_metrics' => array_map(function ($metric) {
                     return [
@@ -109,7 +109,6 @@ class MonitoringService implements MonitoringInterface
                 'trend_data' => $trendData,
                 'summary' => $this->calculateLogSummary($metrics)
             ];
-            
         } catch (\Exception $e) {
             $this->logger->error('Error analyzing logs: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
@@ -127,7 +126,6 @@ class MonitoringService implements MonitoringInterface
                 'performance' => $performanceMetrics,
                 'overall_score' => $this->calculateOverallScore($erpMetrics, $performanceMetrics)
             ];
-            
         } catch (\Exception $e) {
             $this->logger->error('Error getting AWA metrics: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
@@ -138,12 +136,12 @@ class MonitoringService implements MonitoringInterface
     {
         try {
             $this->logger->info('Manual log analysis triggered');
-            
+
             // Trigger all analyzers
             foreach ($this->analyzerPool->getAllAnalyzers() as $analyzer) {
                 $analyzer->analyze();
             }
-            
+
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Error triggering log analysis: ' . $e->getMessage());
@@ -156,7 +154,7 @@ class MonitoringService implements MonitoringInterface
         try {
             $activeAlerts = $this->alertRepository->getActiveAlerts();
             $criticalAlerts = $this->alertRepository->getCriticalAlerts();
-            
+
             $summary = [
                 'total_active' => count($activeAlerts),
                 'critical_count' => count($criticalAlerts),
@@ -168,23 +166,22 @@ class MonitoringService implements MonitoringInterface
                 ],
                 'by_type' => []
             ];
-            
+
             foreach ($activeAlerts as $alert) {
                 $severity = $alert->getSeverity();
                 $type = $alert->getAlertType();
-                
+
                 if (isset($summary['by_severity'][$severity])) {
                     $summary['by_severity'][$severity]++;
                 }
-                
+
                 if (!isset($summary['by_type'][$type])) {
                     $summary['by_type'][$type] = 0;
                 }
                 $summary['by_type'][$type]++;
             }
-            
+
             return $summary;
-            
         } catch (\Exception $e) {
             $this->logger->error('Error getting alert summary: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
@@ -219,7 +216,7 @@ class MonitoringService implements MonitoringInterface
     private function getActiveAlertsData(): array
     {
         $activeAlerts = $this->alertRepository->getActiveAlerts();
-        
+
         return array_map(function ($alert) {
             return [
                 'id' => $alert->getEntityId(),
@@ -240,9 +237,9 @@ class MonitoringService implements MonitoringInterface
     {
         $recentMetrics = $this->logMetricsRepository->getLatestMetrics(10);
         $recentAlerts = $this->alertRepository->getActiveAlerts();
-        
+
         $activity = [];
-        
+
         foreach ($recentMetrics as $metric) {
             $activity[] = [
                 'type' => 'log_analysis',
@@ -255,7 +252,7 @@ class MonitoringService implements MonitoringInterface
                 ]
             ];
         }
-        
+
         foreach (array_slice($recentAlerts, 0, 10) as $alert) {
             $activity[] = [
                 'type' => 'alert',
@@ -269,12 +266,12 @@ class MonitoringService implements MonitoringInterface
                 ]
             ];
         }
-        
+
         // Sort by timestamp desc
         usort($activity, function ($a, $b) {
             return strtotime($b['timestamp']) - strtotime($a['timestamp']);
         });
-        
+
         return array_slice($activity, 0, 20);
     }
 
@@ -284,14 +281,14 @@ class MonitoringService implements MonitoringInterface
         $totalWarnings = 0;
         $totalCritical = 0;
         $totalSize = 0;
-        
+
         foreach ($metrics as $metric) {
             $totalErrors += $metric->getErrorEntries();
             $totalWarnings += $metric->getWarningEntries();
             $totalCritical += $metric->getCriticalEntries();
             $totalSize += $metric->getFileSizeBytes();
         }
-        
+
         return [
             'total_errors' => $totalErrors,
             'total_warnings' => $totalWarnings,

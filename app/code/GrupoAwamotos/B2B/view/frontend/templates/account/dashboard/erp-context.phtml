@@ -1,0 +1,110 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * ERP context fragment — badges, pending banner, company ERP fields, purchase summary card.
+ *
+ * @var \GrupoAwamotos\B2B\Block\Account\Dashboard $block
+ */
+$erpBlock = $block->getErpSuggestionsBlock();
+$data = $block->getErpDashboardData();
+$erpCode = $data['code'];
+$erpSummary = $data['summary'];
+$erpRfm = $data['rfm'];
+$hasCustomPriceList = $data['has_custom_price_list'];
+$customerPriceListName = $data['price_list_name'];
+
+if (!$erpBlock) {
+    return;
+}
+
+$showBadges = ($erpRfm && !empty($erpRfm['segment_label'])) || $hasCustomPriceList;
+$showPending = $block->isApproved() && !$erpCode;
+$showSupplement = ($hasCustomPriceList && $customerPriceListName)
+    || ($erpRfm && !empty($erpRfm['suggested_action']));
+$showSummary = !empty($erpSummary);
+
+if (!$showBadges && !$showPending && !$showSupplement && !$showSummary) {
+    return;
+}
+?>
+<div class="b2b-erp-context-fragment">
+    <?php if ($showBadges): ?>
+        <div class="b2b-erp-context-badges">
+            <?php if ($erpRfm && !empty($erpRfm['segment_label'])): ?>
+                <span class="b2b-rfm-badge b2b-rfm-badge--<?= $block->escapeHtmlAttr($block->getRfmSegmentSlug($erpRfm)) ?>">
+                    <?= $block->escapeHtml($erpRfm['segment_label']) ?>
+                </span>
+            <?php endif; ?>
+            <?php if ($hasCustomPriceList): ?>
+                <span class="b2b-price-list-badge" title="<?= $block->escapeHtmlAttr($customerPriceListName ?? '') ?>">
+                    <?= $block->escapeHtml(__('Tabela: %1', $customerPriceListName ?? __('Exclusiva'))) ?>
+                </span>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($showPending): ?>
+        <div class="b2b-erp-pending-banner">
+            <div class="erp-pending-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="erp-pending-content">
+                <h2 class="b2b-banner-title"><?= $block->escapeHtml(__('Tabela de Preços em Definição')) ?></h2>
+                <p><?= $block->escapeHtml(__('Sua conta foi aprovada! O departamento de vendas está definindo sua tabela de preços personalizada. Você será notificado assim que estiver pronta.')) ?></p>
+                <?php $attendant = $block->getAttendantInfo(); ?>
+                <?php if (!empty($attendant['whatsapp'])): ?>
+                    <?php $whatsappNumber = preg_replace('/\D/', '', (string) $attendant['whatsapp']); ?>
+                    <a href="https://wa.me/55<?= $block->escapeHtmlAttr($whatsappNumber) ?>?text=<?= $block->escapeHtmlAttr(urlencode('Olá! Minha conta B2B foi aprovada e estou aguardando a definição da tabela de preços.')) ?>" class="erp-pending-action" data-b2b-contact-track="dashboard_pending_whatsapp" data-b2b-contact-channel="whatsapp" target="_blank" rel="noopener">
+                        <?= $block->escapeHtml(__('Falar com Vendas')) ?>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($showSupplement): ?>
+        <div class="b2b-company-info b2b-company-info--erp-supplement">
+            <div class="company-details">
+                <?php if ($hasCustomPriceList && $customerPriceListName): ?>
+                    <div class="detail-item">
+                        <span class="label"><?= $block->escapeHtml(__('Sua Tabela de Preços:')) ?></span>
+                        <span class="value b2b-price-list-name"><?= $block->escapeHtml($customerPriceListName) ?></span>
+                    </div>
+                <?php endif; ?>
+                <?php if ($erpRfm && !empty($erpRfm['suggested_action'])): ?>
+                    <div class="detail-item">
+                        <span class="label"><?= $block->escapeHtml(__('Recomendação:')) ?></span>
+                        <span class="value erp-recommendation"><?= $block->escapeHtml($erpRfm['suggested_action']) ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($showSummary): ?>
+        <div class="b2b-summary-cards b2b-summary-cards--erp-fragment">
+            <div class="summary-card purchases-card erp-data">
+                <div class="card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </div>
+                <div class="card-content">
+                    <h2 class="b2b-card-title"><?= $block->escapeHtml(__('Histórico de Compras')) ?></h2>
+                    <p class="card-value"><?= /* @noEscape */ $erpBlock->formatPrice((float) ($erpSummary['valor_total'] ?? 0)) ?></p>
+                    <div class="erp-summary-details">
+                        <span><?= (int) ($erpSummary['total_pedidos'] ?? 0) ?> <?= $block->escapeHtml(__('pedidos')) ?></span>
+                        <span><?= (int) ($erpSummary['produtos_diferentes'] ?? 0) ?> <?= $block->escapeHtml(__('produtos')) ?></span>
+                    </div>
+                    <?php if (!empty($erpSummary['ultima_compra'])): ?>
+                        <p class="erp-last-purchase"><?= $block->escapeHtml(__('Última compra: %1', $erpBlock->formatErpDate($erpSummary['ultima_compra']))) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>

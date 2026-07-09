@@ -8,7 +8,7 @@
 
 :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .opc-wrapper .step-title {
     font-size: 20px !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
     color: var(--awa-cc-text-1) !important;
     border-bottom: none !important;
     margin-bottom: 14px !important;
@@ -23,9 +23,12 @@
 :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .opc-progress-bar-item > span::before {
     background: var(--awa-cc-surface-1) !important;
     border: 2px solid var(--awa-cc-border) !important;
-    width: 32px !important;
-    height: 32px !important;
-    line-height: 28px !important;
+    box-sizing: border-box !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    line-height: 40px !important;
     font-weight: 700 !important;
 }
 
@@ -60,7 +63,7 @@
 
 @media (min-width: 768px) {
     :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .opc-wrapper #checkoutSteps > li {
-        padding: 18px !important;
+        padding: 16px !important;
         border: 1px solid var(--awa-cc-border) !important;
         border-radius: var(--awa-cc-radius-card, 14px) !important;
         background: var(--awa-cc-surface-1) !important;
@@ -72,7 +75,7 @@
     background: var(--awa-cc-surface-1) !important;
     border: 1px solid var(--awa-cc-border) !important;
     border-radius: 14px !important;
-    padding: 18px !important;
+    padding: 16px !important;
     box-shadow: var(--awa-cc-shadow-2) !important;
 }
 
@@ -172,8 +175,8 @@
 :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .opc-block-summary input[type="number"],
 :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .opc-block-summary .details-qty input.qty,
 :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .opc-block-summary .details-qty input.input-text {
-    height: 36px !important;
-    min-height: 36px !important;
+    height: 44px !important;
+    min-height: 44px !important;
     min-width: 48px !important;
     max-width: 72px !important;
     box-sizing: border-box !important;
@@ -241,7 +244,7 @@
 
 @media (max-width: 767px) {
     :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .opc-wrapper #checkoutSteps > li {
-        padding: 20px !important;
+        padding: 16px !important;
         border: 1px solid var(--awa-cc-border) !important;
         border-radius: 12px !important;
         background: var(--awa-cc-surface-1) !important;
@@ -286,11 +289,11 @@ html :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagech
     }
 
     html :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .opc-progress-bar-item > span::before {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        line-height: 32px !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        line-height: 40px !important;
     }
 }
 
@@ -428,7 +431,7 @@ html body.checkout-cart-index .awa-cart-coupon-fieldset .actions-toolbar .action
 html body.checkout-cart-index .awa-cart-coupon-fieldset .action.apply.primary {
     background: var(--awa-primary) !important;
     border: 1px solid var(--awa-primary) !important;
-    color: var(--awa-text-on-primary, #fff) !important;
+    color: var(--awa-text-on-primary, var(--awa-bg)) !important;
 }
 
 html body.checkout-cart-index .awa-cart-coupon-fieldset.applied .action.cancel.primary {
@@ -562,12 +565,8 @@ html body.checkout-index-index .page-wrapper .awa-checkout-header-shell {
     letter-spacing: 0 !important;
 }
 
-/* FIX: Modal agreements — close button span overflow 48px.
-   Botão já tem 40x40px; overflow:hidden contém o texto acessível. */
-:is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-.modal-popup.agreements-modal .modal-header .action-close {
-    overflow: hidden !important;
-}
+/* FIX: Modal agreements — close button: ver "Impeccable fix lock v2" no fim
+   do arquivo (botão 44x44 sem clip + span sr-only com clip-path). */
 
 /* FIX: Cramped padding — legend.label nos fieldsets de logradouro. */
 :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -752,7 +751,7 @@ html :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagech
 /* Mobile: evita overlap footer nav + CTA sticky */
 @media (max-width: 767px) {
     html :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index) .page-main {
-        padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
     }
 
     html :is(body.checkout-index-index, body.rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -847,7 +846,7 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 @media (min-width: 1024px) {
     html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
     .opc-wrapper #checkoutSteps > li {
-        padding: 18px !important;
+        padding: 16px !important;
     }
 }
 
@@ -884,7 +883,7 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 .opc-block-summary .items-in-cart .product-item,
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .opc-block-summary .minicart-items .product-item {
-    padding: 10px 0 !important;
+    padding: 10px 12px !important;
     border-bottom: 1px solid var(--awa-cc-border) !important;
 }
 
@@ -1112,10 +1111,12 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .opc-block-summary .items-in-cart > .title {
-    min-height: 36px !important;
+    min-height: 44px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
+    padding-block: 4px !important;
+    cursor: pointer !important;
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -1240,23 +1241,24 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     }
 }
 
-/* Quantidade no resumo: controles pequenos, explícitos e navegáveis por teclado. */
+/* Quantidade no resumo: stepper horizontal, alvo de toque 44px (touch + pointer). */
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .opc-block-summary .qty-button {
     display: inline-flex !important;
-    flex-direction: column !important;
-    gap: 2px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .opc-block-summary .qty-button :is(.increase, .decrease) {
-    width: 18px !important;
-    height: 16px !important;
-    min-width: 18px !important;
-    min-height: 16px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
     padding: 0 !important;
     border: 1px solid var(--awa-cc-border) !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     background: var(--awa-cc-surface-1) !important;
     color: var(--awa-cc-text-1) !important;
     display: inline-flex !important;
@@ -1272,15 +1274,21 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .opc-block-summary .qty-button .increase::before {
     content: "+" !important;
-    font-size: 11px !important;
+    font-size: 14px !important;
     font-weight: 800 !important;
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .opc-block-summary .qty-button .decrease::before {
     content: "-" !important;
-    font-size: 12px !important;
+    font-size: 14px !important;
     font-weight: 800 !important;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary .qty-button :is(.increase, .decrease):focus-visible {
+    outline: 2px solid var(--awa-primary) !important;
+    outline-offset: 2px !important;
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -1405,7 +1413,7 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 .discount-code .action-apply {
     background: var(--awa-primary) !important;
     border: 1px solid var(--awa-primary) !important;
-    color: var(--awa-text-on-primary, #fff) !important;
+    color: var(--awa-text-on-primary, var(--awa-bg)) !important;
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -1478,18 +1486,11 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 
     html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
     .opc-block-summary .qty-button :is(.increase, .decrease) {
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        min-height: 32px !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
         border-radius: 8px !important;
-    }
-
-    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-    .opc-block-summary .qty-button .increase::before,
-    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-    .opc-block-summary .qty-button .decrease::before {
-        font-size: 14px !important;
     }
 
     html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -1540,22 +1541,16 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     overflow-x: visible !important;
 }
 
-html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-#header .header-container,
-html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-.awa-checkout-header-content,
-html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-.header-content.awa-checkout-header-content {
-    padding-inline: clamp(16px, 3vw, 24px) !important;
-    padding-block: 10px !important;
-    box-sizing: border-box !important;
-}
+/* Header: inset só no .page-main; regra legada removida (conflitava com lock v7 no final do arquivo). */
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-.page-wrapper .columns,
+.page-wrapper .page-main > .columns,
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-.page-wrapper .column.main {
+.page-wrapper .page-main > .columns > .column.main {
     padding-block: 16px !important;
+    padding-inline: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
 }
 
@@ -1614,19 +1609,12 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .modal-popup.agreements-modal .modal-header .action-close {
-    overflow: hidden !important;
     width: 44px !important;
     height: 44px !important;
     min-width: 44px !important;
     min-height: 44px !important;
 }
-
-html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-.modal-popup.agreements-modal .modal-header .action-close > span {
-    max-width: 1px !important;
-    max-height: 1px !important;
-    overflow: hidden !important;
-}
+/* span do action-close: sr-only completo no "Impeccable fix lock v2" (fim do arquivo). */
 
 /* ------------------------------------------------------------------ *
  * Checkout shell lock — alinhamento final das colunas                 *
@@ -1634,9 +1622,18 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .page-wrapper .checkout-container {
-    max-width: var(--awa-checkout-shell-max) !important;
-    margin-inline: auto !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
     width: 100% !important;
+    box-sizing: border-box !important;
+    padding-inline: 0 !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .checkout-container > .messages {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
     box-sizing: border-box !important;
 }
 
@@ -1668,6 +1665,18 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
         margin: 0 !important;
         position: static !important;
     }
+
+    /* Tablet/mobile flex — Luma aplica order:1 no .opc-wrapper, invertendo colunas.
+       Evidência debug 76f15d: tablet wrapperOrder=1, sidebarBeforeWrapper=true. */
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper .checkout-container > .opc-wrapper {
+        order: 0 !important;
+    }
+
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper .checkout-container > :is(#opc-sidebar, .opc-sidebar) {
+        order: 1 !important;
+    }
 }
 
 @media (min-width: 1024px) {
@@ -1687,12 +1696,14 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
     .page-wrapper .checkout-container > :is(#opc-sidebar, .opc-sidebar) {
         grid-column: 2 !important;
+        grid-row: auto !important;
         order: 0 !important;
         min-width: 0 !important;
         width: 100% !important;
         float: none !important;
         margin: 0 !important;
         position: static !important;
+        top: auto !important;
         align-self: start !important;
     }
 
@@ -1716,10 +1727,11 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid var(--awa-cc-border);
-    color: var(--awa-cc-text-2);
-    font-size: 12px;
+    color: var(--awa-cc-text-1);
+    font-size: max(13px, 0.8125rem);
     line-height: 1.4;
     text-align: center;
+    text-wrap: pretty;
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -1728,6 +1740,133 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     width: 16px;
     height: 16px;
     color: var(--awa-primary);
+}
+
+/* UX v11 — banner de resiliência (paridade com _awa-opc-checkout-2026-06.less) */
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    border: 1px solid color-mix(in srgb, var(--awa-warning, #d97706) 30%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--awa-warning, #d97706) 12%, var(--awa-cc-surface-1));
+    color: var(--awa-cc-text-1);
+    scroll-margin-top: 88px;
+    transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    color: var(--awa-warning, #d97706);
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__content {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 8px;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__text {
+    margin: 0;
+    font-size: max(13px, 0.8125rem);
+    line-height: 1.45;
+    color: var(--awa-cc-text-1);
+    text-wrap: pretty;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__retry {
+    min-height: 44px;
+    padding-inline: 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: border-color 180ms ease-out, color 180ms ease-out, box-shadow 180ms ease-out;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__retry:hover,
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__retry:focus-visible {
+    border-color: var(--awa-primary);
+    color: var(--awa-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary) 16%, transparent);
+    outline: none;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__dismiss {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--awa-cc-text-2);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__dismiss:hover {
+    background: color-mix(in srgb, var(--awa-warning, #d97706) 14%, transparent);
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-checkout-resilience__dismiss:focus-visible {
+    outline: 2px solid var(--awa-primary);
+    outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-checkout-resilience__actions {
+        width: 100%;
+    }
+
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-checkout-resilience__retry {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-checkout-resilience,
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-checkout-resilience__retry,
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-checkout-resilience__dismiss {
+        transition: none;
+    }
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -1922,8 +2061,8 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     margin: auto;
     width: 22px;
     height: 22px;
-    border: 2px solid color-mix(in srgb, var(--awa-text-on-primary, #fff) 35%, transparent);
-    border-top-color: var(--awa-text-on-primary, #fff);
+    border: 2px solid color-mix(in srgb, var(--awa-text-on-primary, var(--awa-bg)) 35%, transparent);
+    border-top-color: var(--awa-text-on-primary, var(--awa-bg));
     border-radius: 50%;
     animation: awa-checkout-spin 0.7s linear infinite;
 }
@@ -1963,10 +2102,41 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
         gap: 12px !important;
         margin: 0 !important;
         padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
-        background: color-mix(in srgb, var(--awa-cc-surface-1) 92%, transparent);
-        backdrop-filter: blur(8px);
+        background: var(--awa-cc-surface-1) !important;
         border-top: 1px solid var(--awa-cc-border);
-        box-shadow: 0 -8px 24px rgb(15 23 42 / 10%);
+        box-shadow: 0 -4px 16px rgb(15 23 42 / 8%);
+        grid-template-areas:
+            'meta cta'
+            'hint hint' !important;
+    }
+
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-place-order-toolbar:has(.btn-placeorder) .awa-place-order-toolbar__meta {
+        grid-area: meta !important;
+    }
+
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-place-order-toolbar:has(.btn-placeorder) .primary {
+        grid-area: cta !important;
+    }
+
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-place-order-toolbar:has(.btn-placeorder) .awa-place-order-hint:not(.visually-hidden) {
+        grid-area: hint !important;
+        grid-column: 1 / -1 !important;
+    }
+
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .checkout-container {
+        padding-bottom: 0 !important;
+    }
+
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .opc-block-summary .product-item-inner .subtotal {
+        justify-self: end !important;
+        text-align: right !important;
+        width: 100% !important;
+        margin-top: 4px !important;
     }
 
     html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -2145,6 +2315,7 @@ html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .one
     margin: 0 !important;
 }
 
+/* Card padding vem só de #checkoutSteps > li (fix lock v8); IDs não empilham inset. */
 html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .page-wrapper .opc-wrapper :is(#shipping, #opc-shipping_method, #payment) {
     padding: 0 !important;
@@ -2344,11 +2515,12 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 .awa-opc-step-indicator__pill {
     display: inline-flex;
     align-items: center;
-    min-height: 32px;
-    padding: 4px 12px;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 16px;
     border: 1px solid var(--awa-cc-border);
     border-radius: 999px;
-    font-size: 12px;
+    font-size: max(13px, 0.8125rem);
     font-weight: 600;
     line-height: 1.3;
     color: var(--awa-cc-text-2);
@@ -2639,10 +2811,11 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     border-radius: 8px;
     font-size: max(13px, 0.8125rem);
     line-height: 1.45;
-    color: var(--awa-cc-text-2);
+    color: var(--awa-cc-text-1);
     background: color-mix(in srgb, var(--awa-warning, #d97706) 8%, var(--awa-cc-surface-1));
     border: 1px solid color-mix(in srgb, var(--awa-warning, #d97706) 22%, var(--awa-cc-border));
-    text-align: center;
+    text-align: left;
+    text-wrap: pretty;
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -2705,13 +2878,6 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 }
 
 @media (min-width: 1024px) {
-    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-    .page-wrapper .checkout-container > :is(#opc-sidebar, .opc-sidebar) {
-        position: sticky !important;
-        top: 88px !important;
-        align-self: start !important;
-    }
-
     html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
     .opc-block-summary .table-totals tr.grand.totals {
         border-top: 2px solid var(--awa-cc-border-strong, var(--awa-cc-border)) !important;
@@ -2814,8 +2980,8 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     align-items: center !important;
     justify-content: center !important;
     margin-top: 12px !important;
-    min-height: 36px !important;
-    padding: 6px 14px !important;
+    min-height: 44px !important;
+    padding: 8px 16px !important;
     border: 1px solid var(--awa-cc-border) !important;
     border-radius: 8px !important;
     font-size: 13px !important;
@@ -2868,7 +3034,7 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .opc-block-summary .minicart-items .product-item {
-    padding: 10px 0 !important;
+    padding: 10px 12px !important;
     border-bottom: 1px solid var(--awa-cc-border) !important;
 }
 
@@ -2897,6 +3063,21 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     border: 1px solid var(--awa-cc-border) !important;
     border-radius: 12px !important;
     background: var(--awa-cc-surface-1) !important;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-container--error {
+    border-color: var(--awa-danger, #dc2626) !important;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--awa-danger, #dc2626) 18%, transparent) !important;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-inline-error {
+    margin: 10px 0 0 !important;
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -2953,13 +3134,13 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
    carrega async e precisa vencer styles-m/themes do tema pai.
    ============================================================================ */
 
-/* Mensagens globais (page.messages) — alinhadas ao shell do checkout,
-   com ícone e tipografia consistente em vez de faixa estreita centralizada. */
+/* Mensagens globais — mesma largura do .checkout-container (inset só no .page-main). */
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .page.messages {
-    max-width: var(--awa-checkout-shell-max, 1200px) !important;
-    margin-inline: auto !important;
-    padding-inline: clamp(16px, 3vw, 24px) !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
     box-sizing: border-box !important;
 }
 
@@ -3132,9 +3313,19 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
 .awa-b2b-min-order-progress__fill {
     display: block !important;
+    width: 100% !important;
     height: 100% !important;
     background: var(--awa-primary) !important;
-    transition: width 200ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+    transform: scaleX(var(--awa-min-order-scale, 0));
+    transform-origin: left center;
+    transition: transform 200ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-b2b-min-order-progress__fill {
+        transition: none !important;
+    }
 }
 
 html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
@@ -3386,46 +3577,8 @@ html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagechecko
     border: 0 !important;
 }
 
-/* Mobile — frete na etapa principal sem sobreposição preço/texto. */
+/* Mobile — totais: anula max-width legado nos rótulos. */
 @media (max-width: 767px) {
-    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-    .table-checkout-shipping-method tbody tr.row {
-        display: grid !important;
-        grid-template-columns: 28px minmax(0, 1fr) auto !important;
-        grid-template-areas:
-            'radio method price'
-            'radio carrier price' !important;
-        align-items: center !important;
-        gap: 4px 10px !important;
-        padding: 10px 0 !important;
-    }
-
-    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-    .table-checkout-shipping-method .col.col-method {
-        grid-area: method !important;
-        min-width: 0 !important;
-    }
-
-    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-    .table-checkout-shipping-method .col.col-carrier {
-        grid-area: carrier !important;
-        min-width: 0 !important;
-        font-size: 12px !important;
-    }
-
-    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-    .table-checkout-shipping-method .col.col-price {
-        grid-area: price !important;
-        width: auto !important;
-        text-align: right !important;
-        white-space: nowrap !important;
-    }
-
-    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
-    .table-checkout-shipping-method .col:first-child {
-        grid-area: radio !important;
-    }
-
     html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
     .opc-block-summary .table-totals .mark {
         width: auto !important;
@@ -3647,7 +3800,7 @@ html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .one
     html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
     .opc-estimated-wrapper {
         margin-bottom: 12px !important;
-        padding: 12px 14px !important;
+        padding: 16px !important;
         border: 1px solid var(--awa-cc-border) !important;
         border-radius: 12px !important;
         background: var(--awa-cc-surface-1) !important;
@@ -3663,7 +3816,7 @@ html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .one
 
     html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
     :is(#opc-sidebar, .opc-sidebar) {
-        padding: 18px !important;
+        padding: 16px !important;
     }
 }
 
@@ -3715,3 +3868,1049 @@ html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .one
     }
 }
 
+/* ------------------------------------------------------------------ *
+ * Impeccable fix lock v2 — runtime-verified (sessão 40de3e, 2026-06-10)
+ * Evidência: probe Playwright em expresscheckout.html logado B2B.
+ * ------------------------------------------------------------------ */
+
+/* Itens do resumo flush left/right (computed era 12px 0): garante inset horizontal. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary :is(.minicart-items, .items-in-cart) .product-item {
+    padding-inline: 12px !important;
+}
+
+/* .payment-method clipava filho posicionado (overflow:hidden !important no
+   awa-defer-global-bundle e no less consolidado). Nada precisa de clip aqui:
+   título/conteúdo são fluxo normal e o radius não tem bg interno vazando. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-methods .payment-method,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method._active {
+    overflow: visible !important;
+}
+
+/* Modal agreements — close button: computed era 35x35 com conteúdo 44px
+   (clipping) e span 1x1 sem clip (overflow de 48px). Botão 44x44 (touch
+   target) acomoda o ícone; span vira sr-only completo. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal .modal-header .action-close {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    overflow: visible !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal .modal-header .action-close > span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * Impeccable fix lock v3 — alinhamento/quebra/espaçamento (2026-06-10)
+ * Causa raiz comum: _awa-opc-modern-2026-06.less compila em styles-m
+ * com prefixo body#html-body (especificidade de ID) e vencia as regras
+ * antigas deste arquivo escritas como `html body:is(...)` sem ID.
+ * Todas as regras abaixo replicam o prefixo com ID; o polish carrega
+ * depois de styles-m, então empate de especificidade resolve a favor
+ * daqui. !important onde a regra concorrente também usa !important.
+ * Evidência: probes Playwright (tmp-opc-probe/trace/confirm) logado B2B.
+ * ------------------------------------------------------------------ */
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index) {
+    --awa-checkout-gap: 24px;
+    --awa-checkout-gap-mobile: 16px;
+    --awa-checkout-block-pad: 16px;
+    --awa-checkout-sidebar-pad: 18px;
+    --awa-checkout-line: 1.35;
+    --awa-checkout-line-tight: 1.2;
+}
+
+/* [Resumo] styles-m global "body .page-wrapper .product-item .product-item-details
+   { padding: var(--awa-space-4) }" roubava 32px de largura útil do nome. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .opc-block-summary .product-item .product-item-details {
+    padding: 0 !important;
+}
+
+/* [Resumo] Inset único de 16px vem do #opc-sidebar; o padding-inline extra do
+   summary (super-global/styles-m) desalinhava título, itens e totais. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper :is(#opc-sidebar, .opc-sidebar) .opc-block-summary {
+    padding-inline: 0 !important;
+}
+
+/* [Resumo] Itens alinham na mesma coluna do título/totais (v2 punha 12px). */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary :is(.minicart-items, .items-in-cart) .product-item {
+    padding-inline: 0 !important;
+}
+
+/* [Resumo] Luma: .minicart-items-wrapper { margin: 0 -15px 0 0; padding: 15px 15px 0 0 }
+   — margem negativa estourava o card com o summary sem padding próprio. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary .minicart-items-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* [Resumo] Subtotal do item a 20px (styles-m) esmagava a coluna do nome para
+   ~22px no desktop. 13px tabular mantém o preço legível e o nome em 2 linhas. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary .product-item .subtotal,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary .product-item .subtotal .price {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: var(--awa-checkout-line, 1.35) !important;
+    white-space: nowrap !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+/* [Totais mobile] Luma responsive injeta caption via td::before { content:
+   attr(data-th) } → "Total do Pedido" duplicado e amount estourando. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary .table-totals :is(td, th)::before {
+    content: none !important;
+}
+
+/* [Frete] themes.css esconde input[type=radio].radio (opacity:0 + absolute)
+   e desenha o indicador em "+label::before" — na tabela de frete não há
+   label adjacente, sobrava célula vazia. Radio nativo com accent-color. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.table-checkout-shipping-method input[type="radio"] {
+    opacity: 1 !important;
+    position: static !important;
+    z-index: auto !important;
+    -webkit-appearance: auto !important;
+    appearance: auto !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    accent-color: var(--awa-primary) !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.table-checkout-shipping-method tbody td {
+    vertical-align: middle !important;
+}
+
+/* [Resumo] Nome do item: super-global pinta vermelho com ID; regra antiga
+   deste arquivo (sem ID) perdia. Texto neutro, vermelho fica para preço/CTA. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary .product-item-name,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-block-summary .product-item-name a {
+    color: var(--awa-cc-text-1) !important;
+}
+
+/* [Pagamento] O radio do método fica oculto via KO (style="display: none")
+   quando só há um método, mas o ::before do label (themes.css) continuava
+   desenhando um círculo sobre o "A" de "A Combinar". */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method-title input.radio[style*="display: none"] + label::before,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method-title input.radio[style*="display: none"] + label::after {
+    content: none !important;
+    display: none !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method-title input.radio[style*="display: none"] + label {
+    padding-left: 0 !important;
+}
+
+/* Com radio visível (múltiplos métodos), reserva espaço pro indicador 20px. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method-title input.radio:not([style*="display: none"]) + label {
+    position: relative !important;
+    padding-left: 30px !important;
+}
+
+/* [Shell] Gap uniforme 16px abaixo de 1024px (less punha 20px no tablet,
+   critical punha 12px no mobile). */
+@media (max-width: 1023px) {
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper .checkout-container {
+        gap: var(--awa-checkout-gap-mobile, 16px) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    /* [Frete mobile] tr.row vira grid, mas table/tbody continuavam
+       table/table-row-group com shrink-to-fit → caixa estreita e o
+       método quebrando palavra por palavra. Block + 100% estica a linha. */
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .table-checkout-shipping-method,
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .table-checkout-shipping-method tbody {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* [CTA mobile] styles-m força .actions-toolbar{display:flex} e
+       .actions-toolbar > .primary{width:100%} → toolbar empilhava (124px).
+       Grid meta | botão devolve a barra compacta (~76px). */
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper :is(#opc-sidebar, .opc-sidebar) .actions-toolbar.awa-place-order-toolbar {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper .awa-place-order-toolbar > .primary {
+        width: auto !important;
+        margin: 0 !important;
+    }
+
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper .awa-place-order-toolbar .btn-placeorder {
+        width: auto !important;
+        min-width: 9.5rem !important;
+        white-space: nowrap !important;
+    }
+
+    /* [CTA mobile] Trust strip que vive logo após o toolbar fixo ficava por
+       baixo dele no fim do scroll (OVERLAP firefox/mobile na auditoria). */
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-place-order-toolbar + .awa-opc-trust-strip {
+        display: none !important;
+    }
+
+    /* [CTA mobile] Folga de scroll maior que a barra fixa (~76px + sombra). */
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper .page-main {
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
+
+/* ==========================================================================
+ * Impeccable fix lock v4 — B2B payment blocks + hierarquia UX (2026-06-11)
+ * ========================================================================== */
+
+/* [B2B] Pilha consistente: PO → Termos → Observações antes dos métodos. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method._active .payment-method-content
+:is(.b2b-po-number-container, .b2b-terms-container, .b2b-order-notes-wrapper),
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+#checkout-step-payment
+:is(.b2b-po-number-container, .b2b-terms-container, .b2b-order-notes-wrapper) {
+    margin-bottom: 14px !important;
+}
+
+/* [Termos] Cabeçalho com badge obrigatório (paridade com PO/opcional). */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-heading__row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-badge--required {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 24px !important;
+    padding: 0 10px !important;
+    border-radius: 999px !important;
+    background: color-mix(in srgb, var(--awa-primary) 10%, transparent) !important;
+    color: var(--awa-primary) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+}
+
+/* [Termos] Checkbox + label em coluna flexível; status aceito abaixo no mobile. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-field.choice {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    margin: 0 !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-field .checkbox {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    margin-top: 2px !important;
+    flex-shrink: 0 !important;
+    accent-color: var(--awa-primary) !important;
+    cursor: pointer !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-field .checkbox:focus-visible {
+    outline: 2px solid var(--awa-primary) !important;
+    outline-offset: 2px !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-field .label {
+    flex: 1 !important;
+    min-width: 0 !important;
+    line-height: 1.45 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-status {
+    display: inline-flex !important;
+    align-items: center !important;
+    align-self: flex-start !important;
+    gap: 6px !important;
+    padding: 8px 14px !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+    border-radius: 999px !important;
+    color: var(--awa-success, #15803d) !important;
+    background: color-mix(in srgb, var(--awa-success, #15803d) 12%, transparent) !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-container--error .b2b-terms-field .checkbox {
+    outline: 2px solid var(--awa-danger, #dc2626) !important;
+    outline-offset: 2px !important;
+}
+
+/* [Pagamento] Destaque do método único B2B sem pseudo-radio fantasma. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method._active {
+    border: 1px solid var(--awa-cc-border) !important;
+    border-radius: 12px !important;
+    background: var(--awa-cc-surface-1) !important;
+    padding: 12px 14px !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method-title .label {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: var(--awa-cc-text-1) !important;
+}
+
+/* [Frete] Estado de carregamento mais legível. */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.opc-wrapper .loading-mask {
+    background: color-mix(in srgb, var(--awa-cc-surface-1) 88%, transparent) !important;
+    border-radius: 10px !important;
+}
+
+@media (min-width: 768px) {
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .b2b-terms-wrapper {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Impeccable fix lock v5 — typeset, padding, modal close, headings
+ * (expresscheckout.html audit 2026-06-10 — 15 issues)
+ * ------------------------------------------------------------------ */
+
+/* [Typeset] Root 16px no checkout — corrige herança 10px em head/critical/noscript */
+html:has(body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)) {
+    font-size: 100% !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index) {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+}
+
+/* [Pagamento] v10.1 zerava padding do título — filhos colados à borda esquerda */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method > .payment-method-title.field,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-methods .payment-method > .payment-method-title {
+    padding: 12px 14px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method {
+    padding: 0 !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.payment-method._active .payment-method-content {
+    padding: 0 14px 12px !important;
+    margin-top: 0 !important;
+}
+
+/* [Modal agreements] sr-only no span — botão 44×44 sem overflow:hidden (Impeccable v6) */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal .modal-inner-wrap,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal .modal-header {
+    overflow: visible !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal .modal-header .action-close {
+    position: relative !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal .modal-header .action-close > span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    pointer-events: none !important;
+}
+
+/* [Headings] h2 após h1 page-title — estilos equivalentes ao h3 anterior */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-title,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.b2b-terms-modal-title {
+    margin: 0 !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    color: var(--awa-cc-text-1) !important;
+}
+
+/* UX v11 — pedido mínimo B2B no resumo do checkout */
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-b2b-min-order-progress--checkout.awa-b2b-min-order-progress--near {
+    border-color: color-mix(in srgb, var(--awa-primary) 32%, var(--awa-cc-border)) !important;
+    background: color-mix(in srgb, var(--awa-primary) 7%, var(--awa-cc-surface-1)) !important;
+}
+
+html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.awa-b2b-min-order-progress--checkout .awa-b2b-min-order-progress__message {
+    margin: 8px 0 0;
+    font-size: max(13px, 0.8125rem);
+    line-height: 1.45;
+    color: var(--awa-cc-text-1);
+    text-wrap: pretty;
+}
+
+/* v9 adapt — touch coarse: reforço de alvos e espaçamento (2026-06-11) */
+@media (pointer: coarse) {
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .table-checkout-shipping-method label,
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .payment-method-title label {
+        min-height: 48px !important;
+        gap: 12px !important;
+    }
+
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .opc-block-summary .qty-button {
+        gap: 8px !important;
+    }
+
+    html body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .awa-opc-step-indicator__pill {
+        min-height: 48px !important;
+        padding: 0 18px !important;
+    }
+}
+
+/* Impeccable fix lock v6 — padding shell (vence impeccable-refine terminal) */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .page-main > .columns,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .page-main > .columns > .column.main {
+    padding-inline: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper :is(#checkout.checkout-container, .checkout-container) {
+    padding-inline: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .checkout-container > :is(.opc-wrapper, #opc-sidebar, .opc-sidebar) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-inline: 0 !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .checkout-container > .messages {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Impeccable fix lock v7 — header alinhado ao page-main inset (fórmula explícita) */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper :is(
+    #header .header-container,
+    #header.header-container,
+    .awa-checkout-header-shell .awa-checkout-header-content,
+    .awa-checkout-header-content,
+    .header-content.awa-checkout-header-content
+) {
+    max-width: min(1440px, calc(100vw - (2 * clamp(12px, 3vw, 20px)))) !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .awa-checkout-header-bar {
+    padding-inline: 0 !important;
+}
+
+/* Impeccable fix lock v8 — ritmo interno 16px: etapas = sidebar (log H-F: tablet li 20px vs sidebar 16px) */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .opc-wrapper #checkoutSteps > li {
+    padding: 16px !important;
+}
+
+/* Impeccable fix lock v9 — sidebar + estimated mobile: 16px em todos breakpoints */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper :is(#opc-sidebar, .opc-sidebar) {
+    padding: 16px !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper #opc-sidebar .opc-block-summary,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .opc-sidebar .opc-block-summary {
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+@media (max-width: 767px) {
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper .opc-estimated-wrapper {
+        padding: 16px !important;
+    }
+}
+
+/* Impeccable fix lock v10 — desktop: baseline dos títulos de coluna
+   (step-indicator__label t≈354 vs summary .title; card padding-top 16px deixava 8px de delta) */
+@media (min-width: 1024px) {
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .page-wrapper :is(#opc-sidebar, .opc-sidebar) {
+        padding: 24px 16px 16px !important;
+    }
+}
+
+/* Impeccable fix lock v11 — page-main inset = header (vence align-grid-terminal .page-main.container) */
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .page-main:is(.container, .page-main) {
+    padding-inline: clamp(12px, 3vw, 20px) !important;
+    max-width: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.page-wrapper .page-main > .columns > .column.main {
+    padding-inline: 0 !important;
+    padding-block: 0 !important;
+    max-width: 100% !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * [Modal agreements v8] _inner-scroll + modal-slide (2026-06-16)
+ * Scroll dos termos em .modal-content; wrap/header liberados para o
+ * action-close 44×44 não ser clipado por overflow-y do Luma.
+ * ------------------------------------------------------------------ */
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll.modal-slide .modal-inner-wrap,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-inner-wrap,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header {
+    overflow: visible !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-content {
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    max-height: min(70vh, 520px);
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header .action-close {
+    position: relative !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header .action-close > span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    pointer-events: none !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * [Modal agreements v9] UI/UX — paridade b2b-terms-modal (2026-06-16)
+ * Shell moderno, tipografia legível, close visível, mobile slide, a11y.
+ * ------------------------------------------------------------------ */
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modals-overlay {
+    background: rgb(15 23 42 / 48%) !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll._show .modal-inner-wrap {
+    background: var(--awa-cc-surface-1) !important;
+    border: 1px solid var(--awa-cc-border) !important;
+    border-radius: var(--awa-cc-radius-card, 16px) !important;
+    box-shadow: var(--awa-cc-shadow-2) !important;
+    max-width: min(560px, calc(100vw - 32px)) !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 16px 20px !important;
+    border-bottom: 1px solid var(--awa-cc-border) !important;
+    background: var(--awa-cc-surface-2) !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-title {
+    margin: 0 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    color: var(--awa-cc-text-1) !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header .action-close {
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    color: var(--awa-cc-text-2) !important;
+    cursor: pointer !important;
+    transition:
+        background-color var(--awa-cc-transition, 280ms cubic-bezier(0.4, 0, 0.2, 1)),
+        color var(--awa-cc-transition, 280ms cubic-bezier(0.4, 0, 0.2, 1)),
+        box-shadow var(--awa-cc-transition, 280ms cubic-bezier(0.4, 0, 0.2, 1)) !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header .action-close::before {
+    content: '\00d7' !important;
+    display: block !important;
+    font-size: 22px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    color: inherit !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header .action-close:hover,
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-header .action-close:focus-visible {
+    background: color-mix(in srgb, var(--awa-primary) 10%, var(--awa-cc-surface-2)) !important;
+    color: var(--awa-primary) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px var(--awa-cc-focus) !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-content {
+    padding: 20px !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    color: var(--awa-cc-text-2) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--awa-cc-border) transparent !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-content :is(p, li) {
+    margin-block: 0 0.85em !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.modal-popup.agreements-modal._inner-scroll .modal-content :is(p, ul, ol):last-child {
+    margin-bottom: 0 !important;
+}
+
+html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+.checkout-agreements .action.action-show {
+    font-weight: 600 !important;
+    text-decoration: underline !important;
+    text-underline-offset: 0.14em !important;
+    text-decoration-thickness: 1px !important;
+}
+
+@media (max-width: 767px) {
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .modal-popup.agreements-modal.modal-slide._show .modal-inner-wrap {
+        max-width: 100% !important;
+        width: min(100%, 420px) !important;
+        border-radius: var(--awa-cc-radius-card, 16px) 0 0 var(--awa-cc-radius-card, 16px) !important;
+        box-shadow: -8px 0 32px rgb(15 23 42 / 14%) !important;
+    }
+
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .modal-popup.agreements-modal._inner-scroll .modal-content {
+        max-height: min(65vh, 480px) !important;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .modal-popup.agreements-modal._inner-scroll .modal-header {
+        padding-inline: 16px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .modal-popup.agreements-modal,
+    html body#html-body:is(.checkout-index-index, .rokanthemes-onepagecheckout, .onepagecheckout-index-index)
+    .modal-popup.agreements-modal .modal-inner-wrap {
+        transition: none !important;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * [Modal agreements v10] terminal lock — vence _awa-consolidated.less
+ * overflow:hidden no .modal-inner-wrap (2026-06-19)
+ * ------------------------------------------------------------------ */
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.agreements-modal:not(._show) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    inset: auto !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.agreements-modal._inner-scroll .modal-inner-wrap,
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.agreements-modal._inner-scroll .modal-header {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.agreements-modal._inner-scroll .modal-content {
+    overflow-y: auto !important;
+    max-height: min(70vh, 520px) !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.agreements-modal._inner-scroll .modal-header .action-close {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    overflow: visible !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * [Checkout modals v16] exact shipping address modal fixed in viewport
+ * ------------------------------------------------------------------ */
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 10010 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px)) !important;
+    box-sizing: border-box !important;
+    overflow: auto !important;
+    transform: none !important;
+    will-change: auto !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-inner-wrap {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: min(720px, calc(100vw - 32px)) !important;
+    max-width: min(720px, calc(100vw - 32px)) !important;
+    max-height: calc(100vh - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+    margin: auto !important;
+    overflow: auto !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-header .action-close {
+    position: relative !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show #shipping-new-address-form {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    column-gap: 16px !important;
+    row-gap: 12px !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show #shipping-new-address-form
+:is(.field.street, fieldset.street, .awa-b2b-address-street) {
+    grid-column: 1 / -1 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show #shipping-new-address-form
+.field.awa-b2b-address-field--hidden {
+    display: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show.awa-checkout-b2b-address-modal
+.modal-inner-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show.awa-checkout-b2b-address-modal
+.field.awa-b2b-address-field--hidden {
+    display: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show.awa-checkout-b2b-address-modal
+.modal-content {
+    overflow: visible !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show.awa-checkout-b2b-address-modal
+.modal-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 2 !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 14px 20px !important;
+    border-top: 1px solid var(--awa-checkout-border, var(--awa-cc-border)) !important;
+    background: var(--awa-checkout-surface, var(--awa-cc-surface-1)) !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+) .modals-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 10000 !important;
+}
+
+@media (max-width: 767px) {
+    html body#html-body#html-body#html-body#html-body#html-body:is(
+        .checkout-index-index,
+        .rokanthemes-onepagecheckout,
+        .onepagecheckout-index-index
+    ) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show {
+        align-items: flex-start !important;
+        padding: max(10px, env(safe-area-inset-top, 0px)) 10px max(10px, env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    html body#html-body#html-body#html-body#html-body#html-body:is(
+        .checkout-index-index,
+        .rokanthemes-onepagecheckout,
+        .onepagecheckout-index-index
+    ) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show .modal-inner-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: calc(100vh - 20px) !important;
+        max-height: calc(100dvh - 20px) !important;
+        margin-block: auto !important;
+    }
+
+    html body#html-body#html-body#html-body#html-body#html-body:is(
+        .checkout-index-index,
+        .rokanthemes-onepagecheckout,
+        .onepagecheckout-index-index
+    ) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show #shipping-new-address-form {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}

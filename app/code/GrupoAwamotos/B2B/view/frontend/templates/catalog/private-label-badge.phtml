@@ -1,0 +1,13 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Catalog\PrivateLabelBadge $block */
+$label = $block->getLabel();
+?>
+<div class="b2b-private-label-badge">
+    <span class="b2b-private-label-badge__icon">&#9679;</span>
+    <span class="b2b-private-label-badge__text">
+        <?= $block->escapeHtml(__('Produto Exclusivo')) ?>
+        <?php if ($label): ?>
+            &mdash; <strong><?= $block->escapeHtml($label) ?></strong>
+        <?php endif; ?>
+    </span>
+</div>

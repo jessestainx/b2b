@@ -35,6 +35,10 @@ $directUrl = static function (string $path) use ($block, $normalizeHtmlSuffixUrl
         return $normalizeHtmlSuffixUrl($url);
 };
 
+$cmsPageUrl = static function (string $path) use ($block): string {
+        return rtrim((string) $block->getBaseUrl(), '/') . '/' . ltrim($path, '/');
+};
+
 $heroResponsiveViewModel = $block->getData('hero_responsive_view_model');
 
 // Forca o template do modulo para evitar falhas de validacao no override do tema.
@@ -194,7 +198,7 @@ $categoryCarouselCategories = array_values(array_filter(
 	static fn(array $cat): bool => (int) ($cat['count'] ?? 0) >= $categoryMinProductCount
 ));
 
-$newProductsUrl = $directUrl('lancamentos.html');
+$newProductsUrl = $cmsPageUrl('lancamentos');
 $superOffersUrl = $directUrl('ofertas.html');
 $productPromoBannersHtml = $renderCmsBlock('home_product_promo_banners');
 $productPromoBannersHtml = preg_replace_callback(

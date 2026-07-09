@@ -1,0 +1,110 @@
+//
+// AWA Motos - Image Aspect Ratio Fix (Onda 15)
+// 2026-06-28
+//
+// Corrige CLS em imagens usando --awa-image-aspect CSS variable
+// (que ja esta em uso mas sem a regra CSS correspondente)
+//
+
+// Default 1:1 para product cards
+.awa-image-container {
+    aspect-ratio: var(--awa-image-aspect, 1 / 1);
+    overflow: hidden;
+    position: relative;
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.awa-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+}
+
+// Variantes
+.awa-image-aspect-1x1 { aspect-ratio: 1 / 1; }
+.awa-image-aspect-4x3 { aspect-ratio: 4 / 3; }
+.awa-image-aspect-16x9 { aspect-ratio: 16 / 9; }
+.awa-image-aspect-21x9 { aspect-ratio: 21 / 9; }
+.awa-image-aspect-3x4 { aspect-ratio: 3 / 4; }
+
+// Category carousel icons
+.awa-category-carousel__icon,
+.awa-category-carousel__icon-wrapper {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    position: relative;
+    background: #f9fafb;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.awa-category-carousel__icon img,
+.awa-category-carousel__icon-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+}
+
+// Hero slider
+.wrapper_slider .banner_item,
+.awa-hero-swiper .banner_item {
+    aspect-ratio: 16 / 6;
+    overflow: hidden;
+    position: relative;
+    background: #f3f4f6;
+}
+.wrapper_slider .banner_item img,
+.awa-hero-swiper .banner_item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+@media (max-width: 991px) {
+    .wrapper_slider .banner_item,
+    .awa-hero-swiper .banner_item {
+        aspect-ratio: 4 / 3;
+    }
+}
+@media (max-width: 480px) {
+    .wrapper_slider .banner_item,
+    .awa-hero-swiper .banner_item {
+        aspect-ratio: 1 / 1;
+    }
+}
+
+// Product card image - aspect ratio fix
+.product-image-container,
+.awa-product-card .product-image-container {
+    aspect-ratio: var(--awa-image-aspect, 1 / 1);
+    overflow: hidden;
+    position: relative;
+    background: #f9fafb;
+    display: block;
+}
+.product-image-wrapper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-image-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    max-width: 100%;
+    max-height: 100%;
+}

@@ -13,7 +13,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 
 class MassDelete extends Action implements HttpPostActionInterface
 {
-    const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::recommendations';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_ProductIntelligence::recommendations';
 
     private Filter $filter;
     private CollectionFactory $collectionFactory;

@@ -225,7 +225,7 @@ html body#html-body:is(.b2b-account-shell, .awa-account-operational)
         grid-template-rows: 44px !important;
         align-items: center !important;
         gap: 8px 12px !important;
-        padding: 0 16px !important;
+        padding-inline: var(--awa-page-pad-mobile, 16px); padding-block: 0 !important;
         max-height: 56px !important;
         min-height: 56px !important;
         height: 56px !important;
@@ -329,7 +329,7 @@ html body#html-body:is(.b2b-account-shell, .awa-account-operational)
         height: 44px !important;
     }
 
-    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col > :not(.awa-header-minicart),
+    html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col > :not(.awa-header-minicart):not(.b2b-status-panel),
     html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col .awa-header-account-prompt,
     html body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col .awa-b2b-mode-badge {
         display: none !important;
@@ -383,7 +383,7 @@ html body#html-body .page-wrapper {
         :is(.header-main, .header_main) > .container,
     html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
         .header-wrapper-sticky .header-main > .container {
-        max-width: 1280px !important;
+        max-inline-size: var(--awa-container-max, 1280px) !important;
         width: 100% !important;
         margin-inline: auto !important;
         padding-inline: 0 !important;
@@ -392,7 +392,7 @@ html body#html-body .page-wrapper {
 
     html body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
         :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row]) {
-        max-width: 1280px !important;
+        max-inline-size: var(--awa-container-max, 1280px) !important;
         width: 100% !important;
         margin-inline: auto !important;
         padding-inline: 16px !important;
@@ -403,7 +403,7 @@ html body#html-body .page-wrapper {
         .header-control.awa-nav-bar > .container,
     html body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]
         .header-control.awa-nav-bar .awa-nav-bar__inner {
-        max-width: 1280px !important;
+        max-inline-size: var(--awa-container-max, 1280px) !important;
         width: 100% !important;
         margin-inline: auto !important;
         padding-inline: 16px !important;

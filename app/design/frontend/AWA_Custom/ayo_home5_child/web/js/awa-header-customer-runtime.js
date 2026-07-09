@@ -39,6 +39,10 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             if (customerLoggedIn) {
                 if (accountNav) {
                     accountNav.style.removeProperty('display');
+                    accountNav.removeAttribute('hidden');
+                    accountNav.classList.remove('awa-force-hidden');
+                    accountNav.setAttribute('data-awa-auth-state', 'customer');
+                    accountNav.setAttribute('aria-hidden', 'false');
                 }
                 if (rightCol) {
                     rightCol.classList.add('awa-header-right--logged');
@@ -48,6 +52,10 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
 
             if (accountNav) {
                 accountNav.style.setProperty('display', 'none', 'important');
+                accountNav.classList.add('awa-force-hidden');
+                accountNav.setAttribute('hidden', 'hidden');
+                accountNav.setAttribute('data-awa-auth-state', 'guest');
+                accountNav.setAttribute('aria-hidden', 'true');
             }
             if (rightCol) {
                 rightCol.classList.remove('awa-header-right--logged');
@@ -66,6 +74,102 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 || data.email
                 || ''
             ).trim();
+        }
+
+        function hasB2bStatusPanel() {
+            return !!document.querySelector('.b2b-status-panel');
+        }
+
+        function hidePromptForB2bPanel(prompt) {
+            if (!prompt) {
+                return;
+            }
+
+            prompt.style.setProperty('display', 'none', 'important');
+            prompt.style.setProperty('visibility', 'hidden', 'important');
+            prompt.style.setProperty('pointer-events', 'none', 'important');
+            prompt.setAttribute('aria-hidden', 'true');
+        }
+
+        function syncAccountPromptFallback(data) {
+            let prompt = document.querySelector('.awa-header-account-prompt');
+            let guest;
+            let customer;
+            let customerLine1;
+            let logged;
+            let label;
+            let shortLabel;
+
+            if (!prompt) {
+                return;
+            }
+
+            if (hasB2bStatusPanel()) {
+                hidePromptForB2bPanel(prompt);
+                return;
+            }
+
+            logged = isLoggedIn(data);
+            label = resolveCustomerLabel(data);
+            shortLabel = label.length > 20 ? (label.slice(0, 20) + '...') : label;
+            guest = prompt.querySelector('.awa-header-account-prompt__guest');
+            customer = prompt.querySelector('.awa-header-account-prompt__customer');
+            customerLine1 = prompt.querySelector('.awa-header-account-prompt__customer .awa-header-account-prompt__line1');
+
+            prompt.setAttribute('data-awa-auth-state', logged ? 'customer' : 'guest');
+            prompt.setAttribute('data-awa-auth-settled', '1');
+            prompt.classList.toggle('awa-header-account-prompt--revealed', logged);
+            prompt.classList.toggle('awa-header-account-prompt--long-name', label.length > 16);
+
+            if (window.innerWidth >= 992) {
+                if (logged) {
+                    /*
+                     * Some legacy desktop compact rules hide the account prompt globally.
+                     * Force visibility for authenticated users so Dashboard/Logout remain reachable.
+                     */
+                    prompt.removeAttribute('hidden');
+                    prompt.setAttribute('aria-hidden', 'false');
+                    prompt.style.removeProperty('display');
+                    prompt.style.removeProperty('visibility');
+                    prompt.style.removeProperty('pointer-events');
+                } else {
+                    prompt.style.removeProperty('display');
+                    prompt.style.removeProperty('visibility');
+                    prompt.style.removeProperty('pointer-events');
+                }
+            } else {
+                prompt.style.removeProperty('display');
+                prompt.style.removeProperty('visibility');
+                prompt.style.removeProperty('pointer-events');
+            }
+
+            if (guest) {
+                if (logged) {
+                    guest.hidden = true;
+                    guest.setAttribute('aria-hidden', 'true');
+                    guest.style.removeProperty('display');
+                } else {
+                    guest.hidden = false;
+                    guest.setAttribute('aria-hidden', 'false');
+                    guest.style.removeProperty('display');
+                }
+            }
+
+            if (customer) {
+                if (logged) {
+                    customer.hidden = false;
+                    customer.setAttribute('aria-hidden', 'false');
+                    customer.style.removeProperty('display');
+                } else {
+                    customer.hidden = true;
+                    customer.setAttribute('aria-hidden', 'true');
+                    customer.style.removeProperty('display');
+                }
+            }
+
+            if (logged && customerLine1) {
+                customerLine1.textContent = shortLabel ? ('Olá, ' + shortLabel + '!') : 'Olá!';
+            }
         }
 
         function updateGreeting(data) {
@@ -168,6 +272,17 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             if (window.__awaHeaderMinicartFeedbackInit) {
                 return;
             }
+
+            // Carrinho/checkout: minicart oculto ou redundante — observer no contador travava a página.
+            if (document.body && (
+                document.body.classList.contains('checkout-cart-index') ||
+                document.body.classList.contains('checkout-index-index') ||
+                document.body.classList.contains('rokanthemes-onepagecheckout') ||
+                document.body.classList.contains('onepagecheckout-index-index')
+            )) {
+                return;
+            }
+
             window.__awaHeaderMinicartFeedbackInit = true;
 
             function getQty() {
@@ -179,12 +294,42 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
                 return Number.isFinite(value) ? value : 0;
             }
 
+            function formatCartBadgeLabel(qty) {
+                return qty > 99 ? '99+' : String(qty);
+            }
+
+            function syncCartBadgeLabel(qty) {
+                let counter = document.querySelector(HEADER_MINICART_COUNTER_SELECTOR);
+                if (!counter) {
+                    return;
+                }
+
+                let label = formatCartBadgeLabel(qty);
+                let nextAriaLabel = qty > 99
+                    ? 'Carrinho com mais de 99 itens'
+                    : ('Carrinho com ' + qty + (qty === 1 ? ' item' : ' itens'));
+
+                // Guard obrigatório: setAttribute incondicional dispara o MutationObserver
+                // (attributes:true) deste mesmo counter, criando loop infinito.
+                if (counter.getAttribute('aria-label') !== nextAriaLabel) {
+                    counter.setAttribute('aria-label', nextAriaLabel);
+                }
+
+                counter.querySelectorAll('.total-mini-cart-item, .counter-number').forEach(function (node) {
+                    if (String(node.textContent || '').trim() !== label) {
+                        node.textContent = label;
+                    }
+                });
+            }
+
             function pulseIfChanged() {
                 let qty = getQty();
                 let button = document.querySelector(HEADER_MINICART_BUTTON_SELECTOR);
                 if (!button) {
                     return;
                 }
+
+                syncCartBadgeLabel(qty);
 
                 if (lastCartQty === null) {
                     lastCartQty = qty;
@@ -661,9 +806,14 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         }
 
         function syncCustomerUi(data) {
+            var accountPrompt = document.querySelector('.awa-header-account-prompt');
+
             updateRightCol(data);
+            syncAccountPromptFallback(data);
             updateMcpDashboardLink(data);
-            updateGreeting(data);
+            if (!accountPrompt) {
+                updateGreeting(data);
+            }
             updateAccountQuickActions(data);
             ensureMobileQuickActions(data);
             syncAccountAriaState();

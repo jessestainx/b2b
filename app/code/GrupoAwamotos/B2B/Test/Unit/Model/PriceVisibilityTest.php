@@ -69,9 +69,20 @@ class PriceVisibilityTest extends TestCase
 
     /**
      * Helper: mock logged-in customer with given approval status and optional ERP code
+     *
+     * Also mirrors the "logged in" state into the HttpContext values, since
+     * PriceVisibility::isLoggedInContext() checks HttpContext first (for FPC
+     * cache-safety) and only falls back to CustomerSession when the context
+     * auth key is absent (null) AND a session cookie is present — neither of
+     * which is true by default in a CLI unit test run. Without this, every
+     * "logged in" scenario mocked only via CustomerSession would silently be
+     * evaluated as a guest.
      */
     private function mockLoggedInCustomer(?string $approvalStatus = null, ?string $erpCode = null): void
     {
+        $this->httpContextValues[CustomerContext::CONTEXT_AUTH] = true;
+        $this->httpContextValues['customer_id'] = 42;
+
         $this->customerSession->method('isLoggedIn')->willReturn(true);
         $this->customerSession->method('getCustomerId')->willReturn(42);
 
@@ -292,14 +303,18 @@ class PriceVisibilityTest extends TestCase
         $this->assertFalse($service->canAddToCart());
     }
 
-    public function testCanAddToCartLoggedInNoStatusReturnsTrue(): void
+    public function testCanAddToCartLoggedInNoStatusReturnsFalse(): void
     {
+        // Fail-closed: canViewPrices() treats "no status" as allowed for backward
+        // compatibility, but canAddToCart()/isCustomerApproved() must not — a
+        // customer without an explicit approval status must not be able to
+        // checkout as B2B.
         $this->config->method('isEnabled')->willReturn(true);
         $this->config->method('hidePriceForNoErp')->willReturn(false);
         $this->mockLoggedInCustomer(null);
 
         $service = $this->createService();
-        $this->assertTrue($service->canAddToCart());
+        $this->assertFalse($service->canAddToCart());
     }
 
     // ====================================================================
@@ -434,12 +449,13 @@ class PriceVisibilityTest extends TestCase
         $this->assertTrue($service->isCustomerApproved());
     }
 
-    public function testIsCustomerApprovedReturnsTrueWhenNoAttribute(): void
+    public function testIsCustomerApprovedReturnsFalseWhenNoAttribute(): void
     {
+        // Fail-closed: sem status explícito não deve liberar compra B2B.
         $this->mockLoggedInCustomer(null);
 
         $service = $this->createService();
-        $this->assertTrue($service->isCustomerApproved());
+        $this->assertFalse($service->isCustomerApproved());
     }
 
     public function testIsCustomerApprovedReturnsFalseWhenNotLoggedIn(): void

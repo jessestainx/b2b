@@ -22,6 +22,8 @@ class CustomerPriceProvider
 {
     private const CACHE_PREFIX = 'erp_customer_price_';
     private const CACHE_TTL = 7200; // 2 hours — prices change infrequently; ERP sync cron updates Magento
+    private const CONTEXT_VERSION_PREFIX = self::CACHE_PREFIX . 'ctx_v_';
+    private const CONTEXT_VERSION_TTL = 31536000; // 1 year
 
     /**
      * Max seconds a price query to ERP may block a PHP-FPM worker.
@@ -102,7 +104,7 @@ class CustomerPriceProvider
         }
 
         // Check persistent cache
-        $cacheKey = self::CACHE_PREFIX . 'list_' . $erpCustomerCode;
+        $cacheKey = $this->buildListCacheKey($erpCustomerCode);
         $cached = $this->cache->load($cacheKey);
         if ($cached !== false) {
             $value = $cached === '' ? null : (int) $cached;
@@ -181,13 +183,13 @@ class CustomerPriceProvider
      */
     private function getPriceFromList(int $priceListCode, string $sku): ?float
     {
-        $cacheKey = $priceListCode . ':' . $sku;
+        $cacheKey = $priceListCode . ':' . trim($sku);
         if (isset($this->priceCache[$cacheKey])) {
             return $this->priceCache[$cacheKey] ?: null;
         }
 
         // Check persistent cache
-        $persistKey = self::CACHE_PREFIX . md5($cacheKey);
+        $persistKey = $this->buildPricePersistKey($priceListCode, $sku);
         $cached = $this->cache->load($persistKey);
         if ($cached !== false) {
             $price = $cached === '' ? null : (float) $cached;
@@ -257,7 +259,7 @@ class CustomerPriceProvider
                 }
             } else {
                 // Warm: check persistent Redis cache
-                $persistKey = self::CACHE_PREFIX . md5($cacheKey);
+                $persistKey = $this->buildPricePersistKey($priceListCode, $sku);
                 $cached = $this->cache->load($persistKey);
                 if ($cached !== false) {
                     $price = $cached === '' ? null : (float) $cached;
@@ -326,7 +328,7 @@ class CustomerPriceProvider
                 $this->priceCache[$cacheKey] = $price ?? 0.0;
 
                 // Persist to Redis/cache so next request also skips the ERP query
-                $persistKey = self::CACHE_PREFIX . md5($cacheKey);
+                $persistKey = $this->buildPricePersistKey($priceListCode, $sku);
                 $this->cache->save((string) ($price ?? ''), $persistKey, [], self::CACHE_TTL);
 
                 if ($price !== null && $price > 0) {
@@ -370,8 +372,7 @@ class CustomerPriceProvider
      */
     public function clearCustomerCache(int $erpCustomerCode): void
     {
-        $this->cache->remove(self::CACHE_PREFIX . 'list_' . $erpCustomerCode);
-        unset($this->customerListCache[$erpCustomerCode]);
+        $this->invalidateCustomerPriceList($erpCustomerCode);
     }
 
     /**
@@ -402,7 +403,7 @@ class CustomerPriceProvider
 
                 // Match the exact key format used by getPriceFromList / getPricesFromList
                 $cacheKey = $listCode . ':' . $sku;
-                $persistKey = self::CACHE_PREFIX . md5($cacheKey);
+                $persistKey = $this->buildPricePersistKey($listCode, $sku);
 
                 $this->priceCache[$cacheKey] = $price;
                 $this->cache->save((string) $price, $persistKey, [], self::CACHE_TTL);
@@ -417,5 +418,132 @@ class CustomerPriceProvider
         }
 
         return $warmed;
+    }
+
+    /**
+     * Returns cache context token (priceList:version) for FPC segmentation.
+     */
+    public function getContextTokenForCustomer(int $erpCustomerCode): ?string
+    {
+        $listCode = $this->getCustomerPriceListCode($erpCustomerCode);
+        if ($listCode === null) {
+            return null;
+        }
+
+        return $listCode . ':' . $this->getPriceListContextVersion($listCode);
+    }
+
+    /**
+     * Invalidate customer list cache and bump context versions for affected lists.
+     */
+    public function invalidateCustomerPriceList(
+        int $erpCustomerCode,
+        ?int $previousListCode = null,
+        ?int $nextListCode = null
+    ): void {
+        $this->cache->remove($this->buildListCacheKey($erpCustomerCode));
+        unset($this->customerListCache[$erpCustomerCode]);
+
+        $listCodes = array_unique(array_filter([$previousListCode, $nextListCode], static fn($v) => $v !== null));
+        foreach ($listCodes as $listCode) {
+            $this->bumpPriceListContextVersion((int) $listCode);
+        }
+    }
+
+    /**
+     * Invalidate specific list/SKU cached prices.
+     *
+     * @param int[] $listCodes
+     * @param string[] $skus
+     * @return int Removed cache entries
+     */
+    public function invalidatePricesForListsAndSkus(array $listCodes, array $skus): int
+    {
+        $removed = 0;
+        $normalizedSkus = array_values(array_unique(array_map(static fn($sku) => trim((string) $sku), $skus)));
+
+        foreach (array_unique($listCodes) as $listCode) {
+            $code = (int) $listCode;
+            if ($code <= 0) {
+                continue;
+            }
+
+            foreach ($normalizedSkus as $sku) {
+                if ($sku == '') {
+                    continue;
+                }
+
+                $cacheKey = $code . ':' . $sku;
+                $persistKey = $this->buildPricePersistKey($code, $sku);
+                $this->cache->remove($persistKey);
+                unset($this->priceCache[$cacheKey]);
+                $removed++;
+            }
+
+            $this->bumpPriceListContextVersion($code);
+        }
+
+        return $removed;
+    }
+
+    /**
+     * Replace cached list/SKU value and report if the value changed.
+     */
+    public function replaceCachedPrice(int $priceListCode, string $sku, ?float $price): bool
+    {
+        $cacheKey = $priceListCode . ':' . trim($sku);
+        $persistKey = $this->buildPricePersistKey($priceListCode, $sku);
+        $newValue = $this->normalizeCachePrice($price);
+
+        $existing = $this->cache->load($persistKey);
+        $changed = $existing !== false && $existing !== $newValue;
+
+        if ($changed) {
+            $this->cache->remove($persistKey);
+            unset($this->priceCache[$cacheKey]);
+        }
+
+        if ($existing === false || $changed) {
+            $this->cache->save($newValue, $persistKey, [], self::CACHE_TTL);
+        }
+
+        $this->priceCache[$cacheKey] = $price ?? 0.0;
+
+        return $changed;
+    }
+
+    public function getPriceListContextVersion(int $priceListCode): int
+    {
+        $cacheKey = self::CONTEXT_VERSION_PREFIX . $priceListCode;
+        $cached = $this->cache->load($cacheKey);
+        if ($cached !== false && ctype_digit($cached)) {
+            return (int) $cached;
+        }
+
+        $this->cache->save('1', $cacheKey, [], self::CONTEXT_VERSION_TTL);
+        return 1;
+    }
+
+    public function bumpPriceListContextVersion(int $priceListCode): int
+    {
+        $next = $this->getPriceListContextVersion($priceListCode) + 1;
+        $this->cache->save((string) $next, self::CONTEXT_VERSION_PREFIX . $priceListCode, [], self::CONTEXT_VERSION_TTL);
+
+        return $next;
+    }
+
+    private function buildListCacheKey(int $erpCustomerCode): string
+    {
+        return self::CACHE_PREFIX . 'list_' . $erpCustomerCode;
+    }
+
+    private function buildPricePersistKey(int $priceListCode, string $sku): string
+    {
+        return self::CACHE_PREFIX . hash('xxh128', $priceListCode . ':' . trim($sku));
+    }
+
+    private function normalizeCachePrice(?float $price): string
+    {
+        return $price === null ? '' : (string) $price;
     }
 }

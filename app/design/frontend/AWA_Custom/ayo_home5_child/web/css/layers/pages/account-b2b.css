@@ -6,10 +6,10 @@
 #html-body:is(.account, .customer-account, [class*="b2b-"], .sales-order-history, .sales-order-view, .customer-address-index, .customer-address-form) {
     --awa-acct-sidebar-w: var(--awa-grid-sidebar-width-account, 220px);
     --awa-acct-gap: clamp(16px, 2vw, 28px);
-    --awa-acct-surface: var(--awa-bg-surface, #ffffff);
+    --awa-acct-surface: var(--awa-bg-surface, var(--awa-bg));
     --awa-acct-canvas: var(--awa-b2b-bg-soft, #f8fafc);
-    --awa-acct-nav-active-bg: color-mix(in srgb, var(--awa-primary, #b73337) 8%, var(--awa-acct-surface));
-    --awa-acct-nav-hover-bg: color-mix(in srgb, var(--awa-primary, #b73337) 4%, var(--awa-acct-surface));
+    --awa-acct-nav-active-bg: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 8%, var(--awa-acct-surface));
+    --awa-acct-nav-hover-bg: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-acct-surface));
     /* SSOT v11 — escala legível B2B (label 12px / corpo 14px, min recomendado desktop) */
     --awa-acct-label-size: 12px;
     --awa-acct-body-size: 14px;
@@ -21,10 +21,10 @@
     --awa-b2b-radius: var(--awa-acct-panel-radius);
     --awa-b2b-pad: var(--awa-acct-section-pad);
     --awa-b2b-stack: clamp(12px, 1.5vw, 16px);
-    --awa-b2b-primary: var(--awa-primary, #b73337);
-    --awa-b2b-primary-dark: var(--awa-primary-hover, #8e2629);
-    --awa-b2b-ink: var(--awa-text-primary, #333333);
-    --awa-b2b-muted: var(--awa-text-muted, #666666);
+    --awa-b2b-primary: var(--awa-primary, var(--awa-primary));
+    --awa-b2b-primary-dark: var(--awa-primary-hover, var(--awa-primary-hover));
+    --awa-b2b-ink: var(--awa-text-primary, var(--awa-text));
+    --awa-b2b-muted: var(--awa-text-muted, var(--awa-text-secondary));
     --awa-b2b-border: var(--awa-border, #e8e8e8);
     --awa-b2b-soft: var(--awa-acct-canvas);
 }
@@ -69,7 +69,7 @@
 
 #html-body:is(.account, [class*="b2b-"]) .block-collapsible-nav .block-title,
 #html-body:is(.account, [class*="b2b-"]) .block-collapsible-nav-title {
-    background: var(--awa-acct-surface, #ffffff);
+    background: var(--awa-acct-surface, var(--awa-bg));
     padding: 12px 16px;
     margin: 0;
     border-bottom: 1px solid var(--awa-border-subtle, var(--awa-border, #e8e8e8));
@@ -79,7 +79,7 @@
 #html-body:is(.account, [class*="b2b-"]) .block-collapsible-nav-title strong {
     font-size: var(--awa-acct-body-size, 14px);
     font-weight: 700;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     letter-spacing: normal;
     text-transform: none;
 }
@@ -126,7 +126,7 @@
 }
 
 #html-body:is(.account, [class*="b2b-"]) .account-nav-title {
-    background: var(--awa-acct-surface, #ffffff);
+    background: var(--awa-acct-surface, var(--awa-bg));
     padding: 12px 16px;
     margin: 0;
     border-bottom: 1px solid var(--awa-border-subtle, var(--awa-border, #e8e8e8));
@@ -135,7 +135,7 @@
 #html-body:is(.account, [class*="b2b-"]) .account-nav-title strong {
     font-size: var(--awa-acct-body-size, 14px);
     font-weight: 700;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     letter-spacing: normal;
     text-transform: none;
 }
@@ -188,7 +188,7 @@
     font-weight: 600;
     letter-spacing: normal;
     text-transform: none;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     line-height: 1.35;
 }
 
@@ -208,7 +208,7 @@
     letter-spacing: -0.01em;
     line-height: 1.25;
     text-transform: none;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-section-header .section-subtitle {
@@ -216,7 +216,7 @@
     max-width: 65ch;
     font-size: 0.9375rem;
     line-height: 1.5;
-    color: var(--awa-text-secondary, #666666);
+    color: var(--awa-text-secondary, var(--awa-text-secondary));
 }
 
 /* ── Header auth: server hint em superfícies de conta ──────────────── */
@@ -243,7 +243,7 @@
 
 /* ── Focus visible ─────────────────────────────────────────────────── */
 #html-body:is(.account, [class*="b2b-"]) .block-collapsible-nav :is(.item, li) a:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 2px;
 }
 
@@ -277,45 +277,7 @@
     pointer-events: none !important;
 }
 
-/* Header operacional B2B: manter somente a barra principal (56px desktop / 52px mobile)
-   e colapsar wrappers de navegação residuais para evitar "faixa branca" fantasma. */
-#html-body:is(.awa-account-operational, .b2b-account-shell, .account)
-    .awa-site-header[data-awa-header-mode="default"] :is(
-        .header-control.awa-nav-bar,
-        .header-control.header-nav.awa-nav-bar,
-        .awa-nav-bar__inner,
-        .awa-header-primary-nav,
-        .awa-nav-quick-links,
-        .awa-header-locale
-    ) {
-    display: none !important;
-    min-height: 0 !important;
-    max-height: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-
-@media (min-width: 992px) {
-    #html-body:is(.awa-account-operational, .b2b-account-shell, .account)
-        .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky {
-        min-height: 56px !important;
-        max-height: 56px !important;
-        height: 56px !important;
-    }
-}
-
-@media (max-width: 767px) {
-    #html-body:is(.awa-account-operational, .b2b-account-shell, .account)
-        .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky {
-        min-height: 52px !important;
-        max-height: 52px !important;
-        height: 52px !important;
-    }
-}
+/* Header layout pertence à cascata global do tema; páginas de conta não compactam .awa-site-header. */
 
 #html-body:is(.awa-account-operational, .b2b-account-shell, .account)
     .column.main:has(.b2b-page-shell) .page-title-wrapper {
@@ -370,7 +332,7 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     background: color-mix(in srgb, var(--awa-border, #e8e8e8) 35%, var(--awa-acct-surface));
 }
 
@@ -410,7 +372,7 @@
     font-size: var(--awa-acct-title-size);
     font-weight: 700;
     letter-spacing: -0.012em;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .column.main > .action.primary,
@@ -433,8 +395,8 @@
     font-size: var(--awa-acct-body-size);
     font-weight: 600;
     background: var(--awa-acct-surface);
-    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 24%, var(--awa-border, #e8e8e8));
-    color: var(--awa-primary, #b73337);
+    border: 1px solid color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 24%, var(--awa-border, #e8e8e8));
+    color: var(--awa-primary, var(--awa-primary));
 }
 
 #html-body.account .page-footer,
@@ -465,7 +427,7 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     background: color-mix(in srgb, var(--awa-border, #e8e8e8) 35%, var(--awa-acct-surface));
 }
 
@@ -492,7 +454,7 @@
     .orders-history .data.table,
     .sales-order-history .data.table
 ) tbody tr:hover {
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, var(--awa-acct-surface));
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-acct-surface));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-erp-order-view__meta .label,
@@ -500,7 +462,7 @@
     font-size: var(--awa-acct-label-size);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-reorder-page .reorder-card__total {
@@ -528,7 +490,7 @@
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-reorder-page .b2b-reorder-empty__text {
     font-size: var(--awa-acct-body-size);
-    color: var(--awa-text-secondary, #666666);
+    color: var(--awa-text-secondary, var(--awa-text-secondary));
     max-width: 65ch;
 }
 
@@ -545,7 +507,7 @@
     letter-spacing: 0.03em;
     text-transform: uppercase;
     background: color-mix(in srgb, var(--awa-border, #e8e8e8) 50%, transparent);
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     vertical-align: middle;
 }
 
@@ -565,8 +527,8 @@
 }
 #html-body:is(.account, [class*="b2b-"]) .b2b-reorder-page .reorder-status--canceled,
 #html-body:is(.account, [class*="b2b-"]) .b2b-reorder-page .reorder-status--closed {
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 10%, transparent);
-    color: var(--awa-primary, #b73337);
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 10%, transparent);
+    color: var(--awa-primary, var(--awa-primary));
 }
 
 /* ── SSOT v11.8 adapt: reorder mobile — grid em <td> (sem display:contents) ─ */
@@ -606,7 +568,7 @@
         font-weight: 600;
         letter-spacing: 0;
         text-transform: none;
-        color: var(--awa-text-muted, #666666);
+        color: var(--awa-text-muted, var(--awa-text-secondary));
     }
 
     #html-body:is(.account, [class*="b2b-"]) .b2b-reorder-page .reorder-items tbody td.col-select {
@@ -627,7 +589,7 @@
 /* ── SSOT v11.3: btn-reorder focus state ────────────────────────────── */
 /* polish gap: button had no :focus-visible ring */
 #html-body:is(.account, [class*="b2b-"]) .b2b-reorder-page .btn-reorder:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 3px;
 }
 
@@ -666,9 +628,9 @@
     .b2b-quote-form-container .b2b-quote-info,
     .b2b-quote-view .quote-admin-notes
 ) {
-    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 18%, var(--awa-border, #e8e8e8));
+    border: 1px solid color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 18%, var(--awa-border, #e8e8e8));
     border-radius: var(--awa-acct-panel-radius);
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 5%, var(--awa-acct-surface));
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 5%, var(--awa-acct-surface));
     padding: var(--awa-acct-section-pad);
     border-left-width: 1px;
     border-inline-start-width: 1px;
@@ -679,7 +641,7 @@
     font-size: var(--awa-acct-title-size);
     font-weight: 700;
     letter-spacing: -0.012em;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     margin-bottom: 12px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--awa-border, #e8e8e8);
@@ -725,21 +687,21 @@
     font-size: var(--awa-acct-body-size);
     font-weight: 600;
     background: var(--awa-acct-surface);
-    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 24%, var(--awa-border, #e8e8e8));
-    color: var(--awa-primary, #b73337);
+    border: 1px solid color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 24%, var(--awa-border, #e8e8e8));
+    color: var(--awa-primary, var(--awa-primary));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-shoppinglist-index .list-name,
 #html-body:is(.account, [class*="b2b-"]) .b2b-shoppinglist-index .list-name a {
     font-size: var(--awa-acct-body-size);
     font-weight: 600;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-shoppinglist-index .list-description,
 #html-body:is(.account, [class*="b2b-"]) .b2b-shoppinglist-index .card-meta {
     font-size: var(--awa-acct-body-size);
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-page-shell :is(.field .label, .fieldset > .legend) {
@@ -747,7 +709,7 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 /* ── SSOT v13: lista de compras (view), pedido Magento, endereços, ERP ── */
@@ -763,7 +725,7 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     background: color-mix(in srgb, var(--awa-border, #e8e8e8) 35%, var(--awa-acct-surface));
 }
 
@@ -773,14 +735,14 @@
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-shoppinglist-view .shoppinglist-items-table .col-name a {
     font-weight: 600;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-shoppinglist-view .shoppinglist-items-table .col-sku {
     font-size: var(--awa-acct-label-size);
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-shoppinglist-view .shoppinglist-items-table .col-price,
@@ -811,7 +773,7 @@
 #html-body:is(.account, [class*="b2b-"]) .b2b-erp-order-view__meta dd {
     font-size: var(--awa-acct-body-size);
     font-weight: 600;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-erp-orders__pager .current {
@@ -838,7 +800,7 @@
     font-size: var(--awa-acct-title-size);
     font-weight: 700;
     letter-spacing: -0.012em;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     margin-bottom: 12px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--awa-border, #e8e8e8);
@@ -849,7 +811,7 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 #html-body.sales-order-view .order-details-items tfoot .grand_total .amount .price {
@@ -897,7 +859,7 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 #html-body.b2b-register-index .b2b-register-page .actions-toolbar .action.primary {
@@ -918,7 +880,7 @@
 #html-body:is(.account, [class*="b2b-"]) .b2b-page-shell .b2b-section-header {
     margin-bottom: 0;
     padding-bottom: 12px;
-    border-bottom: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 14%, var(--awa-border, #e8e8e8));
+    border-bottom: 1px solid color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 14%, var(--awa-border, #e8e8e8));
 }
 
 @media (max-width: 767px) {
@@ -963,8 +925,8 @@
         padding: 8px 12px;
         border: 0;
         border-radius: 4px;
-        background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, var(--awa-bg-surface, #ffffff));
-        color: var(--awa-text, #333333);
+        background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 6%, var(--awa-bg-surface, var(--awa-bg)));
+        color: var(--awa-text, var(--awa-text));
         font-size: 0.8125rem;
         font-weight: 600;
         text-align: left;
@@ -1040,18 +1002,18 @@
 
 #html-body:is(.account, [class*="b2b-"]) .block-collapsible-nav.awa-nav--mobile-collapsible > :is(.block-title, .title):focus-visible,
 #html-body:is(.account, [class*="b2b-"]) .account-nav-section__toggle:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 2px;
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-page-shell :is(.action.secondary, a.action.secondary):focus-visible,
 #html-body:is(.account, [class*="b2b-"]) .column.main > .action.secondary:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 2px;
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-page-shell :is(.data.table a, .table-wrapper a.action):focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 2px;
     border-radius: 4px;
 }
@@ -1229,7 +1191,7 @@
     padding: var(--awa-acct-section-pad) !important;
     border: 1px solid var(--awa-border-subtle, var(--awa-border, #e8e8e8)) !important;
     border-radius: var(--awa-acct-panel-radius, 4px) !important;
-    background: var(--awa-acct-surface, #ffffff) !important;
+    background: var(--awa-acct-surface, var(--awa-bg)) !important;
     box-shadow: none !important;
 }
 
@@ -1252,7 +1214,7 @@
     padding: var(--awa-acct-section-pad) !important;
     border: 1px solid var(--awa-border-subtle, var(--awa-border, #e8e8e8)) !important;
     border-radius: var(--awa-acct-panel-radius, 4px) !important;
-    background: var(--awa-acct-surface, #ffffff) !important;
+    background: var(--awa-acct-surface, var(--awa-bg)) !important;
     box-sizing: border-box !important;
 }
 
@@ -1347,7 +1309,7 @@
     min-height: 44px !important;
     font-size: var(--awa-acct-body-size, 14px) !important;
     font-weight: 600 !important;
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-dashboard-details {
@@ -1524,12 +1486,12 @@
 
 /* ── §128 account nav SSOT (2026-06-09) ───────────────────────────────────── */
 #html-body:is(.account, [class*="b2b-"]) .block-collapsible-nav :is(.block-title, .title) {
-    background: var(--awa-acct-surface, #ffffff) !important;
+    background: var(--awa-acct-surface, var(--awa-bg)) !important;
     border-bottom: 1px solid var(--awa-border-subtle, var(--awa-border, #e8e8e8)) !important;
 }
 
 #html-body:is(.account, [class*="b2b-"]) .block-collapsible-nav :is(.block-title strong, .title strong) {
-    color: var(--awa-text-primary, #333333) !important;
+    color: var(--awa-text-primary, var(--awa-text)) !important;
     text-transform: none !important;
     letter-spacing: normal !important;
 }
@@ -1622,7 +1584,7 @@
 #html-body.b2b-account-dashboard .page-wrapper .b2b-onboarding-section {
     border-radius: 4px !important;
     border: 1px solid var(--awa-border-subtle, var(--awa-border, #e8e8e8)) !important;
-    background: var(--awa-acct-surface, #ffffff) !important;
+    background: var(--awa-acct-surface, var(--awa-bg)) !important;
     background-image: none !important;
     box-shadow: none !important;
 }
@@ -1631,7 +1593,7 @@
     .b2b-dashboard-header,
     .b2b-header-inner
 ) {
-    background: var(--awa-acct-surface, #ffffff) !important;
+    background: var(--awa-acct-surface, var(--awa-bg)) !important;
     background-image: none !important;
     box-shadow: none !important;
 }
@@ -1646,8 +1608,8 @@
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .category-chip:hover {
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, #ffffff) !important;
-    color: var(--awa-text, #1a1a1a) !important;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-bg)) !important;
+    color: var(--awa-text, var(--awa-text-primary)) !important;
     transform: none !important;
     box-shadow: none !important;
 }
@@ -1667,17 +1629,7 @@ html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .page-top
     box-sizing: border-box;
 }
 
-html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .awa-site-header :is(
-    .header_main .container,
-    .awa-main-header__inner-wrap,
-    .awa-main-header__inner
-) {
-    max-width: var(--awa-page-dash, 1280px) !important;
-    width: 100% !important;
-    margin-inline: auto !important;
-    padding-inline: var(--awa-page-pad, 24px) !important;
-    box-sizing: border-box !important;
-}
+/* Header layout pertence à cascata global do tema; CSS de conta só ajusta a área de conteúdo. */
 
 @media (min-width: 1024px) {
     html body#html-body.b2b-account-dashboard .page-wrapper .page-main > .columns {
@@ -1754,7 +1706,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .block.block-col
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .checklist-item.done {
-    background: color-mix(in srgb, var(--awa-success, #16a34a) 8%, #ffffff) !important;
+    background: color-mix(in srgb, var(--awa-success, #16a34a) 8%, var(--awa-bg)) !important;
     border: 1px solid color-mix(in srgb, var(--awa-success, #16a34a) 22%, var(--awa-border, #e8e8e8)) !important;
 }
 
@@ -1785,9 +1737,9 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .block.block-col
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-rexis-header {
-    background: var(--awa-bg-surface, #ffffff) !important;
+    background: var(--awa-bg-surface, var(--awa-bg)) !important;
     background-image: none !important;
-    color: var(--awa-text, #1a1a1a) !important;
+    color: var(--awa-text, var(--awa-text-primary)) !important;
 }
 
 html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .block-minicart .block-content > .items-total {
@@ -1796,8 +1748,8 @@ html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .block-mi
 
 html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .block-minicart .action.viewcart {
     background: var(--awa-bg-muted, #f8fafc) !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
-    color: var(--awa-text, #1a1a1a) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
+    color: var(--awa-text, var(--awa-text-primary)) !important;
 }
 
 /* ── §133 SSOT refine terminal (2026-06-09) ───────────────────────────────── */
@@ -1825,38 +1777,7 @@ html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .page-top
     }
 }
 
-html body#html-body:is(.awa-account-operational, .b2b-account-shell, .account, .b2b-account-dashboard)
-    .page-wrapper .awa-site-header:is(.awa-account-header, .awa-header-condensed) :is(
-        .awa-main-header,
-        .header_main
-    ) {
-    min-height: 56px !important;
-}
-
-html body#html-body:is(.awa-account-operational, .b2b-account-shell, .account, .b2b-account-dashboard)
-    .page-wrapper .awa-site-header:is(.awa-account-header, .awa-header-condensed)
-    #header :is(.awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
-    min-height: 56px !important;
-    height: 56px !important;
-    max-height: 56px !important;
-    padding-block: 8px !important;
-    box-sizing: border-box !important;
-}
-
-@media (min-width: 1024px) {
-    html body#html-body:is(.awa-account-operational, .b2b-account-shell, .account, .b2b-account-dashboard)
-        .page-wrapper .awa-site-header .awa-header-search-col :is(form.minisearch, .block-search form.minisearch) {
-        min-height: 40px !important;
-        max-height: 40px !important;
-    }
-
-    html body#html-body:is(.awa-account-operational, .b2b-account-shell, .account, .b2b-account-dashboard)
-        .page-wrapper .awa-site-header .awa-header-search-col :is(input#search, input.input-text) {
-        min-height: 40px !important;
-        max-height: 40px !important;
-        font-size: 0.875rem !important;
-    }
-}
+/* Header layout pertence à cascata global do tema; conta não define altura/search do header. */
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-dashboard-header {
     display: flex !important;
@@ -1886,7 +1807,7 @@ html body#html-body:is(.awa-account-operational, .b2b-account-shell, .account, .
 #html-body.b2b-account-dashboard .page-wrapper .b2b-member-since {
     display: inline-block !important;
     font-size: 0.875rem !important;
-    color: var(--awa-text-muted, #666666) !important;
+    color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper :is(
@@ -2169,7 +2090,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .sidebar-main :i
 html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .block-minicart .action.viewcart {
     background: var(--awa-bg-muted, #f8fafc) !important;
     border: 1px solid var(--awa-border-strong, #d0d0d0) !important;
-    color: var(--awa-text-primary, #333333) !important;
+    color: var(--awa-text-primary, var(--awa-text)) !important;
     font-weight: 600 !important;
 }
 
@@ -2488,7 +2409,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
     -webkit-overflow-scrolling: touch;
     border-radius: var(--awa-acct-panel-radius, 4px);
     border: 1px solid var(--awa-border-subtle, #eeeeee);
-    background: var(--awa-acct-surface, #ffffff);
+    background: var(--awa-acct-surface, var(--awa-bg));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-approval-page :is(.table-approvals, .table-my-approvals) {
@@ -2507,7 +2428,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-approval-page :is(.table-approvals, .table-my-approvals) tbody tr:nth-child(even) td {
-    background: color-mix(in srgb, var(--awa-border, #e8e8e8) 12%, var(--awa-acct-surface, #ffffff));
+    background: color-mix(in srgb, var(--awa-border, #e8e8e8) 12%, var(--awa-acct-surface, var(--awa-bg)));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-approval-page :is(.table-approvals, .table-my-approvals) tbody tr:hover td {
@@ -2550,13 +2471,13 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
     gap: 12px;
     padding: clamp(24px, 4vw, 40px) clamp(16px, 3vw, 24px);
     background: var(--awa-acct-surface);
-    border: 1px dashed color-mix(in srgb, var(--awa-border, #e8e8e8) 80%, var(--awa-primary, #b73337));
+    border: 1px dashed color-mix(in srgb, var(--awa-border, #e8e8e8) 80%, var(--awa-primary, var(--awa-primary)));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.awa-empty-state__title, .b2b-empty-state__title) {
     font-size: var(--awa-acct-title-size);
     font-weight: 700;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     margin: 0;
     text-wrap: balance;
 }
@@ -2564,7 +2485,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
 #html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.awa-empty-state__desc, .b2b-empty-state__desc, .awa-empty-state p) {
     font-size: var(--awa-acct-body-size, 14px);
     line-height: 1.55;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     max-width: 48ch;
     margin: 0;
     text-wrap: pretty;
@@ -2575,7 +2496,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-page-shell :is(input, select, textarea):focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 2px;
     border-radius: 4px;
 }
@@ -2584,7 +2505,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
     font-size: var(--awa-acct-label-size, 12px);
     font-weight: 600;
     letter-spacing: 0.04em;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .b2b-page-shell .field :is(input, select, textarea) {
@@ -2635,7 +2556,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
         content: attr(data-th);
         font-size: var(--awa-acct-label-size, 12px);
         font-weight: 600;
-        color: var(--awa-text-muted, #666666);
+        color: var(--awa-text-muted, var(--awa-text-secondary));
         flex: 0 0 42%;
         text-align: left;
     }
@@ -2655,7 +2576,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
 }
 
 #html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs-container .breadcrumbs a {
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     text-decoration: none;
     min-height: 44px;
     display: inline-flex;
@@ -2664,11 +2585,11 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
 }
 
 #html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs-container .breadcrumbs a:hover {
-    color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, var(--awa-primary));
 }
 
 #html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs-container .breadcrumbs a:focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 2px;
     border-radius: 4px;
 }
@@ -2694,19 +2615,30 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .block.account-n
 }
 
 html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .account-nav-section__label {
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     font-size: var(--awa-acct-label-size, 12px);
     font-weight: 600;
 }
 
-/* Header: busca visível em páginas de conta */
+/* Header: busca visível em páginas de conta — remove padding herdado do bundle global e do .account .block */
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header .awa-header-search-col :is(
+    .block-search,
+    .block-search .block-content,
+    .block-search .block-title
+) {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
 html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header .awa-header-search-col :is(
     form.minisearch,
     .block-search form.minisearch
 ) {
-    border: 1px solid var(--awa-border, #e5e5e5);
+    border: 1px solid var(--awa-border, var(--awa-border));
     border-radius: 4px;
-    background: var(--awa-bg-surface, #ffffff);
+    background: var(--awa-bg-surface, var(--awa-bg));
     box-sizing: border-box;
 }
 
@@ -2716,7 +2648,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 ) {
     border: 0;
     background: transparent;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header .awa-header-search-col input#search::placeholder {
@@ -2726,20 +2658,20 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 
 /* Badges: paleta AWA consistente */
 #html-body.b2b-account-dashboard .page-wrapper .b2b-group-badge.approved {
-    background: color-mix(in srgb, var(--awa-success, #16a34a) 10%, #ffffff);
+    background: color-mix(in srgb, var(--awa-success, #16a34a) 10%, var(--awa-bg));
     color: color-mix(in srgb, var(--awa-success, #16a34a) 85%, #000000);
     border: 1px solid color-mix(in srgb, var(--awa-success, #16a34a) 28%, var(--awa-border, #e8e8e8));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-price-list-badge {
-    color: var(--awa-primary, #b73337);
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #ffffff);
-    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 18%, var(--awa-border, #e8e8e8));
+    color: var(--awa-primary, var(--awa-primary));
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 6%, var(--awa-bg));
+    border: 1px solid color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 18%, var(--awa-border, #e8e8e8));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-rfm-badge {
-    color: var(--b2b-rfm-color, var(--awa-text-primary, #333333));
-    background: color-mix(in srgb, var(--b2b-rfm-color, #6b7280) 10%, #ffffff);
+    color: var(--b2b-rfm-color, var(--awa-text-primary, var(--awa-text)));
+    background: color-mix(in srgb, var(--b2b-rfm-color, #6b7280) 10%, var(--awa-bg));
     border: 1px solid color-mix(in srgb, var(--b2b-rfm-color, #6b7280) 22%, var(--awa-border, #e8e8e8));
 }
 
@@ -2769,7 +2701,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     flex: 0 0 auto;
     font-size: var(--awa-acct-body-size, 14px);
     font-weight: 600;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     white-space: nowrap;
 }
 
@@ -2786,18 +2718,18 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 #html-body.b2b-account-dashboard .page-wrapper .checklist-label {
     font-size: var(--awa-acct-body-size, 14px);
     line-height: 1.45;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .checklist-action {
     margin-inline-start: auto;
     font-weight: 600;
-    color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, var(--awa-primary));
     text-decoration: none;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .checklist-action:hover {
-    color: var(--awa-primary-hover, #8e2629);
+    color: var(--awa-primary-hover, var(--awa-primary-hover));
     text-decoration: underline;
 }
 
@@ -2931,13 +2863,13 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .orders-section .data-table tbody td a {
-    color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, var(--awa-primary));
     font-weight: 600;
     text-decoration: none;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .orders-section .data-table tbody td a:hover {
-    color: var(--awa-primary-hover, #8e2629);
+    color: var(--awa-primary-hover, var(--awa-primary-hover));
     text-decoration: underline;
 }
 
@@ -2983,17 +2915,17 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 #html-body.b2b-account-dashboard .page-wrapper .b2b-discount-badge {
     border-radius: 4px;
     box-shadow: none;
-    background: var(--awa-primary, #b73337);
+    background: var(--awa-primary, var(--awa-primary));
     background-image: none;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-tour-link {
     min-height: 44px;
     padding: 8px 14px;
-    border: 1px solid var(--awa-border, #e5e5e5);
+    border: 1px solid var(--awa-border, var(--awa-border));
     border-radius: 4px;
-    background: var(--awa-bg-surface, #ffffff);
-    color: var(--awa-text-primary, #333333);
+    background: var(--awa-bg-surface, var(--awa-bg));
+    color: var(--awa-text-primary, var(--awa-text));
     font-size: var(--awa-acct-body-size, 14px);
     font-weight: 600;
     line-height: 1.35;
@@ -3001,9 +2933,9 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-tour-link:hover {
-    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e5e5e5));
-    color: var(--awa-primary, #b73337);
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, #ffffff);
+    border-color: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 35%, var(--awa-border, var(--awa-border)));
+    color: var(--awa-primary, var(--awa-primary));
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-bg));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-company-info .company-info-title {
@@ -3035,12 +2967,12 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 #html-body.b2b-account-dashboard .page-wrapper .b2b-company-info .detail-item .label {
     font-size: var(--awa-acct-label-size, 12px);
     font-weight: 600;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-company-info .detail-item .value {
     font-size: var(--awa-acct-body-size, 14px);
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     word-break: break-word;
 }
 
@@ -3067,17 +2999,17 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     text-align: center;
     border-radius: 4px;
     border: 1px solid var(--awa-border, #e8e8e8);
-    background: var(--awa-bg-surface, #ffffff);
-    color: var(--awa-text-primary, #333333);
+    background: var(--awa-bg-surface, var(--awa-bg));
+    color: var(--awa-text-primary, var(--awa-text));
     font-size: var(--awa-acct-body-size, 14px);
     font-weight: 600;
     text-decoration: none;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .category-chip:hover {
-    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e8e8e8));
-    color: var(--awa-primary, #b73337);
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, #ffffff);
+    border-color: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 35%, var(--awa-border, #e8e8e8));
+    color: var(--awa-primary, var(--awa-primary));
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-bg));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .attendant-card {
@@ -3104,13 +3036,13 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     border-radius: 4px;
     font-size: var(--awa-acct-body-size, 14px);
     text-decoration: none;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .attendant-contact .contact-link:hover {
-    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e8e8e8));
-    color: var(--awa-primary, #b73337);
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, #ffffff);
+    border-color: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 35%, var(--awa-border, #e8e8e8));
+    color: var(--awa-primary, var(--awa-primary));
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-bg));
 }
 
 @media (max-width: 768px) {
@@ -3133,7 +3065,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 #html-body.b2b-account-dashboard .page-wrapper .b2b-welcome-sub {
     font-size: var(--awa-acct-body-size, 14px);
     line-height: 1.5;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-member-since::before {
@@ -3191,7 +3123,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     font-size: var(--awa-acct-label-size, 12px);
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     text-transform: none;
 }
 
@@ -3200,7 +3132,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     font-size: clamp(1.125rem, 1rem + 0.35vw, 1.375rem);
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .quotes-stats {
@@ -3217,20 +3149,20 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 
 #html-body.b2b-account-dashboard .page-wrapper .section-header :is(h2, h3) svg {
     flex-shrink: 0;
-    color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, var(--awa-primary));
     opacity: 0.9;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .erp-product-sku {
     font-size: max(12px, 0.75rem);
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     letter-spacing: 0.02em;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .erp-product-price {
     font-size: var(--awa-acct-body-size, 14px);
     font-weight: 700;
-    color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, var(--awa-primary));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .data-table tbody tr {
@@ -3238,7 +3170,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .data-table tbody tr:hover td {
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 3%, var(--awa-bg-surface, #ffffff));
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 3%, var(--awa-bg-surface, var(--awa-bg)));
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .actions-grid:not(.actions-toolbar) .action-item span {
@@ -3255,7 +3187,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     .category-chip,
     .contact-link
 ):focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 2px;
 }
 
@@ -3280,7 +3212,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     font-weight: 700;
     letter-spacing: -0.01em;
     line-height: 1.25;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     text-transform: none;
 }
 
@@ -3289,7 +3221,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     margin: 0;
     font-size: var(--awa-acct-body-size, 14px);
     line-height: 1.5;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     max-width: 65ch;
 }
 
@@ -3340,7 +3272,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 
 #html-body:is(.account, [class*="b2b-"], .sales-order-history, .sales-order-view)
     .page-wrapper :is(.data-table, table.data) tbody tr:hover td {
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 3%, var(--awa-bg-surface, #ffffff));
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 3%, var(--awa-bg-surface, var(--awa-bg)));
 }
 
 /* Badges / pills */
@@ -3368,9 +3300,9 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     min-height: 44px;
     padding: 10px 18px;
     border-radius: var(--awa-b2b-radius, 4px);
-    background: var(--awa-primary, #b73337);
-    border-color: var(--awa-primary, #b73337);
-    color: #ffffff;
+    background: var(--awa-primary, var(--awa-primary));
+    border-color: var(--awa-primary, var(--awa-primary));
+    color: var(--awa-bg);
     font-size: var(--awa-acct-body-size, 14px);
     font-weight: 600;
     text-transform: none;
@@ -3381,8 +3313,8 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
 
 #html-body:is(.account, [class*="b2b-"], .sales-order-history, .sales-order-view, .customer-address-index)
     .page-wrapper .action.primary:hover {
-    background: var(--awa-primary-hover, #8e2629);
-    border-color: var(--awa-primary-hover, #8e2629);
+    background: var(--awa-primary-hover, var(--awa-primary-hover));
+    border-color: var(--awa-primary-hover, var(--awa-primary-hover));
     box-shadow: none;
     transform: none;
 }
@@ -3391,9 +3323,9 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     .page-wrapper .action.secondary {
     min-height: 44px;
     border-radius: var(--awa-b2b-radius, 4px);
-    border: 1px solid var(--awa-border, #e5e5e5);
-    background: var(--awa-bg-surface, #ffffff);
-    color: var(--awa-text-primary, #333333);
+    border: 1px solid var(--awa-border, var(--awa-border));
+    background: var(--awa-bg-surface, var(--awa-bg));
+    color: var(--awa-text-primary, var(--awa-text));
     font-weight: 600;
     text-transform: none;
 }
@@ -3405,7 +3337,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     font-weight: 700;
     letter-spacing: -0.01em;
     text-transform: none;
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     border-bottom: 1px solid var(--awa-border, #e8e8e8);
     padding-bottom: 8px;
     margin-bottom: 16px;
@@ -3415,7 +3347,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     .page-wrapper .field :is(.label, label) {
     font-size: var(--awa-acct-label-size, 12px);
     font-weight: 600;
-    color: var(--awa-text-muted, #666666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     letter-spacing: normal;
     text-transform: none;
 }
@@ -3425,7 +3357,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     min-height: 44px;
     font-size: var(--awa-acct-body-size, 14px);
     border-radius: var(--awa-b2b-radius, 4px);
-    border-color: var(--awa-border, #e5e5e5);
+    border-color: var(--awa-border, var(--awa-border));
 }
 
 #html-body:is(.account, .customer-account-edit, .customer-address-index, .customer-address-form)
@@ -3442,13 +3374,13 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     display: inline-flex;
     align-items: center;
     font-weight: 600;
-    color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, var(--awa-primary));
     text-decoration: none;
 }
 
 #html-body:is(.account, .customer-account-edit, .customer-address-index, .customer-address-form)
     .page-wrapper .box-actions a:hover {
-    color: var(--awa-primary-hover, #8e2629);
+    color: var(--awa-primary-hover, var(--awa-primary-hover));
     text-decoration: underline;
 }
 
@@ -3478,7 +3410,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     select,
     textarea
 ):focus-visible {
-    outline: 2px solid var(--awa-primary, #b73337);
+    outline: 2px solid var(--awa-primary, var(--awa-primary));
     outline-offset: 2px;
 }
 
@@ -3486,5 +3418,40 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-site-header
     #html-body:is(.account, [class*="b2b-"], .sales-order-history, .sales-order-view)
         .page-wrapper :is(.data-table, table.data) tbody tr {
         transition: none;
+    }
+}
+
+/* Tablet fix: evitar "vazio" antes do conteúdo no painel B2B. */
+@media (min-width: 768px) and (max-width: 1024px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > :is(.columns, .columns.layout, .columns.layout-2-col) {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > :is(
+        .column.main,
+        .col-main,
+        .col-lg-10,
+        [class*="col-sm-9"]
+    ) {
+        order: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > :is(
+        .sidebar,
+        .sidebar-main,
+        .sidebar.sidebar-main,
+        .col-lg-2,
+        [class*="col-sm-3"]
+    ) {
+        order: 2 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
     }
 }

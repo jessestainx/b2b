@@ -1,19 +1,9 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!-- ViewModel for Open Graph template —
-         makes the block FPC-compatible (cacheable="true") -->
-
-    <!-- BUG-14 FIX: Generate fallback meta description for products without one -->
     <type name="Magento\Catalog\Helper\Product\View">
         <plugin name="awa_product_meta_description_fallback"
                 type="GrupoAwamotos\SchemaOrg\Plugin\ProductMetaDescriptionFallback"
                 sortOrder="100"/>
-    </type>
-    
-    <type name="GrupoAwamotos\Theme\ViewModel\ProductStructuredData">
-        <plugin name="awa_fitment_view_model_enricher"
-                type="GrupoAwamotos\SchemaOrg\Plugin\AddFitmentToViewModel"
-                sortOrder="10"/>
     </type>
 </config>

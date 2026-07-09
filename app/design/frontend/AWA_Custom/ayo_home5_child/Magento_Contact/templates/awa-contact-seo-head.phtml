@@ -1,0 +1,12 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * SEO head helpers for the native Magento contact route.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+
+$canonical = $block->getUrl('contact', ['_secure' => true]);
+?>
+<link rel="canonical" href="<?= $block->escapeUrl($canonical) ?>"/>

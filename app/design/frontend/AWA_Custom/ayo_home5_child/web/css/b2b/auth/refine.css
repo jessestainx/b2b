@@ -1,8 +1,8 @@
 :root {
     /* ── awa-b2b-auth — design tokens ─── */
-    --awa-b2b-auth-c1: #ffffff;
+    --awa-b2b-auth-c1: var(--awa-bg);
     --awa-b2b-auth-c2: #b8c4d6;
-    --awa-b2b-auth-c3: #fff;
+    --awa-b2b-auth-c3: var(--awa-bg);
 }
 
 /* AWA Round7 (dual-write hotfix): auth pages (B2B/PF) visual refinement */
@@ -13,8 +13,8 @@
     --awa-auth-focus: 0 0 0 3px rgb(183 51 55 / 18%);
     --awa-auth-border: #dfe5ee;
     --awa-auth-border-strong: #c7d2e1;
-    --awa-auth-text: var(--awa-text-primary, #333333);
-    --awa-auth-muted: var(--awa-text-muted, #666666);
+    --awa-auth-text: var(--awa-text-primary, var(--awa-text));
+    --awa-auth-muted: var(--awa-text-muted, var(--awa-text-secondary));
     --awa-auth-radius-lg: 18px;
     --awa-auth-shadow: 0 18px 44px rgb(15 23 42 / 10%);
     --awa-auth-soft: rgb(183 51 55 / 6%);
@@ -36,7 +36,7 @@
 body.b2b-account-login .b2b-login-page {
     font-family: inherit;
     color: var(--awa-auth-text);
-    background: var(--awa-bg-soft, #f7f7f7);
+    background: var(--awa-bg-soft, var(--awa-bg-subtle));
 }
 
 body.b2b-account-login .b2b-login-card {
@@ -51,7 +51,7 @@ body.b2b-account-login .b2b-login-card {
 }
 
 .b2b-field-label {
-    color: var(--awa-text-primary, #333333);
+    color: var(--awa-text-primary, var(--awa-text));
     font-weight: var(--awa-weight-bold);
 }
 
@@ -71,7 +71,7 @@ body.b2b-account-login .b2b-field input {
 }
 
 .b2b-field input::placeholder {
-    color: var(--awa-text-muted, #666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
 }
 
 .b2b-field input:hover {
@@ -192,7 +192,7 @@ body.b2b-account-login .b2b-btn-claim {
 
 body.b2b-account-login .b2b-btn-claim:hover {
     border-color: var(--awa-auth-border-strong);
-    background: var(--awa-bg-soft, #f7f7f7);
+    background: var(--awa-bg-soft, var(--awa-bg-subtle));
     transform: none;
 }
 
@@ -237,7 +237,7 @@ body.b2b-account-login .b2b-btn-claim:hover {
     border-radius: 24px;
     border: 1px solid #1f2937;
     background: #1f2937;
-    color: var(--awa-text-inverse, #fff);
+    color: var(--awa-text-inverse, var(--awa-bg));
     font-size: 14px;
     text-decoration: none;
     box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
@@ -248,7 +248,7 @@ body.b2b-account-login .b2b-login-whatsapp:hover,
 body.b2b-account-login .b2b-login-whatsapp:focus-visible {
     border-color: #374151;
     background: #374151;
-    color: var(--awa-text-inverse, #fff);
+    color: var(--awa-text-inverse, var(--awa-bg));
     box-shadow: 0 6px 16px rgb(0 0 0 / 25%);
     transform: none;
 }

@@ -50,6 +50,7 @@ class BackfillPhoneFromAddressCommand extends Command
         try {
             $this->appState->setAreaCode(Area::AREA_ADMINHTML);
         } catch (\Exception) {
+            // Area code já definido pelo bootstrap do CLI — seguro ignorar.
         }
 
         $output->writeln($dryRun ? '<comment>Modo DRY-RUN (nenhuma gravação)</comment>' : '<info>Modo APPLY (gravação real)</info>');

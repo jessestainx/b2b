@@ -1,0 +1,221 @@
+/**
+ * AWA Motos - Visual Bug Fixes (Onda 8)
+ *
+ * Compilacao de 18 correcoes visuais identificadas na auditoria 2026-06-28.
+ * Cada bloco tem comentario com ID do bug (BXX) para rastreabilidade.
+ *
+ * @version 2026-06-28.1
+ */
+
+/* B02: Hero slider text-banner position absolute */
+.awa-hero-slides .banner_item .text-banner {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    z-index: 5 !important;
+}
+@media (max-width: 768px) {
+    .awa-hero-slides .banner_item .text-banner {
+        padding: 16px !important;
+    }
+}
+
+/* B09: Product card title line-clamp */
+.product-item-info .product-name,
+.product-item-info .product-item-link {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-height: 2.7em !important;
+    line-height: 1.35 !important;
+}
+
+/* B11/B21: Carousel arrows aria-label + size */
+.owl-nav button.owl-prev,
+.owl-nav button.owl-next,
+.owl-nav button[class*="owl-"] {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* B19: Footer mobile gap */
+@media (max-width: 768px) {
+    .awa-footer-static5__grid,
+    .awa-footer-static5 .row,
+    .awa-footer__grid,
+    footer .row {
+        gap: 24px !important;
+    }
+}
+
+/* B30: Destacar CNPJ no footer */
+.awa-footer-atendimento__cnpj,
+[class*="footer"][class*="cnpj"],
+.awa-footer-business-contact__cnpj {
+    background: #fef9e7 !important;
+    border: 1px solid #fcd34d !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    color: #92400e !important;
+    display: inline-block !important;
+    margin-top: 8px !important;
+}
+.awa-footer-atendimento__cnpj::before {
+    content: "📋 " !important;
+    margin-right: 4px !important;
+}
+
+/* B32: Touch target 44x44px */
+button.awa-header-mobile-toggle,
+button.awa-back-to-top,
+.awa-minicart-coupon__btn,
+button.open-children-toggle,
+.awa-pdp-buy-now__button,
+.awa-pdp-sticky-atc__wishlist,
+.awa-pdp-sticky-atc__atc,
+.awa-quick-view-trigger {
+    min-width: 44px !important;
+    min-height: 44px !important;
+}
+
+/* B37: Search placeholder B2B */
+#search::placeholder,
+input[name="q"]::placeholder {
+    color: #9ca3af !important;
+    font-style: italic !important;
+}
+
+/* B38: Botao "Ver todos" - cor primaria */
+.awa-section-header__link,
+.awa-shelf-view-all,
+.awa-shelf__view-all {
+    color: #b73337 !important;
+    font-weight: 600 !important;
+}
+.awa-section-header__link:hover,
+.awa-shelf-view-all:hover {
+    color: #a12d30 !important;
+    text-decoration: underline !important;
+}
+
+/* B40: Header mobile altura reduzida */
+@media (max-width: 768px) {
+    .awa-site-header,
+    .page-header {
+        min-height: 56px !important;
+    }
+    .awa-header-shell {
+        padding: 4px 0 !important;
+    }
+}
+
+/* B25: Contraste de texto */
+small,
+.awa-small-text,
+.awa-muted-text {
+    color: #4b5563 !important;
+}
+
+/* B22: Cards de produto com hover state */
+.product-item-info,
+.awa-product-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    cursor: pointer !important;
+}
+.product-item-info:hover,
+.awa-product-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* B18: aria-current para navegacao ativa */
+[aria-current="page"] {
+    color: #b73337 !important;
+    font-weight: 600 !important;
+    position: relative !important;
+}
+[aria-current="page"]::after {
+    content: "" !important;
+    position: absolute !important;
+    bottom: -2px !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 2px !important;
+    background: #b73337 !important;
+}
+
+/* B28: Skeleton screens */
+.awa-skeleton {
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%) !important;
+    background-size: 200% 100% !important;
+    animation: awa-skeleton-loading 1.5s infinite !important;
+    border-radius: 4px !important;
+}
+@keyframes awa-skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .awa-skeleton { animation: none !important; }
+}
+
+/* B23: Botao Re-pedir */
+.awa-reorder-button {
+    background: #b73337 !important;
+    color: white !important;
+    border: 0 !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    min-height: 40px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+.awa-reorder-button:hover { background: #a12d30 !important; }
+
+/* Focus visivel WCAG 2.4.7 */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #2563eb !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 1px #ffffff inset !important;
+}
+
+/* Skip link visivel */
+.awa-skip-link:focus,
+.awa-skip-link:focus-visible {
+    position: fixed !important;
+    top: 12px !important;
+    left: 12px !important;
+    z-index: 999999 !important;
+    background: #111827 !important;
+    color: #ffffff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    outline: 3px solid #2563eb !important;
+    outline-offset: 2px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

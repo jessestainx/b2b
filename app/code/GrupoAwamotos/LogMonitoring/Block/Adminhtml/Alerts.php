@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Block\Adminhtml;
@@ -61,7 +62,7 @@ class Alerts extends Template
     {
         try {
             $activeAlerts = $this->getActiveAlerts();
-            return $this->serializer->serialize(array_map(function($alert) {
+            return $this->serializer->serialize(array_map(function ($alert) {
                 return [
                     'id' => $alert->getEntityId(),
                     'type' => $alert->getAlertType(),

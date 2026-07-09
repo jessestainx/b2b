@@ -3,6 +3,4 @@ declare(strict_types=1);
 /** Visual QA fixes — loads on all storefront pages except home (handled via awa-head-preload.phtml) */
 $cssUrl = $block->getViewFileUrl('css/awa-visual-qa-fixes-2026-06-17.min.css');
 ?>
-<link rel="preload" as="style" href="<?= $block->escapeUrl($cssUrl) ?>?v=14"/>
-<link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=14" media="print" onload="window.__awaCssQ?__awaCssQ(this):(this.media='all')"/>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=14"/></noscript>
+<link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=14" media="print" onload="this.media='all'" data-awa-visual-qa-fixes="1"/>

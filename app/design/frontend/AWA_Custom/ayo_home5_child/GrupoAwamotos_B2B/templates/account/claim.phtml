@@ -1,0 +1,106 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Ativar acesso online B2B — override tema filho (alinhado ao login).
+ *
+ * @var \GrupoAwamotos\B2B\Block\Account\Claim $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<div id="b2b-claim-shell" class="b2b-login-page" aria-labelledby="b2b-claim-heading">
+    <?= $block->getChildHtml('auth_logo') ?>
+
+    <div class="b2b-login-card">
+        <header class="b2b-auth-card-head">
+            <h1 id="b2b-claim-heading" class="b2b-login-title"><?= $escaper->escapeHtml(__('Ativar conta existente')) ?></h1>
+            <p class="b2b-login-subtitle">
+                <?= $escaper->escapeHtml(__('Já comprou conosco? Informe seus dados e receba um link para criar sua senha.')) ?>
+            </p>
+        </header>
+
+        <div class="b2b-login-messages" role="status" aria-live="polite" aria-atomic="true">
+            <?= $block->getChildHtml('b2b_claim_messages') ?>
+        </div>
+
+        <form class="b2b-login-form"
+              action="<?= $escaper->escapeUrl($block->getFormActionUrl()) ?>"
+              method="post"
+              id="b2b-claim-form"
+              novalidate
+              data-mage-init='{"validation":{}}'>
+            <?= $block->getBlockHtml('formkey') ?>
+
+            <div class="b2b-field">
+                <label class="b2b-field-label" for="b2b-cnpj-or-email"><?= $escaper->escapeHtml(__('E-mail ou CNPJ')) ?></label>
+                <input type="text"
+                       name="cnpj_or_email"
+                       id="b2b-cnpj-or-email"
+                       autocomplete="username"
+                       autocapitalize="none"
+                       spellcheck="false"
+                       inputmode="email"
+                       required
+                       aria-required="true"
+                       data-validate="{required:true}"
+                       placeholder="<?= $escaper->escapeHtmlAttr(__('seu@email.com ou 00.000.000/0000-00')) ?>"
+                       aria-describedby="b2b-claim-user-note" />
+                <p id="b2b-claim-user-note" class="b2b-field-note">
+                    <?= $escaper->escapeHtml(__('Use os mesmos dados informados nas compras anteriores.')) ?>
+                </p>
+            </div>
+
+            <div class="b2b-login-actions">
+                <button type="submit" class="b2b-btn-entrar b2b-btn-claim-submit">
+                    <span><?= $escaper->escapeHtml(__('Enviar link de acesso')) ?></span>
+                </button>
+            </div>
+        </form>
+
+        <div class="b2b-login-divider" role="separator" aria-hidden="true">
+            <span><?= $escaper->escapeHtml(__('ou')) ?></span>
+        </div>
+
+        <nav class="b2b-login-ctas" aria-label="<?= $escaper->escapeHtmlAttr(__('Outras opções de acesso')) ?>">
+            <a href="<?= $escaper->escapeUrl($block->getLoginUrl()) ?>" class="b2b-btn-register">
+                <?= $escaper->escapeHtml(__('Voltar para o login')) ?>
+            </a>
+
+            <a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="b2b-btn-claim">
+                <?= $escaper->escapeHtml(__('Criar conta B2B')) ?>
+            </a>
+        </nav>
+    </div>
+
+    <footer class="b2b-login-footer">
+        <a href="https://wa.me/5516997367588?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20para%20ativar%20meu%20acesso%20B2B"
+           class="b2b-login-whatsapp"
+           data-b2b-contact-track="claim_help_whatsapp"
+           data-b2b-contact-channel="whatsapp"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="<?= $escaper->escapeHtmlAttr(__('Precisa de ajuda? Falar no WhatsApp')) ?>">
+            <?= $escaper->escapeHtml(__('Precisa de ajuda?')) ?> <span class="b2b-login-whatsapp__brand"><?= $escaper->escapeHtml(__('WhatsApp')) ?></span>
+        </a>
+    </footer>
+
+    <script type="text/x-magento-init">
+    {
+        "#b2b-claim-shell": {
+            "GrupoAwamotos_B2B/js/contact-tracker": {
+                "eventName": "Contact",
+                "storagePrefix": "b2b_claim_contact_fired_",
+                "funnelStage": "consideration",
+                "touchpoint": "b2b_claim"
+            }
+        },
+        "#b2b-claim-form": {
+            "GrupoAwamotos_B2B/js/auth-form": {
+                "loadingLabel": "<?= $escaper->escapeJs(__('Enviando link...')) ?>",
+                "usernameSelector": "#b2b-cnpj-or-email",
+                "cnpjOrEmailMaskSelector": "#b2b-cnpj-or-email"
+            }
+        }
+    }
+    </script>
+</div>

@@ -131,7 +131,8 @@ class ShippingAddressFallbackService
         if (!trim((string) $target->getPostcode()) && trim((string) $source->getPostcode())) {
             $target->setPostcode((string) $source->getPostcode());
         }
-        if ($this->isPlaceholderTelephone((string) $target->getTelephone())
+        if (
+            $this->isPlaceholderTelephone((string) $target->getTelephone())
             && !$this->isPlaceholderTelephone((string) $source->getTelephone())
         ) {
             $target->setTelephone((string) $source->getTelephone());

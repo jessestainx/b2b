@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      layout="1column"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="print"/>
+    <head>
+        <title>Boleto</title>
+        <css src="GrupoAwamotos_B2B::css/account/awa-b2b-pages-late.css"/>
+    </head>
+    <body>
+        <!-- AWA: o tema Ayo/AWA_Custom nao usa os containers nativos header.container/catalog.topnav
+             (o handle "print" do Magento_Theme so remove esses). O header real deste tema e o bloco
+             customizado "toki_header" (Rokanthemes_Themeoption::html/header.phtml), injetado direto
+             em page.wrapper via app/design/frontend/AWA_Custom/ayo_home5_child/Rokanthemes_Themeoption/
+             layout/default.xml. Sem remove-lo aqui, o banner/busca/menu completo do site aparece
+             por cima da pagina de impressao. -->
+        <referenceBlock name="toki_header" remove="true"/>
+        <referenceContainer name="awa.layout.compat" remove="true"/>
+        <referenceContainer name="page.top" remove="true"/>
+        <!-- AWA: o print.xml nativo injeta um script que chama window.print() automaticamente
+             ao carregar (Magento_Theme::html/print.phtml). Removido aqui porque esta pagina agora
+             tambem e aberta dentro de um iframe num modal (ver print-modal.js); sem remover,
+             o dialogo de impressao do SO abriria sozinho assim que o iframe carregasse, antes do
+             usuario clicar em "Imprimir" no modal. O botao "Imprimir" do proprio template
+             (print-boleto.phtml) e o botao do modal cobrem o disparo manual em ambos os fluxos. -->
+        <referenceBlock name="sales.order.print.js" remove="true"/>
+
+        <!-- AWA (2026-07-07): remove os blocos de CSS/JS "pesados" do head.additional que
+             so existem para o header, footer, carrossel, auditoria visual do site completo
+             (ver app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Theme/layout/default.xml).
+             Esta pagina ja tem seu proprio style inline auto-contido (print-boleto.phtml) e
+             nao usa header, footer, carrossel, cookie banner, nem os fixes de CLS do header.
+
+             Motivo real: o proprio codigo do tema documenta que styles-m.css (5.1MB, 17.503
+             regras CSS) ja causou "pagina parou de responder" no Chrome/Blink; por isso foi
+             movido para carregamento assincrono via awa.head.preload. Quando esta pagina e aberta
+             dentro do iframe do modal de impressao (ver print-modal.js), o navegador teria que
+             resolver esse mesmo CSS pesado de novo, quase ao mesmo tempo em que a pagina pai
+             (que ja carregou tudo isso) esta processando a abertura e transicao do modal; risco
+             real de reproduzir o mesmo freeze. Removendo os blocos abaixo (nenhum e usado por
+             esta pagina), o head fica muito mais leve e o iframe carrega sem competir por CPU
+             com a pagina pai. -->
+        <referenceBlock name="awa.cls.nav.fix" remove="true"/>
+        <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
+        <referenceBlock name="awa.header.mobile.grid.critical.global" remove="true"/>
+        <referenceBlock name="awa.critical.inline.css" remove="true"/>
+        <referenceBlock name="awa.head.preload" remove="true"/>
+        <referenceBlock name="awa.styles.l.last" remove="true"/>
+        <referenceBlock name="awa.audit.bundle.css" remove="true"/>
+        <referenceBlock name="awa.visual.qa.fixes.css" remove="true"/>
+        <referenceBlock name="awa.shelf.carousel" remove="true"/>
+        <referenceBlock name="awa.cookie.consent.fix.css" remove="true"/>
+
+        <referenceContainer name="content">
+            <block class="GrupoAwamotos\B2B\Block\Finance\PrintBoleto"
+                   name="b2b.finance.print_boleto"
+                   template="GrupoAwamotos_B2B::finance/print-boleto.phtml"
+                   cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

@@ -1,0 +1,113 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Order\ErpOperations $block */
+$data = $block->getOperationsData();
+if (!$block->shouldDisplay()) {
+    return;
+}
+
+$invoice = $data['invoice'] ?? null;
+$tracking = $data['tracking'] ?? [];
+$timeline = $data['timeline'] ?? [];
+?>
+<section class="b2b-order-operations" aria-label="<?= $block->escapeHtmlAttr(__('Informações fiscais e entrega')) ?>">
+    <header class="b2b-order-operations__header">
+        <h2 class="b2b-order-operations__title"><?= $block->escapeHtml(__('NF-e e entrega')) ?></h2>
+    </header>
+
+    <div class="b2b-order-operations__grid">
+        <div class="b2b-order-operations__panel b2b-order-operations__panel--invoice">
+            <h3 class="b2b-order-operations__panel-title"><?= $block->escapeHtml(__('Nota fiscal')) ?></h3>
+            <?php if (is_array($invoice) && ($invoice['numero'] ?? '') !== ''): ?>
+                <dl class="b2b-order-operations__meta">
+                    <div>
+                        <dt><?= $block->escapeHtml(__('Número')) ?></dt>
+                        <dd><?= $block->escapeHtml($invoice['numero'] . '-' . ($invoice['serie'] ?? '1')) ?></dd>
+                    </div>
+                    <?php if (($invoice['data_emissao'] ?? '') !== ''): ?>
+                    <div>
+                        <dt><?= $block->escapeHtml(__('Emissão')) ?></dt>
+                        <dd><?= $block->escapeHtml($invoice['data_emissao']) ?></dd>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (($invoice['chave'] ?? '') !== ''): ?>
+                    <div class="b2b-order-operations__chave">
+                        <dt><?= $block->escapeHtml(__('Chave de acesso')) ?></dt>
+                        <dd><code><?= $block->escapeHtml($invoice['chave']) ?></code></dd>
+                    </div>
+                    <?php endif; ?>
+                </dl>
+                <div class="b2b-order-operations__actions">
+                    <a class="action secondary"
+                       href="<?= $block->escapeUrl($block->getDownloadUrl('xml')) ?>">
+                        <?= $block->escapeHtml(__('Download XML (resumo)')) ?>
+                    </a>
+                    <?php if (($invoice['url_danfe'] ?? '') !== ''): ?>
+                    <a class="action primary"
+                       href="<?= $block->escapeUrl($block->getDownloadUrl('danfe')) ?>"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        <?= $block->escapeHtml(__('Consultar DANFE')) ?>
+                    </a>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <p class="b2b-order-operations__empty">
+                    <?= $block->escapeHtml(__('NF-e em processamento. Assim que emitida, os downloads ficarão disponíveis aqui.')) ?>
+                </p>
+            <?php endif; ?>
+        </div>
+
+        <div class="b2b-order-operations__panel b2b-order-operations__panel--tracking">
+            <h3 class="b2b-order-operations__panel-title"><?= $block->escapeHtml(__('Rastreamento')) ?></h3>
+            <?php if (($tracking['code'] ?? '') !== '' || ($tracking['estimated_delivery'] ?? '') !== ''): ?>
+                <dl class="b2b-order-operations__meta">
+                    <?php if (($tracking['carrier'] ?? '') !== ''): ?>
+                    <div>
+                        <dt><?= $block->escapeHtml(__('Transportadora')) ?></dt>
+                        <dd><?= $block->escapeHtml($tracking['carrier']) ?></dd>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (($tracking['code'] ?? '') !== ''): ?>
+                    <div>
+                        <dt><?= $block->escapeHtml(__('Código')) ?></dt>
+                        <dd>
+                            <?php if (!empty($tracking['url'])): ?>
+                                <a href="<?= $block->escapeUrl((string) $tracking['url']) ?>"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    <?= $block->escapeHtml($tracking['code']) ?>
+                                </a>
+                            <?php else: ?>
+                                <?= $block->escapeHtml($tracking['code']) ?>
+                            <?php endif; ?>
+                        </dd>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (($tracking['estimated_delivery'] ?? '') !== ''): ?>
+                    <div>
+                        <dt><?= $block->escapeHtml(__('Previsão de entrega')) ?></dt>
+                        <dd><?= $block->escapeHtml($tracking['estimated_delivery']) ?></dd>
+                    </div>
+                    <?php endif; ?>
+                </dl>
+            <?php else: ?>
+                <p class="b2b-order-operations__empty">
+                    <?= $block->escapeHtml(__('Informações de rastreio em atualização.')) ?>
+                </p>
+            <?php endif; ?>
+
+            <?php if (!empty($timeline)): ?>
+            <ol class="b2b-order-timeline" aria-label="<?= $block->escapeHtmlAttr(__('Status da entrega')) ?>">
+                <?php foreach ($timeline as $step): ?>
+                <li class="b2b-order-timeline__item b2b-order-timeline__item--<?= $block->escapeHtmlAttr((string) ($step['state'] ?? 'pending')) ?>">
+                    <span class="b2b-order-timeline__label"><?= $block->escapeHtml((string) ($step['label'] ?? '')) ?></span>
+                    <?php if (($step['date'] ?? '') !== ''): ?>
+                    <time class="b2b-order-timeline__date"><?= $block->escapeHtml((string) $step['date']) ?></time>
+                    <?php endif; ?>
+                </li>
+                <?php endforeach; ?>
+            </ol>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>

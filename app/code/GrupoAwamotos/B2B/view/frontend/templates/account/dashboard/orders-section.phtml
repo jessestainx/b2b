@@ -1,0 +1,97 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Orders fragment — ERP last orders with Magento fallback.
+ *
+ * @var \GrupoAwamotos\B2B\Block\Account\Dashboard $block
+ */
+$erpBlock = $block->getErpSuggestionsBlock();
+$data = $block->getErpDashboardData();
+$erpOrders = $data['orders'];
+?>
+<?php if (!empty($erpOrders) && $erpBlock): ?>
+    <div class="b2b-section orders-section erp-orders" data-dashboard-section="orders">
+        <div class="section-header">
+            <h3><?= $block->escapeHtml(__('Últimos Pedidos')) ?></h3>
+            <a href="<?= $block->escapeUrl($block->getOrdersUrl()) ?>" class="view-all">
+                <?= $block->escapeHtml(__('Ver Todos')) ?>
+            </a>
+        </div>
+        <table class="data-table orders-table" aria-label="<?= $block->escapeHtmlAttr(__('Pedidos recentes do ERP')) ?>">
+            <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('Pedido')) ?></th>
+                    <th><?= $block->escapeHtml(__('Data')) ?></th>
+                    <th><?= $block->escapeHtml(__('Status')) ?></th>
+                    <th><?= $block->escapeHtml(__('Total')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($erpOrders as $erpOrder): ?>
+                    <tr>
+                        <td>#<?= $block->escapeHtml($erpOrder['pedido_id'] ?? $erpOrder['CODIGO'] ?? '') ?></td>
+                        <td><?= $block->escapeHtml($erpBlock->formatErpDate($erpOrder['data_pedido'] ?? $erpOrder['DTPEDIDO'] ?? '')) ?></td>
+                        <td>
+                            <?php $status = $erpOrder['status'] ?? $erpOrder['STATUS'] ?? ''; ?>
+                            <span class="status-badge <?= $block->escapeHtmlAttr($erpBlock->getStatusClass((string) $status)) ?>">
+                                <?= $block->escapeHtml($erpBlock->getStatusLabel((string) $status)) ?>
+                            </span>
+                        </td>
+                        <td><?= /* @noEscape */ $erpBlock->formatPrice((float) ($erpOrder['valor_total'] ?? $erpOrder['VLRTOTAL'] ?? 0)) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php return; ?>
+<?php endif; ?>
+
+<?php $orders = $block->getRecentOrders(5); ?>
+<?php if ($orders->getSize() > 0): ?>
+    <div class="b2b-section orders-section" data-dashboard-section="orders">
+        <div class="section-header">
+            <h3><?= $block->escapeHtml(__('Últimos Pedidos')) ?></h3>
+            <a href="<?= $block->escapeUrl($block->getOrdersUrl()) ?>" class="view-all">
+                <?= $block->escapeHtml(__('Ver Todos')) ?>
+            </a>
+        </div>
+        <table class="data-table orders-table">
+            <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('Pedido')) ?></th>
+                    <th><?= $block->escapeHtml(__('Data')) ?></th>
+                    <th><?= $block->escapeHtml(__('Status')) ?></th>
+                    <th><?= $block->escapeHtml(__('Total')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($orders as $order): ?>
+                    <tr>
+                        <td>
+                            <a href="<?= $block->escapeUrl($block->getUrl('sales/order/view', ['order_id' => $order->getId()])) ?>">
+                                #<?= $block->escapeHtml($order->getIncrementId()) ?>
+                            </a>
+                        </td>
+                        <td><?= $block->escapeHtml(date('d/m/Y H:i', strtotime((string) $order->getCreatedAt()))) ?></td>
+                        <td><?= $block->escapeHtml($order->getStatusLabel()) ?></td>
+                        <td><?= /* @noEscape */ $block->formatPrice((float) $order->getGrandTotal()) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+<?php else: ?>
+    <div class="b2b-section orders-section orders-empty-state" data-dashboard-section="orders">
+        <div class="section-header">
+            <h3><?= $block->escapeHtml(__('Últimos Pedidos')) ?></h3>
+        </div>
+        <div class="empty-state-message">
+            <p><?= $block->escapeHtml(__('Você ainda não realizou nenhum pedido.')) ?></p>
+            <a href="<?= $block->escapeUrl($block->getUrl('catalogsearch/result/?q=')) ?>" class="action primary">
+                <?= $block->escapeHtml(__('Explorar Catálogo')) ?>
+            </a>
+        </div>
+    </div>
+<?php endif; ?>

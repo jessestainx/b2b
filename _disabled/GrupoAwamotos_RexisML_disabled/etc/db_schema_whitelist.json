@@ -1,0 +1,108 @@
+{
+    "rexis_dataset_recomendacao": {
+        "column": {
+            "id": true,
+            "chave_global": true,
+            "mes_rexis_code": true,
+            "identificador_cliente": true,
+            "customer_id": true,
+            "identificador_produto": true,
+            "product_id": true,
+            "classificacao_cliente": true,
+            "classificacao_produto": true,
+            "ja_comprou": true,
+            "pred": true,
+            "probabilidade_compra": true,
+            "previsao_gasto_round_up": true,
+            "valor_total_esperado": true,
+            "valor_convertida": true,
+            "quantidade_convertida": true,
+            "valor_unitario": true,
+            "tipo_recomendacao": true,
+            "recencia": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "REXIS_DATASET_RECOMENDACAO_MES_REXIS_CODE": true,
+            "REXIS_DATASET_RECOMENDACAO_IDENTIFICADOR_CLIENTE": true,
+            "REXIS_DATASET_RECOMENDACAO_CUSTOMER_ID": true,
+            "REXIS_DATASET_RECOMENDACAO_CLASSIFICACAO_PRODUTO": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "REXIS_DATASET_RECOMENDACAO_CHAVE_GLOBAL": true,
+            "REXIS_DATASET_RECOMENDACAO_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true
+        }
+    },
+    "rexis_network_rules": {
+        "column": {
+            "id": true,
+            "antecedent": true,
+            "consequent": true,
+            "antecedents": true,
+            "consequents": true,
+            "support": true,
+            "confidence": true,
+            "lift": true,
+            "conviction": true,
+            "leverage": true,
+            "is_active": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "REXIS_NETWORK_RULES_LIFT": true,
+            "REXIS_NETWORK_RULES_CONFIDENCE": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "REXIS_NETWORK_RULES_ANTECEDENT_CONSEQUENT": true
+        }
+    },
+    "rexis_customer_classification": {
+        "column": {
+            "id": true,
+            "customer_id": true,
+            "identificador_cliente": true,
+            "mes_rexis_code": true,
+            "classificacao_cliente": true,
+            "rfm_score": true,
+            "recency": true,
+            "frequency": true,
+            "monetary": true,
+            "mean_ticket_per_order": true,
+            "ltv": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "REXIS_CUSTOMER_CLASSIFICATION_CLASSIFICACAO_CLIENTE": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "REXIS_CUSTOMER_CLASSIFICATION_CUSTOMER_ID_MES_REXIS_CODE": true,
+            "REXIS_CSTR_CLASSIFICATION_CSTR_ID_CSTR_ENTT_ENTT_ID": true
+        }
+    },
+    "rexis_metricas_conversao": {
+        "column": {
+            "id": true,
+            "mes_rexis_code": true,
+            "n_clientes_rec_mes_atual": true,
+            "n_cliente_comprou_mes_atual": true,
+            "perc_conversao_cliente": true,
+            "n_produto_rec_mes_atual": true,
+            "n_produto_comprou_mes_atual": true,
+            "perc_conversao_produto": true,
+            "valor_esperado_atual": true,
+            "valor_convertido_atual": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "REXIS_METRICAS_CONVERSAO_MES_REXIS_CODE": true
+        }
+    }
+}

@@ -11,6 +11,9 @@
  */
 import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
+import { resolveBaseUrl } from './helpers/resolve-base-url';
+
+const resolvedBaseUrl = resolveBaseUrl('pw-visual-suite');
 
 export default defineConfig({
   testDir:   path.join(__dirname, 'specs/visual'),
@@ -33,7 +36,7 @@ export default defineConfig({
     ['json', { outputFile: path.join(__dirname, 'reports/visual-suite-results.json') }],
   ],
   use: {
-    baseURL:            'https://awamotos.com',
+    baseURL:            resolvedBaseUrl,
     ignoreHTTPSErrors:  true,
     locale:             'pt-BR',
     timezoneId:         'America/Sao_Paulo',

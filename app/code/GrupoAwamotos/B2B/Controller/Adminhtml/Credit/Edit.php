@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Credit;
 
 use GrupoAwamotos\B2B\Model\CreditLimitFactory;
@@ -18,7 +20,8 @@ class Edit extends Action implements HttpGetActionInterface
         private readonly PageFactory $resultPageFactory,
         private readonly CreditLimitFactory $creditLimitFactory,
         private readonly CreditLimitResource $creditLimitResource
-    ) { parent::__construct($context); }
+    ) { parent::__construct($context);
+    }
 
     public function execute()
     {

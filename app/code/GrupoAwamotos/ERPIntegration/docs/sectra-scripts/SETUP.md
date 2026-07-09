@@ -1,3 +1,24 @@
+## ⚠️ Segurança — Ação Obrigatória (2026-07-02)
+
+O `config.json` real deste diretório continha um token Magento em texto puro
+versionado no Git (histórico do repositório). Esse token dá acesso a APIs
+sensíveis de clientes B2B e pedidos (`/V1/erp/customers/b2b`).
+
+**Ações obrigatórias:**
+1. Em **Admin → System → Extensions → Integrations → SECTRA ERP**, desative e
+   reative (ou "Reauthorize") a integração para gerar um novo token.
+2. Atualize `C:\SectraSync\config.json` **no servidor Sectra** com o token novo.
+   **Nunca** coloque o token real no `config.json` deste repositório — o arquivo
+   agora está no `.gitignore` e foi desrastreado do Git.
+3. Considere o token antigo comprometido; ele deve parar de funcionar assim que
+   a integração for reautorizada.
+
+Também foi removido `Find-SqlCredentials.ps1` deste diretório — o script fazia
+varredura de credenciais e tentativas de força bruta contra o SQL Server de
+produção, sem qualquer utilidade operacional legítima.
+
+---
+
 # Sync Magento B2B → Sectra (Substituicao do OpenCardB2B)
 
 ## O que faz

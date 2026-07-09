@@ -28,10 +28,10 @@ body.checkout-index-index .b2b-order-notes-wrapper,
 body.rokanthemes-onepagecheckout .b2b-order-notes-wrapper {
     margin: 0 0 18px;
     padding: 18px 20px;
-    background: linear-gradient(180deg, var(--b2b-checkout-white) 0%, var(--awa-bg-subtle, #f8fafc) 100%);
+    background: var(--awa-bg-soft, #f7f7f7);
     border: 1px solid var(--awa-border, #e5e7eb);
     border-radius: var(--awa-radius-lg, 12px);
-    box-shadow: var(--awa-shadow-xs, 0 1px 2px rgb(0 0 0 / 5%));
+    box-shadow: none;
 }
 
 body.checkout-index-index .b2b-po-number-header,
@@ -50,7 +50,9 @@ body.rokanthemes-onepagecheckout .b2b-po-number-container .label,
 body.checkout-index-index .b2b-order-notes-wrapper .label,
 body.rokanthemes-onepagecheckout .b2b-order-notes-wrapper .label,
 body.checkout-index-index .b2b-terms-title,
-body.rokanthemes-onepagecheckout .b2b-terms-title {
+body.rokanthemes-onepagecheckout .b2b-terms-title,
+body.checkout-index-index .b2b-terms-modal-title,
+body.rokanthemes-onepagecheckout .b2b-terms-modal-title {
     margin: 0;
     color: var(--awa-text, #111827);
     font-size: 15px;
@@ -156,8 +158,8 @@ body.rokanthemes-onepagecheckout .b2b-order-notes-counter {
 
 body.checkout-index-index .b2b-terms-container,
 body.rokanthemes-onepagecheckout .b2b-terms-container {
-    background: linear-gradient(135deg, var(--b2b-checkout-c1) 0%, var(--b2b-checkout-c2) 100%);
-    border-color: var(--b2b-checkout-c3);
+    background: var(--awa-bg-soft, #f7f7f7);
+    border-color: var(--awa-border, #e5e7eb);
 }
 
 body.checkout-index-index .b2b-terms-heading,
@@ -165,13 +167,46 @@ body.rokanthemes-onepagecheckout .b2b-terms-heading {
     margin-bottom: 14px;
 }
 
-body.checkout-index-index .b2b-terms-wrapper,
-body.rokanthemes-onepagecheckout .b2b-terms-wrapper {
+body.checkout-index-index .b2b-terms-heading__row,
+body.rokanthemes-onepagecheckout .b2b-terms-heading__row {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
     flex-wrap: wrap;
-    gap: 12px;
+}
+
+body.checkout-index-index .b2b-terms-badge--required,
+body.rokanthemes-onepagecheckout .b2b-terms-badge--required {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: var(--awa-primary-subtle, rgb(183 51 55 / 8%));
+    color: var(--awa-primary, #A33B3B);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+body.checkout-index-index .b2b-terms-wrapper,
+body.rokanthemes-onepagecheckout .b2b-terms-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+@media (min-width: 768px) {
+    body.checkout-index-index .b2b-terms-wrapper,
+    body.rokanthemes-onepagecheckout .b2b-terms-wrapper {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
 }
 
 body.checkout-index-index .b2b-terms-field.choice,
@@ -228,7 +263,7 @@ body.rokanthemes-onepagecheckout .b2b-terms-status {
     align-items: center;
     gap: 6px;
     min-height: 32px;
-    padding: 0 12px;
+    padding: 8px 14px;
     border-radius: 999px;
     background: rgb(22 163 74 / 10%);
     color: var(--b2b-checkout-c4);

@@ -116,7 +116,7 @@
 .column.main a svg,
 .widget a svg,
 .cms-content a svg {
-    color: var(--awa-text, #1a1a1a) !important;
+    color: var(--awa-text, var(--awa-text-primary)) !important;
     fill: currentColor !important;
 }
 
@@ -165,10 +165,10 @@
 .awa-category-hero:not(.awa-category-hero--has-image) {
     position: relative;
     overflow: hidden;
-    --awa-text-primary: #ffffff;
+    --awa-text-primary: var(--awa-bg);
     --awa-text-secondary: rgba(255, 255, 255, 0.92);
     --awa-text-muted: rgba(255, 255, 255, 0.85);
-    --awa-cons-c70: #ffffff;
+    --awa-cons-c70: var(--awa-bg);
 }
 
 .awa-category-hero:not(.awa-category-hero--has-image)::after {
@@ -189,7 +189,7 @@
 }
 
 .awa-category-hero:not(.awa-category-hero--has-image) :is(.awa-category-hero__title, .awa-category-hero__count) {
-    color: #fff;
+    color: var(--awa-bg);
 }
 
 .awa-category-hero:not(.awa-category-hero--has-image) .awa-category-hero__count {
@@ -205,10 +205,10 @@
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
 .page-wrapper .awa-category-hero--has-image {
-    --awa-text-primary: var(--awa-color-text-primary, #333333);
-    --awa-text-secondary: var(--awa-text-secondary, #666666);
-    background: var(--awa-bg, #ffffff) !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    --awa-text-primary: var(--awa-color-text-primary, var(--awa-text));
+    --awa-text-secondary: var(--awa-text-secondary, var(--awa-text-secondary));
+    background: var(--awa-bg, var(--awa-bg)) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
@@ -227,13 +227,13 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
 .page-wrapper .awa-category-hero--has-image
 :is(.awa-category-hero__title, .awa-category-hero__count, .awa-category-hero__eyebrow) {
-    color: #333333 !important;
+    color: var(--awa-text) !important;
     text-shadow: none !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
 .page-wrapper .awa-category-hero--has-image .awa-category-hero__count {
-    color: #666666 !important;
+    color: var(--awa-text-secondary) !important;
 }
 
 /* B2 — Toolbar de listagem: grid-mode-2/3/4 sem estilo de botão
@@ -253,18 +253,18 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
     color: #555;
     font-size: 13px;
     cursor: pointer;
-    background: #fff;
+    background: var(--awa-bg);
     transition: background-color .15s, border-color .15s, color .15s;
 }
 [class^="grid-mode-"]:hover {
-    border-color: #b73337;
-    color: #b73337;
+    border-color: var(--awa-primary);
+    color: var(--awa-primary);
 }
 [class^="grid-mode-"].actived,
 [class^="grid-mode-"].active {
-    background: #b73337;
-    border-color: #b73337;
-    color: #fff;
+    background: var(--awa-primary);
+    border-color: var(--awa-primary);
+    color: var(--awa-bg);
 }
 
 /* ==========================================================================

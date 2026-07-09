@@ -1,0 +1,471 @@
+/**
+ * AWA Vertical Menu Distill — 2026-05-28
+ * SSOT final-wins: lista + flyout essenciais, sem camadas conflitantes.
+ * Substitui awa-vertical-menu-polish (mesmas correções) + cortes decorativos.
+ */
+
+/* ─── Typeahead search no painel ────────────────────────────────────────── */
+body .page-wrapper .navigation.verticalmenu
+    [data-role="awa-vmenu-search-row"] {
+    display: none; /* visível só no desktop — JS toggle */
+    padding: 8px 10px 6px !important;
+    border-bottom: 1px solid var(--awa-vmenu-border,
+        color-mix(in srgb, oklch(42% 0.01 25) 8%, transparent)) !important;
+    margin-bottom: 0 !important;
+    list-style: none !important;
+    background: var(--awa-vmenu-surface, oklch(99.4% 0.004 25)) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-wrap {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-icon {
+    position: absolute !important;
+    left: 10px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 14px !important;
+    height: 14px !important;
+    color: color-mix(in srgb, oklch(42% 0.01 25) 45%, transparent) !important;
+    pointer-events: none !important;
+    flex-shrink: 0 !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-icon svg {
+    width: 14px !important;
+    height: 14px !important;
+    display: block !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-input {
+    width: 100% !important;
+    padding: 7px 10px 7px 32px !important;
+    background: color-mix(in srgb, oklch(42% 0.01 25) 5%,
+        var(--awa-vmenu-surface, oklch(99.4% 0.004 25))) !important;
+    border: 1px solid transparent !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 400 !important;
+    color: oklch(30% 0.01 25) !important;
+    line-height: 1.4 !important;
+    outline: none !important;
+    transition: border-color 120ms ease-out, background 120ms ease-out !important;
+    box-shadow: none !important;
+    /* Reset Magento input defaults */
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-input:focus {
+    border-color: var(--awa-primary, #b73337) !important;
+    background: var(--awa-vmenu-surface, oklch(99.4% 0.004 25)) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 14%, transparent) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu
+    .awa-vmenu-search-input::placeholder {
+    color: color-mix(in srgb, oklch(42% 0.01 25) 38%, transparent) !important;
+}
+
+/* Esconder barra de busca nativa do tipo search */
+body .page-wrapper .navigation.verticalmenu
+    .awa-vmenu-search-input::-webkit-search-cancel-button,
+body .page-wrapper .navigation.verticalmenu
+    .awa-vmenu-search-input::-webkit-search-decoration {
+    -webkit-appearance: none !important;
+    display: none !important;
+}
+
+/* DELIGHT: empty state quando busca não encontra categorias */
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-empty-li {
+    display: none;
+    list-style: none !important;
+    padding: 20px 14px 16px !important;
+    text-align: center !important;
+    border-bottom: none !important;
+    background: var(--awa-vmenu-surface, oklch(99.4% 0.004 25)) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-empty-li.is-visible {
+    display: block !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-empty {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-empty-icon {
+    width: 28px !important;
+    height: 28px !important;
+    color: color-mix(in srgb, oklch(42% 0.01 25) 32%, transparent) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-empty-icon svg {
+    width: 28px !important;
+    height: 28px !important;
+    display: block !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-empty-text {
+    margin: 0 !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    color: color-mix(in srgb, oklch(42% 0.01 25) 52%, transparent) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-empty-query {
+    font-weight: 600 !important;
+    color: oklch(30% 0.01 25) !important;
+}
+
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
+    --awa-vmenu-surface: oklch(99.4% 0.004 25);
+    --awa-vmenu-hover: color-mix(in srgb, var(--awa-primary, #b73337) 7%, var(--awa-vmenu-surface));
+    --awa-vmenu-active: color-mix(in srgb, var(--awa-primary, #b73337) 11%, var(--awa-vmenu-surface));
+    --awa-vmenu-border: color-mix(in srgb, var(--awa-text, oklch(42% 0.01 25)) 8%, transparent);
+    --awa-vmenu-flyout-shadow: 0 8px 24px rgb(15 23 42 / 10%);
+    --awa-vmenu-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── Painel: sólido, sem glass ───────────────────────────────────────── */
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu,
+body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
+    background: var(--awa-vmenu-surface) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: var(--awa-vmenu-flyout-shadow) !important;
+    border: 1px solid var(--awa-vmenu-border) !important;
+}
+
+/* ─── Sem animação decorativa ─────────────────────────────────────────── */
+body .page-wrapper .navigation.verticalmenu .cat-label,
+body .page-wrapper .navigation.verticalmenu .togge-menu.vmm-animate-in > li {
+    animation: none !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label::after {
+    display: none !important;
+    content: none !important;
+}
+
+@media (min-width: 992px) {
+    /* ─── Lista lateral ─────────────────────────────────────────────────── */
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        background: transparent !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: var(--awa-touch-min, 44px) !important;
+        padding-inline: 14px !important;
+        padding-block: 0 !important;
+        box-sizing: border-box !important;
+        color: var(--awa-text, oklch(42% 0.01 25)) !important;
+        background: transparent !important;
+        text-decoration: none !important;
+        transition: color 150ms var(--awa-vmenu-ease), background-color 150ms var(--awa-vmenu-ease) !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link
+        .navigation__label,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link
+        > span:not(.cat-label):not(.arrow) {
+        display: block !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        position: static !important;
+        inset: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        color: inherit !important;
+        background: transparent !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        line-height: 1.3 !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link
+        em.menu-thumb-icon {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 20px !important;
+        width: 20px !important;
+        min-height: 0 !important;
+        height: auto !important;
+        color: var(--awa-primary, #b73337) !important;
+        opacity: 0.72 !important;
+        font-style: normal !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:focus-within {
+        background: var(--awa-vmenu-hover) !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active {
+        background: var(--awa-vmenu-active) !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top.navigation__link,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > a.level-top.navigation__link,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active > a.level-top.navigation__link,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:focus-within > a.level-top.navigation__link,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top.navigation__link
+        :is(.navigation__label, span:not(.cat-label), em.menu-thumb-icon),
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > a.level-top.navigation__link
+        :is(.navigation__label, span:not(.cat-label), em.menu-thumb-icon),
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active > a.level-top.navigation__link
+        :is(.navigation__label, span:not(.cat-label), em.menu-thumb-icon) {
+        color: var(--awa-primary, #b73337) !important;
+        background: transparent !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0:hover > a.level-top.navigation__link
+        em.menu-thumb-icon,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.vmm-active > a.level-top.navigation__link
+        em.menu-thumb-icon,
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0.awa-vmf-active > a.level-top.navigation__link
+        em.menu-thumb-icon {
+        opacity: 1 !important;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link::before {
+        top: 8px !important;
+        bottom: 8px !important;
+        width: 3px !important;
+        border-radius: 0 2px 2px 0 !important;
+    }
+
+    /* ─── Flyout base: sem side-stripe, sem slide ──────────────────────── */
+    body .page-wrapper .navigation.verticalmenu .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu .level0 > .level0.submenu,
+    body .awa-vmf-portal.submenu,
+    body .awa-vmf-portal.navigation__submenu {
+        background: var(--awa-vmenu-surface) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-left: none !important;
+        border-top: 2px solid var(--awa-primary, #b73337) !important;
+        border-radius: 0 10px 10px 0 !important;
+        box-shadow: var(--awa-vmenu-flyout-shadow) !important;
+        transform: none !important;
+        opacity: 1 !important;
+        min-height: 0 !important;
+        transition: opacity 150ms var(--awa-vmenu-ease) !important;
+    }
+
+    /* Mega: 2 colunas + imagem (substitui grid 4 col fixo do layout-bundle) */
+    body .page-wrapper .awa-site-header .header-control.awa-nav-bar .menu_left_home1
+        .navigation.verticalmenu.side-verticalmenu .level0.submenu,
+    body .page-wrapper .awa-site-header .header-control.awa-nav-bar .menu_left_home1
+        .navigation.verticalmenu.side-verticalmenu .level0 > .level0.submenu,
+    body .awa-vmf-portal.submenu:not(.awa-vmf-compact),
+    body .awa-vmf-portal.navigation__submenu:not(.awa-vmf-compact) {
+        width: min(520px, calc(100vw - 280px)) !important;
+        min-width: 300px !important;
+        max-height: min(480px, calc(100vh - 120px)) !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-list--level1,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu.mega-columns,
+    body .awa-vmf-portal:not(.awa-vmf-compact) .navigation__inner-list--level1 {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(120px, 160px) !important;
+        grid-auto-rows: min-content !important;
+        align-content: start !important;
+        gap: 0 16px !important;
+        min-height: 0 !important;
+        height: auto !important;
+        padding: 16px 12px 14px 20px !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-title span,
+    body .awa-vmf-portal:not(.awa-vmf-compact)
+        .navigation__inner-item--level1.subcategory-title span {
+        font-size: 17px !important;
+        font-weight: 700 !important;
+        line-height: 1.25 !important;
+        margin: 0 0 6px !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.imagem.img-subcategory,
+    body .awa-vmf-portal:not(.awa-vmf-compact)
+        .navigation__inner-item--level1.imagem.img-subcategory {
+        grid-column: 3 !important;
+        grid-row: 1 / span 10 !important;
+    }
+
+    /* Compacto: categorias sparse */
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        .togge-menu > li.ui-menu-item.level0.subcategory-first-level > .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        .togge-menu > li.ui-menu-item.level0.subcategory-first-level > .submenu.navigation__submenu,
+    body .awa-vmf-portal.awa-vmf-compact,
+    body .awa-vmf-portal[data-awa-vmf-density="compact"] {
+        width: min(380px, calc(100vw - 280px)) !important;
+        min-width: 260px !important;
+        max-height: min(400px, calc(100vh - 120px)) !important;
+        overflow: hidden !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        .togge-menu > li.ui-menu-item.level0.subcategory-first-level .navigation__inner-list--level1,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        .togge-menu > li.ui-menu-item.level0.subcategory-first-level .subchildmenu.mega-columns,
+    body .awa-vmf-portal.awa-vmf-compact .navigation__inner-list--level1,
+    body .awa-vmf-portal[data-awa-vmf-density="compact"] .navigation__inner-list--level1 {
+        grid-template-columns: minmax(0, 1fr) minmax(120px, 150px) !important;
+        gap: 0 12px !important;
+        padding: 14px 10px 12px 18px !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        .togge-menu > li.ui-menu-item.level0.subcategory-first-level
+        .navigation__inner-item--level1.subcategory-title,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        .togge-menu > li.ui-menu-item.level0.subcategory-first-level
+        .navigation__inner-item--level1.subcategory-second-level,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        .togge-menu > li.ui-menu-item.level0.subcategory-first-level
+        .navigation__inner-item--all,
+    body .awa-vmf-portal.awa-vmf-compact
+        .navigation__inner-item--level1.subcategory-title,
+    body .awa-vmf-portal.awa-vmf-compact
+        .navigation__inner-item--level1.subcategory-second-level,
+    body .awa-vmf-portal.awa-vmf-compact
+        .navigation__inner-item--all,
+    body .awa-vmf-portal[data-awa-vmf-density="compact"]
+        .navigation__inner-item--level1.subcategory-title,
+    body .awa-vmf-portal[data-awa-vmf-density="compact"]
+        .navigation__inner-item--level1.subcategory-second-level,
+    body .awa-vmf-portal[data-awa-vmf-density="compact"]
+        .navigation__inner-item--all {
+        grid-column: 1 !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        .togge-menu > li.ui-menu-item.level0.subcategory-first-level
+        .navigation__inner-item--level1.imagem.img-subcategory,
+    body .awa-vmf-portal.awa-vmf-compact
+        .navigation__inner-item--level1.imagem.img-subcategory,
+    body .awa-vmf-portal[data-awa-vmf-density="compact"]
+        .navigation__inner-item--level1.imagem.img-subcategory {
+        grid-column: 2 !important;
+        grid-row: 1 / span 8 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.imagem.img-subcategory img,
+    body .awa-vmf-portal .navigation__inner-item--level1.imagem.img-subcategory img {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 120px !important;
+        max-height: 200px !important;
+        object-fit: cover !important;
+        object-position: center !important;
+        border-radius: 0 8px 8px 0 !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu li a::before,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-second-level > a::before,
+    body .awa-vmf-portal .subcategory-second-level > a::before,
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-title > span::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-second-level > a,
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-second-level > a {
+        padding: 6px 10px !important;
+        border-radius: 6px !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        color: var(--awa-text, oklch(42% 0.01 25)) !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-second-level > a:hover,
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-second-level > a:hover {
+        color: var(--awa-primary, #b73337) !important;
+        background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, transparent) !important;
+    }
+
+    /* Ver mais: texto simples, sem ícone FA extra */
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-icon {
+        display: none !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .togge-menu > li.expand-category-link .vm-toggle-categories {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em !important;
+        text-transform: none !important;
+        color: var(--awa-primary, #b73337) !important;
+        padding: 10px 14px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu .togge-menu,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu,
+    body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link {
+        transition: none !important;
+        animation: none !important;
+    }
+}

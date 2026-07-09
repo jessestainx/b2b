@@ -308,6 +308,292 @@
     }
 }
 
+@media (max-width: 767px) {
+    @{awa-home-density-grid-scope} .content-top-home {
+        :is(.awa-section-header, .awa-shelf__header, .awa-category-carousel__header) {
+            align-items: flex-start !important;
+            height: auto !important;
+            justify-content: flex-start !important;
+            min-height: 0 !important;
+        }
+
+        :is(.awa-section-header__left, .awa-shelf__heading, .awa-category-carousel__heading) {
+            flex: 1 1 auto !important;
+            flex-basis: auto !important;
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        :is(.awa-shelf--carousel, .awa-carousel-section, .awa-grid-section, .awa-home-niche-shelves)
+            :is(.awa-carousel, .awa-carousel__viewport, .awa-carousel__track) {
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        :is(.awa-shelf--carousel, .awa-carousel-section, .awa-grid-section, .awa-home-niche-shelves)
+            :is(.item-product, .content-item-product, .product-item-info, .awa-product-card) {
+            height: auto !important;
+            min-height: 236px !important;
+        }
+
+        :is(.awa-shelf--carousel, .awa-carousel-section, .awa-grid-section, .awa-home-niche-shelves)
+            :is(.product-info, .product-details, .product-item-details) {
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        .top-home-content--category-carousel :is(.awa-category-carousel__prev, .awa-category-carousel__next) {
+            align-self: center !important;
+            flex: 0 0 44px !important;
+            height: 44px !important;
+            max-height: 44px !important;
+            min-height: 44px !important;
+            padding: 0 !important;
+            width: 44px !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) {
+            align-items: center !important;
+            box-sizing: border-box !important;
+            height: 44px !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            min-height: 44px !important;
+            overflow: hidden !important;
+            padding: 0 44px 0 12px !important;
+            width: 100% !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+            :is(.awa-b2b-promo-bar__inner, .awa-b2b-promo-bar__layout) {
+            align-items: center !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            gap: var(--awa-home-corp-space-2) !important;
+            height: 44px !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            min-height: 44px !important;
+            padding: 0 !important;
+            position: static !important;
+            width: 100% !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+            :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__cta) {
+            align-items: center !important;
+            display: inline-flex !important;
+            height: auto !important;
+            line-height: 1.2 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            white-space: nowrap !important;
+            width: auto !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+            :is(.awa-b2b-promo-bar__lead-long, .awa-b2b-promo-bar__cta-long, .awa-b2b-promo-bar__separator, .awa-b2b-promo-bar__tail) {
+            display: none !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+            :is(.awa-b2b-promo-bar__lead-short, .awa-b2b-promo-bar__cta-short) {
+            display: inline !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__cta {
+            flex: 0 0 auto !important;
+            min-height: 32px !important;
+            padding: 0 var(--awa-home-corp-space-2) !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-close {
+            height: 36px !important;
+            inset: 4px 4px auto auto !important;
+            min-height: 36px !important;
+            min-width: 36px !important;
+            position: absolute !important;
+            transform: none !important;
+            width: 36px !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.footer-container, .footer-static, .awa-footer-newsletter, .footer-bottom, .footer-copyright) {
+            padding-block: var(--awa-home-corp-space-2) !important;
+        }
+
+        :is(.page_footer, .page-footer) .awa-footer-newsletter {
+            height: auto !important;
+            padding-inline: var(--awa-home-corp-space-3) !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.awa-newsletter-wrapper, .awa-newsletter-info, .awa-newsletter-form-container, .newsletter-footer, form.subscribe, .field.newsletter) {
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.footer-container .row, .footer-static .row) {
+            gap: var(--awa-home-corp-space-2) !important;
+            padding-block: var(--awa-home-corp-space-2) !important;
+        }
+
+        :is(.page_footer, .page-footer) .velaFooterTitle {
+            height: auto !important;
+            margin: 0 !important;
+            min-height: 44px !important;
+            padding: 0 !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.footer-bottom, .footer-bottom-inner, .awa-footer-bottom__row, .awa-footer-bottom__row > [class*='col-'], .awa-footer-bottom__copyright) {
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.footer-bottom-inner, .awa-footer-bottom__row) {
+            align-items: start !important;
+            gap: var(--awa-home-corp-space-3) !important;
+            justify-content: start !important;
+        }
+
+        :is(.page_footer, .page-footer) .awa-footer-cnpj-badge {
+            display: inline-flex !important;
+            min-height: 32px !important;
+            padding: 6px 10px !important;
+            width: auto !important;
+        }
+
+        :is(.page_footer, .page-footer) .awa-footer-copyright__disclaimer {
+            font-size: 11px !important;
+            line-height: 1.45 !important;
+        }
+    }
+}
+
+@media (max-width: 767px) {
+    @{awa-home-density-grid-scope} {
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) {
+            align-items: center !important;
+            box-sizing: border-box !important;
+            height: 44px !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            min-height: 44px !important;
+            overflow: hidden !important;
+            padding: 0 44px 0 12px !important;
+            width: 100% !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+            :is(.awa-b2b-promo-bar__inner, .awa-b2b-promo-bar__layout) {
+            align-items: center !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            gap: var(--awa-home-corp-space-2) !important;
+            height: 44px !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            min-height: 44px !important;
+            padding: 0 !important;
+            position: static !important;
+            width: 100% !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+            :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__cta) {
+            align-items: center !important;
+            display: inline-flex !important;
+            height: auto !important;
+            line-height: 1.2 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            white-space: nowrap !important;
+            width: auto !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+            :is(.awa-b2b-promo-bar__lead-long, .awa-b2b-promo-bar__cta-long, .awa-b2b-promo-bar__separator, .awa-b2b-promo-bar__tail) {
+            display: none !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+            :is(.awa-b2b-promo-bar__lead-short, .awa-b2b-promo-bar__cta-short) {
+            display: inline !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-bar__cta {
+            flex: 0 0 auto !important;
+            min-height: 32px !important;
+            padding: 0 var(--awa-home-corp-space-2) !important;
+        }
+
+        .awa-site-header :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-close {
+            height: 36px !important;
+            inset: 4px 4px auto auto !important;
+            min-height: 36px !important;
+            min-width: 36px !important;
+            position: absolute !important;
+            transform: none !important;
+            width: 36px !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.footer-container, .footer-static, .awa-footer-newsletter, .footer-bottom, .footer-copyright) {
+            padding-block: var(--awa-home-corp-space-2) !important;
+        }
+
+        :is(.page_footer, .page-footer) .awa-footer-newsletter {
+            height: auto !important;
+            padding-inline: var(--awa-home-corp-space-3) !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.awa-newsletter-wrapper, .awa-newsletter-info, .awa-newsletter-form-container, .newsletter-footer, form.subscribe, .field.newsletter) {
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.footer-container .row, .footer-static .row) {
+            gap: var(--awa-home-corp-space-2) !important;
+            padding-block: var(--awa-home-corp-space-2) !important;
+        }
+
+        :is(.page_footer, .page-footer) .velaFooterTitle {
+            height: auto !important;
+            margin: 0 !important;
+            min-height: 44px !important;
+            padding: 0 !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.footer-bottom, .footer-bottom-inner, .awa-footer-bottom__row, .awa-footer-bottom__row > [class*='col-'], .awa-footer-bottom__copyright) {
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        :is(.page_footer, .page-footer) :is(.footer-bottom-inner, .awa-footer-bottom__row) {
+            align-items: start !important;
+            gap: var(--awa-home-corp-space-3) !important;
+            justify-content: start !important;
+        }
+
+        :is(.page_footer, .page-footer) .awa-footer-cnpj-badge {
+            display: inline-flex !important;
+            min-height: 32px !important;
+            padding: 6px 10px !important;
+            width: auto !important;
+        }
+
+        :is(.page_footer, .page-footer) .awa-footer-copyright__disclaimer {
+            font-size: 11px !important;
+            line-height: 1.45 !important;
+        }
+    }
+}
+
 // Hero e categorias: corrigem largura aparente menor e trilhos desalinhados.
 @{awa-home-density-grid-scope} .content-top-home {
     .top-home-content--above-fold :is(
@@ -587,14 +873,16 @@
             padding-block-end: var(--awa-home-corp-space-2) !important;
         }
 
+        // FIX 2026-07-07: removidos .awa-hero-swiper, .swiper-wrapper, .swiper-slide,
+        // .banner_item_bg e .banner_item_bg > a desta lista. Esses elementos dependem da
+        // cadeia height:100% (ver awa-hero-lcp-critical) alimentada pelo
+        // min-height:288px!important do awa-align-grid-inline-lock-20260626-phase3d22b.
+        // Zerar a altura aqui (height:auto + min-height:0) vencia a regra de 288px no
+        // Chromium (mesma especificidade, este arquivo carregado depois no cascade) e
+        // colapsava o hero inteiro para ~0px no mobile, deixando paginação/botão de pausa
+        // flutuando sobre espaço em branco — causa raiz do gap excessivo pós-hero.
         .top-home-content--above-fold :is(
             .banner-slider,
-            .wrapper_slider.visible-xs,
-            .awa-hero-swiper,
-            .swiper-wrapper,
-            .swiper-slide,
-            .banner_item_bg,
-            .banner_item_bg > a,
             picture
         ) {
             height: auto !important;
@@ -636,5 +924,238 @@
     @{awa-home-density-grid-scope} * {
         scroll-behavior: auto;
         transition-duration: 0.001ms !important;
+    }
+}
+
+// 2026-06-29 — Product Design audit polish.
+// Terminal home override: vence bundles legados que ainda chegam depois do LESS compilado.
+@{awa-home-density-grid-scope} {
+    .content-top-home .awa-hero-b2b-cta {
+        background: transparent;
+        color: var(--awa-text);
+
+        .awa-hero-benefits {
+            gap: var(--awa-home-corp-gap) !important;
+        }
+
+        :is(.awa-hero-benefits__item, .awa-hero-benefits__link) {
+            align-items: flex-start !important;
+            background: var(--awa-bg-surface) !important;
+            border: 1px solid var(--awa-border) !important;
+            border-radius: var(--awa-home-corp-card-radius) !important;
+            color: var(--awa-text) !important;
+            min-height: 92px !important;
+            padding: var(--awa-home-corp-space-3) !important;
+        }
+
+        .awa-hero-benefits__icon {
+            color: var(--awa-primary) !important;
+            opacity: 1 !important;
+        }
+
+        .awa-hero-benefits__title {
+            color: var(--awa-text) !important;
+            font-weight: 700 !important;
+        }
+
+        .awa-hero-benefits__text {
+            color: var(--awa-text-muted) !important;
+            line-height: 1.42 !important;
+        }
+    }
+
+    :is(.page_footer, .page-footer) {
+        .awa-footer-categories-expand {
+            background: var(--awa-bg-surface) !important;
+            border: 1px solid var(--awa-border) !important;
+            border-radius: var(--awa-home-corp-card-radius) !important;
+            color: var(--awa-text) !important;
+        }
+
+        .awa-footer-categories-expand :is(a, button) {
+            color: var(--awa-text) !important;
+            opacity: 1 !important;
+        }
+
+        .awa-footer-categories-expand :is(a:hover, a:focus-visible, button:hover, button:focus-visible) {
+            color: var(--awa-primary) !important;
+        }
+
+        :is(.awa-footer-pay-sec, .awa-footer-sec-seals, .awa-footer-devby, .footer-bottom) img {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        .awa-seal,
+        .awa-footer-sec-seals li,
+        .awa-footer-devby__logo {
+            background: var(--awa-bg-surface) !important;
+            border: 1px solid var(--awa-border) !important;
+            border-radius: var(--awa-home-corp-card-radius) !important;
+        }
+
+        .awa-seal__img {
+            filter: none !important;
+            opacity: 1 !important;
+        }
+
+        .awa-footer-devby {
+            align-items: center !important;
+            color: var(--awa-text) !important;
+            display: flex !important;
+            gap: var(--awa-home-corp-space-3) !important;
+        }
+    }
+}
+
+@media (max-width: 767px) {
+    @{awa-home-density-grid-scope} {
+        .content-top-home .top-home-content--category-carousel {
+            .awa-category-carousel__header {
+                align-items: start !important;
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) auto !important;
+                row-gap: var(--awa-home-corp-space-1) !important;
+            }
+
+            .awa-section-header__left {
+                align-items: start !important;
+                display: block !important;
+                min-width: 0 !important;
+                width: 100% !important;
+            }
+
+            .awa-category-carousel__subtitle {
+                display: block !important;
+                margin-top: var(--awa-home-corp-space-1) !important;
+                max-width: 22ch !important;
+            }
+
+            :is(.awa-category-carousel__cta-link, .awa-section-header__link, .awa-shelf__view-all) {
+                grid-column: 2 !important;
+                grid-row: 1 / span 2 !important;
+                justify-self: end !important;
+                margin-left: 0 !important;
+                max-width: 112px !important;
+                min-height: 44px !important;
+                padding-inline: var(--awa-home-corp-space-2) !important;
+                white-space: nowrap !important;
+            }
+        }
+
+        :is(.fixed-bottom.hidden-sm, nav.fixed-bottom.hidden-sm) {
+            overflow: visible !important;
+        }
+
+        :is(.fixed-bottom.hidden-sm, nav.fixed-bottom.hidden-sm) .mobile-bottom-link {
+            align-items: stretch !important;
+            display: grid !important;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        :is(.fixed-bottom.hidden-sm, nav.fixed-bottom.hidden-sm) .mobile-bottom-link > li,
+        :is(.fixed-bottom.hidden-sm, nav.fixed-bottom.hidden-sm) .mobile-bottom-link > li > :is(a, button) {
+            width: auto !important;
+            min-width: 0 !important;
+        }
+
+        :is(.fixed-bottom.hidden-sm, nav.fixed-bottom.hidden-sm) .mobile-bottom-link > li > :is(a, button) {
+            align-items: center !important;
+            display: inline-flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            min-height: 56px !important;
+            padding: var(--awa-home-corp-space-1) !important;
+        }
+    }
+
+    body#html-body.nav-open,
+    body#html-body.awa-menu-drawer-open {
+        .category-dropdown-items.is-awa-mobile-open {
+            background: var(--awa-bg-surface) !important;
+            box-shadow: var(--awa-shadow-md) !important;
+            left: 0 !important;
+            /* less.php do Magento pode quebrar com min() + unidades mistas */
+            max-width: 344px !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            padding: var(--awa-home-corp-space-4) var(--awa-home-corp-space-3) calc(72px + env(safe-area-inset-bottom)) !important;
+            top: 44px !important;
+            width: 88vw !important;
+        }
+
+        .category-dropdown-items.is-awa-mobile-open .section-item-content {
+            display: block !important;
+            height: auto !important;
+            min-height: calc(100vh - 96px) !important;
+            overflow: visible !important;
+            padding: 0 !important;
+            position: static !important;
+            width: 100% !important;
+        }
+
+        .category-dropdown-items.is-awa-mobile-open .navigation.verticalmenu.side-verticalmenu {
+            display: block !important;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            position: static !important;
+            width: 100% !important;
+        }
+
+        .category-dropdown-items.is-awa-mobile-open :is(.togge-menu, .list-category-dropdown) {
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            display: block !important;
+            height: auto !important;
+            max-height: none !important;
+            min-height: 0 !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+            padding: var(--awa-home-corp-space-2) 0 0 !important;
+            position: static !important;
+            visibility: visible !important;
+            width: 100% !important;
+        }
+
+        .category-dropdown-items.is-awa-mobile-open :is(.togge-menu, .list-category-dropdown) > li {
+            border-bottom: 1px solid var(--awa-border) !important;
+            display: block !important;
+            margin: 0 !important;
+            min-height: 44px !important;
+            opacity: 1 !important;
+            position: relative !important;
+            visibility: visible !important;
+        }
+
+        .category-dropdown-items.is-awa-mobile-open :is(.togge-menu, .list-category-dropdown) > li > a {
+            align-items: center !important;
+            color: var(--awa-text) !important;
+            display: flex !important;
+            font-weight: 650 !important;
+            gap: var(--awa-home-corp-space-2) !important;
+            min-height: 44px !important;
+            padding: var(--awa-home-corp-space-2) 0 !important;
+            text-decoration: none !important;
+        }
+
+        .category-dropdown-items.is-awa-mobile-open :is(.togge-menu, .list-category-dropdown) > li > a:hover,
+        .category-dropdown-items.is-awa-mobile-open :is(.togge-menu, .list-category-dropdown) > li > a:focus-visible {
+            color: var(--awa-primary) !important;
+        }
+
+        .category-dropdown-items.is-awa-mobile-open .section-item-title {
+            display: none !important;
+        }
+
+        .category-dropdown-items.is-awa-mobile-open .nav-toggle {
+            position: absolute !important;
+            right: var(--awa-home-corp-space-3) !important;
+            top: var(--awa-home-corp-space-2) !important;
+        }
     }
 }

@@ -5,7 +5,6 @@
         <sequence>
             <module name="LiveChat_LiveChat"/>
             <module name="GrupoAwamotos_B2B"/>
-            <module name="GrupoAwamotos_Fitment"/>
         </sequence>
     </module>
 </config>

@@ -1,0 +1,34 @@
+<?php
+/**
+ * Template parcial para lista de oportunidades de churn em email
+ *
+ * @var $block \GrupoAwamotos\RexisML\Block\Email\ChurnOpportunities
+ */
+$opportunities = $block->getOpportunities();
+?>
+
+<?php foreach ($opportunities as $opp): ?>
+<tr style="border-bottom: 1px solid #e5e7eb;">
+    <td style="padding: 12px; border: 1px solid #e5e7eb;">
+        <strong style="display: block; margin-bottom: 4px;"><?= $block->escapeHtml($opp['customer_name']) ?></strong>
+        <span style="font-size: 12px; color: #6b7280;"><?= $block->escapeHtml($opp['customer_email']) ?></span>
+    </td>
+    <td style="padding: 12px; border: 1px solid #e5e7eb;">
+        <strong style="display: block; margin-bottom: 4px;"><?= $block->escapeHtml($opp['product_name']) ?></strong>
+        <span style="font-size: 12px; color: #6b7280;">SKU: <?= $block->escapeHtml($opp['product_sku']) ?></span>
+    </td>
+    <td style="padding: 12px; text-align: center; border: 1px solid #e5e7eb;">
+        <span style="display: inline-block; padding: 4px 12px; background: <?= $opp['score'] >= 90 ? '#fee2e2' : '#fef3c7' ?>; color: <?= $opp['score'] >= 90 ? '#991b1b' : '#92400e' ?>; border-radius: 12px; font-weight: 600; font-size: 13px;">
+            <?= number_format($opp['score'], 1) ?>%
+        </span>
+    </td>
+    <td style="padding: 12px; text-align: right; font-weight: 600; border: 1px solid #e5e7eb;">
+        R$ <?= $block->escapeHtml(number_format((float) $opp['predicted_value'], 2, ',', '.')) ?>
+    </td>
+    <td style="padding: 12px; text-align: center; border: 1px solid #e5e7eb;">
+        <span style="color: <?= $opp['recency_days'] > 90 ? '#dc2626' : '#d97706' ?>; font-weight: 600;">
+            <?= $opp['recency_days'] ?> dias
+        </span>
+    </td>
+</tr>
+<?php endforeach; ?>

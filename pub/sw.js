@@ -1,141 +1,118 @@
-/** AWA Service Worker v2.5.0 — Multi-strategy Cache & Offline Support (2026-04-28) */
-const CACHE_VERSION = '20260506-visual-qa-split';
-const FONT_CACHE = 'awa-fonts-v1';
-const IMAGE_CACHE = 'awa-images-v1';
-const OFFLINE_CACHE = 'awa-offline-v1';
-const OFFLINE_URL = '/offline.html';
-const IMAGE_CACHE_MAX = 300; // max entries
+/**
+ * AWA Motos - Service Worker
+ *
+ * Sprint 1 (PWA + Performance):
+ * - Cache estatico (CSS, JS, imagens) - 30 dias
+ * - Network-first para paginas HTML
+ * - Offline fallback
+ *
+ * Versao: 1.1.0
+ */
 
-/* Patterns to cache with stale-while-revalidate */
-const CACHEABLE_PATTERNS = [
-  /\/css\/awa-bundle-[\w-]+\.css$/,
-  /\/css\/awa-visual-fixes-critical\.css$/,
-  /\/css\/awa-polish-sweep\.css$/,
-  /\/css\/awa-pdp-b2b-pro\.css$/,
-  /\/css\/swiper-bundle\.min\.css$/,
-  /\/css\/themes5\.css$/,
-  /\/js\/swiper-bundle\.min\.js$/,
-  /\/fonts\/rubik\/rubik-\d{3}\.woff2$/
+const CACHE_VERSION = 'awa-v7';
+const STATIC_CACHE = `${CACHE_VERSION}-static`;
+const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
+
+const STATIC_ASSETS = [
+    '/',
+    '/static/version*/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/styles-m.min.css',
+    '/static/version*/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/styles-l.min.css',
+    '/static/version*/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/print.min.css',
+    '/media/logo/stores/1/logo_161x92_1.png',
+    '/offline',
 ];
 
-/* Patterns for font caching (immutable — cache-first, long TTL) */
-const FONT_PATTERNS = [
-  /\.woff2$/
-];
-
-/* Product image cache: cache-first with LRU eviction */
-const IMAGE_PATTERNS = [
-  /\/media\/catalog\/product\/cache\/.+\.(jpe?g|png|webp|avif)$/,
-  /\/media\/catalog\/product\/.+\.(jpe?g|png|webp|avif)$/
-];
-
-/** LRU eviction: keep cache under IMAGE_CACHE_MAX entries */
-async function trimImageCache(cache) {
-  const keys = await cache.keys();
-  if (keys.length > IMAGE_CACHE_MAX) {
-    const toDelete = keys.slice(0, keys.length - IMAGE_CACHE_MAX);
-    await Promise.all(toDelete.map((k) => cache.delete(k)));
-  }
-}
-
+// Install - cache static assets
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(OFFLINE_CACHE).then((cache) => {
-      return cache.addAll([OFFLINE_URL]);
-    })
-  );
-  self.skipWaiting();
+    event.waitUntil(
+        caches.open(STATIC_CACHE)
+            .then((cache) => cache.addAll(STATIC_ASSETS))
+            .then(() => self.skipWaiting())
+    );
 });
 
+// Activate - cleanup old caches
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(
-        names
-          .filter((name) => name !== CACHE_VERSION && name !== FONT_CACHE && name !== IMAGE_CACHE && name !== OFFLINE_CACHE)
-          .map((name) => caches.delete(name))
-      )
-    ).then(() => self.clients.claim())
-  );
+    event.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.filter((k) => !k.startsWith(CACHE_VERSION))
+                    .map((k) => caches.delete(k))
+            );
+        }).then(() => self.clients.claim())
+    );
 });
 
+// Fetch - network-first for HTML, cache-first for assets
 self.addEventListener('fetch', (event) => {
-  const url = event.request.url;
+    const { request } = event;
+    const url = new URL(request.url);
+    const acceptHeader = request.headers.get('accept') || '';
+    const isMenuControllerAsset = /\/static\/version[^/]+\/frontend\/AWA_Custom\/ayo_home5_child\/[^/]+\/js\/(awa-menu-controller|awa-header-minicart-ui-v2)\.js$/.test(url.pathname)
+        || /\/js\/(awa-menu-controller|awa-header-minicart-ui-v2)\.js$/.test(url.pathname);
 
-  /* Skip admin, checkout, customer, and API routes entirely — never intercept */
-  if (/\/(admin_|admin\/|checkout(\/|$|\?|#)|customer\/|rest\/|graphql)/.test(url)) {
-    return;
-  }
+    // Skip non-GET
+    if (request.method !== 'GET') return;
 
-  /* Skip non-GET requests */
-  if (event.request.method !== 'GET') {
-    return;
-  }
+    // Skip cross-origin
+    if (url.origin !== location.origin) return;
 
-  // --- NAVIGATION (HTML) Strategy: Network First with Offline Fallback ---
-  if (event.request.mode === 'navigate') {
+    // Skip admin/cart/checkout (sensitive)
+    if (url.pathname.match(/^\/(admin|customer|checkout|cart|wishlist|sales)/)) return;
+
+    // HTML pages - network-first
+    if (request.mode === 'navigate' || acceptHeader.includes('text/html')) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    // Cache successful responses
+                    if (response.ok) {
+                        const clone = response.clone();
+                        caches.open(RUNTIME_CACHE).then((c) => c.put(request, clone));
+                    }
+                    return response;
+                })
+                .catch(() => caches.match(request).then((r) => r || caches.match('/')))
+        );
+        return;
+    }
+
+    // JS do controller do menu vertical e do header/minicart: sempre prioriza
+    // rede para evitar lock em bundle antigo no cache do service worker
+    // (2026-07-08: mesmo bug do menu-controller, reproduzido no minicart).
+    if (isMenuControllerAsset) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response.ok && response.type === 'basic') {
+                        const clone = response.clone();
+                        caches.open(RUNTIME_CACHE).then((c) => c.put(request, clone));
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    return caches.match(request).then((cached) => {
+                        if (cached) {
+                            return cached;
+                        }
+                        return fetch(request);
+                    });
+                })
+        );
+        return;
+    }
+
+    // Static assets - cache-first
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.open(OFFLINE_CACHE).then((cache) => {
-            return cache.match(OFFLINE_URL);
-          });
+        caches.match(request).then((cached) => {
+            if (cached) return cached;
+            return fetch(request).then((response) => {
+                if (response.ok && response.type === 'basic') {
+                    const clone = response.clone();
+                    caches.open(RUNTIME_CACHE).then((c) => c.put(request, clone));
+                }
+                return response;
+            });
         })
     );
-    return;
-  }
-
-  /* Fonts: cache-first (immutable content, long TTL) */
-  if (FONT_PATTERNS.some((re) => re.test(url))) {
-    event.respondWith(
-      caches.open(FONT_CACHE).then((cache) =>
-        cache.match(event.request).then((cached) => {
-          if (cached) return cached;
-          return fetch(event.request).then((response) => {
-            if (response.ok) cache.put(event.request, response.clone());
-            return response;
-          });
-        })
-      )
-    );
-    return;
-  }
-
-  /* Product images: cache-first with LRU eviction */
-  if (IMAGE_PATTERNS.some((re) => re.test(url))) {
-    event.respondWith(
-      caches.open(IMAGE_CACHE).then((cache) =>
-        cache.match(event.request).then((cached) => {
-          if (cached) return cached;
-          return fetch(event.request).then((response) => {
-            if (response.ok) {
-              cache.put(event.request, response.clone());
-              trimImageCache(cache).catch(function () {});
-            }
-            return response;
-          }).catch(() => cached || Response.error());
-        })
-      )
-    );
-    return;
-  }
-
-  /* CSS/JS bundles: stale-while-revalidate (serve cached, update in background) */
-  if (CACHEABLE_PATTERNS.some((re) => re.test(url))) {
-    event.respondWith(
-      caches.open(CACHE_VERSION).then((cache) =>
-        cache.match(event.request).then((cached) => {
-          const networkFetch = fetch(event.request).then((response) => {
-            if (response.ok) cache.put(event.request, response.clone());
-            return response;
-          });
-          return cached || networkFetch.catch(function () { return Response.error(); });
-        })
-      )
-    );
-    return;
-  }
-
-  /* Everything else: network-only (no caching) */
 });
-

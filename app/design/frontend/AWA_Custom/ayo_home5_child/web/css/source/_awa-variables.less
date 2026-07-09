@@ -142,8 +142,8 @@
 @grid-gap:                @space-4;
 @awa-container-max-width: @container-max;
 @awa-container-pad:       @container-pad;
-@awa-container-small-max-width: 960px;
-@awa-container-wide-max-width: 1440px; // alias "wide" permanece 1440px para seções full-bleed específicas
+@awa-container-small-max-inline-size: var(--awa-container-small-max, 960px);
+@awa-container-wide-max-inline-size: var(--awa-container-wide-max, 1440px); // alias "wide" permanece 1440px para seções full-bleed específicas
 
 // Novos tokens canônicos (v1.2) - Ref: _awa-page-containers.less
 @awa-page-pad-desktop : 24px;

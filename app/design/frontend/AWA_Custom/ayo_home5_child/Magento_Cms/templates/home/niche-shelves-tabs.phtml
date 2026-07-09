@@ -51,6 +51,8 @@ $sectionId = 'awa-home-niche-shelves';
                             id="<?= $block->escapeHtmlAttr($tabId) ?>"
                             aria-selected="<?= $isActive ? 'true' : 'false' ?>"
                             aria-controls="<?= $block->escapeHtmlAttr($panelId) ?>"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Mostrar ' . (string) ($shelf['label'] ?? ''))) ?>"
+                            aria-current="<?= $isActive ? 'true' : 'false' ?>"
                             tabindex="<?= $isActive ? '0' : '-1' ?>"
                             data-awa-niche-tab="<?= (int) $index ?>">
                         <?= $block->escapeHtml((string) ($shelf['label'] ?? '')) ?>

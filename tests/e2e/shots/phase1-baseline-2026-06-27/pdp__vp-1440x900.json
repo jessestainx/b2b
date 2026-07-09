@@ -1,0 +1,21 @@
+{
+  "route": "pdp",
+  "viewport": "vp-1440x900",
+  "requestedUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+  "screenshot": "shots/phase1-baseline-2026-06-27/pdp__vp-1440x900.png",
+  "startedAt": "2026-06-27T03:52:08.542Z",
+  "httpStatus": 200,
+  "finalUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+  "navError": null,
+  "consoleErrorCount": 0,
+  "httpErrorCount": 0,
+  "metrics": {
+    "scrollWidth": 1440,
+    "clientWidth": 1440,
+    "overflow": false,
+    "owlAll": 0,
+    "owlLoaded": 0,
+    "searchVisible": true
+  },
+  "finishedAt": "2026-06-27T03:52:09.311Z"
+}

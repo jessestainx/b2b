@@ -563,10 +563,10 @@ $growthExperiments = $block->getGrowthExperiments();
     <?php endif; ?>
 </div>
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+require(['awaChartjs'], function (Chart) {
+    'use strict';
+
     var scoreData = <?= /* @noEscape */ $scoreChartJson ?>;
     var ufData = <?= /* @noEscape */ $ufChartJson ?>;
 

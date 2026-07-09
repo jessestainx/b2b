@@ -30,7 +30,8 @@ class LeadLoversClient
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly Curl $curl,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function sendLeadFromCustomer(CustomerInterface $customer): bool
     {

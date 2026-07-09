@@ -4,6 +4,7 @@
     <body>
         <referenceBlock name="cookie_config" template="GrupoAwamotos_Theme::core/cookie-config.phtml"/>
         <referenceBlock name="authentication-popup" template="GrupoAwamotos_Theme::core/authentication-popup.phtml"/>
+        <move element="authentication-popup" destination="before.body.end"/>
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
                    name="grupoawamotos.menu.bootstrap"

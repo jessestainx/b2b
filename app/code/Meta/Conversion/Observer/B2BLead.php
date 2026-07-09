@@ -7,7 +7,7 @@ namespace Meta\Conversion\Observer;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
@@ -22,7 +22,7 @@ class B2BLead implements ObserverInterface
 {
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly LoggerInterface $logger,
         private readonly B2BSignalBuilder $b2bSignalBuilder,
         private readonly UserDataBuilder $userDataBuilder
@@ -77,15 +77,7 @@ class B2BLead implements ObserverInterface
                 $capiEvent['event_source_url'] = $eventSourceUrl;
             }
 
-            $result = $this->graphApi->sendEvents($pixelId, [$capiEvent], $storeId);
-
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] Lead API error', [
-                    'store_id' => $storeId,
-                    'http_status' => $result['http_status'] ?? null,
-                    'error' => $result['error']
-                ]);
-            }
+            $this->capiDispatcher->sendEvents($pixelId, [$capiEvent], $storeId, 'Lead');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] Lead event failed', [
                 'error' => $e->getMessage()

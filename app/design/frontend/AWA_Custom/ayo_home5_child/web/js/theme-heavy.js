@@ -27,9 +27,13 @@ define([
         }
     }
 
-    $('.cart-summary').mage('sticky', {
-        container: '#maincontent'
-    });
+    // Carrinho: CSS já aplica position:sticky no .cart-summary; o widget jQuery
+    // recalcula top/width em loop com MutationObservers → "Página sem resposta".
+    if (!$('body').hasClass('checkout-cart-index')) {
+        $('.cart-summary').mage('sticky', {
+            container: '#maincontent'
+        });
+    }
 
     $('.panel.header > .header.links').clone().appendTo('#store\\.links');
 
@@ -38,7 +42,102 @@ define([
     let isHomePath = /^\/(?:index\.php\/?)?$/.test(pathName);
     let bodyClassName = bodyEl ? bodyEl.className : '';
     let isHomePage = isHomePath || /\bcms-index-index\b|\bcms-home\b|\bcms-homepage_ayo_home5\b/.test(bodyClassName);
-    let shouldRunAwaPublicHotfix = !isHomePage;
+    let isCatalogPage = /\bcatalog-category-view\b|\bcatalogsearch-result-index\b/.test(bodyClassName);
+    let isCartPage = !!(bodyEl && bodyEl.classList.contains('checkout-cart-index'));
+    let isCheckoutFlowPage = isCartPage || !!(bodyEl && (
+        bodyEl.classList.contains('checkout-index-index') ||
+        bodyEl.classList.contains('rokanthemes-onepagecheckout') ||
+        bodyEl.classList.contains('onepagecheckout-index-index')
+    ));
+    let shouldRunAwaPublicHotfix = !isHomePage && !isCheckoutFlowPage;
+
+    function applyPlpSearchFontFix() {
+        if (!isCatalogPage) {
+            return;
+        }
+        let searchInput = document.querySelector('#search');
+        if (!searchInput) {
+            return;
+        }
+        let isMobile = window.innerWidth <= 767;
+        let searchFontSize = isMobile ? '16px' : '14px';
+        searchInput.style.setProperty('font-size', searchFontSize, 'important');
+        searchInput.style.setProperty('line-height', isMobile ? '1.25' : '1.35', 'important');
+        searchInput.style.setProperty('height', '44px', 'important');
+        searchInput.style.setProperty('min-height', '44px', 'important');
+    }
+
+    function applyPlpB2bCtaFontFix() {
+        if (!isCatalogPage) {
+            return;
+        }
+        // Guest gate (__title/__message): NÃO injetar inline — background #fff + font 13px
+        // anulavam o CSS terminal (debug cc2a40). Só limpa inlines legados.
+        document.querySelectorAll('.b2b-login-to-see-price').forEach(function (cta) {
+            var isGuestGate = !!cta.querySelector('.b2b-login-to-see-price__title, .b2b-login-to-see-price__message')
+                || !cta.querySelector('a');
+            if (isGuestGate) {
+                cta.style.removeProperty('font-size');
+                cta.style.removeProperty('background');
+                cta.style.removeProperty('border-radius');
+                cta.querySelectorAll('.b2b-login-to-see-price__title, .b2b-login-to-see-price__message, span').forEach(function (child) {
+                    child.style.removeProperty('font-size');
+                    if (!child.getAttribute('style')) {
+                        child.removeAttribute('style');
+                    }
+                });
+                if (!cta.getAttribute('style')) {
+                    cta.removeAttribute('style');
+                }
+                return;
+            }
+            cta.style.setProperty('font-size', '13px', 'important');
+            cta.style.setProperty('border-radius', '8px', 'important');
+            cta.querySelectorAll('.price-label, a, span').forEach(function (child) {
+                child.style.setProperty('font-size', '13px', 'important');
+            });
+        });
+    }
+
+    function applyPlpFootGapFix() {
+        if (!isCatalogPage || window.innerWidth < 992) {
+            return;
+        }
+        let grid = document.querySelector('.wrapper.grid.products-grid');
+        let footRow = document.querySelector('.col-main .product-content-right > .row');
+        if (!grid || !footRow) {
+            return;
+        }
+        let gap = footRow.getBoundingClientRect().top - grid.getBoundingClientRect().bottom;
+        if (gap > 16) {
+            footRow.style.marginTop = (-1 * (gap - 12)) + 'px';
+        } else {
+            footRow.style.removeProperty('margin-top');
+        }
+    }
+
+    applyPlpSearchFontFix();
+    applyPlpB2bCtaFontFix();
+    applyPlpFootGapFix();
+
+    if (isCatalogPage && window.MutationObserver) {
+        let footGapTarget = document.querySelector('.product-content-right') || document.querySelector('.page-main');
+        if (footGapTarget) {
+            let footGapRaf = 0;
+            let footGapObserver = new MutationObserver(function () {
+                if (footGapRaf) {
+                    return;
+                }
+                footGapRaf = window.requestAnimationFrame(function () {
+                    footGapRaf = 0;
+                    applyPlpFootGapFix();
+                });
+            });
+            // childList apenas — attributes em <img src> disparava recálculo em loop durante fallbacks
+            footGapObserver.observe(footGapTarget, { childList: true, subtree: true });
+        }
+        window.addEventListener('resize', applyPlpFootGapFix);
+    }
 
     // PERF HOME (experimento controlado): evita executar blocos pesados no caminho crítico.
     if (isHomePage) {
@@ -186,7 +285,6 @@ define([
     if (window.MutationObserver && shouldRunAwaPublicHotfix) {
         let observerTarget = document.querySelector('.page-wrapper') || document.body;
         if (observerTarget) {
-
             /*
              * CORREÇÃO DE PERFORMANCE:
              * Acumula os nós adicionados e processa em batch no próximo frame
@@ -244,43 +342,210 @@ define([
     }
 
     /**
-     * Fallback para imagens de produto quebradas (ex: _2.jpg que não existe).
-     * Tenta substituir _N.jpg por _1.jpg; se ainda falhar, esconde a imagem.
+     * Fallback para imagens de produto quebradas (ex: _3.jpg no second-thumb).
+     * 1) Tenta _N → _1 uma vez; 2) second-thumb inválido → desativa hover swap;
+     * 3) imagem principal → placeholder uma vez, sem loop de error handlers.
      */
+    var awaProductPlaceholderUrl = '';
+
+    function resolveProductPlaceholderUrl() {
+        if (awaProductPlaceholderUrl) {
+            return awaProductPlaceholderUrl;
+        }
+        try {
+            if (typeof require !== 'undefined' && typeof require.toUrl === 'function') {
+                awaProductPlaceholderUrl = require.toUrl('Magento_Catalog/images/product/placeholder/image.jpg');
+            }
+        } catch (e) {
+            awaProductPlaceholderUrl = '';
+        }
+        return awaProductPlaceholderUrl;
+    }
+
+    function markProductImageLoaded(img) {
+        if (!img || img.dataset.awaLoaded === '1') {
+            return;
+        }
+        img.dataset.awaLoaded = '1';
+        img.classList.add('awa-loaded');
+
+        let thumb = img.closest('[data-awa-thumb-stabilized]');
+        if (thumb) {
+            thumb.classList.add('awa-thumb-ready');
+        }
+
+        let wrapper = img.closest('.product-image-wrapper');
+        if (wrapper) {
+            wrapper.style.setProperty('animation', 'none', 'important');
+            wrapper.style.setProperty('transform', 'none', 'important');
+            wrapper.style.setProperty('transition', 'none', 'important');
+        }
+    }
+
+    function bindProductImageLoaded(img) {
+        if (img.dataset.awaLoadBound === '1') {
+            return;
+        }
+        img.dataset.awaLoadBound = '1';
+        img.addEventListener('load', function () {
+            markProductImageLoaded(img);
+        });
+        if (img.complete && img.naturalWidth > 0) {
+            markProductImageLoaded(img);
+        }
+    }
+
+    function detachBrokenImageHandlers(img) {
+        if (img.__awaBrokenErrorHandler) {
+            img.removeEventListener('error', img.__awaBrokenErrorHandler);
+            img.__awaBrokenErrorHandler = null;
+        }
+    }
+
+    function disableSecondThumbSwap(img) {
+        let second = img.closest('.second-thumb');
+        let thumb = img.closest('.product-thumb');
+
+        if (second) {
+            second.style.display = 'none';
+            second.setAttribute('aria-hidden', 'true');
+        }
+        if (thumb) {
+            thumb.setAttribute('data-no-swap', 'true');
+        }
+    }
+
+    function applyBrokenProductPlaceholder(img) {
+        if (img.dataset.awaBrokenFinal === '1') {
+            return;
+        }
+
+        detachBrokenImageHandlers(img);
+
+        let placeholder = resolveProductPlaceholderUrl();
+        img.style.visibility = 'visible';
+        img.style.opacity = '1';
+        img.classList.add('awa-no-image');
+
+        if (!placeholder || img.getAttribute('src') === placeholder) {
+            img.dataset.awaBrokenFinal = '1';
+            return;
+        }
+
+        img.dataset.awaPlaceholderTried = '1';
+        img.addEventListener('error', function onPlaceholderError() {
+            img.removeEventListener('error', onPlaceholderError);
+            img.dataset.awaBrokenFinal = '1';
+        }, { once: true });
+        img.setAttribute('src', placeholder);
+    }
+
+    function finalizeBrokenImage(img) {
+        img.dataset.awaBrokenFinal = '1';
+        detachBrokenImageHandlers(img);
+
+        if (img.closest('.second-thumb')) {
+            disableSecondThumbSwap(img);
+            return;
+        }
+
+        applyBrokenProductPlaceholder(img);
+    }
+
+    function handleBrokenProductImage(img) {
+        if (img.dataset.awaBrokenFinal === '1') {
+            return;
+        }
+
+        let src = img.getAttribute('src') || '';
+        let fallback = src.replace(/_\d+(\.(?:jpg|jpeg|png|webp))$/i, '_1$1');
+
+        if (fallback !== src && img.dataset.awaVariantTried !== '1') {
+            img.dataset.awaVariantTried = '1';
+            img.setAttribute('src', fallback);
+            return;
+        }
+
+        finalizeBrokenImage(img);
+    }
+
     function fixBrokenProductImages(root) {
         let scope = root && root.querySelectorAll ? root : document;
         scope.querySelectorAll('img[src*="/media/catalog/product/"]').forEach(function (img) {
-            if (img.dataset.awaBrokenHandled) return;
+            if (img.dataset.awaBrokenHandled === '1') {
+                return;
+            }
             img.dataset.awaBrokenHandled = '1';
 
-            function tryFallback() {
-                let src = img.getAttribute('src') || '';
-                let fallback = src.replace(/_\d+(\.(?:jpg|jpeg|png|webp))$/i, '_1$1');
-                if (fallback !== src) {
-                    img.removeEventListener('error', tryFallback);
-                    img.addEventListener('error', function () {
-                        img.style.visibility = 'hidden';
-                    });
-                    img.setAttribute('src', fallback);
-                } else {
-                    img.style.visibility = 'hidden';
-                }
-            }
+            bindProductImageLoaded(img);
 
-            img.addEventListener('error', tryFallback);
+            img.__awaBrokenErrorHandler = function () {
+                handleBrokenProductImage(img);
+            };
+            img.addEventListener('error', img.__awaBrokenErrorHandler);
 
-            // Handle images already in broken state (complete + naturalWidth === 0)
-            // This happens when the error event fired before our listener was attached
             if (img.complete && img.naturalWidth === 0) {
-                tryFallback();
+                handleBrokenProductImage(img);
             }
         });
     }
 
-    // PERF: na homepage este scan varre centenas de imagens e causa long task >1s.
-    // Mantemos o fallback apenas fora da home (PDP/PLP/checkout etc), onde o custo é menor.
+    function lockPlpProductThumbsStatic() {
+        if (!isCatalogPage) {
+            return;
+        }
+        document.querySelectorAll('.wrapper.grid.products-grid .product-thumb').forEach(function (thumb) {
+            thumb.setAttribute('data-no-swap', 'true');
+            thumb.setAttribute('data-awa-plp-static-thumb', 'true');
+        });
+    }
+
     if (!isHomePage) {
+        document.querySelectorAll('img.product-image-photo, .product-thumb img').forEach(bindProductImageLoaded);
+        lockPlpProductThumbsStatic();
+    }
+
+    // PERF: na homepage este scan varre centenas de imagens e causa long task >1s.
+    // Carrinho/checkout: scan + observer em .page-wrapper travavam a aba ("Página sem resposta").
+    if (!isHomePage && !isCheckoutFlowPage) {
         fixBrokenProductImages(document);
+
+        // Imagens ocultas no second-thumb (display:none) não disparam error — probe tardio
+        window.setTimeout(function () {
+            document.querySelectorAll('.second-thumb img[src*="/media/catalog/product/"]').forEach(function (img) {
+                if (img.dataset.awaBrokenFinal === '1' || img.dataset.awaSecondProbe === '1') {
+                    return;
+                }
+                img.dataset.awaSecondProbe = '1';
+
+                if (img.complete && img.naturalWidth > 0) {
+                    return;
+                }
+
+                let src = img.getAttribute('src') || '';
+                if (!src) {
+                    finalizeBrokenImage(img);
+                    return;
+                }
+
+                let probe = new Image();
+                probe.onload = function () {
+                    if (probe.naturalWidth === 0) {
+                        finalizeBrokenImage(img);
+                    }
+                };
+                probe.onerror = function () {
+                    finalizeBrokenImage(img);
+                };
+                probe.src = src;
+            });
+
+            lockPlpProductThumbsStatic();
+            document.dispatchEvent(new CustomEvent('awa:product-images-ready', {
+                bubbles: true,
+                detail: { source: 'theme-heavy-second-probe' }
+            }));
+        }, 1200);
 
         // Also apply to dynamically loaded carousels
         if (window.MutationObserver) {
@@ -299,7 +564,10 @@ define([
                         _ric(function () {
                             let nodes = _imgPendingNodes.splice(0);
                             _imgRafScheduled = false;
-                            nodes.forEach(fixBrokenProductImages);
+                            nodes.forEach(function (node) {
+                                fixBrokenProductImages(node);
+                                lockPlpProductThumbsStatic();
+                            });
                         });
                     }
                 });

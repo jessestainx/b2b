@@ -1,0 +1,30 @@
+<?php
+/**
+ * Template: account/navigation/link.phtml
+ *
+ * Renderiza um item de navegação lateral da conta do cliente.
+ * Compatível com Magento_Customer::SortLink e GrupoAwamotos_B2B::B2bAccountLink.
+ *
+ * Variáveis disponíveis no bloco (via SortLink / Link\Current):
+ *  - getLabel()         Texto exibido
+ *  - getHref()          URL do link
+ *  - getIsCurrentUrl()  true quando a URL atual coincide com o link
+ *
+ * @var \GrupoAwamotos\B2B\Block\Link\B2bAccountLink $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ * @var \Magento\Framework\Escaper $escaper
+ */
+declare(strict_types=1);
+?>
+<?php if ($block->getIsCurrentUrl()): ?>
+<li class="nav item current">
+    <strong><?= $block->escapeHtml(__($block->getLabel())) ?></strong>
+</li>
+<?php else: ?>
+<li class="nav item">
+    <a href="<?= $block->escapeUrl($block->getHref()) ?>"
+       title="<?= $block->escapeHtmlAttr(__($block->getLabel())) ?>">
+        <?= $block->escapeHtml(__($block->getLabel())) ?>
+    </a>
+</li>
+<?php endif; ?>

@@ -14,6 +14,7 @@ define([
 ], function (
     ko,
     _,
+    $,
     quote,
     storage,
     errorProcessor,
@@ -22,8 +23,7 @@ define([
     shippingService,
     selectShippingMethodAction,
     payloadExtender,
-    customer,
-    $
+    customer
 ) {
     'use strict';
 

@@ -44,7 +44,8 @@ class ApprovedCustomerErpSync
         private readonly ErpHelper $erpHelper,
         private readonly SyncLogResource $syncLogResource,
         private readonly ProspectPipeline $prospectPipeline,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly ?CreditService $creditService = null
     ) {
     }
 
@@ -196,11 +197,20 @@ class ApprovedCustomerErpSync
             : ErpCustomerSyncStatus::LINKED_BY_CNPJ;
         $action = $existingErpCode !== null ? self::ACTION_LINKED_EXISTING : self::ACTION_LINKED_BY_CNPJ;
 
-        $this->setCustomerSyncStatus($customer, ErpCustomerSyncStatus::CUSTOMER_VALIDATED_IN_ERP);
         $this->ensureErpValidatorRegistration($customer, (string) $targetErpCode, $newGroupId);
+        $erpValidated = $this->b2bClientRegistration->isClientRegistered($targetErpCode);
+        $erpSyncStatus = $erpValidated
+            ? ErpCustomerSyncStatus::CUSTOMER_VALIDATED_IN_ERP
+            : ErpCustomerSyncStatus::CUSTOMER_PENDING_ERP_VALIDATION;
+        $this->setCustomerSyncStatus($customer, $erpSyncStatus);
         $this->syncCreditLimit($customer);
 
-        $message = sprintf('Cliente já existia no ERP — vínculo #%d (sync real).', $targetErpCode);
+        $message = $erpValidated
+            ? sprintf('Cliente já existia no ERP — vínculo #%d (validado para Importar Pedidos).', $targetErpCode)
+            : sprintf(
+                'Cliente vinculado ao ERP #%d — aguardando Exportar Clientes no Sectra (Cadastro de Cliente).',
+                $targetErpCode
+            );
         $this->logger->info(sprintf('[B2B-ERP-Sync] Customer #%d: %s', $customerId, $message));
         $this->logSyncAttempt($customerId, 'success', $message, (string) $targetErpCode, $cnpjDigits);
 
@@ -211,7 +221,7 @@ class ApprovedCustomerErpSync
             'cnpj_source' => 'b2b_cnpj',
             'erp_code' => $targetErpCode,
             'action' => $action,
-            'erp_customer_sync_status' => ErpCustomerSyncStatus::CUSTOMER_VALIDATED_IN_ERP,
+            'erp_customer_sync_status' => $erpSyncStatus,
             'message' => $message,
             'last_sync_at_updated' => true,
         ];
@@ -261,6 +271,16 @@ class ApprovedCustomerErpSync
 
             $creditLimit = $this->erpIntegration->getCreditLimitFromErp((string) $erpCode);
             if ($creditLimit !== null && $creditLimit > 0) {
+                if ($this->creditService !== null) {
+                    $this->creditService->setLimit(
+                        $customerId,
+                        (float) $creditLimit,
+                        null,
+                        'Sincronizado do ERP durante aprovação B2B.'
+                    );
+                    return;
+                }
+
                 $customer->setCustomAttribute('credit_limit', $creditLimit);
                 $this->customerRepository->save($customer);
             }
@@ -288,7 +308,11 @@ class ApprovedCustomerErpSync
     ): void {
         $logMessage = $message;
         if ($cnpj !== null) {
-            $logMessage .= ' CNPJ: ' . $cnpj;
+            $digits = preg_replace('/\D/', '', $cnpj);
+            $masked = strlen($digits) === 14
+                ? substr($digits, 0, 2) . '********' . substr($digits, -4)
+                : '***';
+            $logMessage .= ' CNPJ: ' . $masked;
         }
 
         $this->syncLogResource->addLog(

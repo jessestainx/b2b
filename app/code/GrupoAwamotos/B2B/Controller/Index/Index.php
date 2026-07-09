@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Index;
@@ -20,7 +21,8 @@ class Index implements HttpGetActionInterface
         private readonly Session $customerSession,
         private readonly RedirectFactory $redirectFactory,
         private readonly Config $config
-    ) {}
+    ) {
+    }
 
     public function execute(): \Magento\Framework\Controller\ResultInterface
     {

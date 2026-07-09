@@ -1,0 +1,273 @@
+<?php
+/**
+ * AWA Motos - Push Notifications Opt-in (2026-06-28)
+ *
+ * Solicita permissão de notificações push para PWA.
+ * - Mostra apenas na primeira visita elegível
+ * - Nunca disputa sessão com o prompt de instalação
+ * - Respeita opt-out em localStorage
+ */
+?>
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaPushNotifInit) return;
+    w.__awaPushNotifInit = true;
+
+    var STORAGE_KEY = 'awa-push-notif';
+
+    function ensureHomeModalScheduler() {
+        if (w.__awaRequestHomeModal) return;
+
+        var VISIT_KEY = 'awa-home-visited-before';
+        var SESSION_KEY = 'awa-home-modal-shown';
+        var visitType = 'first';
+
+        try {
+            visitType = localStorage.getItem(VISIT_KEY) ? 'returning' : 'first';
+        } catch (e) {}
+
+        w.__awaHomeVisitType = visitType;
+
+        function markVisited() {
+            try {
+                localStorage.setItem(VISIT_KEY, '1');
+            } catch (e) {}
+        }
+
+        if (d.readyState === 'complete') {
+            setTimeout(markVisited, 0);
+        } else {
+            w.addEventListener('load', function () {
+                setTimeout(markVisited, 0);
+            }, { once: true });
+        }
+
+        w.__awaRequestHomeModal = function (type, callback) {
+            try {
+                if (sessionStorage.getItem(SESSION_KEY) === '1') return false;
+            } catch (e) {}
+
+            if (w.__awaHomeModalPending) return false;
+            if (visitType === 'first' && type !== 'notification') return false;
+            if (visitType === 'returning' && type !== 'install') return false;
+
+            w.__awaHomeModalPending = type;
+
+            var run = function () {
+                try {
+                    if (sessionStorage.getItem(SESSION_KEY) === '1') return;
+                    sessionStorage.setItem(SESSION_KEY, '1');
+                } catch (e) {}
+                callback();
+            };
+
+            var schedule = function () {
+                setTimeout(run, 30000);
+            };
+
+            if (d.readyState === 'complete') {
+                schedule();
+            } else {
+                w.addEventListener('load', schedule, { once: true });
+            }
+
+            return true;
+        };
+    }
+
+    ensureHomeModalScheduler();
+
+    function getStatus() {
+        try {
+            return localStorage.getItem(STORAGE_KEY) || 'pending';
+        } catch (e) { return 'pending'; }
+    }
+
+    function setStatus(status) {
+        try { localStorage.setItem(STORAGE_KEY, status); } catch (e) {}
+    }
+
+    function canPrompt() {
+        if (w.__awaHomeVisitType !== 'first') return false;
+        if (!('Notification' in w)) return false;
+        if (Notification.permission !== 'default') return false;
+        var status = getStatus();
+        if (status === 'denied' || status === 'subscribed') return false;
+        return true;
+    }
+
+    function showPrompt() {
+        // Mostrar apenas em paginas relevantes
+        var path = w.location.pathname;
+        if (path.indexOf('/checkout') === 0 || path.indexOf('/customer') === 0) return;
+
+        // Criar elemento customizado
+        var existing = d.getElementById('awa-push-prompt');
+        if (existing) return;
+
+        var prompt = d.createElement('div');
+        prompt.id = 'awa-push-prompt';
+        prompt.setAttribute('role', 'dialog');
+        prompt.setAttribute('aria-labelledby', 'awa-push-prompt-title');
+        prompt.className = 'awa-push-prompt';
+        prompt.innerHTML =
+            '<div class="awa-push-prompt__backdrop" data-awa-push-close></div>' +
+            '<div class="awa-push-prompt__card">' +
+            '<button type="button" class="awa-push-prompt__close" data-awa-push-close aria-label="Fechar">' +
+            '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+            '</button>' +
+            '<div class="awa-push-prompt__icon" aria-hidden="true">🔔</div>' +
+            '<h2 id="awa-push-prompt-title" class="awa-push-prompt__title">Ative as notificações</h2>' +
+            '<p class="awa-push-prompt__desc">Receba alertas de ofertas exclusivas, promoções e lançamentos direto no seu dispositivo.</p>' +
+            '<div class="awa-push-prompt__actions">' +
+            '<button type="button" class="awa-push-prompt__cta action primary" data-awa-push-accept aria-label="Ativar notificações">Ativar</button>' +
+            '<button type="button" class="awa-push-prompt__decline" data-awa-push-close aria-label="Agora não">Agora não</button>' +
+            '</div></div>';
+        d.body.appendChild(prompt);
+
+        // Bind
+        prompt.addEventListener('click', function (e) {
+            var t;
+            if (t = e.target.closest('[data-awa-push-close]')) {
+                prompt.remove();
+                setStatus('dismissed');
+            }
+            if (t = e.target.closest('[data-awa-push-accept]')) {
+                e.preventDefault();
+                Notification.requestPermission().then(function (result) {
+                    setStatus(result);
+                    prompt.remove();
+                    if (result === 'granted') {
+                        // Subscribe to push
+                        if (w.navigator.serviceWorker && w.navigator.serviceWorker.ready) {
+                            w.navigator.serviceWorker.ready.then(function (reg) {
+                                return reg.pushManager.subscribe({ userVisibleOnly: true });
+                            }).then(function (sub) {
+                                // Enviar subscription para backend
+                                w.fetch('/awamotos_push/subscribe', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(sub)
+                                }).catch(function (e) {
+                                    console.warn('[AWA] Push subscribe error', e);
+                                });
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function init() {
+        if (canPrompt()) {
+            w.__awaRequestHomeModal('notification', showPrompt);
+        }
+    }
+
+    if (d.readyState === 'complete') {
+        init();
+    } else {
+        w.addEventListener('load', init);
+    }
+})(window, document);
+</script>
+
+<style>
+.awa-push-prompt {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 99997;
+    max-width: 360px;
+    animation: awa-push-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes awa-push-slide-in {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.awa-push-prompt__backdrop {
+    display: none;
+}
+.awa-push-prompt__card {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+    border: 1px solid #e5e7eb;
+}
+.awa-push-prompt__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 4px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 4px;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.awa-push-prompt__close:hover { background: #f3f4f6; }
+.awa-push-prompt__icon {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 8px;
+}
+.awa-push-prompt__title {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.3;
+}
+.awa-push-prompt__desc {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+.awa-push-prompt__actions {
+    display: flex;
+    gap: 8px;
+}
+.awa-push-prompt__cta,
+.awa-push-prompt__decline {
+    flex: 1;
+    min-height: 40px;
+    padding-inline: var(--awa-page-pad-mobile, 16px); padding-block: 0;
+    border-radius: 6px;
+    border: 0;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+.awa-push-prompt__cta {
+    background: #b73337;
+    color: white;
+}
+.awa-push-prompt__cta:hover { background: #a12d30; }
+.awa-push-prompt__decline {
+    background: transparent;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+.awa-push-prompt__decline:hover { background: #f3f4f6; }
+@media (max-width: 480px) {
+    .awa-push-prompt {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        max-width: none;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .awa-push-prompt { animation: none; }
+}
+</style>

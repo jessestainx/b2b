@@ -52,6 +52,7 @@ class ValidateSectraFlowCommand extends Command
         try {
             $this->appState->setAreaCode(Area::AREA_ADMINHTML);
         } catch (\Exception) {
+            // Area code já definido pelo bootstrap do CLI — seguro ignorar.
         }
 
         $report = [];
@@ -67,7 +68,7 @@ class ValidateSectraFlowCommand extends Command
         $report[] = '## 1. Cliente não validado #' . $unvalidatedId;
         $report[] = $this->describeCustomer($unvalidatedId);
         $blockTest = $this->testCheckoutBlock($unvalidatedId);
-        $report[] = 'Checkout block: ' . ($blockTest['blocked'] ? 'OK' : 'FALHOU');
+        $report[] = 'Gate ERP (Importar Pedidos): ' . ($blockTest['blocked'] ? 'OK' : 'FALHOU');
         $report[] = 'Mensagem: ' . ($blockTest['message'] ?? '—');
         $report[] = '';
 
@@ -141,6 +142,13 @@ class ValidateSectraFlowCommand extends Command
      */
     private function testCheckoutBlock(int $customerId): array
     {
+        if (!$this->validatorChecker->isCustomerValidatedInSectra($customerId)) {
+            return [
+                'blocked' => true,
+                'message' => 'Cliente ainda ausente em oc_customer_b2b_confirmed (gate ativo).',
+            ];
+        }
+
         $quote = $this->buildQuoteStub($customerId);
         $event = new Event(['quote' => $quote]);
         $observer = new Observer(['event' => $event]);
@@ -193,12 +201,17 @@ class ValidateSectraFlowCommand extends Command
         $connection = $this->resourceConnection->getConnection();
         $row = $connection->fetchRow(
             "SELECT ce.email, sync.value AS erp_sync, map.old_oc_customer_id,
+                    COALESCE(NULLIF(CAST(erp_attr.value AS UNSIGNED), 0), map.old_oc_customer_id) AS sectra_chave,
                     conf.customer_id AS confirmed_chave
              FROM customer_entity ce
              LEFT JOIN customer_entity_varchar sync ON sync.entity_id=ce.entity_id
                AND sync.attribute_id=(SELECT attribute_id FROM eav_attribute WHERE attribute_code='erp_customer_sync_status' AND entity_type_id=1)
+             LEFT JOIN customer_entity_varchar erp_attr ON erp_attr.entity_id=ce.entity_id
+               AND erp_attr.attribute_id=(SELECT attribute_id FROM eav_attribute WHERE attribute_code='erp_code' AND entity_type_id=1)
+               AND erp_attr.value REGEXP '^[0-9]+$'
              LEFT JOIN oc_customer_id_map map ON map.magento_customer_id=ce.entity_id
-             LEFT JOIN oc_customer_b2b_confirmed conf ON conf.customer_id=map.old_oc_customer_id
+             LEFT JOIN oc_customer_b2b_confirmed conf
+               ON conf.customer_id=COALESCE(NULLIF(CAST(erp_attr.value AS UNSIGNED), 0), map.old_oc_customer_id)
              WHERE ce.entity_id=?",
             [$customerId]
         );
@@ -211,7 +224,7 @@ class ValidateSectraFlowCommand extends Command
             'email=%s | erp_sync=%s | sectra_chave=%s | b2b_confirmed=%s | validated=%s',
             $row['email'],
             $row['erp_sync'] ?? 'NULL',
-            $row['old_oc_customer_id'] ?? 'NULL',
+            $row['sectra_chave'] ?? 'NULL',
             $row['confirmed_chave'] ? 'sim' : 'não',
             $this->validatorChecker->isCustomerValidatedInSectra($customerId) ? 'sim' : 'não'
         );
@@ -224,7 +237,11 @@ class ValidateSectraFlowCommand extends Command
             "SELECT ce.entity_id
              FROM customer_entity ce
              INNER JOIN oc_customer_id_map map ON map.magento_customer_id=ce.entity_id
-             INNER JOIN oc_customer_b2b_confirmed conf ON conf.customer_id=map.old_oc_customer_id
+             LEFT JOIN customer_entity_varchar erp_attr ON erp_attr.entity_id=ce.entity_id
+               AND erp_attr.attribute_id=(SELECT attribute_id FROM eav_attribute WHERE attribute_code='erp_code' AND entity_type_id=1)
+               AND erp_attr.value REGEXP '^[0-9]+$'
+             INNER JOIN oc_customer_b2b_confirmed conf
+               ON conf.customer_id=COALESCE(NULLIF(CAST(erp_attr.value AS UNSIGNED), 0), map.old_oc_customer_id)
              INNER JOIN customer_entity_varchar appr ON appr.entity_id=ce.entity_id
                AND appr.attribute_id=142 AND appr.value='approved'
              WHERE ce.group_id IN (4,5,6)

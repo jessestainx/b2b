@@ -12,7 +12,42 @@ html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama_
   border-radius: 8px !important;
 }
 
-@media (min-width:992px){html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage{min-height:0!important;height:clamp(340px,32vw,400px)!important;max-height:clamp(340px,32vw,400px)!important}html body#html-body.catalog-product-view .page-wrapper .product.media :is(.fotorama__wrap,.fotorama-item,.gallery-placeholder){max-height:clamp(440px,38vw,500px)!important;min-height:0!important}html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav__frame{height:56px!important}html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media{min-height:0!important}html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media .fotorama__stage{height:clamp(280px,24vw,340px)!important;max-height:clamp(280px,24vw,340px)!important}html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media :is(.fotorama__wrap,.fotorama-item,.gallery-placeholder){max-height:clamp(380px,30vw,440px)!important}html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media .fotorama__nav__frame{height:52px!important}}
+/* Vence awa-pdp-ui-promax min-height:clamp(320px,38vw,520px) — causa ~300px vazio sob buy-box B2B */
+@media (min-width: 992px) {
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage {
+    min-height: 0 !important;
+    height: clamp(340px, 32vw, 400px) !important;
+    max-height: clamp(340px, 32vw, 400px) !important;
+  }
+
+  html body#html-body.catalog-product-view .page-wrapper .product.media
+    :is(.fotorama__wrap, .fotorama-item, .gallery-placeholder) {
+    max-height: clamp(440px, 38vw, 500px) !important;
+    min-height: 0 !important;
+  }
+
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav__frame {
+    height: 56px !important;
+  }
+
+  html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media {
+    min-height: 0 !important;
+  }
+
+  html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media .fotorama__stage {
+    height: clamp(280px, 24vw, 340px) !important;
+    max-height: clamp(280px, 24vw, 340px) !important;
+  }
+
+  html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media
+    :is(.fotorama__wrap, .fotorama-item, .gallery-placeholder) {
+    max-height: clamp(380px, 30vw, 440px) !important;
+  }
+
+  html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media .fotorama__nav__frame {
+    height: 52px !important;
+  }
+}
 
 html body#html-body.catalog-product-view .page-wrapper .product-info-main :is(.action.primary.tocart, .action.tocart.primary) {
   box-shadow: none !important;

@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Comando CLI para exibir estatisticas do REXIS ML
+ * Comando CLI para exibir estatisticas do Product Intelligence
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Console\Command;
 
@@ -29,7 +29,7 @@ class StatsCommand extends Command
     protected function configure()
     {
         $this->setName('rexis:stats')
-            ->setDescription('Exibir estatisticas completas do sistema REXIS ML');
+            ->setDescription('Exibir estatisticas completas do sistema Product Intelligence');
         parent::configure();
     }
 
@@ -39,7 +39,7 @@ class StatsCommand extends Command
 
         $output->writeln('');
         $output->writeln('<fg=cyan;options=bold>+=============================================+</>');
-        $output->writeln('<fg=cyan;options=bold>|     REXIS ML - Estatisticas do Sistema      |</>');
+        $output->writeln('<fg=cyan;options=bold>| Product Intelligence - Estatisticas Sistema |</>');
         $output->writeln('<fg=cyan;options=bold>+=============================================+</>');
         $output->writeln('');
 

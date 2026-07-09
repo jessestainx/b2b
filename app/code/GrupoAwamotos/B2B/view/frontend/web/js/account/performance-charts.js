@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'chartjs',
+    'awaChartjs',
     'mage/translate'
 ], function ($, Chart, $t) {
     'use strict';
@@ -22,7 +22,25 @@ define([
         const revenueData = rawData.map(item => item.revenue);
         const orderData = rawData.map(item => item.order_count);
 
-        new Chart(element, {
+        const canvas = element instanceof HTMLCanvasElement ? element : $element[0];
+        if (!canvas || !canvas.getContext) {
+            return;
+        }
+
+        const ChartConstructor = (typeof Chart === 'function')
+            ? Chart
+            : (Chart && Chart.default) || window.Chart;
+
+        if (typeof ChartConstructor !== 'function') {
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            return;
+        }
+
+        new ChartConstructor(ctx, {
             type: 'line',
             data: {
                 labels: labels,
@@ -36,7 +54,7 @@ define([
                         fill: true,
                         tension: 0.4,
                         yAxisID: 'y'
-                    },
+                },
                     {
                         label: $t('Número de Pedidos'),
                         data: orderData,
@@ -47,7 +65,7 @@ define([
                         fill: false,
                         tension: 0.4,
                         yAxisID: 'y1'
-                    }
+                }
                 ]
             },
             options: {
@@ -74,7 +92,7 @@ define([
                         borderWidth: 1,
                         displayColors: true,
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -98,7 +116,7 @@ define([
                             drawOnChartArea: true,
                         },
                         ticks: {
-                            callback: function(value) {
+                            callback: function (value) {
                                 return 'R$ ' + value.toLocaleString('pt-BR');
                             }
                         }

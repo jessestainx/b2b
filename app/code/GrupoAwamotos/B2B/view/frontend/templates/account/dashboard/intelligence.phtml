@@ -6,23 +6,26 @@ $erpSummary = $block->getPurchaseSummary();
 $rfm = $block->getCustomerRfm();
 $trend = $block->getMonthlyTrend(12);
 $frequency = $block->getPurchaseFrequency();
+$hasRfmCard = !empty($rfm);
+$hasFrequencyCard = !empty($frequency) && ((int) ($frequency['total_orders'] ?? 0) > 1);
+$hasAnyIntelligenceCard = $hasRfmCard || $hasFrequencyCard;
 ?>
 
 <div class="b2b-section b2b-intelligence-section">
     <div class="section-header">
-        <h3>
+        <h2>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
             <?= $block->escapeHtml(__('Inteligência de Vendas B2B')) ?>
-        </h3>
+        </h2>
         <span class="badge intelligence-badge"><?= $block->escapeHtml(__('Exclusivo B2B')) ?></span>
     </div>
 
     <div class="intelligence-grid">
         <!-- RFM Status -->
-        <?php if ($rfm): ?>
+        <?php if ($hasRfmCard): ?>
             <div class="intelligence-card rfm-card">
                 <div class="card-header">
-                    <h4><?= $block->escapeHtml(__('Seu Perfil de Compra')) ?></h4>
+                    <h3><?= $block->escapeHtml(__('Seu Perfil de Compra')) ?></h3>
                     <span class="rfm-tag" style="--b2b-rfm-tag-bg: <?= $block->escapeHtmlAttr($rfm['segment_color'] ?? '#6b7280') ?>">
                         <?= $block->escapeHtml($rfm['segment_label'] ?? 'Novo') ?>
                     </span>
@@ -30,28 +33,28 @@ $frequency = $block->getPurchaseFrequency();
                 <div class="rfm-stats">
                     <div class="rfm-item">
                         <span class="label"><?= $block->escapeHtml(__('Recência:')) ?></span>
-                        <span class="value"><?= $block->escapeHtml($rfm['recency_days'] ?? 0) ?> <?= $block->escapeHtml(__('dias')) ?></span>
+                        <span class="value"><?= $block->escapeHtml($rfm['recency'] ?? 0) ?> <?= $block->escapeHtml(__('dias')) ?></span>
                     </div>
                     <div class="rfm-item">
                         <span class="label"><?= $block->escapeHtml(__('Frequência:')) ?></span>
-                        <span class="value"><?= $block->escapeHtml($rfm['frequency_count'] ?? 0) ?> <?= $block->escapeHtml(__('pedidos')) ?></span>
+                        <span class="value"><?= $block->escapeHtml($rfm['frequency'] ?? 0) ?> <?= $block->escapeHtml(__('pedidos')) ?></span>
                     </div>
                     <div class="rfm-item">
                         <span class="label"><?= $block->escapeHtml(__('Valor Total:')) ?></span>
-                        <span class="value"><?= $block->escapeHtml($block->formatPrice((float)($rfm['monetary_value'] ?? 0))) ?></span>
+                        <span class="value"><?= $block->escapeHtml($block->formatPrice((float)($rfm['monetary'] ?? 0))) ?></span>
                     </div>
                 </div>
                 <div class="rfm-recommendation">
-                    <p><strong><?= $block->escapeHtml(__('Dica do Consultor:')) ?></strong> <?= $block->escapeHtml($rfm['recommendation'] ?? '') ?></p>
+                    <p><strong><?= $block->escapeHtml(__('Dica do Consultor:')) ?></strong> <?= $block->escapeHtml($rfm['suggested_action'] ?? __('Continue comprando para desbloquear recomendações personalizadas.')) ?></p>
                 </div>
             </div>
         <?php endif; ?>
 
         <!-- Frequency Analysis -->
-        <?php if ($frequency && $frequency['total_orders'] > 1): ?>
+        <?php if ($hasFrequencyCard): ?>
             <div class="intelligence-card frequency-card">
                 <div class="card-header">
-                    <h4><?= $block->escapeHtml(__('Ciclo de Reposição')) ?></h4>
+                    <h3><?= $block->escapeHtml(__('Ciclo de Reposição')) ?></h3>
                 </div>
                 <div class="frequency-content">
                     <div class="frequency-main">
@@ -64,18 +67,30 @@ $frequency = $block->getPurchaseFrequency();
                 </div>
             </div>
         <?php endif; ?>
+
+        <?php if (!$hasAnyIntelligenceCard): ?>
+            <div class="intelligence-card intelligence-empty-card">
+                <div class="card-header">
+                    <h3><?= $block->escapeHtml(__('Seu painel esta sendo preparado')) ?></h3>
+                </div>
+                <div class="intelligence-empty-content">
+                    <p><?= $block->escapeHtml(__('Ainda nao encontramos historico suficiente no ERP para montar os indicadores de recencia, frequencia e valor.')) ?></p>
+                    <p><?= $block->escapeHtml(__('Assim que novos dados forem sincronizados, esta area sera atualizada automaticamente.')) ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Monthly Trend Chart (Advanced) -->
     <?php if (!empty($trend)): ?>
         <div class="intelligence-trend">
             <div class="card-header">
-                <h4><?= $block->escapeHtml(__('Tendência de Crescimento (12 Meses)')) ?></h4>
+                <h3><?= $block->escapeHtml(__('Tendência de Crescimento (12 Meses)')) ?></h3>
             </div>
             <div class="b2b-chart-container advanced-chart">
-                <canvas id="b2b-performance-trend-chart" 
+                <canvas id="b2b-performance-trend-chart"
                         data-chart-data='<?= $block->escapeHtmlAttr(json_encode($trend)) ?>'
-                        aria-label="Grafico de tendencia de performance" role="img"></canvas>
+                        aria-label="<?= $block->escapeHtmlAttr(__('Gráfico de tendência de performance')) ?>" role="img"></canvas>
             </div>
         </div>
     <?php endif; ?>

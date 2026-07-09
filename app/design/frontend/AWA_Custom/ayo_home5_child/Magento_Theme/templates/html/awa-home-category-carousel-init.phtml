@@ -1,12 +1,86 @@
 <?php
 declare(strict_types=1);
 ?>
-<script type="text/x-magento-init">
-{
-    "#awa-cat-carousel": {
-        "js/awa-home-category-carousel": {
-            "mobileBreakpoint": 768
+<script>
+(function (w, d) {
+    'use strict';
+
+    var started = false;
+    var requireRetries = 0;
+    var maxRequireRetries = 80;
+
+    function isCarouselIntentTarget(target) {
+        if (!target || typeof target.closest !== 'function') {
+            return false;
         }
+
+        return !!target.closest('.top-home-content--category-carousel, #awa-cat-carousel, .awa-category-carousel__prev, .awa-category-carousel__next');
     }
-}
+
+    function initCategoryCarousel() {
+        if (started) {
+            return;
+        }
+
+        var target = d.getElementById('awa-cat-carousel');
+        if (!target) {
+            return;
+        }
+
+        started = true;
+
+        function boot() {
+            if (typeof w.require !== 'function') {
+                requireRetries += 1;
+                if (requireRetries < maxRequireRetries) {
+                    w.setTimeout(boot, 120);
+                }
+                return;
+            }
+
+            w.require(['js/awa-home-category-carousel'], function (init) {
+                if (typeof init === 'function') {
+                    init({ mobileBreakpoint: 768 }, target);
+                }
+            });
+        }
+
+        if (typeof w.awaRunWhenRequire === 'function') {
+            w.awaRunWhenRequire(boot, { key: 'awa-home-category-carousel' });
+            return;
+        }
+
+        boot();
+    }
+
+    function schedule() {
+        var target = d.getElementById('awa-cat-carousel');
+        if (!target) {
+            return;
+        }
+
+        var intentEvents = ['pointerdown', 'keydown', 'touchstart'];
+
+        function onIntent(event) {
+            if (!isCarouselIntentTarget(event && event.target ? event.target : null)) {
+                return;
+            }
+
+            intentEvents.forEach(function (name) {
+                w.removeEventListener(name, onIntent, true);
+            });
+            initCategoryCarousel();
+        }
+
+        intentEvents.forEach(function (name) {
+            w.addEventListener(name, onIntent, { capture: true, passive: name !== 'keydown', once: false });
+        });
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', schedule, { once: true });
+    } else {
+        schedule();
+    }
+}(window, document));
 </script>

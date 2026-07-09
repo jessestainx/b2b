@@ -12,10 +12,11 @@ use Magento\Eav\Model\Entity\Attribute\Source\AbstractSource;
 
 class ApprovalStatus extends AbstractSource
 {
-    const STATUS_PENDING = 'pending';
-    const STATUS_APPROVED = 'approved';
-    const STATUS_REJECTED = 'rejected';
-    const STATUS_SUSPENDED = 'suspended';
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_DATA_REVIEW = 'data_review';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_SUSPENDED = 'suspended';
 
     /**
      * Get all options
@@ -27,6 +28,7 @@ class ApprovalStatus extends AbstractSource
         if ($this->_options === null) {
             $this->_options = [
                 ['value' => self::STATUS_PENDING, 'label' => __('Pendente de Aprovação')],
+                ['value' => self::STATUS_DATA_REVIEW, 'label' => __('Revisão de Cadastro')],
                 ['value' => self::STATUS_APPROVED, 'label' => __('Aprovado')],
                 ['value' => self::STATUS_REJECTED, 'label' => __('Rejeitado')],
                 ['value' => self::STATUS_SUSPENDED, 'label' => __('Suspenso')],

@@ -19,8 +19,8 @@ import {
   navigateTo, css, px,
   isVisible, hasNoOverflow,
 } from '../helpers/visual-audit.helpers';
-
-const BASE = 'https://awamotos.com';
+import { targetUrl } from '../helpers/target-url';
+import { blockOptionalThirdParty } from '../helpers/third-party-block';
 
 /* Seletores do componente de busca */
 const SEL = {
@@ -31,6 +31,11 @@ const SEL = {
   categorySelect: '#choose_category',
   suggestions:    '#search_autocomplete .item, #search_autocomplete li, .search-autocomplete .item',
 } as const;
+
+async function navigateToSearchHome(page: Page): Promise<boolean> {
+  await blockOptionalThirdParty(page.context());
+  return navigateTo(page, targetUrl('/', 'visual-audit-search-autocomplete'));
+}
 
 /* ── Helper: aguardar autocomplete aparecer ─────────────────────── */
 async function waitAutocomplete(page: Page, timeout = 8_000): Promise<boolean> {
@@ -60,8 +65,9 @@ test.describe('Busca — Input (estrutura e estilos)', () => {
 
   test.beforeAll(async ({ browser }) => {
     const ctx = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
+    await blockOptionalThirdParty(ctx);
     homePage = await ctx.newPage();
-    const ok = await navigateTo(homePage, BASE);
+    const ok = await navigateTo(homePage, targetUrl('/', 'visual-audit-search-autocomplete'));
     if (!ok) throw new Error('Homepage não carregou para testes de busca');
     await homePage.waitForTimeout(2_000);
   });
@@ -119,7 +125,7 @@ test.describe('Busca — Autocomplete (sugestões)', () => {
   test.use({ viewport: { width: 1366, height: 768 } });
 
   test('Autocomplete aparece ao digitar "retrovisor"', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -136,7 +142,7 @@ test.describe('Busca — Autocomplete (sugestões)', () => {
   });
 
   test('Sugestões têm ao menos 1 item após digitar "bagageiro"', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -155,7 +161,7 @@ test.describe('Busca — Autocomplete (sugestões)', () => {
   });
 
   test('Container do autocomplete tem position absolute ou fixed', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -174,7 +180,7 @@ test.describe('Busca — Autocomplete (sugestões)', () => {
   });
 
   test('Autocomplete não causa overflow horizontal', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -197,7 +203,7 @@ test.describe('Busca — Navegação por teclado', () => {
   test.use({ viewport: { width: 1366, height: 768 } });
 
   test('Enter no input navega para página de resultados', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -242,7 +248,7 @@ test.describe('Busca — Navegação por teclado', () => {
   });
 
   test('ESC fecha o autocomplete', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -275,7 +281,7 @@ test.describe('Busca — SearchbyCat (filtro por categoria)', () => {
   test.use({ viewport: { width: 1366, height: 768 } });
 
   test('Select de categoria tem ao menos 2 opções', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -288,7 +294,7 @@ test.describe('Busca — SearchbyCat (filtro por categoria)', () => {
   });
 
   test('Busca com categoria navega para resultados', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -319,7 +325,7 @@ test.describe('Busca — Mobile (375px)', () => {
   test.use({ viewport: { width: 375, height: 667 } });
 
   test('Input de busca acessível em mobile', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -337,7 +343,7 @@ test.describe('Busca — Mobile (375px)', () => {
   });
 
   test('Busca mobile sem overflow horizontal', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(1_500);
     const noOverflow = await hasNoOverflow(page);
@@ -352,7 +358,7 @@ test.describe('Busca — Screenshots baseline', () => {
   test.use({ viewport: { width: 1366, height: 768 } });
 
   test('Screenshot — área de busca (estado inicial)', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -366,7 +372,7 @@ test.describe('Busca — Screenshots baseline', () => {
   });
 
   test('Screenshot — autocomplete aberto', async ({ page }) => {
-    const ok = await navigateTo(page, BASE);
+    const ok = await navigateToSearchHome(page);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 

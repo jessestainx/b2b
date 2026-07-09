@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <!-- Tabela 1: Dataset de Recomendações -->
+    <table name="rexis_dataset_recomendacao" resource="default" engine="innodb" comment="Dataset de Recomendações REXIS ML">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="varchar" name="chave_global" length="255" nullable="false" comment="Chave Global (Cliente-Produto-Mes)"/>
+        <column xsi:type="varchar" name="mes_rexis_code" length="10" nullable="false" comment="Código do Mês REXIS"/>
+        <column xsi:type="varchar" name="identificador_cliente" length="50" nullable="false" comment="ID do Cliente (CNPJ ou código ERP)"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true" comment="Customer ID Magento"/>
+        <column xsi:type="varchar" name="identificador_produto" length="50" nullable="false" comment="ID do Produto (SKU ou código ERP)"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="true" comment="Product ID Magento"/>
+        <column xsi:type="varchar" name="classificacao_cliente" length="50" nullable="true" comment="Classificação do Cliente"/>
+        <column xsi:type="varchar" name="classificacao_produto" length="50" nullable="true" comment="Classificação do Produto"/>
+        <column xsi:type="boolean" name="ja_comprou" nullable="false" default="0" comment="Cliente já comprou esse produto?"/>
+        <column xsi:type="decimal" name="pred" precision="10" scale="4" nullable="true" comment="Predição do Modelo ML (Score 0-1)"/>
+        <column xsi:type="decimal" name="probabilidade_compra" precision="10" scale="4" nullable="true" comment="Probabilidade de Compra"/>
+        <column xsi:type="decimal" name="previsao_gasto_round_up" precision="12" scale="2" nullable="true" comment="Previsão de Gasto"/>
+        <column xsi:type="decimal" name="valor_total_esperado" precision="12" scale="2" nullable="true" comment="Valor Total Esperado"/>
+        <column xsi:type="decimal" name="valor_convertida" precision="12" scale="2" nullable="true" default="0" comment="Valor Convertido"/>
+        <column xsi:type="int" name="quantidade_convertida" nullable="true" default="0" comment="Quantidade Convertida"/>
+        <column xsi:type="decimal" name="valor_unitario" precision="12" scale="2" nullable="true" comment="Valor Unitário do Produto"/>
+        <column xsi:type="varchar" name="tipo_recomendacao" length="50" nullable="true" comment="Tipo de Recomendação"/>
+        <column xsi:type="int" name="recencia" nullable="true" comment="Recência (dias)"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Data de Criação"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Data de Atualização"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="REXIS_DATASET_RECOMENDACAO_CHAVE_GLOBAL">
+            <column name="chave_global"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="REXIS_DATASET_REC_CUSTOMER_ID_CUSTOMER_ENTITY_ID"
+                    table="rexis_dataset_recomendacao" column="customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id"
+                    onDelete="SET NULL"/>
+        <index referenceId="REXIS_DATASET_RECOMENDACAO_MES_REXIS_CODE" indexType="btree">
+            <column name="mes_rexis_code"/>
+        </index>
+        <index referenceId="REXIS_DATASET_RECOMENDACAO_IDENTIFICADOR_CLIENTE" indexType="btree">
+            <column name="identificador_cliente"/>
+        </index>
+        <index referenceId="REXIS_DATASET_RECOMENDACAO_CUSTOMER_ID" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="REXIS_DATASET_RECOMENDACAO_CLASSIFICACAO_PRODUTO" indexType="btree">
+            <column name="classificacao_produto"/>
+        </index>
+    </table>
+
+    <!-- Tabela 2: Regras de Associação (Market Basket Analysis) -->
+    <table name="rexis_network_rules" resource="default" engine="innodb" comment="Regras de Associação - Market Basket Analysis">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="varchar" name="antecedent" length="255" nullable="false" comment="Produto Antecedente (SKU)"/>
+        <column xsi:type="varchar" name="consequent" length="255" nullable="false" comment="Produto Consequente (SKU)"/>
+        <column xsi:type="text" name="antecedents" nullable="true" comment="Lista de Antecedentes (JSON)"/>
+        <column xsi:type="text" name="consequents" nullable="true" comment="Lista de Consequentes (JSON)"/>
+        <column xsi:type="decimal" name="support" precision="10" scale="6" nullable="false" comment="Support"/>
+        <column xsi:type="decimal" name="confidence" precision="10" scale="6" nullable="false" comment="Confidence"/>
+        <column xsi:type="decimal" name="lift" precision="10" scale="4" nullable="false" comment="Lift"/>
+        <column xsi:type="decimal" name="conviction" precision="10" scale="4" nullable="true" comment="Conviction"/>
+        <column xsi:type="decimal" name="leverage" precision="10" scale="6" nullable="true" comment="Leverage"/>
+        <column xsi:type="boolean" name="is_active" nullable="false" default="1" comment="Regra Ativa"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Data de Criação"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Data de Atualização"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="REXIS_NETWORK_RULES_ANTECEDENT_CONSEQUENT">
+            <column name="antecedent"/>
+            <column name="consequent"/>
+        </constraint>
+        <index referenceId="REXIS_NETWORK_RULES_LIFT" indexType="btree">
+            <column name="lift"/>
+        </index>
+        <index referenceId="REXIS_NETWORK_RULES_CONFIDENCE" indexType="btree">
+            <column name="confidence"/>
+        </index>
+    </table>
+
+    <!-- Tabela 3: Classificação de Clientes (RFM) -->
+    <table name="rexis_customer_classification" resource="default" engine="innodb" comment="Classificação de Clientes - RFM">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Customer ID"/>
+        <column xsi:type="varchar" name="identificador_cliente" length="50" nullable="false" comment="Identificador ERP (CNPJ)"/>
+        <column xsi:type="varchar" name="mes_rexis_code" length="10" nullable="false" comment="Mês de Referência"/>
+        <column xsi:type="varchar" name="classificacao_cliente" length="50" nullable="false" comment="Classificação"/>
+        <column xsi:type="varchar" name="rfm_score" length="10" nullable="true" comment="Score RFM"/>
+        <column xsi:type="int" name="recency" nullable="true" comment="Recência (dias)"/>
+        <column xsi:type="int" name="frequency" nullable="true" comment="Frequência"/>
+        <column xsi:type="decimal" name="monetary" precision="12" scale="2" nullable="true" comment="Monetary"/>
+        <column xsi:type="decimal" name="mean_ticket_per_order" precision="12" scale="2" nullable="true" comment="Ticket Médio"/>
+        <column xsi:type="decimal" name="ltv" precision="12" scale="2" nullable="true" comment="Life Time Value"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Data de Criação"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Data de Atualização"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="REXIS_CUSTOMER_CLASSIFICATION_CUSTOMER_MES">
+            <column name="customer_id"/>
+            <column name="mes_rexis_code"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="REXIS_CUST_CLASS_CUSTOMER_ID_CUSTOMER_ENTITY_ID"
+                    table="rexis_customer_classification" column="customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="REXIS_CUSTOMER_CLASSIFICATION_CLASSIFICACAO" indexType="btree">
+            <column name="classificacao_cliente"/>
+        </index>
+    </table>
+
+    <!-- Tabela 4: Métricas de Conversão -->
+    <table name="rexis_metricas_conversao" resource="default" engine="innodb" comment="Métricas de Conversão REXIS">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="varchar" name="mes_rexis_code" length="10" nullable="false" comment="Mês de Referência"/>
+        <column xsi:type="int" name="n_clientes_rec_mes_atual" nullable="false" default="0" comment="Nº Clientes Recomendados"/>
+        <column xsi:type="int" name="n_cliente_comprou_mes_atual" nullable="false" default="0" comment="Nº Clientes que Compraram"/>
+        <column xsi:type="decimal" name="perc_conversao_cliente" precision="10" scale="4" nullable="true" comment="% Conversão Cliente"/>
+        <column xsi:type="int" name="n_produto_rec_mes_atual" nullable="false" default="0" comment="Nº Produtos Recomendados"/>
+        <column xsi:type="int" name="n_produto_comprou_mes_atual" nullable="false" default="0" comment="Nº Produtos Comprados"/>
+        <column xsi:type="decimal" name="perc_conversao_produto" precision="10" scale="4" nullable="true" comment="% Conversão Produto"/>
+        <column xsi:type="decimal" name="valor_esperado_atual" precision="12" scale="2" nullable="true" default="0" comment="Valor Esperado Total"/>
+        <column xsi:type="decimal" name="valor_convertido_atual" precision="12" scale="2" nullable="true" default="0" comment="Valor Convertido Total"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Data de Criação"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Data de Atualização"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="REXIS_METRICAS_CONVERSAO_MES_REXIS_CODE">
+            <column name="mes_rexis_code"/>
+        </constraint>
+    </table>
+
+</schema>

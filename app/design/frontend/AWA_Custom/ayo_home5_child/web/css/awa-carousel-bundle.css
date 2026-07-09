@@ -6,16 +6,16 @@
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) {
     --awa-home-carousel-radius: 14px;
     --awa-home-carousel-border: rgba(15, 23, 42, 0.10);
-    --awa-home-carousel-surface: #ffffff;
-    --awa-home-carousel-section-bg: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    --awa-home-carousel-surface: var(--awa-bg);
+    --awa-home-carousel-section-bg: linear-gradient(180deg, var(--awa-bg) 0%, #fbfcfe 100%);
     --awa-home-carousel-section-shadow: 0 2px 8px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.05);
     --awa-home-carousel-gap: 12px;
     --awa-home-carousel-arrow-size: 40px;
     --awa-home-carousel-arrow-bg: rgba(255, 255, 255, 0.96);
     --awa-home-carousel-arrow-border: rgba(15, 23, 42, 0.14);
     --awa-home-carousel-arrow-color: #374151;
-    --awa-home-carousel-arrow-color-hover: #ffffff;
-    --awa-home-carousel-arrow-bg-hover: var(--awa-red, #b73337);
+    --awa-home-carousel-arrow-color-hover: var(--awa-bg);
+    --awa-home-carousel-arrow-bg-hover: var(--awa-red, var(--awa-primary));
 }
 
 /* Standard section shell for all product carousels on homepage */
@@ -48,7 +48,7 @@
     padding-bottom: 10px;
     border-bottom: none;
     /* Gradiente: vermelho AWA → transparente — marca a divisão de forma sutil e on-brand */
-    background-image: linear-gradient(90deg, var(--awa-red, #b73337) 0%, rgba(183, 51, 55, 0.12) 28%, rgba(183, 51, 55, 0) 60%);
+    background-image: linear-gradient(90deg, var(--awa-red, var(--awa-primary)) 0%, rgba(183, 51, 55, 0.12) 28%, rgba(183, 51, 55, 0) 60%);
     background-repeat: no-repeat;
     background-size: 100% 2px;
     background-position: 0 100%;
@@ -95,8 +95,8 @@
     padding: 0 14px 0 12px !important;
     border: 1px solid rgba(183, 51, 55, 0.45) !important;
     border-radius: 999px !important;
-    background: var(--awa-surface, #fff) !important;
-    color: var(--awa-red, #b73337) !important;
+    background: var(--awa-surface, var(--awa-bg)) !important;
+    color: var(--awa-red, var(--awa-primary)) !important;
     font-size: 12px !important;
     font-weight: 600 !important;
     text-decoration: none !important;
@@ -116,9 +116,9 @@
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .ayo-home5-wrapper
     :is(.view-all, .view-more a):hover {
-    background: var(--awa-red, #b73337) !important;
-    border-color: var(--awa-red, #b73337) !important;
-    color: var(--awa-white, #fff) !important;
+    background: var(--awa-red, var(--awa-primary)) !important;
+    border-color: var(--awa-red, var(--awa-primary)) !important;
+    color: var(--awa-white, var(--awa-bg)) !important;
 }
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
@@ -143,7 +143,7 @@
     padding: 0 12px !important;
     border: 1px solid var(--awa-border-color, #e5e7eb) !important;
     border-radius: 999px !important;
-    background: var(--awa-surface, #fff) !important;
+    background: var(--awa-surface, var(--awa-bg)) !important;
     color: var(--awa-text-primary, #374151) !important;
     font-size: 12px !important;
     font-weight: 600 !important;
@@ -152,9 +152,9 @@
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
     .ayo-home5-wrapper
     .list-tab-product .tabs :is(li.active a, .active [role="tab"], [aria-selected="true"]) {
-    border-color: var(--awa-red, #b73337) !important;
-    background: var(--awa-red, #b73337) !important;
-    color: var(--awa-surface, #fff) !important;
+    border-color: var(--awa-red, var(--awa-primary)) !important;
+    background: var(--awa-red, var(--awa-primary)) !important;
+    color: var(--awa-surface, var(--awa-bg)) !important;
 }
 
 /* Keep card edges and image presentation consistently clean */
@@ -249,7 +249,7 @@
     .ayo-home5-wrapper
     :is(.products-swiper, .hot-deal-slide, .productTabContent, .category_tab_slider, .owl-carousel)
     :is(.swiper-pagination-bullet-active, .owl-dot.active) {
-    background: var(--awa-red, #b73337) !important;
+    background: var(--awa-red, var(--awa-primary)) !important;
 }
 
 @media (max-width: 991px) {
@@ -498,14 +498,14 @@
 }
 
 .awa-owl-nav__btn:hover {
-  background: var(--awa-home-carousel-arrow-bg-hover, #b73337) !important;
-  border-color: var(--awa-home-carousel-arrow-bg-hover, #b73337) !important;
-  color: var(--awa-home-carousel-arrow-color-hover, #ffffff) !important;
+  background: var(--awa-home-carousel-arrow-bg-hover, var(--awa-primary)) !important;
+  border-color: var(--awa-home-carousel-arrow-bg-hover, var(--awa-primary)) !important;
+  color: var(--awa-home-carousel-arrow-color-hover, var(--awa-bg)) !important;
   box-shadow: 0 4px 14px rgba(183, 51, 55, 0.35);
 }
 
 .awa-owl-nav__btn:focus-visible {
-  outline: 2px solid var(--awa-red, #b73337);
+  outline: 2px solid var(--awa-red, var(--awa-primary));
   outline-offset: 2px;
 }
 
@@ -542,7 +542,7 @@
 
 :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5)
   .wrapper_slider .owl-carousel .owl-buttons > div:hover {
-  background: var(--awa-red, #b73337) !important;
+  background: var(--awa-red, var(--awa-primary)) !important;
   box-shadow: 0 4px 16px rgba(183, 51, 55, 0.35) !important;
 }
 
@@ -594,7 +594,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--awa-red, #b73337);
+  background: var(--awa-red, var(--awa-primary));
   border-radius: 2px;
   transform: scaleX(var(--awa-progress, 0.08));
   transform-origin: left center;
@@ -725,3 +725,20 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   overflow-x: hidden !important;
 }
 
+
+/* ============================================================================
+   AWA QA 2026-07-01 — desktop carousel overflow containment
+   The product carousel keeps offscreen slides positioned beyond the viewport.
+   Clip only the carousel viewport/wrappers on desktop so hidden slides do not
+   increase document scrollWidth. Mobile peek remains handled by the mobile rules
+   above and is intentionally not affected here.
+   ============================================================================ */
+@media (min-width: 768px) {
+  :is(body.cms-index-index, body.cms-home, body.cms-homepage_ayo_home5) .page-wrapper
+    :is(.rokan-newproduct, .rokan-bestseller, .rokan-mostviewed, .rokan-featuredproduct, .list-tab-product, .categorytab-container, .block.widget.block-products-list)
+    :is(.owl-stage-outer, .slick-list, .swiper, .swiper-container, .products-grid, .products.wrapper) {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+}

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Copyright © GrupoAwamotos. All rights reserved.
  * Fix para compatibilidade do MagePal Gmail SMTP App com Symfony Mailer no Magento 2.4.8
@@ -16,6 +14,8 @@ declare(strict_types=1);
  * O segundo problema: A lógica do TLS está invertida - para porta 587 com STARTTLS,
  * o terceiro parâmetro do EsmtpTransport deve ser false.
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\SmtpFix\Mail;
 

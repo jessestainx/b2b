@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Service\LogAnalyzer;
@@ -46,22 +47,22 @@ class PerformanceAnalyzer implements AnalyzerInterface
         ];
 
         $analysis = [];
-        
+
         foreach ($logFiles as $logFile) {
             if ($logDir->isExist($logFile)) {
                 $analysis[$logFile] = $this->analyzeLogFile($logDir, $logFile);
             }
         }
-        
+
         $this->generatePerformanceAlerts($analysis);
-        
+
         return $analysis;
     }
 
     public function getSpecificMetrics(): array
     {
         $metrics = $this->logMetricsRepository->getMetricsByType('performance', 10);
-        
+
         $performanceMetrics = [
             'cache_hit_rate' => $this->calculateCacheHitRate($metrics),
             'page_load_time' => $this->calculateAveragePageLoadTime($metrics),
@@ -74,7 +75,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
 
         // Calculate overall health score
         $performanceMetrics['health_score'] = $this->calculateHealthScore($performanceMetrics);
-        
+
         return $performanceMetrics;
     }
 
@@ -85,16 +86,16 @@ class PerformanceAnalyzer implements AnalyzerInterface
             'issues' => [],
             'score' => 100
         ];
-        
+
         $metrics = $this->getSpecificMetrics();
-        
+
         // Check cache hit rate
         if ($metrics['cache_hit_rate'] < 0.8) {
             $health['status'] = 'warning';
             $health['issues'][] = 'Low cache hit rate affecting performance';
             $health['score'] -= 20;
         }
-        
+
         // Check page load time
         if ($metrics['page_load_time'] > 3.0) {
             $health['status'] = 'critical';
@@ -105,7 +106,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
             $health['issues'][] = 'Elevated page load times';
             $health['score'] -= 15;
         }
-        
+
         // Check memory usage
         if ($metrics['memory_usage'] > 80) {
             $health['status'] = 'critical';
@@ -116,7 +117,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
             $health['issues'][] = 'Elevated memory usage';
             $health['score'] -= 10;
         }
-        
+
         return $health;
     }
 
@@ -124,7 +125,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
     {
         $alerts = [];
         $metrics = $this->getSpecificMetrics();
-        
+
         // Cache performance alert
         if ($metrics['cache_hit_rate'] < 0.7) {
             $alerts[] = $this->createAlert(
@@ -135,7 +136,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
                 ['cache_hit_rate' => $metrics['cache_hit_rate']]
             );
         }
-        
+
         // Page load time alert
         if ($metrics['page_load_time'] > 5.0) {
             $alerts[] = $this->createAlert(
@@ -146,7 +147,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
                 ['page_load_time' => $metrics['page_load_time']]
             );
         }
-        
+
         // Memory usage alert
         if ($metrics['memory_usage'] > 85) {
             $alerts[] = $this->createAlert(
@@ -157,7 +158,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
                 ['memory_usage' => $metrics['memory_usage']]
             );
         }
-        
+
         return $alerts;
     }
 
@@ -178,7 +179,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
             }
 
             $lines = explode("\n", $content);
-            
+
             $analysis = [
                 'total_lines' => count($lines),
                 'error_lines' => 0,
@@ -194,7 +195,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
                 'file_size' => $fileSize,
                 'patterns' => []
             ];
-            
+
             foreach ($lines as $line) {
                 // General log level analysis
                 if (stripos($line, '[ERROR]') !== false) {
@@ -206,7 +207,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
                 if (stripos($line, '[CRITICAL]') !== false) {
                     $analysis['critical_lines']++;
                 }
-                
+
                 // Performance specific patterns
                 if (stripos($line, 'cache miss') !== false || stripos($line, 'cache_miss') !== false) {
                     $analysis['performance_specific']['cache_misses']++;
@@ -224,7 +225,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
                     $analysis['performance_specific']['performance_alerts']++;
                 }
             }
-            
+
             // Save metrics
             $logMetrics = $this->logMetricsFactory->create();
             $logMetrics->setLogType('performance');
@@ -235,11 +236,10 @@ class PerformanceAnalyzer implements AnalyzerInterface
             $logMetrics->setCriticalEntries($analysis['critical_lines']);
             $logMetrics->setFileSizeBytes($analysis['file_size']);
             $logMetrics->setAnalysisData($analysis);
-            
+
             $this->logMetricsRepository->save($logMetrics);
-            
+
             return $analysis;
-            
         } catch (\Throwable $e) {
             $this->logger->error('Error analyzing performance log file: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
@@ -252,39 +252,48 @@ class PerformanceAnalyzer implements AnalyzerInterface
             if (isset($data['error'])) {
                 continue;
             }
-            
+
             // Alert on high cache miss rate
             if ($data['performance_specific']['cache_misses'] > 100) {
                 $this->createAndSaveAlert(
                     'high_cache_miss_rate',
                     'high',
                     'High Cache Miss Rate Detected',
-                    sprintf('Detected %d cache misses in %s, performance may be affected', 
-                        $data['performance_specific']['cache_misses'], $file),
+                    sprintf(
+                        'Detected %d cache misses in %s, performance may be affected',
+                        $data['performance_specific']['cache_misses'],
+                        $file
+                    ),
                     ['file' => $file, 'count' => $data['performance_specific']['cache_misses']]
                 );
             }
-            
+
             // Alert on slow queries
             if ($data['performance_specific']['slow_queries'] > 20) {
                 $this->createAndSaveAlert(
                     'slow_queries_detected',
                     'medium',
                     'Slow Database Queries',
-                    sprintf('Found %d slow queries in %s, database performance may be degraded', 
-                        $data['performance_specific']['slow_queries'], $file),
+                    sprintf(
+                        'Found %d slow queries in %s, database performance may be degraded',
+                        $data['performance_specific']['slow_queries'],
+                        $file
+                    ),
                     ['file' => $file, 'count' => $data['performance_specific']['slow_queries']]
                 );
             }
-            
+
             // Alert on memory issues
             if ($data['performance_specific']['memory_warnings'] > 5) {
                 $this->createAndSaveAlert(
                     'memory_warnings',
                     'critical',
                     'Memory Usage Warnings',
-                    sprintf('Detected %d memory warnings in %s, system stability at risk', 
-                        $data['performance_specific']['memory_warnings'], $file),
+                    sprintf(
+                        'Detected %d memory warnings in %s, system stability at risk',
+                        $data['performance_specific']['memory_warnings'],
+                        $file
+                    ),
                     ['file' => $file, 'count' => $data['performance_specific']['memory_warnings']]
                 );
             }
@@ -316,7 +325,7 @@ class PerformanceAnalyzer implements AnalyzerInterface
             $alert->setOccurrences(1);
             $alert->setFirstOccurrence(date('Y-m-d H:i:s'));
             $alert->setLastOccurrence(date('Y-m-d H:i:s'));
-            
+
             $this->alertRepository->save($alert);
         } catch (\Exception $e) {
             $this->logger->error('Error creating performance alert: ' . $e->getMessage());
@@ -328,25 +337,25 @@ class PerformanceAnalyzer implements AnalyzerInterface
         if (empty($metrics)) {
             return 0.9; // Default assumption
         }
-        
+
         $totalRequests = 0;
         $cacheMisses = 0;
-        
+
         foreach ($metrics as $metric) {
             $analysisData = $metric->getAnalysisData();
             if (isset($analysisData['performance_specific']['cache_misses'])) {
                 $misses = $analysisData['performance_specific']['cache_misses'];
                 $requests = max(1, $metric->getTotalEntries() / 5); // Estimate requests
-                
+
                 $totalRequests += $requests;
                 $cacheMisses += $misses;
             }
         }
-        
+
         if ($totalRequests == 0) {
             return 0.9;
         }
-        
+
         return max(0, 1 - ($cacheMisses / $totalRequests));
     }
 
@@ -357,16 +366,16 @@ class PerformanceAnalyzer implements AnalyzerInterface
         if (empty($metrics)) {
             return 1.5;
         }
-        
+
         $baseTime = 1.2;
         $errorMultiplier = 0;
-        
+
         foreach ($metrics as $metric) {
             if ($metric->getErrorEntries() > 0) {
                 $errorMultiplier += ($metric->getErrorEntries() / max(1, $metric->getTotalEntries())) * 0.5;
             }
         }
-        
+
         return $baseTime + ($errorMultiplier / count($metrics));
     }
 
@@ -377,16 +386,16 @@ class PerformanceAnalyzer implements AnalyzerInterface
         if (empty($metrics)) {
             return 45.0;
         }
-        
+
         $totalSize = 0;
         foreach ($metrics as $metric) {
             $totalSize += $metric->getFileSizeBytes();
         }
-        
+
         // Simulate memory usage based on log size (more logs = more activity = more memory)
         $baseMem = 45.0;
         $memIncrease = min(40, ($totalSize / (1024 * 1024)) * 0.1); // MB to percentage
-        
+
         return $baseMem + $memIncrease;
     }
 
@@ -406,37 +415,39 @@ class PerformanceAnalyzer implements AnalyzerInterface
     {
         // Check if cache warmer is running properly
         $recentMetrics = $this->logMetricsRepository->getMetricsByType('performance', 1);
-        
+
         if (empty($recentMetrics)) {
             return 'unknown';
         }
-        
+
         $latestMetric = reset($recentMetrics);
         $analysisData = $latestMetric->getAnalysisData();
-        
+
         if (isset($analysisData['performance_specific']['cache_misses'])) {
             $missRate = $analysisData['performance_specific']['cache_misses'] / max(1, $latestMetric->getTotalEntries());
-            
+
             if ($missRate > 0.3) {
                 return 'ineffective';
             } elseif ($missRate > 0.2) {
                 return 'partial';
             }
         }
-        
+
         return 'effective';
     }
 
     private function getPerformanceIssues(array $metrics): array
     {
         $issues = [];
-        
+
         foreach ($metrics as $metric) {
             $analysisData = $metric->getAnalysisData();
-            if (!$analysisData) continue;
-            
+            if (!$analysisData) {
+                continue;
+            }
+
             $perfData = $analysisData['performance_specific'] ?? [];
-            
+
             if (($perfData['cache_misses'] ?? 0) > 50) {
                 $issues[] = 'High cache miss rate';
             }
@@ -450,37 +461,37 @@ class PerformanceAnalyzer implements AnalyzerInterface
                 $issues[] = 'Request timeout errors';
             }
         }
-        
+
         return array_unique($issues);
     }
 
     private function calculateHealthScore(array $metrics): float
     {
         $score = 100;
-        
+
         // Reduce score based on various factors
         if ($metrics['cache_hit_rate'] < 0.7) {
             $score -= 30;
         } elseif ($metrics['cache_hit_rate'] < 0.8) {
             $score -= 15;
         }
-        
+
         if ($metrics['page_load_time'] > 3.0) {
             $score -= 40;
         } elseif ($metrics['page_load_time'] > 2.0) {
             $score -= 20;
         }
-        
+
         if ($metrics['memory_usage'] > 80) {
             $score -= 25;
         } elseif ($metrics['memory_usage'] > 70) {
             $score -= 10;
         }
-        
+
         if ($metrics['slow_queries_count'] > 20) {
             $score -= 15;
         }
-        
+
         return max(0, $score);
     }
 }

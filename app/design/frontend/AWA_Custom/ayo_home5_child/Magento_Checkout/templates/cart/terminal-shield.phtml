@@ -61,4 +61,94 @@ declare(strict_types=1);
         width: 100% !important;
     }
 }
+
+/* §APF-T — busca header mobile compacta (polish 2026-06-12) */
+html body#html-body#html-body#html-body.checkout-cart-index .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form {
+    display: flex !important;
+    align-items: stretch !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+}
+
+html body#html-body#html-body#html-body.checkout-cart-index .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form .actions {
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    align-self: stretch !important;
+}
+
+html body#html-body#html-body#html-body.checkout-cart-index .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form .action.search {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+}
+
+/* §CI-01: awa-nav-bar__inner — children flush against bg top/bottom
+   padding-inline já vem do awa-home-gate-postaudit-bundle; falta padding-block. */
+html body#html-body .page-wrapper
+    .awa-site-header .awa-nav-bar .awa-nav-bar__inner {
+    padding-block: 4px !important;
+}
+
+/* §CI-02: awa-cart-skip-summary — sr-only em estado não-focado
+   CSS async (impeccable-refine) chega tarde; aqui é sincronizado. */
+html body#html-body .page-wrapper
+    .awa-cart-skip-summary.awa-sr-only-focusable:not(:focus):not(:active) {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* §CI-03: b2b-status-dropdown — Impeccable: 1px border + shadow-sm */
+html body#html-body#html-body .page-wrapper
+    :is(#b2b-status-dropdown, .b2b-status-dropdown) {
+    border: 1px solid var(--b2b-panel-border, var(--awa-border, #e5e7eb)) !important;
+    box-shadow: var(--awa-shadow-sm, 0 2px 8px rgb(15 23 42 / 8%)) !important;
+}
+
+/* §CI-04: footer-bottom-inner — padding-inline: 0 forçado por 3x #html-body em
+   HeaderImpeccableCascadeLockCss. Aqui 4x #html-body vence no cascade. */
+html body#html-body#html-body#html-body#html-body .page-wrapper
+    :is(.page_footer, .page-footer) .footer-bottom .footer-bottom-inner {
+    padding-inline: max(16px, env(safe-area-inset-left), env(safe-area-inset-right)) !important;
+}
+
+/* §CI-05: minicart + menu vertical — overflow visible (Impeccable clipping) */
+html body#html-body#html-body.checkout-cart-index .page-wrapper
+    :is(.block.block-minicart, .block-minicart.ui-dialog-content, .minicart-wrapper .mage-dropdown-dialog,
+        ul.togge-menu.list-category-dropdown, .level0.submenu.navigation__submenu,
+        .level0.submenu.navigation__inner-list) {
+    overflow: visible !important;
+}
+
+/* §CI-06: header inner — respiro vertical */
+html body#html-body#html-body.checkout-cart-index .page-wrapper
+    .awa-site-header .awa-main-header .awa-main-header__inner.wp-header {
+    padding-block: 12px !important;
+    min-height: 72px !important;
+    height: auto !important;
+}
+
+/* §CI-07: footer trust bar + footer-bottom */
+html body#html-body#html-body.checkout-cart-index .page-wrapper section.awa-footer-trust-bar {
+    padding-block: 14px 16px !important;
+}
+
+html body#html-body#html-body#html-body.checkout-cart-index .page-wrapper
+    :is(.page_footer, .page-footer) .footer-bottom {
+    padding-inline: max(16px, env(safe-area-inset-left), env(safe-area-inset-right)) !important;
+}
 </style>

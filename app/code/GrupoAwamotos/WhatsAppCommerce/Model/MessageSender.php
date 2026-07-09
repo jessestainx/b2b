@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
 
 use GrupoAwamotos\SmartSuggestions\Api\WhatsappSenderInterface;
 use GrupoAwamotos\WhatsAppCommerce\Helper\Config;
+use GrupoAwamotos\WhatsAppCommerce\Model\AppBuilderDispatcher;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,7 +21,9 @@ class MessageSender
         private readonly WhatsappSenderInterface $whatsappSender,
         private readonly Config $config,
         private readonly LoggerInterface $logger,
-    ) {}
+        private readonly AppBuilderDispatcher $appBuilderDispatcher,
+    ) {
+    }
 
     /**
      * Send a text message via WhatsApp
@@ -66,6 +70,15 @@ class MessageSender
      */
     public function sendOrderNotification(string $phone, string $orderId, string $event, array $data = []): bool
     {
+        if (
+            $this->config->isAppBuilderOffloadEnabled()
+            && $this->appBuilderDispatcher->dispatch($phone, $orderId, $event, $data)
+        ) {
+            // Job accepted by the Adobe I/O Runtime action — the actual
+            // WhatsApp API call now happens off this request entirely.
+            return true;
+        }
+
         $total = $data['total'] ?? '';
         $tracking = $data['tracking'] ?? 'em breve';
 

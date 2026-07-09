@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Api\Data;
 
 interface AttendantInterface
@@ -12,7 +14,7 @@ interface AttendantInterface
     public const DEPARTMENT     = 'department';
     public const MAX_CUSTOMERS  = 'max_customers';
     public const ADMIN_USER_ID  = 'admin_user_id';
-    public const ERP_SELLER_CODE= 'erp_seller_code';
+    public const ERP_SELLER_CODE = 'erp_seller_code';
     public const IS_ACTIVE      = 'is_active';
     public const CREATED_AT     = 'created_at';
 

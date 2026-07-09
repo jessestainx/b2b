@@ -2,7 +2,7 @@
 /**
  * Widget Template - Recomendações (Carrossel)
  *
- * @var $block \GrupoAwamotos\RexisML\Block\Widget\Recommendations
+ * @var $block \GrupoAwamotos\ProductIntelligence\Block\Widget\Recommendations
  */
 declare(strict_types=1);
 
@@ -15,7 +15,7 @@ if (empty($recommendations) && !$block->getShowForGuest()) {
 $customClass = $block->getCustomClass();
 $uniqueId = 'rexis-carousel-' . uniqid();
 $carouselConfig = [
-    'GrupoAwamotos_RexisML/js/rexis-carousel' => [
+    'GrupoAwamotos_ProductIntelligence/js/rexis-carousel' => [
         'trackSelector' => '.rexis-carousel-track',
         'slideSelector' => '.rexis-carousel-slide',
         'prevSelector' => '.rexis-prev',

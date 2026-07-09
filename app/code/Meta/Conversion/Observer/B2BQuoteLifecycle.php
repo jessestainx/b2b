@@ -8,7 +8,7 @@ use GrupoAwamotos\B2B\Api\Data\QuoteRequestInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
@@ -17,7 +17,7 @@ class B2BQuoteLifecycle implements ObserverInterface
 {
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly LoggerInterface $logger,
         private readonly B2BSignalBuilder $b2bSignalBuilder,
         private readonly UserDataBuilder $userDataBuilder
@@ -64,10 +64,14 @@ class B2BQuoteLifecycle implements ObserverInterface
                 ? (string) $customerId
                 : (string) ($quoteRequest->getCustomerEmail() ?: $quoteRequest->getRequestId());
 
+            $lcFullName = trim((string) ($customerData['name'] ?? $quoteRequest->getCustomerName() ?? ''));
+            $lcNameParts = $lcFullName !== '' ? explode(' ', $lcFullName, 2) : [];
             $userData = $this->userDataBuilder->build(
                 (string) ($customerData['email'] ?? $quoteRequest->getCustomerEmail()),
                 (string) ($customerData['phone'] ?? $quoteRequest->getPhone()),
-                $externalId
+                $externalId,
+                $lcNameParts[0] ?? null,
+                $lcNameParts[1] ?? null
             );
             $eventSourceUrl = $this->userDataBuilder->getEventSourceUrl();
 
@@ -125,16 +129,7 @@ class B2BQuoteLifecycle implements ObserverInterface
                 $capiEvent['event_source_url'] = $eventSourceUrl;
             }
 
-            $result = $this->graphApi->sendEvents($pixelId, [$capiEvent], $storeId);
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] Quote lifecycle API error', [
-                    'store_id' => $storeId,
-                    'request_id' => $quoteRequest->getRequestId(),
-                    'lifecycle_event' => $lifecycleEvent,
-                    'http_status' => $result['http_status'] ?? null,
-                    'error' => $result['error']
-                ]);
-            }
+            $this->capiDispatcher->sendEvents($pixelId, [$capiEvent], $storeId, 'QuoteLifecycle');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] Quote lifecycle event failed', [
                 'error' => $e->getMessage()

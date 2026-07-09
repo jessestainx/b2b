@@ -14,60 +14,64 @@ use Magento\Store\Model\ScopeInterface;
 
 class Config extends AbstractHelper
 {
-    const XML_PATH_ENABLED = 'grupoawamotos_b2b/general/enabled';
-    const XML_PATH_B2B_MODE = 'grupoawamotos_b2b/general/b2b_mode';
+    public const XML_PATH_ENABLED = 'grupoawamotos_b2b/general/enabled';
+    public const XML_PATH_B2B_MODE = 'grupoawamotos_b2b/general/b2b_mode';
 
     // Price Visibility
-    const XML_PATH_HIDE_PRICE_GUESTS = 'grupoawamotos_b2b/price_visibility/hide_price_guests';
-    const XML_PATH_HIDE_ADD_TO_CART_GUESTS = 'grupoawamotos_b2b/price_visibility/hide_add_to_cart_guests';
-    const XML_PATH_LOGIN_MESSAGE = 'grupoawamotos_b2b/price_visibility/login_message';
-    const XML_PATH_SHOW_PRICE_PENDING = 'grupoawamotos_b2b/price_visibility/show_price_pending';
-    const XML_PATH_HIDE_PRICE_NO_ERP = 'grupoawamotos_b2b/price_visibility/hide_price_no_erp';
-    const XML_PATH_PENDING_ERP_MESSAGE = 'grupoawamotos_b2b/price_visibility/pending_erp_message';
+    public const XML_PATH_HIDE_PRICE_GUESTS = 'grupoawamotos_b2b/price_visibility/hide_price_guests';
+    public const XML_PATH_HIDE_ADD_TO_CART_GUESTS = 'grupoawamotos_b2b/price_visibility/hide_add_to_cart_guests';
+    public const XML_PATH_LOGIN_MESSAGE = 'grupoawamotos_b2b/price_visibility/login_message';
+    public const XML_PATH_SHOW_PRICE_PENDING = 'grupoawamotos_b2b/price_visibility/show_price_pending';
+    public const XML_PATH_HIDE_PRICE_NO_ERP = 'grupoawamotos_b2b/price_visibility/hide_price_no_erp';
+    public const XML_PATH_PENDING_ERP_MESSAGE = 'grupoawamotos_b2b/price_visibility/pending_erp_message';
 
     // Customer Approval
-    const XML_PATH_REQUIRE_APPROVAL = 'grupoawamotos_b2b/customer_approval/require_approval';
-    const XML_PATH_AUTO_APPROVE_GROUPS = 'grupoawamotos_b2b/customer_approval/auto_approve_groups';
-    const XML_PATH_PENDING_MESSAGE = 'grupoawamotos_b2b/customer_approval/pending_message';
-    const XML_PATH_SEND_APPROVAL_EMAIL = 'grupoawamotos_b2b/customer_approval/send_approval_email';
-    const XML_PATH_NOTIFY_ADMIN = 'grupoawamotos_b2b/customer_approval/notify_admin_new_customer';
-    const XML_PATH_ADMIN_EMAIL = 'grupoawamotos_b2b/customer_approval/admin_email';
+    public const XML_PATH_REQUIRE_APPROVAL = 'grupoawamotos_b2b/customer_approval/require_approval';
+    public const XML_PATH_SCORING_ENABLED = 'grupoawamotos_b2b/customer_approval/scoring_enabled';
+    public const XML_PATH_AUTO_APPROVE_GROUPS = 'grupoawamotos_b2b/customer_approval/auto_approve_groups';
+    public const XML_PATH_PENDING_MESSAGE = 'grupoawamotos_b2b/customer_approval/pending_message';
+    public const XML_PATH_SEND_APPROVAL_EMAIL = 'grupoawamotos_b2b/customer_approval/send_approval_email';
+    public const XML_PATH_NOTIFY_ADMIN = 'grupoawamotos_b2b/customer_approval/notify_admin_new_customer';
+    public const XML_PATH_ADMIN_EMAIL = 'grupoawamotos_b2b/customer_approval/admin_email';
 
     // Minimum Qty
-    const XML_PATH_MIN_QTY_ENABLED = 'grupoawamotos_b2b/minimum_qty/enabled';
-    const XML_PATH_GLOBAL_MIN_QTY = 'grupoawamotos_b2b/minimum_qty/global_min_qty';
-    const XML_PATH_MIN_ORDER_AMOUNT = 'grupoawamotos_b2b/minimum_qty/min_order_amount';
-    const XML_PATH_MIN_ORDER_MESSAGE = 'grupoawamotos_b2b/minimum_qty/min_order_message';
+    public const XML_PATH_MIN_QTY_ENABLED = 'grupoawamotos_b2b/minimum_qty/enabled';
+    public const XML_PATH_GLOBAL_MIN_QTY = 'grupoawamotos_b2b/minimum_qty/global_min_qty';
+    public const XML_PATH_MIN_ORDER_AMOUNT = 'grupoawamotos_b2b/minimum_qty/min_order_amount';
+    public const XML_PATH_MIN_ORDER_MESSAGE = 'grupoawamotos_b2b/minimum_qty/min_order_message';
 
     // Quote Request
-    const XML_PATH_QUOTE_ENABLED = 'grupoawamotos_b2b/quote_request/enabled';
-    const XML_PATH_QUOTE_BUTTON = 'grupoawamotos_b2b/quote_request/show_button';
-    const XML_PATH_QUOTE_ALLOW_GUESTS = 'grupoawamotos_b2b/quote_request/allow_guests';
-    const XML_PATH_QUOTE_EXPIRY_DAYS = 'grupoawamotos_b2b/quote_request/expiry_days';
-    const XML_PATH_QUOTE_NOTIFY_CUSTOMER = 'grupoawamotos_b2b/quote_request/notify_customer';
+    public const XML_PATH_QUOTE_ENABLED = 'grupoawamotos_b2b/quote_request/enabled';
+    public const XML_PATH_QUOTE_BUTTON = 'grupoawamotos_b2b/quote_request/show_button';
+    public const XML_PATH_QUOTE_ALLOW_GUESTS = 'grupoawamotos_b2b/quote_request/allow_guests';
+    public const XML_PATH_QUOTE_EXPIRY_DAYS = 'grupoawamotos_b2b/quote_request/expiry_days';
+    public const XML_PATH_QUOTE_NOTIFY_CUSTOMER = 'grupoawamotos_b2b/quote_request/notify_customer';
 
     // Customer Groups
-    const XML_PATH_WHOLESALE_GROUP = 'grupoawamotos_b2b/customer_groups/wholesale_group';
-    const XML_PATH_WHOLESALE_DISCOUNT = 'grupoawamotos_b2b/customer_groups/wholesale_discount';
-    const XML_PATH_VIP_GROUP = 'grupoawamotos_b2b/customer_groups/vip_group';
-    const XML_PATH_VIP_DISCOUNT = 'grupoawamotos_b2b/customer_groups/vip_discount';
-    const XML_PATH_DEFAULT_B2B_GROUP = 'grupoawamotos_b2b/customer_groups/default_b2b_group';
-    const XML_PATH_REVENDEDOR_GROUP = 'grupoawamotos_b2b/customer_groups/revendedor_group';
-    const XML_PATH_PENDING_GROUP = 'grupoawamotos_b2b/customer_groups/pending_group';
+    public const XML_PATH_WHOLESALE_GROUP = 'grupoawamotos_b2b/customer_groups/wholesale_group';
+    public const XML_PATH_WHOLESALE_DISCOUNT = 'grupoawamotos_b2b/customer_groups/wholesale_discount';
+    public const XML_PATH_VIP_GROUP = 'grupoawamotos_b2b/customer_groups/vip_group';
+    public const XML_PATH_VIP_DISCOUNT = 'grupoawamotos_b2b/customer_groups/vip_discount';
+    public const XML_PATH_DEFAULT_B2B_GROUP = 'grupoawamotos_b2b/customer_groups/default_b2b_group';
+    public const XML_PATH_REVENDEDOR_GROUP = 'grupoawamotos_b2b/customer_groups/revendedor_group';
+    public const XML_PATH_PENDING_GROUP = 'grupoawamotos_b2b/customer_groups/pending_group';
 
     // CNAE Profiling
-    const XML_PATH_CNAE_ENABLED = 'grupoawamotos_b2b/cnae_profiling/enabled';
-    const XML_PATH_CNAE_AUTO_APPROVE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/auto_approve_direct';
-    const XML_PATH_CNAE_DIRECT_GROUP = 'grupoawamotos_b2b/cnae_profiling/direct_group';
-    const XML_PATH_CNAE_ADJACENT_GROUP = 'grupoawamotos_b2b/cnae_profiling/adjacent_group';
+    public const XML_PATH_CNAE_ENABLED = 'grupoawamotos_b2b/cnae_profiling/enabled';
+    public const XML_PATH_CNAE_AUTO_APPROVE_DIRECT = 'grupoawamotos_b2b/cnae_profiling/auto_approve_direct';
+    public const XML_PATH_CNAE_DIRECT_GROUP = 'grupoawamotos_b2b/cnae_profiling/direct_group';
+    public const XML_PATH_CNAE_ADJACENT_GROUP = 'grupoawamotos_b2b/cnae_profiling/adjacent_group';
+
+    // Sectra integration
+    public const XML_PATH_SECTRA_CANCEL_STUCK_DRY_RUN = 'grupoawamotos_b2b/sectra/cancel_stuck_dry_run';
 
     // Checkout Fields (Delivery Date, Order Notes, PO Number)
-    const XML_PATH_DELIVERY_DATE_ENABLED = 'grupoawamotos_b2b/checkout/delivery_date_enabled';
-    const XML_PATH_DELIVERY_DATE_REQUIRED = 'grupoawamotos_b2b/checkout/delivery_date_required';
-    const XML_PATH_ORDER_NOTES_ENABLED = 'grupoawamotos_b2b/checkout/order_notes_enabled';
-    const XML_PATH_ORDER_NOTES_REQUIRED = 'grupoawamotos_b2b/checkout/order_notes_required';
-    const XML_PATH_PO_NUMBER_ENABLED = 'grupoawamotos_b2b/checkout/po_number_enabled';
-    const XML_PATH_PO_NUMBER_REQUIRED = 'grupoawamotos_b2b/checkout/po_number_required';
+    public const XML_PATH_DELIVERY_DATE_ENABLED = 'grupoawamotos_b2b/checkout/delivery_date_enabled';
+    public const XML_PATH_DELIVERY_DATE_REQUIRED = 'grupoawamotos_b2b/checkout/delivery_date_required';
+    public const XML_PATH_ORDER_NOTES_ENABLED = 'grupoawamotos_b2b/checkout/order_notes_enabled';
+    public const XML_PATH_ORDER_NOTES_REQUIRED = 'grupoawamotos_b2b/checkout/order_notes_required';
+    public const XML_PATH_PO_NUMBER_ENABLED = 'grupoawamotos_b2b/checkout/po_number_enabled';
+    public const XML_PATH_PO_NUMBER_REQUIRED = 'grupoawamotos_b2b/checkout/po_number_required';
 
     /**
      * Check if B2B module is enabled
@@ -186,6 +190,22 @@ class Config extends AbstractHelper
     }
 
     /**
+     * Check if approval scoring (green/yellow/red screening at registration) is enabled.
+     *
+     * Bug fix: this method was referenced by ApprovalScoreService::evaluate() but never
+     * implemented, causing a fatal "Call to undefined method" whenever a customer with a
+     * direct CNAE profile went through registration screening.
+     */
+    public function isApprovalScoringEnabled($storeId = null): bool
+    {
+        return $this->requireApproval($storeId) && $this->scopeConfig->isSetFlag(
+            self::XML_PATH_SCORING_ENABLED,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
      * Get auto approve groups
      */
     public function getAutoApproveGroups($storeId = null): array
@@ -249,6 +269,16 @@ class Config extends AbstractHelper
             ScopeInterface::SCOPE_STORE,
             $storeId
         );
+    }
+
+    /**
+     * Sender identity used by TransportBuilder::setFromByScope() for B2B transactional e-mails.
+     * Matches the "general" store contact identity used consistently across the module
+     * (CustomerApproval, Quote\Save, Register\Save, Cron\NotifyPendingApprovals).
+     */
+    public function getEmailSender($storeId = null): string
+    {
+        return 'general';
     }
 
     /**
@@ -563,6 +593,19 @@ class Config extends AbstractHelper
     {
         return (string) $this->scopeConfig->getValue(
             'grupoawamotos_b2b/whatsapp/default_number',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Whether Sectra "cancel stuck orders" runs in dry-run mode (log only, no cancellation).
+     * Default: false = actually cancel orders for unvalidated customers.
+     */
+    public function isSectraCancelStuckDryRun($storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_SECTRA_CANCEL_STUCK_DRY_RUN,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );

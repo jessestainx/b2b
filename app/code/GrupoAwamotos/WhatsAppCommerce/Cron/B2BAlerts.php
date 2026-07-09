@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Cron;
@@ -35,7 +36,8 @@ class B2BAlerts
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly Config $config,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * Execute B2B alerts cron

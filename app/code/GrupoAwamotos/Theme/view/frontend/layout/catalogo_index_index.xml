@@ -6,7 +6,9 @@
         <css src="GrupoAwamotos_Theme::css/catalogo-viewer.css"/>
     </head>
     <body>
-        <attribute name="class" value="catalogo-index-index awa-catalog-page"/>
+        <!-- BUG-CORE-2026-07-04: ver customer_account.xml — split evita merge de classes -->
+        <attribute name="class" value="catalogo-index-index"/>
+        <attribute name="class" value="awa-catalog-page"/>
         <referenceBlock name="page.main.title" remove="true"/>
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
         <referenceContainer name="sidebar.main">

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\CommercialAbandonedCart;
 
 use GrupoAwamotos\B2B\CommercialPanel\Api\CommercialTaskManagementInterface;
+use GrupoAwamotos\B2B\CommercialPanel\Api\PortfolioScopeInterface;
 use GrupoAwamotos\B2B\CommercialPanel\Model\AbandonedCartCommercialManagement;
 use GrupoAwamotos\B2B\CommercialPanel\Model\TaskType;
 use Magento\Backend\App\Action;
@@ -20,7 +21,8 @@ class CreateTask extends Action implements HttpPostActionInterface
     public function __construct(
         Context $context,
         private readonly AbandonedCartCommercialManagement $abandonedCartManagement,
-        private readonly CommercialTaskManagementInterface $taskManagement
+        private readonly CommercialTaskManagementInterface $taskManagement,
+        private readonly PortfolioScopeInterface $portfolioScope
     ) {
         parent::__construct($context);
     }
@@ -46,6 +48,10 @@ class CreateTask extends Action implements HttpPostActionInterface
                 throw new LocalizedException(__('Carrinho sem cliente vinculado.'));
             }
 
+            if (!$this->portfolioScope->canAccessCustomer($customerId)) {
+                throw new LocalizedException(__('Carrinho fora do seu escopo comercial.'));
+            }
+
             $user = $this->_auth->getUser();
             if ($attendantId <= 0 && $user) {
                 $this->taskManagement->createManual([
@@ -61,6 +67,10 @@ class CreateTask extends Action implements HttpPostActionInterface
 
             if ($attendantId <= 0) {
                 throw new LocalizedException(__('Carrinho sem vendedora responsável.'));
+            }
+
+            if (!in_array($attendantId, $this->portfolioScope->getVisibleAttendantIds(), true)) {
+                throw new LocalizedException(__('Carrinho fora do seu escopo comercial.'));
             }
 
             $period = date('Y-m');

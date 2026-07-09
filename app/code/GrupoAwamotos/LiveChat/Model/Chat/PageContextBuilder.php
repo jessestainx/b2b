@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LiveChat\Model\Chat;
 
-use GrupoAwamotos\Fitment\Model\ResourceModel\Application\CollectionFactory as ApplicationCollectionFactory;
 use Magento\Catalog\Api\Data\CategoryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\App\RequestInterface;
@@ -13,21 +13,6 @@ use Magento\Store\Model\StoreManagerInterface;
 class PageContextBuilder
 {
     private const MAX_VALUE_LENGTH = 500;
-    private const MAX_FITMENT_BRANDS = 3;
-    private const MAX_FITMENT_MODELS_PER_BRAND = 3;
-
-    private RequestInterface $request;
-
-    private Registry $registry;
-
-    private StoreManagerInterface $storeManager;
-
-    private ApplicationCollectionFactory $applicationCollectionFactory;
-
-    /**
-     * @var array<int, array<int, array<string, mixed>>>
-     */
-    private array $groupedApplicationsCache = [];
 
     /**
      * @var array<int, array{name: string, value: string}>|null
@@ -35,20 +20,13 @@ class PageContextBuilder
     private ?array $pageVariablesCache = null;
 
     public function __construct(
-        RequestInterface $request,
-        Registry $registry,
-        StoreManagerInterface $storeManager,
-        ApplicationCollectionFactory $applicationCollectionFactory
+        private readonly RequestInterface $request,
+        private readonly Registry $registry,
+        private readonly StoreManagerInterface $storeManager
     ) {
-        $this->request = $request;
-        $this->registry = $registry;
-        $this->storeManager = $storeManager;
-        $this->applicationCollectionFactory = $applicationCollectionFactory;
     }
 
     /**
-     * Build contextual page variables for LiveChat.
-     *
      * @return array<int, array{name: string, value: string}>
      */
     public function build(): array
@@ -90,7 +68,6 @@ class PageContextBuilder
         $this->appendVariable($variables, 'Produto', (string) $product->getName());
         $this->appendVariable($variables, 'SKU do produto', (string) $product->getSku());
         $this->appendVariable($variables, 'Marca do produto', $this->getProductBrand($product));
-        $this->appendVariable($variables, 'Compatibilidade', $this->buildFitmentSummary((int) $product->getId()));
     }
 
     private function getCurrentProduct(): ?ProductInterface
@@ -113,123 +90,9 @@ class PageContextBuilder
             $manufacturer = implode(', ', array_filter($manufacturer));
         }
 
-        $manufacturer = is_string($manufacturer) ? $manufacturer : '';
-        if ($manufacturer !== '') {
-            return $manufacturer;
-        }
+        $manufacturer = is_string($manufacturer) ? trim($manufacturer) : '';
 
-        $groupedApplications = $this->getGroupedApplications((int) $product->getId());
-
-        if (!empty($groupedApplications[0]['brand_name'])) {
-            return (string) $groupedApplications[0]['brand_name'];
-        }
-
-        return null;
-    }
-
-    private function buildFitmentSummary(int $productId): ?string
-    {
-        $groupedApplications = $this->getGroupedApplications($productId);
-        if ($groupedApplications === []) {
-            return null;
-        }
-
-        $chunks = [];
-        $brandCount = 0;
-
-        foreach ($groupedApplications as $brandGroup) {
-            if ($brandCount >= self::MAX_FITMENT_BRANDS) {
-                break;
-            }
-
-            $brandName = isset($brandGroup['brand_name']) ? (string) $brandGroup['brand_name'] : '';
-            $models = is_array($brandGroup['models'] ?? null) ? $brandGroup['models'] : [];
-            if ($brandName === '' || $models === []) {
-                continue;
-            }
-
-            $modelLabels = [];
-            foreach (array_slice($models, 0, self::MAX_FITMENT_MODELS_PER_BRAND) as $model) {
-                if (!is_array($model)) {
-                    continue;
-                }
-
-                $label = trim($this->buildMotorcycleLabel($model));
-                if ($label !== '') {
-                    $modelLabels[] = $label;
-                }
-            }
-
-            if ($modelLabels === []) {
-                continue;
-            }
-
-            $chunk = $brandName . ': ' . implode(', ', $modelLabels);
-            $extraModels = count($models) - count($modelLabels);
-            if ($extraModels > 0) {
-                $chunk .= sprintf(' +%d modelos', $extraModels);
-            }
-
-            $chunks[] = $chunk;
-            $brandCount++;
-        }
-
-        if ($chunks === []) {
-            return null;
-        }
-
-        $extraBrands = count($groupedApplications) - $brandCount;
-        if ($extraBrands > 0) {
-            $chunks[] = sprintf('+%d marcas', $extraBrands);
-        }
-
-        return $this->truncateValue(implode(' | ', $chunks));
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private function getGroupedApplications(int $productId): array
-    {
-        if ($productId <= 0) {
-            return [];
-        }
-
-        if (array_key_exists($productId, $this->groupedApplicationsCache)) {
-            return $this->groupedApplicationsCache[$productId];
-        }
-
-        $collection = $this->applicationCollectionFactory->create();
-        $collection->addProductFilter($productId);
-
-        $this->groupedApplicationsCache[$productId] = $collection->getGroupedByBrand();
-
-        return $this->groupedApplicationsCache[$productId];
-    }
-
-    /**
-     * @param array<string, mixed> $model
-     */
-    private function buildMotorcycleLabel(array $model): string
-    {
-        $parts = [];
-
-        $modelName = trim((string) ($model['model_name'] ?? ''));
-        if ($modelName !== '') {
-            $parts[] = $modelName;
-        }
-
-        $years = trim((string) ($model['years'] ?? ''));
-        if ($years !== '') {
-            $parts[] = '(' . $years . ')';
-        }
-
-        $engineCc = trim((string) ($model['engine_cc'] ?? ''));
-        if ($engineCc !== '') {
-            $parts[] = $engineCc;
-        }
-
-        return implode(' ', $parts);
+        return $manufacturer !== '' ? $manufacturer : null;
     }
 
     /**

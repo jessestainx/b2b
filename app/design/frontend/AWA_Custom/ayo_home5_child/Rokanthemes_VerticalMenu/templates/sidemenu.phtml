@@ -59,7 +59,11 @@ if (!empty($_config['general']['enable'])):
                         <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
                     </svg>
                 </span>
+                <label for="<?= $block->escapeHtmlAttr($menuId) ?>-search" class="awa-sr-only">
+                    <span><?= $block->escapeHtml(__('Buscar categoria no menu')) ?></span>
+                </label>
                 <input type="search"
+                       id="<?= $block->escapeHtmlAttr($menuId) ?>-search"
                        class="awa-vmenu-search-input"
                        data-role="awa-vmenu-search"
                        placeholder="<?= $block->escapeHtmlAttr(__('Buscar categoria...')) ?>"

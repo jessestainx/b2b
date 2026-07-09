@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/queue.xsd">
+    <broker topic="grupoawamotos.b2b.whatsapp.send" type="db" exchange="magento-db">
+        <queue name="grupoawamotos.b2b.whatsapp.send"
+               consumer="grupoawamotos.b2b.whatsapp.consumer"
+               handler="GrupoAwamotos\B2B\Model\Notification\WhatsAppConsumer::process"/>
+    </broker>
+</config>

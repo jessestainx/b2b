@@ -39,7 +39,6 @@ class UpdateRfmAnalysis
         }
 
         try {
-
             // Clear cache and force recalculation
             $this->rfmCalculator->clearCache();
             $customers = $this->rfmCalculator->calculateForAllCustomers(24, true);

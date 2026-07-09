@@ -27,7 +27,7 @@ use Magento\Framework\DataObject;
  */
 class ACombinar extends AbstractMethod
 {
-    const CODE = 'acombinar';
+    public const CODE = 'acombinar';
 
     /**
      * @var string

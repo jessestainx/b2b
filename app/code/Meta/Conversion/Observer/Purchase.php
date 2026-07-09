@@ -9,7 +9,7 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Model\Order;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\B2BSignalBuilder;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
@@ -23,7 +23,7 @@ class Purchase implements ObserverInterface
 
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly \Magento\Checkout\Model\Session $checkoutSession,
         private readonly LoggerInterface $logger,
         private readonly B2BHelper $b2bHelper,
@@ -87,14 +87,24 @@ class Purchase implements ObserverInterface
                 return;
             }
 
-            $externalId = (string) ($order->getCustomerId() ?: ($order->getIncrementId() ?: $order->getId()));
-            $userData = $this->userDataBuilder
+            $externalId    = (string) ($order->getCustomerId() ?: ($order->getIncrementId() ?: $order->getId()));
+            $purchaseAddr  = $order->getBillingAddress() ?: $order->getShippingAddress();
+            $userData      = $this->userDataBuilder
                 ? $this->userDataBuilder->build(
                     (string) ($order->getCustomerEmail() ?: ''),
-                    (string) ($order->getBillingAddress()?->getTelephone() ?: ''),
-                    $externalId
+                    (string) ($purchaseAddr?->getTelephone() ?: ''),
+                    $externalId,
+                    (string) ($order->getCustomerFirstname() ?: $purchaseAddr?->getFirstname() ?: ''),
+                    (string) ($order->getCustomerLastname() ?: $purchaseAddr?->getLastname() ?: ''),
+                    (string) ($purchaseAddr?->getCity() ?: ''),
+                    (string) ($purchaseAddr?->getRegionCode() ?: $purchaseAddr?->getRegion() ?: ''),
+                    (string) ($purchaseAddr?->getPostcode() ?: ''),
+                    strtolower((string) ($purchaseAddr?->getCountryId() ?: 'br'))
                 )
                 : [];
+            if ($this->userDataBuilder && !$this->userDataBuilder->hasMinimumSignals($userData)) {
+                return;
+            }
             $eventSourceUrl = $this->userDataBuilder?->getEventSourceUrl();
 
             $currency = (string) ($order->getOrderCurrencyCode() ?: $order->getBaseCurrencyCode() ?: 'BRL');
@@ -140,18 +150,11 @@ class Purchase implements ObserverInterface
 
             $eventData = [$event];
 
-            $result = $this->graphApi->sendEvents($pixelId, $eventData, $storeId);
             if ($orderReference !== '') {
                 $this->checkoutSession->setData(self::SESSION_KEY_LAST_ORDER_ID, $orderReference);
             }
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] Purchase API error', [
-                    'store_id' => $storeId,
-                    'order_id' => $order->getIncrementId(),
-                    'http_status' => $result['http_status'] ?? null,
-                    'error' => $result['error']
-                ]);
-            }
+
+            $this->capiDispatcher->sendEvents($pixelId, $eventData, $storeId, 'Purchase');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] Purchase event failed', [
                 'error' => $e->getMessage()

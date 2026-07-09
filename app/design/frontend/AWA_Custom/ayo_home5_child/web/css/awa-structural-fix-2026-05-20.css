@@ -6,17 +6,17 @@
 
 /* ═══ 1. Design system — container / gap / radius ═══ */
 :root {
-  --awa-container-catalog: 1320px;
-  --awa-container-max: 1320px;
-  --awa-page-catalog: 1320px;
-  --awa-hdr-container-max: 1320px;
-  --footer-container: 1320px;
+  --awa-container-catalog: 1280px;
+  --awa-container-max: 1280px;
+  --awa-page-catalog: 1280px;
+  --awa-hdr-container-max: 1280px;
+  --footer-container: 1280px;
   --awa-checkout-shell-max: min(1280px, calc(100vw - 48px));
   --awa-structural-gap: 24px;
   --awa-structural-radius: 12px;
-  --awa-structural-border: #e5e5e5;
-  --awa-structural-bg: #ffffff;
-  --awa-structural-bg-soft: #f7f7f7;
+  --awa-structural-border: var(--awa-border);
+  --awa-structural-bg: var(--awa-bg);
+  --awa-structural-bg-soft: var(--awa-bg-subtle);
 }
 
 /* Overflow global */
@@ -26,7 +26,7 @@ html {
 
 body {
   overflow-x: clip;
-  color: #333333;
+  color: var(--awa-text);
 }
 
 body .page-wrapper {
@@ -34,9 +34,9 @@ body .page-wrapper {
   min-width: 0;
 }
 
-/* Containers tier catalog — 1320px + pad 24/16
+/* Containers tier catalog — eixo 1280px + pad 16 (alinhado ao SSOT shell)
  * Usa valor fixo (não variável CSS) porque outros bundles async sobrescrevem
- * --awa-container-catalog de volta para 1440px após este arquivo carregar.
+ * --awa-container-catalog antes deste arquivo carregar.
  */
 body#html-body .page-wrapper :is(
   .page-main.container,
@@ -44,9 +44,9 @@ body#html-body .page-wrapper :is(
   .nav-breadcrumbs .container,
   .page.messages
 ) {
-  max-width: 1320px !important;
+  max-width: min(100%, 1280px) !important;
   margin-inline: auto !important;
-  padding-inline: clamp(16px, 3vw, 24px) !important;
+  padding-inline: 16px !important;
   box-sizing: border-box !important;
   width: 100% !important;
 }
@@ -54,17 +54,34 @@ body#html-body .page-wrapper :is(
 body#html-body .page-wrapper .page-main > .columns {
   padding-inline: 0 !important;
   max-width: 100% !important;
+  margin-inline: 0 !important;
 }
 
+/* Cart/checkout/login: vence defer-global §20 (padding/margin em .columns) */
+body#html-body:is(
+  .checkout-cart-index,
+  .checkout-index-index,
+  .rokanthemes-onepagecheckout,
+  .onepagecheckout-index-index,
+  .b2b-account-login,
+  .b2b-auth-shell,
+  .customer-account-login,
+  .customer-account-create
+) .page-wrapper .page-main > .columns {
+  padding-inline: 0 !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  box-sizing: border-box !important;
+}
 @media (min-width: 992px) {
   body#html-body .page-wrapper .awa-site-header :is(
     .header-main > .container,
     .awa-b2b-promo-bar > .container,
     .header-control.awa-nav-bar .awa-nav-bar__inner
   ) {
-    max-width: 1320px !important;
+    max-width: min(100%, 1280px) !important;
     margin-inline: auto !important;
-    padding-inline: clamp(16px, 3vw, 24px) !important;
+    padding-inline: 16px !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
@@ -77,18 +94,79 @@ body#html-body .page-wrapper :is(
   .aw-footer-highlights,
   .footer-bottom-inner
 ) {
-  max-width: 1320px !important;
+  max-width: min(100%, 1280px) !important;
   margin-inline: auto !important;
-  padding-inline: clamp(16px, 3vw, 24px) !important;
+  padding-inline: 16px !important;
   box-sizing: border-box !important;
 }
 
-/* Home: shell content-top-home alinhado */
+/* Home: shell content-top-home alinhado ao header/page-main (eixo 1280px) */
 body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
-  .page-wrapper .content-top-home {
-  max-width: 1320px !important;
+  .page-wrapper .content-top-home,
+body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  > .content-top-home,
+body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  :is(.page-wrapper .content-top-home, > .content-top-home) > .ayo-home5-wrapper,
+body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  :is(.page-wrapper .content-top-home, > .content-top-home) .top-home-content--above-fold,
+body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  :is(.page-wrapper .content-top-home, > .content-top-home) .top-home-content:not(.top-home-content--above-fold),
+body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  :is(.page-wrapper .content-top-home, > .content-top-home) .awa-home-section {
+  max-width: min(100%, 1280px) !important;
   margin-inline: auto !important;
-  padding-inline: clamp(16px, 3vw, 24px) !important;
+  padding-inline: 16px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+@media (max-width: 991px) {
+  /* Mobile: header-main usa borda 8px — remover gutter duplo do shell home */
+  body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    :is(.page-wrapper .content-top-home, > .content-top-home),
+  body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    :is(.page-wrapper .content-top-home, > .content-top-home) > .ayo-home5-wrapper,
+  body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    :is(.page-wrapper .content-top-home, > .content-top-home) .top-home-content--above-fold,
+  body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    :is(.page-wrapper .content-top-home, > .content-top-home) .awa-home-section {
+    padding-inline: 0 !important;
+  }
+
+  /* Seções abaixo do hero (page-main) — mesmo eixo do header mobile */
+  body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper .page-main {
+    padding-inline: 0 !important;
+  }
+
+  /* PLP/PDP mobile: page-main sem gutter extra vs header full-bleed */
+  body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view)
+    .page-wrapper .page-main {
+    padding-inline: 0 !important;
+  }
+}
+
+/* Header primary container — vence awa-super-global + padding duplo em .header-main */
+@media (min-width: 992px) {
+  #html-body .page-wrapper .awa-site-header .awa-main-header,
+  #html-body .page-wrapper .awa-site-header .header_main.awa-main-header-inner-wrap {
+    padding-inline: 0 !important;
+    max-width: none !important;
+  }
+
+  #html-body .page-wrapper .awa-site-header .header-main,
+  #html-body .page-wrapper .awa-site-header .header-main > .container,
+  #html-body .page-wrapper .awa-site-header .header-main .container,
+  #html-body .page-wrapper .header.awa-main-header .header-main > .container,
+  body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper .awa-site-header .header_main.awa-main-header-inner-wrap > .header-main > .container,
+  body#html-body .page-wrapper .awa-site-header.awa-header-professional .awa-main-header .header-main > .container {
+    max-width: min(100%, 1280px) !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: 16px !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* ═══ 2. Header — proporção + alinhamento + minicart (todos breakpoints) ═══ */
@@ -136,12 +214,11 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   #html-body .page-wrapper .awa-site-header .awa-main-header__inner[data-awa-header-row] {
     display: grid !important;
     grid-template-areas: "brand search actions" !important;
-    grid-template-columns: minmax(140px, 196px) minmax(0, 1fr) minmax(280px, auto) !important;
     align-items: center !important;
     gap: clamp(12px, 2vw, 24px) !important;
-    min-height: 72px !important;
-    max-height: 88px !important;
-    padding-block: 10px !important;
+    min-height: 60px !important;
+    max-height: 68px !important;
+    padding-block: 4px !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
@@ -265,8 +342,8 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   min-height: 44px !important;
   opacity: 1 !important;
   visibility: visible !important;
-  background: #b73337 !important;
-  color: #ffffff !important;
+  background: var(--awa-primary) !important;
+  color: var(--awa-bg) !important;
   border: 0 !important;
   border-radius: 10px !important;
   cursor: pointer !important;
@@ -279,7 +356,7 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .action.showcart,
   a.showcart.header-mini-cart
 ):hover {
-  background: #8e2629 !important;
+  background: var(--awa-primary-hover) !important;
 }
 
 #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .awa-minicart-icon,
@@ -287,36 +364,46 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   display: inline-block !important;
   width: 20px !important;
   height: 20px !important;
-  stroke: #ffffff !important;
+  stroke: var(--awa-bg) !important;
   fill: none !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-/* Fallback visível até KO (vence display:none do anti-FOUC quando sem dropdown) */
+/* Fallback só antes do KO — esconde quando .showcart existe (evita ícone duplicado) */
 #html-body .page-wrapper .awa-site-header .awa-header-minicart .awa-header-cart-fallback {
-  display: inline-flex !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 44px !important;
-  height: 44px !important;
-  background: #b73337 !important;
-  border-radius: 10px !important;
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+@media (min-width: 992px) {
+  #html-body .page-wrapper .awa-site-header .awa-header-minicart:not(:has(.minicart-wrapper .showcart)) .awa-header-cart-fallback {
+    display: inline-flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: var(--awa-primary) !important;
+    border-radius: 10px !important;
+  }
 }
 
 #html-body .page-wrapper .awa-site-header
   .awa-header-minicart .minicart-wrapper[data-awa-minicart-dropdown="1"]
   ~ .awa-header-cart-fallback,
 #html-body .page-wrapper .awa-site-header
-  .awa-header-minicart:has(.minicart-wrapper[data-awa-minicart-dropdown="1"]) .awa-header-cart-fallback {
+  .awa-header-minicart:has(.minicart-wrapper[data-awa-minicart-dropdown="1"]) .awa-header-cart-fallback,
+#html-body .page-wrapper .awa-site-header
+  .awa-header-minicart:has(.minicart-wrapper .showcart) .awa-header-cart-fallback {
   display: none !important;
 }
 
 /* Nav secundária — visível em TODAS as páginas (desktop ≥992px)
  * ui-ux-pro-max: fundo branco + borda; coluna Departamentos permanece vermelha.
- * NÃO pintar a barra inteira de #b73337 — o trigger some no mesmo tom (carrinho vazio).
+ * NÃO pintar a barra inteira de var(--awa-primary) — o trigger some no mesmo tom (carrinho vazio).
  */
 @media (min-width: 992px) {
   #html-body .page-wrapper .header-control.header-nav,
@@ -328,10 +415,10 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     min-height: var(--awa-hdr-nav-h, 52px) !important;
     height: auto !important;
     width: 100% !important;
-    background: #ffffff !important;
-    color: #333333 !important;
-    border-block-start: 1px solid #e5e5e5 !important;
-    border-block-end: 1px solid #e5e5e5 !important;
+    background: var(--awa-bg) !important;
+    color: var(--awa-text) !important;
+    border-block-start: 1px solid var(--awa-border) !important;
+    border-block-end: 1px solid var(--awa-border) !important;
     overflow: visible !important;
     max-height: none !important;
   }
@@ -341,9 +428,9 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     display: flex !important;
     align-items: stretch !important;
     width: 100% !important;
-    max-width: 1320px !important;
+    max-width: min(100%, 1280px) !important;
     margin-inline: auto !important;
-    padding-inline: clamp(16px, 3vw, 24px) !important;
+    padding-inline: 16px !important;
     box-sizing: border-box !important;
   }
 
@@ -364,7 +451,7 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     visibility: visible !important;
     opacity: 1 !important;
     overflow: visible !important;
-    background: #b73337 !important;
+    background: var(--awa-primary) !important;
   }
 
   #html-body .page-wrapper .header-control.awa-nav-bar
@@ -373,8 +460,8 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     display: inline-flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    color: #ffffff !important;
-    background: #b73337 !important;
+    color: var(--awa-bg) !important;
+    background: var(--awa-primary) !important;
   }
 
   #html-body .page-wrapper .header-control.awa-nav-bar .awa-header-primary-nav.menu_primary {
@@ -432,14 +519,14 @@ body#html-body .page-wrapper .page-footer .newsletter .action.subscribe {
   flex: 0 0 auto !important;
   min-height: 44px !important;
   border-radius: 10px !important;
-  background: #b73337 !important;
-  color: #ffffff !important;
+  background: var(--awa-primary) !important;
+  color: var(--awa-bg) !important;
 }
 
 body#html-body .page-wrapper .footer-bottom,
 body#html-body .page-wrapper .footer-copyright {
-  background: #ffffff !important;
-  color: #666666 !important;
+  background: var(--awa-bg) !important;
+  color: var(--awa-text-secondary) !important;
   padding-block: 16px !important;
 }
 
@@ -467,9 +554,9 @@ body#html-body .page-wrapper #footer.footer-container .vela-content.velaFooterMe
  * Fix: nowrap + flex proporcional
  */
 body#html-body .page-wrapper .footer-bottom .container {
-  max-width: 1320px !important;
+  max-width: min(100%, 1280px) !important;
   margin-inline: auto !important;
-  padding: 16px 24px !important;
+  padding: 16px !important;
   box-sizing: border-box !important;
 }
 
@@ -523,6 +610,57 @@ body#html-body .page-wrapper .footer-bottom .row.awa-footer-bottom__row > [class
   flex-shrink: 0 !important;
 }
 
+/* Mobile footer-bottom: neutralize Bootstrap column widths inside the payment row. */
+@media (max-width: 767px) {
+  body#html-body .page-wrapper .footer-bottom {
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body#html-body .page-wrapper .footer-bottom .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: var(--awa-container-pad, 16px) !important;
+    box-sizing: border-box !important;
+  }
+
+  body#html-body .page-wrapper .footer-bottom .footer-bottom-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: var(--awa-space-3, 12px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body#html-body .page-wrapper .footer-bottom .row.awa-footer-bottom__row,
+  body#html-body .page-wrapper .footer-bottom-inner .row.awa-footer-bottom__row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body#html-body .page-wrapper .footer-bottom .row.awa-footer-bottom__row > [class*="col-"],
+  body#html-body .page-wrapper .footer-bottom-inner .row.awa-footer-bottom__row > [class*="col-"] {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body#html-body .page-wrapper .footer-bottom :is(.awa-footer-pay-sec, .awa-footer-security-sec, .awa-footer-bottom__copyright) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+}
+
 /* Footer container: reduzir padding-bottom que cria espaço vazio */
 body#html-body .page-wrapper #footer.footer-container {
   padding-bottom: 0 !important;
@@ -553,7 +691,7 @@ body#html-body .fixed-right .fixed-right-ul li.scroll-top:not(.show) {
 
 /* ═══ 4. PDP — layout + botão compra + relacionados ═══ */
 body#html-body.catalog-product-view .page-wrapper .page-main {
-  max-width: 1320px !important;
+  max-width: min(100%, 1280px) !important;
 }
 
 @media (min-width: 992px) {
@@ -602,14 +740,14 @@ body#html-body.catalog-product-view .product-info-main .action.primary.tocart {
   font-weight: 600 !important;
   line-height: 1.25 !important;
   border-radius: 12px !important;
-  background: #b73337 !important;
-  color: #ffffff !important;
+  background: var(--awa-primary) !important;
+  color: var(--awa-bg) !important;
   border: 0 !important;
   box-sizing: border-box !important;
 }
 
 body#html-body.catalog-product-view .box-tocart .action.tocart:hover {
-  background: #8e2629 !important;
+  background: var(--awa-primary-hover) !important;
 }
 
 body#html-body.catalog-product-view .related.products .products-grid,
@@ -628,20 +766,21 @@ body#html-body.catalog-product-view .related.products .product-item {
 
 /* Sticky bar PDP */
 body#html-body.catalog-product-view .awa-pdp-sticky-bar {
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  max-width: 100vw !important;
+  left: 50% !important;
+  right: auto !important;
+  width: calc(100% - 32px) !important;
+  max-width: 500px !important;
   box-sizing: border-box !important;
-  padding-inline: var(--awa-container-pad, 16px) !important;
-  background: #ffffff !important;
-  border-top: 1px solid #e5e5e5 !important;
+  padding-inline: 12px !important;
+  transform: translateX(-50%) !important;
+  background: var(--awa-bg) !important;
+  border-top: 1px solid var(--awa-border) !important;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08) !important;
   z-index: 1002 !important;
 }
 
 body#html-body.catalog-product-view .awa-pdp-sticky-bar__inner {
-  max-width: 1320px !important;
+  max-width: min(100%, 1280px) !important;
   margin-inline: auto !important;
   display: flex !important;
   align-items: center !important;
@@ -655,7 +794,43 @@ body#html-body.catalog-product-view .awa-pdp-sticky-bar__btn {
   flex-shrink: 0 !important;
 }
 
-/* ═══ 5. Checkout — escopo .checkout-index-index ═══ */
+/* Mobile — sticky bar acima da bottom nav (JS: .awa-pdp-sticky-bar--visible + .is-visible) */
+@media (max-width: 991px) {
+  body#html-body.catalog-product-view .awa-pdp-sticky-bar.awa-pdp-sticky-bar--visible,
+  body#html-body.catalog-product-view .awa-pdp-sticky-bar.is-visible {
+    bottom: calc(var(--awa-mobile-bottom-nav-h, 84px) + 12px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 24px) !important;
+    max-width: 500px !important;
+    padding: 8px !important;
+    border-radius: 22px !important;
+  }
+
+  body#html-body.catalog-product-view .awa-pdp-sticky-bar__inner {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) minmax(96px, auto) !important;
+    gap: 8px !important;
+    min-height: 56px !important;
+    padding: 0 !important;
+  }
+
+  body#html-body.catalog-product-view:has(.awa-pdp-sticky-bar.awa-pdp-sticky-bar--visible),
+  body#html-body.catalog-product-view:has(.awa-pdp-sticky-bar.is-visible) {
+    padding-bottom: calc(76px + var(--awa-mobile-bottom-nav-h, 84px) + 24px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Keep the scroll shortcut out of the sticky buy area on mobile PDP. */
+  body#html-body.catalog-product-view:has(.awa-pdp-sticky-bar.awa-pdp-sticky-bar--visible) :is(#awa-back-to-top, .awa-back-to-top),
+  body#html-body.catalog-product-view:has(.awa-pdp-sticky-bar.is-visible) :is(#awa-back-to-top, .awa-back-to-top) {
+    bottom: calc(var(--awa-mobile-bottom-nav-h, 84px) + 108px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 12px !important;
+    z-index: 1001 !important;
+  }
+}
+
+/* ═══ 5. Checkout — escopo .checkout-index-index (exceto OPC: premium 2-col) ═══ */
 body#html-body.checkout-index-index,
 body#html-body.onepagecheckout-index-index {
   --awa-checkout-col-left: 200px;
@@ -665,15 +840,15 @@ body#html-body.onepagecheckout-index-index {
 
 body#html-body.checkout-index-index .page-wrapper .page-main,
 body#html-body.onepagecheckout-index-index .page-wrapper .page-main {
-  max-width: min(1280px, calc(100vw - 32px)) !important;
-  padding-inline: clamp(16px, 3vw, 24px) !important;
+  max-width: min(1440px, calc(100vw - 32px)) !important;
+  padding-inline: 16px !important;
   font-size: 15px !important;
   line-height: 1.5 !important;
 }
 
 @media (min-width: 1024px) {
-  body#html-body.checkout-index-index .page-wrapper .checkout-container,
-  body#html-body.onepagecheckout-index-index .page-wrapper .checkout-container {
+  body#html-body.checkout-index-index:not(.rokanthemes-onepagecheckout) .page-wrapper .checkout-container,
+  body#html-body.onepagecheckout-index-index:not(.rokanthemes-onepagecheckout) .page-wrapper .checkout-container {
     display: grid !important;
     grid-template-columns:
       minmax(180px, var(--awa-checkout-col-left, 200px))
@@ -689,15 +864,15 @@ body#html-body.onepagecheckout-index-index .page-wrapper .page-main {
     box-sizing: border-box !important;
   }
 
-  body#html-body.checkout-index-index .checkout-container > .awa-checkout-steps-rail,
-  body#html-body.checkout-index-index .checkout-container > .opc-progress-bar {
+  body#html-body.checkout-index-index:not(.rokanthemes-onepagecheckout) .checkout-container > .awa-checkout-steps-rail,
+  body#html-body.checkout-index-index:not(.rokanthemes-onepagecheckout) .checkout-container > .opc-progress-bar {
     grid-column: 1 !important;
     grid-row: 1 / -1 !important;
     width: 100% !important;
     max-width: var(--awa-checkout-col-left, 200px) !important;
   }
 
-  body#html-body.checkout-index-index .checkout-container > .opc-wrapper {
+  body#html-body.checkout-index-index:not(.rokanthemes-onepagecheckout) .checkout-container > .opc-wrapper {
     grid-column: 2 !important;
     grid-row: 1 / -1 !important;
     width: 100% !important;
@@ -705,7 +880,7 @@ body#html-body.onepagecheckout-index-index .page-wrapper .page-main {
     font-size: 15px !important;
   }
 
-  body#html-body.checkout-index-index .checkout-container > :is(#opc-sidebar, .opc-sidebar) {
+  body#html-body.checkout-index-index:not(.rokanthemes-onepagecheckout) .checkout-container > :is(#opc-sidebar, .opc-sidebar) {
     grid-column: 3 !important;
     grid-row: 1 / -1 !important;
     width: 100% !important;
@@ -722,9 +897,9 @@ body#html-body.checkout-index-index .opc-wrapper .step-title {
 
 body#html-body.checkout-index-index .opc-block-summary {
   font-size: 14px !important;
-  border: 1px solid #e5e5e5 !important;
+  border: 1px solid var(--awa-border) !important;
   border-radius: 12px !important;
-  background: #f7f7f7 !important;
+  background: var(--awa-bg-subtle) !important;
   padding: 16px !important;
 }
 
@@ -734,56 +909,7 @@ body#html-body.checkout-index-index .action.action-apply {
   border-radius: 10px !important;
 }
 
-/* Carrinho — grid desktop + mobile (escopo checkout-cart-index) */
-@media (min-width: 992px) {
-  body#html-body.checkout-cart-index .page-wrapper .cart-container {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) min(360px, 35%) !important;
-    grid-template-rows: auto auto !important;
-    gap: clamp(16px, 3vw, 32px) !important;
-    align-items: start !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  body#html-body.checkout-cart-index .cart-container .awa-b2b-cart-trust-strip,
-  body#html-body.checkout-cart-index .cart-container > aside:first-child {
-    grid-column: 1 / -1 !important;
-  }
-
-  body#html-body.checkout-cart-index .cart-container .form-cart {
-    grid-column: 1 !important;
-    min-width: 0 !important;
-    overflow-x: hidden !important;
-  }
-
-  body#html-body.checkout-cart-index .cart-container .cart-summary {
-    grid-column: 2 !important;
-    grid-row: 2 !important;
-    min-width: 0 !important;
-    position: sticky !important;
-    top: var(--awa-header-scroll-offset, 120px) !important;
-    align-self: start !important;
-  }
-}
-
-@media (max-width: 991px) {
-  body#html-body.checkout-cart-index .page-wrapper .cart-container {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 20px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  body#html-body.checkout-cart-index .cart-container .form-cart,
-  body#html-body.checkout-cart-index .cart-container .cart-summary {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-}
+/* Carrinho grid: awa-cart-layout-terminal.css (blocking no checkout_cart_index) */
 
 /* ═══ 6. Dashboard B2B / conta ═══ */
 body#html-body:is(
@@ -794,21 +920,10 @@ body#html-body:is(
   max-width: 1280px !important;
 }
 
-body#html-body.b2b-account-dashboard .page-main > .columns,
-body#html-body.customer-account-index .page-main > .columns,
-body#html-body.account .page-main > .columns {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 24px !important;
-  align-items: start !important;
-}
+/* Layout de colunas de conta: definido em awa-b2b-pages-late.css (§3).
+   Duplicação removida — uma única fonte de verdade evita conflito de cascata. */
 
 @media (min-width: 768px) {
-  body#html-body.b2b-account-dashboard .page-main > .columns,
-  body#html-body.customer-account-index .page-main > .columns,
-  body#html-body.account .page-main > .columns {
-    grid-template-columns: 240px minmax(0, 1fr) !important;
-  }
 
   body#html-body.b2b-account-dashboard .columns.layout-2-col > div:first-child {
     max-height: calc(100vh - var(--awa-header-scroll-offset, 120px) - 32px) !important;
@@ -901,16 +1016,16 @@ body#html-body.b2b-account-dashboard .awa-b2b-dashboard :is(
 ) {
   max-width: 100% !important;
   border-radius: 12px !important;
-  border: 1px solid #e5e5e5 !important;
-  background: #ffffff !important;
+  border: 1px solid var(--awa-border) !important;
+  background: var(--awa-bg) !important;
 }
 
 body#html-body.b2b-account-dashboard .block-collapsible-nav .item.current a,
 body#html-body.b2b-account-dashboard .block-collapsible-nav .item a.current {
-  background: color-mix(in srgb, #b73337 8%, transparent) !important;
-  color: #b73337 !important;
+  background: color-mix(in srgb, var(--awa-primary) 8%, transparent) !important;
+  color: var(--awa-primary) !important;
   font-weight: 700 !important;
-  border-inline-start: 3px solid #b73337 !important;
+  border-inline-start: 3px solid var(--awa-primary) !important;
 }
 
 /* ═══ 7. Home desktop — alinhamento header + nav sem buraco (2026-05-20) ═══ */
@@ -964,9 +1079,9 @@ body#html-body.b2b-account-dashboard .block-collapsible-nav .item a.current {
   }
 
   #html-body .page-wrapper .awa-site-header .awa-header-account-prompt__line1 {
-    font-size: 11px !important;
+    font-size: max(12px, 0.75rem) !important;
     line-height: 1.25 !important;
-    color: #666666 !important;
+    color: var(--awa-text-secondary) !important;
     white-space: nowrap !important;
   }
 
@@ -1034,7 +1149,7 @@ body#html-body.b2b-account-dashboard .block-collapsible-nav .item a.current {
     align-items: center !important;
     min-height: 52px !important;
     padding-inline: 16px !important;
-    color: #333333 !important;
+    color: var(--awa-text) !important;
     white-space: nowrap !important;
   }
 

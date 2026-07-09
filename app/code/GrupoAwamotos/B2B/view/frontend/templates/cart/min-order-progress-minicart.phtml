@@ -1,0 +1,43 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \GrupoAwamotos\B2B\Block\Cart\MinOrderProgress $block */
+
+if (!$block->isEnabled()) {
+    return;
+}
+
+$config = $block->getClientConfig();
+$shouldDisplay = $block->shouldDisplay();
+$percent = (int) $config['percent'];
+$message = (string) $config['message'];
+?>
+<div class="awa-b2b-min-order-progress awa-b2b-min-order-progress--minicart"
+     data-awa-min-order-progress="dynamic"
+     data-min-amount="<?= $block->escapeHtmlAttr((string) $config['minAmount']) ?>"
+     <?= $shouldDisplay ? '' : 'hidden' ?>
+     <?= $shouldDisplay ? '' : 'aria-hidden="true"' ?>>
+    <div class="awa-b2b-min-order-progress__header">
+        <span class="awa-b2b-min-order-progress__label"><?= $block->escapeHtml(__('Pedido mínimo')) ?></span>
+        <span class="awa-b2b-min-order-progress__percent" data-role="percent"><?= $block->escapeHtml((string) $percent) ?>%</span>
+    </div>
+    <div class="awa-b2b-min-order-progress__track"
+         role="progressbar"
+         aria-valuemin="0"
+         aria-valuemax="100"
+         aria-valuenow="<?= $block->escapeHtmlAttr((string) $percent) ?>"
+         aria-describedby="awa-b2b-min-order-minicart-message">
+        <span class="awa-b2b-min-order-progress__fill" data-role="fill" style="width: <?= $block->escapeHtmlAttr((string) $percent) ?>%;"></span>
+    </div>
+    <p class="awa-b2b-min-order-progress__message"
+       id="awa-b2b-min-order-minicart-message"
+       data-role="message"><?= $block->escapeHtml($message) ?></p>
+</div>
+<script type="text/x-magento-init">
+{
+    "[data-awa-min-order-progress=\"dynamic\"]": {
+        "GrupoAwamotos_B2B/js/cart/min-order-progress": <?= /* @noEscape */ json_encode($config, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>
+    }
+}
+</script>

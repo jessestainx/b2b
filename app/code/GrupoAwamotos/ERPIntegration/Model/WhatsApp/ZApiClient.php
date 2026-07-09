@@ -790,7 +790,7 @@ class ZApiClient
 
     private function buildMissingClientTokenFingerprint(): string
     {
-        return md5(implode('|', [
+        return hash('xxh128', implode('|', [
             (string) (int) $this->helper->isWhatsAppEnabled(),
             $this->helper->getZApiInstanceId(),
             $this->helper->getZApiToken(),

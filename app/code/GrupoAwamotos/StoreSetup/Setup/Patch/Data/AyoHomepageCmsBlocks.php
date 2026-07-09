@@ -14,17 +14,17 @@ use Psr\Log\LoggerInterface;
 /**
  * Cria os blocos CMS da homepage que antes só existiam via CLI (awa:setup).
  *
- * Estes 12 blocos são referenciados por top-home.phtml e ficam vazios
+ * Estes 13 blocos são referenciados por top-home.phtml e ficam vazios
  * se o StoreConfigurator nunca foi executado manualmente.
  *
  * Blocos cobertos:
  * - block_top             (barra de benefícios — 5 itens)
  * - banner_mid_home5      (3 banners mid-page)
+ * - home_product_promo_banners (3 banners promocionais de produto)
  * - notification_home5    (ticker de notificações promo)
  * - category1_home5       (Categorytab widget: mais vendidos)
  * - category2_home5       (Categorytab widget: categorias populares)
  * - home_hero             (fallback hero quando slider não existe)
- * - home_fitment_search   (busca por aplicação simplificada)
  * - home_new_products     (widget Newproduct: lançamentos)
  * - trust_badges_homepage (selos de confiança)
  * - home_faq_quick        (FAQ rápido accordion)
@@ -53,7 +53,7 @@ class AyoHomepageCmsBlocks implements DataPatchInterface
 
         $this->applyConfigFixes();
 
-        $this->logger->info('[AyoHomepageCmsBlocks] Todos os 12 blocos homepage criados/atualizados + configs corrigidas.');
+        $this->logger->info('[AyoHomepageCmsBlocks] Todos os 13 blocos homepage criados/atualizados + configs corrigidas.');
 
         $this->moduleDataSetup->endSetup();
 
@@ -136,11 +136,6 @@ class AyoHomepageCmsBlocks implements DataPatchInterface
                 'content'    => $this->homeHeroContent(),
             ],
             [
-                'identifier' => 'home_fitment_search',
-                'title'      => 'Homepage — Busca por Aplicação',
-                'content'    => $this->homeFitmentSearchContent(),
-            ],
-            [
                 'identifier' => 'home_new_products',
                 'title'      => 'Homepage — Lançamentos (Newproduct)',
                 'content'    => $this->homeNewProductsContent(),
@@ -164,6 +159,11 @@ class AyoHomepageCmsBlocks implements DataPatchInterface
                 'identifier' => 'featured_categories',
                 'title'      => 'Homepage — Coleções (Categorytab)',
                 'content'    => $this->featuredCategoriesContent(),
+            ],
+            [
+                'identifier' => 'home_product_promo_banners',
+                'title'      => 'Homepage — Banners Promocionais de Produto',
+                'content'    => CmsBlockData::homeProductPromoBannersContent(),
             ],
         ];
     }
@@ -382,26 +382,6 @@ HTML;
         <img class="card__media" loading="eager" fetchpriority="high" src="{{view url='Magento_Catalog::images/product/placeholder/image.jpg'}}" alt="Peças e acessórios para motos" width="600" height="400" />
     </div>
 </section>
-HTML;
-    }
-
-    private function homeFitmentSearchContent(): string
-    {
-        return <<<'HTML'
-<div class="ayo-home5-fitment">
-    <div class="ayo-home5-fitment__box">
-        <div class="ayo-home5-fitment__intro">
-            <p>Busque por modelo, ano e marca para achar compatibilidades.</p>
-        </div>
-        <form class="ayo-home5-fitment__form" action="{{store url='catalogsearch/result'}}" method="get">
-            <div class="ayo-home5-fitment__fields">
-                <input type="text" name="q" placeholder="Ex.: Honda CG 160 2022" aria-label="Buscar por aplicação" required />
-                <button class="action primary" type="submit">Buscar</button>
-            </div>
-            <small class="ayo-home5-fitment__hint">Dica: use marca + modelo + ano para resultados mais precisos.</small>
-        </form>
-    </div>
-</div>
 HTML;
     }
 

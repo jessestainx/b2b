@@ -1,0 +1,60 @@
+<?php
+/**
+ * Widget Template - Recomendações (Lista Simples)
+ *
+ * @var $block \GrupoAwamotos\RexisML\Block\Widget\Recommendations
+ */
+declare(strict_types=1);
+
+$recommendations = $block->getRecommendedProducts();
+
+if (empty($recommendations) && !$block->getShowForGuest()) {
+    return;
+}
+
+$customClass = $block->getCustomClass();
+?>
+
+<div class="rexis-widget-simple <?= $block->escapeHtmlAttr($customClass) ?>">
+    <?php if (empty($recommendations)): ?>
+        <div class="rexis-login-prompt-simple">
+            <p>🔒 <?= $block->escapeHtml(__('Faça login para ver recomendações personalizadas.')) ?>
+                <a href="<?= $block->escapeUrl($block->getUrl('customer/account/login')) ?>"><?= $block->escapeHtml(__('Login')) ?></a>
+            </p>
+        </div>
+    <?php else: ?>
+        <div class="rexis-simple-header">
+            <h3 class="rexis-simple-title">
+                🎯 <?= $block->escapeHtml($block->getWidgetTitle()) ?>
+                <span class="rexis-simple-badge">IA</span>
+            </h3>
+        </div>
+        <ul class="rexis-simple-list">
+            <?php foreach ($recommendations as $item): ?>
+                <?php
+                $product = $item['product'];
+                $score = $item['score'] * 100;
+                $classificacao = $item['classificacao'];
+                ?>
+                <li class="rexis-simple-item">
+                    <a href="<?= $block->escapeUrl($product->getProductUrl()) ?>" class="rexis-simple-link">
+                        <img src="<?= $block->escapeUrl($block->getProductImageUrl($product)) ?>"
+                             alt="<?= $block->escapeHtml($product->getName()) ?>"
+                                class="rexis-simple-img" loading="lazy" decoding="async" width="50" height="50" />
+                        <div class="rexis-simple-info">
+                            <span class="rexis-simple-name"><?= $block->escapeHtml($product->getName()) ?></span>
+                            <span class="rexis-simple-price">
+                                <?= /* @noEscape */ $block->getLayout()->createBlock('Magento\Catalog\Pricing\Render')->render(
+                                    'final_price', $product, ['zone' => 'item_list']
+                                ) ?>
+                            </span>
+                        </div>
+                        <?php if ($score >= 80): ?>
+                            <span class="rexis-simple-score"><?= round($score) ?>%</span>
+                        <?php endif; ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+</div>

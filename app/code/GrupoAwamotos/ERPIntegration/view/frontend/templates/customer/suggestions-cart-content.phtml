@@ -61,10 +61,10 @@ if (empty($allItems)) {
 
 <div class="erp-cart-suggestions-widget" id="erp-cart-suggestions">
     <div class="erp-widget-header">
-        <h3 class="erp-widget-title">
+        <h2 class="erp-widget-title">
             <span class="erp-icon">💡</span>
             <?= $block->escapeHtml($suggestionsTitle) ?>
-        </h3>
+        </h2>
         <a href="<?= $block->escapeUrl($block->getUrl('erpintegration/customer/suggestedcart')) ?>" class="erp-view-all">
             <?= $block->escapeHtml($viewFullCartLabel) ?> →
         </a>

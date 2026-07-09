@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
 
-use GrupoAwamotos\B2B\Model\Sectra\CheckoutBlockMessage;
 use GrupoAwamotos\B2B\Model\Sectra\ProspectEvent;
 use GrupoAwamotos\B2B\Model\Sectra\SectraSyncLogger;
 use GrupoAwamotos\B2B\Model\Sectra\ValidatorChecker;
@@ -17,7 +16,7 @@ use Magento\Quote\Model\Quote\Address;
 use Psr\Log\LoggerInterface;
 
 /**
- * Blocks B2B order placement when fiscal data is incomplete for Sectra pull.
+ * Valida endereço de entrega B2B e registra clientes pendentes no validador Sectra.
  */
 class ValidateB2bOrderErpReadinessObserver implements ObserverInterface
 {
@@ -42,37 +41,15 @@ class ValidateB2bOrderErpReadinessObserver implements ObserverInterface
         }
 
         if (!$this->validatorChecker->isCustomerValidatedInSectra($customerId)) {
-            $message = CheckoutBlockMessage::MESSAGE;
             $sectraChave = $this->validatorChecker->resolveSectraChave($customerId);
             $this->syncLogger->log(
                 ProspectEvent::CHECKOUT_BLOCKED_CUSTOMER_NOT_VALIDATED,
-                $message,
+                'Cliente ainda não consta no validador; o Sectra validará no Importar Pedidos.',
                 $customerId,
                 null,
                 null,
                 $sectraChave
             );
-            $this->syncLogger->log(
-                ProspectEvent::ORDER_NOT_CREATED_CUSTOMER_PENDING_ERP,
-                'Finalização bloqueada — cliente pendente de validação ERP.',
-                $customerId,
-                null,
-                null,
-                $sectraChave
-            );
-            $this->logger->warning(sprintf(
-                '[B2B-Sectra] Checkout bloqueado — customer #%d não validado no ERP',
-                $customerId
-            ));
-            throw new LocalizedException(__($message));
-        }
-
-        if (!$this->orderPullCustomerData->isReadyForOrderPull($customerId)) {
-            $message = (string) __(
-                'Dados fiscais incompletos para integração ERP. Verifique CNPJ, razão social e telefone.'
-            );
-            $this->logger->warning(sprintf('[B2B-ERP-Pull] Pedido bloqueado — customer #%d: %s', $customerId, $message));
-            throw new LocalizedException(__($message));
         }
 
         /** @phpstan-ignore-next-line */
@@ -82,7 +59,8 @@ class ValidateB2bOrderErpReadinessObserver implements ObserverInterface
         }
 
         $street = implode(' ', array_filter($shipping->getStreet() ?? []));
-        if (trim($street) === '' || trim((string) $shipping->getCity()) === ''
+        if (
+            trim($street) === '' || trim((string) $shipping->getCity()) === ''
             || trim((string) $shipping->getPostcode()) === ''
             || trim((string) $shipping->getRegion()) === ''
         ) {

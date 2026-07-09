@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Block para exibir recomendações personalizadas no frontend
  * Integrado com dados reais do pipeline ERP → ProductIntelligence
  */
+
+declare(strict_types=1);
 
 namespace GrupoAwamotos\ProductIntelligence\Block;
 
@@ -57,7 +57,7 @@ class Recommendations extends Template
     }
 
     /**
-     * Verificar se REXIS ML está habilitado
+     * Verificar se Product Intelligence está habilitado
      */
     public function isEnabled()
     {
@@ -120,6 +120,13 @@ class Recommendations extends Template
         return $this->resolvedErpCode;
     }
 
+    private function tableExists(string $tableName): bool
+    {
+        return $this->resource->getConnection()->isTableExists(
+            $this->resource->getTableName($tableName)
+        );
+    }
+
     /**
      * Obter produtos recomendados para o cliente logado (dados reais do pipeline)
      */
@@ -147,6 +154,10 @@ class Recommendations extends Template
 
         $limit = (int)($this->getLimit() ?: 6);
         $classificacao = $this->getClassificacao();
+
+        if (!$this->tableExists('rexis_dataset_recomendacao')) {
+            return $this->cachedProducts;
+        }
 
         try {
             $connection = $this->resource->getConnection();
@@ -209,6 +220,10 @@ class Recommendations extends Template
             return $this->cachedRfm;
         }
 
+        if (!$this->tableExists('rexis_customer_classification')) {
+            return $this->cachedRfm;
+        }
+
         try {
             $connection = $this->resource->getConnection();
             $table = $this->resource->getTableName('rexis_customer_classification');
@@ -238,6 +253,12 @@ class Recommendations extends Template
 
         $erpCode = $this->resolveErpCode();
         if (!$erpCode) {
+            $this->cachedCounts = ['churn' => 0, 'crosssell' => 0, 'total' => 0];
+
+            return $this->cachedCounts;
+        }
+
+        if (!$this->tableExists('rexis_dataset_recomendacao')) {
             $this->cachedCounts = ['churn' => 0, 'crosssell' => 0, 'total' => 0];
 
             return $this->cachedCounts;
@@ -332,7 +353,7 @@ class Recommendations extends Template
             case 'irregular':
                 return __('Produtos que voce compra regularmente');
             default:
-                return __('Sugestoes Personalizadas por IA');
+                return __('Sugestoes Personalizadas');
         }
     }
 

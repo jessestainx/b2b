@@ -17,7 +17,8 @@ define([
      *
      * @returns {HTMLElement|null}
      */
-    function ensureAutofillStatusRegion() {
+    function ensureAutofillStatusRegion()
+    {
         if (typeof document === 'undefined') {
             return null;
         }
@@ -42,7 +43,8 @@ define([
      *
      * @param {string} message
      */
-    function announceAutofill(message) {
+    function announceAutofill(message)
+    {
         var region = ensureAutofillStatusRegion();
 
         if (!region) {

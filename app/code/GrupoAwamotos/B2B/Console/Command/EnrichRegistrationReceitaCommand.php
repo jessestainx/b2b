@@ -43,6 +43,7 @@ class EnrichRegistrationReceitaCommand extends Command
         try {
             $this->appState->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
         } catch (\Exception) {
+            // Area code já definido pelo bootstrap do CLI — seguro ignorar.
         }
 
         $apply = (bool) $input->getOption('apply');

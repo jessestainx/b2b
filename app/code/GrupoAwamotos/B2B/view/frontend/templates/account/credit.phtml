@@ -6,7 +6,8 @@ $usagePercent = $block->getUsagePercent();
 ?>
 <div class="b2b-credit-page b2b-page-shell">
     <div class="b2b-section-header">
-        <h1><?= __('Meu Crédito B2B') ?></h1>
+        <h1><?= $block->escapeHtml(__('Meu Crédito B2B')) ?></h1>
+        <p class="section-subtitle"><?= $block->escapeHtml(__('Limite disponível, uso atual e histórico de movimentações.')) ?></p>
     </div>
 
     <!-- Resumo de Crédito -->
@@ -78,7 +79,7 @@ $usagePercent = $block->getUsagePercent();
                 </tbody>
             </table>
         <?php else: ?>
-            <p class="empty-message"><?= __('Nenhuma transação registrada ainda.') ?></p>
+            <p class="empty-message"><?= $block->escapeHtml(__('Nenhuma movimentação ainda. Compras e pagamentos com crédito aparecem aqui.')) ?></p>
         <?php endif; ?>
     </div>
 </div>

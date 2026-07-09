@@ -1,7 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\Block;
+
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
 
 /**
  * Carrossel de produtos filtrado por categoria(s) — compatível com bestseller.phtml
@@ -16,6 +19,7 @@ namespace GrupoAwamotos\Theme\Block;
 class CategoryProductCarousel extends \Rokanthemes\BestsellerProduct\Block\Bestseller
 {
     private const DEFAULT_QTY = 12;
+    private ?Collection $resolvedCollection = null;
 
     /**
      * Retorna produtos das categorias definidas em category_ids.
@@ -25,10 +29,16 @@ class CategoryProductCarousel extends \Rokanthemes\BestsellerProduct\Block\Bests
      */
     public function getProducts(): \Magento\Catalog\Model\ResourceModel\Product\Collection
     {
+        if ($this->resolvedCollection !== null) {
+            return $this->resolvedCollection;
+        }
+
         $rawIds = $this->getData('category_ids');
 
         if (empty($rawIds)) {
-            return parent::getProducts();
+            $collection = parent::getProducts();
+            $this->resolvedCollection = $collection;
+            return $collection;
         }
 
         $ids = array_filter(
@@ -37,7 +47,9 @@ class CategoryProductCarousel extends \Rokanthemes\BestsellerProduct\Block\Bests
         );
 
         if (empty($ids)) {
-            return parent::getProducts();
+            $collection = parent::getProducts();
+            $this->resolvedCollection = $collection;
+            return $collection;
         }
 
         $storeId = $this->storeManager->getStore()->getId();
@@ -51,6 +63,7 @@ class CategoryProductCarousel extends \Rokanthemes\BestsellerProduct\Block\Bests
             ->addTaxPercents()
             ->addUrlRewrite()
             ->setVisibility($this->productVisibility->getVisibleInCatalogIds())
+            ->addAttributeToFilter('image', ['neq' => 'no_selection'])
             ->addAttributeToSort('entity_id', 'desc');
 
         $qty = (int) ($this->getData('qty') ?: $this->getConfig('qty') ?: self::DEFAULT_QTY);
@@ -61,7 +74,14 @@ class CategoryProductCarousel extends \Rokanthemes\BestsellerProduct\Block\Bests
             ['collection' => $collection]
         );
 
+        $this->resolvedCollection = $collection;
+
         return $collection;
+    }
+
+    public function hasProducts(): bool
+    {
+        return (int) $this->getProducts()->getSize() > 0;
     }
 
     /**
@@ -72,6 +92,11 @@ class CategoryProductCarousel extends \Rokanthemes\BestsellerProduct\Block\Bests
     {
         if ($att === 'enabled') {
             return 1;
+        }
+
+        if ($att === 'show_price') {
+            $override = $this->getData('show_price');
+            return $override !== null ? $override : 1;
         }
 
         $override = $this->getData($att);

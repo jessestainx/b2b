@@ -1,7 +1,7 @@
 :root {
     /* ── awa-cih — design tokens ─── */
-    --awa-cih-c1: #f7f7f7;
-    --awa-cih-c2: #fff;
+    --awa-cih-c1: var(--awa-bg-subtle);
+    --awa-cih-c2: var(--awa-bg);
     --awa-cih-c3: #222;
     --awa-cih-c4: #999;
 }

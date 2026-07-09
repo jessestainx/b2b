@@ -151,7 +151,7 @@ text-wrap: balance;
 <?php
     $__l2cCssUrl = $block->getViewFileUrl('GrupoAwamotos_B2B::css/product/login-to-cart.css');
     // P4b: crítico home em arquivo externo (cacheável) — antes ~43KB inline no HTML/FPC
-    $__criticalHomeCssUrl = $block->getViewFileUrl('css/awa-head-preload-critical-home.min.css') . '?v=20260702-cart-icon-fix';
+    $__criticalHomeCssUrl = $block->getViewFileUrl('css/awa-head-preload-critical-home.min.css') . '?v=20260707-rating-home-critical';
     /* first-paint + header critical: awa-home-critical-stack.phtml (cms_index_index) */
 ?>
 <!-- awa-head-preload-critical-home: async stagger abaixo (anti-FOUC inline cobre 1º paint) -->
@@ -164,6 +164,10 @@ html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .content-top-home .product-image-container{aspect-ratio:1/1!important;min-height:var(--awa-home-product-media-min,120px)!important;display:block!important;width:100%!important;contain:layout!important}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .content-top-home .product-thumb img,
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .content-top-home .item-product .product-image-photo{width:100%!important;height:auto!important;aspect-ratio:1/1!important;object-fit:contain!important;opacity:1!important;visibility:visible!important}
+/* BUG-NOVO-001 (home first-paint): hide Magento rating a11y inner text ("93% of 100")
+   in the critical home layer. The previous fix lived only in gated/late CSS, so
+   on home before gate activation the text still appeared visibly. */
+:is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .rating-summary .rating-result > span > span{display:none!important}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .awa-category-carousel__icon svg{display:block!important;width:64px!important;height:64px!important;max-width:64px!important;max-height:64px!important}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .awa-category-carousel__icon img,
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .awa-category-carousel__icon picture img{width:64px!important;height:64px!important;min-width:64px!important;min-height:64px!important;object-fit:contain!important}
@@ -281,7 +285,11 @@ body .page-wrapper .page_footer .footer-container,body .page-wrapper .page_foote
 .wrapper_slider.hidden-xs .awa-hero-swiper .swiper-slide,.wrapper_slider:not(.visible-xs) .awa-hero-swiper .swiper-slide{display:block!important;flex-direction:unset!important}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .wrapper_slider:not(.visible-xs){min-height:0!important;padding-inline:0!important;overflow:hidden!important;background:transparent!important}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .top-home-content--above-fold .banner-slider.banner-slider2{min-height:0!important;padding:clamp(8px,1.2vw,14px)!important;box-sizing:border-box!important;overflow:hidden!important;background:transparent!important}
-html body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer):not(.awa-footer--dark) .footer-container :is(p.awa-footer-atendimento__label,p.awa-footer-atendimento__label--social){color:color-mix(in srgb,var(--awa-text-inverse,white) 76%,transparent)!important}
+/* FIX 2026-07-06 (Impeccable "low contrast text" p.awa-footer-atendimento__label 1:1): esta regra
+   usava --awa-text-inverse (branco) justamente no contexto :not(.awa-footer--dark), ou seja, no
+   footer CLARO (.footer-container tem background branco aqui) — texto branco sobre fundo branco
+   era ilegível por design. Troca para --awa-text-secondary (#666666, ~5.7:1 sobre branco — AA). */
+html body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer):not(.awa-footer--dark) .footer-container :is(p.awa-footer-atendimento__label,p.awa-footer-atendimento__label--social){color:var(--awa-text-secondary,#666666)!important}
 /* Homepage: swiper pre-init (previne h=1260px antes do IntersectionObserver) */
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized){max-height:320px;overflow:hidden}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .products-swiper:not(.swiper-initialized)>.swiper-wrapper{display:flex;flex-wrap:nowrap;gap:16px}
@@ -1346,7 +1354,11 @@ endif; ?>
     $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.min.css');
     /* Home: carousel CSS async imediato — gate escondia visual Swiper até interação */
     ($__emitDeferredCss)($__carouselBundleUrl, false, false, false);
-    $__shelfCarouselUrl = $block->getViewFileUrl('css/awa-shelf-carousel.min.css') . '?v=20260703-flexbasis-gap-fix';
+    /* awa-shelf-carousel.min.css: NÃO reemitir aqui — bloco global awa.shelf.carousel
+       (Magento_Theme::html/awa-shelf-carousel-loader.phtml, default.xml) já carrega este
+       arquivo de forma assíncrona (media=print→all, sem gate de interação) em TODAS as
+       páginas, incluindo a home. Reemissão duplicada confirmada via telemetria de runtime
+       2026-07-05 (2x <link rel=stylesheet> apontando pro mesmo arquivo, só na home). */
     ?>
     <?php /* Scroll-snap + audit polish critical (merged 2026-06-10 — −1 style tag) */ ?>
     <style id="awa-home-shelf-audit-critical">
@@ -1385,7 +1397,6 @@ endif; ?>
     (function(d){'use strict';function mount(){d.querySelectorAll('.awa-carousel-section > .container').forEach(function(c){var h=c.querySelector(':scope > .awa-section-header, :scope > header.awa-section-header');if(!h||h.querySelector('.awa-owl-nav')){return;}var n=d.createElement('div');n.className='awa-owl-nav awa-owl-nav--header-slot';n.setAttribute('aria-hidden','true');n.innerHTML='<span class="awa-owl-nav__btn awa-owl-nav__btn--prev" aria-hidden="true"></span><span class="awa-owl-nav__btn awa-owl-nav__btn--next" aria-hidden="true"></span>';h.appendChild(n);});}if(d.readyState==='loading'){d.addEventListener('DOMContentLoaded',mount,{once:true});}else{mount();}})(document);
     </script>
     <?php
-    ($__emitDeferredCss)($__shelfCarouselUrl, false, false, false);
     /* awa-carousel-refine → consolidado em awa-home-gate-postaudit-bundle (optimize 2026-05-31) */
     /* S3-01 / 2026-06-07: header-stack migrado para _awa-header-stack.less (import 43.01 em _extend.less).
        Critical inline + styles-l cobrem o header — sem double-fetch via gate/preload. */
@@ -1766,16 +1777,15 @@ endif;
 <?php if (!$isB2bAuthShell && !$isB2bAccountOperational): ?>
 <style id="awa-header-account-hierarchy-terminal-inline">
 /* ui-ux-pro-max — sync final-wins após bundles async (todas as páginas) */
-html body#html-body#html-body#html-body#html-body .page-wrapper #header :is(#awa-b2b-promo-bar, .top-header.awa-b2b-promo-bar, .awa-b2b-promo-bar[data-awa-header-utility]) {
-  background: var(--awa-bg-surface, #ffffff) !important;
-  background-color: var(--awa-bg-surface, #ffffff) !important;
-  background-image: none !important;
-  color: var(--awa-text-primary, #111827) !important;
-  border: 0 !important;
-}
-html body#html-body#html-body#html-body#html-body .page-wrapper #header :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__lead-long, .awa-b2b-promo-bar__tail, .awa-b2b-promo-bar__separator, .awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta strong) {
-  color: var(--awa-text-primary, #111827) !important;
-}
+/* FIX 2026-07-06 (Impeccable "low contrast text" strong.awa-b2b-promo-bar__cta-long 1:1):
+   este normalizador genérico de "hierarquia de conta" forçava background claro
+   (--awa-bg-surface) + texto escuro (--awa-text-primary) no #awa-b2b-promo-bar, mas esse
+   elemento é o unico com data-awa-header-utility="b2b-promo" e já tem contrato de cor
+   dedicado (fundo --awa-primary vermelho + texto --awa-on-primary branco) definido em
+   OptimizeHeadStylesPlugin. O background aqui vencia a cascata (unlayered !important) e o
+   texto branco do CTA ficava sobre fundo claro/branco = ilegível. Removido daqui; border
+   segue no contrato dedicado.
+   */
 html body#html-body#html-body#html-body#html-body .page-wrapper #header :is(button.awa-b2b-promo-close, #awa-b2b-promo-close) {
   background: transparent !important;
   color: var(--awa-text-secondary, var(--awa-text, #111827)) !important;
@@ -1830,11 +1840,10 @@ html body#html-body#html-body#html-body#html-body .page-wrapper #header :is(butt
     text-decoration: none !important;
     cursor: pointer !important;
   }
+  /* FIX 2026-07-06 (Impeccable "low contrast text"): mesma correção do bloco base — remove
+     background/color hardcoded, mantém apenas dimensionamento (o contrato de cor dedicado
+     do promo bar já cobre este breakpoint). */
   #html-body .page-wrapper #header :is(#awa-b2b-promo-bar, .top-header.awa-b2b-promo-bar, .awa-b2b-promo-bar[data-awa-header-utility]) {
-    background: var(--awa-bg-surface, #ffffff) !important;
-    background-color: var(--awa-bg-surface, #ffffff) !important;
-    background-image: none !important;
-    color: var(--awa-text-primary, #111827) !important;
     border: 0 !important;
     min-height: 44px !important;
     max-height: 44px !important;
@@ -2044,21 +2053,11 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:
         w.addEventListener(eventName, onGateIntent, { capture: true, passive: eventName !== 'keydown' });
     });
 
-    if (typeof w.requestIdleCallback === 'function') {
-      w.requestIdleCallback(function () {
-        loadGate(true);
-      }, { timeout: 1500 });
-    } else {
-      w.setTimeout(function () {
-        loadGate(true);
-      }, 1500);
-    }
-
-    w.addEventListener('load', function () {
-      w.setTimeout(function () {
-        loadGate(true);
-      }, 350);
-    }, { once: true });
+    // PERF-F3: gate JS only on real intent in the critical window.
+    // Keep a very late passive bootstrap for long idle sessions.
+    w.setTimeout(function () {
+      loadGate(false);
+    }, 18000);
 
 }(window, document));
 </script>
@@ -2146,7 +2145,7 @@ html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper 
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;height:63px!important;max-height:72px!important;display:flex!important;align-items:center!important;overflow:visible!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .header-wrapper-sticky .awa-header-right-col{grid-area:actions!important;height:63px!important;max-height:72px!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;overflow:visible!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .header-control.awa-nav-bar{box-sizing:border-box!important;min-height:76px!important;height:76px!important;padding:4px 16px!important;overflow:visible!important}
-html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .awa-nav-bar__inner{box-sizing:border-box!important;display:flex!important;align-items:center!important;width:min(100%,1280px)!important;max-width:1280px!important;min-height:64px!important;height:64px!important;margin-inline:auto!important;padding:8px 16px!important;gap:12px!important;overflow:visible!important}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .awa-nav-bar__inner{box-sizing:border-box!important;display:flex!important;align-items:center!important;width:100%!important;max-width:100%!important;min-height:64px!important;height:64px!important;margin-inline:auto!important;padding:8px 16px!important;gap:12px!important;overflow:visible!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .awa-nav-quick-links{display:flex!important;align-items:center!important;min-height:46px!important;height:46px!important;max-height:46px!important;width:341px!important;min-width:341px!important;max-width:341px!important;margin-left:auto!important;gap:16px!important;justify-content:flex-end!important;overflow:visible!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home .top-home-content--category-carousel{box-sizing:border-box!important;min-height:272px!important;padding:8px 16px!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .content-top-home #awa-home-pricing-notice{box-sizing:border-box!important;min-height:153px!important;padding:8px 16px!important}
@@ -2188,7 +2187,7 @@ html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper 
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header :is(.awa-header-minicart .showcart,.awa-header-minicart .action.showcart,.showcart.header-mini-cart){background:var(--awa-primary)!important;color:var(--awa-text-on-primary,var(--awa-white,white))!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar,.header-control.header-nav>.container,.awa-nav-bar__inner){height:48px!important;min-height:48px!important;max-height:48px!important;padding:0!important;overflow:visible!important;box-sizing:border-box!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .header-control.awa-nav-bar{background:var(--awa-bg,Canvas)!important;border-block:1px solid var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas))!important}
-html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .awa-nav-bar__inner{display:flex!important;align-items:center!important;gap:12px!important;width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;background:transparent!important}
+html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .awa-nav-bar__inner{display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;max-width:100%!important;margin-inline:auto!important;background:transparent!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .awa-header-categories.menu_left_home1{flex:0 0 206px!important;width:206px!important;min-width:206px!important;max-width:206px!important;height:44px!important;max-height:44px!important;margin:0!important;padding:0!important;overflow:visible!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header button.title-category-dropdown.our_categories[data-role="awa-vertical-menu-trigger"]{width:206px!important;min-width:206px!important;max-width:206px!important;height:44px!important;min-height:44px!important;max-height:44px!important;border-radius:8px!important;background:var(--awa-primary)!important;color:var(--awa-text-on-primary,var(--awa-white,white))!important}
 html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper .awa-site-header .awa-nav-quick-links{height:44px!important;max-height:44px!important;flex:1 1 auto!important;width:auto!important;min-width:0!important;max-width:none!important;margin-left:auto!important;overflow:hidden!important}

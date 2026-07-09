@@ -7,7 +7,7 @@ namespace Meta\Conversion\Observer;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Meta\BusinessExtension\Api\SystemConfigInterface;
-use Meta\BusinessExtension\Helper\GraphAPIAdapter;
+use Meta\Conversion\Model\CapiEventDispatcher;
 use Meta\Conversion\Helper\UserDataBuilder;
 use Psr\Log\LoggerInterface;
 
@@ -18,7 +18,7 @@ class AddToCart implements ObserverInterface
 {
     public function __construct(
         private readonly SystemConfigInterface $config,
-        private readonly GraphAPIAdapter $graphApi,
+        private readonly CapiEventDispatcher $capiDispatcher,
         private readonly LoggerInterface $logger,
         private readonly ?UserDataBuilder $userDataBuilder = null
     ) {
@@ -71,14 +71,24 @@ class AddToCart implements ObserverInterface
             $quoteReference = (string) ($quote?->getId() ?: 'guest');
             $quoteItemReference = (string) ($eventQuoteItem->getId() ?: 'new');
             $eventId = sprintf('atc-%s-%s-%s-%d', $quoteReference, $quoteItemReference, $sku, $qty);
-            $externalId = (string) ($quote?->getCustomerId() ?: ($quote?->getId() ?: ''));
-            $userData = $this->userDataBuilder
+            $externalId  = (string) ($quote?->getCustomerId() ?: ($quote?->getId() ?: ''));
+            $atcAddress  = $quote?->getBillingAddress() ?: $quote?->getShippingAddress();
+            $userData    = $this->userDataBuilder
                 ? $this->userDataBuilder->build(
                     (string) ($quote?->getCustomerEmail() ?: ''),
-                    (string) ($quote?->getBillingAddress()?->getTelephone() ?: ''),
-                    $externalId
+                    (string) ($atcAddress?->getTelephone() ?: ''),
+                    $externalId,
+                    (string) ($quote?->getCustomerFirstname() ?: $atcAddress?->getFirstname() ?: ''),
+                    (string) ($quote?->getCustomerLastname() ?: $atcAddress?->getLastname() ?: ''),
+                    (string) ($atcAddress?->getCity() ?: ''),
+                    (string) ($atcAddress?->getRegionCode() ?: $atcAddress?->getRegion() ?: ''),
+                    (string) ($atcAddress?->getPostcode() ?: ''),
+                    strtolower((string) ($atcAddress?->getCountryId() ?: 'br'))
                 )
                 : [];
+            if ($this->userDataBuilder && !$this->userDataBuilder->hasMinimumSignals($userData)) {
+                return;
+            }
             $eventSourceUrl = $this->userDataBuilder?->getEventSourceUrl();
 
             $event = [
@@ -107,15 +117,7 @@ class AddToCart implements ObserverInterface
 
             $eventData = [$event];
 
-            $result = $this->graphApi->sendEvents($pixelId, $eventData, $storeId);
-            if (isset($result['error'])) {
-                $this->logger->warning('[Meta CAPI] AddToCart API error', [
-                    'store_id' => $storeId,
-                    'sku' => $sku,
-                    'http_status' => $result['http_status'] ?? null,
-                    'error' => $result['error']
-                ]);
-            }
+            $this->capiDispatcher->sendEvents($pixelId, $eventData, $storeId, 'AddToCart');
         } catch (\Throwable $e) {
             $this->logger->error('[Meta CAPI] AddToCart event failed', [
                 'error' => $e->getMessage()

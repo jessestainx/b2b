@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>AWA Motos - Atualizar Cache</title>
+<script>
+// Detectar versão antiga e forçar hard refresh
+(function() {
+    var url = window.location.href;
+    // Adicionar cache buster na URL para forçar reload
+    var separator = url.indexOf('?') === -1 ? '?' : '&';
+    var newUrl = url + separator + '_t=' + Date.now();
+    // Hard refresh bypassando cache
+    setTimeout(function() {
+        window.location.replace(newUrl);
+    }, 1500);
+})();
+</script>
+</head>
+<body style="font-family:system-ui,sans-serif;max-width:600px;margin:60px auto;padding:30px;background:#f8f8f9">
+<h1 style="color:#b73337">🔄 Atualizando cache do navegador...</h1>
+<p style="font-size:18px;line-height:1.6">
+Você está vendo esta página porque o navegador tinha cache antigo.<br><br>
+Estamos forçando uma <strong>atualização completa</strong> do cache agora.<br>
+Você será redirecionado automaticamente em <strong id="countdown">2</strong> segundos.
+</p>
+<p style="margin-top:40px;font-size:14px;color:#666">
+Se o redirecionamento não funcionar, clique no botão abaixo:<br>
+<a href="https://awamotos.com/?_cb=<?=time()?>" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#b73337;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">
+🔄 Forçar Atualização Manual
+</a>
+</p>
+<script>
+var n=2;
+setInterval(function(){
+    n--;
+    if(n<1) n=1;
+    document.getElementById('countdown').textContent=n;
+},1000);
+</script>
+</body>
+</html>

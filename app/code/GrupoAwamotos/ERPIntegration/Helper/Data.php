@@ -22,6 +22,9 @@ class Data extends AbstractHelper
     private const ENV_DATABASE = 'ERP_SQL_DATABASE';
     private const ENV_USERNAME = 'ERP_SQL_USERNAME';
     private const ENV_PASSWORD = 'ERP_SQL_PASSWORD';
+    private const ENV_WRITE_ENABLED = 'ERP_SQL_WRITE_ENABLED';
+    private const ENV_WRITE_USERNAME = 'ERP_SQL_WRITE_USERNAME';
+    private const ENV_WRITE_PASSWORD = 'ERP_SQL_WRITE_PASSWORD';
     private const ENV_WHATSAPP_TOKEN = 'ERP_WHATSAPP_TOKEN';
 
     private EncryptorInterface $encryptor;
@@ -423,6 +426,34 @@ class Data extends AbstractHelper
             self::XML_PREFIX . 'sync_prices/default_price_list',
             ScopeInterface::SCOPE_STORE
         ) ?: 24);
+    }
+
+    public function isPriceDeltaSyncEnabled(): bool
+    {
+        return $this->isPriceSyncEnabled() && $this->scopeConfig->isSetFlag(
+            self::XML_PREFIX . 'sync_prices/delta_enabled',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    public function getPriceDeltaBatchSize(): int
+    {
+        $value = (int) ($this->scopeConfig->getValue(
+            self::XML_PREFIX . 'sync_prices/delta_batch_size',
+            ScopeInterface::SCOPE_STORE
+        ) ?: 500);
+
+        return max(50, min($value, 5000));
+    }
+
+    public function getCustomerPriceDeltaBatchSize(): int
+    {
+        $value = (int) ($this->scopeConfig->getValue(
+            self::XML_PREFIX . 'sync_prices/customer_delta_batch_size',
+            ScopeInterface::SCOPE_STORE
+        ) ?: 500);
+
+        return max(50, min($value, 5000));
     }
 
     public function isCategorySyncEnabled(): bool
@@ -1000,7 +1031,15 @@ class Data extends AbstractHelper
 
     public function isWriteConnectionEnabled(): bool
     {
-        return $this->isEnabled() && $this->scopeConfig->isSetFlag(
+        if (!$this->isEnabled()) {
+            return false;
+        }
+
+        if ($this->getEnvValue(self::ENV_WRITE_ENABLED) === '1') {
+            return $this->getWriteUsername() !== '' && $this->getWritePassword() !== '';
+        }
+
+        return $this->scopeConfig->isSetFlag(
             self::XML_PREFIX . 'write_connection/enabled',
             ScopeInterface::SCOPE_STORE
         );
@@ -1008,19 +1047,29 @@ class Data extends AbstractHelper
 
     public function getWriteUsername(): string
     {
-        return (string) $this->scopeConfig->getValue(
+        $envUser = $this->getEnvValue(self::ENV_WRITE_USERNAME);
+        if ($envUser !== null && $envUser !== '') {
+            return $envUser;
+        }
+
+        return (string) ($this->scopeConfig->getValue(
             self::XML_PREFIX . 'write_connection/username',
             ScopeInterface::SCOPE_STORE
-        );
+        ) ?? '');
     }
 
     public function getWritePassword(): string
     {
-        $value = (string) $this->scopeConfig->getValue(
+        $envPass = $this->getEnvValue(self::ENV_WRITE_PASSWORD);
+        if ($envPass !== null && $envPass !== '') {
+            return $envPass;
+        }
+
+        $value = (string) ($this->scopeConfig->getValue(
             self::XML_PREFIX . 'write_connection/password',
             ScopeInterface::SCOPE_STORE
-        );
-        return $value ? $this->encryptor->decrypt($value) : '';
+        ) ?? '');
+        return $value !== '' ? $this->encryptor->decrypt($value) : '';
     }
 
     // ==================== Circuit Breaker Configuration ====================

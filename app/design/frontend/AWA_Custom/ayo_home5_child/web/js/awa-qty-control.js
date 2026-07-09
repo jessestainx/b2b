@@ -29,6 +29,25 @@ define([], function () {
         return Number.isFinite(parsed) ? parsed : fallback;
     }
 
+    /**
+     * @param {HTMLInputElement} input
+     * @param {HTMLElement} root
+     * @param {string} triggerSelector
+     */
+    function syncTriggerState(input, root, triggerSelector) {
+        let min = normalizeNumber(input.getAttribute('min'), 0);
+        let current = normalizeNumber(input.value, min);
+        let decrement = root.querySelector('[data-awa-direction="decrement"]');
+        let atMin = current <= min;
+
+        if (!decrement) {
+            return;
+        }
+
+        decrement.disabled = atMin;
+        decrement.setAttribute('aria-disabled', atMin ? 'true' : 'false');
+    }
+
     return function (config, element) {
         let root = element;
         let options = config || {};
@@ -36,6 +55,7 @@ define([], function () {
         let flags = options.flags || {};
         let inputSelector = selectors.input || '[data-awa-role="qty-input"]';
         let triggerSelector = selectors.trigger || '[data-awa-role="qty-trigger"]';
+        let input = root ? root.querySelector(inputSelector) : null;
 
         if (!root || root.nodeType !== 1 || root.getAttribute('data-awa-qty-bound') === 'true') {
             return;
@@ -44,9 +64,18 @@ define([], function () {
         root.setAttribute('data-awa-qty-bound', 'true');
         root.setAttribute('data-awa-component', 'awa-qty-control');
 
+        if (input) {
+            syncTriggerState(input, root, triggerSelector);
+            input.addEventListener('input', function () {
+                syncTriggerState(input, root, triggerSelector);
+            });
+            input.addEventListener('change', function () {
+                syncTriggerState(input, root, triggerSelector);
+            });
+        }
+
         root.addEventListener('click', function (event) {
             let trigger = event.target.closest(triggerSelector);
-            let input;
             let min;
             let step;
             let precision;
@@ -55,6 +84,10 @@ define([], function () {
             let direction;
 
             if (!trigger || !root.contains(trigger)) {
+                return;
+            }
+
+            if (trigger.disabled) {
                 return;
             }
 
@@ -83,6 +116,8 @@ define([], function () {
                 input.dispatchEvent(new Event('input', { bubbles: true }));
                 input.dispatchEvent(new Event('change', { bubbles: true }));
             }
+
+            syncTriggerState(input, root, triggerSelector);
 
             emit(root, 'awa:qty-control:change', {
                 value: input.value

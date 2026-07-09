@@ -1,115 +1,36 @@
 {
-  "auditDate": "2026-05-08T10:22:44.123Z",
-  "totalIssues": 13,
+  "auditDate": "2026-06-23T06:50:53.497Z",
+  "totalIssues": 3,
   "bySeverity": {
-    "Critical": 1,
-    "High": 4,
-    "Medium": 8,
+    "Critical": 0,
+    "High": 2,
+    "Medium": 1,
     "Low": 0
   },
   "issues": [
     {
-      "page": "Homepage",
+      "page": "Categoria",
       "viewport": "Desktop",
-      "severity": "Medium",
-      "category": "Tipografia / Fonte Pequena",
-      "description": "10 elemento(s) com fonte abaixo de 11px",
-      "detail": "SPAN \"Top Vendas\" → 10px | SPAN \"Promoção\" → 10px | SPAN \"Novidades\" → 10px | SPAN \"-27%\" → 10px | SPAN \"Peças\" → 10px | SPAN \"Acessórios\" → 10px | SPAN \"Promoção\" → 10px | SPAN \"Peças\" → 10px | SPAN \"Promoção\" → 10px | SPAN \"Promoção\" → 10px"
-    },
-    {
-      "page": "Homepage",
-      "viewport": "Mobile",
       "severity": "High",
-      "category": "Tipografia / Fonte Pequena",
-      "description": "10 elemento(s) com fonte abaixo de 11px",
-      "detail": "SPAN \"Top Vendas\" → 10px | SPAN \"REF:2220\" → 10px | SPAN \"REF:\" → 10px | SPAN \"REF:2246\" → 10px | SPAN \"REF:\" → 10px | SPAN \"REF:501\" → 10px | SPAN \"REF:\" → 10px | SPAN \"REF:624\" → 10px | SPAN \"REF:\" → 10px | SPAN \"REF:557\" → 10px"
-    },
-    {
-      "page": "Homepage",
-      "viewport": "Mobile",
-      "severity": "Medium",
-      "category": "UX / Touch Targets Pequenos",
-      "description": "12 elemento(s) interativo(s) abaixo de 44×44px",
-      "detail": "A \"Ret. BIZ 100 CR. Redondo Unive\" → 272×34px | A \"Faça login\" → 238×42px | A \"Retrovisor CB 300 Modelo 11 Pa\" → 272×34px | A \"Faça login\" → 238×42px | A \"Ret. Titan 2000 03 D/E\" → 272×34px | A \"Faça login\" → 238×42px | A \"Ret. BIZ 18/20 Padrao Honda D/\" → 272×34px | A \"Faça login\" → 238×42px | A \"Ret. XL H. Curta DT 200 H Curt\" → 272×34px | A \"Faça login\" → 238×42px | A \"Ret. Mini YBR D/E Honda\" → 272×34px | A \"Faça login\" → 238×42px"
+      "category": "Responsividade / Overflow Horizontal",
+      "description": "Página tem scroll horizontal (doc: 1284px, janela: 1280px)",
+      "detail": "Elementos suspeitos: "
     },
     {
       "page": "Categoria",
-      "viewport": "Desktop",
-      "severity": "Medium",
-      "category": "Tipografia / Fonte Pequena",
-      "description": "10 elemento(s) com fonte abaixo de 11px",
-      "detail": "SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px"
-    },
-    {
-      "page": "Categoria",
-      "viewport": "Mobile",
-      "severity": "High",
-      "category": "Tipografia / Fonte Pequena",
-      "description": "10 elemento(s) com fonte abaixo de 11px",
-      "detail": "SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px"
-    },
-    {
-      "page": "Categoria",
-      "viewport": "Mobile",
-      "severity": "Medium",
-      "category": "UX / Touch Targets Pequenos",
-      "description": "12 elemento(s) interativo(s) abaixo de 44×44px",
-      "detail": "A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px"
-    },
-    {
-      "page": "PDP",
-      "viewport": "Desktop",
-      "severity": "Medium",
-      "category": "Tipografia / Fonte Pequena",
-      "description": "10 elemento(s) com fonte abaixo de 11px",
-      "detail": "SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px"
-    },
-    {
-      "page": "PDP",
-      "viewport": "Mobile",
-      "severity": "High",
-      "category": "Tipografia / Fonte Pequena",
-      "description": "10 elemento(s) com fonte abaixo de 11px",
-      "detail": "SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px | SPAN \"Pronta Entrega\" → 10px"
-    },
-    {
-      "page": "PDP",
-      "viewport": "Mobile",
-      "severity": "Medium",
-      "category": "UX / Touch Targets Pequenos",
-      "description": "12 elemento(s) interativo(s) abaixo de 44×44px",
-      "detail": "A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px | A \"Faça login\" → 114×42px"
-    },
-    {
-      "page": "Busca",
       "viewport": "Mobile",
       "severity": "High",
       "category": "Tipografia / Fonte Pequena",
       "description": "2 elemento(s) com fonte abaixo de 11px",
-      "detail": "P \"Pague com\" → 10.5px | P \"Certificados e Segurança\" → 10.5px"
+      "detail": "P \"Todos os direitos reservados © 2026 - AW\" → 10.5px | P \"Preços válidos hoje, apenas no site. Em \" → 10.5px"
     },
     {
-      "page": "Busca",
+      "page": "Categoria",
       "viewport": "Mobile",
       "severity": "Medium",
       "category": "UX / Touch Targets Pequenos",
-      "description": "8 elemento(s) interativo(s) abaixo de 44×44px",
-      "detail": "A \"Haste Mini Titan/Mini BIZ (Ø 9\" → 272×38px | A \"Haste Nmax Rosca Direita (Ø 9,\" → 272×38px | A \"Haste PCX 150 Padrao Honda Ros\" → 272×38px | A \"Haste SH 150 GS Mod. 2017 Rosc\" → 272×38px | A \"Haste SH 300 GS Mod. 2016 Rosc\" → 272×38px | A \"Manete Embreagem Fazer 250 Mod\" → 272×38px | A \"Haste Curta Fazer 2015 Padrao \" → 272×38px | A \"Manete Embreagem - Bros 150/16\" → 272×38px"
-    },
-    {
-      "page": "Login",
-      "viewport": "Mobile",
-      "severity": "Medium",
-      "category": "UX / Touch Targets Pequenos",
-      "description": "1 elemento(s) interativo(s) abaixo de 44×44px",
-      "detail": "BUTTON \"Mostrar\" → 34×44px"
-    },
-    {
-      "page": "Login",
-      "viewport": "Mobile",
-      "severity": "Critical",
-      "category": "UX / Formulário",
-      "description": "Formulário incompleto no mobile – email:true senha:false botão:true"
+      "description": "5 elemento(s) interativo(s) abaixo de 44×44px",
+      "detail": "A \"Ir para o conteúdo principal\" → 1×1px | A \"Ir para a navegação\" → 1×1px | A \"Cadastre agora Cadastre-se\" → 89×36px | A \"Abrir carrinho\" → 44×2px | BUTTON \"Pesquisar catálogo\" → 38×44px"
     }
   ]
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Observer;
@@ -26,10 +27,16 @@ class CustomerGroupRefresh implements ObserverInterface
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly CacheInterface $cache,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {
+        // FPC: não chamar CustomerSession em visitantes sem cookie (evita session_start em PLP/home).
+        if (($_COOKIE[session_name()] ?? null) === null) {
+            return;
+        }
+
         if (!$this->customerSession->isLoggedIn()) {
             return;
         }

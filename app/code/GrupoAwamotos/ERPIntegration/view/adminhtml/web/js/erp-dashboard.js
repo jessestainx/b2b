@@ -70,7 +70,8 @@ define([
             var $btn = $(this);
             let action = $btn.data('action');
             let url = syncUrls[action];
-            if (!url) { return; }
+            if (!url) {
+                return; }
 
             $btn.prop('disabled', true).addClass('loading');
             showNotification('info', 'Executando...');
@@ -82,7 +83,8 @@ define([
                 success: function (response) {
                     if (response.success) {
                         showNotification('success', response.message || 'Operação concluída');
-                        setTimeout(function () { location.reload(); }, RELOAD_DELAY_MS);
+                        setTimeout(function () {
+                            location.reload(); }, RELOAD_DELAY_MS);
                     } else {
                         showNotification('error', response.message || 'Erro na operação');
                     }
@@ -119,11 +121,15 @@ define([
                 success: function (response) {
                     if (response.success) {
                         let msg = 'Sincronização concluída';
-                        if (response.processed) { msg += ': ' + response.processed + ' registros'; }
-                        if (response.created)   { msg += ' (' + response.created + ' novos)'; }
-                        if (response.updated)   { msg += ' (' + response.updated + ' atualizados)'; }
+                        if (response.processed) {
+                            msg += ': ' + response.processed + ' registros'; }
+                        if (response.created) {
+                            msg += ' (' + response.created + ' novos)'; }
+                        if (response.updated) {
+                            msg += ' (' + response.updated + ' atualizados)'; }
                         showNotification('success', msg);
-                        setTimeout(function () { location.reload(); }, 2000);
+                        setTimeout(function () {
+                            location.reload(); }, 2000);
                     } else {
                         showNotification('error', response.message || 'Erro na sincronização');
                     }
@@ -154,7 +160,8 @@ define([
                 if (seconds <= 0) {
                     clearInterval(interval);
                     $value.text('Pronto');
-                    setTimeout(function () { location.reload(); }, COUNTDOWN_RELOAD_DELAY_MS);
+                    setTimeout(function () {
+                        location.reload(); }, COUNTDOWN_RELOAD_DELAY_MS);
                 } else {
                     $value.text(seconds + 's');
                 }
@@ -190,7 +197,8 @@ define([
         // ──────────────────────────────────────────────
         // Notification System
         // ──────────────────────────────────────────────
-        function showNotification(type, message) {
+        function showNotification(type, message)
+        {
             var $container = $dashboard.find('.erp-notifications');
             if (!$container.length) {
                 $container = $('<div class="erp-notifications"></div>');
@@ -215,12 +223,14 @@ define([
             $container.append($n);
 
             $n.find('.erp-notification-close').on('click', function () {
-                $n.fadeOut(300, function () { $(this).remove(); });
+                $n.fadeOut(300, function () {
+                    $(this).remove(); });
             });
 
             if (type !== 'error') {
                 setTimeout(function () {
-                    $n.fadeOut(300, function () { $(this).remove(); });
+                    $n.fadeOut(300, function () {
+                        $(this).remove(); });
                 }, 5000);
             }
         }
@@ -266,8 +276,10 @@ define([
                     yaxis: {
                         labels: {
                             formatter: function (val) {
-                                if (val >= 1000000) { return 'R$ ' + (val / 1000000).toFixed(1) + 'M'; }
-                                if (val >= 1000)    { return 'R$ ' + (val / 1000).toFixed(0) + 'K'; }
+                                if (val >= 1000000) {
+                                    return 'R$ ' + (val / 1000000).toFixed(1) + 'M'; }
+                                if (val >= 1000) {
+                                    return 'R$ ' + (val / 1000).toFixed(0) + 'K'; }
                                 return 'R$ ' + val.toFixed(0);
                             }
                         }
@@ -282,7 +294,7 @@ define([
                         y: {
                             formatter: function (val) {
                                 return val
-                                    ? 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                                    ? 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits : 2 })
                                     : '-';
                             }
                         }
@@ -310,26 +322,30 @@ define([
                 document.querySelector('#rfm-chart'),
                 {
                     chart: { type: 'donut', height: 350 },
-                    series: rfmData.map(function (s) { return s.count; }),
-                    labels: rfmData.map(function (s) { return s.segment; }),
-                    colors: rfmData.map(function (s) { return s.color; }),
-                    legend: { position: 'bottom', fontSize: '12px' },
-                    plotOptions: {
-                        pie: {
-                            donut: {
-                                size: '60%',
-                                labels: {
+                    series: rfmData.map(function (s) {
+                        return s.count; }),
+                labels: rfmData.map(function (s) {
+                    return s.segment; }),
+                colors: rfmData.map(function (s) {
+                    return s.color; }),
+                legend: { position: 'bottom', fontSize: '12px' },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '60%',
+                            labels: {
+                                show: true,
+                                total: {
                                     show: true,
-                                    total: {
-                                        show: true,
-                                        label: 'Total Clientes',
-                                        formatter: function (w) {
-                                            return w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0);
-                                        }
+                                    label: 'Total Clientes',
+                                    formatter: function (w) {
+                                        return w.globals.seriesTotals.reduce(function (a, b) {
+                                            return a + b; }, 0);
                                     }
                                 }
                             }
                         }
+                    }
                     },
                     tooltip: {
                         y: {

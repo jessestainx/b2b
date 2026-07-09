@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page layout="empty"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <block class="GrupoAwamotos\B2B\Block\Account\Dashboard"
+               name="b2b.dashboard.fragment"
+               template="GrupoAwamotos_B2B::account/dashboard/fragment-empty.phtml">
+            <block class="GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions"
+                   name="erp.dashboard.suggestions"/>
+        </block>
+    </body>
+</page>

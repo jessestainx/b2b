@@ -1,0 +1,61 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Skeleton placeholder for lazy dashboard fragments.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$variant = (string) $block->getData('variant');
+$label = (string) $block->getData('label');
+?>
+<div class="b2b-dashboard-lazy-placeholder b2b-dashboard-lazy-placeholder--<?= $block->escapeHtmlAttr($variant) ?>"
+     aria-busy="true"
+     aria-live="polite">
+    <?php if ($variant === 'context'): ?>
+        <div class="b2b-skeleton-row b2b-skeleton-row--badges" aria-hidden="true">
+            <span class="b2b-skeleton b2b-skeleton-pill"></span>
+            <span class="b2b-skeleton b2b-skeleton-pill b2b-skeleton-pill--short"></span>
+        </div>
+        <div class="b2b-skeleton-card" aria-hidden="true">
+            <span class="b2b-skeleton b2b-skeleton-line b2b-skeleton-line--title"></span>
+            <span class="b2b-skeleton b2b-skeleton-line"></span>
+            <span class="b2b-skeleton b2b-skeleton-line b2b-skeleton-line--short"></span>
+        </div>
+    <?php elseif ($variant === 'intelligence'): ?>
+        <div class="b2b-skeleton-grid b2b-skeleton-grid--2" aria-hidden="true">
+            <div class="b2b-skeleton-card">
+                <span class="b2b-skeleton b2b-skeleton-line b2b-skeleton-line--title"></span>
+                <span class="b2b-skeleton b2b-skeleton-line"></span>
+                <span class="b2b-skeleton b2b-skeleton-line"></span>
+            </div>
+            <div class="b2b-skeleton-card">
+                <span class="b2b-skeleton b2b-skeleton-line b2b-skeleton-line--title"></span>
+                <span class="b2b-skeleton b2b-skeleton-line b2b-skeleton-line--short"></span>
+            </div>
+        </div>
+    <?php elseif ($variant === 'commerce' || $variant === 'recommendations'): ?>
+        <div class="b2b-skeleton-grid b2b-skeleton-grid--products" aria-hidden="true">
+            <?php for ($i = 0; $i < 3; $i++): ?>
+                <div class="b2b-skeleton-product">
+                    <span class="b2b-skeleton b2b-skeleton-thumb"></span>
+                    <span class="b2b-skeleton b2b-skeleton-line b2b-skeleton-line--title"></span>
+                    <span class="b2b-skeleton b2b-skeleton-line b2b-skeleton-line--short"></span>
+                </div>
+            <?php endfor; ?>
+        </div>
+    <?php elseif ($variant === 'orders' || $variant === 'quotes'): ?>
+        <div class="b2b-skeleton-table-wrap" aria-hidden="true">
+            <span class="b2b-skeleton b2b-skeleton-line b2b-skeleton-line--title"></span>
+            <div class="b2b-skeleton-table">
+                <?php for ($i = 0; $i < 4; $i++): ?>
+                    <span class="b2b-skeleton b2b-skeleton-table-row"></span>
+                <?php endfor; ?>
+            </div>
+        </div>
+    <?php else: ?>
+        <span class="b2b-skeleton b2b-skeleton-block" aria-hidden="true"></span>
+    <?php endif; ?>
+    <span class="b2b-dashboard-lazy-label"><?= $block->escapeHtml($label) ?></span>
+</div>

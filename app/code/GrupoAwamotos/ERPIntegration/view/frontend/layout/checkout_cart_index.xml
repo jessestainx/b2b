@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <head>
-        <!-- cart-suggestions.css async (non-blocking) — below fold on cart (AWA 2026-04-25) -->
-        <css src="GrupoAwamotos_ERPIntegration::css/cart-suggestions.css"/>
-    </head>
     <body>
+        <!-- cart-suggestions.css async via head.additional — below-fold, não bloqueia FCP -->
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="erp.cart.suggestions.css"
+                   template="GrupoAwamotos_ERPIntegration::css/cart-suggestions-async.phtml"
+                   after="-"/>
+        </referenceBlock>
+
         <!-- Add suggestions widget after cart form -->
         <referenceContainer name="checkout.cart.container">
             <block class="GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions"

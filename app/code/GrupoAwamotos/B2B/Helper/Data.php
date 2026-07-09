@@ -23,26 +23,26 @@ class Data extends AbstractHelper
     /**
      * Config paths
      */
-    const XML_PATH_ENABLED = 'grupoawamotos_b2b/general/enabled';
-    const XML_PATH_B2B_MODE = 'grupoawamotos_b2b/general/b2b_mode';
-    const XML_PATH_HIDE_PRICES = 'grupoawamotos_b2b/price_visibility/hide_price_guests';
-    const XML_PATH_REQUIRE_APPROVAL = 'grupoawamotos_b2b/customer_approval/require_approval';
-    const XML_PATH_QUOTE_ENABLED = 'grupoawamotos_b2b/quote_request/enabled';
-    const XML_PATH_QUOTE_EXPIRY = 'grupoawamotos_b2b/quote_request/expiry_days';
+    public const XML_PATH_ENABLED = 'grupoawamotos_b2b/general/enabled';
+    public const XML_PATH_B2B_MODE = 'grupoawamotos_b2b/general/b2b_mode';
+    public const XML_PATH_HIDE_PRICES = 'grupoawamotos_b2b/price_visibility/hide_price_guests';
+    public const XML_PATH_REQUIRE_APPROVAL = 'grupoawamotos_b2b/customer_approval/require_approval';
+    public const XML_PATH_QUOTE_ENABLED = 'grupoawamotos_b2b/quote_request/enabled';
+    public const XML_PATH_QUOTE_EXPIRY = 'grupoawamotos_b2b/quote_request/expiry_days';
 
     // Order Approval
-    const XML_PATH_ORDER_APPROVAL_ENABLED = 'grupoawamotos_b2b/order_approval/enabled';
-    const XML_PATH_THRESHOLD_MANAGER = 'grupoawamotos_b2b/order_approval/threshold_manager';
-    const XML_PATH_THRESHOLD_FINANCE = 'grupoawamotos_b2b/order_approval/threshold_finance';
-    const XML_PATH_THRESHOLD_DIRECTOR = 'grupoawamotos_b2b/order_approval/threshold_director';
+    public const XML_PATH_ORDER_APPROVAL_ENABLED = 'grupoawamotos_b2b/order_approval/enabled';
+    public const XML_PATH_THRESHOLD_MANAGER = 'grupoawamotos_b2b/order_approval/threshold_manager';
+    public const XML_PATH_THRESHOLD_FINANCE = 'grupoawamotos_b2b/order_approval/threshold_finance';
+    public const XML_PATH_THRESHOLD_DIRECTOR = 'grupoawamotos_b2b/order_approval/threshold_director';
 
     /**
      * B2B Customer Groups (fallback defaults)
      */
-    const GROUP_B2B_ATACADO = 4;
-    const GROUP_B2B_VIP = 5;
-    const GROUP_B2B_REVENDEDOR = 6;
-    const GROUP_B2B_PENDENTE = 7;
+    public const GROUP_B2B_ATACADO = 4;
+    public const GROUP_B2B_VIP = 5;
+    public const GROUP_B2B_REVENDEDOR = 6;
+    public const GROUP_B2B_PENDENTE = 7;
 
     /**
      * @var CustomerSession
@@ -224,6 +224,30 @@ class Data extends AbstractHelper
             self::XML_PATH_THRESHOLD_DIRECTOR,
             ScopeInterface::SCOPE_STORE
         ) ?: 50000);
+    }
+
+    /**
+     * Format a customer/company name for display.
+     *
+     * Registros importados do ERP frequentemente chegam 100% em caixa alta
+     * (ex.: "FERNANDO", "JOSE PAVAO & CIA LTDA"), resultando em saudações
+     * como "Olá, FERNANDO" no header B2B. Aplicamos title-case somente em
+     * nomes totalmente maiúsculos (assinatura do import ERP), preservando
+     * intocado qualquer nome já digitado corretamente pelo próprio cliente
+     * (ex.: "Maria Silva" no autocadastro).
+     *
+     * @param string|null $name
+     * @return string
+     */
+    public function formatDisplayName(?string $name): string
+    {
+        $name = trim((string) $name);
+
+        if ($name === '' || $name !== mb_strtoupper($name, 'UTF-8')) {
+            return $name;
+        }
+
+        return mb_convert_case(mb_strtolower($name, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
     }
 
     /**
@@ -475,7 +499,18 @@ class Data extends AbstractHelper
      */
     public function getPriceGateDescription(): string
     {
-        $fallback = match ($this->getPriceGateState()) {
+        return $this->sanitizeGateMessage(
+            $this->priceVisibility->getPriceReplacementMessage(),
+            $this->getPriceGateBannerDescription()
+        );
+    }
+
+    /**
+     * Long-form copy for PLP/search gate banner (not card CTA snippets).
+     */
+    public function getPriceGateBannerDescription(): string
+    {
+        return match ($this->getPriceGateState()) {
             'guest' => 'Cadastre-se gratuitamente em 2 min para consultar preços e comprar no atacado.',
             'erp_pending' => 'Sua empresa já foi aprovada e nossa equipe está concluindo a tabela comercial no ERP.',
             'rejected' => 'Fale com a equipe comercial para revisar os dados da sua empresa e liberar o acesso novamente.',
@@ -483,11 +518,26 @@ class Data extends AbstractHelper
             'pending' => 'Estamos validando os dados da sua empresa para liberar condições comerciais e compra recorrente.',
             default => 'Acesso comercial liberado.',
         };
+    }
 
-        return $this->sanitizeGateMessage(
-            $this->priceVisibility->getPriceReplacementMessage(),
-            $fallback
-        );
+    /**
+     * Short-form copy for the price-gate badge inside product grid cards.
+     *
+     * O card tem espaço limitado (ao contrário do banner institucional do
+     * topo da PLP/busca, que já mostra a explicação completa). Reaproveita a
+     * mesma redação curta do CTA principal para manter a mensagem consistente
+     * entre o texto do card e o botão de ação.
+     */
+    public function getPriceGateCardMessage(): string
+    {
+        return match ($this->getPriceGateState()) {
+            'guest' => 'Cadastre-se para ver o preço',
+            'erp_pending' => 'Tabela de preços em liberação',
+            'rejected' => 'Cadastro precisa de revisão',
+            'suspended' => 'Acesso comercial suspenso',
+            'pending' => 'Cadastro em análise',
+            default => 'Acesso comercial liberado',
+        };
     }
 
     /**

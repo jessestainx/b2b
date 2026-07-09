@@ -1,0 +1,218 @@
+<?php
+/** @var \GrupoAwamotos\B2B\Block\Adminhtml\Customer\View $block */
+/** @var \GrupoAwamotos\B2B\Model\B2bCustomer $b2b */
+$b2b = $block->getB2bCustomer();
+if (!$b2b) return;
+?>
+
+<div class="b2b-customer-view">
+
+    <!-- Toolbar superior -->
+    <div class="b2b-action-toolbar">
+        <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>"
+           class="action-back action-secondary">
+            <span><?= $block->escapeHtml(__('← Voltar para lista')) ?></span>
+        </a>
+        <?php if ($b2b->isPending()): ?>
+        <button onclick="approveCustomer()" class="action-accept">
+            ✓ <?= $block->escapeHtml(__('Aprovar')) ?>
+        </button>
+        <button onclick="showRejectModal()" class="action-reject">
+            ✗ <?= $block->escapeHtml(__('Rejeitar')) ?>
+        </button>
+        <?php endif; ?>
+    </div>
+
+    <!-- Status badge -->
+    <div style="margin-bottom:20px;">
+        <?= /* @noEscape */ $block->getStatusBadge($b2b->getStatus()) ?>
+        <?php if (!$b2b->isPending()): ?>
+            <span style="color:#888;font-size:12px;margin-left:10px;">
+                Processado em: <?= $block->escapeHtml($b2b->getData('approved_at') ?? '') ?>
+            </span>
+            <?php if ($b2b->getData('rejection_reason')): ?>
+            <div style="margin-top:8px;padding:10px 14px;background:#fff3cd;border-left:4px solid #f57c00;border-radius:0 4px 4px 0;">
+                <strong>Motivo:</strong> <?= $block->escapeHtml($b2b->getData('rejection_reason')) ?>
+            </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+
+    <div class="b2b-info-grid">
+
+        <!-- Dados da Empresa -->
+        <div class="b2b-info-card">
+            <h3>Dados da Empresa</h3>
+            <table class="data-grid" style="width:100%;border-collapse:collapse;">
+                <?php foreach ([
+                    'CNPJ'               => $b2b->getCnpj(),
+                    'Razão Social'        => $b2b->getRazaoSocial(),
+                    'Nome Fantasia'       => $b2b->getNomeFantasia() ?: '—',
+                    'Inscrição Estadual'  => $b2b->getInscricaoEstadual() ?: '—',
+                ] as $label => $value): ?>
+                <tr>
+                    <td style="padding:7px 10px;font-weight:600;color:#555;font-size:13px;width:40%;border-bottom:1px solid #f5f5f5;">
+                        <?= $block->escapeHtml($label) ?>
+                    </td>
+                    <td style="padding:7px 10px;font-size:13px;border-bottom:1px solid #f5f5f5;">
+                        <?= $block->escapeHtml($value) ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+
+        <!-- Dados do Responsável -->
+        <div class="b2b-info-card">
+            <h3>Responsável / Conta</h3>
+            <table class="data-grid" style="width:100%;border-collapse:collapse;">
+                <?php foreach ([
+                    'Nome'         => $b2b->getContactName(),
+                    'E-mail'       => $b2b->getEmail(),
+                    'Telefone'     => $b2b->getPhone(),
+                    'Cadastrado em'=> $b2b->getData('created_at'),
+                ] as $label => $value): ?>
+                <tr>
+                    <td style="padding:7px 10px;font-weight:600;color:#555;font-size:13px;width:40%;border-bottom:1px solid #f5f5f5;">
+                        <?= $block->escapeHtml($label) ?>
+                    </td>
+                    <td style="padding:7px 10px;font-size:13px;border-bottom:1px solid #f5f5f5;">
+                        <?= $block->escapeHtml((string) $value) ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+
+            <?php $magUrl = $block->getMagentoCustomerUrl(); ?>
+            <?php if ($magUrl): ?>
+            <div style="margin-top:12px;">
+                <a href="<?= $block->escapeUrl($magUrl) ?>"
+                   target="_blank"
+                   style="font-size:12px;color:#006bb4;">
+                    → Ver conta Magento do cliente
+                </a>
+            </div>
+            <?php endif; ?>
+        </div>
+
+    </div><!-- .b2b-info-grid -->
+
+    <!-- Integração ERP -->
+    <div class="b2b-info-card" style="margin-top:20px;">
+        <h3>Integração ERP Sectra</h3>
+        <table class="data-grid" style="width:100%;border-collapse:collapse;">
+            <tr>
+                <td style="padding:7px 10px;font-weight:600;color:#555;font-size:13px;width:30%;border-bottom:1px solid #f5f5f5;">
+                    Código do Cliente (ERP)
+                </td>
+                <td style="padding:7px 10px;font-size:13px;border-bottom:1px solid #f5f5f5;">
+                    <input type="text" id="b2b-cod-erp"
+                           value="<?= $block->escapeHtmlAttr($b2b->getCodErp()) ?>"
+                           placeholder="ex: 19107"
+                           style="width:180px;padding:5px 8px;border:1px solid #ccc;border-radius:4px;font-size:13px;" />
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:7px 10px;font-weight:600;color:#555;font-size:13px;border-bottom:1px solid #f5f5f5;">
+                    Lista de Preço (ERP)
+                </td>
+                <td style="padding:7px 10px;font-size:13px;border-bottom:1px solid #f5f5f5;">
+                    <input type="text" id="b2b-lista-preco"
+                           value="<?= $block->escapeHtmlAttr($b2b->getListaPrecoErp()) ?>"
+                           placeholder="ex: TABELA-B2B-01"
+                           style="width:220px;padding:5px 8px;border:1px solid #ccc;border-radius:4px;font-size:13px;" />
+                </td>
+            </tr>
+        </table>
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+            <button onclick="saveErpFields()"
+                    style="padding:7px 18px;background:#006bb4;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">
+                Salvar campos ERP
+            </button>
+            <span id="b2b-erp-save-msg" style="font-size:12px;color:#2e7d32;display:none;">✓ Salvo</span>
+        </div>
+    </div>
+
+    <?php if ($b2b->getData('admin_note')): ?>
+    <div style="margin-top:20px;padding:12px 16px;background:#e8f5e9;border-left:4px solid #2e7d32;border-radius:0 4px 4px 0;">
+        <strong>Observação interna:</strong> <?= $block->escapeHtml($b2b->getData('admin_note')) ?>
+    </div>
+    <?php endif; ?>
+
+</div><!-- /b2b-customer-view -->
+
+<!-- Modal de Rejeição -->
+<div id="reject-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:8px;padding:30px;max-width:480px;width:90%;">
+        <h3 style="margin:0 0 16px;font-size:18px;"><?= $block->escapeHtml(__('Motivo da Rejeição')) ?></h3>
+        <p style="color:#555;font-size:13px;margin-bottom:16px;">
+            Informe o motivo da rejeição para que o solicitante seja notificado por e-mail.
+        </p>
+        <textarea id="reject-reason"
+                  style="width:100%;padding:10px;border:1px solid #ccc;border-radius:4px;font-size:14px;min-height:100px;"
+                  placeholder="Ex: Documentação incompleta, CNPJ irregular, etc."></textarea>
+        <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+            <button onclick="closeRejectModal()"
+                    style="padding:8px 20px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer;">
+                Cancelar
+            </button>
+            <button onclick="confirmReject()"
+                    style="padding:8px 20px;background:#c62828;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;">
+                Confirmar Rejeição
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function approveCustomer() {
+    if (confirm('Confirma a aprovação deste cliente B2B?')) {
+        window.location.href = '<?= $block->escapeJs($block->getApproveUrl()) ?>';
+    }
+}
+
+function showRejectModal() {
+    document.getElementById('reject-modal').style.display = 'flex';
+}
+
+function closeRejectModal() {
+    document.getElementById('reject-modal').style.display = 'none';
+}
+
+function saveErpFields() {
+    var codErp    = document.getElementById('b2b-cod-erp').value.trim();
+    var listPreco = document.getElementById('b2b-lista-preco').value.trim();
+    var msg       = document.getElementById('b2b-erp-save-msg');
+
+    fetch('<?= $block->escapeJs($block->getUrl('b2b/customer/saveErp')) ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+        body: JSON.stringify({
+            id:              <?= (int) $b2b->getId() ?>,
+            cod_erp:         codErp,
+            lista_preco_erp: listPreco,
+            form_key:        window.FORM_KEY || ''
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            msg.style.display = 'inline';
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        } else {
+            alert('Erro: ' + (data.message || 'Não foi possível salvar.'));
+        }
+    })
+    .catch(() => alert('Erro de comunicação com o servidor.'));
+}
+
+function confirmReject() {
+    var reason = document.getElementById('reject-reason').value.trim();
+    if (!reason) {
+        alert('Por favor informe o motivo da rejeição.');
+        return;
+    }
+    window.location.href = '<?= $block->escapeJs($block->getRejectUrl()) ?>'
+        + '&reason=' + encodeURIComponent(reason);
+}
+</script>

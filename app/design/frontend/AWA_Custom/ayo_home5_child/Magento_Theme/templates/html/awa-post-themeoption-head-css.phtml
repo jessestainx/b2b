@@ -1,14 +1,6 @@
 <?php
-/**
- * DESATIVADO em 2026-03-16: CSS migrado para awa-bundle-site.css (carregado globalmente via default_head_blocks.xml)
- * 5 requests bloqueantes → 1 bundle. Homepage remove o bundle via cms_index_index.xml <remove>.
- * Arquivo preservado para rollback — remova quando confirmar estabilidade por ≥2 semanas.
- *
- * @var \Magento\Framework\View\Element\Template $block
- */
-return; // migrado para awa-bundle-site.css
-
 /** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\App\Request\Http|null $request */
 $request = $block->getRequest();
 $fullActionName = $request ? (string) $request->getFullActionName() : '';
 $pathInfo = $request ? (string) ($request->getOriginalPathInfo() ?: $request->getPathInfo()) : '';
@@ -16,6 +8,7 @@ $pathSlug = trim($pathInfo, '/');
 $isHomeRoute = $fullActionName === 'cms_index_index' || $pathSlug === '';
 $isDemoStagePreview = $fullActionName === 'cms_page_view'
     && in_array($pathSlug, ['homepage_ayo_home5_stage', 'homepage_ayo_home5_demo_stage'], true);
+$isProductRoute = $fullActionName === 'catalog_product_view';
 $disableAwaPostThemeoptionCss = (bool) $block->getData('disable_awa_post_themeoption_css');
 
 if ($isHomeRoute || $isDemoStagePreview) {
@@ -29,21 +22,26 @@ if ($disableAwaPostThemeoptionCss) {
 <link rel="stylesheet"
       type="text/css"
       media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-custom-post-themeoption-overrides.css')) ?>" />
-<!-- Footer light CSS removed: replaced by awa-custom-footer-dark-gradient.css loaded globally via default_head_blocks.xml -->
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-round9-post-themeoption-overrides.css')) ?>" />
 <link rel="stylesheet"
       type="text/css"
       media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-custom-components-b2b-foundation.css')) ?>" />
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-round10-footer-light-perfect.css')) ?>" />
 <link rel="stylesheet"
       type="text/css"
       media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-custom-compat-b2b-nav-plp-cart-checkout.css')) ?>" />
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-components-b2b-foundation.css')) ?>" />
 <link rel="stylesheet"
       type="text/css"
       media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-custom-page-b2b-cart-checkout-premium.css')) ?>" />
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-compat-b2b-nav-plp-cart-checkout.css')) ?>" />
+<?php if (!$isProductRoute): ?>
 <link rel="stylesheet"
       type="text/css"
       media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-custom-page-home-category-premium.css')) ?>" />
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-page-b2b-cart-checkout-premium.css')) ?>" />
+<link rel="stylesheet"
+      type="text/css"
+      media="all"
+      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-page-home-category-premium.css')) ?>" />
+<?php endif; ?>

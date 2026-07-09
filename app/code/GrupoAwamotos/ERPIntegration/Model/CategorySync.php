@@ -244,7 +244,7 @@ class CategorySync implements CategorySyncInterface
         }
 
         // Hash-based change detection
-        $dataHash = md5(json_encode($erpCategory));
+        $dataHash = hash('xxh128', json_encode($erpCategory));
         $existingHash = $this->syncLogResource->getEntityMapHash('category', $erpCode);
 
         if ($existingHash === $dataHash) {

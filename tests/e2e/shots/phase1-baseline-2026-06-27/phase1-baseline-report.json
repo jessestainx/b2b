@@ -1,0 +1,447 @@
+{
+  "generatedAt": "2026-06-27T03:52:27.646947Z",
+  "engine": "firefox(js_disabled)",
+  "scenarios": [
+    {
+      "route": "b2b_login",
+      "viewport": "vp-1440x900",
+      "requestedUrl": "https://awamotos.com/b2b/account/login/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/b2b_login__vp-1440x900.png",
+      "startedAt": "2026-06-27T03:52:17.279Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/b2b/account/login/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": false
+      },
+      "finishedAt": "2026-06-27T03:52:18.093Z"
+    },
+    {
+      "route": "b2b_login",
+      "viewport": "vp-390x844",
+      "requestedUrl": "https://awamotos.com/b2b/account/login/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/b2b_login__vp-390x844.png",
+      "startedAt": "2026-06-27T03:52:19.319Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/b2b/account/login/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": false
+      },
+      "finishedAt": "2026-06-27T03:52:20.178Z"
+    },
+    {
+      "route": "b2b_login",
+      "viewport": "vp-768x1024",
+      "requestedUrl": "https://awamotos.com/b2b/account/login/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/b2b_login__vp-768x1024.png",
+      "startedAt": "2026-06-27T03:52:18.312Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/b2b/account/login/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": false
+      },
+      "finishedAt": "2026-06-27T03:52:19.125Z"
+    },
+    {
+      "route": "b2b_register",
+      "viewport": "vp-1440x900",
+      "requestedUrl": "https://awamotos.com/b2b/register/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/b2b_register__vp-1440x900.png",
+      "startedAt": "2026-06-27T03:52:20.412Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/b2b/register/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": false
+      },
+      "finishedAt": "2026-06-27T03:52:21.247Z"
+    },
+    {
+      "route": "b2b_register",
+      "viewport": "vp-390x844",
+      "requestedUrl": "https://awamotos.com/b2b/register/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/b2b_register__vp-390x844.png",
+      "startedAt": "2026-06-27T03:52:22.527Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/b2b/register/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": false
+      },
+      "finishedAt": "2026-06-27T03:52:23.326Z"
+    },
+    {
+      "route": "b2b_register",
+      "viewport": "vp-768x1024",
+      "requestedUrl": "https://awamotos.com/b2b/register/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/b2b_register__vp-768x1024.png",
+      "startedAt": "2026-06-27T03:52:21.480Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/b2b/register/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": false
+      },
+      "finishedAt": "2026-06-27T03:52:22.305Z"
+    },
+    {
+      "route": "cart",
+      "viewport": "vp-1440x900",
+      "requestedUrl": "https://awamotos.com/checkout/cart/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/cart__vp-1440x900.png",
+      "startedAt": "2026-06-27T03:52:23.542Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/checkout/cart/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:24.621Z"
+    },
+    {
+      "route": "cart",
+      "viewport": "vp-390x844",
+      "requestedUrl": "https://awamotos.com/checkout/cart/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/cart__vp-390x844.png",
+      "startedAt": "2026-06-27T03:52:25.993Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/checkout/cart/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:26.896Z"
+    },
+    {
+      "route": "cart",
+      "viewport": "vp-768x1024",
+      "requestedUrl": "https://awamotos.com/checkout/cart/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/cart__vp-768x1024.png",
+      "startedAt": "2026-06-27T03:52:24.884Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/checkout/cart/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:25.785Z"
+    },
+    {
+      "route": "home",
+      "viewport": "vp-1440x900",
+      "requestedUrl": "https://awamotos.com/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/home__vp-1440x900.png",
+      "startedAt": "2026-06-27T03:52:02.543Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:03.631Z"
+    },
+    {
+      "route": "home",
+      "viewport": "vp-390x844",
+      "requestedUrl": "https://awamotos.com/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/home__vp-390x844.png",
+      "startedAt": "2026-06-27T03:52:04.822Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:05.531Z"
+    },
+    {
+      "route": "home",
+      "viewport": "vp-768x1024",
+      "requestedUrl": "https://awamotos.com/",
+      "screenshot": "shots/phase1-baseline-2026-06-27/home__vp-768x1024.png",
+      "startedAt": "2026-06-27T03:52:03.878Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:04.609Z"
+    },
+    {
+      "route": "pdp",
+      "viewport": "vp-1440x900",
+      "requestedUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "screenshot": "shots/phase1-baseline-2026-06-27/pdp__vp-1440x900.png",
+      "startedAt": "2026-06-27T03:52:08.542Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:09.311Z"
+    },
+    {
+      "route": "pdp",
+      "viewport": "vp-390x844",
+      "requestedUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "screenshot": "shots/phase1-baseline-2026-06-27/pdp__vp-390x844.png",
+      "startedAt": "2026-06-27T03:52:10.495Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:11.324Z"
+    },
+    {
+      "route": "pdp",
+      "viewport": "vp-768x1024",
+      "requestedUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "screenshot": "shots/phase1-baseline-2026-06-27/pdp__vp-768x1024.png",
+      "startedAt": "2026-06-27T03:52:09.529Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/bagageiros/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:10.284Z"
+    },
+    {
+      "route": "plp",
+      "viewport": "vp-1440x900",
+      "requestedUrl": "https://awamotos.com/retrovisores.html",
+      "screenshot": "shots/phase1-baseline-2026-06-27/plp__vp-1440x900.png",
+      "startedAt": "2026-06-27T03:52:05.733Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:06.459Z"
+    },
+    {
+      "route": "plp",
+      "viewport": "vp-390x844",
+      "requestedUrl": "https://awamotos.com/retrovisores.html",
+      "screenshot": "shots/phase1-baseline-2026-06-27/plp__vp-390x844.png",
+      "startedAt": "2026-06-27T03:52:07.622Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:08.330Z"
+    },
+    {
+      "route": "plp",
+      "viewport": "vp-768x1024",
+      "requestedUrl": "https://awamotos.com/retrovisores.html",
+      "screenshot": "shots/phase1-baseline-2026-06-27/plp__vp-768x1024.png",
+      "startedAt": "2026-06-27T03:52:06.681Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:07.392Z"
+    },
+    {
+      "route": "search_retrovisor",
+      "viewport": "vp-1440x900",
+      "requestedUrl": "https://awamotos.com/catalogsearch/result/?q=retrovisor",
+      "screenshot": "shots/phase1-baseline-2026-06-27/search_retrovisor__vp-1440x900.png",
+      "startedAt": "2026-06-27T03:52:11.639Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:13.438Z"
+    },
+    {
+      "route": "search_retrovisor",
+      "viewport": "vp-390x844",
+      "requestedUrl": "https://awamotos.com/catalogsearch/result/?q=retrovisor",
+      "screenshot": "shots/phase1-baseline-2026-06-27/search_retrovisor__vp-390x844.png",
+      "startedAt": "2026-06-27T03:52:15.413Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:17.030Z"
+    },
+    {
+      "route": "search_retrovisor",
+      "viewport": "vp-768x1024",
+      "requestedUrl": "https://awamotos.com/catalogsearch/result/?q=retrovisor",
+      "screenshot": "shots/phase1-baseline-2026-06-27/search_retrovisor__vp-768x1024.png",
+      "startedAt": "2026-06-27T03:52:13.680Z",
+      "httpStatus": 200,
+      "finalUrl": "https://awamotos.com/retrovisores.html",
+      "navError": null,
+      "consoleErrorCount": 0,
+      "httpErrorCount": 0,
+      "metrics": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": false,
+        "owlAll": 0,
+        "owlLoaded": 0,
+        "searchVisible": true
+      },
+      "finishedAt": "2026-06-27T03:52:15.201Z"
+    }
+  ]
+}

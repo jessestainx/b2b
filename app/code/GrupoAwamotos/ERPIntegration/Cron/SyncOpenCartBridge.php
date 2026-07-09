@@ -39,15 +39,17 @@ class SyncOpenCartBridge
     /** @var int[] B2B customer group IDs */
     private const B2B_GROUP_IDS = [4, 5, 6, 7];
 
-    // EAV attribute IDs (customer entity) — confirmed stable on this installation
-    private const ATTR_B2B_CNPJ          = 143;
-    private const ATTR_B2B_RAZAO_SOCIAL  = 144;
-    private const ATTR_ERP_CODE          = 198;
+    private const ATTR_CODE_B2B_CNPJ         = 'b2b_cnpj';
+    private const ATTR_CODE_B2B_RAZAO_SOCIAL = 'b2b_razao_social';
+    private const ATTR_CODE_ERP_CODE         = 'erp_code';
     private const WARNING_COOLDOWN_SECONDS = 21600;
     private const SQL_EXPORT_DIR = '/var/log';
     private const SQL_EXPORT_PREFIX = 'erp_register_clients_auto_';
     private const SQL_EXPORT_LATEST = 'erp_register_clients_pending_latest.sql';
     private const GENERATE_SQL_COMMAND = 'bin/magento erp:client:register --generate-sql';
+
+    /** @var array<string, int> Resolved customer EAV attribute_id cache, keyed by attribute_code */
+    private array $attributeIdCache = [];
 
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
@@ -55,6 +57,35 @@ class SyncOpenCartBridge
         private readonly B2BClientRegistration $b2bRegistration,
         private readonly LoggerInterface $logger
     ) {
+    }
+
+    /**
+     * Resolve a customer EAV attribute_id dynamically instead of relying on
+     * hardcoded IDs, which are not stable across installations/migrations.
+     */
+    private function getAttributeId(string $attributeCode): int
+    {
+        if (isset($this->attributeIdCache[$attributeCode])) {
+            return $this->attributeIdCache[$attributeCode];
+        }
+
+        $connection = $this->resourceConnection->getConnection();
+        $attributeId = (int) $connection->fetchOne(
+            "SELECT ea.attribute_id
+             FROM eav_attribute ea
+             INNER JOIN eav_entity_type et ON et.entity_type_id = ea.entity_type_id
+             WHERE ea.attribute_code = :attribute_code
+               AND et.entity_type_code = 'customer'",
+            ['attribute_code' => $attributeCode]
+        );
+
+        if ($attributeId <= 0) {
+            $this->logger->warning(
+                "[ERP Cron] Customer EAV attribute '{$attributeCode}' not found — related sync steps will be skipped."
+            );
+        }
+
+        return $this->attributeIdCache[$attributeCode] = $attributeId;
     }
 
     public function execute(): void
@@ -68,6 +99,7 @@ class SyncOpenCartBridge
             $confirmed = $this->syncB2bConfirmed();
             $synced = $this->syncCustomerTable();
             $preReg = $this->syncPreRegistration();
+            $preRegRemoved = $this->removeResolvedCustomersFromPreRegistration();
             $recovered = $this->recoverAfterTruncate();
             $registered = $this->registerPendingOrderClients();
             $viewPatched = $this->ensureOcOrderViewUsesConfirmedCustomers();
@@ -77,6 +109,7 @@ class SyncOpenCartBridge
                 || $confirmed > 0
                 || $synced > 0
                 || $preReg > 0
+                || $preRegRemoved > 0
                 || $recovered > 0
                 || $registered > 0
                 || $viewPatched
@@ -86,6 +119,7 @@ class SyncOpenCartBridge
                     'new_confirmations' => $confirmed,
                     'customer_table_synced' => $synced,
                     'pre_registration_synced' => $preReg,
+                    'pre_registration_removed_resolved' => $preRegRemoved,
                     'truncate_recovery' => $recovered,
                     'b2b_registrations' => $registered,
                     'oc_order_view_patched' => $viewPatched,
@@ -146,6 +180,11 @@ class SyncOpenCartBridge
         $connection = $this->resourceConnection->getConnection();
         $groupIds = implode(',', self::B2B_GROUP_IDS);
 
+        $erpCodeAttrId = $this->getAttributeId(self::ATTR_CODE_ERP_CODE);
+        if ($erpCodeAttrId <= 0) {
+            return 0;
+        }
+
         $mappedRows = $connection->fetchAll(
             "SELECT map.old_oc_customer_id AS customer_id,
                     CAST(erp_attr.value AS UNSIGNED) AS erp_code
@@ -156,7 +195,7 @@ class SyncOpenCartBridge
                  AND erp_attr.attribute_id = :attr_erp_code
              WHERE ce.group_id IN ({$groupIds})
                AND erp_attr.value REGEXP '^[0-9]+$'",
-            ['attr_erp_code' => self::ATTR_ERP_CODE]
+            ['attr_erp_code' => $erpCodeAttrId]
         );
 
         if (empty($mappedRows)) {
@@ -250,6 +289,8 @@ class SyncOpenCartBridge
     private function syncCustomerTable(): int
     {
         $connection = $this->resourceConnection->getConnection();
+        $cnpjAttrId = $this->getAttributeId(self::ATTR_CODE_B2B_CNPJ);
+        $razaoAttrId = $this->getAttributeId(self::ATTR_CODE_B2B_RAZAO_SOCIAL);
 
         $sql = "
             INSERT INTO oc_customer (
@@ -316,12 +357,13 @@ class SyncOpenCartBridge
                 email = VALUES(email),
                 telephone = VALUES(telephone),
                 custom_field = VALUES(custom_field),
-                customer_group_id = VALUES(customer_group_id)
+                customer_group_id = VALUES(customer_group_id),
+                safe = 1
         ";
 
         $stmt = $connection->query($sql, [
-            'attr_cnpj'  => self::ATTR_B2B_CNPJ,
-            'attr_razao' => self::ATTR_B2B_RAZAO_SOCIAL,
+            'attr_cnpj'  => $cnpjAttrId,
+            'attr_razao' => $razaoAttrId,
         ]);
 
         return (int) $stmt->rowCount();
@@ -340,11 +382,23 @@ class SyncOpenCartBridge
      * custom_field keys (per Sectra spec):
      *   "6" = CNPJ (digits only)   "2" = CPF (empty for PJ)
      *   "3" = IE   (empty — not collected)   "1" = Razão Social
+     *
+     * IMPORTANT — avoids re-registering customers who already exist in Sectra:
+     * Customers that already have a resolved `erp_code` (either because they were
+     * bulk-migrated from Sectra originally, or because ResolveCustomerErpCodes
+     * later matched them by CPF/CNPJ) are NOT sent here. Sending them would
+     * either (a) just be noise — Sectra already has them, no "prospect" step
+     * needed — or (b) in the worst case create a duplicate CHAVE in Sectra for
+     * a customer who was auto-mapped with a synthetic old_oc_customer_id
+     * (entity_id+200000) before their real erp_code was resolved.
      */
     private function syncPreRegistration(): int
     {
         $connection = $this->resourceConnection->getConnection();
         $groupIds   = implode(',', self::B2B_GROUP_IDS);
+        $cnpjAttrId = $this->getAttributeId(self::ATTR_CODE_B2B_CNPJ);
+        $razaoAttrId = $this->getAttributeId(self::ATTR_CODE_B2B_RAZAO_SOCIAL);
+        $erpCodeAttrId = $this->getAttributeId(self::ATTR_CODE_ERP_CODE);
 
         $sql = "
             INSERT INTO oc_pre_registration (
@@ -398,6 +452,9 @@ class SyncOpenCartBridge
                 ce.created_at AS date_added
             FROM oc_customer_id_map map
             INNER JOIN customer_entity ce ON ce.entity_id = map.magento_customer_id
+            LEFT JOIN customer_entity_varchar erp_attr
+                ON erp_attr.entity_id = ce.entity_id
+                AND erp_attr.attribute_id = :attr_erp_code
             LEFT JOIN (
                 SELECT parent_id, MIN(entity_id) AS entity_id
                 FROM customer_address_entity
@@ -406,6 +463,12 @@ class SyncOpenCartBridge
             LEFT JOIN customer_address_entity ca ON ca.entity_id = first_addr.entity_id
             WHERE map.magento_customer_id IS NOT NULL
               AND ce.group_id IN ({$groupIds})
+              AND (
+                  erp_attr.value IS NULL
+                  OR erp_attr.value = ''
+                  OR erp_attr.value = '0'
+                  OR erp_attr.value NOT REGEXP '^[0-9]+$'
+              )
             ON DUPLICATE KEY UPDATE
                 firstname    = VALUES(firstname),
                 lastname     = VALUES(lastname),
@@ -415,9 +478,48 @@ class SyncOpenCartBridge
         ";
 
         $stmt = $connection->query($sql, [
-            'attr_cnpj'  => self::ATTR_B2B_CNPJ,
-            'attr_razao' => self::ATTR_B2B_RAZAO_SOCIAL,
+            'attr_cnpj'     => $cnpjAttrId,
+            'attr_razao'    => $razaoAttrId,
+            'attr_erp_code' => $erpCodeAttrId,
         ]);
+
+        return (int) $stmt->rowCount();
+    }
+
+    /**
+     * Remove customers from oc_pre_registration once they get a resolved
+     * `erp_code` (real Sectra CHAVE) — whether from the initial bulk mapping
+     * or resolved later by ResolveCustomerErpCodes (CPF/CNPJ match).
+     *
+     * Self-heals the two duplication risks:
+     *  - Legacy customers who already exist in Sectra but were left in the
+     *    prospect queue (cosmetic noise, inflates "Importar Clientes
+     *    Prospect" counts).
+     *  - Customers auto-mapped with a synthetic old_oc_customer_id
+     *    (entity_id+200000) who are later matched to a *different* real
+     *    erp_code — these MUST be removed before Sectra ever imports them,
+     *    otherwise a duplicate CHAVE would be created for an existing client.
+     */
+    private function removeResolvedCustomersFromPreRegistration(): int
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $erpCodeAttrId = $this->getAttributeId(self::ATTR_CODE_ERP_CODE);
+
+        if ($erpCodeAttrId <= 0) {
+            return 0;
+        }
+
+        $sql = "
+            DELETE pr FROM oc_pre_registration pr
+            INNER JOIN oc_customer_id_map map ON map.old_oc_customer_id = pr.customer_id
+            INNER JOIN customer_entity_varchar erp_attr
+                ON erp_attr.entity_id = map.magento_customer_id
+                AND erp_attr.attribute_id = :attr_erp_code
+            WHERE erp_attr.value REGEXP '^[0-9]+$'
+              AND erp_attr.value != '0'
+        ";
+
+        $stmt = $connection->query($sql, ['attr_erp_code' => $erpCodeAttrId]);
 
         return (int) $stmt->rowCount();
     }
@@ -494,7 +596,7 @@ class SyncOpenCartBridge
                 . implode(', ', $missing)
                 . ' — execute "' . $cliCommand . '" or enable write connection';
 
-            $payloadHash = md5(implode(',', $missing));
+            $payloadHash = hash('xxh128', implode(',', $missing));
             if ($this->shouldLogWarningWithCooldown('b2b_missing_clients', $payloadHash)) {
                 $context = [
                     'cli_command' => $cliCommand,
@@ -710,7 +812,7 @@ class SyncOpenCartBridge
         $basePath = defined('BP') ? BP : sys_get_temp_dir();
         $lockDir = rtrim($basePath, '/') . '/var/locks';
 
-        if (!is_dir($lockDir) && !@mkdir($lockDir, 0777, true) && !is_dir($lockDir)) {
+        if (!is_dir($lockDir) && !@mkdir($lockDir, 0775, true) && !is_dir($lockDir)) {
             return true;
         }
 

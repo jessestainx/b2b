@@ -15,7 +15,8 @@
     flex: 1;
 }
 
-.acombinar-message h4 {
+/* Heading semântico h2 (a11y: h1 → h2), visual compacto igual ao antigo h4 */
+.acombinar-message .acombinar-heading {
     margin: 0 0 8px;
     font-size: 1rem;
     font-weight: 600;

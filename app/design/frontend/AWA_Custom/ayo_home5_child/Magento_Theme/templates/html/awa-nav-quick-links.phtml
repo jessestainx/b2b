@@ -10,15 +10,30 @@ declare(strict_types=1);
 
 $escaper = $block->getEscaper() ?? $this;
 
+$normalizeHtmlSuffixUrl = static function (string $url): string {
+    return preg_replace('/\.html\/(?=($|[?#]))/i', '.html', $url) ?? $url;
+};
+
+$directUrl = static function (string $path) use ($block, $normalizeHtmlSuffixUrl): string {
+    $url = $block->getUrl('', ['_direct' => ltrim($path, '/'), '_nosid' => true]);
+
+    return $normalizeHtmlSuffixUrl($url);
+};
+
+// CMS pages (ex.: lancamentos) resolvem em /slug sem sufixo .html nesta loja.
+$cmsPageUrl = static function (string $path) use ($block): string {
+    return rtrim((string) $block->getBaseUrl(), '/') . '/' . ltrim($path, '/');
+};
+
 /** @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $collectionFactory */
 $collectionFactory = $this->helper(\Magento\Catalog\Helper\Data::class);
 
 // Categorias de destaque hardcoded (IDs das mais vendidas)
 // Fallback para nomes + URLs se a collection não estiver disponível.
 $quickLinks = [
-    ['name' => 'Nossas Marcas', 'url' => (string) $block->getUrl('nossas-marcas')],
-    ['name' => 'Lançamentos',   'url' => (string) $block->getUrl('ofertas.html')],
-    ['name' => 'Catálogo',      'url' => (string) $block->getUrl('catalogo')],
+    ['name' => 'Nossas Marcas', 'url' => $directUrl('nossas-marcas')],
+    ['name' => 'Lançamentos',   'url' => $cmsPageUrl('lancamentos')],
+    ['name' => 'Catálogo',      'url' => $directUrl('catalogo')],
 ];
 ?>
 <div class="awa-nav-quick-links" data-awa-nav-quick="true" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Links rápidos de categorias')) ?>">

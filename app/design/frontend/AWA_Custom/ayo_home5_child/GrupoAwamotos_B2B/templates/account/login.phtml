@@ -1,0 +1,143 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Login B2B — override tema filho (compacto, CTA acima da dobra).
+ *
+ * @var \GrupoAwamotos\B2B\Block\Account\Login $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<div id="b2b-login-shell" class="b2b-login-page" aria-labelledby="b2b-login-heading">
+    <?= $block->getChildHtml('auth_logo') ?>
+
+    <div class="b2b-login-card">
+        <header class="b2b-auth-card-head">
+            <h1 id="b2b-login-heading" class="b2b-login-title"><?= $escaper->escapeHtml(__('Acesse sua conta')) ?></h1>
+            <p class="b2b-login-subtitle">
+                <?= $escaper->escapeHtml(__('Portal exclusivo para empresas e revendas.')) ?>
+            </p>
+        </header>
+
+        <div class="b2b-login-messages" role="status" aria-live="polite" aria-atomic="true">
+            <?= $block->getChildHtml('b2b_login_messages') ?>
+        </div>
+
+        <form class="b2b-login-form"
+              action="<?= $escaper->escapeUrl($block->getPostActionUrl()) ?>"
+              method="post"
+              id="b2b-login-form"
+              novalidate
+              data-mage-init='{"validation":{}}'>
+            <?= $block->getBlockHtml('formkey') ?>
+
+            <div class="b2b-field">
+                <label class="b2b-field-label" for="b2b-email"><?= $escaper->escapeHtml(__('E-mail ou CNPJ')) ?></label>
+                <input type="text"
+                       name="login[username]"
+                       id="b2b-email"
+                       autocomplete="username"
+                       autocapitalize="none"
+                       spellcheck="false"
+                       inputmode="email"
+                       required
+                       aria-required="true"
+                       data-validate="{required:true}"
+                       placeholder="<?= $escaper->escapeHtmlAttr(__('seu@email.com ou 00.000.000/0000-00')) ?>"
+                       aria-describedby="b2b-login-user-note" />
+                <p id="b2b-login-user-note" class="b2b-field-note">
+                    <?= $escaper->escapeHtml(__('Use o e-mail cadastrado ou o CNPJ da empresa.')) ?>
+                </p>
+            </div>
+
+            <div class="b2b-field b2b-field-password">
+                <label class="b2b-field-label" for="b2b-pass"><?= $escaper->escapeHtml(__('Senha')) ?></label>
+                <div class="b2b-password-wrap">
+                    <input type="password"
+                           name="login[password]"
+                           id="b2b-pass"
+                           autocomplete="current-password"
+                           required
+                           aria-required="true"
+                           data-validate="{required:true}"
+                           placeholder="<?= $escaper->escapeHtmlAttr(__('Sua senha')) ?>" />
+                    <button type="button"
+                            class="b2b-password-toggle"
+                            data-password-toggle
+                            data-target="#b2b-pass"
+                            aria-controls="b2b-pass"
+                            aria-pressed="false"
+                            aria-label="<?= $escaper->escapeHtmlAttr(__('Mostrar senha')) ?>">
+                        <span class="b2b-sr-only" data-password-toggle-label aria-hidden="true"><?= $escaper->escapeHtml(__('Mostrar')) ?></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="b2b-login-forgot">
+                <span class="b2b-login-forgot__text" id="b2b-login-forgot-label"><?= $escaper->escapeHtml(__('Esqueceu sua senha?')) ?></span>
+                <a class="b2b-login-forgot__link"
+                   href="<?= $escaper->escapeUrl($block->getForgotPasswordUrl()) ?>"
+                   aria-labelledby="b2b-login-forgot-label">
+                    <?= $escaper->escapeHtml(__('Recuperar')) ?>
+                </a>
+            </div>
+
+            <div class="b2b-login-actions">
+                <button type="submit" class="b2b-btn-entrar">
+                    <span><?= $escaper->escapeHtml(__('Entrar')) ?></span>
+                </button>
+            </div>
+        </form>
+
+        <div class="b2b-login-divider" role="separator" aria-hidden="true">
+            <span><?= $escaper->escapeHtml(__('ou')) ?></span>
+        </div>
+
+        <nav class="b2b-login-ctas" aria-label="<?= $escaper->escapeHtmlAttr(__('Outras opções de acesso')) ?>">
+            <a href="<?= $escaper->escapeUrl($block->getB2BRegisterUrl()) ?>" class="b2b-btn-register">
+                <?= $escaper->escapeHtml(__('Criar conta B2B')) ?>
+            </a>
+
+            <a href="<?= $escaper->escapeUrl($block->getClaimAccountUrl()) ?>" class="b2b-btn-claim">
+                <?= $escaper->escapeHtml(__('Ativar conta existente')) ?>
+            </a>
+        </nav>
+    </div>
+
+    <footer class="b2b-login-footer">
+        <a href="https://wa.me/5516997367588?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20para%20acessar%20minha%20conta%20B2B"
+           class="b2b-login-whatsapp"
+           data-b2b-contact-track="login_help_whatsapp"
+           data-b2b-contact-channel="whatsapp"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="<?= $escaper->escapeHtmlAttr(__('Precisa de ajuda? Falar no WhatsApp')) ?>">
+            <?= $escaper->escapeHtml(__('Precisa de ajuda?')) ?> <span class="b2b-login-whatsapp__brand"><?= $escaper->escapeHtml(__('WhatsApp')) ?></span>
+        </a>
+    </footer>
+
+    <script type="text/x-magento-init">
+    {
+        "#b2b-login-shell": {
+            "GrupoAwamotos_B2B/js/contact-tracker": {
+                "eventName": "Contact",
+                "storagePrefix": "b2b_login_contact_fired_",
+                "funnelStage": "consideration",
+                "touchpoint": "b2b_login"
+            }
+        },
+        "#b2b-login-form": {
+            "GrupoAwamotos_B2B/js/auth-form": {
+                "loadingLabel": "<?= $escaper->escapeJs(__('Entrando...')) ?>",
+                "usernameSelector": "#b2b-email",
+                "cnpjOrEmailMaskSelector": "#b2b-email",
+                "passwordToggleSelector": "[data-password-toggle]",
+                "passwordShowText": "<?= $escaper->escapeJs(__('Mostrar')) ?>",
+                "passwordHideText": "<?= $escaper->escapeJs(__('Ocultar')) ?>",
+                "passwordShowAriaLabel": "<?= $escaper->escapeJs(__('Mostrar senha')) ?>",
+                "passwordHideAriaLabel": "<?= $escaper->escapeJs(__('Ocultar senha')) ?>"
+            }
+        }
+    }
+    </script>
+</div>

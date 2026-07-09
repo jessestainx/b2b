@@ -15,13 +15,17 @@ $__skipAuditBundle = in_array($__action, [
     'checkout_index_index',
     'onepagecheckout_index_index',
     'cms_index_index',
-], true);
+    'catalog_product_view',
+    'catalog_category_view',
+    'catalogsearch_result_index',
+], true)
+    || (bool) $block->getData('awa_skip_audit_bundle');
 if ($__skipAuditBundle) {
     return;
 }
 $cssUrl = $block->getViewFileUrl('css/awa-audit-bundle.min.css');
 ?>
-<link rel="preload" href="<?= $block->escapeUrl($cssUrl) ?>?v=3" as="style"/>
+<?php /* Sem rel=preload: media=print+onload não consome o preload a tempo (warning Chrome no dashboard/conta). */ ?>
 <link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=3" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=3"/></noscript>
 <?php
@@ -31,8 +35,5 @@ $cssUrl = $block->getViewFileUrl('css/awa-audit-bundle.min.css');
  */
 $polishUrl = $block->getViewFileUrl('css/awa-visual-polish-r2.css');
 ?>
-<link rel="preload" href="<?= $block->escapeUrl($polishUrl) ?>?v=2" as="style"/>
 <link rel="stylesheet" href="<?= $block->escapeUrl($polishUrl) ?>?v=2" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($polishUrl) ?>?v=2"/></noscript>
-/* Header refine terminal — migrado para _awa-header-refine-terminal.less (import 43.02 em _extend.less).
- * Agora faz parte de styles-l.css (blocking). Request async removido. */

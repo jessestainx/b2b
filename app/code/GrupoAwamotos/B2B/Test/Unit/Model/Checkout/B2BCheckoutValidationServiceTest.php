@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Model\Checkout;
 
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Api\Data\PaymentInterface;
+use Magento\Quote\Model\Quote;
 use PHPUnit\Framework\TestCase;
 use GrupoAwamotos\B2B\Helper\Config as B2BConfig;
 use Psr\Log\LoggerInterface;
@@ -20,14 +20,17 @@ class B2BCheckoutValidationServiceTest extends TestCase
     private B2BCheckoutValidationService $validationService;
     private B2BConfig $configMock;
     private LoggerInterface $loggerMock;
-    private CartInterface $quoteMock;
+    private Quote $quoteMock;
     private PaymentInterface $paymentMock;
 
     protected function setUp(): void
     {
         $this->configMock = $this->createMock(B2BConfig::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
-        $this->quoteMock = $this->createMock(CartInterface::class);
+        // Mocked against the concrete Quote model (not CartInterface) because
+        // getData() is a DataObject method, not part of the API interface,
+        // yet it's how the real object is always accessed in production.
+        $this->quoteMock = $this->createMock(Quote::class);
         $this->paymentMock = $this->createMock(PaymentInterface::class);
 
         $this->validationService = new B2BCheckoutValidationService(

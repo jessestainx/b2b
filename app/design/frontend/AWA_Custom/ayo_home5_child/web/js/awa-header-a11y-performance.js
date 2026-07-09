@@ -689,7 +689,6 @@
 
             activePanel.classList.add('is-open', 'has-results');
             activePanel.removeAttribute('hidden');
-            activePanel.setAttribute('aria-hidden', 'false');
             if (form) {
                 form.classList.add('is-open', 'has-results');
             }
@@ -700,26 +699,30 @@
         }
 
         function syncExpanded() {
+            let activePanel = getActivePanel();
             // If Mirasvit has set _active, trust it as the source of truth for visibility.
-            let isMirasvitActive = panel.classList.contains('_active');
-            let hasItems = isMirasvitActive || getSuggestionCount() > 0;
+            let isMirasvitActive = activePanel.classList.contains('_active');
+            let hasItems = isMirasvitActive || getSuggestionCount() > 0 ||
+                normalizeText(activePanel.textContent || '').length > 0;
+            let compatOpen = activePanel.classList.contains('is-open') ||
+                activePanel.classList.contains('has-results');
             let focused = isSearchFocused();
-            let expanded = hasItems && focused && (promotePanelIfNeeded() || isMirasvitActive || panel.classList.contains('is-open'));
+            let expanded = focused && (
+                compatOpen ||
+                (hasItems && (promotePanelIfNeeded() || isMirasvitActive))
+            );
             let query = normalizeText(input.value || '');
             input.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-            panel.setAttribute('aria-hidden', expanded ? 'false' : 'true');
-            if (expanded) {
-                panel.removeAttribute('hidden');
-            } else if (!panel.hasAttribute('hidden')) {
-                panel.setAttribute('hidden', '');
-            }
+            // ARIA visibility (aria-hidden/hidden): owned by awa-search-autocomplete-compat.js
             if (status) {
+                var nextStatusText = '';
                 if (expanded) {
-                    status.textContent = String(getSuggestionCount()) + ' sugestões disponíveis';
+                    nextStatusText = String(getSuggestionCount()) + ' sugestões disponíveis';
                 } else if (query.length >= 2) {
-                    status.textContent = 'Nenhuma sugestão encontrada';
-                } else {
-                    status.textContent = '';
+                    nextStatusText = 'Nenhuma sugestão encontrada';
+                }
+                if (status.textContent !== nextStatusText) {
+                    status.textContent = nextStatusText;
                 }
             }
             root.setAttribute('aria-busy', 'false');
@@ -730,7 +733,9 @@
             root.setAttribute('aria-busy', 'true');
             root.classList.add('is-searching');
             if (status) {
-                status.textContent = 'Buscando sugestões...';
+                if (status.textContent !== 'Buscando sugestões...') {
+                    status.textContent = 'Buscando sugestões...';
+                }
             }
             if (busyTimer) {
                 window.clearTimeout(busyTimer);
@@ -770,8 +775,12 @@
         addListener(document, 'click', function (event) {
             if (!root.contains(event.target)) {
                 input.setAttribute('aria-expanded', 'false');
-                panel.setAttribute('aria-hidden', 'true');
-                panel.setAttribute('hidden', '');
+                if (panel.getAttribute('aria-hidden') !== 'true') {
+                    panel.setAttribute('aria-hidden', 'true');
+                }
+                if (!panel.hasAttribute('hidden')) {
+                    panel.setAttribute('hidden', '');
+                }
                 panel.classList.remove('is-open', 'has-results');
                 if (form) {
                     form.classList.remove('is-open', 'has-results');
@@ -785,8 +794,12 @@
         addListener(document, 'keyup', function (event) {
             if (event.key === 'Escape') {
                 input.setAttribute('aria-expanded', 'false');
-                panel.setAttribute('aria-hidden', 'true');
-                panel.setAttribute('hidden', '');
+                if (panel.getAttribute('aria-hidden') !== 'true') {
+                    panel.setAttribute('aria-hidden', 'true');
+                }
+                if (!panel.hasAttribute('hidden')) {
+                    panel.setAttribute('hidden', '');
+                }
                 panel.classList.remove('is-open', 'has-results');
                 if (form) {
                     form.classList.remove('is-open', 'has-results');
@@ -800,12 +813,32 @@
         }, { capture: true });
 
         if (window.MutationObserver) {
-            let observer = new MutationObserver(function () {
+            let observer = new MutationObserver(function (mutations) {
+                // BUG-a1f9f3: ignorar attribute mutations em filhos do painel
+                // (ex.: Mirasvit alternando class em <li>) — só reagir a childList
+                // ou atributos do próprio painel.
+                let shouldSync = false;
+                let i;
+                for (i = 0; i < mutations.length; i += 1) {
+                    if (mutations[i].type === 'childList') {
+                        shouldSync = true;
+                        break;
+                    }
+                    if (mutations[i].type === 'attributes' && mutations[i].target === panel && mutations[i].attributeName === 'class') {
+                        shouldSync = true;
+                        break;
+                    }
+                }
+                if (!shouldSync) {
+                    return;
+                }
                 raf(syncExpanded);
             });
             observer.observe(panel, {
                 attributes: true,
-                attributeFilter: ['class', 'style', 'hidden', 'aria-hidden'],
+                // BUG-a1f9f3 v7: aria-hidden/hidden/style aqui realimentavam syncExpanded
+                // quando awa-search-autocomplete-compat.js e minicart-ui-v2 escreviam ARIA.
+                attributeFilter: ['class'],
                 childList: true,
                 subtree: true
             });
@@ -1482,7 +1515,7 @@
                 desktopHeaderParityObserverTarget = headerScope;
                 desktopHeaderParityObserverOptions = {
                     attributes: true,
-                    attributeFilter: ['class', 'style', 'aria-expanded', 'aria-hidden'],
+                    attributeFilter: ['class'],
                     childList: true,
                     subtree: true
                 };

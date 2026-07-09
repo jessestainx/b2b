@@ -7,6 +7,9 @@
  */
 import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
+import { resolveBaseUrl } from './helpers/resolve-base-url';
+
+const resolvedBaseUrl = resolveBaseUrl('pw-functional');
 
 export default defineConfig({
   testDir: path.join(__dirname, 'specs/functional'),
@@ -23,7 +26,7 @@ export default defineConfig({
     ['json', { outputFile: path.join(__dirname, 'reports/functional-results.json') }],
   ],
   use: {
-    baseURL: 'https://awamotos.com',
+    baseURL: resolvedBaseUrl,
     ignoreHTTPSErrors: true,
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',

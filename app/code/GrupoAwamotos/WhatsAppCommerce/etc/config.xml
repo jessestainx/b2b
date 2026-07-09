@@ -14,6 +14,12 @@
                 <order_shipped>1</order_shipped>
                 <order_refunded>0</order_refunded>
             </notifications>
+            <app_builder_offload>
+                <enabled>0</enabled>
+                <webhook_url/>
+                <shared_secret/>
+                <timeout_seconds>3</timeout_seconds>
+            </app_builder_offload>
                     <b2b>
                 <alerts_enabled>0</alerts_enabled>
                 <stock_alert_enabled>1</stock_alert_enabled>

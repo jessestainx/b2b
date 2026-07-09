@@ -35,30 +35,21 @@
 	</div>
 	<a href="<?php echo $block->getUrl('testimonials');?>" class="viewall"><?php echo __('View All');?></a>
 </div>
-<script type="text/javascript">
-	require([
-		'jquery',
-		'mage/mage',
-		'rokanthemes/owl'
-	], function ($) {
-		'use strict';
-	jQuery(document).ready(function ($) {
-		$('.testimo-slider .wrap-item').owlCarousel({
-			lazyLoad:true,
-			items:1,
-			itemsCustom: [ 
-			[0, 1], 
-			[480, 1], 
-			[768, 1], 
-			[992, 1], 
-			[1200, 1] 
-			],
-			pagination: true,
-			navigation: false,
-			navigationText:['<i class="fa fa-angle-left"></i>','<i class="fa fa-angle-right"></i>']
-		});
-	});
-});
+<script type="text/x-magento-init">
+{
+	".testimo-slider .wrap-item": {
+		"awaLegacySwiper": {
+			"items": 1,
+			"itemsDesktop": [1200, 1],
+			"itemsDesktopSmall": [992, 1],
+			"itemsTablet": [768, 1],
+			"itemsMobile": [480, 1],
+			"navigation": false,
+			"pagination": true,
+			"label": "<?php echo $block->escapeJs(__('Depoimentos')); ?>"
+		}
+	}
+}
 </script>
 <?php else :?>
 <div class="box-bottom-home2 box-testimo">

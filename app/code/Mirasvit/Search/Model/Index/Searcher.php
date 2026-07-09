@@ -153,7 +153,7 @@ class Searcher
         $requestBuilder = $this->requestBuilderFactory->create();
         $requestBuilder->bind('search_term', $queryText);
 
-        $requestBuilder->bindDimension('scope', $this->scopeResolver->getScope());
+        $scope = $this->scopeResolver->getScope();        $requestBuilder->bindDimension('scope', $scope);
 
         if (!empty($args) && $this->appState->getAreaCode() === 'graphql') {
             $requestBuilder->setRequestName('quick_search_container');

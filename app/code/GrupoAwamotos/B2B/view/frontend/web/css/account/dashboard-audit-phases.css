@@ -1,0 +1,3433 @@
+/**
+ * B2B Dashboard — Audit Phases CSS (2026-06-15)
+ * Part 1 of 2 — split from dashboard-impeccable-audit.css
+ * Contains: anti-pattern fixes, audit phases P0/P1/P2, harden, a11y, responsive.
+ * Loaded via requestIdleCallback (low priority), before audit-terminal.css.
+ */
+
+/**
+ * B2B Dashboard — Impeccable terminal bundle (2026-05-28 → 2026-05-30)
+ * Carrega após awa-b2b-dashboard-late.css (PHTML b2b-dashboard-css.phtml).
+ * Consolida: audit + optimize + polish + harden + modernize (v1–v6).
+ * Escopo: body#html-body.account.b2b-account-dashboard
+ */
+
+/* ── Section titles: sem faixa lateral (Impeccable ban) ─────────────── */
+body.b2b-account-dashboard :is(
+    .section-header h2,
+    .section-header h3,
+    .b2b-quick-actions > h2,
+    .b2b-quick-actions > h3,
+    .b2b-section > h2,
+    .b2b-section > h3,
+    .categories-section > h2,
+    .categories-section > h3,
+    .onboarding-header h2,
+    .onboarding-header h3
+) {
+    margin: 0;
+    padding-left: 0;
+    border-left: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--awa-text-primary, #333333);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Stack surfaces (SSOT card — §123/§124 terminal refines) ───────── */
+body.b2b-account-dashboard .b2b-dashboard-header {
+    margin: 0;
+    padding: var(--awa-acct-section-pad, clamp(14px, 2vw, 18px));
+    border: 1px solid var(--awa-border, #e8e8e8);
+    border-radius: var(--awa-acct-panel-radius, 4px);
+    background: var(--awa-bg-surface, #ffffff);
+    box-shadow: none;
+}
+
+body.b2b-account-dashboard :is(
+    .b2b-onboarding-section,
+    .b2b-quick-actions,
+    .b2b-section,
+    .b2b-suggestions-section
+) {
+    margin: 0;
+    padding: var(--awa-acct-section-pad, clamp(14px, 2vw, 18px));
+    border: 1px solid var(--awa-border, #e8e8e8);
+    border-radius: var(--awa-acct-panel-radius, 4px);
+    background: var(--awa-bg-surface, #ffffff);
+    box-shadow: none;
+}
+
+body.b2b-account-dashboard .b2b-dashboard > :is(
+    .b2b-onboarding-section,
+    .b2b-dashboard-primary,
+    .b2b-summary-cards,
+    .b2b-dashboard-activity,
+    .b2b-dashboard-secondary,
+    .b2b-dashboard-details
+) {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+body.b2b-account-dashboard .summary-card {
+    border: 1px solid var(--awa-border, #e8e8e8);
+    box-shadow: none;
+    background: var(--awa-bg-surface, #ffffff);
+    border-radius: var(--awa-acct-panel-radius, 4px);
+}
+
+body.b2b-account-dashboard .b2b-dashboard-details {
+    border: 1px solid var(--awa-border, #e8e8e8);
+    border-radius: var(--awa-acct-panel-radius, 4px);
+    background: var(--awa-bg-surface, #ffffff);
+    overflow: hidden;
+}
+
+body.b2b-account-dashboard .b2b-dashboard-details .attendant-card {
+    border: 0;
+    box-shadow: none;
+    background: var(--awa-b2b-bg-soft, #f8fafc);
+    border-radius: var(--awa-acct-panel-radius, 4px);
+}
+
+body.b2b-account-dashboard .b2b-onboarding-section .checklist-item {
+    border: 0;
+    background: color-mix(in srgb, var(--awa-border, #e5e7eb) 35%, transparent);
+}
+
+/* ── Sugestões: sem faixa lateral ─────────────────────────────────── */
+body.b2b-account-dashboard :is(
+    .suggestion-quote,
+    .suggestion-quickorder,
+    .suggestion-attendant,
+    .suggestion-shoppinglist,
+    .suggestion-catalog
+) {
+    border-left-width: 1px;
+    border-left-style: solid;
+}
+
+/* ── Sidebar nav: fundo tintado, sem stripe ───────────────────────── */
+body.b2b-account-dashboard .block-collapsible-nav :is(.item a, .nav.item > a, .nav.item > strong) {
+    border-left: 0;
+    border-inline-start: 0;
+}
+
+/* ── Progress bars: sem animação de layout (width) ──────────────────── */
+body.b2b-account-dashboard :is(.progress-bar, .credit-bar) {
+    position: relative;
+    overflow: hidden;
+}
+
+body.b2b-account-dashboard :is(.progress-fill, .credit-bar-fill) {
+    width: 100% !important;
+    transform: scaleX(calc(var(--b2b-bar-width, 0) / 100)) !important;
+    transform-origin: left center !important;
+    transition: transform 0.3s ease-out !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    body.b2b-account-dashboard :is(.progress-fill, .credit-bar-fill)::after {
+        animation-duration: 2.5s;
+    }
+}
+
+/* ── Contraste: atendente ───────────────────────────────────────────── */
+body.b2b-account-dashboard .attendant-name {
+    color: var(--awa-text-primary, #333333);
+    background: transparent;
+}
+
+body.b2b-account-dashboard .attendant-department {
+    color: var(--awa-text-secondary, #666666);
+    background: transparent;
+}
+
+body.b2b-account-dashboard .attendant-info {
+    background: transparent;
+}
+
+/* ── Performance: sem animações de entrada/shine no painel ──────────── */
+body.b2b-account-dashboard :is(
+    .b2b-dashboard-header,
+    .b2b-company-info,
+    .b2b-summary-cards,
+    .b2b-onboarding-section,
+    .b2b-suggestions-section,
+    .b2b-quick-actions,
+    .b2b-section,
+    .b2b-rexis-section,
+    .erp-suggestions-section,
+    .erp-reorder-section,
+    .categories-section,
+    .summary-card
+) {
+    animation: none;
+}
+
+body.b2b-account-dashboard :is(.progress-fill, .credit-bar-fill)::after {
+    animation: none;
+    content: none;
+}
+
+/* ── Performance: paint abaixo da dobra adiado ─────────────────────── */
+body.b2b-account-dashboard :is(
+    .b2b-dashboard-activity,
+    .b2b-dashboard-secondary,
+    .b2b-dashboard-details
+) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 320px;
+}
+
+/* .b2b-summary-cards removida de content-visibility:auto — fica perto do
+   topo da página (posição 4-5 no fluxo), acima ou na dobra em 1080p.
+   content-visibility:auto em conteúdo acima da dobra causa CLS
+   no primeiro paint porque o browser reserva 180px e depois expande. */
+
+@media (prefers-reduced-motion: reduce) {
+    body.b2b-account-dashboard .b2b-dashboard,
+    body.b2b-account-dashboard .b2b-dashboard * {
+        animation: none;
+        transition-duration: 0.01ms;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § OPTIMIZE — Substitui transition:all por propriedades explícitas
+   (2026-05-29)
+
+   "transition: all" força o browser a observar TODAS as propriedades
+   animáveis durante cada repaint — incluindo width, height, padding,
+   margin — mesmo quando o :hover só muda 2-3 delas.
+
+   Inventário completo: dashboard.css ×11, awa-b2b-dashboard-late.css ×5,
+   dashboard-visual-upgrade.css ×1.
+
+   Curva: ease-out (start rápido, desaceleração suave) conforme
+   design law. Material Design ease-in-out (0.4,0,0.2,1) substituído.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* summary-card — hover: transform, box-shadow, border-color */
+body#html-body.account.b2b-account-dashboard .summary-card {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out !important;
+}
+
+/* action-item — hover: background-color, border-color, transform, box-shadow
+   Cobre: dashboard.css .action-item + late.css .actions-grid .action-item + > a */
+body#html-body.account.b2b-account-dashboard .action-item,
+body#html-body.account.b2b-account-dashboard .actions-grid .action-item,
+body#html-body.account.b2b-account-dashboard .actions-grid > a {
+    transition: background-color 0.18s ease-out, border-color 0.18s ease-out, transform 0.18s ease-out, box-shadow 0.18s ease-out !important;
+}
+
+/* action.primary (botão CTA vermelho) — hover: background, transform, box-shadow
+   Nota: background-image (gradiente) não é animável de forma GPU; snaps são OK. */
+body#html-body.account.b2b-account-dashboard .action.primary {
+    transition: background-color 0.18s ease-out, transform 0.18s ease-out, box-shadow 0.18s ease-out !important;
+}
+
+/* suggestion-card — hover: border-color, box-shadow, transform */
+body#html-body.account.b2b-account-dashboard .suggestion-card {
+    transition: border-color 0.18s ease-out, box-shadow 0.18s ease-out, transform 0.18s ease-out !important;
+}
+
+/* suggestion-action — hover: background-color, color */
+body#html-body.account.b2b-account-dashboard .suggestion-action {
+    transition: background-color 0.15s ease-out, color 0.15s ease-out !important;
+}
+
+/* category-chip — hover: background-color, border-color, color, transform, box-shadow
+   Cobre: dashboard.css + late.css + visual-upgrade.css */
+body#html-body.account.b2b-account-dashboard .category-chip {
+    transition: background-color 0.18s ease-out, border-color 0.18s ease-out, color 0.18s ease-out, transform 0.18s ease-out, box-shadow 0.18s ease-out !important;
+}
+
+/* checklist-item — state: background-color, border-color */
+body#html-body.account.b2b-account-dashboard .checklist-item {
+    transition: background-color 0.18s ease-out, border-color 0.18s ease-out !important;
+}
+
+/* contact-link (atendente) — hover: border-color, color, background-color */
+body#html-body.account.b2b-account-dashboard .contact-link {
+    transition: border-color 0.18s ease-out, color 0.18s ease-out, background-color 0.18s ease-out !important;
+}
+
+/* erp-product-card — hover: border-color, box-shadow, transform */
+body#html-body.account.b2b-account-dashboard .erp-product-card {
+    transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out, transform 0.2s ease-out !important;
+}
+
+/* erp-pending-action — hover: background-color, transform, box-shadow */
+body#html-body.account.b2b-account-dashboard .erp-pending-action {
+    transition: background-color 0.18s ease-out, transform 0.18s ease-out, box-shadow 0.18s ease-out !important;
+}
+
+/* view-all link (seção headers) — hover: color, text-decoration */
+body#html-body.account.b2b-account-dashboard .view-all {
+    transition: color 0.15s ease-out !important;
+}
+
+/* Garante que prefers-reduced-motion sempre sobrescreve */
+@media (prefers-reduced-motion: reduce) {
+    body#html-body.account.b2b-account-dashboard :is(
+        .summary-card,
+        .action-item,
+        .action.primary,
+        .suggestion-card,
+        .suggestion-action,
+        .category-chip,
+        .checklist-item,
+        .contact-link,
+        .erp-product-card,
+        .erp-pending-action,
+        .view-all,
+        .actions-grid > a
+    ) {
+        transition: none !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § POLISH — Passe final de qualidade (2026-05-29)
+
+   Checklist executado:
+   [P1-a11y] .b2b-group-badge.pending — branco em âmbar (#f59e0b) = 2.11:1
+             Corrigido: texto escuro em âmbar claro (#fef3c7) → 6.3:1 WCAG AA
+   [P1-a11y] .action.primary + .erp-pending-action focus ring a 28% opacidade
+             (dashboard.css §517-526) — inadequado para WCAG 2.2 §2.4.11.
+             Corrigido: 100% --awa-primary, consistente com visual-upgrade.css
+   [P2-ux]   :active ausente em cards interativos — só .action.primary tinha.
+             Adicionado: snap-back (scale/translateY) com transition-duration 80ms
+   [P3-typo] late.css §1408 força font-size: 11px !important em todos os badges.
+             11px abaixo do mínimo de legibilidade para labels; corrigido para 12px.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────
+   [P1-a11y] Badge "pendente" — contraste WCAG AA (min. 4.5:1)
+
+   Problema:  .b2b-group-badge.pending usa background: #f59e0b (âmbar) +
+              color: #fff → razão de contraste = 2.11:1. FALHA.
+   Solução:   Padrão light-bg + dark-text, idêntico ao .status-badge.pending
+              já em uso na mesma página (late.css §20).
+   Resultado: #92400e em #fef3c7 → contraste 6.30:1. APROVADO AA.
+   ───────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .b2b-group-badge.pending {
+    background: var(--awa-warning-bg, #fef3c7) !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-group-badge.pending .pending-label {
+    opacity: 0.85 !important;
+    color: inherit !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   [P1-a11y] Focus rings completos em todos os elementos interativos
+
+   dashboard.css §517-526 usa 28% de opacidade no outline de
+   .action.primary e .erp-pending-action — invisível em backgrounds
+   claros. dashboard-visual-upgrade.css já corrige os outros 7
+   elementos com full-opacity; estes dois ficaram para trás.
+   ───────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .action.primary:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+    border-radius: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-pending-action:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+    border-radius: 4px !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   [P2-ux] Estados :active — pressão imediata em todos os cards
+
+   Product register: "Every interactive component has: default,
+   hover, focus, active, disabled, loading, error."
+   dashboard.css só define .action.primary:active.
+   transition-duration: 0.08s no :active garante snap rápido; o
+   elemento retorna ao hover state quando o dedo/botão solta.
+   ───────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .action-item:active,
+body#html-body.account.b2b-account-dashboard .actions-grid > a:active,
+body#html-body.account.b2b-account-dashboard .suggestion-card:active,
+body#html-body.account.b2b-account-dashboard .category-chip:active,
+body#html-body.account.b2b-account-dashboard .erp-product-card:active,
+body#html-body.account.b2b-account-dashboard .erp-pending-action:active {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   [P3-typo] Badges — tamanho mínimo de legibilidade
+
+   late.css §1408 sobrescreve font-size para 11px !important em
+   .b2b-group-badge, .b2b-rfm-badge e .b2b-price-list-badge.
+   11px é abaixo do floor aceitável para UI labels.
+   12px é o mínimo razoável para texto secundário.
+   ───────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard :is(
+    .b2b-group-badge,
+    .b2b-rfm-badge,
+    .b2b-price-list-badge
+) {
+    font-size: 12px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Shell fixes (merged from awa-b2b-dashboard-shell-fix-2026-05-27.css)
+   Decoracao dashboard: F2 gray blocks, F3 pagination, F4 orders table
+   Layout grid: _awa-account-layout.less (sync)
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .page-main {
+    max-width: var(--awa-page-dash, 1280px) !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: var(--awa-page-pad, 16px) !important;
+    padding-top: 10px !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 767px) {
+    body#html-body.account.b2b-account-dashboard .page-main {
+        padding-inline: var(--awa-page-pad-tablet, 16px) !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .block.block-collapsible-nav {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+    }
+}
+
+body#html-body.account.b2b-account-dashboard .block.block-collapsible-nav,
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav {
+    overflow: visible !important;
+    max-height: none !important;
+    padding: 12px 8px !important;
+    border-radius: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .item a,
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .item > a {
+    min-height: 44px !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    border-left: 0 !important;
+    border-inline-start: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .item.current > a,
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .item > a.current {
+    border-left: 0 !important;
+    border-inline-start: 0 !important;
+    background: rgba(183, 51, 55, 0.08) !important;
+    border-radius: 4px !important;
+    color: var(--awa-primary, #b73337) !important;
+    font-weight: 600 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard {
+    gap: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-section.orders-section {
+    padding-top: 14px !important;
+    padding-inline: var(--awa-acct-section-pad, clamp(14px, 2vw, 18px)) !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .section-header {
+    padding-bottom: 8px !important;
+    margin-bottom: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel {
+    margin-block: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-placeholder {
+    padding: 12px 16px !important;
+    background: transparent !important;
+    border: 1px dashed var(--awa-border, #e5e5e5) !important;
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-activity {
+    gap: 10px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .pager,
+body#html-body.account.b2b-account-dashboard .orders-section .toolbar,
+body#html-body.account.b2b-account-dashboard .orders-section .toolbar-orders {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 10px 0 12px !important;
+    margin: 0 !important;
+    border-top: 1px solid var(--awa-border, #e5e5e5) !important;
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #666) !important;
+    background: transparent !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .toolbar-amount {
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #666) !important;
+    white-space: nowrap !important;
+    order: 1 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .pages {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    order: 2 !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .pages .page,
+body#html-body.account.b2b-account-dashboard .orders-section .pages a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    padding: 0 6px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    border: 1px solid transparent !important;
+    color: var(--awa-text, #333) !important;
+    transition: background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .pages .page:hover,
+body#html-body.account.b2b-account-dashboard .orders-section .pages a:hover {
+    background: rgba(183, 51, 55, 0.05) !important;
+    border-color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .pages .current,
+body#html-body.account.b2b-account-dashboard .orders-section .pages li.current .page {
+    background: var(--awa-primary, #b73337) !important;
+    color: oklch(98% 0.01 27) !important;
+    border-color: var(--awa-primary, #b73337) !important;
+    font-weight: 600 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .limiter {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #666) !important;
+    order: 3 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .limiter-options {
+    padding: 3px 8px !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    background: var(--awa-bg-muted, #fafafa) !important;
+    cursor: pointer !important;
+    color: var(--awa-text, #333) !important;
+    min-height: 28px !important;
+}
+
+@media (max-width: 480px) {
+    body#html-body.account.b2b-account-dashboard .orders-section .limiter-label {
+        display: none !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .orders-section .toolbar-amount {
+        width: 100% !important;
+    }
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table th:nth-child(1),
+body#html-body.account.b2b-account-dashboard .orders-table td:nth-child(1) { width: 18% !important; }
+
+body#html-body.account.b2b-account-dashboard .orders-table th:nth-child(2),
+body#html-body.account.b2b-account-dashboard .orders-table td:nth-child(2) { width: 26% !important; }
+
+body#html-body.account.b2b-account-dashboard .orders-table th:nth-child(3),
+body#html-body.account.b2b-account-dashboard .orders-table td:nth-child(3) { width: 32% !important; }
+
+body#html-body.account.b2b-account-dashboard .orders-table th:nth-child(4),
+body#html-body.account.b2b-account-dashboard .orders-table td:nth-child(4) { width: 24% !important; }
+
+body#html-body.account.b2b-account-dashboard .orders-table td {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table td:nth-child(3) {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table td:empty,
+body#html-body.account.b2b-account-dashboard .orders-table th:empty {
+    padding: 0 !important;
+    border-bottom: 0 !important;
+    line-height: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table .col.actions {
+    text-align: right !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    width: auto !important;
+}
+
+@media (max-width: 640px) {
+    body#html-body.account.b2b-account-dashboard .orders-section {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-gutter: stable;
+    }
+
+    body#html-body.account.b2b-account-dashboard .orders-table {
+        min-width: 400px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § POLISH v2 — Passe final (2026-05-30)
+
+   [P1-a11y] Labels secundários #888 → tokens muted (#666, ≥4.5:1)
+   [P1-a11y] status-badge 11px → 12px (legibilidade + contraste)
+   [P2-ux]   checklist-action :active — feedback tátil nos links do onboarding
+   [P2-ux]   section-header: alinhamento óptico título + "Ver todos"
+   [P3-typo] Sidebar nav title 11px → 12px (refinement.css)
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard :is(
+    .summary-card .card-label,
+    .credit-label,
+    .detail-item .label,
+    .orders-section .toolbar-amount,
+    .progress-text
+) {
+    color: var(--awa-text-muted, #666666) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .status-badge,
+body#html-body.account.b2b-account-dashboard .quotes-stats .stat {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .section-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px 12px !important;
+    margin-bottom: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .section-header .view-all {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 44px !important;
+    padding-inline: 4px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .view-all:focus-visible,
+body#html-body.account.b2b-account-dashboard .checklist-action:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+    border-radius: 6px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .checklist-action:active {
+    transform: translateX(1px) !important;
+    opacity: 0.85 !important;
+    transition-duration: 0.08s !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar-main-1 .block-collapsible-nav .title strong,
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .title strong {
+    font-size: 12px !important;
+    letter-spacing: 0.04em !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table thead th {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    color: var(--awa-text-muted, #666666) !important;
+    text-transform: none !important;
+    padding-block: 10px !important;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .onboarding-progress .progress-text {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § POLISH v3 — Continuação (2026-05-30)
+
+   [P0-ban]  visual-upgrade §20.6: border-left 3px no item.current — side-stripe
+   [P1-a11y] .b2b-member-since #999; KPI h4 / toolbar label 11px
+   [P2-ux]   trigger-b2b-tour + details/summary + paginação: toque 44px mobile
+   [P2-ux]   Sidebar hover sem animar padding-left (layout thrashing)
+   [P3-copy] .b2b-empty-state legível e alinhado ao lazy-placeholder
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Impeccable ban: faixa lateral na nav (visual-upgrade.css §20.6) */
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .item.current :is(a, strong),
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .item.current > a {
+    border-left: 0 !important;
+    border-inline-start: 0 !important;
+    padding-left: 12px !important;
+    border-radius: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .item a:hover {
+    padding-left: 12px !important;
+    transition: background-color 0.18s ease-out, color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .card-content h4,
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .b2b-toolbar-label {
+    font-size: 12px !important;
+    letter-spacing: 0.05em !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-member-since {
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #666666) !important;
+    background: var(--awa-bg-muted, #f7f7f7) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .trigger-b2b-tour {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 44px !important;
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    border-radius: 4px !important;
+    transition: background-color 0.18s ease-out, border-color 0.18s ease-out, color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .trigger-b2b-tour:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .trigger-b2b-tour:active {
+    transform: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details > summary {
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details > summary::after {
+    float: none !important;
+    flex-shrink: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details > summary:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: -2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .summary-card .action.primary,
+body#html-body.account.b2b-account-dashboard .quotes-card .action.primary {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .action.primary:disabled,
+body#html-body.account.b2b-account-dashboard .action.primary.disabled {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-empty-state {
+    margin-top: 12px !important;
+    padding: 16px 18px !important;
+    border-radius: 4px !important;
+    border: 1px dashed var(--awa-border, #e5e5e5) !important;
+    background: transparent !important;
+    text-align: left !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-empty-state p {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    color: var(--awa-text-muted, #666666) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-erp-pending-banner {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    padding: 16px 18px !important;
+    border-radius: 4px !important;
+    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 22%, var(--awa-border, #e5e5e5)) !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, #ffffff) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-erp-pending-banner :is(.b2b-banner-title, h4) {
+    margin: 0 0 4px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: var(--awa-text-primary, #333333) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-erp-pending-banner p {
+    margin: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    color: var(--awa-text-muted, #666666) !important;
+}
+
+@media (max-width: 767px) {
+    body#html-body.account.b2b-account-dashboard .orders-section .pages .page,
+    body#html-body.account.b2b-account-dashboard .orders-section .pages a {
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .orders-section .limiter-options {
+        min-height: 44px !important;
+        padding: 8px 12px !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-dashboard-header {
+        padding: 16px !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-welcome-sub {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § FINAL v4 — MODO FORÇA TOTAL (2026-05-30)
+   Camada terminal: vence late.css + visual-upgrade + dashboard.css
+   Escopo: body#html-body.account.b2b-account-dashboard
+   Restrição: apenas CSS (sem HTML/PHP/XML)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── P0 Anti-pattern: todas as faixas laterais >1px ───────────────── */
+body#html-body.account.b2b-account-dashboard :is(
+    .section-header h2,
+    .section-header h3,
+    .b2b-section > h2,
+    .b2b-section > h3,
+    .b2b-quick-actions > h2,
+    .b2b-quick-actions > h3,
+    .b2b-company-info > h3,
+    .categories-section > h2,
+    .categories-section > h3
+) {
+    padding-left: 0 !important;
+    border-left: 0 !important;
+    border-inline-start: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .item :is(a, strong),
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .item a:hover,
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .item.current :is(a, strong),
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .item > a.current {
+    border-left: 0 !important;
+    border-inline-start: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(
+    .suggestion-quote,
+    .suggestion-quickorder,
+    .suggestion-attendant,
+    .suggestion-shoppinglist,
+    .suggestion-catalog,
+    .suggestion-card
+) {
+    border-left-width: 1px !important;
+    border-left-style: solid !important;
+}
+
+/* ── P0 Anti-pattern: grid de action cards → toolbar pill (distill) ─ */
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid,
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    grid-template-columns: unset !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid :is(.action-item, > a) {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    flex: 0 1 auto !important;
+    min-height: 44px !important;
+    padding: 8px 14px !important;
+    border-radius: 999px !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    background: var(--awa-bg-muted, #f8fafc) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: background-color 0.18s ease-out, border-color 0.18s ease-out, color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid :is(.action-item, > a):hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--awa-primary, #b73337) !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #ffffff) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid :is(.action-item, > a) img {
+    width: 16px !important;
+    height: 16px !important;
+    transform: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid :is(.action-item, > a) span {
+    font-size: 13px !important;
+    text-align: left !important;
+}
+
+/* ── P1 KPI strip: sem hero-metric hover lift / ícone circular ─────── */
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    grid-template-columns: unset !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .summary-card {
+    flex: 1 1 min(100%, 200px) !important;
+    min-width: 0 !important;
+    display: block !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .summary-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--awa-border, #e5e5e5) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .card-icon {
+    display: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-discount-badge {
+    flex-shrink: 0 !important;
+    padding: 10px 14px !important;
+    border-radius: 4px !important;
+    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 25%, var(--awa-border, #e5e5e5)) !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 5%, #ffffff) !important;
+    text-align: center !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-discount-badge .discount-value {
+    font-size: clamp(1.25rem, 2vw, 1.5rem) !important;
+    font-weight: 800 !important;
+    color: var(--awa-primary, #b73337) !important;
+    line-height: 1.1 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-discount-badge .discount-label {
+    font-size: 12px !important;
+    color: var(--awa-text-muted, #666666) !important;
+}
+
+/* ── P1 Theming: neutralizar #888 / #999 no escopo do dashboard ───── */
+body#html-body.account.b2b-account-dashboard :is(
+    .suggestion-card p,
+    .attendant-department,
+    .erp-pending-content p,
+    .checklist-pending-text,
+    .detail-item .label
+) {
+    color: var(--awa-text-muted, #666666) !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(
+    .b2b-dashboard-header,
+    .b2b-section,
+    .b2b-onboarding-section,
+    .summary-card,
+    .suggestion-card,
+    .b2b-dashboard-details,
+    .column.main,
+    .col-main
+) {
+    min-width: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-main > .columns > .column.main,
+body#html-body.account.b2b-account-dashboard .page-main > .columns > .col-main {
+    min-width: 0 !important;
+    overflow-x: clip !important;
+}
+
+/* ── P1 Tipografia mínima 12px (catch-all labels secundários) ─────── */
+body#html-body.account.b2b-account-dashboard :is(
+    .status-badge,
+    .stat,
+    .b2b-group-badge,
+    .b2b-rfm-badge,
+    .b2b-price-list-badge,
+    .block-collapsible-nav .title strong,
+    .orders-section .toolbar,
+    .orders-section .pager
+) {
+    font-size: max(12px, 0.75rem) !important;
+}
+
+/* ── P1 A11y: recuperar focus-visible onde outline:none vence ─────── */
+body#html-body.account.b2b-account-dashboard :is(
+    .action-item,
+    .suggestion-action,
+    .checklist-action,
+    .category-chip,
+    .view-all,
+    .contact-link,
+    .trigger-b2b-tour,
+    .orders-section .pages a,
+    .orders-section .pages .page
+):focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .pages :is(a, .page):focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .limiter-options:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+}
+
+/* ── § HARDEN — overflow, i18n, erros, loading ─────────────────────── */
+body#html-body.account.b2b-account-dashboard :is(
+    .card-value,
+    .credit-value,
+    .detail-item .value,
+    .company-details .value,
+    .attendant-name,
+    .b2b-welcome-sub,
+    .checklist-label,
+    .orders-table td,
+    .orders-table td a
+) {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    max-width: 100% !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-badges,
+body#html-body.account.b2b-account-dashboard .quotes-stats {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-group-badge,
+body#html-body.account.b2b-account-dashboard .b2b-rfm-badge {
+    max-width: 100% !important;
+    white-space: normal !important;
+    text-align: center !important;
+    height: auto !important;
+    min-height: 24px !important;
+    padding-block: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-placeholder--error {
+    border-style: solid !important;
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e5e5e5)) !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #ffffff) !important;
+    color: var(--awa-text-primary, #333333) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-placeholder--error .b2b-dashboard-lazy-label {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: var(--awa-primary, #b73337) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-async-message {
+    margin-bottom: 12px !important;
+    padding: 12px 16px !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-async-loading td {
+    padding: 20px 16px !important;
+    text-align: center !important;
+    color: var(--awa-text-muted, #666666) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-stat-value--loading {
+    display: inline-block !important;
+    min-width: 2.5rem !important;
+    min-height: 1rem !important;
+    border-radius: 4px !important;
+    vertical-align: middle !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body#html-body.account.b2b-account-dashboard .b2b-stat-value--loading {
+        animation: none !important;
+        background: var(--awa-bg-muted, #f3f4f6) !important;
+    }
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard[aria-busy="true"] .b2b-dashboard-lazy-panel[aria-busy="true"] {
+    opacity: 1 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .message.info {
+    padding: 14px 16px !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    background: var(--awa-bg-muted, #f8fafc) !important;
+    color: var(--awa-text-primary, #333333) !important;
+}
+
+/* ── P2 Performance: neutralizar hover com layout shift ───────────── */
+body#html-body.account.b2b-account-dashboard .category-chip:hover {
+    transform: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .summary-card:hover {
+    transform: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .suggestion-card:hover {
+    transform: none !important;
+}
+
+/* ── P2 Responsive: header discount empilha em mobile ─────────────── */
+@media (max-width: 767px) {
+    body#html-body.account.b2b-account-dashboard .b2b-dashboard-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-discount-badge {
+        width: 100% !important;
+        margin-top: 4px !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .summary-card {
+        flex: 1 1 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    body#html-body.account.b2b-account-dashboard .b2b-dashboard {
+        gap: 10px !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .onboarding-progress {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .progress-text {
+        width: 100% !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § FINAL v5 — 100% CSS (2026-05-30)
+   Fecha gaps: layout shell, header drift, sugestões, contatos, grids órfãos
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Layout shell — removido (flex row 250px); SSOT §129-terminal + refinements §127 */
+
+/* Header: vence visual-upgrade §20.7 (card aninhado) */
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-header {
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0 0 16px !important;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-header h1 {
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* Grids de conteúdo — CSS Grid SSOT (§126 restaura se regras legadas vencem) */
+body#html-body.account.b2b-account-dashboard .actions-grid:not(.actions-toolbar) {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: clamp(10px, 1.2vw, 14px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .suggestions-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: clamp(12px, 1.5vw, 16px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .categories-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .category-chip {
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+}
+
+/* Lista de sugestões (template atual) */
+body#html-body.account.b2b-account-dashboard .b2b-suggestion-cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    transition: background-color 0.18s ease-out, border-color 0.18s ease-out, color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-suggestion-cta:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-suggestion-cta:active {
+    transform: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .contact-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+    border-radius: 4px !important;
+    transition: background-color 0.18s ease-out, border-color 0.18s ease-out, color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .contact-link:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .contact-link:active {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table :is(a, .action):focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+    border-radius: 4px !important;
+}
+
+/* Progress bar: GPU transform; sem animação com reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    body#html-body.account.b2b-account-dashboard .progress-fill,
+    body#html-body.account.b2b-account-dashboard .credit-bar-fill {
+        transition: none !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § MODERNIZE v6 — UI/UX 2026 + optimize (2026-05-30)
+   Tokens locais, superfícies planas, tabelas legíveis, ERP flex, perf
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard {
+    --b2b-dash-surface: var(--awa-bg-surface, #ffffff);
+    --b2b-dash-muted: var(--awa-bg-muted, #f8fafc);
+    --b2b-dash-border: var(--awa-border, #e5e5e5);
+    --b2b-dash-text: var(--awa-text-primary, #333333);
+    --b2b-dash-text-muted: var(--awa-text-muted, #666666);
+    --b2b-dash-accent: var(--awa-primary, #b73337);
+    --b2b-dash-radius: var(--awa-acct-panel-radius, 4px);
+    --b2b-dash-gap: clamp(10px, 1.2vw, 16px);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--b2b-dash-text);
+    max-width: 100%;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard :is(
+    .b2b-onboarding-section,
+    .b2b-quick-actions--toolbar,
+    .b2b-dashboard-details,
+    .orders-section,
+    .b2b-suggestions-section,
+    .categories-section,
+    .b2b-erp-context-fragment,
+    .b2b-company-info--erp-supplement
+) {
+    border: 1px solid var(--b2b-dash-border) !important;
+    border-radius: var(--b2b-dash-radius) !important;
+    background: var(--b2b-dash-surface) !important;
+    box-shadow: none !important;
+    padding: clamp(14px, 2vw, 18px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section {
+    margin-top: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar-main-1 .block.block-collapsible-nav {
+    border: 1px solid var(--b2b-dash-border) !important;
+    border-radius: var(--b2b-dash-radius) !important;
+    background: var(--b2b-dash-surface) !important;
+    box-shadow: none !important;
+}
+
+@media (min-width: 992px) {
+    body#html-body.account.b2b-account-dashboard .sidebar-main-1 .block.block-collapsible-nav {
+        position: sticky !important;
+        top: 16px !important;
+    }
+}
+
+body#html-body.account.b2b-account-dashboard :is(
+    .card-value,
+    .credit-value,
+    .erp-product-price,
+    .orders-table td:last-child
+) {
+    font-variant-numeric: tabular-nums !important;
+}
+
+body#html-body.account.b2b-account-dashboard .credit-bar {
+    height: 6px !important;
+    border-radius: 999px !important;
+    background: color-mix(in srgb, var(--b2b-dash-border) 55%, transparent) !important;
+    overflow: hidden !important;
+}
+
+body#html-body.account.b2b-account-dashboard .credit-bar-fill {
+    border-radius: 999px !important;
+    background: var(--b2b-dash-accent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(.orders-table, .data-table) {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 14px !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(.orders-table, .data-table) tbody tr {
+    transition: background-color 0.15s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(.orders-table, .data-table) tbody tr:hover {
+    background: color-mix(in srgb, var(--b2b-dash-accent) 4%, var(--b2b-dash-surface)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(.orders-table, .data-table) td {
+    padding: 10px 12px !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--b2b-dash-border) 80%, transparent) !important;
+    color: var(--b2b-dash-text) !important;
+    vertical-align: middle !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(.orders-table, .data-table) td a {
+    color: var(--b2b-dash-accent) !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    text-underline-offset: 2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(.orders-table, .data-table) td a:hover {
+    text-decoration: underline !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-products-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+    gap: clamp(12px, 1.5vw, 16px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-product-card {
+    flex: unset !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    border: 1px solid var(--awa-border-subtle, var(--b2b-dash-border)) !important;
+    border-radius: var(--awa-acct-panel-radius, 4px) !important;
+    background: var(--awa-bg-surface, var(--b2b-dash-muted)) !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transition: border-color 0.18s ease-out, background-color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-product-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: color-mix(in srgb, var(--b2b-dash-accent) 35%, var(--b2b-dash-border)) !important;
+    background: color-mix(in srgb, var(--b2b-dash-accent) 3%, var(--b2b-dash-surface)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-product-name,
+body#html-body.account.b2b-account-dashboard .erp-product-name a {
+    color: var(--b2b-dash-text) !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-product-sku,
+body#html-body.account.b2b-account-dashboard .erp-product-price {
+    color: var(--b2b-dash-text-muted) !important;
+    font-size: 13px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-skeleton,
+body#html-body.account.b2b-account-dashboard .b2b-skeleton-line,
+body#html-body.account.b2b-account-dashboard .b2b-skeleton-block,
+body#html-body.account.b2b-account-dashboard .b2b-skeleton-thumb,
+body#html-body.account.b2b-account-dashboard .b2b-skeleton-table-row {
+    contain: strict !important;
+    content-visibility: auto !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    body#html-body.account.b2b-account-dashboard .b2b-skeleton,
+    body#html-body.account.b2b-account-dashboard .b2b-stat-value--loading {
+        animation-duration: 1.6s !important;
+    }
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel:not([data-lazy-priority="high"]) {
+    content-visibility: auto !important;
+    contain-intrinsic-size: auto 240px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-async-message.message.error {
+    border-color: color-mix(in srgb, var(--awa-error, #dc2626) 35%, var(--b2b-dash-border)) !important;
+    background: color-mix(in srgb, var(--awa-error, #dc2626) 6%, var(--b2b-dash-surface)) !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-async-message.message.warning {
+    border-color: color-mix(in srgb, var(--awa-warning, #d97706) 35%, var(--b2b-dash-border)) !important;
+    background: color-mix(in srgb, var(--awa-warning, #d97706) 8%, var(--b2b-dash-surface)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .checklist-item {
+    border-radius: 4px !important;
+    padding: 12px 14px !important;
+    gap: 12px !important;
+    transition: background-color 0.18s ease-out, border-color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .checklist-item:focus-within {
+    outline: 2px solid color-mix(in srgb, var(--b2b-dash-accent) 40%, transparent) !important;
+    outline-offset: 2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-group-badge.approved {
+    background: color-mix(in srgb, var(--awa-success, #059669) 10%, var(--b2b-dash-surface)) !important;
+    color: color-mix(in srgb, var(--awa-success, #059669) 85%, #000000) !important;
+    border: 1px solid color-mix(in srgb, var(--awa-success, #059669) 28%, var(--b2b-dash-border)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .action-item.action-highlight {
+    border-color: color-mix(in srgb, var(--b2b-dash-accent) 45%, var(--b2b-dash-border)) !important;
+    background: color-mix(in srgb, var(--b2b-dash-accent) 8%, var(--b2b-dash-muted)) !important;
+    color: var(--b2b-dash-accent) !important;
+    font-weight: 700 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § BUGFIX v7 — Investigação visual (2026-05-30)
+
+   [F1] _awa-account-layout.less usa grid no .columns; filhos precisam
+        de .sidebar-main + grid-column reset explícitos.
+   [F2] v6 repôs padding-bottom na .orders-section → blocos cinza na paginação.
+   [F3] Borda dupla: border-top nos filhos + surface v6 → só surfaces.
+   [F4] Lazy panel wrapper sem “caixa vazia”; pedidos só na .orders-section.
+   [F5] empty-state-message alinhado ao empty state do dashboard.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .page-main > .columns > :is(
+    .sidebar,
+    .sidebar-main,
+    .sidebar.sidebar-main,
+    .col-lg-2,
+    [class*="col-sm-3"]
+) {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-main > .columns > :is(
+    .column.main,
+    .col-main,
+    .col-lg-10,
+    [class*="col-sm-9"]
+) {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+}
+
+@media (min-width: 768px) {
+    body#html-body.account.b2b-account-dashboard .page-main > .columns > :is(
+        .sidebar,
+        .sidebar-main,
+        .sidebar.sidebar-main,
+        .col-lg-2,
+        [class*="col-sm-3"]
+    ) {
+        grid-column: 1 / 2 !important;
+        grid-row: 1 !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .page-main > .columns > :is(
+        .column.main,
+        .col-main,
+        .col-lg-10,
+        [class*="col-sm-9"]
+    ) {
+        grid-column: 2 / 3 !important;
+        grid-row: 1 !important;
+    }
+}
+
+/* Grid shell mobile-first — substitui bloco legado grid 1fr + min-width 769 */
+@media (max-width: 768px) {
+    body#html-body.account.b2b-account-dashboard .page-main > :is(.columns, .columns.layout) {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        grid-template-columns: unset !important;
+        grid-template-areas: unset !important;
+        gap: var(--awa-b2b-stack-gap, clamp(12px, 1.5vw, 16px)) !important;
+        align-items: stretch !important;
+        width: 100% !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .page-main > .columns > :is(
+        .sidebar, .sidebar-main, .column.main, .col-main
+    ) {
+        width: 100% !important;
+        max-width: 100% !important;
+        grid-area: unset !important;
+        grid-column: unset !important;
+        flex: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    body#html-body.account.b2b-account-dashboard .page-main > :is(.columns, .columns.layout) {
+        display: grid !important;
+        grid-template-columns: 220px minmax(0, 1fr) !important;
+        grid-template-areas: "account-side account-main" !important;
+        column-gap: var(--awa-grid-gap-loose, 32px) !important;
+        gap: var(--awa-grid-gap-loose, 32px) !important;
+        align-items: start !important;
+        width: 100% !important;
+    }
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard > :is(
+    .b2b-onboarding-section,
+    .b2b-dashboard-primary,
+    .b2b-summary-cards,
+    .b2b-dashboard-overview,
+    .b2b-dashboard-activity,
+    .b2b-dashboard-secondary,
+    .b2b-dashboard-details
+) {
+    border-top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: var(--b2b-dash-gap) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard > .b2b-dashboard-header + * {
+    padding-top: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-section.orders-section {
+    padding-top: 14px !important;
+    padding-right: 16px !important;
+    padding-bottom: 0 !important;
+    padding-left: 16px !important;
+    overflow: hidden !important;
+    margin-bottom: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel .b2b-dashboard-lazy-placeholder {
+    margin-bottom: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel--loaded {
+    min-height: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-empty-state .empty-state-message,
+body#html-body.account.b2b-account-dashboard .orders-empty-state .b2b-empty-state {
+    margin-top: 12px !important;
+    padding: 16px 18px !important;
+    border: 1px dashed var(--b2b-dash-border) !important;
+    border-radius: var(--b2b-dash-radius) !important;
+    background: transparent !important;
+    text-align: left !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-empty-state .empty-state-message p {
+    margin: 0 0 12px !important;
+    font-size: 14px !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-empty-state .action.primary {
+    min-height: 44px !important;
+}
+
+@media (min-width: 992px) {
+    body#html-body.account.b2b-account-dashboard .sidebar-main-1 .block.block-collapsible-nav,
+    body#html-body.account.b2b-account-dashboard .sidebar.sidebar-main .block.block-collapsible-nav,
+    body#html-body.account.b2b-account-dashboard .sidebar-main .block.block-collapsible-nav {
+        top: var(--awa-header-scroll-offset, 72px) !important;
+    }
+}
+
+body#html-body.account.b2b-account-dashboard .column.main {
+    display: block !important;
+    gap: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard h3 :is(svg, .icon) {
+    flex-shrink: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-section > h3,
+body#html-body.account.b2b-account-dashboard .section-header h3 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § HIERARCHY v8 — Impeccable visual hierarchy (2026-06-01)
+   Cena: lojista no balcão, monitor 24", luz de loja; limite, pedidos
+   e próximo passo precisam escanear em poucos segundos.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-header h1 {
+    font-size: clamp(1.375rem, 1.15rem + 0.75vw, 1.75rem) !important;
+    margin: 0 0 6px !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-welcome-sub {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 12px !important;
+    margin: 0 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-badges {
+    margin-top: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .card-content h4 {
+    margin: 0 0 8px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip :is(
+    .card-value,
+    .credit-row:first-child .credit-value
+) {
+    font-size: clamp(1.3125rem, 1.1rem + 0.55vw, 1.5625rem) !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .credit-label {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .credit-row--meta {
+    font-size: 12px !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .credit-row--meta .credit-value {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .summary-card {
+    padding: clamp(14px, 1.5vw, 18px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .item :is(a, strong) {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--b2b-dash-text-muted) !important;
+    padding: 10px 12px !important;
+    border-radius: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .item.current :is(a, strong) {
+    font-weight: 600 !important;
+    color: var(--b2b-dash-accent) !important;
+    background: color-mix(in srgb, var(--b2b-dash-accent) 8%, var(--b2b-dash-surface)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .title strong {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted) !important;
+    padding: 8px 12px 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(
+    .b2b-section > h2,
+    .b2b-section > h3,
+    .section-header h2,
+    .section-header h3
+) {
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.012em !important;
+    color: var(--b2b-dash-text) !important;
+    margin-bottom: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .b2b-toolbar-label {
+    font-size: 11px !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+    color: var(--b2b-dash-text-muted) !important;
+    margin: 0 0 10px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table thead th {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted) !important;
+    background: color-mix(in srgb, var(--b2b-dash-border) 35%, var(--b2b-dash-surface)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table tbody td {
+    font-size: 13px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table tbody td:first-child,
+body#html-body.account.b2b-account-dashboard .orders-table tbody td:first-child a {
+    font-weight: 600 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table tbody td:last-child {
+    font-weight: 700 !important;
+    font-size: 14px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item:not(.action-highlight) {
+    background: var(--b2b-dash-surface) !important;
+    border: 1px solid var(--b2b-dash-border) !important;
+    color: var(--b2b-dash-text) !important;
+    font-weight: 500 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item.action-highlight {
+    background: var(--b2b-dash-accent) !important;
+    border-color: var(--b2b-dash-accent) !important;
+    color: oklch(99% 0.005 25) !important;
+    font-weight: 600 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item.action-highlight svg {
+    stroke: oklch(99% 0.005 25) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .quotes-card .quotes-stats .stat {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .quotes-card .action.primary {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin-top: 8px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-overview {
+    margin-bottom: clamp(8px, 1vw, 16px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-primary {
+    margin-top: clamp(12px, 1.5vw, 20px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-footer {
+    margin-top: clamp(2rem, 3vw, 3rem) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § STANDARDIZE v9 — Tokens + superfícies + componentes (2026-06-01)
+   Alinha Painel B2B com account-b2b.css e padrão product UI da home.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard {
+    --b2b-dash-surface: var(--awa-acct-surface, var(--awa-bg-surface, #ffffff));
+    --b2b-dash-muted: var(--awa-acct-canvas, var(--awa-b2b-bg-soft, #f8fafc));
+    --b2b-dash-border: var(--awa-border, #e5e5e5);
+    --b2b-dash-accent: var(--awa-primary, #b73337);
+    --b2b-dash-text: var(--awa-text-primary, #333333);
+    --b2b-dash-text-muted: var(--awa-text-muted, #666666);
+    --b2b-dash-radius: var(--awa-acct-panel-radius, 4px);
+    --b2b-dash-section-pad: clamp(14px, 2vw, 18px);
+    --b2b-dash-label-size: 11px;
+    --b2b-dash-body-size: 13px;
+    --b2b-dash-title-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --b2b-dash-value-size: clamp(1.3125rem, 1.1rem + 0.55vw, 1.5625rem);
+}
+
+body#html-body.account.b2b-account-dashboard .page-main {
+    background: var(--b2b-dash-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav :is(.block-title, .title) {
+    background: var(--b2b-dash-accent) !important;
+    padding: 14px 16px !important;
+    margin: 0 !important;
+    border-radius: var(--b2b-dash-radius) var(--b2b-dash-radius) 0 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .title strong {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: oklch(99% 0.005 25) !important;
+    padding: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .item :is(a, strong) {
+    margin-inline: 6px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard :is(
+    .b2b-onboarding-section,
+    .b2b-suggestions-section,
+    .b2b-dashboard-details,
+    .categories-section,
+    .b2b-quick-actions--toolbar,
+    .orders-section
+) {
+    border: 1px solid var(--b2b-dash-border) !important;
+    border-radius: var(--b2b-dash-radius) !important;
+    background: var(--b2b-dash-surface) !important;
+    padding: var(--b2b-dash-section-pad) !important;
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-activity {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: clamp(12px, 1.5vw, 16px) !important;
+    margin-top: clamp(12px, 1.5vw, 16px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details > summary {
+    font-size: var(--b2b-dash-title-size) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.012em !important;
+    color: var(--b2b-dash-text) !important;
+    padding: 0 !important;
+    min-height: 44px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details[open] > summary {
+    margin-bottom: 12px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--b2b-dash-border) 85%, transparent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details .b2b-details-body {
+    padding: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .attendant-name {
+    margin: 0 0 4px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .attendant-department {
+    margin: 0 0 12px !important;
+    font-size: var(--b2b-dash-body-size) !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .contact-link {
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 500 !important;
+    color: var(--b2b-dash-text) !important;
+    border: 1px solid var(--b2b-dash-border) !important;
+    border-radius: 999px !important;
+    background: var(--b2b-dash-muted) !important;
+    padding: 8px 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .contact-link span {
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-suggestions-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-suggestion-item {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px 12px !important;
+    padding: 12px 14px !important;
+    border: 1px solid color-mix(in srgb, var(--b2b-dash-border) 90%, transparent) !important;
+    border-radius: 4px !important;
+    background: var(--b2b-dash-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-suggestion-title {
+    display: block !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    color: var(--b2b-dash-text) !important;
+    margin-bottom: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-suggestion-desc {
+    margin: 0 !important;
+    font-size: var(--b2b-dash-body-size) !important;
+    line-height: 1.45 !important;
+    color: var(--b2b-dash-text-muted) !important;
+    max-width: 52ch !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-suggestion-cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-height: 44px !important;
+    padding: 10px 14px !important;
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 600 !important;
+    color: var(--b2b-dash-accent) !important;
+    border: 1px solid color-mix(in srgb, var(--b2b-dash-accent) 28%, var(--b2b-dash-border)) !important;
+    border-radius: 999px !important;
+    background: var(--b2b-dash-surface) !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+body#html-body.account.b2b-account-dashboard .onboarding-header h3 {
+    font-size: var(--b2b-dash-title-size) !important;
+    margin-bottom: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .checklist-label {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .checklist-pending-text,
+body#html-body.account.b2b-account-dashboard .onboarding-progress .progress-text {
+    font-size: var(--b2b-dash-body-size) !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-label {
+    font-size: var(--b2b-dash-label-size) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard :is(
+    .action.primary,
+    .summary-card .action.primary,
+    .quotes-card .action.primary
+) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 600 !important;
+    border-radius: 999px !important;
+    background: var(--b2b-dash-accent) !important;
+    border: 1px solid var(--b2b-dash-accent) !important;
+    color: oklch(99% 0.005 25) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .action.secondary,
+body#html-body.account.b2b-account-dashboard .trigger-b2b-tour {
+    background: var(--b2b-dash-surface) !important;
+    border: 1px solid color-mix(in srgb, var(--b2b-dash-accent) 24%, var(--b2b-dash-border)) !important;
+    color: var(--b2b-dash-accent) !important;
+    font-weight: 600 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip :is(
+    .card-value,
+    .credit-row:first-child .credit-value
+) {
+    font-size: var(--b2b-dash-value-size) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .card-content h4,
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .b2b-toolbar-label {
+    font-size: var(--b2b-dash-label-size) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § RHYTHM v10 — Ritmo vertical + scanabilidade (2026-06-01)
+   KPI strip separada do trabalho; tabela e badges escaneáveis.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip {
+    display: grid !important;
+    gap: clamp(10px, 1.25vw, 14px) !important;
+    margin-bottom: clamp(16px, 2vw, 24px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .summary-card {
+    border: 1px solid var(--b2b-dash-border) !important;
+    border-radius: var(--b2b-dash-radius) !important;
+    background: var(--b2b-dash-surface) !important;
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table tbody tr {
+    transition: background-color 0.15s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table tbody tr:hover {
+    background: color-mix(in srgb, var(--b2b-dash-accent) 4%, var(--b2b-dash-surface)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table tbody td {
+    padding-block: 12px !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--b2b-dash-border) 80%, transparent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-table .order-status,
+body#html-body.account.b2b-account-dashboard .b2b-badges :is(.badge, .status-badge) {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-header {
+    margin-bottom: clamp(12px, 1.5vw, 20px) !important;
+    padding-bottom: clamp(12px, 1.5vw, 16px) !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--b2b-dash-border) 85%, transparent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .onboarding-progress {
+    margin-bottom: 14px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .quotes-card .quotes-stats {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px 16px !important;
+    margin-bottom: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .quotes-card .quotes-stats .stat strong {
+    font-size: var(--b2b-dash-value-size) !important;
+    font-weight: 700 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+@media (max-width: 767px) {
+    body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-dashboard-activity {
+        gap: 12px !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .orders-table {
+        font-size: 12px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § UNIFY v11 — Superfícies lazy, chips, links terciários (2026-06-01)
+   Estende SSOT v9 às seções ERP/intelligence; corrige KPI flex vs grid.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: clamp(10px, 1.25vw, 14px) !important;
+    margin-bottom: clamp(16px, 2vw, 24px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .summary-card {
+    flex: 1 1 min(100%, 200px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard :is(
+    .b2b-intelligence-section,
+    .erp-reorder-section,
+    .b2b-dashboard-lazy-panel--loaded > .b2b-intelligence-section
+) {
+    border: 1px solid var(--b2b-dash-border) !important;
+    border-radius: var(--b2b-dash-radius) !important;
+    background: var(--b2b-dash-surface) !important;
+    padding: var(--b2b-dash-section-pad) !important;
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .categories-section > h3 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: var(--b2b-dash-title-size) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.012em !important;
+    color: var(--b2b-dash-text) !important;
+    margin-bottom: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .categories-section > h3 svg {
+    flex-shrink: 0 !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--b2b-dash-accent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .categories-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .category-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 44px !important;
+    padding: 10px 14px !important;
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 500 !important;
+    color: var(--b2b-dash-text) !important;
+    border: 1px solid var(--b2b-dash-border) !important;
+    border-radius: 999px !important;
+    background: var(--b2b-dash-muted) !important;
+    text-decoration: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .section-header {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    gap: 8px 12px !important;
+    margin-bottom: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .section-header .view-all {
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 600 !important;
+    color: var(--b2b-dash-accent) !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+body#html-body.account.b2b-account-dashboard .orders-section .section-header h2,
+body#html-body.account.b2b-account-dashboard .orders-section .section-header h3 {
+    margin: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel[data-lazy-loaded="loading"] {
+    border: 1px dashed color-mix(in srgb, var(--b2b-dash-border) 90%, transparent) !important;
+    border-radius: var(--b2b-dash-radius) !important;
+    background: color-mix(in srgb, var(--b2b-dash-muted) 50%, transparent) !important;
+    padding: 12px 16px !important;
+    min-height: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel[data-lazy-loaded="error"],
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel.b2b-dashboard-lazy-panel--error {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 8px 0 !important;
+    min-height: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel[data-lazy-loaded="error"] .b2b-dashboard-lazy-placeholder,
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-panel.b2b-dashboard-lazy-panel--error .b2b-dashboard-lazy-placeholder {
+    padding: 10px 12px !important;
+    border: 1px solid color-mix(in srgb, var(--b2b-dash-border) 80%, transparent) !important;
+    border-radius: 4px !important;
+    background: color-mix(in srgb, var(--b2b-dash-muted) 35%, transparent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-label {
+    margin-bottom: 8px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § POLISH v12 — Ações, onboarding, cotações no dashboard (2026-06-01)
+   Cena: lojista revisa próximo passo antes de abrir ERP ou cotação.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-height: 88px !important;
+    padding: 12px 10px !important;
+    border-radius: var(--b2b-dash-radius) !important;
+    text-align: center !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item svg {
+    width: 22px !important;
+    height: 22px !important;
+    flex-shrink: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item span {
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .checklist-item {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--b2b-dash-border) 80%, transparent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .checklist-item:last-child {
+    border-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-welcome-sub .b2b-company-name {
+    font-weight: 600 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .quotes-card {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .quotes-card .quotes-empty {
+    font-size: var(--b2b-dash-body-size) !important;
+    color: var(--b2b-dash-text-muted) !important;
+    margin: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .credit-row:not(.credit-row--meta) .credit-value {
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .card-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-top: 8px !important;
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 600 !important;
+    color: var(--b2b-dash-accent) !important;
+    text-decoration: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § INTELLIGENCE v13 — ERP reorder + inteligência sem hero-metric (2026-06-01)
+   Cena: gerente de loja lê perfil RFM e lista de reposição no mesmo painel.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body#html-body.account.b2b-account-dashboard .b2b-intelligence-section .section-header h3 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-intelligence-section .section-header h3 svg {
+    flex-shrink: 0 !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--b2b-dash-accent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .intelligence-badge {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    padding: 3px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid color-mix(in srgb, var(--b2b-dash-accent) 22%, var(--b2b-dash-border)) !important;
+    background: color-mix(in srgb, var(--b2b-dash-accent) 6%, var(--b2b-dash-surface)) !important;
+    color: var(--b2b-dash-accent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .intelligence-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    margin-top: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .intelligence-card {
+    background: transparent !important;
+    border: 0 !important;
+    border-top: 1px solid color-mix(in srgb, var(--b2b-dash-border) 85%, transparent) !important;
+    border-radius: 0 !important;
+    padding: 14px 0 !important;
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .intelligence-grid > .intelligence-card:first-child {
+    border-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .intelligence-card h4 {
+    font-size: var(--b2b-dash-title-size) !important;
+    font-weight: 700 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .rfm-item .label {
+    font-size: var(--b2b-dash-label-size) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .rfm-item .value {
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 600 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .rfm-item .value:last-child,
+body#html-body.account.b2b-account-dashboard .rfm-item:nth-child(3) .value {
+    font-size: var(--b2b-dash-value-size) !important;
+    font-weight: 700 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .freq-value {
+    font-size: var(--b2b-dash-value-size) !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .freq-unit,
+body#html-body.account.b2b-account-dashboard .freq-detail {
+    font-size: var(--b2b-dash-body-size) !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .rfm-recommendation {
+    font-size: var(--b2b-dash-body-size) !important;
+    color: var(--b2b-dash-text-muted) !important;
+    border-top: 1px solid color-mix(in srgb, var(--b2b-dash-border) 80%, transparent) !important;
+    padding-top: 12px !important;
+    margin-top: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .intelligence-trend {
+    margin-top: 14px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid color-mix(in srgb, var(--b2b-dash-border) 85%, transparent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-reorder-section .section-header h3 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-reorder-section .section-header h3 svg {
+    flex-shrink: 0 !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--b2b-dash-accent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-reorder-item {
+    padding: 12px 0 !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--b2b-dash-border) 80%, transparent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-reorder-item:hover {
+    background: color-mix(in srgb, var(--b2b-dash-accent) 4%, var(--b2b-dash-surface)) !important;
+    margin: 0 !important;
+    padding: 10px 8px !important;
+    border-radius: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .reorder-name,
+body#html-body.account.b2b-account-dashboard .reorder-name a {
+    font-size: var(--b2b-dash-body-size) !important;
+    font-weight: 600 !important;
+    color: var(--b2b-dash-text) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .reorder-sku {
+    display: block !important;
+    margin-top: 2px !important;
+    font-size: var(--b2b-dash-label-size) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .reorder-price {
+    font-size: var(--b2b-dash-value-size) !important;
+    font-weight: 700 !important;
+    color: var(--b2b-dash-text) !important;
+    white-space: nowrap !important;
+}
+
+/* ============================================================================
+   § polish v14 — dashboard findings (2026-06-01)
+   - remove nested card feel in collapsible/details internals
+   - fix heading hierarchy after h4 -> h2
+   - harden contrast and tiny-text floor
+   - reduce overflow clipping false positives in dashboard shell
+   ============================================================================ */
+body#html-body.account.b2b-account-dashboard .b2b-dashboard .b2b-card-title,
+body#html-body.account.b2b-account-dashboard .b2b-dashboard .b2b-banner-title {
+    margin: 0 0 8px !important;
+    font-size: var(--b2b-dash-label-size, 11px) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted, #666666) !important;
+    line-height: 1.35 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details .company-details,
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details .attendant-card {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-details .b2b-details-body {
+    padding-top: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-member-since {
+    font-size: max(12px, 0.75rem) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .block.block-collapsible-nav,
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav {
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard,
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-overview,
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-activity {
+    overflow: visible !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .progress-bar,
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .progress-fill {
+    transition-property: background-color, opacity !important;
+}
+
+/* ============================================================================
+   § polish v15 — header/footer/modal harden no dashboard (2026-06-01)
+   ============================================================================ */
+body#html-body.account.b2b-account-dashboard .page-wrapper :is(
+    #header,
+    .header-content,
+    .header-wrapper-sticky,
+    .header.awa-main-header,
+    .header_main.awa-main-header-inner-wrap,
+    .header-main
+) {
+    overflow: visible !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper #header .header-container,
+body#html-body.account.b2b-account-dashboard .page-wrapper .header-content,
+body#html-body.account.b2b-account-dashboard .page-wrapper #awa-b2b-promo-bar {
+    padding-block: 4px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper #awa-b2b-promo-bar {
+    overflow: visible !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper .awa-footer-business-contact__action-copy small {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper :is(
+    #awa-footer-title-1,
+    #awa-footer-title-2,
+    #awa-footer-title-3,
+    #awa-footer-title-4,
+    .awa-footer-atendimento__store-name,
+    .awa-footer-atendimento__store-address
+) {
+    color: #111827 !important;
+    text-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper :is(
+    .awa-footer-pay-sec__label.awa-footer-muted-label,
+    .awa-footer-copyright__legal,
+    .awa-footer-copyright__disclaimer
+) {
+    color: #4b5563 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper .modal-popup .modal-inner-wrap,
+body#html-body.account.b2b-account-dashboard .page-wrapper .modal-slide .modal-inner-wrap {
+    border: 1px solid var(--awa-border, #e5e7eb) !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+/* ============================================================================
+   § polish v16 — layout rhythm + toolbar SSOT + sidebar flatten (2026-06-01)
+   Cena: lojista no balcão, tablet landscape, revisa KPIs e abre cotação em 2 toques.
+   ============================================================================ */
+
+body#html-body.account.b2b-account-dashboard .page-wrapper {
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper .header-wrapper-sticky {
+    box-shadow: none !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--b2b-dash-border, var(--awa-border, #e5e5e5)) !important;
+    border-radius: 0 !important;
+    background: var(--b2b-dash-surface, var(--awa-bg-surface, #ffffff)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-overview {
+    display: grid !important;
+    gap: clamp(12px, 1.5vw, 18px) !important;
+    margin-bottom: clamp(12px, 1.5vw, 20px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-welcome-sub {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px 10px !important;
+    max-width: 72ch !important;
+    margin: 0 !important;
+    line-height: 1.45 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-welcome-sub .b2b-member-since {
+    flex: 0 0 auto !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-welcome-sub .trigger-b2b-tour {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 10px 14px !important;
+    border-radius: 999px !important;
+    font-size: var(--b2b-dash-body-size, 13px) !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .checklist-item.pending {
+    padding-block: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .checklist-item.done {
+    padding-block: 10px !important;
+}
+
+/* v12 column cards revertidos: toolbar pill é o SSOT (v4 distill) */
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid,
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    grid-template-columns: unset !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item,
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid :is(.action-item, > a) {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    flex: 0 1 auto !important;
+    min-height: 44px !important;
+    max-height: none !important;
+    min-width: 0 !important;
+    padding: 8px 14px !important;
+    border-radius: 999px !important;
+    border: 1px solid var(--b2b-dash-border, var(--awa-border, #e5e5e5)) !important;
+    background: color-mix(in srgb, var(--b2b-dash-muted, #f8fafc) 88%, var(--b2b-dash-surface, #ffffff)) !important;
+    box-shadow: none !important;
+    text-align: left !important;
+    transform: none !important;
+    transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+        color 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item svg,
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid :is(.action-item, > a) img {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item span,
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid :is(.action-item, > a) span {
+    font-size: var(--b2b-dash-body-size, 13px) !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item.action-highlight {
+    border-color: color-mix(in srgb, var(--b2b-dash-accent, #b73337) 35%, var(--b2b-dash-border, #e5e5e5)) !important;
+    background: color-mix(in srgb, var(--b2b-dash-accent, #b73337) 8%, var(--b2b-dash-surface, #ffffff)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar-additional .block.block-reorder,
+body#html-body.account.b2b-account-dashboard .sidebar-additional1 .block.block-reorder {
+    margin-top: 14px !important;
+    padding: 14px 0 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border-top: 1px solid color-mix(in srgb, var(--b2b-dash-border, #e5e5e5) 85%, transparent) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar-additional .block-reorder .block-title,
+body#html-body.account.b2b-account-dashboard .sidebar-additional1 .block-reorder .block-title {
+    padding: 0 0 8px !important;
+    margin: 0 !important;
+    border-bottom: 0 !important;
+    background: transparent !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar-additional .block-reorder .block-title strong,
+body#html-body.account.b2b-account-dashboard .sidebar-additional1 .block-reorder .block-title strong {
+    font-size: var(--b2b-dash-label-size, 11px) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted, #666666) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .credit-info :is(.credit-row, .credit-stat) {
+    gap: 8px !important;
+    padding-block: 6px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-primary {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: clamp(12px, 1.5vw, 18px) !important;
+}
+
+/* ============================================================================
+   § polish v17 — shell consistency + nav flatten + clipping harden (2026-06-01)
+   Cena: comprador B2B alterna entre busca, menu e ações rápidas no celular.
+   ============================================================================ */
+
+body#html-body.account.b2b-account-dashboard .sidebar-main-1 .block.block-collapsible-nav,
+body#html-body.account.b2b-account-dashboard .sidebar.sidebar-main .block.block-collapsible-nav,
+body#html-body.account.b2b-account-dashboard .sidebar-main .block.block-collapsible-nav {
+    border: 1px solid var(--b2b-dash-border, var(--awa-border, #e5e5e5)) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    background: var(--b2b-dash-surface, var(--awa-bg-surface, #ffffff)) !important;
+    overflow: visible !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav :is(.block-title, .title) {
+    padding: 12px 14px !important;
+    border-radius: 3px 3px 0 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .item :is(a, strong) {
+    min-height: 44px !important;
+    margin-inline: 8px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .item.current :is(a, strong) {
+    background: color-mix(in srgb, var(--b2b-dash-accent, #b73337) 8%, var(--b2b-dash-surface, #ffffff)) !important;
+    border-color: color-mix(in srgb, var(--b2b-dash-accent, #b73337) 28%, var(--b2b-dash-border, #e5e5e5)) !important;
+    color: var(--b2b-dash-text, var(--awa-text-primary, #333333)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper :is(
+    .block-search,
+    .minicart-wrapper,
+    .minicart-wrapper .block-minicart,
+    .header.links,
+    .header-right
+) {
+    overflow: visible !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper .header-content {
+    row-gap: 8px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-toolbar {
+    align-items: center !important;
+}
+
+@media (max-width: 767px) {
+    body#html-body.account.b2b-account-dashboard .b2b-welcome-sub {
+        gap: 8px !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-welcome-sub .b2b-member-since {
+        width: 100% !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-welcome-sub .trigger-b2b-tour {
+        min-height: 44px !important;
+        width: 100% !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .action-item,
+    body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-grid > a {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        padding-inline: 14px !important;
+    }
+}
+
+/* ============================================================================
+   § polish v18 — impeccable report closeout (2026-06-01)
+   ============================================================================ */
+body#html-body.account.b2b-account-dashboard {
+    --b2b-dash-text-muted-strong: color-mix(in srgb, var(--b2b-dash-text, #333333) 76%, white);
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-welcome-sub,
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .card-content h4,
+body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .b2b-toolbar-label,
+body#html-body.account.b2b-account-dashboard .attendant-department,
+body#html-body.account.b2b-account-dashboard .b2b-suggestion-desc,
+body#html-body.account.b2b-account-dashboard .checklist-pending-text,
+body#html-body.account.b2b-account-dashboard .onboarding-progress .progress-text,
+body#html-body.account.b2b-account-dashboard .checklist-item .checklist-label small {
+    color: var(--b2b-dash-text-muted-strong, #4b5563) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-lazy-label {
+    text-transform: none !important;
+    letter-spacing: 0.01em !important;
+    font-size: 12px !important;
+    color: var(--b2b-dash-text-muted-strong, #4b5563) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .checklist-item {
+    padding-inline: 6px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .checklist-item.pending {
+    padding-inline: 6px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper #header .header-container {
+    padding-inline: clamp(10px, 2vw, 20px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper :is(
+    .header-wrapper-sticky,
+    .header.awa-main-header,
+    .header_main.awa-main-header-inner-wrap,
+    .header-main
+) {
+    padding-block: 3px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper #awa-b2b-promo-bar {
+    padding-block: 6px !important;
+}
+
+/* ============================================================================
+   § polish v19 — audit residual: nav flatten, shell padding, hierarchy SSOT
+   Cena: comprador B2B no painel, foco no conteúdo, chrome mínimo no header.
+   ============================================================================ */
+
+body#html-body.account.b2b-account-dashboard #awa-b2b-promo-bar,
+body#html-body.account.b2b-account-dashboard .awa-b2b-promo-bar {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-main > .columns.layout,
+body#html-body.account.b2b-account-dashboard .page-main > .columns.layout-2-col {
+    padding-block: clamp(8px, 1.2vw, 14px) !important;
+}
+
+body#html-body.account.b2b-account-dashboard #maincontent,
+body#html-body.account.b2b-account-dashboard .page-main {
+    overflow: visible !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar.sidebar-additional1,
+body#html-body.account.b2b-account-dashboard .sidebar-additional1 {
+    padding: 0 10px 10px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav :is(.block-title, .title) {
+    background: color-mix(in srgb, var(--b2b-dash-accent, #b73337) 8%, var(--b2b-dash-surface, #ffffff)) !important;
+    border-bottom: 1px solid var(--b2b-dash-border, var(--awa-border, #e5e5e5)) !important;
+    border-radius: 0 !important;
+    padding: 12px 14px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .block-collapsible-nav .title strong,
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .block-title strong {
+    color: var(--b2b-dash-text, var(--awa-text-primary, #333333)) !important;
+    padding: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .content,
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .block-content {
+    padding: 8px 6px 10px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .card-content :is(h2.b2b-card-title, h4),
+body#html-body.account.b2b-account-dashboard .b2b-summary-cards--erp-fragment .card-content :is(h2.b2b-card-title, h4),
+body#html-body.account.b2b-account-dashboard .b2b-erp-pending-banner :is(h2.b2b-banner-title, h4) {
+    margin: 0 0 8px !important;
+    font-size: var(--b2b-dash-label-size, 11px) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: var(--b2b-dash-text-muted-strong, #4b5563) !important;
+    line-height: 1.35 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-intelligence-section .intelligence-card .card-header h4 {
+    margin: 0 !important;
+    font-size: var(--b2b-dash-body-size, 13px) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    color: var(--b2b-dash-text, var(--awa-text-primary, #333333)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-product-name {
+    margin: 0 0 4px !important;
+    font-size: var(--b2b-dash-body-size, 13px) !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    color: var(--b2b-dash-text, var(--awa-text-primary, #333333)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper .modal-popup .modal-inner-wrap,
+body#html-body.account.b2b-account-dashboard .page-wrapper .modal-slide .modal-inner-wrap {
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper nav.fixed-bottom.hidden-sm {
+    box-shadow: none !important;
+    border-top: 1px solid var(--b2b-dash-border, var(--awa-border, #e5e5e5)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper :is(
+    #search_mini_form,
+    #search_mini_form .actions,
+    .mst-searchautocomplete__autocomplete,
+    .minicart-wrapper,
+    .minicart-wrapper .block-minicart
+) {
+    overflow: visible !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper .awa-b2b-min-order-progress--minicart {
+    padding-top: 10px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .page-wrapper .awa-footer-business-contact {
+    padding-block-end: clamp(12px, 2vw, 20px) !important;
+}
+
+/* ============================================================================
+   § adapt v20 — touch 44px SSOT + 390px shell (2026-06-05)
+   ============================================================================ */
+
+body#html-body.account.b2b-account-dashboard {
+    --b2b-touch-target: 44px;
+}
+
+body#html-body.account.b2b-account-dashboard :is(
+    .checklist-action,
+    .view-all,
+    .category-chip,
+    .suggestion-action,
+    .erp-pending-action,
+    .b2b-suggestion-cta,
+    .trigger-b2b-tour,
+    .sidebar .block-collapsible-nav .item :is(a, strong),
+    .b2b-quick-actions--toolbar .action-item,
+    .b2b-quick-actions--toolbar .actions-grid > a
+) {
+    min-height: var(--b2b-touch-target) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .section-header .view-all {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding-inline: 8px !important;
+}
+
+@media (pointer: coarse) {
+    body#html-body.account.b2b-account-dashboard .b2b-onboarding-section .checklist-item {
+        min-height: var(--b2b-touch-target) !important;
+    }
+}
+
+@media (max-width: 390px) {
+    body#html-body.account.b2b-account-dashboard .page-main > .columns.layout {
+        padding-inline: clamp(8px, 2.5vw, 12px) !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-dashboard,
+    body#html-body.account.b2b-account-dashboard .column.main {
+        overflow-x: clip !important;
+        max-width: 100% !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-dashboard-header h1 {
+        font-size: clamp(1.125rem, 4.8vw, 1.375rem) !important;
+        text-wrap: balance !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .onboarding-progress .progress-bar {
+        width: auto !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
+    body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .actions-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+}
+
+/* ============================================================================
+   § harden v21 — a11y live, overflow, async errors (2026-06-05)
+   ============================================================================ */
+
+body#html-body.account.b2b-account-dashboard .b2b-dashboard :is(
+    .detail-item .value,
+    .company-details,
+    .company-name,
+    .b2b-price-list-name,
+    .status-badge,
+    .card-value,
+    .attendant-name
+) {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-async-message--section {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px 14px !important;
+    margin-block-start: 12px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-async-retry {
+    min-height: var(--b2b-touch-target, 44px) !important;
+    flex-shrink: 0 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-erp-pending-banner .b2b-banner-title {
+    margin: 0 0 6px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    text-wrap: balance !important;
+}
+
+/* ============================================================================
+   § polish v22 — heading hierarchy, transition targets, retry button,
+                  table link focus (2026-06-05)
+   ============================================================================ */
+
+/* ── .b2b-company-info title (h2, formerly h3) — maintain visual scale ── */
+body#html-body.account.b2b-account-dashboard .b2b-company-info .company-info-title {
+    margin: 0 0 12px !important;
+    font-size: 1.0625rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
+    line-height: 1.3 !important;
+    color: var(--awa-text-primary, #333333) !important;
+}
+
+/* ── Card titles (h3.card-title, formerly h4) — maintain visual scale ── */
+body#html-body.account.b2b-account-dashboard .summary-card .card-title {
+    margin: 0 0 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--awa-text-muted, #666666) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.3 !important;
+}
+
+/* ── Fix transition:all → targeted properties (performance, no layout anim) ──
+   dashboard.css uses transition:all on 9 selectors which may animate
+   layout properties (padding, width) when states change. Override with
+   only the properties actually being animated.
+   ─────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .summary-card {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .suggestion-card {
+    transition: transform 0.2s ease-out,
+                box-shadow 0.2s ease-out,
+                border-color 0.2s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-product-card {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .attendant-contact .contact-link {
+    transition: background-color 0.18s ease-out,
+                border-color 0.18s ease-out,
+                color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .category-chip {
+    transition: background-color 0.18s ease-out,
+                border-color 0.18s ease-out,
+                color 0.18s ease-out,
+                transform 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .checklist-item {
+    transition: background-color 0.18s ease-out,
+                border-color 0.18s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .erp-pending-action {
+    transition: background-color 0.18s ease-out,
+                transform 0.18s ease-out,
+                box-shadow 0.18s ease-out !important;
+}
+
+/* ── .b2b-async-retry — aparência de botão secundário ──────────────────
+   Herda box-model (min-height, flex-shrink) do § harden.
+   Aparência: tom neutro, borda da brand, hover sutil.
+   ─────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .b2b-async-retry {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    color: var(--awa-primary, #b73337) !important;
+    background: transparent !important;
+    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 35%, transparent) !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    transition: background-color 0.15s ease-out,
+                border-color 0.15s ease-out !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-async-retry:hover {
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, transparent) !important;
+    border-color: var(--awa-primary, #b73337) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-async-retry:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-async-retry:active {
+    transform: none !important;
+}
+
+/* ── Focus rings para links de tabela (pedidos / cotações) ──────────── */
+body#html-body.account.b2b-account-dashboard .data-table td a:focus-visible,
+body#html-body.account.b2b-account-dashboard .orders-table td a:focus-visible,
+body#html-body.account.b2b-account-dashboard .quotes-table td a:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+    border-radius: 2px !important;
+}
+
+body#html-body.account.b2b-account-dashboard .data-table td a:focus:not(:focus-visible),
+body#html-body.account.b2b-account-dashboard .orders-table td a:focus:not(:focus-visible),
+body#html-body.account.b2b-account-dashboard .quotes-table td a:focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body#html-body.account.b2b-account-dashboard :is(
+        .summary-card,
+        .suggestion-card,
+        .erp-product-card,
+        .attendant-contact .contact-link,
+        .category-chip,
+        .checklist-item,
+        .erp-pending-action,
+        .b2b-async-retry
+    ) {
+        transition: none !important;
+    }
+}
+
+/* ============================================================================
+   § v23 — sidebar wrap fix + onboarding completion state (2026-06-08)
+   Cena: cliente B2B no painel com 4/5 etapas completas — sidebar legível,
+   onboarding celebra progresso com tint verde sem quebrar identidade AWA.
+   ============================================================================ */
+
+/* ── Sidebar: prevenir truncamento do tema base (Ayo theme) ─────────────────
+   O tema Rokanthemes aplica white-space:nowrap + overflow:hidden nos nav items,
+   causando "Meus Pe..." / "Solicitar Cotado..." / "Meu Cré...".
+   Override conservador: normal wrap, sem text-overflow.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .sidebar :is(
+    .block-collapsible-nav .item :is(a, strong),
+    .account-nav-item :is(.account-nav-link, .account-nav-text),
+    .account-nav .nav.item :is(a, strong)
+) {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    hyphens: auto !important;
+}
+
+/* ── Onboarding: estado quase-completo (PHP injeta is-near-complete) ─────────
+   Ativa quando $progress >= 75. Sinaliza conclusão iminente com verde AWA
+   nos elementos de progresso — sem alterar o layout do card.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section.is-near-complete .onboarding-title {
+    color: color-mix(in srgb, var(--awa-success, #16a34a) 88%, var(--b2b-dash-text, #333333)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section.is-near-complete .onboarding-title svg {
+    stroke: var(--awa-success, #16a34a) !important;
+    color: var(--awa-success, #16a34a) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section.is-near-complete .progress-fill {
+    background: var(--awa-success, #16a34a) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section.is-near-complete .onboarding-progress .progress-text {
+    color: color-mix(in srgb, var(--awa-success, #16a34a) 80%, var(--b2b-dash-text, #333333)) !important;
+    font-weight: 700 !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section.is-near-complete .checklist-item.done .checklist-label {
+    color: var(--b2b-dash-text, var(--awa-text-primary, #333333)) !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section.is-near-complete .onboarding-header {
+    padding-bottom: 12px !important;
+}
+
+/* Suaviza a barra de progresso para indicar conclusão */
+body#html-body.account.b2b-account-dashboard .b2b-onboarding-section.is-near-complete .progress-bar {
+    background: color-mix(in srgb, var(--awa-success, #16a34a) 18%, var(--b2b-dash-border, #e5e5e5)) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body#html-body.account.b2b-account-dashboard .b2b-onboarding-section.is-near-complete .progress-fill {
+        transition: none !important;
+    }
+}
+
+/* ============================================================================
+   § v24 — conflict resolution + quality fixes (2026-06-08)
+   Fonte: Impeccable scanner — 15 AI tells + 100 quality issues.
+   Foco: conflitos reais no dashboard (contraste P0, padding, legibilidade).
+   ============================================================================ */
+
+/* ── 1. Sidebar title — P0 contrast: white on #f8fafc (1:1 → 4.5:1) ─────────
+   Ayo theme força color: #fff em .block-collapsible-nav .title strong.
+   Regras anteriores (v8 / v12 / v19) cobrem .title strong mas o scanner vê
+   .block-collapsible-nav-title como classe própria no div. SSOT via :is().
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard :is(
+    .block-collapsible-nav .title strong,
+    .block-collapsible-nav .title .nav-title,
+    .block-collapsible-nav-title strong,
+    .block-collapsible-nav .block-title strong,
+    .block-collapsible-nav .block-collapsible-nav-title strong
+) {
+    color: var(--b2b-dash-text-muted, var(--awa-text-muted, #4b5563)) !important;
+    background: transparent !important;
+    text-shadow: none !important;
+}
+
+/* ── 2. Welcome tour button — 0px vertical padding ───────────────────────────
+   Magento button reset aplica padding: 0 em certos contextos CSS.
+   Regra mais específica garante padding mínimo de 10px v / 14px h + min-height
+   para alvo de toque ≥ 44px.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard p.b2b-welcome-sub > button.action.secondary,
+body#html-body.account.b2b-account-dashboard .b2b-welcome-sub .action.secondary.trigger-b2b-tour,
+body#html-body.account.b2b-account-dashboard .b2b-welcome-sub .trigger-b2b-tour {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    padding-inline: 14px !important;
+    min-height: 44px !important;
+    line-height: 1.35 !important;
+    box-sizing: border-box !important;
+}
+
+/* ── 3. ERP product meta — 11px → 12px (floor de legibilidade) ───────────────
+   dashboard.css define font-size: 11px; nenhuma regra audit sobrescreve.
+   Minimum legível para labels é 12px. Também normaliza font-style italic
+   que adiciona ruído visual sem valor informacional.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .erp-product-meta {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    font-style: normal !important;
+}
+
+/* ── 4. ERP product name link — line-height conflict (1.35 vs 1.4) ───────────
+   Conflito: linha ~1500 (.erp-product-name a { line-height: 1.4 !important })
+   vs linha ~3015 (.erp-product-name { line-height: 1.35 !important }).
+   Ambos !important — especificidade decide: a regra do <a> deveria vencer
+   (seletor mais específico: 0-1-1 vs 0-1-0). Mas o computed style do link
+   mostra 1.30 = valor do tema Ayo. Regra final-wins com classe + elemento.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard h4.erp-product-name > a,
+body#html-body.account.b2b-account-dashboard .erp-product-name > a {
+    line-height: 1.4 !important;
+    display: block !important;
+    color: var(--b2b-dash-text, var(--awa-text-primary, #333333)) !important;
+}
+
+/* ── 5. Suggestion cards — nested card AI tell ────────────────────────────────
+   dashboard.css: .suggestion-card { box-shadow: 0 1px 3px rgb(0 0 0 / 4%) }.
+   O scanner vê o leve shadow at-rest como card-inside-card quando o wrapper
+   é transparente. Remove shadow at rest; hover continua com elevação clara.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .b2b-suggestions-section .suggestion-card {
+    box-shadow: none !important;
+}
+
+body#html-body.account.b2b-account-dashboard .b2b-suggestions-section .suggestion-card:hover {
+    box-shadow: none !important;
+    transform: none !important;
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 28%, var(--awa-border, #e5e5e5)) !important;
+}
+
+/* ── 6. Dashboard header — superfície card SSOT (sem nested shadow) ───────── */
+body#html-body.account.b2b-account-dashboard .b2b-dashboard-header,
+body#html-body.account.b2b-account-dashboard .b2b-header-inner {
+    box-shadow: none !important;
+    background: var(--awa-bg-surface, #ffffff) !important;
+    background-image: none !important;
+    border-radius: 4px !important;
+}
+
+/* ── 7. block-customer-login — hairline border + 24px shadow ─────────────────
+   div.block.block-customer-login (dropdown de login no header): 1px border
+   + 24px blur. Combinação inconsistente: shadow exagerado para border tênue.
+   Override: remove border (shadow já separa visualmente) e calibra o blur.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body .page-wrapper .block-customer-login,
+body#html-body .page-wrapper .block.block-customer-login {
+    border: 1px solid var(--awa-border, #e5e7eb) !important;
+    box-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body#html-body.account.b2b-account-dashboard .b2b-suggestions-section .suggestion-card:hover {
+        transform: none !important;
+    }
+}
+
+/* ============================================================================
+   § v24-b — cramped padding + overflow clip residuals (2026-06-08)
+   Fonte: Impeccable scanner — remaining quality issues (continuação v24).
+   ============================================================================ */
+
+/* ── 8. Page title: border-bottom flush contra o texto ───────────────────────
+   Scanner: h1.page-title children flush against border-bottom (no inset).
+   Magento padrão: padding-bottom: 0 no .page-title wrapper.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard h1.page-title,
+body#html-body.account.b2b-account-dashboard .page-title-wrapper .page-title {
+    padding-bottom: 8px !important;
+    margin-bottom: 16px !important;
+}
+
+/* ── 9. Sidebar nav: overflow clip de filho posicionado ──────────────────────
+   Scanner: div.block.block-collapsible-nav clips a positioned child.
+   O Magento aplica overflow: hidden no bloco de nav colapsável em alguns
+   viewports. Fix: visibilidade completa com clip cirúrgico.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .block.block-collapsible-nav,
+body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav {
+    overflow: visible !important;
+}
+
+/* ── 10. Block-reorder: overflow clip ────────────────────────────────────────
+   Scanner: div.block.block-reorder clips a positioned child.
+   ─────────────────────────────────────────────────────────────────────────── */
+body#html-body.account.b2b-account-dashboard .block.block-reorder {
+    overflow: visible !important;
+}
+

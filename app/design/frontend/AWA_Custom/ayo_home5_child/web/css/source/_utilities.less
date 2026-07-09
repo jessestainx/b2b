@@ -1,0 +1,416 @@
+// ============================================================================
+// AWA MOTOS — UTILITY LIBRARY
+// ----------------------------------------------------------------------------
+// Single source of truth for layout utility classes (atomic primitives).
+// Use these classes to compose consistent layouts across the project.
+//
+// PHILOSOPHY (awa skill + flex-grid-flow + impeccable/layout):
+//   1. Gap > Margin — gap on containers, never margin on children
+//   2. Logical properties — padding-block, padding-inline
+//   3. Tokens > hardcoded — always use var(--awa-*) with px fallback
+//   4. Grid|Flex on every wrapper — never implicit block layout
+//   5. Touch target >=44px on every interactive element
+//   6. !important only with documented justification
+//
+// RELATIONSHIP TO _awa-flex-grid-flow.less:
+//   The earlier file already defines .awa-stack / .awa-cluster / .awa-switcher
+//   / .awa-with-sidebar / .awa-grid-auto-fit / .awa-reel / .awa-icon-box as
+//   targeted fixes. This file formalizes them as documented utilities and
+//   ADDS the missing patterns. Future refactor should consolidate both into
+//   this canonical file.
+//
+// USAGE:
+//   <div class="awa-stack" data-gap="lg">              <!-- vertical rhythm -->
+//   <div class="awa-cluster" data-justify="between">   <!-- horizontal wrap -->
+//   <div class="awa-switcher">                          <!-- row/col at threshold -->
+//   <div class="awa-bento">                             <!-- asymmetric grid -->
+//   <div class="awa-frame awa-frame--16-9">            <!-- 16:9 aspect -->
+//   <div class="awa-cover awa-cover--center">          <!-- full viewport -->
+// ============================================================================
+
+
+// --- 0. TOKEN REFERENCE (commented for IDE help) ---
+// @awa-space-1:   4px       @awa-color-primary: #b73337
+// @awa-space-2:   8px       @awa-color-navy:    #0F172A
+// @awa-space-3:   12px      @awa-color-cta:     #0369A1
+// @awa-space-4:   16px      @awa-touch-target:  44px
+// @awa-space-6:   24px      @awa-radius-md:     12px
+// @awa-space-7:   32px      @awa-radius-lg:     16px
+// @awa-space-8:   40px      @awa-shadow-sm:     0 1px 3px rgba(0,0,0,.08)
+// @awa-space-9:   48px      @awa-color-bg-soft: #f7f7f7
+// @awa-space-10:  64px      @awa-color-border:  #e5e5e5
+
+
+// ============================================================================
+// 1. STACK — vertical rhythm with gap (most common building block)
+// ============================================================================
+.awa-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--awa-space-4, 16px);
+}
+
+.awa-stack[data-gap="none"]    { gap: 0; }
+.awa-stack[data-gap="xs"]      { gap: var(--awa-space-1, 4px); }
+.awa-stack[data-gap="sm"]      { gap: var(--awa-space-2, 8px); }
+.awa-stack[data-gap="md"]      { gap: var(--awa-space-4, 16px); }
+.awa-stack[data-gap="lg"]      { gap: var(--awa-space-6, 24px); }
+.awa-stack[data-gap="xl"]      { gap: var(--awa-space-7, 32px); }
+.awa-stack[data-gap="2xl"]     { gap: var(--awa-space-8, 40px); }
+.awa-stack[data-gap="3xl"]     { gap: var(--awa-space-9, 48px); }
+.awa-stack[data-gap="4xl"]     { gap: var(--awa-space-10, 64px); }
+.awa-stack[data-gap="section"] { gap: var(--awa-space-9, 48px); }
+.awa-stack[data-gap="page"]    { gap: var(--awa-space-10, 64px); }
+
+.awa-stack[data-align="start"]   { align-items: flex-start; }
+.awa-stack[data-align="center"]  { align-items: center; }
+.awa-stack[data-align="end"]     { align-items: flex-end; }
+.awa-stack[data-align="stretch"] { align-items: stretch; }
+
+
+// ============================================================================
+// 2. CLUSTER — horizontal wrap with gap (badges, buttons, tags)
+// ============================================================================
+.awa-cluster {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--awa-space-2, 8px);
+}
+
+.awa-cluster[data-gap="xs"] { gap: var(--awa-space-1, 4px); }
+.awa-cluster[data-gap="sm"] { gap: var(--awa-space-2, 8px); }
+.awa-cluster[data-gap="md"] { gap: var(--awa-space-4, 16px); }
+.awa-cluster[data-gap="lg"] { gap: var(--awa-space-6, 24px); }
+
+.awa-cluster[data-justify="start"]   { justify-content: flex-start; }
+.awa-cluster[data-justify="center"]  { justify-content: center; }
+.awa-cluster[data-justify="end"]     { justify-content: flex-end; }
+.awa-cluster[data-justify="between"] { justify-content: space-between; }
+.awa-cluster[data-justify="around"]  { justify-content: space-around; }
+.awa-cluster[data-justify="evenly"]  { justify-content: space-evenly; }
+
+
+// ============================================================================
+// 3. SWITCHER — fluid row/column (collapses below threshold)
+// ============================================================================
+.awa-switcher {
+    --awa-switcher-break: 30rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--awa-space-4, 16px);
+}
+
+.awa-switcher > * {
+    flex-grow: 1;
+    flex-basis: calc((var(--awa-switcher-break) - 100%) * 999);
+    min-inline-size: 0;
+}
+
+.awa-switcher--sm { --awa-switcher-break: 20rem; }
+.awa-switcher--md { --awa-switcher-break: 30rem; }
+.awa-switcher--lg { --awa-switcher-break: 45rem; }
+.awa-switcher--xl { --awa-switcher-break: 60rem; }
+
+
+// ============================================================================
+// 4. WITH-SIDEBAR — fluid sidebar + main
+// ============================================================================
+.awa-with-sidebar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--awa-space-6, 24px);
+}
+
+.awa-with-sidebar > :first-child {
+    flex-basis: var(--awa-sidebar-width, 15.625rem);
+    flex-grow: 1;
+}
+
+.awa-with-sidebar > :last-child {
+    flex-basis: 0;
+    flex-grow: 999;
+    min-inline-size: 60%;
+}
+
+.awa-with-sidebar--narrow > :first-child {
+    --awa-sidebar-width: 12.5rem;
+}
+
+
+// ============================================================================
+// 5. REEL — horizontal scroll with snap
+// ============================================================================
+.awa-reel {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: var(--awa-space-3, 12px);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-block-end: var(--awa-space-2, 8px);
+    padding-block-start: var(--awa-space-1, 4px);
+    scroll-padding-inline: var(--awa-space-4, 16px);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.awa-reel::-webkit-scrollbar { display: none; }
+
+.awa-reel > * {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-reel {
+        scroll-behavior: auto;
+        scroll-snap-type: none;
+    }
+}
+
+
+// ============================================================================
+// 6. GRID AUTO-FIT — intrinsic responsive grid
+// ============================================================================
+.awa-grid-auto-fit {
+    display: grid;
+    gap: var(--awa-space-6, 24px);
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(18rem, 100%), 1fr))";
+}
+
+.awa-grid-auto-fit--tight {
+    gap: var(--awa-space-4, 16px);
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(14rem, 100%), 1fr))";
+}
+
+.awa-grid-auto-fit--loose {
+    gap: var(--awa-space-7, 32px);
+    grid-template-columns: ~"repeat(auto-fit, minmax(min(22rem, 100%), 1fr))";
+}
+
+
+// ============================================================================
+// 7. GRID AUTO-FILL — like auto-fit but keeps empty tracks
+// ============================================================================
+.awa-grid-auto-fill {
+    display: grid;
+    gap: var(--awa-space-6, 24px);
+    grid-template-columns: ~"repeat(auto-fill, minmax(min(18rem, 100%), 1fr))";
+}
+
+
+// ============================================================================
+// 8. FRAME — aspect-ratio container
+// ============================================================================
+.awa-frame {
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    aspect-ratio: var(--awa-frame-ratio, 1 / 1);
+    background: var(--awa-color-bg-soft, #f7f7f7);
+}
+
+.awa-frame--square        { --awa-frame-ratio: 1 / 1; }
+.awa-frame--16-9          { --awa-frame-ratio: 16 / 9; }
+.awa-frame--4-3           { --awa-frame-ratio: 4 / 3; }
+.awa-frame--3-2           { --awa-frame-ratio: 3 / 2; }
+.awa-frame--2-1           { --awa-frame-ratio: 2 / 1; }
+.awa-frame--21-9          { --awa-frame-ratio: 21 / 9; }
+.awa-frame--portrait      { --awa-frame-ratio: 3 / 4; }
+.awa-frame--portrait-tall { --awa-frame-ratio: 9 / 16; }
+
+.awa-frame > img,
+.awa-frame > video,
+.awa-frame > iframe,
+.awa-frame > svg {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+// ============================================================================
+// 9. COVER — full-viewport hero pattern
+// ============================================================================
+.awa-cover {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: var(--awa-space-6, 24px);
+    min-block-size: 100vh;
+    min-block-size: 100svh;
+    padding-block: var(--awa-space-8, 40px);
+    padding-inline: var(--awa-page-pad-mobile, 16px);
+}
+
+.awa-cover--center {
+    align-items: center;
+    justify-items: center;
+    text-align: center;
+}
+
+.awa-cover__header  { align-self: stretch; }
+.awa-cover__content { align-self: center; inline-size: 100%; }
+.awa-cover__footer  { align-self: stretch; }
+
+@media (min-width: 768px) {
+    .awa-cover { padding-inline: var(--awa-page-pad-tablet, 16px); }
+}
+
+@media (min-width: 1024px) {
+    .awa-cover { padding-inline: var(--awa-page-pad-desktop, 24px); }
+}
+
+
+// ============================================================================
+// 10. BENTO — asymmetric highlight grid
+// ============================================================================
+.awa-bento {
+    display: grid;
+    gap: var(--awa-space-4, 16px);
+    grid-template-areas:
+        "primary   secondary"
+        "primary   tertiary";
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    min-block-size: 24rem;
+}
+
+.awa-bento__primary   { grid-area: primary; }
+.awa-bento__secondary { grid-area: secondary; }
+.awa-bento__tertiary  { grid-area: tertiary; }
+
+.awa-bento--reverse {
+    grid-template-areas:
+        "secondary primary"
+        "tertiary  primary";
+}
+
+@media (max-width: 767px) {
+    .awa-bento,
+    .awa-bento--reverse {
+        grid-template-areas:
+            "primary"
+            "secondary"
+            "tertiary";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        min-block-size: 0;
+    }
+}
+
+
+// ============================================================================
+// 11. CENTER — vertical + horizontal center
+// ============================================================================
+.awa-center {
+    box-sizing: content-box;
+    display: grid;
+    place-items: center;
+    padding-block: var(--awa-space-8, 40px);
+    text-align: center;
+}
+
+.awa-center--narrow {
+    margin-inline: auto;
+    max-inline-size: 48rem;
+    padding-inline: var(--awa-page-pad-mobile, 16px);
+}
+
+.awa-center--wide {
+    margin-inline: auto;
+    max-inline-size: 64rem;
+}
+
+
+// ============================================================================
+// 12. ICON-BOX — 1:1 icon container (Hard Rule from flex-grid-flow)
+// ============================================================================
+.awa-icon-box {
+    display: inline-grid;
+    flex-shrink: 0;
+    place-items: center;
+    aspect-ratio: 1;
+    inline-size: var(--awa-icon-size, 1.5rem);
+    block-size: var(--awa-icon-size, 1.5rem);
+}
+
+.awa-icon-box--xs { --awa-icon-size: 0.875rem; }
+.awa-icon-box--sm { --awa-icon-size: 1rem; }
+.awa-icon-box--md { --awa-icon-size: 1.5rem; }
+.awa-icon-box--lg { --awa-icon-size: 2rem; }
+.awa-icon-box--xl { --awa-icon-size: 3rem; }
+
+
+// ============================================================================
+// 13. CONTAINER QUERIES — components respond to their container
+// ============================================================================
+.awa-card-responsive {
+    container-type: inline-size;
+    container-name: awa-card;
+}
+
+@container awa-card (min-width: 24rem) {
+    .awa-card-responsive {
+        display: grid;
+        grid-template-columns: 8rem 1fr;
+        gap: var(--awa-space-4, 16px);
+    }
+
+    .awa-card-responsive__media {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+    }
+
+    .awa-card-responsive__body  { grid-column: 2; }
+    .awa-card-responsive__cta    { grid-column: 2; align-self: end; }
+}
+
+
+// ============================================================================
+// 14. CONTAINER — max-width with safe inline padding
+// ============================================================================
+.awa-container {
+    margin-inline: auto;
+    max-inline-size: var(--awa-container-max-width, 1280px);
+    padding-inline: var(--awa-page-pad-mobile, 16px);
+}
+
+@media (min-width: 768px) {
+    .awa-container { padding-inline: var(--awa-page-pad-tablet, 16px); }
+}
+
+@media (min-width: 1024px) {
+    .awa-container { padding-inline: var(--awa-page-pad-desktop, 24px); }
+}
+
+.awa-container--wide   { max-inline-size: 1440px; }
+.awa-container--narrow { max-inline-size: 960px; }
+
+
+// ============================================================================
+// 15. VISUALLY HIDDEN — accessible hide (a11y)
+// ============================================================================
+.awa-sr-only {
+    block-size: 1px;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    inline-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+}
+
+
+// ============================================================================
+// 16. GLOBAL DEFAULTS — universal best practices
+// ============================================================================
+
+:focus-visible {
+    outline: 2px solid var(--awa-color-primary, #b73337);
+    outline-offset: 2px;
+}

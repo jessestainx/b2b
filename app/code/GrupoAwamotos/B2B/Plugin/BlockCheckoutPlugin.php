@@ -10,13 +10,12 @@ namespace GrupoAwamotos\B2B\Plugin;
 
 use GrupoAwamotos\B2B\Api\PriceVisibilityInterface;
 use GrupoAwamotos\B2B\Helper\Config;
+use GrupoAwamotos\B2B\Helper\LoginRefererParams;
 use Magento\Checkout\Controller\Index\Index;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session as CustomerSession;
-use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Message\ManagerInterface;
-use Magento\Framework\UrlInterface;
 
 class BlockCheckoutPlugin
 {
@@ -51,14 +50,9 @@ class BlockCheckoutPlugin
     private $checkoutSession;
 
     /**
-     * @var Http
+     * @var LoginRefererParams
      */
-    private $request;
-
-    /**
-     * @var UrlInterface
-     */
-    private $urlBuilder;
+    private $loginRefererParams;
 
     public function __construct(
         PriceVisibilityInterface $priceVisibility,
@@ -67,8 +61,7 @@ class BlockCheckoutPlugin
         ManagerInterface $messageManager,
         CustomerSession $customerSession,
         CheckoutSession $checkoutSession,
-        Http $request,
-        UrlInterface $urlBuilder
+        LoginRefererParams $loginRefererParams
     ) {
         $this->priceVisibility = $priceVisibility;
         $this->config = $config;
@@ -76,8 +69,7 @@ class BlockCheckoutPlugin
         $this->messageManager = $messageManager;
         $this->customerSession = $customerSession;
         $this->checkoutSession = $checkoutSession;
-        $this->request = $request;
-        $this->urlBuilder = $urlBuilder;
+        $this->loginRefererParams = $loginRefererParams;
     }
 
     /**
@@ -107,19 +99,13 @@ class BlockCheckoutPlugin
                 $this->messageManager->addNoticeMessage(
                     __('Faça login no portal B2B para finalizar sua compra.')
                 );
-                return $redirect->setPath('b2b/account/login', $this->getLoginRedirectParams());
+                return $redirect->setPath('b2b/account/login', $this->loginRefererParams->toLoginRedirectParams());
             }
 
             // Cliente logado mas não aprovado
-            if ($this->priceVisibility->isApprovedPendingErp()) {
-                $this->messageManager->addWarningMessage(
-                    __('Sua tabela de preços ainda está sendo vinculada ao ERP. Finalize esse ajuste com o time comercial antes de concluir pedidos.')
-                );
-            } else {
-                $this->messageManager->addWarningMessage(
-                    __('Sua conta está pendente de aprovação. Você não pode finalizar compras até que sua conta seja aprovada.')
-                );
-            }
+            $this->messageManager->addWarningMessage(
+                __('Sua conta está pendente de aprovação. Você não pode finalizar compras até que sua conta seja aprovada.')
+            );
 
             return $redirect->setPath('b2b/account/dashboard');
         }
@@ -146,25 +132,5 @@ class BlockCheckoutPlugin
         }
 
         return $proceed();
-    }
-
-    /**
-     * Preserve the storefront route when checkout is interrupted by strict B2B login.
-     *
-     * @return array<string, string>
-     */
-    private function getLoginRedirectParams(): array
-    {
-        $referer = (string) $this->request->getServer('HTTP_REFERER');
-        if ($referer === '') {
-            return [];
-        }
-
-        $baseUrl = $this->urlBuilder->getBaseUrl();
-        if ($baseUrl === '' || !str_starts_with($referer, $baseUrl)) {
-            return [];
-        }
-
-        return ['referer' => base64_encode($referer)];
     }
 }

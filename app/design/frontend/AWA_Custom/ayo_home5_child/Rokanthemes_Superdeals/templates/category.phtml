@@ -22,17 +22,19 @@
 	if ($desktopItems <= 0) {
 		$desktopItems = 4;
 	}
-	$desktopItems = min($desktopItems, 4);
-	$desktopSmallItems = min($desktopItems, 3);
-	$tabletItems = min($desktopItems, 2);
-	$mobileItems = 2;
+		$desktopItems = min($desktopItems, 5);
+		$desktopSmallItems = min($desktopItems, 3);
+		$tabletItems = min($desktopItems, 2);
+		$mobileItems = 2;
+$b2bPriceGate = $this->helper(\GrupoAwamotos\B2B\Helper\Data::class);
 
 	if ($enabled && $category_load && strtotime($block->getConfig('end_date')) >= strtotime($block->getCurrentTime())) {
 		$image = 'category_image_primary_small';
+	$isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 ?>
-<?php if($this->getConfig('title')){?>
-	<div class="rokan-product-heading rokan-onsale-heading" aria-hidden="true"><h2><?php echo $block->escapeHtml($this->getConfig('title')) ?>  <span class="sup-title"><?php echo $block->escapeHtml(__('Of The Day')) ?></span></h2></div>
-<?php }?>
+<?php if ($this->getConfig('title') && !$isHomePage): ?>
+	<div class="rokan-product-heading rokan-onsale-heading"><h2><?php echo $block->escapeHtml($this->getConfig('title')) ?>  <span class="sup-title"><?php echo $block->escapeHtml(__('Of The Day')) ?></span></h2></div>
+<?php endif; ?>
 <?php
 	$newItems = $block->getProducts();
 	$carouselLabel = (string) __('Super Ofertas');
@@ -40,7 +42,7 @@
 <div class="hot-deal-tab-slider hot-deal-tab-slider-customcss awa-shelf awa-shelf--carousel awa-shelf--has-countdown" data-awa-shelf="super-offers">
 	<div class="awa-shelf__countdown">
 	<div class="countdown_block">
-		<div class="title_countdown"><?php echo $block->escapeHtml(__('Hurry Up! Offer ends in:')) ?></div>
+		<div class="title_countdown"><?php echo $block->escapeHtml(__('Corra! A oferta termina em:')) ?></div>
 		<div class="super-deal-countdown" data-date="<?php echo $block->escapeHtmlAttr($block->getConfig('end_date')); ?>"></div>
 	</div>
 	</div>
@@ -65,14 +67,32 @@
 									<?php $productImageThumb = $block->getImage($_item, 'category_image_second_small');
 									$productImageThumbUrl = (string)$productImageThumb->getImageUrl();
 									$productImagePrimaryUrl = (string)$productImage->getImageUrl();
+									$superMainImgHtml = (string) $productImage->toHtml();
+									$superThumbImgHtml = (string) $productImageThumb->toHtml();
+									if ($isHomePage) {
+										$superMainImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $superMainImgHtml);
+										$superThumbImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $superThumbImgHtml);
+									} elseif ($i < 2) {
+										$superMainImgHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $superMainImgHtml);
+										$superThumbImgHtml = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $superThumbImgHtml);
+									} else {
+										$superMainImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $superMainImgHtml);
+										$superThumbImgHtml = str_replace([' loading="eager"', ' fetchpriority="high"'], [' loading="lazy"', ''], $superThumbImgHtml);
+									}
+									if (strpos($superMainImgHtml, 'decoding=') === false) {
+										$superMainImgHtml = str_replace('<img ', '<img decoding="async" ', $superMainImgHtml);
+									}
+									if (strpos($superThumbImgHtml, 'decoding=') === false) {
+										$superThumbImgHtml = str_replace('<img ', '<img decoding="async" ', $superThumbImgHtml);
+									}
 									?>
 									<span class="first-thumb">
-									 <?php echo $productImage->toHtml(); ?>
+									 <?php echo /* @noEscape */ $superMainImgHtml; ?>
 									</span>
 									<?php $productType = $_item->getTypeID();
 									if ($productType === 'simple' && strpos($productImageThumbUrl, '/placeholder/') === false && $productImageThumbUrl !== $productImagePrimaryUrl): ?>
 									<span class="second-thumb">
-											<?php echo $productImageThumb->toHtml(); ?>
+											<?php echo /* @noEscape */ $superThumbImgHtml; ?>
 										</span>
 				                		<?php endif; ?>
 								</a>
@@ -156,15 +176,22 @@
 										<?php echo $block->getReviewsSummaryHtml($_item, $templateType,true); ?>
 									<?php endif; ?>
 								</div>
-							<?php $cats = $_item->getAttributeText('sold_by'); ?>
-							<?php if (!empty($cats)): ?>
-							<div class="sold-by">
-								<span><?= $block->escapeHtml(__('Sold by:')) ?></span>
-								<?= $block->escapeHtml($cats) ?>
-							</div>
-							<?php endif; ?>
+								<?php $cats = $_item->getAttributeText('sold_by'); ?>
+								<?php if (!empty($cats)): ?>
+								<div class="sold-by">
+									<span><?= $block->escapeHtml(__('Sold by:')) ?></span>
+									<?= $block->escapeHtml($cats) ?>
+								</div>
+								<?php endif; ?>
 								<div class="info-price">
-									<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+									<?php if ($b2bPriceGate->canViewPrices()): ?>
+										<?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_item)) ?>
+									<?php else: ?>
+										<div class="b2b-login-to-see-price">
+											<span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()) ?></span>
+											<span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bPriceGate->getPriceGateDescription()) ?></span>
+										</div>
+									<?php endif; ?>
 								</div>
 								<?php
 									$total = 0;
@@ -246,9 +273,6 @@
 <?php else: ?>
 <script type="text/x-magento-init">
 {
-	"[data-role=tocart-form]": {
-		"catalogAddToCart": {}
-	},
 	".hot-deal-tab-slider-customcss": {
 		"js/superdeals-init": <?= /* @noEscape */ json_encode($awaSuperdealsInitConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>
 	}

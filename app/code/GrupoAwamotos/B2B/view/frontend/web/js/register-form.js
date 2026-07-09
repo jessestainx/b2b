@@ -5,7 +5,8 @@ define([
 ], function ($, urlBuilder) {
     'use strict';
 
-    function escapeHtml(value) {
+    function escapeHtml(value)
+    {
         return String(value)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -66,11 +67,13 @@ define([
         var $stepNext = $stepNav.find('.b2b-register-step-next');
         var $stepIndicator = $stepNav.find('.b2b-register-step-indicator__text');
 
-        function $field(selector) {
+        function $field(selector)
+        {
             return $form.find(selector);
         }
 
-        function hasLeadBeenTracked() {
+        function hasLeadBeenTracked()
+        {
             try {
                 return window.sessionStorage.getItem(leadStorageKey) === '1';
             } catch (error) {
@@ -78,7 +81,8 @@ define([
             }
         }
 
-        function markLeadTracked() {
+        function markLeadTracked()
+        {
             try {
                 window.sessionStorage.setItem(leadStorageKey, '1');
             } catch (error) {
@@ -86,7 +90,8 @@ define([
             }
         }
 
-        function trackLeadStart() {
+        function trackLeadStart()
+        {
             if (leadTriggered || hasLeadBeenTracked()) {
                 return;
             }
@@ -122,7 +127,8 @@ define([
             markLeadTracked();
         }
 
-        function updateRegisterPasswordToggleButton($toggle, isVisible) {
+        function updateRegisterPasswordToggleButton($toggle, isVisible)
+        {
             let isConfirm = $toggle.attr('data-target') === '#password_confirmation';
             let showLabel = isConfirm ? 'Mostrar confirmação de senha' : 'Mostrar senha';
             let hideLabel = isConfirm ? 'Ocultar confirmação de senha' : 'Ocultar senha';
@@ -132,7 +138,8 @@ define([
             $toggle.text(isVisible ? 'Ocultar' : 'Mostrar');
         }
 
-        function initRegisterPasswordToggles() {
+        function initRegisterPasswordToggles()
+        {
             $passwordToggles.each(function () {
                 var $toggle = $(this);
                 let targetSelector = $toggle.attr('data-target');
@@ -156,7 +163,8 @@ define([
             });
         }
 
-        function setHiddenState($element, isHidden) {
+        function setHiddenState($element, isHidden)
+        {
             if (!$element || !$element.length) {
                 return $element;
             }
@@ -168,30 +176,35 @@ define([
             return $element;
         }
 
-        function showBlock($element) {
+        function showBlock($element)
+        {
             setHiddenState($element, false);
             $element.show();
             return $element;
         }
 
-        function hideBlock($element) {
+        function hideBlock($element)
+        {
             $element.hide();
             setHiddenState($element, true);
             return $element;
         }
 
-        function slideShow($element, duration) {
+        function slideShow($element, duration)
+        {
             setHiddenState($element, false);
             return $element.stop(true, true).slideDown(duration || 200);
         }
 
-        function slideHide($element, duration) {
+        function slideHide($element, duration)
+        {
             return $element.stop(true, true).slideUp(duration || 200, function () {
                 setHiddenState($(this), true);
             });
         }
 
-        function setActiveProgressStep(stepNumber) {
+        function setActiveProgressStep(stepNumber)
+        {
             let activeStep = parseInt(stepNumber, 10);
 
             if (!activeStep || !$progressSteps.length) {
@@ -219,7 +232,8 @@ define([
             scrollActiveProgressStepIntoView();
         }
 
-        function getFormValidator() {
+        function getFormValidator()
+        {
             if (typeof $form.valid === 'function') {
                 return $form.validate();
             }
@@ -227,7 +241,8 @@ define([
             return $form.data('validator') || null;
         }
 
-        function validateStepFields(stepNumber, validationOptions) {
+        function validateStepFields(stepNumber, validationOptions)
+        {
             validationOptions = validationOptions || {};
             var $section = $stepSections.filter('[data-step="' + stepNumber + '"]').first();
             var valid = true;
@@ -248,15 +263,32 @@ define([
                     return;
                 }
 
+                clearInlineFieldError($input);
+
                 if (validator && typeof validator.element === 'function') {
                     if (!validator.element(this)) {
+                        if (!validationOptions.silent) {
+                            ensureInlineFieldError($input, resolveFieldValidationMessage($input));
+                        }
                         valid = false;
                     }
                     return;
                 }
 
                 if ($input.prop('required') && $.trim(String($input.val() || '')) === '') {
+                    if (!validationOptions.silent) {
+                        ensureInlineFieldError($input, resolveFieldValidationMessage($input));
+                    }
                     valid = false;
+                    return;
+                }
+
+                if (!validationOptions.silent && $.trim(String($input.val() || '')) !== '') {
+                    let customMessage = resolveFieldValidationMessage($input);
+                    if (customMessage !== '') {
+                        ensureInlineFieldError($input, customMessage);
+                        valid = false;
+                    }
                 }
             });
 
@@ -292,7 +324,8 @@ define([
             return valid;
         }
 
-        function updateStepNav() {
+        function updateStepNav()
+        {
             if (!$stepNav.length) {
                 return;
             }
@@ -320,7 +353,8 @@ define([
             }
         }
 
-        function initStepNavigation() {
+        function initStepNavigation()
+        {
             if (!$stepNav.length) {
                 return;
             }
@@ -353,7 +387,8 @@ define([
             });
         }
 
-        function validateStepsBeforeTarget(targetStep) {
+        function validateStepsBeforeTarget(targetStep)
+        {
             let step = currentProgressStep;
 
             while (step < targetStep) {
@@ -368,7 +403,8 @@ define([
             return true;
         }
 
-        function syncProgressFromFocus($target) {
+        function syncProgressFromFocus($target)
+        {
             var $section = $target.closest('.form-section');
             let stepNumber = $section.data('step');
 
@@ -385,7 +421,8 @@ define([
             }
         }
 
-        function scrollActiveProgressStepIntoView() {
+        function scrollActiveProgressStepIntoView()
+        {
             var $activeStep;
             let supportsSmooth = !!(window.CSS && window.CSS.supports && window.CSS.supports('scroll-behavior', 'smooth'));
 
@@ -410,7 +447,8 @@ define([
             }
         }
 
-        function isCompactBenefitsViewport() {
+        function isCompactBenefitsViewport()
+        {
             if (window.innerWidth <= 768) {
                 return true;
             }
@@ -422,7 +460,8 @@ define([
             return false;
         }
 
-        function setBenefitsExpanded(isExpanded, animate) {
+        function setBenefitsExpanded(isExpanded, animate)
+        {
             if (!$benefitsToggle.length || !$benefitsPanel.length) {
                 return;
             }
@@ -445,7 +484,8 @@ define([
             }
         }
 
-        function syncBenefitsDisclosure() {
+        function syncBenefitsDisclosure()
+        {
             let compactMode = isCompactBenefitsViewport();
 
             if (!$benefitsToggle.length || !$benefitsPanel.length) {
@@ -462,15 +502,18 @@ define([
             lastBenefitsCompactMode = true;
         }
 
-        function getStepSectionBody($section) {
+        function getStepSectionBody($section)
+        {
             return $section.children('.form-section__body').first();
         }
 
-        function getStepSectionToggle($section) {
+        function getStepSectionToggle($section)
+        {
             return $section.children('.form-section__heading').find('.form-section__toggle').first();
         }
 
-        function initStepSectionAccordionMarkup() {
+        function initStepSectionAccordionMarkup()
+        {
             $stepSections.each(function (index) {
                 var $section = $(this);
                 var $heading = $section.children('h2, h3').first();
@@ -527,7 +570,8 @@ define([
             });
         }
 
-        function setStepSectionExpanded($section, isExpanded, animate) {
+        function setStepSectionExpanded($section, isExpanded, animate)
+        {
             var $body = getStepSectionBody($section);
             var $toggle = getStepSectionToggle($section);
 
@@ -555,7 +599,8 @@ define([
             }
         }
 
-        function openStepSection($section, animate, collapseSiblings) {
+        function openStepSection($section, animate, collapseSiblings)
+        {
             let shouldCollapseSiblings = collapseSiblings;
 
             if (!$section || !$section.length || !$stepSections.length) {
@@ -575,7 +620,8 @@ define([
             setStepSectionExpanded($section, true, animate);
         }
 
-        function expandAllStepSections(animate) {
+        function expandAllStepSections(animate)
+        {
             if (!$stepSections.length) {
                 return;
             }
@@ -585,7 +631,8 @@ define([
             });
         }
 
-        function syncStepSectionsDisclosure() {
+        function syncStepSectionsDisclosure()
+        {
             let compactMode = isCompactBenefitsViewport();
             var $activeSection = $stepSections.filter('[data-step="' + currentProgressStep + '"]').first();
 
@@ -604,7 +651,8 @@ define([
             }
         }
 
-        function goToStepSection(stepNumber, animate) {
+        function goToStepSection(stepNumber, animate)
+        {
             var $section = $stepSections.filter('[data-step="' + stepNumber + '"]').first();
 
             if (!$section.length) {
@@ -616,7 +664,8 @@ define([
             scrollToSection($section);
         }
 
-        function initIeIsentoToggle() {
+        function initIeIsentoToggle()
+        {
             var $ieCheckbox = $field('#ie_isento');
             var $ieInput = $field('#inscricao_estadual');
             var $ieField = $form.find('.field-ie-input');
@@ -625,7 +674,8 @@ define([
                 return;
             }
 
-            function syncIeIsentoState() {
+            function syncIeIsentoState()
+            {
                 let isExempt = $ieCheckbox.is(':checked');
 
                 $ieField.toggleClass('is-disabled', isExempt);
@@ -640,33 +690,43 @@ define([
             syncIeIsentoState();
         }
 
-        function syncProgressFromViewport() {
+        function syncProgressFromViewport()
+        {
             // Acordeão por etapa: progresso é controlado pelo stepper e foco, não pelo scroll.
         }
 
-        function scheduleProgressViewportSync() {
+        function scheduleProgressViewportSync()
+        {
             // noop — scroll sync desativado com acordeão em todos os breakpoints
         }
 
-        function fieldHasValue(selector) {
+        function fieldHasValue(selector)
+        {
             return $.trim(String($field(selector).val() || '')) !== '';
         }
 
-        function getPasswordClassCount(password) {
+        function getPasswordClassCount(password)
+        {
             let classes = 0;
-            if (/[a-z]/.test(password)) { classes++; }
-            if (/[A-Z]/.test(password)) { classes++; }
-            if (/[0-9]/.test(password)) { classes++; }
-            if (/[^a-zA-Z0-9]/.test(password)) { classes++; }
+            if (/[a-z]/.test(password)) {
+                classes++; }
+            if (/[A-Z]/.test(password)) {
+                classes++; }
+            if (/[0-9]/.test(password)) {
+                classes++; }
+            if (/[^a-zA-Z0-9]/.test(password)) {
+                classes++; }
             return classes;
         }
 
-        function isPasswordComplexEnough(password) {
+        function isPasswordComplexEnough(password)
+        {
             return String(password || '').length >= passwordMinLength
                 && getPasswordClassCount(String(password || '')) >= passwordMinClasses;
         }
 
-        function isStepComplete(stepIndex) {
+        function isStepComplete(stepIndex)
+        {
             if (stepIndex === 1) {
                 return fieldHasValue('#cnpj') && fieldHasValue('#razao_social') && fieldHasValue('#phone') && cnpjValidated;
             }
@@ -695,7 +755,8 @@ define([
             return false;
         }
 
-        function updateProgressCompletionState() {
+        function updateProgressCompletionState()
+        {
             if (!$progressSteps.length) {
                 return;
             }
@@ -710,7 +771,8 @@ define([
             });
         }
 
-        function refreshFieldAndSectionErrorStates() {
+        function refreshFieldAndSectionErrorStates()
+        {
             $form.find('.field').each(function () {
                 var $wrapper = $(this);
                 let hasError = $wrapper.hasClass('_error') || $wrapper.find('.mage-error:visible').length > 0;
@@ -729,7 +791,8 @@ define([
             }
         }
 
-        function focusFirstFieldInSection($section) {
+        function focusFirstFieldInSection($section)
+        {
             var $target;
 
             if (!$section || !$section.length) {
@@ -749,7 +812,8 @@ define([
             }
         }
 
-        function scrollToSection($section) {
+        function scrollToSection($section)
+        {
             let topOffset;
             let prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             let scrollOffset = isCompactBenefitsViewport() ? 86 : 18;
@@ -768,7 +832,8 @@ define([
             $('html, body').stop(true).animate({ scrollTop: topOffset }, 240);
         }
 
-        function announceFormStatus(message) {
+        function announceFormStatus(message)
+        {
             var $region = $('#b2b-register-form-status');
 
             if (!$region.length) {
@@ -778,7 +843,8 @@ define([
             $region.text(message || '');
         }
 
-        function getFieldLabel($input) {
+        function getFieldLabel($input)
+        {
             var id = $input.attr('id');
             var $label;
 
@@ -792,7 +858,66 @@ define([
             return $input.attr('title') || $input.attr('name') || 'Campo';
         }
 
-        function announceValidationErrors() {
+        function clearInlineFieldError($input)
+        {
+            var $field = $input.closest('.field');
+            $field.removeClass('_error');
+            $field.find('.awa-field-error').remove();
+        }
+
+        function ensureInlineFieldError($input, message)
+        {
+            var $field = $input.closest('.field');
+            var $control = $field.find('.control').first();
+            var $error = $field.find('.awa-field-error');
+
+            $field.addClass('_error');
+            $input.attr('aria-invalid', 'true');
+
+            if (!$error.length) {
+                $error = $('<div/>', {
+                    class: 'awa-field-error mage-error',
+                    role: 'alert'
+                });
+                ($control.length ? $control : $field).append($error);
+            }
+
+            $error.text(message).show();
+        }
+
+        function resolveFieldValidationMessage($input)
+        {
+            var name = String($input.attr('name') || '');
+            var value = $.trim(String($input.val() || ''));
+            var digits;
+
+            if ($input.prop('required') && value === '') {
+                return 'Preencha ' + getFieldLabel($input) + '.';
+            }
+
+            if (name === 'cnpj') {
+                digits = value.replace(/\D/g, '');
+                if (digits.length > 0 && digits.length !== 14) {
+                    return 'Informe um CNPJ válido com 14 dígitos.';
+                }
+            }
+
+            if (name === 'telefone' || name === 'whatsapp') {
+                digits = value.replace(/\D/g, '');
+                if (digits.length > 0 && (digits.length < 10 || digits.length > 11)) {
+                    return 'Informe um telefone válido com DDD.';
+                }
+            }
+
+            if ($input.attr('type') === 'email' && value !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                return 'Informe um e-mail válido.';
+            }
+
+            return '';
+        }
+
+        function announceValidationErrors()
+        {
             var $invalidFields = $form.find('.field._error input, .field._error select, .field._error textarea')
                 .filter(':visible');
             var count = $invalidFields.length;
@@ -812,7 +937,8 @@ define([
             announceFormStatus(count + ' campos precisam de correção. Primeiro: ' + firstLabel + '.');
         }
 
-        function focusFirstInvalidField() {
+        function focusFirstInvalidField()
+        {
             var $firstInvalid = $form.find('.field._error input, .field._error select, .field._error textarea')
                 .filter(':visible')
                 .first();
@@ -835,7 +961,8 @@ define([
             }, 60);
         }
 
-        function maskCnpj(value) {
+        function maskCnpj(value)
+        {
             let masked = value.replace(/\D/g, '');
 
             if (masked.length <= 14) {
@@ -848,7 +975,8 @@ define([
             return masked;
         }
 
-        function maskPhone(value) {
+        function maskPhone(value)
+        {
             let digits = String(value).replace(/\D/g, '').substring(0, 11);
 
             if (!digits.length) {
@@ -870,7 +998,8 @@ define([
             return '(' + digits.substring(0, 2) + ') ' + digits.substring(2, 7) + '-' + digits.substring(7);
         }
 
-        function maskCep(value) {
+        function maskCep(value)
+        {
             let masked = value.replace(/\D/g, '');
 
             if (masked.length > 5) {
@@ -880,7 +1009,8 @@ define([
             return masked;
         }
 
-        function setCepLoading(isLoading) {
+        function setCepLoading(isLoading)
+        {
             var $feedback = $('#cep-feedback');
 
             if (!$feedback.length) {
@@ -891,7 +1021,8 @@ define([
             $feedback.text(isLoading ? 'Consultando CEP...' : '');
         }
 
-        function lookupRegisterCep(cep) {
+        function lookupRegisterCep(cep)
+        {
             let clean = String(cep).replace(/\D/g, '');
 
             if (clean.length !== 8 || !cepLookupUrl) {
@@ -930,14 +1061,16 @@ define([
             });
         }
 
-        function normalizeClassSuffix(value) {
+        function normalizeClassSuffix(value)
+        {
             return String(value || '')
                 .toLowerCase()
                 .replace(/[^a-z0-9_-]+/g, '-')
                 .replace(/^-+|-+$/g, '') || 'indefinida';
         }
 
-        function setCnpjStatus(type, message, options) {
+        function setCnpjStatus(type, message, options)
+        {
             var $status = $field('#cnpj-status');
             var $feedback = $field('#cnpj-feedback');
             var $message;
@@ -1000,7 +1133,8 @@ define([
             }
         }
 
-        function updateSubmitState() {
+        function updateSubmitState()
+        {
             var $submit = $form.find('.actions-toolbar .create-b2b-account');
             let digits = ($field('#cnpj').val() || '').replace(/\D/g, '');
 
@@ -1017,7 +1151,8 @@ define([
             $submit.prop('disabled', false).removeClass('cnpj-pending');
         }
 
-        function resetCnpjStatus() {
+        function resetCnpjStatus()
+        {
             $field('#cnpj-status')
                 .removeClass('status-loading status-success status-error')
                 .html('');
@@ -1034,7 +1169,8 @@ define([
             refreshFieldAndSectionErrorStates();
         }
 
-        function showErpEmailAlert() {
+        function showErpEmailAlert()
+        {
             var $alert = $field('#erp-email-alert');
             let currentEmail = ($field('#email').val() || '').trim().toLowerCase();
 
@@ -1084,11 +1220,13 @@ define([
             slideShow($alert, 200);
         }
 
-        function isValidEmail(email) {
+        function isValidEmail(email)
+        {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        function updateEmailCheckAlert() {
+        function updateEmailCheckAlert()
+        {
             let email = ($field('#email').val() || '').trim();
             let password = $field('#password').val() || '';
             let passwordConfirmation = $field('#password_confirmation').val() || '';
@@ -1111,7 +1249,8 @@ define([
             slideHide($alert, 120).empty();
         }
 
-        function startRateLimitCountdown(seconds) {
+        function startRateLimitCountdown(seconds)
+        {
             let remaining = seconds;
             var $cnpj = $field('#cnpj');
 
@@ -1144,7 +1283,8 @@ define([
             }, 1000);
         }
 
-        function consultarCnpj(cnpj, forceRefresh) {
+        function consultarCnpj(cnpj, forceRefresh)
+        {
             if (!cnpjValidateUrl) {
                 return;
             }
@@ -1545,7 +1685,8 @@ define([
             return true;
         });
 
-        function getPasswordStrength(password) {
+        function getPasswordStrength(password)
+        {
             let classes = getPasswordClassCount(password);
 
             if (password.length === 0) {
@@ -1563,10 +1704,12 @@ define([
             return 'strong';
         }
 
-        function initPasswordStrengthMeter() {
+        function initPasswordStrengthMeter()
+        {
             var $meter = $field('#password-strength-meter');
             var $label = $field('#password-strength-label');
-            if (!$meter.length) { return; }
+            if (!$meter.length) {
+                return; }
             let strengthLabels = { weak: 'Fraca', medium: 'Média', strong: 'Forte' };
             $field('#password').on('input.strengthMeter', function () {
                 let strength = getPasswordStrength(String($(this).val() || ''));

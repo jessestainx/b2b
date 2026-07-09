@@ -38,6 +38,7 @@ class CancelStuckOrdersCommand extends Command
         try {
             $this->appState->setAreaCode(Area::AREA_ADMINHTML);
         } catch (LocalizedException) {
+            // Area code já definido pelo bootstrap do CLI — seguro ignorar.
         }
 
         $incrementId = $input->getOption('increment-id');

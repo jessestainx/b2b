@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Credit;
 
 use GrupoAwamotos\B2B\Model\CreditService;
@@ -16,13 +18,16 @@ class Save extends Action implements HttpPostActionInterface
         Context $context,
         private readonly CreditService $creditService,
         private readonly AdminSession $adminSession
-    ) { parent::__construct($context); }
+    ) { parent::__construct($context);
+    }
 
     public function execute()
     {
         $redirect = $this->resultRedirectFactory->create();
         $data = $this->getRequest()->getPostValue();
-        if (!$data) return $redirect->setPath('*/*/');
+        if (!$data) {
+            return $redirect->setPath('*/*/');
+        }
 
         $customerId   = (int)   ($data['customer_id']   ?? 0);
         $limitValue   = (float) ($data['credit_limit']   ?? 0.0);

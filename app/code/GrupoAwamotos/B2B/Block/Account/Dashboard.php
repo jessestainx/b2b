@@ -139,6 +139,17 @@ class Dashboard extends Template
     }
 
     /**
+     * Format customer/company name for display (title-case for ERP all-caps imports).
+     *
+     * @param string|null $name
+     * @return string
+     */
+    public function formatDisplayName(?string $name): string
+    {
+        return $this->b2bHelper->formatDisplayName($name);
+    }
+
+    /**
      * Get current customer
      *
      * @return \Magento\Customer\Api\Data\CustomerInterface|null

@@ -162,15 +162,16 @@ define([], function () {
         }
 
         let attempts = 0;
+        const MAX_ATTEMPTS = 24;
 
         function tick() {
             attempts += 1;
 
-            if (install() || attempts > 120) {
+            if (install() || attempts >= MAX_ATTEMPTS) {
                 return;
             }
 
-            window.requestAnimationFrame(tick);
+            window.setTimeout(tick, 100);
         }
 
         if (document.readyState === 'loading') {

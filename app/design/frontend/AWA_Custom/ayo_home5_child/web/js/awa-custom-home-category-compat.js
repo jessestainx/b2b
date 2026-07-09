@@ -153,7 +153,91 @@ define(['jquery'], function ($) {
         }
     }
 
+    /* ---- PLP live region (filter/AJAX updates) ---- */
+    function ensurePlpLiveRegion() {
+        if (!document.getElementById('awa-plp-live-region')) {
+            var live = document.createElement('div');
+            live.id = 'awa-plp-live-region';
+            live.className = 'sr-only';
+            live.setAttribute('role', 'status');
+            live.setAttribute('aria-live', 'polite');
+            live.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(live);
+        }
+    }
+
+    function announcePlpUpdate(message) {
+        var live = document.getElementById('awa-plp-live-region');
+        if (!live || !message) { return; }
+        live.textContent = '';
+        window.setTimeout(function () {
+            live.textContent = message;
+        }, 60);
+    }
+
+    function bindPlpContentUpdated() {
+        if (window.__awaPlpContentUpdatedBound) { return; }
+        window.__awaPlpContentUpdatedBound = true;
+
+        $(document).on('contentUpdated', '#layered-ajax-list-products, #layered-ajax-filter-block', function () {
+            applyPlpA11y();
+            applyProductCardA11y();
+            var countEl = document.querySelector('#toolbar-amount-top, #toolbar-amount-bottom, .toolbar-amount');
+            var countText = countEl ? trimText(countEl.textContent) : '';
+            announcePlpUpdate(countText ? ('Lista atualizada. ' + countText) : 'Lista de produtos atualizada.');
+        });
+    }
+
+    function bindFilterOverlayWatchdog() {
+        if (window.__awaFilterOverlayWatchdog) { return; }
+        window.__awaFilterOverlayWatchdog = true;
+
+        var overlayTimer = null;
+        var hideStuckOverlay = function () {
+            var $overlay = $('#layered_ajax_overlay');
+            if (!$overlay.length || !$overlay.is(':visible')) { return; }
+            $overlay.hide().attr('aria-hidden', 'true');
+            announcePlpUpdate('Não foi possível atualizar os filtros. A página foi restaurada.');
+        };
+
+        $(document).ajaxSend(function (_e, _xhr, settings) {
+            if (!settings || !settings.url || settings.url.indexOf('isAjax=1') === -1) { return; }
+            window.clearTimeout(overlayTimer);
+            overlayTimer = window.setTimeout(hideStuckOverlay, 20000);
+        });
+
+        $(document).ajaxComplete(function () {
+            window.clearTimeout(overlayTimer);
+            var $overlay = $('#layered_ajax_overlay');
+            if ($overlay.length && !$overlay.is(':visible')) {
+                $overlay.attr('aria-hidden', 'true');
+            }
+        });
+    }
+
     /* ---- PLP / Filters ---- */
+    function ensureFilterTitle() {
+        var blocks = document.querySelectorAll('#layered-ajax-filter-block, .sidebar-main .block.filter, .block.filter');
+        var i;
+        var block;
+        var content;
+        var title;
+
+        for (i = 0; i < blocks.length; i++) {
+            block = blocks[i];
+            content = block.querySelector('.block-content.filter-content');
+            if (!content || content.querySelector('.block-title.filter-title')) {
+                continue;
+            }
+            title = document.createElement('div');
+            title.className = 'block-title filter-title';
+            title.setAttribute('role', 'heading');
+            title.setAttribute('aria-level', '2');
+            title.innerHTML = '<strong data-role="title">Comprar por</strong>';
+            content.insertBefore(title, content.firstChild);
+        }
+    }
+
     function applyPlpA11y() {
         let isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
         let isCategoryOrSearch = document.body &&
@@ -163,6 +247,9 @@ define(['jquery'], function ($) {
         $('.toolbar.toolbar-products').each(function () {
             $(this).attr('data-awa-component', $(this).attr('data-awa-component') || 'plp-toolbar');
         });
+
+        /* Filter panel heading — FPC/AJAX pode omitir .filter-title do template */
+        ensureFilterTitle();
 
         /* Layered filter groups */
         $('.filter-options-item').each(function () {
@@ -199,6 +286,22 @@ define(['jquery'], function ($) {
             }
         });
 
+        var $layerOverlay = $('#layered_ajax_overlay');
+        if ($layerOverlay.length && !$layerOverlay.data('awa-overlay-a11y')) {
+            $layerOverlay.data('awa-overlay-a11y', true);
+            var overlayNode = $layerOverlay.get(0);
+            if (overlayNode && typeof MutationObserver !== 'undefined') {
+                var syncOverlayA11y = function () {
+                    $layerOverlay.attr('aria-hidden', $layerOverlay.is(':visible') ? 'false' : 'true');
+                };
+                syncOverlayA11y();
+                new MutationObserver(syncOverlayA11y).observe(overlayNode, {
+                    attributes: true,
+                    attributeFilter: ['style', 'class']
+                });
+            }
+        }
+
         /* Mobile filter toggle */
         if (isCategoryOrSearch) {
             var $body    = $('body');
@@ -210,9 +313,11 @@ define(['jquery'], function ($) {
                 $label.attr({ role: 'button', tabindex: '0', 'data-awa-filter-toggle': 'true' });
 
                 if (isMobile && !$body.attr('data-awa-filter-init')) {
-                    $body.attr('data-awa-filter-init', 'true').addClass('awa-plp-filters-collapsed');
+                    $body.attr('data-awa-filter-init', 'true')
+                        .addClass('awa-plp-filters-collapsed')
+                        .removeClass('awa-plp-filters-expanded');
                 } else if (!isMobile) {
-                    $body.removeClass('awa-plp-filters-collapsed');
+                    $body.removeClass('awa-plp-filters-collapsed awa-plp-filters-expanded');
                 }
 
                 $label.off('keydown.awaFilterToggle').on('keydown.awaFilterToggle', function (e) {
@@ -228,6 +333,7 @@ define(['jquery'], function ($) {
                         if (isMobile) {
                             e.preventDefault();
                             $body.toggleClass('awa-plp-filters-collapsed');
+                            $body.toggleClass('awa-plp-filters-expanded', !$body.hasClass('awa-plp-filters-collapsed'));
                             updateFilterLabel();
                         }
                     });
@@ -336,9 +442,36 @@ define(['jquery'], function ($) {
         return false;
     }
 
+    function resolveObserverRoots() {
+        let roots = [];
+        let home = document.querySelector('.content-top-home');
+        let main = document.querySelector('.page-main, .column.main, #maincontent');
+        let nav = document.querySelector('.navigation.verticalmenu, .navigation.custommenu');
+
+        if (home) {
+            roots.push(home);
+        }
+        if (main) {
+            roots.push(main);
+        }
+        if (nav) {
+            roots.push(nav);
+        }
+
+        return roots;
+    }
+
     function setupObserver() {
+        let roots;
+        let i;
+
         if (!window.MutationObserver || window[OBSERVER_KEY]) { return; }
         if (!document.body) { return; }
+
+        roots = resolveObserverRoots();
+        if (!roots.length) {
+            return;
+        }
 
         window[OBSERVER_KEY] = new window.MutationObserver(function (mutations) {
             if (!hasRelevantNode(mutations)) { return; }
@@ -351,12 +484,32 @@ define(['jquery'], function ($) {
             schedule();
         });
 
-        window[OBSERVER_KEY].observe(document.body, { childList: true, subtree: true });
+        for (i = 0; i < roots.length; i++) {
+            window[OBSERVER_KEY].observe(roots[i], { childList: true, subtree: true });
+        }
     }
 
     /* ---- Entry point (called by awa-custom-compat-bootstrap.js) ---- */
     return function () {
         if (!isRelevantPage()) { return; }
+
+        /* PLP: filtros recolhidos + toggle antes do defer de 5s (adapt mobile) */
+        if (document.body.classList.contains('catalog-category-view') ||
+            document.body.classList.contains('catalogsearch-result-index')) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', ensureFilterTitle);
+            } else {
+                ensureFilterTitle();
+            }
+            document.addEventListener('contentUpdated', ensureFilterTitle);
+
+            $(function () {
+                ensurePlpLiveRegion();
+                bindPlpContentUpdated();
+                bindFilterOverlayWatchdog();
+                applyPlpA11y();
+            });
+        }
 
         /* Adiado para apos o LCP:
          * runAll() imediato ou em 2000ms causava long tasks que criavam

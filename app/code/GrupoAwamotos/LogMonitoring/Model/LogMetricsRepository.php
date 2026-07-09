@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Model;
@@ -49,7 +50,7 @@ class LogMetricsRepository implements LogMetricsRepositoryInterface
             $this->logger->error('Error saving log metrics: ' . $e->getMessage());
             throw new LocalizedException(__('Unable to save log metrics: %1', $e->getMessage()));
         }
-        
+
         return $logMetrics;
     }
 
@@ -57,18 +58,18 @@ class LogMetricsRepository implements LogMetricsRepositoryInterface
     {
         $logMetrics = $this->logMetricsFactory->create();
         $this->resource->load($logMetrics, $id);
-        
+
         if (!$logMetrics->getEntityId()) {
             throw new NoSuchEntityException(__('Log metrics with ID %1 does not exist', $id));
         }
-        
+
         return $logMetrics;
     }
 
     public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
     {
         $collection = $this->collectionFactory->create();
-        
+
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
             foreach ($filterGroup->getFilters() as $filter) {
                 $condition = $filter->getConditionType() ?: 'eq';
@@ -99,7 +100,7 @@ class LogMetricsRepository implements LogMetricsRepositoryInterface
             $this->logger->error('Error deleting log metrics: ' . $e->getMessage());
             throw new LocalizedException(__('Unable to delete log metrics: %1', $e->getMessage()));
         }
-        
+
         return true;
     }
 
@@ -141,9 +142,9 @@ class LogMetricsRepository implements LogMetricsRepositoryInterface
     {
         $connection = $this->resource->getConnection();
         $tableName = $this->resource->getMainTable();
-        
+
         $fromDate = date('Y-m-d H:i:s', strtotime("-{$days} days"));
-        
+
         $select = $connection->select()
             ->from(
                 $tableName,

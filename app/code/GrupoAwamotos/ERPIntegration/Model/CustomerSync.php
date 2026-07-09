@@ -22,12 +22,12 @@ use Magento\Framework\Math\Random;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\App\State as AppState;
 use Magento\Store\Model\StoreManagerInterface;
+use GrupoAwamotos\B2B\Service\CustomerGroupManager;
 use Psr\Log\LoggerInterface;
 
 class CustomerSync implements CustomerSyncInterface
 {
     private const BATCH_SIZE = 100;
-    private const CUSTOMER_GROUP_B2B = 4; // Grupo B2B (Revendedor)
 
     private ConnectionInterface $connection;
     private Helper $helper;
@@ -45,6 +45,7 @@ class CustomerSync implements CustomerSyncInterface
     private Random $random;
     private EncryptorInterface $encryptor;
     private AppState $appState;
+    private ?CustomerGroupManager $customerGroupManager;
 
     private array $regionCache = [];
     private array $erpMappingCache = [];
@@ -65,7 +66,8 @@ class CustomerSync implements CustomerSyncInterface
         LoggerInterface $logger,
         Random $random,
         EncryptorInterface $encryptor,
-        AppState $appState
+        AppState $appState,
+        ?CustomerGroupManager $customerGroupManager = null
     ) {
         $this->connection = $connection;
         $this->helper = $helper;
@@ -83,6 +85,7 @@ class CustomerSync implements CustomerSyncInterface
         $this->random = $random;
         $this->encryptor = $encryptor;
         $this->appState = $appState;
+        $this->customerGroupManager = $customerGroupManager;
     }
 
     public function getErpCustomerByTaxvat(string $taxvat): ?array
@@ -351,7 +354,7 @@ class CustomerSync implements CustomerSyncInterface
                 'customer',
                 (string)$erpCode,
                 $customerId,
-                md5(json_encode($erpCustomer))
+                hash('xxh128', json_encode($erpCustomer))
             );
 
             // Atualiza atributo custom no cliente
@@ -541,7 +544,7 @@ class CustomerSync implements CustomerSyncInterface
         }
 
         $erpCode = (int)$row['CODIGO'];
-        $dataHash = md5(json_encode($row));
+        $dataHash = hash('xxh128', json_encode($row));
 
         // Verifica se dados mudaram desde último sync
         $existingHash = $this->syncLogResource->getEntityMapHash('customer', (string)$erpCode);
@@ -601,7 +604,10 @@ class CustomerSync implements CustomerSyncInterface
 
         // Grupo de cliente (B2B se for pessoa jurídica)
         if ($isPJ) {
-            $customer->setGroupId(self::CUSTOMER_GROUP_B2B);
+            $approvedGroupId = $this->resolveApprovedB2bGroupId();
+            if ($approvedGroupId !== null) {
+                $customer->setGroupId($approvedGroupId);
+            }
             // Clientes criados pelo ERP sync já são clientes aprovados — garantir que o
             // atributo b2b_approval_status reflita isso para que PriceVisibility mostre preços.
             $customer->setCustomAttribute('b2b_approval_status', 'approved');
@@ -1018,5 +1024,19 @@ class CustomerSync implements CustomerSyncInterface
         }
 
         return null;
+    }
+
+    private function resolveApprovedB2bGroupId(): ?int
+    {
+        if ($this->customerGroupManager === null) {
+            return null;
+        }
+
+        try {
+            return $this->customerGroupManager->getGroupIdByName(CustomerGroupManager::GROUP_NAME_APPROVED);
+        } catch (\Throwable $e) {
+            $this->logger->warning('[ERP] Could not resolve approved B2B group dynamically: ' . $e->getMessage());
+            return null;
+        }
     }
 }

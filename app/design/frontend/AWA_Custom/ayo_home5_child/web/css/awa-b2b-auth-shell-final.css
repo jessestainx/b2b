@@ -8,7 +8,7 @@ body#html-body.b2b-auth-shell :is(.b2b-login-card, #b2b-register-shell.b2b-login
     border: 1px solid var(--awa-border, #e5e7eb) !important;
     border-radius: var(--b2b-auth-radius-card, 8px) !important;
     box-shadow: none !important;
-    background: var(--awa-bg, #fff) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
 }
 
 body#html-body.b2b-auth-shell:not(.b2b-register-index) .b2b-login-card {
@@ -124,7 +124,7 @@ body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-step-nav {
 body#html-body.b2b-auth-shell.b2b-account-login .page-wrapper .b2b-login-card {
     display: grid !important;
     gap: var(--b2b-auth-gap-md, 12px) !important;
-    background: var(--awa-bg, #fff) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
 }
 
 body#html-body.b2b-auth-shell.b2b-account-login .page-wrapper .b2b-login-form,
@@ -184,7 +184,7 @@ body#html-body.b2b-auth-shell.b2b-account-login .page-wrapper .b2b-password-togg
     padding: 0 !important;
     border: 1px solid var(--awa-color-border, #d1d5db) !important;
     border-radius: 8px !important;
-    background: var(--awa-bg-surface, #fff) !important;
+    background: var(--awa-bg-surface, var(--awa-bg)) !important;
 }
 
 body#html-body.b2b-auth-shell.b2b-account-login .page-wrapper .b2b-login-divider {
@@ -200,11 +200,11 @@ body#html-body.b2b-auth-shell.b2b-account-login .page-wrapper .b2b-login-divider
     content: "" !important;
     flex: 1 1 auto !important;
     height: 1px !important;
-    background: var(--awa-color-border, #e5e5e5) !important;
+    background: var(--awa-color-border, var(--awa-border)) !important;
 }
 
 body#html-body.b2b-auth-shell.b2b-account-login .page-wrapper .b2b-login-divider span {
-    color: var(--awa-text-muted, #666) !important;
+    color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
     font-size: var(--b2b-auth-font-label, 13px) !important;
     font-weight: 600 !important;
     line-height: 1.35 !important;
@@ -332,18 +332,18 @@ body#html-body.b2b-auth-shell:not(.b2b-register-index) :is(.b2b-btn-register, .b
     box-sizing: border-box !important;
 }
 
-/* WhatsApp auth — contraste WCAG AA (#fff sobre verde escuro da marca) */
+/* WhatsApp auth — contraste WCAG AA (var(--awa-bg) sobre verde escuro da marca) */
 body#html-body.b2b-auth-shell :is(.b2b-login-page, .page-wrapper) .b2b-login-whatsapp {
     background: #117a6f !important;
     border-color: #117a6f !important;
-    color: #fff !important;
+    color: var(--awa-bg) !important;
 }
 
 body#html-body.b2b-auth-shell :is(.b2b-login-page, .page-wrapper) .b2b-login-whatsapp:hover,
 body#html-body.b2b-auth-shell :is(.b2b-login-page, .page-wrapper) .b2b-login-whatsapp:focus-visible {
     background: #075e54 !important;
     border-color: #075e54 !important;
-    color: #fff !important;
+    color: var(--awa-bg) !important;
 }
 
 /* ============================================================
@@ -518,7 +518,7 @@ body#html-body.b2b-auth-shell .b2b-auth-back-link {
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: var(--awa-text-muted, #666);
+    color: var(--awa-text-muted, var(--awa-text-secondary));
     text-decoration: none;
     white-space: nowrap;
     padding: 6px 0;

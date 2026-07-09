@@ -1,4 +1,68 @@
 <?php
 declare(strict_types=1);
 ?>
-<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-home-product-promo-banners.js')) ?>" defer></script>
+<script>
+(function (w, d) {
+    'use strict';
+    if (w.__awaHomeProductPromoBannersScriptLoaded) {
+        return;
+    }
+
+    var section = d.querySelector('.awa-product-promo-banners');
+    if (!section) {
+        return;
+    }
+
+    w.__awaHomeProductPromoBannersScriptLoaded = true;
+    var scriptUrl = <?= json_encode($block->getViewFileUrl('js/awa-home-product-promo-banners.js'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    var loaded = false;
+
+    function injectScript() {
+        if (loaded) {
+            return;
+        }
+        loaded = true;
+
+        var s = d.createElement('script');
+        s.src = scriptUrl;
+        s.defer = true;
+        s.setAttribute('data-awa-promo-banners', '1');
+        d.body.appendChild(s);
+    }
+
+    function observeAndLoad() {
+        if (!('IntersectionObserver' in w)) {
+            if ('requestIdleCallback' in w) {
+                w.requestIdleCallback(injectScript, { timeout: 900 });
+                return;
+            }
+
+            w.setTimeout(injectScript, 900);
+            return;
+        }
+
+        var io = new w.IntersectionObserver(function (entries) {
+            for (var i = 0; i < entries.length; i += 1) {
+                if (entries[i].isIntersecting) {
+                    io.disconnect();
+                    injectScript();
+                    break;
+                }
+            }
+        }, { rootMargin: '300px 0px 150px 0px' });
+
+        io.observe(section);
+        w.setTimeout(function () {
+            io.disconnect();
+            injectScript();
+        }, 1400);
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', observeAndLoad, { once: true });
+        return;
+    }
+
+    observeAndLoad();
+})(window, document);
+</script>

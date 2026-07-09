@@ -437,7 +437,7 @@
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
-    padding: 0 16px !important;
+    padding-inline: var(--awa-page-pad-mobile, 16px) !important; padding-block: 0 !important;
     border: 0 !important;
     border-radius: var(--awa-header-action-radius) !important;
     background: var(--awa-primary, oklch(48% .14 20)) !important;
@@ -1214,7 +1214,7 @@
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
     .page-wrapper .awa-site-header :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row]) {
     width: ~"min(100%, 1280px)" !important;
-    max-width: 1280px !important;
+    max-inline-size: var(--awa-container-max, 1280px) !important;
     margin: 0 auto !important;
     grid-template-columns: minmax(132px, 160px) minmax(420px, 1fr) minmax(286px, 300px) !important;
   }
@@ -1349,7 +1349,7 @@
     .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner {
     box-sizing: border-box !important;
     width: 100% !important;
-    max-width: 1280px !important;
+    max-inline-size: var(--awa-container-max, 1280px) !important;
     margin: 0 auto !important;
     padding: 0 !important;
   }

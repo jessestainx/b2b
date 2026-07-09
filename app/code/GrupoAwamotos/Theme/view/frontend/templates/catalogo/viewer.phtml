@@ -21,8 +21,8 @@ $b2bRegisterUrl = $viewModel->getB2bRegisterUrl();
             <img src="<?= $escaper->escapeUrl($coverUrl) ?>"
                  alt="<?= $escaper->escapeHtmlAttr(__('Capa do Catálogo AWA 2026')) ?>"
                  class="awa-catalogo-page__cover"
-                 width="1200"
-                 height="400"
+                 width="1920"
+                 height="700"
                  loading="eager"
                  decoding="async">
         </picture>
@@ -38,14 +38,17 @@ $b2bRegisterUrl = $viewModel->getB2bRegisterUrl();
                 <a href="<?= $escaper->escapeUrl($pdfUrl) ?>"
                    class="action primary awa-catalogo-page__cta awa-catalogo-page__download"
                    target="_blank"
-                   rel="noopener noreferrer">
+                   rel="noopener noreferrer"
+                   aria-label="<?= $escaper->escapeHtmlAttr(__('Baixar PDF do catálogo (abre em nova aba)')) ?>">
                     <svg class="awa-catalogo-page__cta-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <?= $escaper->escapeHtml(__('Baixar PDF')) ?>
+                    <span><?= $escaper->escapeHtml(__('Baixar PDF')) ?></span>
+                    <span class="awa-catalogo-page__cta-hint" aria-hidden="true"><?= $escaper->escapeHtml(__('nova aba')) ?></span>
                 </a>
                 <a href="<?= $escaper->escapeUrl($block->getUrl('catalogo/revista')) ?>"
-                   class="action secondary awa-catalogo-page__cta awa-catalogo-page__revista">
+                   class="action secondary awa-catalogo-page__cta awa-catalogo-page__revista"
+                   aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir catálogo em formato revista')) ?>">
                     <svg class="awa-catalogo-page__cta-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H18a2 2 0 0 1 2 2v14a1 1 0 0 1-1.447.894L12 17.118l-6.553 3.776A1 1 0 0 1 4 20.5v-15Z" stroke="currentColor" stroke-width="1.6"/>
                     </svg>

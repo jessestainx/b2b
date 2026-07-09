@@ -1,0 +1,23 @@
+{
+  "name": "awa-appbuilder-whatsapp-notify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Adobe App Builder action that offloads WhatsApp order notifications from the AWA Motos Magento checkout thread to serverless Adobe I/O Runtime.",
+  "dependencies": {
+    "@adobe/aio-sdk": "^6",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "jest": "^29",
+    "eslint": "^8",
+    "eslint-plugin-jest": "^27.2.3"
+  },
+  "scripts": {
+    "test": "jest --passWithNoTests ./test",
+    "lint": "eslint --no-error-on-unmatched-pattern test actions",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

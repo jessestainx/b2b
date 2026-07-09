@@ -1,0 +1,242 @@
+/** pages-quickorder.css */
+/* Quickorder */
+.b2b-quickorder {
+    max-width: 760px;
+}
+
+.b2b-quickorder .block-title {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--awa-border, #e5e7eb);
+}
+
+.b2b-quickorder .block-title strong {
+    font-size: 1.4rem;
+}
+
+.b2b-quickorder .quickorder-description {
+    margin-top: 8px;
+    color: var(--awa-b2b-muted);
+    font-size: 14px;
+}
+
+.b2b-quickorder .quickorder-header-row {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--awa-b2b-muted);
+    text-transform: none;
+    letter-spacing: normal;
+    border-bottom: 1px solid var(--awa-border, #e5e7eb);
+}
+
+.b2b-quickorder .quickorder-header-row .col-sku {
+    flex: 3;
+}
+
+.b2b-quickorder .quickorder-header-row .col-qty {
+    flex: 1;
+}
+
+.b2b-quickorder .quickorder-header-row .col-action {
+    width: 36px;
+}
+
+.b2b-quickorder .quickorder-row {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    align-items: center;
+    border-bottom: 1px solid var(--awa-bg-muted, #f3f4f6);
+}
+
+.b2b-quickorder .quickorder-row input[type="text"],
+.b2b-quickorder .quickorder-row input[type="number"] {
+    border: 1px solid var(--awa-border, #e5e7eb);
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 10px 12px;
+}
+
+.b2b-quickorder .quickorder-row input[type="text"] {
+    flex: 3;
+}
+
+.b2b-quickorder .quickorder-row input[type="number"] {
+    flex: 1;
+    text-align: center;
+}
+
+.b2b-quickorder .quickorder-row input:focus {
+    border-color: var(--awa-b2b-primary);
+    box-shadow: 0 0 0 2px rgb(183 51 55 / 15%);
+    outline: none;
+}
+
+.b2b-quickorder .quickorder-row .btn-remove {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, #ffffff);
+    color: var(--awa-primary-hover, #8e2629);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.b2b-quickorder .quickorder-row .btn-remove:hover {
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 18%, #ffffff);
+}
+
+.b2b-quickorder .quickorder-row.has-error input[type="text"] {
+    border-color: var(--awa-primary, #b73337);
+}
+
+.b2b-quickorder .quickorder-add-row {
+    margin: 12px 0;
+}
+
+.b2b-quickorder .quickorder-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--awa-border, #e5e7eb);
+}
+
+.b2b-quickorder .quickorder-results {
+    margin: 16px 0;
+}
+
+.b2b-quickorder .results-success,
+.b2b-quickorder .results-errors {
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 14px;
+}
+
+.b2b-quickorder .results-success {
+    background: color-mix(in srgb, var(--awa-success, #16a34a) 8%, #ffffff);
+    border: 1px solid color-mix(in srgb, var(--awa-success, #16a34a) 22%, #ffffff);
+    color: color-mix(in srgb, var(--awa-success, #16a34a) 85%, #000000);
+    margin-bottom: 8px;
+}
+
+.b2b-quickorder .results-errors {
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #ffffff);
+    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 18%, #ffffff);
+    color: var(--awa-primary-hover, #8e2629);
+}
+
+.b2b-quickorder .results-success:empty,
+.b2b-quickorder .results-errors:empty {
+    display: none;
+}
+
+.b2b-quickorder .quickorder-loading {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* Quickorder CSV Upload Zone */
+.b2b-quickorder .quickorder-csv-zone {
+    margin-bottom: 24px;
+}
+
+.b2b-quickorder .csv-dropzone {
+    border: 2px dashed var(--awa-border, #e5e7eb);
+    border-radius: 4px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    background: var(--awa-bg-muted, #f8fafc);
+}
+
+.b2b-quickorder .csv-dropzone:hover,
+.b2b-quickorder .csv-dropzone:focus-visible {
+    border-color: var(--awa-b2b-primary);
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #ffffff);
+    outline: none;
+}
+
+.b2b-quickorder .csv-dropzone--active {
+    border-color: var(--awa-b2b-primary);
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #ffffff);
+    border-style: solid;
+}
+
+.b2b-quickorder .csv-dropzone__icon {
+    color: var(--awa-text-muted, #888888);
+    margin-bottom: 8px;
+}
+
+.b2b-quickorder .csv-dropzone:hover .csv-dropzone__icon,
+.b2b-quickorder .csv-dropzone--active .csv-dropzone__icon {
+    color: var(--awa-b2b-primary);
+}
+
+.b2b-quickorder .csv-dropzone__text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--awa-text-primary, #333333);
+    margin: 0 0 4px;
+}
+
+.b2b-quickorder .csv-dropzone__hint {
+    font-size: 12px;
+    color: var(--awa-b2b-muted);
+    margin: 0;
+}
+
+.b2b-quickorder .csv-dropzone__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.b2b-quickorder .csv-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 0 4px;
+}
+
+.b2b-quickorder .csv-sample-link {
+    font-size: 12px;
+    color: var(--awa-b2b-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.b2b-quickorder .csv-sample-link:hover {
+    text-decoration: underline;
+}
+
+.b2b-quickorder .csv-status {
+    font-size: 12px;
+    font-weight: 500;
+    display: none;
+}
+
+.b2b-quickorder .csv-status--success {
+    color: color-mix(in srgb, var(--awa-success, #16a34a) 85%, #000000);
+    display: inline;
+}
+
+    .b2b-quickorder .quickorder-actions,
+    .b2b-shoppinglist-view .shoppinglist-bottom-actions,
+    .b2b-quote-view .quote-decision-actions,
+    .b2b-quote-view .quote-view-actions {
+        flex-direction: column;
+    }

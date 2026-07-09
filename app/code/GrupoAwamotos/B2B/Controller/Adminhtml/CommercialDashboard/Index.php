@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\CommercialDashboard;
 
+use GrupoAwamotos\B2B\Adminhtml\View\BackendPageFactory;
 use GrupoAwamotos\B2B\CommercialPanel\Api\PortfolioScopeInterface;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\View\Result\PageFactory;
 
 class Index extends Action implements HttpGetActionInterface
 {
@@ -17,7 +17,7 @@ class Index extends Action implements HttpGetActionInterface
 
     public function __construct(
         Context $context,
-        private readonly PageFactory $resultPageFactory,
+        private readonly BackendPageFactory $resultPageFactory,
         private readonly PortfolioScopeInterface $portfolioScope
     ) {
         parent::__construct($context);

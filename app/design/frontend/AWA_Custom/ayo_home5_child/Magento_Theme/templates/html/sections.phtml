@@ -48,10 +48,15 @@ $sectionItemsClass = trim($groupCss . '-items awa-header-primary-nav');
                 <div class="section-item-title <?= $block->escapeHtmlAttr($groupCss) ?>-item-title"
                      data-role="collapsible"
                      role="presentation">
-                    <a class="<?= $block->escapeHtmlAttr($groupCss) ?>-item-switch"
+                    <?php $switchClass = trim((string) $groupCss) . '-item-switch'; ?>
+                    <?php if (trim((string) $label) === ''): ?>
+                    <?php $switchClass .= ' awa-sr-only'; ?>
+                    <?php endif; ?>
+                    <a class="<?= $block->escapeHtmlAttr($switchClass) ?>"
                        data-toggle="switch"
                        href="#<?= $block->escapeHtmlAttr($alias) ?>"
-                       aria-label="<?= $block->escapeHtmlAttr($ariaLabel) ?>">
+                       aria-label="<?= $block->escapeHtmlAttr($ariaLabel) ?>"
+                       <?php if (trim((string) $label) === ''): ?>tabindex="-1"<?php endif; ?>>
                         <?= /* @noEscape */ $label ?>
                     </a>
                 </div>

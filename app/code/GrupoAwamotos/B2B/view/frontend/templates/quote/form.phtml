@@ -1,24 +1,23 @@
 <?php
 /**
  * Quote Request Form Template
- * 
+ *
  * @var \GrupoAwamotos\B2B\Block\Quote\Form $block
  */
 ?>
 <div class="b2b-quote-form-container b2b-page-shell">
-    <div class="page-title-wrapper">
-        <h1 class="page-title">
-            <span class="base"><?= $block->escapeHtml(__('Solicitar Cotação')) ?></span>
-        </h1>
+    <div class="b2b-section-header">
+        <h1><?= $block->escapeHtml(__('Solicitar cotação')) ?></h1>
+        <p class="section-subtitle"><?= $block->escapeHtml(__('Envie os itens do carrinho para receber um orçamento formal da equipe AWA.')) ?></p>
     </div>
-    
+
     <?php if (!$block->hasItems()): ?>
         <div class="message info empty">
-            <span><?= $block->escapeHtml(__('Seu carrinho está vazio. Adicione produtos antes de solicitar uma cotação.')) ?></span>
+            <span><?= $block->escapeHtml(__('O carrinho está vazio. Adicione produtos antes de solicitar a cotação.')) ?></span>
         </div>
         <div class="actions">
-            <a href="<?= $block->escapeUrl($block->getUrl('/')) ?>" class="action primary">
-                <span><?= $block->escapeHtml(__('Continuar Comprando')) ?></span>
+            <a href="<?= $block->escapeUrl($block->getUrl('')) ?>" class="action primary">
+                <span><?= $block->escapeHtml(__('Ir ao catálogo')) ?></span>
             </a>
         </div>
     <?php else: ?>
@@ -71,91 +70,91 @@
                     <small><?= $block->escapeHtml(__('* Os preços são estimados. O valor final será informado na cotação.')) ?></small>
                 </p>
             </div>
-            
+
             <!-- Formulário -->
             <div class="b2b-quote-form">
                 <h2><?= $block->escapeHtml(__('Seus Dados')) ?></h2>
-                <form action="<?= $block->escapeUrl($block->getSubmitUrl()) ?>" 
-                      method="post" 
+                <form action="<?= $block->escapeUrl($block->getSubmitUrl()) ?>"
+                      method="post"
                       enctype="multipart/form-data"
-                      
+
                       id="quote-request-form"
                       class="form"
                       data-mage-init='{"validation":{}}'>
                     <?= $block->getBlockHtml('formkey') ?>
-                    
+
                     <fieldset class="fieldset">
                         <div class="field name required">
                             <label class="label" for="name">
                                 <span><?= $block->escapeHtml(__('Nome Completo')) ?></span>
                             </label>
                             <div class="control">
-                                <input type="text" 
-                                       name="name" 
-                                       id="name" 
+                                <input type="text"
+                                       name="name"
+                                       id="name"
                                        value="<?= $block->escapeHtmlAttr($block->getCustomerName()) ?>"
                                        class="input-text"
                                        data-validate="{required:true}"
                                        <?= $block->isLoggedIn() ? 'readonly' : '' ?>>
                             </div>
                         </div>
-                        
+
                         <div class="field email required">
                             <label class="label" for="email">
                                 <span><?= $block->escapeHtml(__('E-mail')) ?></span>
                             </label>
                             <div class="control">
-                                <input type="email" 
-                                       name="email" 
-                                       id="email" 
+                                <input type="email"
+                                       name="email"
+                                       id="email"
                                        value="<?= $block->escapeHtmlAttr($block->getCustomerEmail()) ?>"
                                        class="input-text"
                                        data-validate="{required:true, 'validate-email':true}"
                                        <?= $block->isLoggedIn() ? 'readonly' : '' ?>>
                             </div>
                         </div>
-                        
+
                         <div class="field company_name">
                             <label class="label" for="company_name">
                                 <span><?= $block->escapeHtml(__('Razão Social / Empresa')) ?></span>
                             </label>
                             <div class="control">
-                                <input type="text" 
-                                       name="company_name" 
-                                       id="company_name" 
+                                <input type="text"
+                                       name="company_name"
+                                       id="company_name"
                                        value="<?= $block->escapeHtmlAttr($block->getCompanyName()) ?>"
                                        class="input-text">
                             </div>
                         </div>
-                        
+
                         <div class="field cnpj">
                             <label class="label" for="cnpj">
                                 <span><?= $block->escapeHtml(__('CNPJ')) ?></span>
                             </label>
                             <div class="control">
-                                <input type="text" 
-                                       name="cnpj" 
-                                       id="cnpj" 
+                                <input type="text"
+                                       name="cnpj"
+                                       id="cnpj"
                                        value="<?= $block->escapeHtmlAttr($block->getCnpj()) ?>"
                                        class="input-text"
                                        placeholder="00.000.000/0000-00">
                             </div>
                         </div>
-                        
+
                         <div class="field phone">
                             <label class="label" for="phone">
                                 <span><?= $block->escapeHtml(__('Telefone')) ?></span>
                             </label>
                             <div class="control">
-                                <input type="tel" 
-                                       name="phone" 
-                                       id="phone" 
+                                <input type="tel"
+                                       name="phone"
+                                       id="phone"
                                        value="<?= $block->escapeHtmlAttr($block->getPhone()) ?>"
                                        class="input-text"
                                        placeholder="(00) 00000-0000">
                             </div>
                         </div>
-                        
+
                         <!-- M23: Upload de lista de peças -->
                         <div class="field attachment">
                             <label class="label" for="quote_attachment">
@@ -178,22 +177,22 @@
                                 <span><?= $block->escapeHtml(__('Mensagem / Observações')) ?></span>
                             </label>
                             <div class="control">
-                                <textarea name="message" 
-                                          id="message" 
+                                <textarea name="message"
+                                          id="message"
                                           class="input-text"
                                           rows="4"
                                           placeholder="<?= $block->escapeHtmlAttr(__('Informe detalhes adicionais, condições especiais desejadas, prazo de entrega, etc.')) ?>"></textarea>
                             </div>
                         </div>
                     </fieldset>
-                    
+
                     <div class="b2b-quote-info">
                         <p>
                             <i class="fa fa-info-circle"></i>
                             <?= $block->escapeHtml(__('Sua cotação terá validade de %1 dias após o envio.', $block->getExpiryDays())) ?>
                         </p>
                     </div>
-                    
+
                     <div class="actions-toolbar">
                         <div class="secondary">
                             <a href="<?= $block->escapeUrl($block->getCartUrl()) ?>" class="action back">

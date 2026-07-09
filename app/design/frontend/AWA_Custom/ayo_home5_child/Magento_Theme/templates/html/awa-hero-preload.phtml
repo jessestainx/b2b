@@ -1,33 +1,39 @@
 <?php declare(strict_types=1);
 /**
- * LCP Hero Image Preload — homepage (P9 srcset responsivo).
+ * LCP Hero critical CSS — homepage (P9 srcset responsivo).
+ *
+ * Preload links: awa-hero-preload-links.phtml (início de head.additional).
  *
  * @var \GrupoAwamotos\Theme\Block\Html\HeroPreload $block
  */
-$heroPreloadUrl = $block->getHeroImageUrl();
-if ($heroPreloadUrl === '') {
+if ($block->getHeroImageUrl() === '') {
     return;
 }
-$heroPreloadSrcset = $block->getHeroImageSrcset();
-$heroPreloadSizes = $block->getHeroImageSizes();
-$heroMobileUrl = $block->getHeroImageMobileUrl() ?: $heroPreloadUrl;
-$heroMobileSrcset = $block->getHeroImageMobileSrcset() ?: $heroPreloadSrcset;
-$heroMobileSizes = $block->getHeroImageMobileSizes();
 ?>
 <!-- P9b: oculta slider desktop no 1º paint mobile (hidden-xs depende de CSS gated na home) -->
 <style id="awa-hero-lcp-critical">
 @media(max-width:767px){.wrapper_slider.hidden-xs{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;pointer-events:none!important}.wrapper_slider.visible-xs{display:block!important}}
 @media(min-width:768px){.wrapper_slider.visible-xs{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;pointer-events:none!important}}
-.wrapper_slider .owl:not(.owl-carousel):not(.awa-hero-owl-ready)>.banner_item{display:none}
-.wrapper_slider .owl:not(.owl-carousel):not(.awa-hero-owl-ready)>.banner_item:first-child{display:block}
-.wrapper_slider.visible-xs .banner_item_bg{aspect-ratio:1920/900;min-height:clamp(140px,42vw,240px)}
-.wrapper_slider.hidden-xs .banner_item_bg{aspect-ratio:1920/900;min-height:clamp(180px,42vw,520px)}
-.wrapper_slider .banner_item_bg img,.wrapper_slider .banner_item_bg picture{display:block;width:100%;height:100%;object-fit:cover}
-/* P12: shelf pré-init — flex síncrono antes do awa-shelf-carousel async */
-#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded){display:flex!important;flex-wrap:wrap!important;min-height:0!important;grid-template-columns:none!important;overflow:hidden!important}
-#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+5){display:none!important}
+.wrapper_slider .awa-hero-swiper:not(.swiper-initialized):not(.awa-hero-swiper-ready) .swiper-slide:not(:first-child){display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important}
+.wrapper_slider.visible-xs .banner_item_bg,.wrapper_slider.visible-xs .banner_item{flex:1 1 auto;height:100%;min-height:100%;aspect-ratio:unset;display:flex;flex-direction:column}
+.wrapper_slider.visible-xs .swiper-slide{display:flex;flex-direction:column;align-items:stretch}
+.wrapper_slider.visible-xs .banner_item_bg{position:relative;overflow:hidden}
+.wrapper_slider.visible-xs .banner_item_bg>a{position:absolute;inset:0;width:100%;height:100%;display:block}
+.wrapper_slider.visible-xs .banner_item_bg picture,.wrapper_slider.visible-xs .banner_item_bg img{width:100%;height:100%;object-fit:contain;object-position:center;display:block;background:var(--awa-surface)}
+.wrapper_slider.hidden-xs .banner_item_bg{aspect-ratio:1920/470;min-height:clamp(160px,24.5vw,470px)}
+.wrapper_slider .banner_item_bg picture>source{display:none!important;width:0!important;height:0!important}
+.wrapper_slider .banner_item_bg img,.wrapper_slider .banner_item_bg picture{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:var(--awa-surface)}
+/* P12: shelf pré-init — linha única, larguras fixas (espelha awa-shelf-carousel.css) */
+#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded){display:flex!important;flex-flow:row nowrap!important;flex-wrap:nowrap!important;gap:0!important;min-height:var(--awa-shelf-preinit-h,300px)!important;max-height:var(--awa-shelf-preinit-h,300px)!important;overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important;grid-template-columns:none!important}
+#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item{flex:0 0 50%!important;max-width:50%!important;min-width:0!important;box-sizing:border-box!important;padding-inline:8px!important}
+#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+3){display:none!important}
+@media(min-width:768px){#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item{flex:0 0 33.333%!important;max-width:33.333%!important;padding-inline:12px!important}#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+3){display:flex!important}#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+4){display:none!important}}
+@media(min-width:1024px){#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item{flex:0 0 25%!important;max-width:25%!important}#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+4){display:flex!important}#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+5){display:none!important}}
+@media(min-width:1280px){#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item{flex:0 0 20%!important;max-width:20%!important}#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+5){display:flex!important}#html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item:nth-child(n+6){display:none!important}}
+@media(min-width:1280px){html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel):not(.owl-loaded)>li.item{flex:0 0 20%!important;max-width:20%!important;width:20%!important}}
+@media(min-width:1280px){#html-body .page-wrapper .rokan-featuredproduct .owl:not(.owl-carousel)>li:first-child,#html-body .page-wrapper .rokan-bestseller .owl:not(.owl-carousel)>li:first-child,#html-body .page-wrapper .rokan-newproduct .owl:not(.owl-carousel)>li:first-child,#html-body .page-wrapper .rokan-mostviewed .owl:not(.owl-carousel)>li:first-child,#html-body .page-wrapper .rokan-toprate .owl:not(.owl-carousel)>li:first-child,#html-body .page-wrapper .rokan-onsaleproduct .owl:not(.owl-carousel)>li:first-child{flex:0 0 20%!important;max-width:20%!important}}
 #html-body .awa-shelf--carousel ul.owl.awa-carousel__track:not(.owl-carousel) .product-thumb img{opacity:1!important}
+#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .content-top-home .ayo-home5-wrapper--template-driven>.awa-carousel-section{max-block-size:clamp(34rem,54vw,44rem)!important;overflow:visible!important;contain:layout}
+#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .content-top-home .awa-carousel-section :is(.awa-carousel__viewport,ol.product-items:not(.awa-carousel__track),.product-items:not(.awa-carousel__track),.products-grid){max-block-size:clamp(22rem,42vw,36rem)!important;overflow:hidden!important}
+#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .content-top-home .awa-carousel-section :is(ul.owl.owl-carousel:not(.owl-loaded),ul.owl:not(.owl-loaded),ol.product-items:not(.owl-loaded),.product-items:not(.owl-loaded)){display:flex!important;flex-flow:row nowrap!important}
 </style>
-<!-- LCP Hero Image Preload — fetchpriority=high, srcset responsivo (P9) -->
-<link rel="preload" href="<?= $block->escapeUrl($heroPreloadUrl) ?>"<?php if ($heroPreloadSrcset): ?> imagesrcset="<?= /* @noEscape */ $heroPreloadSrcset ?>" imagesizes="<?= $block->escapeHtmlAttr($heroPreloadSizes) ?>"<?php endif; ?> as="image" fetchpriority="high" media="(min-width: 768px)" type="image/webp"/>
-<link rel="preload" href="<?= $block->escapeUrl($heroMobileUrl) ?>"<?php if ($heroMobileSrcset): ?> imagesrcset="<?= /* @noEscape */ $heroMobileSrcset ?>" imagesizes="<?= $block->escapeHtmlAttr($heroMobileSizes) ?>"<?php endif; ?> as="image" fetchpriority="high" media="(max-width: 767px)" type="image/webp"/>

@@ -1,43 +1,9 @@
-:root {
-    /* ── b2b-pg-late — design tokens ─── */
-    --b2b-pg-late-bg-subtle: #f7f7f7;
-    --b2b-pg-late-c1: #e5e5e5;
-    --b2b-pg-late-c2: #A33B3B;
-    --b2b-pg-late-c3: #f0f9ff;
-    --b2b-pg-late-c4: #bae6fd;
-    --b2b-pg-late-c5: #0369a1;
-    --b2b-pg-late-c6: #f8f8f8;
-    --b2b-pg-late-bg-ultra: #fafafa;
-    --b2b-pg-late-c7: #9b2b2f;
-    --b2b-pg-late-border-mid: #d1d5db;
-    --b2b-pg-late-c8: #fef3c7;
-    --b2b-pg-late-c9: #92400e;
-    --b2b-pg-late-c10: #dbeafe;
-    --b2b-pg-late-c11: #1e40af;
-    --b2b-pg-late-c12: #d1fae5;
-    --b2b-pg-late-c13: #065f46;
-    --b2b-pg-late-c14: #fee2e2;
-    --b2b-pg-late-c15: #991b1b;
-    --b2b-pg-late-c16: #f3f4f6;
-    --b2b-pg-late-c17: #374151;
-    --b2b-pg-late-bg: #f9fafb;
-    --b2b-pg-late-c18: #9ca3af;
-    --b2b-pg-late-c19: #111827;
-    --b2b-pg-late-border-main: #e5e7eb;
-    --b2b-pg-late-dark: #333;
-    --b2b-pg-late-faint: #eee;
-    --b2b-pg-late-white: #fff;
-    --b2b-pg-late-mid: #666;
-    --b2b-pg-late-c20: #555;
-    --b2b-pg-late-light-gray: #ccc;
-}
-
 /**
  * AWA B2B Pages — Late-Loading Visual Fix (ALL account pages)
  * Carregado via PHTML (nao via <css> no XML), NAO mergeado.
  * Carrega DEPOIS de awa-bundle-refinements.css.
  * Scope: body.account (todas as paginas de conta) + body[class*="b2b-"] (B2B specific)
- * Version: 2
+ * Version: 3
  */
 
 /* ============================================================
@@ -85,36 +51,9 @@ body[class*="b2b-"] .breadcrumbs .items {
 
 /* ============================================================
    §3 — COLUMNS LAYOUT
+   Removido: grid shell agora em _awa-account-layout.less (LESS síncrono).
+   Este arquivo cuida apenas de decoração (nav, tabelas, header account).
    ============================================================ */
-body.account .columns,
-body.account .page-main > .columns,
-body[class*="b2b-"] .columns,
-body[class*="b2b-"] .page-main > .columns {
-    display: flex;
-    gap: 20px !important;
-    row-gap: 20px !important;
-    column-gap: 20px !important;
-    align-items: flex-start;
-}
-
-body.account .columns > .col-lg-2,
-body.account .columns > [class*="col-sm-3"],
-body[class*="b2b-"] .columns > .col-lg-2,
-body[class*="b2b-"] .columns > [class*="col-sm-3"] {
-    flex: 0 0 200px;
-    max-width: 200px;
-    width: 200px;
-}
-
-body.account .columns > .col-main,
-body.account .columns > .col-lg-10,
-body.account .columns > [class*="col-sm-9"],
-body[class*="b2b-"] .columns > .col-main,
-body[class*="b2b-"] .columns > .col-lg-10,
-body[class*="b2b-"] .columns > [class*="col-sm-9"] {
-    flex: 1;
-    min-width: 0;
-}
 
 /* ============================================================
    §4 — SIDEBAR NAVIGATION
@@ -128,9 +67,9 @@ body.account .sidebar .block-collapsible-nav,
 body.account .block.block-collapsible-nav,
 body[class*="b2b-"] .sidebar .block-collapsible-nav,
 body[class*="b2b-"] .block.block-collapsible-nav {
-    background: var(--b2b-pg-late-bg-subtle) !important;
-    border: 1px solid var(--b2b-pg-late-c1) !important;
-    border-radius: 8px !important;
+    background: var(--awa-bg-subtle, var(--awa-gray-50, #f7f7f7)) !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border-radius: 4px !important;
     padding: 6px 0 !important;
     width: 100%;
 }
@@ -158,29 +97,53 @@ body[class*="b2b-"] .block-collapsible-nav .item {
 html body.account .sidebar .block-collapsible-nav .item a,
 body.account .block-collapsible-nav .item a,
 html body[class*="b2b-"] .sidebar .block-collapsible-nav .item a,
-body[class*="b2b-"] .block-collapsible-nav .item a {
-    display: block;
-    min-height: 0 !important;
+body[class*="b2b-"] .block-collapsible-nav .item a,
+body.account .account-nav-item .account-nav-link,
+body[class*="b2b-"] .account-nav-item .account-nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 44px !important;
     height: auto !important;
-    padding: 6px 12px !important;
-    color: var(--b2b-pg-late-dark);
-    font-size: 12px !important;
-    line-height: 1.3 !important;
+    padding: 10px 14px !important;
+    margin: 2px 6px !important;
+    color: var(--awa-text, #333);
+    font-size: 13px !important;
+    line-height: 1.35 !important;
     text-decoration: none;
-    border-left: 3px solid transparent;
-    transition: background 0.2s, border-color 0.2s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    border: 0 !important;
+    border-left: 0 !important;
+    border-inline-start: 0 !important;
+    border-radius: 4px;
+    transition: background-color 200ms ease-out, color 200ms ease-out, box-shadow 200ms ease-out;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 html body.account .sidebar .block-collapsible-nav .item a:hover,
 body.account .block-collapsible-nav .item a:hover,
 html body[class*="b2b-"] .sidebar .block-collapsible-nav .item a:hover,
-body[class*="b2b-"] .block-collapsible-nav .item a:hover {
-    background: rgba(183, 51, 55, 0.05);
-    border-left-color: var(--b2b-pg-late-c2);
-    color: var(--b2b-pg-late-c2);
+body[class*="b2b-"] .block-collapsible-nav .item a:hover,
+body.account .account-nav-item .account-nav-link:hover,
+body[class*="b2b-"] .account-nav-item .account-nav-link:hover {
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, transparent);
+    color: var(--awa-primary, #b73337);
+}
+
+html body.account .sidebar .block-collapsible-nav .item a:focus-visible,
+body.account .block-collapsible-nav .item a:focus-visible,
+html body[class*="b2b-"] .sidebar .block-collapsible-nav .item a:focus-visible,
+body[class*="b2b-"] .block-collapsible-nav .item a:focus-visible,
+body.account .account-nav-item .account-nav-link:focus-visible,
+body[class*="b2b-"] .account-nav-item .account-nav-link:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337);
+    outline-offset: 2px;
+}
+
+html body.account .sidebar .block-collapsible-nav .item a:active,
+body.account .block-collapsible-nav .item a:active,
+html body[class*="b2b-"] .sidebar .block-collapsible-nav .item a:active,
+body[class*="b2b-"] .block-collapsible-nav .item a:active {
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 10%, transparent);
 }
 
 html body.account .sidebar .block-collapsible-nav .item.current a,
@@ -188,11 +151,48 @@ body.account .block-collapsible-nav .item.current a,
 html body.account .sidebar .block-collapsible-nav .item a.current,
 body.account .block-collapsible-nav .item a.current,
 body[class*="b2b-"] .block-collapsible-nav .item.current a,
-body[class*="b2b-"] .block-collapsible-nav .item a.current {
-    background: rgba(183, 51, 55, 0.08);
-    border-left-color: var(--b2b-pg-late-c2);
-    color: var(--b2b-pg-late-c2);
+body[class*="b2b-"] .block-collapsible-nav .item a.current,
+body.account .account-nav-item.current .account-nav-text,
+body.account .account-nav-item.current .account-nav-link,
+body[class*="b2b-"] .account-nav-item.current .account-nav-text,
+body[class*="b2b-"] .account-nav-item.current .account-nav-link {
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 10%, transparent);
+    color: var(--awa-primary, #b73337);
     font-weight: 600;
+    border-left: 0 !important;
+    border-inline-start: 0 !important;
+}
+
+body.account .account-nav-section,
+body[class*="b2b-"] .account-nav-section {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+body.account .account-nav-section:not(:first-child),
+body[class*="b2b-"] .account-nav-section:not(:first-child) {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--awa-border, #e5e5e5);
+}
+
+body.account .account-nav-section__label,
+body[class*="b2b-"] .account-nav-section__label {
+    display: block;
+    padding: 4px 12px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--awa-text-muted, #666);
+}
+
+body.account .block.account-nav > .account-nav-title,
+body.account .block.account-nav > .title,
+body[class*="b2b-"] .block.account-nav > .account-nav-title,
+body[class*="b2b-"] .block.account-nav > .title {
+    display: none !important;
 }
 
 /* ============================================================
@@ -204,25 +204,25 @@ body[class*="b2b-"] .sidebar .block-reorder,
 body[class*="b2b-"] .sidebar .block.block-reorder {
     margin-top: 8px !important;
     padding: 6px !important;
-    background: var(--b2b-pg-late-bg-subtle) !important;
-    border: 1px solid var(--b2b-pg-late-c1) !important;
-    border-radius: 8px !important;
+    background: var(--awa-bg-subtle, var(--awa-gray-50, #f7f7f7)) !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border-radius: 4px !important;
 }
 
 body.account .sidebar .block-reorder .block-title,
 body[class*="b2b-"] .sidebar .block-reorder .block-title {
     padding: 4px 6px !important;
     margin-bottom: 4px !important;
-    border-bottom: 2px solid var(--b2b-pg-late-c2);
+    border-bottom: 2px solid var(--awa-primary, #b73337);
 }
 
 body.account .sidebar .block-reorder .block-title strong,
 body[class*="b2b-"] .sidebar .block-reorder .block-title strong {
-    font-size: 10px !important;
+    font-size: 12px !important;
     font-weight: 700 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--b2b-pg-late-dark);
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--awa-text, #333);
 }
 
 body.account .sidebar .block-reorder .block-content,
@@ -241,7 +241,7 @@ body.account .sidebar .block-reorder .product-item,
 body[class*="b2b-"] .sidebar .block-reorder .product-item {
     padding: 3px 0 !important;
     margin: 0 !important;
-    border-bottom: 1px solid var(--b2b-pg-late-faint);
+    border-bottom: 1px solid #eee;
 }
 
 body.account .sidebar .block-reorder .product-item:last-child,
@@ -258,7 +258,7 @@ body[class*="b2b-"] .sidebar .block-reorder .product-item-name {
 
 body.account .sidebar .block-reorder .product-item-name a,
 body[class*="b2b-"] .sidebar .block-reorder .product-item-name a {
-    color: var(--b2b-pg-late-dark);
+    color: var(--awa-text, #333);
     text-decoration: none;
 }
 
@@ -294,7 +294,7 @@ body.account .page-title-wrapper .page-title,
 body[class*="b2b-"] .page-title-wrapper .page-title {
     font-size: 20px !important;
     font-weight: 700 !important;
-    color: var(--b2b-pg-late-dark) !important;
+    color: var(--awa-text, #333) !important;
     margin: 0 0 4px 0 !important;
     text-transform: none !important;
 }
@@ -311,9 +311,9 @@ body[class*="b2b-"] .page-title-wrapper .page-title span {
 body[class*="b2b-"] .column.main > .block:not(.block-collapsible-nav),
 body[class*="b2b-"] .column.main > form,
 body[class*="b2b-"] .column.main > .table-wrapper {
-    background: var(--b2b-pg-late-white);
-    border: 1px solid var(--b2b-pg-late-c1);
-    border-radius: 8px;
+    background: var(--awa-bg, #fff);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: 4px;
     padding: 16px 20px;
     margin-bottom: 12px;
 }
@@ -321,72 +321,163 @@ body[class*="b2b-"] .column.main > .table-wrapper {
 body[class*="b2b-"] .column.main > .block .block-title {
     padding-bottom: 8px !important;
     margin-bottom: 8px !important;
-    border-bottom: 1px solid var(--b2b-pg-late-faint);
+    border-bottom: 1px solid #eee;
 }
 
 body[class*="b2b-"] .column.main > .block .block-title strong {
     font-size: 15px !important;
     font-weight: 600 !important;
-    color: var(--b2b-pg-late-dark);
+    color: var(--awa-text, #333);
 }
 
 /* ============================================================
    §8 — EMPTY STATES / INFO MESSAGES
    ============================================================ */
+.awa-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 42rem;
+    padding: 20px 22px;
+    border: 1px solid var(--awa-border-subtle, #e5e7eb);
+    border-radius: 4px;
+    background: var(--awa-bg, #fff);
+    box-shadow: none;
+}
+
+.awa-empty-state__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--awa-text, #333);
+}
+
+.awa-empty-state__hint {
+    margin: 0;
+    max-width: 65ch;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--awa-text-muted, #666);
+}
+
+.awa-empty-state__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
 body.account .message.info,
 body[class*="b2b-"] .message.info {
-    background: var(--b2b-pg-late-c3) !important;
-    border: 1px solid var(--b2b-pg-late-c4) !important;
-    border-radius: 8px !important;
+    background: var(--awa-info-bg, #f0f9ff) !important;
+    border: 1px solid #bae6fd !important;
+    border-radius: 4px !important;
     padding: 10px 14px !important;
-    color: var(--b2b-pg-late-c5) !important;
+    color: var(--awa-info, #0369a1) !important;
     font-size: 13px !important;
     margin-bottom: 12px !important;
 }
 
 body.account .message.info::before,
 body[class*="b2b-"] .message.info::before {
-    color: var(--b2b-pg-late-c5) !important;
+    color: var(--awa-info, #0369a1) !important;
 }
 
 /* ============================================================
-   §9 — TABLES (orders, quotes, invoices)
+   §9 — TABLES (orders, quotes, invoices, ERP, shopping lists)
    ============================================================ */
-body.account .table-wrapper,
-body[class*="b2b-"] .table-wrapper {
+body.account :is(.table-wrapper, .shoppinglist-items-table-wrapper),
+body[class*="b2b-"] :is(.table-wrapper, .shoppinglist-items-table-wrapper) {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--awa-border-subtle, #e5e7eb);
+    border-radius: 4px;
+    background: var(--awa-bg, #fff);
 }
 
-body.account table.table,
-body[class*="b2b-"] table.table {
+body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table),
+body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) {
     width: 100%;
     border-collapse: collapse;
+    font-size: 14px;
+}
+
+body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) thead th,
+body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--awa-bg-muted, var(--awa-neutral-50, #f8f8f8));
+    padding: 10px 12px;
     font-size: 13px;
-}
-
-body.account table.table thead th,
-body[class*="b2b-"] table.table thead th {
-    background: var(--b2b-pg-late-c6);
-    padding: 8px 12px;
-    font-size: 11px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    color: var(--b2b-pg-late-mid);
-    border-bottom: 2px solid var(--b2b-pg-late-c1);
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--awa-text-muted, #666);
+    border-bottom: 1px solid var(--awa-border, #e5e5e5);
+    white-space: nowrap;
 }
 
-body.account table.table tbody td,
-body[class*="b2b-"] table.table tbody td {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--b2b-pg-late-faint);
-    color: var(--b2b-pg-late-dark);
+body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody td,
+body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #eee;
+    color: var(--awa-text, #333);
     vertical-align: middle;
 }
 
-body.account table.table tbody tr:hover,
-body[class*="b2b-"] table.table tbody tr:hover {
-    background: var(--b2b-pg-late-bg-ultra);
+body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody tr:nth-child(even),
+body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 35%, transparent);
+}
+
+body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody tr:hover,
+body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody tr:hover {
+    background: var(--awa-bg-muted, #fafafa);
+}
+
+@media (max-width: 767px) {
+    body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) thead,
+    body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) thead {
+        display: none;
+    }
+
+    body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody tr,
+    body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody tr {
+        display: grid;
+        gap: 4px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--awa-border-subtle, #e5e7eb);
+    }
+
+    body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody td,
+    body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody td {
+        display: grid;
+        grid-template-columns: minmax(88px, 38%) 1fr;
+        gap: 8px;
+        padding: 4px 0;
+        border-bottom: 0;
+    }
+
+    body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody td::before,
+    body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody td::before {
+        content: attr(data-th);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: normal;
+        color: var(--awa-text-muted, #666);
+    }
+
+    body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tfoot,
+    body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tfoot {
+        display: block;
+        padding: 12px 14px;
+        border-top: 1px solid var(--awa-border-subtle, #e5e7eb);
+    }
 }
 
 /* ============================================================
@@ -396,22 +487,40 @@ body.account .action.primary,
 body.account button.action.primary,
 body[class*="b2b-"] .action.primary,
 body[class*="b2b-"] button.action.primary {
-    background: var(--b2b-pg-late-c2) !important;
-    border-color: var(--b2b-pg-late-c2) !important;
-    border-radius: 6px !important;
-    font-size: 13px !important;
-    padding: 8px 16px !important;
+    background: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, #b73337) !important;
+    border-radius: 4px !important;
+    min-height: 44px !important;
+    font-size: 14px !important;
+    padding: 10px 18px !important;
     font-weight: 600 !important;
     text-transform: none !important;
-    transition: background 0.2s !important;
+    transition: background-color 200ms ease-out, border-color 200ms ease-out, box-shadow 200ms ease-out !important;
 }
 
 body.account .action.primary:hover,
 body.account button.action.primary:hover,
 body[class*="b2b-"] .action.primary:hover,
 body[class*="b2b-"] button.action.primary:hover {
-    background: var(--b2b-pg-late-c7) !important;
-    border-color: var(--b2b-pg-late-c7) !important;
+    background: var(--awa-primary-dark, #8e2629) !important;
+    border-color: var(--awa-primary-dark, #8e2629) !important;
+}
+
+body.account .action.primary:focus-visible,
+body.account button.action.primary:focus-visible,
+body[class*="b2b-"] .action.primary:focus-visible,
+body[class*="b2b-"] button.action.primary:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 20%, transparent) !important;
+}
+
+body.account .action.primary:active,
+body.account button.action.primary:active,
+body[class*="b2b-"] .action.primary:active,
+body[class*="b2b-"] button.action.primary:active {
+    background: var(--awa-primary-dark, #8e2629) !important;
+    transform: scale(0.99);
 }
 
 /* ============================================================
@@ -440,23 +549,6 @@ body[class*="b2b-"] .footer.content {
    §12 — MOBILE RESPONSIVE (< 768px)
    ============================================================ */
 @media (max-width: 767px) {
-    body.account .columns,
-    body.account .page-main > .columns,
-    body[class*="b2b-"] .columns,
-    body[class*="b2b-"] .page-main > .columns {
-        flex-direction: column !important;
-        gap: 12px !important;
-    }
-
-    body.account .columns > .col-lg-2,
-    body.account .columns > [class*="col-sm-3"],
-    body[class*="b2b-"] .columns > .col-lg-2,
-    body[class*="b2b-"] .columns > [class*="col-sm-3"] {
-        flex: none;
-        max-width: 100%;
-        width: 100%;
-    }
-
     html body.account .sidebar .block-collapsible-nav .item a,
 body.account .block-collapsible-nav .item a,
     html body[class*="b2b-"] .sidebar .block-collapsible-nav .item a,
@@ -480,24 +572,24 @@ body.account .sidebar .block:not(.block-collapsible-nav):not(.block-reorder),
 body[class*="b2b-"] .sidebar .block:not(.block-collapsible-nav):not(.block-reorder) {
     margin-top: 8px !important;
     padding: 6px 10px !important;
-    background: var(--b2b-pg-late-bg-subtle) !important;
-    border: 1px solid var(--b2b-pg-late-c1) !important;
-    border-radius: 8px !important;
+    background: var(--awa-bg-subtle, var(--awa-gray-50, #f7f7f7)) !important;
+    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border-radius: 4px !important;
     font-size: 11px !important;
 }
 
 body.account .sidebar .block:not(.block-collapsible-nav):not(.block-reorder) .block-title strong,
 body[class*="b2b-"] .sidebar .block:not(.block-collapsible-nav):not(.block-reorder) .block-title strong {
-    font-size: 10px !important;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 12px !important;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 /* ============================================================
    §14 — LINK STYLES (B2B pages only)
    ============================================================ */
 body[class*="b2b-"] .column.main a:not(.action) {
-    color: var(--b2b-pg-late-c2);
+    color: var(--awa-primary, #b73337);
     text-decoration: none;
 }
 
@@ -508,6 +600,14 @@ body[class*="b2b-"] .column.main a:not(.action):hover {
 /* ============================================================
    §15 — FORMS (credit, company edit, etc.)
    ============================================================ */
+
+/* Limita largura de formulários de edição simples para conforto de preenchimento */
+body.account .column.main > form:not(.form-cart):not(.form-validate):not(.form-wishlist-items),
+body.customer-account-edit .column.main > .form-edit-account,
+body.customer-address-form .column.main > form {
+    max-width: 560px;
+}
+
 body.account .fieldset,
 body[class*="b2b-"] .fieldset {
     margin-bottom: 12px;
@@ -522,7 +622,7 @@ body.account .field .label,
 body[class*="b2b-"] .field .label {
     font-size: 12px !important;
     font-weight: 600 !important;
-    color: var(--b2b-pg-late-c20) !important;
+    color: #555 !important;
     margin-bottom: 4px !important;
 }
 
@@ -532,22 +632,37 @@ body.account .field .control textarea,
 body[class*="b2b-"] .field .control input,
 body[class*="b2b-"] .field .control select,
 body[class*="b2b-"] .field .control textarea {
-    border: 1px solid var(--b2b-pg-late-border-mid) !important;
-    border-radius: 6px !important;
-    padding: 8px 12px !important;
-    font-size: 13px !important;
-    transition: border-color 0.2s !important;
+    min-height: 44px !important;
+    border: 1.5px solid var(--awa-neutral-300, #d1d5db) !important;
+    border-radius: 4px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    transition: border-color 200ms ease-out, box-shadow 200ms ease-out !important;
+    box-sizing: border-box !important;
+}
+
+body.account .field .control textarea,
+body[class*="b2b-"] .field .control textarea {
+    min-height: 100px !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
 }
 
 body.account .field .control input:focus,
 body.account .field .control select:focus,
 body.account .field .control textarea:focus,
+body.account .field .control input:focus-visible,
+body.account .field .control select:focus-visible,
+body.account .field .control textarea:focus-visible,
 body[class*="b2b-"] .field .control input:focus,
 body[class*="b2b-"] .field .control select:focus,
-body[class*="b2b-"] .field .control textarea:focus {
-    border-color: var(--b2b-pg-late-c2) !important;
+body[class*="b2b-"] .field .control textarea:focus,
+body[class*="b2b-"] .field .control input:focus-visible,
+body[class*="b2b-"] .field .control select:focus-visible,
+body[class*="b2b-"] .field .control textarea:focus-visible {
+    border-color: var(--awa-primary, #b73337) !important;
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(183, 51, 55, 0.1) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--awa-primary, #b73337) 12%, transparent) !important;
 }
 
 /* ============================================================
@@ -569,18 +684,7 @@ body[class*="b2b-"] .sidebar .block.block-reorder {
     display: none !important;
 }
 
-/* ============================================================
-   §18 — STICKY SIDEBAR (desktop)
-   Sidebar fixa ao scrollar para manter navegação visível.
-   ============================================================ */
-@media (min-width: 768px) {
-    body.account .sidebar,
-    body[class*="b2b-"] .sidebar {
-        position: sticky;
-        top: 16px;
-        align-self: flex-start;
-    }
-}
+/* §18 sticky sidebar — movido para _awa-account-layout.less (sync) */
 
 /* ============================================================
    §19 — STATUS BADGES (pedidos, cotações, aprovações)
@@ -590,13 +694,15 @@ body.account .order-status,
 body[class*="b2b-"] .order-status,
 body.account .b2b-status-badge,
 body[class*="b2b-"] .b2b-status-badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
     font-weight: 600;
     text-transform: capitalize;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
 }
 
 /* Pending / Em análise */
@@ -604,35 +710,35 @@ body.account .order-status-pending,
 body[class*="b2b-"] .b2b-status-badge--pending,
 body.account td:has(> .order-status) .order-status[class*="pending"],
 body[class*="b2b-"] td .order-status[class*="pending"] {
-    background: var(--b2b-pg-late-c8) !important;
-    color: var(--b2b-pg-late-c9) !important;
+    background: var(--awa-warning-bg, #fef3c7) !important;
+    color: #92400e !important;
 }
 
 /* Processing / Em produção */
 body.account .order-status-processing,
 body[class*="b2b-"] .b2b-status-badge--processing {
-    background: var(--b2b-pg-late-c10) !important;
-    color: var(--b2b-pg-late-c11) !important;
+    background: #dbeafe !important;
+    color: #1e40af !important;
 }
 
 /* Complete / Aprovado */
 body.account .order-status-complete,
 body[class*="b2b-"] .b2b-status-badge--approved {
-    background: var(--b2b-pg-late-c12) !important;
-    color: var(--b2b-pg-late-c13) !important;
+    background: var(--awa-success-bg, #d1fae5) !important;
+    color: #065f46 !important;
 }
 
 /* Canceled / Rejeitado */
 body.account .order-status-canceled,
 body[class*="b2b-"] .b2b-status-badge--rejected {
-    background: var(--b2b-pg-late-c14) !important;
-    color: var(--b2b-pg-late-c15) !important;
+    background: var(--awa-error-bg, #fee2e2) !important;
+    color: #991b1b !important;
 }
 
 /* Closed / Finalizado */
 body.account .order-status-closed {
-    background: var(--b2b-pg-late-c16) !important;
-    color: var(--b2b-pg-late-c17) !important;
+    background: var(--awa-neutral-100, #f3f4f6) !important;
+    color: var(--awa-neutral-700, #374151) !important;
 }
 
 /* ============================================================
@@ -648,8 +754,14 @@ body[class*="b2b-"] .column.main > .table-wrapper {
 body[class*="b2b-"] .column.main > .block:not(.block-collapsible-nav):hover,
 body[class*="b2b-"] .column.main > form:hover,
 body[class*="b2b-"] .column.main > .table-wrapper:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border-color: var(--b2b-pg-late-border-mid);
+    box-shadow: none;
+    border-color: var(--awa-neutral-300, #d1d5db);
+}
+
+body[class*="b2b-"] .column.main > .block:not(.block-collapsible-nav):active,
+body[class*="b2b-"] .column.main > form:active,
+body[class*="b2b-"] .column.main > .table-wrapper:active {
+    box-shadow: none;
 }
 
 /* ============================================================
@@ -663,22 +775,11 @@ body[class*="b2b-"] .column.main > .table-wrapper:hover {
         overflow: visible;
     }
 
+    /* §67 layout: scroll interno substituído por accordion (nav-mobile.js) */
     body.account .block-collapsible-nav .content,
     body[class*="b2b-"] .block-collapsible-nav .content {
-        max-height: 180px;
-        overflow-y: auto;
-        transition: max-height 0.3s ease;
-    }
-
-    body.account .block-collapsible-nav .content::-webkit-scrollbar,
-    body[class*="b2b-"] .block-collapsible-nav .content::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    body.account .block-collapsible-nav .content::-webkit-scrollbar-thumb,
-    body[class*="b2b-"] .block-collapsible-nav .content::-webkit-scrollbar-thumb {
-        background: var(--b2b-pg-late-light-gray);
-        border-radius: 2px;
+        max-height: none;
+        overflow: visible;
     }
 }
 
@@ -692,13 +793,13 @@ body.account a.action.secondary,
 body[class*="b2b-"] .action.secondary,
 body[class*="b2b-"] button.action.secondary,
 body[class*="b2b-"] a.action.secondary {
-    background: var(--b2b-pg-late-white) !important;
-    border: 1px solid var(--b2b-pg-late-border-mid) !important;
+    background: var(--awa-bg, #fff) !important;
+    border: 1px solid var(--awa-neutral-300, #d1d5db) !important;
     border-radius: 6px !important;
     font-size: 12px !important;
     padding: 6px 12px !important;
     font-weight: 500 !important;
-    color: var(--b2b-pg-late-c17) !important;
+    color: var(--awa-neutral-700, #374151) !important;
     text-transform: none !important;
     transition: all 0.2s !important;
     text-decoration: none !important;
@@ -710,9 +811,9 @@ body.account a.action.secondary:hover,
 body[class*="b2b-"] .action.secondary:hover,
 body[class*="b2b-"] button.action.secondary:hover,
 body[class*="b2b-"] a.action.secondary:hover {
-    background: var(--b2b-pg-late-bg) !important;
-    border-color: var(--b2b-pg-late-c18) !important;
-    color: var(--b2b-pg-late-c19) !important;
+    background: var(--awa-bg-muted, #f9fafb) !important;
+    border-color: var(--awa-neutral-400, #9ca3af) !important;
+    color: var(--awa-neutral-900, #111827) !important;
 }
 
 /* ============================================================
@@ -742,23 +843,23 @@ body[class*="b2b-"] .toolbar .pages .item strong {
 
 body.account .toolbar .pages .item a,
 body[class*="b2b-"] .toolbar .pages .item a {
-    background: var(--b2b-pg-late-white);
-    border: 1px solid var(--b2b-pg-late-border-main);
-    color: var(--b2b-pg-late-c17);
+    background: var(--awa-bg, #fff);
+    border: 1px solid var(--awa-border-subtle, #e5e7eb);
+    color: var(--awa-neutral-700, #374151);
 }
 
 body.account .toolbar .pages .item a:hover,
 body[class*="b2b-"] .toolbar .pages .item a:hover {
-    background: var(--b2b-pg-late-c16);
-    border-color: var(--b2b-pg-late-c2);
-    color: var(--b2b-pg-late-c2);
+    background: var(--awa-neutral-100, #f3f4f6);
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
 }
 
 body.account .toolbar .pages .item.current strong,
 body[class*="b2b-"] .toolbar .pages .item.current strong {
-    background: var(--b2b-pg-late-c2);
-    color: var(--b2b-pg-late-white);
-    border: 1px solid var(--b2b-pg-late-c2);
+    background: var(--awa-primary, #b73337);
+    color: var(--awa-bg, #fff);
+    border: 1px solid var(--awa-primary, #b73337);
 }
 
 /* ============================================================
@@ -775,211 +876,1194 @@ body[class*="b2b-"] .column.main > *:first-child {
     margin-top: 0 !important;
 }
 
+/* Header layout pertence à cascata global do tema; páginas B2B não aplicam compact header. */
+
 /* ============================================================
-   §25 — HEADER HARD FIX (B2B account pages)
-   Garante logo visivel no sticky e remove bordas duplicadas
-   em busca + bloco "Minha conta" no desktop.
+   §27 — FLOW PAGE: solicitar cotação (1 col, sem sidebar)
    ============================================================ */
-@media (min-width: 992px) {
-    body.account .page-wrapper .awa-site-header.awa-header-condensed #header .awa-main-header__inner.wp-header,
-    body[class*="b2b-"] .page-wrapper .awa-site-header.awa-header-condensed #header .awa-main-header__inner.wp-header {
-        grid-template-columns: 161px minmax(0, 1fr) auto !important;
-        min-height: 56px !important;
-        height: 56px !important;
-        column-gap: 20px !important;
-        overflow: visible !important;
+body.b2b-quote-index .page-main {
+    padding-top: 12px !important;
+}
+
+body.b2b-quote-index .b2b-quote-form-container .page-title-wrapper {
+    margin-bottom: 16px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid var(--awa-border-subtle, #e5e7eb);
+}
+
+body.b2b-quote-index .b2b-quote-form-container .page-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+body.b2b-quote-index .b2b-quote-form-container .b2b-quote-items h2,
+body.b2b-quote-index .b2b-quote-form-container .b2b-quote-form h2 {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    margin: 0 0 12px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid #eee !important;
+}
+
+body.b2b-quote-index .b2b-quote-form-container .b2b-quote-form .form {
+    max-width: 560px;
+}
+
+body.b2b-quote-index .b2b-quote-form-container .awa-empty-state {
+    margin-top: 8px;
+}
+
+@media (max-width: 991px) {
+    body.b2b-quote-index .b2b-quote-form-container .b2b-quote-wrapper {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+}
+
+/* ============================================================
+   §28 — NATIVE MAGENTO ACCOUNT (Tier B)
+   /customer/account/, sales/order/*, customer/address/*
+   ============================================================ */
+
+.awa-empty-state--compact {
+    padding: 16px 18px;
+}
+
+body.account .column.main > .block:not(.block-collapsible-nav):not(.block-dashboard-info):not(.block-dashboard-addresses):not(.block-dashboard-orders),
+body.sales-order-history .column.main > .table-wrapper,
+body.sales-order-view .column.main > .block-order-details-view,
+body.sales-order-view .column.main > .order-details-items,
+body.customer-address-index .column.main > .block-addresses-default,
+body.customer-address-index .column.main > .block-addresses-list {
+    background: var(--awa-bg, #fff);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+}
+
+body.account .block-dashboard-info .box,
+body.account .block-dashboard-addresses .box,
+body.customer-address-index .block-addresses-default .box {
+    background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 45%, transparent);
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+
+body.account .block-dashboard-info .box-title,
+body.account .block-dashboard-addresses .box-title,
+body.customer-address-index .box-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--awa-text-muted, #666);
+    margin-bottom: 8px;
+}
+
+body.account .box-actions .action,
+body.customer-address-index .box-actions .action {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--awa-primary, #b73337);
+    text-decoration: none;
+}
+
+body.account .box-actions .action:hover,
+body.customer-address-index .box-actions .action:hover {
+    text-decoration: underline;
+}
+
+body.customer-account-index .awa-account-dashboard-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+body.customer-account-index .awa-account-credit-teaser {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 18px 20px;
+    border: 1px solid var(--awa-border-subtle, #e5e7eb);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 35%, var(--awa-bg, #fff));
+}
+
+body.customer-account-index .awa-account-credit-teaser__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--awa-text, #333);
+}
+
+body.customer-account-index .awa-account-credit-teaser__hint {
+    margin: 0;
+    max-width: 65ch;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--awa-text-muted, #666);
+}
+
+body.customer-account-index .awa-account-credit-teaser__link {
+    margin-top: 4px;
+}
+
+body.customer-account-index .b2b-dashboard-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 0;
+}
+
+body.customer-account-index .b2b-shortcut-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-height: 44px;
+    padding: 16px 18px;
+    text-align: left;
+    text-decoration: none;
+    background: var(--awa-bg, #fff);
+    border: 1px solid var(--awa-border, #e5e5e5);
+    border-radius: 4px;
+    transition: border-color 200ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+body.customer-account-index .b2b-shortcut-card:hover {
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e5e5e5));
+    background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 25%, var(--awa-bg, #fff));
+    box-shadow: none;
+    text-decoration: none;
+}
+
+body.customer-account-index .b2b-shortcut-card:active {
+    background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 40%, var(--awa-bg, #fff));
+}
+
+body.customer-account-index .b2b-shortcut-card:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337);
+    outline-offset: 2px;
+}
+
+body.customer-account-index .b2b-shortcut-icon {
+    display: block;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 12%, transparent);
+}
+
+body.customer-account-index .b2b-shortcut-icon--dashboard {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2'%3E%3Crect x='3' y='3' width='7' height='7' rx='1'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 18px 18px;
+}
+
+body.customer-account-index .b2b-shortcut-icon--reorder {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2'%3E%3Cpath d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/%3E%3Cpath d='M21 3v5h-5'/%3E%3Cpath d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/%3E%3Cpath d='M3 21v-5h5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 18px 18px;
+}
+
+body.customer-account-index .b2b-shortcut-icon--quote {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3Cpath d='M8 13h8'/%3E%3Cpath d='M8 17h5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 18px 18px;
+}
+
+body.customer-account-index .b2b-shortcut-icon--address {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b73337' stroke-width='2'%3E%3Cpath d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 18px 18px;
+}
+
+body.customer-account-index .b2b-shortcut-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--awa-text, #333);
+}
+
+body.customer-account-index .b2b-shortcut-desc {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--awa-text-muted, #666);
+}
+
+body.sales-order-view .order-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+body.sales-order-view .block-order-details-view .box-title,
+body.sales-order-view .block-order-details-view .box-content {
+    font-size: 14px;
+}
+
+body.sales-order-history .order-products-toolbar.toolbar,
+body.customer-address-index .customer-addresses-toolbar.toolbar {
+    margin-top: 12px;
+}
+
+@media (max-width: 767px) {
+    body.customer-account-index .b2b-dashboard-shortcuts {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================
+   §29 — SALES ORDER VIEW (detalhe do pedido Magento)
+   ============================================================ */
+
+body.sales-order-view .page-title-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+}
+
+body.sales-order-view .awa-order-status-badge,
+body.sales-order-view .order-status.awa-order-status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--awa-info, #0369a1);
+    background: var(--awa-primary, #b73337);
+    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 80%, var(--awa-text, #333));
+}
+
+body.sales-order-view .block-order-details-view .block-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+body.sales-order-view .block-order-details-view .box {
+    background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 45%, transparent);
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin: 0;
+}
+
+body.sales-order-view .block-order-details-view .box-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--awa-text-muted, #666);
+    margin-bottom: 8px;
+}
+
+body.sales-order-view .block-order-details-view address,
+body.sales-order-view .block-order-details-view .box-content {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--awa-text, #333);
+    font-style: normal;
+}
+
+body.sales-order-view .order-details-items.ordered {
+    margin-top: 4px;
+}
+
+body.sales-order-view .order-details-items .order-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+body.sales-order-view .table-wrapper.order-items {
+    border: 1px solid var(--awa-border-subtle, #e5e7eb);
+    border-radius: 4px;
+    overflow-x: auto;
+    background: var(--awa-bg, #fff);
+}
+
+body.sales-order-view table.table-order-items .product-item-name {
+    font-weight: 600;
+    color: var(--awa-text, #333);
+}
+
+body.sales-order-view table.table-order-items tfoot tr th,
+body.sales-order-view table.table-order-items tfoot tr td {
+    padding: 10px 14px;
+    font-size: 14px;
+    border-top: 1px solid #eee;
+}
+
+body.sales-order-view table.table-order-items tfoot tr.grand_total th,
+body.sales-order-view table.table-order-items tfoot tr.grand_total td {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--awa-text, #333);
+}
+
+body.sales-order-view .order-details-items > .actions-toolbar {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+}
+
+body.sales-order-view .block.block-order-details-view + .block {
+    margin-top: 12px;
+}
+
+@media (max-width: 767px) {
+    body.sales-order-view .block-order-details-view .block-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================================
+   §127-terminal — operational pages SSOT final-wins (2026-06-09)
+   Vence pages.css / pages-credit.css / pages-quote.css em cascata async.
+   ============================================================================ */
+
+body#html-body .page-wrapper .b2b-page-shell .b2b-section-header h1 {
+    font-size: clamp(22px, 2vw, 28px) !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    letter-spacing: -0.01em !important;
+}
+
+body#html-body .page-wrapper .b2b-page-shell :is(
+    .credit-card,
+    .company-info-card,
+    .add-user-form,
+    .b2b-quote-wrapper,
+    .b2b-quote-form,
+    .table-wrapper,
+    .b2b-section
+) {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+body#html-body .page-wrapper .b2b-page-shell :is(.badge, .badge--admin, .badge--approver) {
+    border-radius: 4px !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: 600 !important;
+}
+
+body#html-body .page-wrapper .b2b-credit-page .credit-card {
+    border-radius: 4px !important;
+}
+
+body#html-body .page-wrapper .b2b-credit-page :is(.credit-usage-bar__track, .credit-usage-bar__fill) {
+    border-radius: 4px !important;
+}
+
+body#html-body .page-wrapper .b2b-credit-page .credit-usage-bar__fill {
+    background: var(--awa-primary, #b73337) !important;
+    background-image: none !important;
+}
+
+body#html-body .page-wrapper .b2b-credit-page .credit-card__label {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+}
+
+body#html-body .page-wrapper .b2b-page-shell :is(.action.primary, .btn-add-user, .btn-save) {
+    min-height: 44px !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+body#html-body .page-wrapper .b2b-page-shell table :is(th, thead th) {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: 600 !important;
+}
+
+body#html-body.sales-order-view .table-wrapper.order-items {
+    border-radius: 4px !important;
+}
+
+body#html-body.sales-order-view .block-order-details-view .box {
+    border-radius: 4px !important;
+}
+
+/* ============================================================================
+   §128-terminal — account nav SSOT (2026-06-09)
+   ============================================================================ */
+
+body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .account-nav-title {
+    background: var(--awa-bg-surface, #ffffff) !important;
+    background-image: none !important;
+    border-bottom: 1px solid var(--awa-border-subtle, #e5e5e5) !important;
+}
+
+body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .account-nav-title strong {
+    color: var(--awa-text-primary, #333333) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+}
+
+body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .account-nav-link {
+    border-radius: 4px !important;
+    border-left: 0 !important;
+}
+
+body.account .sidebar .block-reorder,
+body[class*="b2b-"] .sidebar .block-reorder {
+    border-radius: 4px !important;
+}
+
+/* ============================================================================
+   §134-terminal — account shell 1280px + operational stack (2026-06-09)
+   ============================================================================ */
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main {
+    max-width: var(--awa-page-dash, 1280px) !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: var(--awa-page-pad, 24px) !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs-container {
+    max-width: var(--awa-page-dash, 1280px) !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: var(--awa-page-pad, 24px) !important;
+    box-sizing: border-box !important;
+}
+
+@media (min-width: 1024px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > :is(.columns, .columns.layout) {
+        grid-template-columns: 220px minmax(0, 1fr) !important;
+        column-gap: var(--awa-grid-gap-loose, 32px) !important;
+        align-items: start !important;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-header-brand-cell,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-brand-cell {
-        display: flex !important;
-        align-items: center !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        min-width: 148px !important;
-        width: 161px !important;
-        max-width: 161px !important;
-        overflow: visible !important;
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > :is(
+        .sidebar-main, .sidebar.sidebar-main, .sidebar
+    ) {
+        min-width: 220px !important;
+        max-width: 220px !important;
+        width: 220px !important;
+    }
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: clamp(12px, 1.5vw, 16px) !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell :is(
+    .message,
+    .messages .message,
+    .awa-empty-state,
+    .b2b-empty-state,
+    .data.table-wrapper,
+    .table-wrapper
+) {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .account-nav-item :is(.account-nav-link, .account-nav-text) {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* ============================================================================
+   §135-terminal — tablet grid + operational surfaces (2026-06-09)
+   ============================================================================ */
+
+@media (min-width: 769px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > :is(.columns, .columns.layout) {
+        display: grid !important;
+        grid-template-columns: 220px minmax(0, 1fr) !important;
+        column-gap: var(--awa-grid-gap-loose, 32px) !important;
+        align-items: start !important;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-header-brand-cell .logo,
-    body.account .page-wrapper .awa-site-header .awa-header-brand-cell .logo a,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-brand-cell .logo,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-brand-cell .logo a {
-        display: flex !important;
-        align-items: center !important;
-        visibility: visible !important;
-        opacity: 1 !important;
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > :is(
+        .sidebar-main, .sidebar.sidebar-main, .sidebar
+    ) {
+        min-width: 220px !important;
+        max-width: 220px !important;
+        width: 220px !important;
+    }
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-empty-state {
+    box-shadow: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell :is(
+    .b2b-quote-wrapper,
+    .b2b-quote-form,
+    .approval-section,
+    .company-users-section,
+    .b2b-cotacao-card
+) {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+/* ============================================================================
+   §136-terminal — operational pages SSOT (2026-06-09)
+   ============================================================================ */
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+    .box-title,
+    .data.table th,
+    table thead th,
+    .block-title strong,
+    .fieldset > .legend
+) {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: 600 !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+    .block-collapsible-nav,
+    .block.block-collapsible-nav .item a,
+    .b2b-page-shell,
+    .box,
+    .message,
+    .b2b-quote-wrapper,
+    .approval-section,
+    .company-users-section,
+    .b2b-cotacao-card,
+    .awa-empty-state,
+    .b2b-empty-state
+) {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+    .action.secondary,
+    a.action.secondary,
+    button.action.secondary
+) {
+    min-height: 44px !important;
+    border-radius: 4px !important;
+    text-transform: none !important;
+}
+
+/* §136-terminal — nav coluna única (operational late.css) */
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .sidebar-main {
+    min-width: 220px !important;
+    max-width: 220px !important;
+    width: 220px !important;
+    overflow: visible !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .account-nav-items {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    columns: 1 !important;
+    column-count: 1 !important;
+    max-height: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .account-nav-item :is(.account-nav-link, .account-nav-text) {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* ============================================================================
+   §141-terminal — operational flat lock + tables (2026-06-09)
+   ============================================================================ */
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .column.main > :is(
+    .block:not(.block-collapsible-nav),
+    form,
+    .table-wrapper
+):is(:hover, :active, :focus-within) {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+    .b2b-shortcut-card,
+    .b2b-quote-wrapper,
+    .approval-section,
+    .company-users-section,
+    .b2b-cotacao-card,
+    .credit-card,
+    .box,
+    .message
+):is(:hover, :active, :focus-within) {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+    .data.table th,
+    .data.table td,
+    table th,
+    table td
+) {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    vertical-align: middle !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.data.table th, table thead th) {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: 600 !important;
+    background: var(--awa-bg-muted, #f8fafc) !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+    .action.primary,
+    .action.secondary,
+    a.action.secondary,
+    button.action.secondary
+) {
+    min-height: 44px !important;
+    border-radius: 4px !important;
+    text-transform: none !important;
+    box-shadow: none !important;
+}
+
+@media (min-width: 769px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > .column.main {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        min-width: 0 !important;
+        padding-inline: 0 !important;
+    }
+}
+
+/* ============================================================================
+   §151-terminal — account/B2B shell standard (2026-06-12)
+   ============================================================================ */
+
+html body#html-body:is(.account, [class*="b2b-"]) {
+    --awa-account-shell-sidebar: 240px;
+    --awa-account-shell-gap: clamp(16px, 2vw, 24px);
+    --awa-account-section-gap: clamp(12px, 1.5vw, 16px);
+    --awa-account-section-pad: clamp(14px, 1.8vw, 18px);
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main,
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs-container {
+    max-width: var(--awa-page-dash) !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: var(--awa-page-pad) !important;
+    box-sizing: border-box !important;
+}
+
+@media (min-width: 769px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > :is(.columns, .columns.layout, .columns.row, .columns.layout.row) {
+        display: grid !important;
+        grid-template-columns: minmax(220px, var(--awa-account-shell-sidebar)) minmax(0, 1fr) !important;
+        column-gap: var(--awa-account-shell-gap) !important;
+        row-gap: 0 !important;
+        align-items: start !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-inline: 0 !important;
+        box-sizing: border-box !important;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-header-brand-cell img,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-brand-cell img,
-    body.account .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-brand-cell .logo img,
-    body[class*="b2b-"] .page-wrapper .awa-site-header.awa-header-condensed #header .awa-header-brand-cell .logo img {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        width: auto !important;
-        height: auto !important;
-        min-height: 34px !important;
-        max-height: 50px !important;
-        object-fit: contain !important;
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > :is(.sidebar, .sidebar-main, .sidebar.sidebar-main, .col-lg-2, [class*="col-sm-3"], :first-child) {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: var(--awa-account-shell-sidebar) !important;
+        padding-inline: 0 !important;
+        float: none !important;
+        box-sizing: border-box !important;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-header-search-col form.minisearch,
-    body.account .page-wrapper .awa-site-header .awa-header-search-col .block-search form.minisearch,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-search-col form.minisearch,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-search-col .block-search form.minisearch {
-        border: 1px solid var(--b2b-pg-late-border-mid) !important;
-        border-radius: 8px !important;
-        box-shadow: none !important;
-        overflow: hidden !important;
-        background: var(--b2b-pg-late-white) !important;
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > :is(.column.main, .col-main, .col-lg-10, [class*="col-sm-9"]) {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        padding-inline: 0 !important;
+        float: none !important;
+        box-sizing: border-box !important;
+    }
+}
+
+@media (max-width: 768px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main,
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs-container {
+        padding-inline: var(--awa-page-pad-mobile) !important;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-header-search-col .field.search,
-    body.account .page-wrapper .awa-site-header .awa-header-search-col .field.search .control,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-search-col .field.search,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-search-col .field.search .control {
-        border: 0 !important;
-        box-shadow: none !important;
-    }
-
-    body.account .page-wrapper .awa-site-header .awa-header-search-col input#search,
-    body.account .page-wrapper .awa-site-header .awa-header-search-col input.input-text,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-search-col input#search,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-search-col input.input-text {
-        border: 0 !important;
-        box-shadow: none !important;
-        outline: 0 !important;
-        background: transparent !important;
-    }
-
-    body.account .page-wrapper .awa-site-header .awa-header-search-col .actions .action.search,
-    body.account .page-wrapper .awa-site-header .awa-header-search-col button.action.search,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-search-col .actions .action.search,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-search-col button.action.search {
-        border: 0 !important;
-        border-left: 1px solid var(--b2b-pg-late-border-main) !important;
-        box-shadow: none !important;
-        outline: 0 !important;
-    }
-
-    body.account .page-wrapper .awa-site-header .awa-header-right-col,
-    body.account .page-wrapper .awa-site-header .awa-header-account-prompt,
-    body.account .page-wrapper .awa-site-header .awa-header-account-nav,
-    body.account .page-wrapper .awa-site-header .top-account,
-    body.account .page-wrapper .awa-site-header .top-account ul.header.links,
-    body.account .page-wrapper .awa-site-header .awa-account-dropdown__trigger,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-right-col,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-account-prompt,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-account-nav,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .top-account,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .top-account ul.header.links,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-account-dropdown__trigger {
-        border: 0 !important;
-        box-shadow: none !important;
-        outline: 0 !important;
-        background: transparent !important;
-    }
-
-    /* Normaliza bloco de texto da conta (guest/customer) para evitar recortes e bordas extras. */
-    body.account .page-wrapper .awa-site-header .awa-header-account-prompt__text,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-account-prompt__text {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > :is(.columns, .columns.layout, .columns.row, .columns.layout.row) {
         display: flex !important;
         flex-direction: column !important;
-        align-items: flex-start !important;
-        justify-content: center !important;
-        min-width: 0 !important;
-        text-align: left !important;
-        line-height: 1.2 !important;
-    }
-
-    body.account .page-wrapper .awa-site-header .awa-header-account-prompt__line1,
-    body.account .page-wrapper .awa-site-header .awa-header-account-prompt__line2,
-    body.account .page-wrapper .awa-site-header .awa-header-account-prompt__guest,
-    body.account .page-wrapper .awa-site-header .awa-header-account-prompt__customer,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-account-prompt__line1,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-account-prompt__line2,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-account-prompt__guest,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-account-prompt__customer {
-        min-width: 0 !important;
-        white-space: normal !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-    }
-
-    body.account .page-wrapper .awa-site-header .awa-account-dropdown__trigger,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-account-dropdown__trigger {
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 4px !important;
+        gap: var(--awa-account-section-gap) !important;
+        width: 100% !important;
         margin: 0 !important;
-        padding: 0 !important;
-        border: 0 !important;
-        border-radius: 0 !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        line-height: 1.2 !important;
+    }
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.column.main, .col-main, .b2b-page-shell) {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--awa-account-section-gap) !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell > :is(
+    .b2b-section-header,
+    .message,
+    .messages,
+    .credit-summary-cards,
+    .credit-transactions,
+    .company-info-grid,
+    .company-users-section,
+    .approval-section,
+    .b2b-quote-wrapper,
+    .b2b-quote-form-container,
+    .b2b-reorder-page,
+    .shoppinglist-page,
+    .table-wrapper,
+    form
+) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell :is(
+    .credit-card,
+    .company-info-card,
+    .add-user-form,
+    .approval-section,
+    .b2b-quote-wrapper,
+    .b2b-quote-form,
+    .b2b-cotacao-card,
+    .table-wrapper,
+    .box,
+    .message
+) {
+    border-radius: var(--awa-radius-sm, 4px) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    background-image: none !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell .b2b-section-header {
+    padding-bottom: var(--awa-account-section-gap) !important;
+    border-bottom: 1px solid var(--awa-border-subtle) !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell .b2b-section-header h1 {
+    margin: 0 !important;
+    line-height: 1.25 !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.table-wrapper, .b2b-quote-items, .company-users-section, .approval-section) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.data.table, table.data-table, table.table, table.shoppinglist-items-table) {
+    width: 100% !important;
+    min-width: 620px !important;
+    table-layout: fixed !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.data.table, table.data-table, table.table, table.shoppinglist-items-table) :is(th, td) {
+    vertical-align: middle !important;
+    overflow-wrap: anywhere !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.data.table, table.data-table, table.table, table.shoppinglist-items-table) :is(th:last-child, td:last-child) {
+    text-align: right !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.actions-toolbar, .form-actions, .toolbar-actions) {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+@media (max-width: 640px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(.data.table, table.data-table, table.table, table.shoppinglist-items-table) {
+        min-width: 560px !important;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-header-account-prompt__line2.awa-account-dropdown__trigger,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-header-account-prompt__line2.awa-account-dropdown__trigger,
-    body.account .page-wrapper .awa-site-header .awa-account-dropdown__trigger .awa-header-account-prompt__link,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-account-dropdown__trigger .awa-header-account-prompt__link {
-        background: transparent !important;
-        background-color: transparent !important;
-        border: 0 !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        outline: 0 !important;
-        text-decoration: none !important;
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell :is(.credit-summary-cards, .company-info-grid) {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: var(--awa-account-section-gap) !important;
+    }
+}
+
+/* ============================================================================
+   §152-terminal — header spacing global align (2026-06-12)
+   Sobrescreve §25/§26: mesmo eixo 1280/16px, gap 12px, row 56px fixa.
+   ============================================================================ */
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-top {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-block: clamp(8px, 1vw, 12px) 0 !important;
+    background: transparent !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main {
+    padding-top: clamp(12px, 1.5vw, 16px) !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .column.main {
+    padding-top: 0 !important;
+}
+
+/* Header layout pertence à cascata global do tema; conteúdo B2B não redefine header. */
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-top .b2b-breadcrumbs-container {
+    max-width: min(100%, 1280px) !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-inline: 16px !important;
+    padding-block: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-top .b2b-breadcrumbs-container .breadcrumbs {
+    margin: 0 !important;
+    padding-block: 4px !important;
+}
+
+@media (max-width: 1024px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+        .page-top .b2b-breadcrumbs-container,
+        .page-main
+    ) {
+        padding-inline: 16px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
+        .page-top .b2b-breadcrumbs-container,
+        .page-main
+    ) {
+        padding-inline: 12px !important;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-account-dropdown__trigger .awa-header-account-prompt__link,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-account-dropdown__trigger .awa-header-account-prompt__link {
-        display: inline-flex !important;
-        align-items: center !important;
-        font-size: 14px !important;
-        line-height: 1.2 !important;
-        font-weight: 700 !important;
-        color: var(--b2b-pg-late-dark) !important;
+    html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main {
+        padding-top: 12px !important;
+    }
+}
+
+/* ============================================================
+   §9.1 — FINANCEIRO (tabs de situação + badges de boleto)
+   Adicionado junto com a Fase 3 de BOLETOS_NFE_IMPLEMENTACAO.md.
+   Sem !important: especificidade via body[class*="b2b-"] já é suficiente
+   neste contexto de página de conta.
+   ============================================================ */
+body[class*="b2b-"] .b2b-finance-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+body[class*="b2b-"] .b2b-finance-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    background: var(--awa-bg-muted, var(--awa-neutral-50, #f0f0f0));
+    color: var(--awa-text-muted, #666);
+}
+
+body[class*="b2b-"] .b2b-finance-badge--vencido {
+    background: var(--awa-danger-bg, #fdecea);
+    color: var(--awa-danger-txt, var(--awa-red, #c62828));
+}
+
+body[class*="b2b-"] .b2b-finance-badge--a_vencer {
+    background: var(--awa-info-bg, #e8f2fd);
+    color: var(--awa-blue-dark, #1565c0);
+}
+
+body[class*="b2b-"] .b2b-finance-badge--pago {
+    background: var(--awa-success-bg, #e7f6ec);
+    color: var(--awa-success-txt, #2e7d32);
+}
+
+body[class*="b2b-"] .b2b-finance-badge--aberto {
+    background: var(--awa-bg-muted, var(--awa-neutral-50, #f0f0f0));
+    color: var(--awa-text-muted, #666);
+}
+
+/* ==========================================================================
+   §9.2 — FINANCEIRO (modal de impressão de boleto)
+   ========================================================================== */
+.b2b-finance-print-modal-wrap .modal-inner-wrap {
+    max-width: 820px;
+    width: 92%;
+}
+
+.b2b-finance-print-modal {
+    position: relative;
+    min-height: 70vh;
+}
+
+.b2b-finance-print-modal__loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--awa-text-muted, #666);
+    background: var(--awa-bg-muted, #fafafa);
+}
+
+.b2b-finance-print-modal__frame {
+    width: 100%;
+    height: 70vh;
+    border: 0;
+    display: block;
+    background: #fff;
+}
+
+
+/* ============================================================================
+   §9.3 — FINANCEIRO (página de impressão do boleto)
+   Migração dos estilos antes inline em print-boleto.phtml para CSS modular.
+   ============================================================================ */
+.b2b-print-boleto {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    font-family: -apple-system, "Segoe UI", Arial, Helvetica, sans-serif;
+    color: var(--awa-text-primary, #1a1a1a);
+}
+
+.b2b-print-boleto__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.b2b-print-boleto__btn {
+    appearance: none;
+    border: 1px solid var(--awa-red, #b3261e);
+    background: var(--awa-red, #b3261e);
+    color: var(--awa-white, #fff);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.b2b-print-boleto__btn:hover {
+    background: var(--awa-red-dark, #931f18);
+}
+
+.b2b-print-boleto__brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--awa-text-primary, #1a1a1a);
+    margin-bottom: 20px;
+}
+
+.b2b-print-boleto__brand-name {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--awa-text-muted, #555);
+}
+
+.b2b-print-boleto__doc-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 2px 0 0;
+}
+
+.b2b-print-boleto__card {
+    border: 1px solid var(--awa-border-color, #d0d0d0);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.b2b-print-boleto__header {
+    padding: 16px 20px;
+    background: var(--awa-bg-muted, #fafafa);
+    border-bottom: 1px solid var(--awa-border-subtle, #e2e2e2);
+}
+
+.b2b-print-boleto__header h1 {
+    font-size: 16px;
+    margin: 0 0 4px;
+    font-weight: 700;
+}
+
+.b2b-print-boleto__header p {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--awa-text-muted, #666);
+    line-height: 1.5;
+}
+
+.b2b-print-boleto__meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+    margin: 0;
+    padding: 18px 20px;
+}
+
+.b2b-print-boleto__meta dt {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--awa-text-subtle, #888);
+    margin-bottom: 3px;
+}
+
+.b2b-print-boleto__meta dd {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.b2b-print-boleto__meta dd.is-value {
+    font-size: 17px;
+    color: var(--awa-red, #b3261e);
+}
+
+.b2b-print-boleto__linha {
+    margin: 0 0 24px;
+}
+
+.b2b-print-boleto__linha-label {
+    display: block;
+    font-size: 11.5px;
+    color: var(--awa-text-muted, #666);
+    margin: 0 0 8px;
+    font-weight: 600;
+}
+
+.b2b-print-boleto__linha-valor {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 14px 16px;
+    border: 1.5px dashed var(--awa-border-strong, #999);
+    border-radius: 6px;
+    background: var(--awa-bg-muted, #fafafa);
+    word-break: break-word;
+}
+
+.b2b-print-boleto__barcode {
+    margin: 0 0 20px;
+    padding: 4px 0 0;
+    overflow-x: auto;
+}
+
+.b2b-print-boleto__aviso {
+    margin: 20px 0 0;
+    padding: 14px 16px;
+    background: var(--awa-warning-bg, #fff8e1);
+    border: 1px solid var(--awa-warning-border, #e0c46c);
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.b2b-print-boleto__footer-note {
+    font-size: 11px;
+    color: var(--awa-text-subtle, #999);
+    text-align: center;
+    margin-top: 8px;
+}
+
+@media print {
+    .b2b-print-boleto {
+        padding: 0;
+        max-width: none;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-account-dropdown__menu,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-account-dropdown__menu {
-        top: calc(100% + 8px) !important;
-        right: 0 !important;
-        left: auto !important;
-        margin-top: 0 !important;
-        z-index: 10001 !important;
+    .b2b-print-boleto__toolbar {
+        display: none;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-account-dropdown__item,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-account-dropdown__item {
-        color: var(--b2b-pg-late-dark) !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        line-height: 1.35 !important;
-        text-decoration: none !important;
-        background: transparent !important;
-        border: 0 !important;
-        border-bottom: 1px solid var(--b2b-pg-late-border-main) !important;
+    .b2b-print-boleto__barcode {
+        overflow: visible;
     }
 
-    body.account .page-wrapper .awa-site-header .awa-account-dropdown__item:last-child,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-account-dropdown__item:last-child {
-        border-bottom: 0 !important;
+    .b2b-print-boleto__card {
+        border-color: var(--awa-border-strong, #999);
     }
 
-    body.account .page-wrapper .awa-site-header .awa-account-dropdown__item:hover,
-    body[class*="b2b-"] .page-wrapper .awa-site-header .awa-account-dropdown__item:hover {
-        background: var(--b2b-pg-late-bg-ultra) !important;
-        color: var(--b2b-pg-late-c2) !important;
-    }
-
-    body.account .page-wrapper .awa-site-header.awa-header-condensed .awa-header-account-prompt__line1,
-    body[class*="b2b-"] .page-wrapper .awa-site-header.awa-header-condensed .awa-header-account-prompt__line1 {
-        display: none !important;
+    @page {
+        size: A4;
+        margin: 16mm 14mm;
     }
 }

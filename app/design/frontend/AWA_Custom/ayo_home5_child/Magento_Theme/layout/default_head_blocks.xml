@@ -153,7 +153,38 @@
             já estão resolvidos via _extend.less/head.additional; este CSS patch
             carrega POR ÚLTIMO na cascata do head.
         -->
-        <css src="css/awa-visual-fixes-2026-06-29-final.min.css"/>
+        <!--
+            Visual Autopilot 2026-07-02 (causa raiz, não workaround): NÃO colocar
+            query string (?v=...) diretamente no atributo `src` de <css>. O core
+            do Magento resolve o content-type do asset via
+            `strtolower(pathinfo($path, PATHINFO_EXTENSION))`
+            (Magento\Framework\View\Asset\Source::getContentType) — com
+            "arquivo.min.css?v=xxx" o pathinfo() retorna a extensão
+            "css?v=xxx" (não "css"), então `Renderer::addDefaultAttributes()`
+            nunca casa `$contentType === 'css'` e o atributo `rel="stylesheet"`
+            é OMITIDO do <link> renderizado. Resultado: o navegador ignora o
+            <link> inteiro (link sem rel não é reconhecido como stylesheet) e
+            NENHUMA regra deste arquivo chega a aplicar — bug confirmado ao
+            vivo via curl no HTML bruto, antes de qualquer plugin deste tema
+            rodar. Isso já custou ciclos inteiros de debugging tentando migrar
+            regras para outros arquivos; a causa real nunca era CSS/cascata.
+
+            Cache-busting continua necessário (nginx serve pub/static com
+            `cache-control: immutable` de 1 ano), mas agora é aplicado
+            DEPOIS da resolução do asset pelo core, via
+            GrupoAwamotos\Theme\Plugin\Response\OptimizeHeadStylesPlugin
+            (pós-processamento do HTML já renderizado — não altera o `src`
+            usado pelo Magento para resolver o asset, então não quebra o
+            pathinfo()). Ver AWA_VISUAL_FIXES_QUERY em
+            HeaderImpeccableCascadeLockCss.php.
+        -->
+        <css src="css/awa-visual-fixes-2026-06-29-final.css"/>
+        <!--
+            AWA 2026-07-08: fix isolado (arquivo próprio, não edita o CSS acima em
+            estado MM não commitado) — FAB modo escuro colidindo com botão
+            "Permitir cookies" no mobile. Ver comentário no próprio arquivo CSS.
+        -->
+        <css src="css/awa-cookie-fab-collision-fix-2026-07-08.min.css"/>
     </head>
     <body>
         <referenceBlock name="head.additional">

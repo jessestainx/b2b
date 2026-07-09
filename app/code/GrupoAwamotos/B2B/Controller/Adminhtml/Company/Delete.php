@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace GrupoAwamotos\B2B\Controller\Adminhtml\Company;
 
 use GrupoAwamotos\B2B\Model\CompanyFactory;
@@ -16,17 +18,22 @@ class Delete extends Action implements HttpPostActionInterface
         Context $context,
         private readonly CompanyFactory $companyFactory,
         private readonly CompanyResource $companyResource
-    ) { parent::__construct($context); }
+    ) { parent::__construct($context);
+    }
 
     public function execute()
     {
         $redirect = $this->resultRedirectFactory->create();
         $id = (int) $this->getRequest()->getParam('company_id');
-        if (!$id) return $redirect->setPath('*/*/');
+        if (!$id) {
+            return $redirect->setPath('*/*/');
+        }
         try {
             $company = $this->companyFactory->create();
             $this->companyResource->load($company, $id);
-            if ($company->getId()) $this->companyResource->delete($company);
+            if ($company->getId()) {
+                $this->companyResource->delete($company);
+            }
             $this->messageManager->addSuccessMessage(__('Empresa excluída.'));
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(__('Erro: %1', $e->getMessage()));

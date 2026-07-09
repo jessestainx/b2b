@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Injeta coluna "Private Label" no grid de produtos do admin.
+    Produtos OEM aparecem com "✔ [Marca] → [e-mail do cliente]".
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <columns name="product_columns">
+        <column name="private_label"
+                class="GrupoAwamotos\B2B\Ui\Component\Listing\Column\PrivateLabelColumn"
+                sortOrder="200">
+            <settings>
+                <label translate="true">Private Label</label>
+                <visible>true</visible>
+                <sortable>false</sortable>
+                <filter>false</filter>
+            </settings>
+        </column>
+    </columns>
+</listing>

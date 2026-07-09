@@ -1,1 +1,171 @@
-define(["jquery"],function(o){"use strict";let t="form.form.minisearch, #search_mini_form",n="__awaSearchCompatBootObserver",e="__awaSearchCompatBootScheduled";function a(o){return!0===o||1===o||"1"===o||"true"===o}function i(t){"loading"!==document.readyState?t():o(t)}function r(o,t){window[o]||(window[o]=!0,t())}function c(n){let e;return!(!n||1!==n.nodeType)&&((e=o(n)).is(t)||e.find(t).length>0)}function u(){r("__awaSearchCompatBootInit",function(){require(["js/awa-search-autocomplete-compat"],function(a){function r(){function n(){window[e]=!1,o(t).each(function(){a({},this)})}window[e]||(window[e]=!0,"function"!=typeof window.requestAnimationFrame?window.setTimeout(n,0):window.requestAnimationFrame(n))}i(function(){r(),o(document).on("contentUpdated.awaSearchCompatBootstrap",function(o){o&&o.target&&!c(o.target)||r()}),window.MutationObserver&&document.body&&!window[n]&&(window[n]=new window.MutationObserver(function(o){(function(o){let t,n,e,a,i;if(!o||!o.length)return!1;for(t=0;t<o.length;t+=1)if(e=o[t]){for(a=e.addedNodes||[],n=0;n<a.length;n+=1)if(c(a[n]))return!0;for(i=e.removedNodes||[],n=0;n<i.length;n+=1)if(c(i[n]))return!0}return!1})(o)&&r()}),window[n].observe(document.body,{childList:!0,subtree:!0}))})})})}return function(o){let t=o||{};a(t.load_search_compat_js)&&u(),a(t.load_b2b_checkout_compat_js)&&r("__awaB2bCheckoutCompatBootInit",function(){require(["js/awa-custom-b2b-cart-checkout-compat"],function(o){i(function(){o()})})}),a(t.load_home_category_compat_js)&&r("__awaHomeCategoryCompatBootInit",function(){require(["js/awa-custom-home-category-compat"],function(o){i(function(){o()})})})}});
+define(['jquery'], function ($) {
+    'use strict';
+
+    const SEARCH_FORM_SELECTOR = 'form.form.minisearch, #search_mini_form';
+    const OBSERVER_KEY = '__awaSearchCompatBootObserver';
+    const SCHEDULE_KEY = '__awaSearchCompatBootScheduled';
+    const INIT_KEY = '__awaSearchCompatBootInit';
+    const HEADER_SCOPE_SELECTOR = '.awa-site-header, #header.header-container, .page-header, header.page-header';
+
+    function flagEnabled(value) {
+        return value === true || value === 1 || value === '1' || value === 'true';
+    }
+
+    function onReady(callback) {
+        if (document.readyState !== 'loading') {
+            callback();
+            return;
+        }
+        $(callback);
+    }
+
+    function runOnce(flag, callback) {
+        if (window[flag]) {
+            return;
+        }
+        window[flag] = true;
+        callback();
+    }
+
+    function isSearchFormNode(node) {
+        if (!node || node.nodeType !== 1) {
+            return false;
+        }
+        const $node = $(node);
+        return $node.is(SEARCH_FORM_SELECTOR) || $node.find(SEARCH_FORM_SELECTOR).length > 0;
+    }
+
+    function mutationsTouchSearch(mutations) {
+        if (!mutations || !mutations.length) {
+            return false;
+        }
+
+        for (let i = 0; i < mutations.length; i += 1) {
+            const mutation = mutations[i];
+            if (!mutation) {
+                continue;
+            }
+
+            const added = mutation.addedNodes || [];
+            for (let j = 0; j < added.length; j += 1) {
+                if (isSearchFormNode(added[j])) {
+                    return true;
+                }
+            }
+
+            const removed = mutation.removedNodes || [];
+            for (let k = 0; k < removed.length; k += 1) {
+                if (isSearchFormNode(removed[k])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    function scheduleSearchBoot() {
+        if (window[SCHEDULE_KEY]) {
+            return;
+        }
+        window[SCHEDULE_KEY] = true;
+
+        const run = function () {
+            window[SCHEDULE_KEY] = false;
+            require(['js/awa-search-autocomplete-compat'], function (initCompat) {
+                $(SEARCH_FORM_SELECTOR).each(function () {
+                    initCompat({}, this);
+                });
+            });
+        };
+
+        if (typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(run);
+        } else {
+            window.setTimeout(run, 0);
+        }
+    }
+
+    function bootSearchCompat() {
+        runOnce(INIT_KEY, function () {
+            require(['js/awa-search-autocomplete-compat'], function () {
+                onReady(function () {
+                    scheduleSearchBoot();
+
+                    $(document).on('contentUpdated.awaSearchCompatBootstrap', function (event) {
+                        if (event && event.target && !isSearchFormNode(event.target)) {
+                            return;
+                        }
+                        scheduleSearchBoot();
+                    });
+
+                    const headerScope = document.querySelector(HEADER_SCOPE_SELECTOR);
+                    if (!window.MutationObserver || !headerScope || window[OBSERVER_KEY]) {
+                        return;
+                    }
+
+                    const observer = new window.MutationObserver(function (records) {
+                        if (!mutationsTouchSearch(records)) {
+                            return;
+                        }
+                        scheduleSearchBoot();
+                        const $forms = $(SEARCH_FORM_SELECTOR);
+                        if ($forms.length && $forms.filter('[data-awa-search-compat-init="1"]').length >= $forms.length) {
+                            observer.disconnect();
+                            window[OBSERVER_KEY] = null;
+                        }
+                    });
+
+                    window[OBSERVER_KEY] = observer;
+                    observer.observe(headerScope, { childList: true, subtree: true });
+                });
+            });
+        });
+    }
+
+    function bootB2bCheckoutCompat() {
+        runOnce('__awaB2bCheckoutCompatBootInit', function () {
+            require(['js/awa-custom-b2b-cart-checkout-compat'], function (init) {
+                onReady(function () {
+                    init();
+                });
+            });
+        });
+    }
+
+    function bootHomeCategoryCompat() {
+        runOnce('__awaHomeCategoryCompatBootInit', function () {
+            const run = function () {
+                require(['js/awa-custom-home-category-compat'], function (init) {
+                    onReady(function () {
+                        init();
+                    });
+                });
+            };
+
+            if (document.body && (document.body.classList.contains('cms-index-index') || document.body.classList.contains('cms-home'))) {
+                if ('requestIdleCallback' in window) {
+                    window.requestIdleCallback(run, { timeout: 4500 });
+                } else {
+                    window.setTimeout(run, 3200);
+                }
+                return;
+            }
+            run();
+        });
+    }
+
+    return function (config) {
+        const cfg = config || {};
+
+        if (flagEnabled(cfg.load_search_compat_js)) {
+            bootSearchCompat();
+        }
+        if (flagEnabled(cfg.load_b2b_checkout_compat_js)) {
+            bootB2bCheckoutCompat();
+        }
+        if (flagEnabled(cfg.load_home_category_compat_js)) {
+            bootHomeCategoryCompat();
+        }
+    };
+});

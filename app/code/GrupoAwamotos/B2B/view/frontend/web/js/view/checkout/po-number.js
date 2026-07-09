@@ -9,8 +9,9 @@ define([
     'ko',
     'Magento_Customer/js/model/customer',
     'GrupoAwamotos_B2B/js/model/checkout/po-number-storage',
+    'GrupoAwamotos_B2B/js/model/checkout/b2b-config',
     'mage/translate'
-], function (Component, ko, customer, poNumberStorage, $t) {
+], function (Component, ko, customer, poNumberStorage, b2bConfig, $t) {
     'use strict';
 
     return Component.extend({
@@ -27,13 +28,17 @@ define([
             this._super();
 
             this.poNumber = poNumberStorage.poNumberObservable;
-            var config = (window.checkoutConfig || {}).b2bCheckout || {};
-            var poNumberConfig = config.poNumber || {};
-            var isEnabled = poNumberConfig.enabled === true;
+            this.errorMessage = poNumberStorage.errorMessageObservable;
 
             this.isVisible = ko.computed(function () {
-                return customer.isLoggedIn() && isEnabled;
+                return customer.isLoggedIn() && b2bConfig.isEnabled(b2bConfig.getSection('poNumber').enabled);
             }, this);
+
+            this.poNumber.subscribe(function () {
+                if (poNumberStorage.errorMessageObservable()) {
+                    poNumberStorage.validate();
+                }
+            });
 
             return this;
         },
@@ -96,8 +101,28 @@ define([
         /**
          * @returns {string}
          */
+        getErrorId: function () {
+            return 'b2b-po-number-error';
+        },
+
+        /**
+         * @returns {number}
+         */
+        getMaxLength: function () {
+            return poNumberStorage.getMaxLength();
+        },
+
+        /**
+         * @returns {string}
+         */
         getAriaDescribedBy: function () {
-            return this.getDescriptionId() + ' ' + this.getSupportId();
+            var ids = [this.getDescriptionId(), this.getSupportId()];
+
+            if (this.errorMessage && this.errorMessage()) {
+                ids.push(this.getErrorId());
+            }
+
+            return ids.join(' ');
         },
 
         /**

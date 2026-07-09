@@ -2898,6 +2898,11 @@
     var hasDeferredMutationPass = false;
     var visibilityDeferredScheduled = false;
     var scheduledMutationWorkId = null;
+    var mutationObserverStopped = false;
+    var mutationPassCount = 0;
+    var mutationObserverStartTs = Date.now();
+    var MAX_MUTATION_PASSES = isHome5LikePage() ? 260 : 520;
+    var MUTATION_OBSERVER_MAX_RUNTIME_MS = isHome5LikePage() ? 180000 : 0;
 
     function queueMutationWork(fn) {
         if (document.hidden) {
@@ -2913,6 +2918,22 @@
 
         scheduledMutationWorkId = scheduleCallback(function () {
             scheduledMutationWorkId = null;
+
+            if (mutationObserverStopped) {
+                return;
+            }
+
+            mutationPassCount += 1;
+            if (mutationPassCount > MAX_MUTATION_PASSES) {
+                stopMutationObserver('max-passes');
+                return;
+            }
+
+            if (MUTATION_OBSERVER_MAX_RUNTIME_MS > 0 && (Date.now() - mutationObserverStartTs) > MUTATION_OBSERVER_MAX_RUNTIME_MS) {
+                stopMutationObserver('max-runtime');
+                return;
+            }
+
             fn();
         });
     }
@@ -2938,6 +2959,28 @@
         debounceTimer = null;
         cancelMutationWork();
         visibilityDeferredScheduled = false;
+    }
+
+    function stopMutationObserver(reason) {
+        if (mutationObserverStopped) {
+            return;
+        }
+
+        mutationObserverStopped = true;
+        cleanupOnDocumentHidden();
+        pendingNodes = [];
+        if (pendingNodesSet) {
+            pendingNodesSet.clear();
+        }
+        processFullPass = false;
+
+        try {
+            observer.disconnect();
+        } catch (e) {
+            /* noop */
+        }
+
+        log('Mutation observer stopped: ' + reason);
     }
 
     /* R20-01: Gating seletivo para mutações — reduz trabalho em nós irrelevantes */
@@ -3180,19 +3223,63 @@
         }
     });
 
-    var observeTarget = getPageWrapper();
-    if (!observeTarget || !observeTarget.nodeType) {
-        observeTarget = document.body || document.documentElement;
+    var observeTargets = [];
+
+    function pushObserveTarget(node) {
+        if (!node || !node.nodeType) {
+            return;
+        }
+        if (observeTargets.indexOf(node) === -1) {
+            observeTargets.push(node);
+        }
     }
-    if (observeTarget && observeTarget.nodeType) {
-        observer.observe(observeTarget, {
+
+    if (isHome5LikePage()) {
+        [
+            '.search-autocomplete',
+            '.minicart-wrapper',
+            '.nav-sections',
+            '.wrapper_slider',
+            '.list-tab-product',
+            '.categorytab-container',
+            '.homebuilder-section',
+            '.products.wrapper',
+            '.page-footer'
+        ].forEach(function (selector) {
+            var node = document.querySelector(selector);
+            if (node) {
+                pushObserveTarget(node);
+            }
+        });
+    }
+
+    if (!observeTargets.length) {
+        var observeTarget = getPageWrapper();
+        if (!observeTarget || !observeTarget.nodeType) {
+            observeTarget = document.body || document.documentElement;
+        }
+        pushObserveTarget(observeTarget);
+    }
+
+    observeTargets.forEach(function (target) {
+        observer.observe(target, {
             childList: true,
             subtree: true
         });
+    });
+
+    if (MUTATION_OBSERVER_MAX_RUNTIME_MS > 0) {
+        setTimeout(function () {
+            stopMutationObserver('max-runtime-timer');
+        }, MUTATION_OBSERVER_MAX_RUNTIME_MS);
     }
 
     if (document && document.addEventListener) {
         document.addEventListener('visibilitychange', function () {
+            if (mutationObserverStopped) {
+                return;
+            }
+
             if (document.hidden) {
                 if (visibilityDeferredScheduled) {
                     hasDeferredMutationPass = true;

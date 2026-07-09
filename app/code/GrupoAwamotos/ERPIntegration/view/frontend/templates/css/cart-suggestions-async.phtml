@@ -1,0 +1,16 @@
+<?php
+declare(strict_types=1);
+/**
+ * ERP cart-suggestions.css — async loader.
+ *
+ * O widget de sugestões do carrinho é below-fold: o CSS não precisa bloquear o FCP.
+ * Carregado via head.additional (dentro do <head>) para evitar repaint do corpo,
+ * mas sem bloquear a renderização (media=print onload).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$cssUrl = $block->getViewFileUrl('GrupoAwamotos_ERPIntegration::css/cart-suggestions.css');
+?>
+<link rel="preload" href="<?= $block->escapeUrl($cssUrl) ?>" as="style"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/></noscript>

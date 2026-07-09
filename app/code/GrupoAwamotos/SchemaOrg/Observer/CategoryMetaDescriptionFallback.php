@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\SchemaOrg\Observer;
@@ -31,7 +32,8 @@ class CategoryMetaDescriptionFallback implements ObserverInterface
     public function __construct(
         private readonly PageConfig $pageConfig,
         private readonly ScopeConfigInterface $scopeConfig
-    ) {}
+    ) {
+    }
 
     public function execute(Observer $observer): void
     {

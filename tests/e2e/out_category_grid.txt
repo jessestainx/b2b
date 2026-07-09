@@ -1,5 +1,0 @@
-{
-  "width": 842,
-  "gridTemplateColumns": "270px 270px 270px",
-  "gridGap": "16px"
-}

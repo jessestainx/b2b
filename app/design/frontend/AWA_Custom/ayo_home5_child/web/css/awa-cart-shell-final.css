@@ -88,9 +88,9 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.cart-empty, .awa-cart
     max-width: min(100%, 860px) !important;
     margin: var(--awa-cart-gap-md) auto !important;
     padding: var(--awa-cart-gap-md) !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
     border-radius: 8px !important;
-    background: var(--awa-bg, #fff) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
     box-shadow: none !important;
     text-align: center !important;
 }
@@ -99,7 +99,7 @@ html body#html-body.checkout-cart-index .page-wrapper .cart-empty.awa-cart-empty
     gap: var(--awa-cart-gap-sm) !important;
     max-width: min(100%, 36rem) !important;
     padding: clamp(20px, 3vw, 28px) clamp(16px, 3vw, 24px) !important;
-    box-shadow: 0 4px 18px color-mix(in srgb, var(--awa-text-primary, #333) 6%, transparent) !important;
+    box-shadow: 0 4px 18px color-mix(in srgb, var(--awa-text-primary, var(--awa-text)) 6%, transparent) !important;
 }
 
 html body#html-body.checkout-cart-index .page-wrapper .awa-cart-empty--success {
@@ -113,8 +113,8 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__icon-
     width: 56px !important;
     height: 56px !important;
     margin: 0 auto !important;
-    color: var(--awa-primary, #b73337) !important;
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 10%, var(--awa-bg, #fff)) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 10%, var(--awa-bg, var(--awa-bg))) !important;
     border-radius: 50% !important;
 }
 
@@ -129,7 +129,7 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__title
     font-size: clamp(1.125rem, 1rem + 0.45vw, 1.375rem) !important;
     font-weight: 700 !important;
     line-height: 1.25 !important;
-    color: var(--awa-text-primary, #333) !important;
+    color: var(--awa-text-primary, var(--awa-text)) !important;
     text-align: center !important;
 }
 
@@ -138,7 +138,7 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__subti
     margin: 0 auto var(--awa-cart-gap-sm) !important;
     font-size: 14px !important;
     line-height: 1.45 !important;
-    color: var(--awa-text-muted, #666) !important;
+    color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
     text-align: center !important;
 }
 
@@ -148,8 +148,8 @@ html body#html-body.checkout-cart-index .page-wrapper .awa-cart-empty__min-order
     padding: var(--awa-cart-gap-sm) var(--awa-cart-gap-md) !important;
     max-width: 72ch !important;
     border-radius: 8px !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 5%, var(--awa-bg, #fff)) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 5%, var(--awa-bg, var(--awa-bg))) !important;
     font-size: 13px !important;
     line-height: 1.4 !important;
     text-align: center !important;
@@ -208,9 +208,9 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__secon
 }
 
 html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__suggestion, .awa-order-success__cta-secondary, .awa-order-success__wa) {
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
-    background: var(--awa-bg, #fff) !important;
-    color: var(--awa-primary, #b73337) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
 }
 
 html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__categories, .awa-order-success__categories) {
@@ -219,9 +219,9 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__categ
     margin: 0 !important;
     padding: var(--awa-cart-gap-md) !important;
     max-width: 100% !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
     border-radius: 8px !important;
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, var(--awa-bg, #fff)) !important;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-bg, var(--awa-bg))) !important;
     text-align: center !important;
 }
 
@@ -230,7 +230,7 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__categ
     font-size: 15px !important;
     font-weight: 700 !important;
     line-height: 1.35 !important;
-    color: var(--awa-text-primary, #333) !important;
+    color: var(--awa-text-primary, var(--awa-text)) !important;
 }
 
 html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__categories-list, .awa-order-success__categories-list) {
@@ -250,7 +250,7 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__categ
     font-size: 13px !important;
     font-weight: 700 !important;
     line-height: 1.3 !important;
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
 }
 
 html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__trust, .awa-order-success__trust) {
@@ -262,7 +262,7 @@ html body#html-body.checkout-cart-index .page-wrapper :is(.awa-cart-empty__trust
     margin: var(--awa-cart-gap-sm) 0 0 !important;
     font-size: 13px !important;
     line-height: 1.4 !important;
-    color: var(--awa-text-muted, #666) !important;
+    color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
     text-align: center !important;
 }
 
@@ -273,9 +273,9 @@ html body#html-body.checkout-cart-index .page-wrapper .awa-order-success__card {
     max-width: min(100%, 560px) !important;
     margin: var(--awa-cart-gap-md) auto !important;
     padding: var(--awa-cart-gap-md) !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
     border-radius: 8px !important;
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, var(--awa-bg, #fff)) !important;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 4%, var(--awa-bg, var(--awa-bg))) !important;
 }
 
 html body#html-body.checkout-cart-index .page-wrapper .awa-order-success__details {
@@ -290,7 +290,7 @@ html body#html-body.checkout-cart-index .page-wrapper .awa-order-success__row {
     gap: var(--awa-cart-gap-sm) !important;
     align-items: baseline !important;
     padding-block: var(--awa-cart-gap-xs) !important;
-    border-bottom: 1px solid var(--awa-border, #e5e5e5) !important;
+    border-bottom: 1px solid var(--awa-border, var(--awa-border)) !important;
 }
 
 html body#html-body.checkout-cart-index .page-wrapper .awa-order-success__row:last-child {
@@ -305,16 +305,16 @@ html body#html-body.checkout-cart-index .page-wrapper .awa-order-success__row :i
 
 html body#html-body.checkout-cart-index .page-wrapper .awa-order-success__row dt {
     font-weight: 700 !important;
-    color: var(--awa-text-primary, #333) !important;
+    color: var(--awa-text-primary, var(--awa-text)) !important;
 }
 
 html body#html-body.checkout-cart-index .page-wrapper .awa-order-success__row dd {
-    color: var(--awa-text-muted, #666) !important;
+    color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
     text-align: right !important;
 }
 
 html body#html-body.checkout-cart-index .page-wrapper :is(.awa-order-success__number, .awa-order-success__total) {
-    color: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
     font-weight: 700 !important;
 }
 
@@ -327,8 +327,8 @@ html body#html-body.checkout-cart-index .modal-popup._show .modal-inner-wrap:has
     margin: var(--awa-cart-gap-lg) auto !important;
     padding: var(--awa-cart-gap-lg) !important;
     border-radius: 8px !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
-    background: var(--awa-bg, #fff) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
     box-shadow: none !important;
 }
 
@@ -351,7 +351,7 @@ html body#html-body.checkout-cart-index .modal-popup .block-authentication :is(.
     font-size: clamp(1.125rem, 1rem + 0.45vw, 1.375rem) !important;
     font-weight: 700 !important;
     line-height: 1.25 !important;
-    color: var(--awa-text-primary, #333) !important;
+    color: var(--awa-text-primary, var(--awa-text)) !important;
     text-transform: none !important;
 }
 
@@ -366,7 +366,7 @@ html body#html-body.checkout-cart-index .modal-popup .block-authentication :is(l
     font-size: 13px !important;
     font-weight: 700 !important;
     line-height: 1.35 !important;
-    color: var(--awa-text-primary, #333) !important;
+    color: var(--awa-text-primary, var(--awa-text)) !important;
 }
 
 html body#html-body.checkout-cart-index .modal-popup .block-authentication :is(input, select) {
@@ -375,7 +375,7 @@ html body#html-body.checkout-cart-index .modal-popup .block-authentication :is(i
     max-width: 100% !important;
     min-height: 44px !important;
     padding: 0 var(--awa-cart-gap-md) !important;
-    border: 1px solid var(--awa-border, #e5e5e5) !important;
+    border: 1px solid var(--awa-border, var(--awa-border)) !important;
     border-radius: 8px !important;
     box-sizing: border-box !important;
 }
@@ -439,7 +439,7 @@ html body#html-body#html-body.checkout-cart-index .page-wrapper :is(.cart-empty.
     margin: var(--awa-cart-gap-md) auto !important;
     padding: var(--awa-cart-gap-md) !important;
     border-radius: 8px !important;
-    background: var(--awa-bg, #fff) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
     text-align: center !important;
 }
 
@@ -447,7 +447,7 @@ html body#html-body#html-body.checkout-cart-index .page-wrapper .cart-empty.awa-
     gap: var(--awa-cart-gap-sm) !important;
     max-width: min(100%, 36rem) !important;
     padding: clamp(20px, 3vw, 28px) clamp(16px, 3vw, 24px) !important;
-    box-shadow: 0 4px 18px color-mix(in srgb, var(--awa-text-primary, #333) 6%, transparent) !important;
+    box-shadow: 0 4px 18px color-mix(in srgb, var(--awa-text-primary, var(--awa-text)) 6%, transparent) !important;
 }
 
 html body#html-body#html-body.checkout-cart-index .page-wrapper :is(
@@ -780,15 +780,15 @@ html body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index 
 
 html body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index .page-wrapper
 .awa-site-header[data-awa-header-mode='default'] .awa-header-search-col form#search_mini_form {
-    background: var(--awa-bg, #fff) !important;
-    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 24%, var(--awa-border, #e5e7eb)) !important;
+    background: var(--awa-bg, var(--awa-bg)) !important;
+    border: 1px solid color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 24%, var(--awa-border, #e5e7eb)) !important;
     box-shadow: none !important;
     outline: none !important;
 }
 
 html body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index .page-wrapper
 .awa-site-header[data-awa-header-mode='default'] .awa-header-search-col form#search_mini_form:focus-within {
-    border-color: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, var(--awa-primary)) !important;
     box-shadow: none !important;
     outline: none !important;
 }
@@ -902,8 +902,8 @@ html body#html-body.checkout-cart-index .cart.table-wrapper .awa-cart-item-actio
     padding: 0 var(--awa-space-3, 12px) !important;
     border: 1px solid var(--awa-cc-border, var(--awa-border, #e5e7eb)) !important;
     border-radius: var(--awa-radius-sm, 8px) !important;
-    background: var(--awa-cc-surface-1, var(--awa-bg, #fff)) !important;
-    color: var(--awa-cc-text-2, var(--awa-text-muted, #666)) !important;
+    background: var(--awa-cc-surface-1, var(--awa-bg, var(--awa-bg))) !important;
+    color: var(--awa-cc-text-2, var(--awa-text-muted, var(--awa-text-secondary))) !important;
     font-size: var(--awa-text-sm, 13px) !important;
     font-weight: var(--awa-weight-semibold, 600) !important;
     line-height: 1 !important;
@@ -926,9 +926,9 @@ html body#html-body.checkout-cart-index .cart.table-wrapper .awa-cart-item-actio
 
 html body#html-body.checkout-cart-index .cart.table-wrapper .awa-cart-item-actions .action-delete:hover,
 html body#html-body.checkout-cart-index .cart.table-wrapper .awa-cart-item-actions .action-delete:focus-visible {
-    border-color: var(--awa-primary, #b73337) !important;
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 7%, var(--awa-bg, #fff)) !important;
-    color: var(--awa-primary, #b73337) !important;
+    border-color: var(--awa-primary, var(--awa-primary)) !important;
+    background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 7%, var(--awa-bg, var(--awa-bg))) !important;
+    color: var(--awa-primary, var(--awa-primary)) !important;
 }
 
 html body#html-body.checkout-cart-index .cart-summary #block-shipping,
@@ -936,7 +936,7 @@ html body#html-body.checkout-cart-index .cart-summary .block.shipping {
     padding: var(--awa-space-3, 12px) !important;
     border: 1px solid var(--awa-cc-border, var(--awa-border, #e5e7eb)) !important;
     border-radius: var(--awa-radius-sm, 8px) !important;
-    background: var(--awa-cc-surface-1, var(--awa-bg, #fff)) !important;
+    background: var(--awa-cc-surface-1, var(--awa-bg, var(--awa-bg))) !important;
 }
 
 html body#html-body.checkout-cart-index .cart-summary #block-shipping .legend,
@@ -1032,7 +1032,7 @@ html body#html-body.checkout-cart-index .cart-summary .block.shipping .price {
         content: attr(data-th) !important;
         display: block !important;
         margin-bottom: 2px !important;
-        color: var(--awa-cc-text-2, var(--awa-text-muted, #666)) !important;
+        color: var(--awa-cc-text-2, var(--awa-text-muted, var(--awa-text-secondary))) !important;
         font-size: var(--awa-text-xs, 12px) !important;
         font-weight: var(--awa-weight-semibold, 600) !important;
     }

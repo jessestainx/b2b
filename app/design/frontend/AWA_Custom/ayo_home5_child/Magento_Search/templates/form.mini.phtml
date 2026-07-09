@@ -13,6 +13,7 @@ $searchHelper = $this->helper('Magento\Search\Helper\Data');
 $fallbackSuggestUrl = $block->getUrl('search/ajax/suggest');
 $searchQueryText = (string) $searchHelper->getEscapedQueryText();
 $searchFormClass = 'form minisearch search-content is-ready';
+$isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 
 if ($searchQueryText === '') {
     $searchFormClass .= ' is-empty';
@@ -43,6 +44,7 @@ if ($searchQueryText === '') {
                       aria-atomic="true"></span>
                 <div class="control" data-awa-search-control="true">
                     <input id="search"
+                           aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar produtos')) ?>"
                            data-awa-search-input="true"
                            data-mage-init='{"quickSearch":{
                                "formSelector":"#search_mini_form",
@@ -52,13 +54,12 @@ if ($searchQueryText === '') {
                            type="search"
                            name="<?php echo $block->escapeHtmlAttr($searchHelper->getQueryParamName()) ?>"
                            value="<?php echo $block->escapeHtmlAttr($searchQueryText) ?>"
-                           placeholder="<?php echo $block->escapeHtmlAttr(__('O que você procura?')); ?>"
+                           placeholder="<?php echo $block->escapeHtmlAttr(__('Buscar peça, marca ou moto')); ?>"
                            class="input-text"
                            minlength="2"
                            maxlength="<?php echo (int) $searchHelper->getMaxQueryLength(); ?>"
                            role="combobox"
                            aria-labelledby="awa-search-label"
-                           aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar')) ?>"
                            aria-describedby="awa-search-help"
                            aria-autocomplete="both"
                            aria-expanded="false"
@@ -67,7 +68,9 @@ if ($searchQueryText === '') {
                            autocomplete="search"
                            autocapitalize="off"
                            autocorrect="off"
-                           spellcheck="false" />
+                           spellcheck="false"
+                           inputmode="search"
+                           enterkeyhint="search" />
                     <div id="search_autocomplete"
                          class="search-autocomplete searchsuite-autocomplete"
                          data-role="search-autocomplete"
@@ -83,9 +86,15 @@ if ($searchQueryText === '') {
                         title="<?php echo $block->escapeHtmlAttr(__('Buscar')) ?>"
                         aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar produtos')) ?>"
                         class="action search"
-                        data-awa-search-submit="true">
-                    <span class="awa-sr-only"><?php echo $block->escapeHtml(__('Buscar')); ?></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        data-awa-search-submit="true"
+                        data-awa-search-icon="single-lupa">
+                    <span class="awa-sr-only"><?php echo $block->escapeHtml(__('Pesquisar catálogo')); ?></span>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true" focusable="false"
+                         data-awa-search-svg-icon="lupa">
                         <circle cx="11" cy="11" r="8"/>
                         <path d="m21 21-4.35-4.35"/>
                     </svg>
@@ -93,12 +102,11 @@ if ($searchQueryText === '') {
             </div>
         </form>
         <p class="awa-search-helper-copy" data-awa-search-helper-copy="true" aria-hidden="true">
-            <?php echo $block->escapeHtml(__('Busque por nome, código, SKU ou aplicação.')); ?>
+            <?php echo $block->escapeHtml(__('Busque por nome, código, SKU, marca ou modelo da moto.')); ?>
         </p>
     </div>
 </div>
-<?php $isHomePage = ($block->getRequest()->getFullActionName() === 'cms_index_index'); ?>
-<?php if (!$isHomePage): ?>
+<?php if ($isHomePage): ?>
 <script type="text/x-magento-init">
 {
     "#search_mini_form": {
@@ -113,4 +121,4 @@ if ($searchQueryText === '') {
     }
 }
 </script>
-<?php endif ?>
+<?php endif; ?>

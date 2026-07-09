@@ -351,7 +351,7 @@ class ProductSync implements ProductSyncInterface
             : ($erpProduct['CCKATIVO'] ?? 'N') === 'S';
 
         // Check if data has changed using hash
-        $dataHash = md5(json_encode($erpProduct));
+        $dataHash = hash('xxh128', json_encode($erpProduct));
         $existingHash = $this->syncLogResource->getEntityMapHash('product', $sku);
 
         if ($existingHash === $dataHash && $this->canSkipUnchangedProduct($sku, $isActive)) {

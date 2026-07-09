@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\LogMonitoring\Model;
@@ -85,7 +86,7 @@ class Alert extends AbstractModel implements AlertInterface
         if ($data === null) {
             return null;
         }
-        
+
         if (is_string($data)) {
             try {
                 return $this->serializer->unserialize($data);
@@ -93,7 +94,7 @@ class Alert extends AbstractModel implements AlertInterface
                 return null;
             }
         }
-        
+
         return is_array($data) ? $data : null;
     }
 
@@ -102,7 +103,7 @@ class Alert extends AbstractModel implements AlertInterface
         if ($contextData === null) {
             return $this->setData(self::CONTEXT_DATA, null);
         }
-        
+
         try {
             $serialized = $this->serializer->serialize($contextData);
             return $this->setData(self::CONTEXT_DATA, $serialized);

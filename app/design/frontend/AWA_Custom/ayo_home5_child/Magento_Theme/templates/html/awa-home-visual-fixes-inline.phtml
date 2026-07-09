@@ -1,0 +1,66 @@
+<?php declare(strict_types=1); ?>
+<style id="awa-home-visual-fixes-terminal">
+/* BUG-MOB-SEARCH-001: pseudo-elementos do tema Ayo */
+html body#html-body .block.block-search .actions button.action.search::before,
+html body#html-body .block.block-search .actions button.action.search::after,
+html body#html-body .awa-professional-search button.action.search::before,
+html body#html-body .awa-professional-search button.action.search::after{content:none!important;display:none!important}
+html body#html-body input[type=search]::-webkit-search-cancel-button,
+html body#html-body input[type=search]::-webkit-search-decoration{-webkit-appearance:none!important;appearance:none!important}
+html body#html-body button.action.search svg{display:block!important;width:18px!important;height:18px!important;margin-inline:auto!important}
+html body#html-body .block.block-search .actions button.action.search{min-height:44px!important;min-width:44px!important}
+
+/* BUG-BP-360-009 */
+@media (max-width:374px){
+html body#html-body .page-wrapper .awa-carousel-shell,
+html body#html-body .page-wrapper .awa-home-section,
+html body#html-body .page-wrapper .awa-category-carousel{padding-inline:12px!important}
+}
+
+/* BUG-IMAGES-001: aspect-ratio 1/1 (CLS=0) */
+html body#html-body .content-top-home .product-thumb,
+html body#html-body .content-top-home .product-image-container{aspect-ratio:1/1!important;min-height:120px!important;display:block!important;width:100%!important;contain:layout!important}
+html body#html-body .content-top-home .product-thumb img,
+html body#html-body .content-top-home .item-product .product-image-photo{width:100%!important;height:auto!important;aspect-ratio:1/1!important;object-fit:contain!important}
+
+/* BUG-FOCUS-001: focus rings WCAG 2.4.7 */
+html body#html-body :focus-visible{outline:2.5px solid var(--awa-primary,#b73337)!important;outline-offset:2px!important;border-radius:3px!important}
+
+/* BUG-PROMO-001: barra B2B system message */
+html body#html-body .awa-b2b-promo-bar{background:var(--awa-bg-subtle, #f8f8f9)!important;background-image:none!important;border-bottom:1px solid var(--awa-border,#e5e5e5)!important;box-shadow:none!important}
+html body#html-body .awa-b2b-promo-bar__text{color:var(--awa-text,#333)!important;font-size:13px!important;line-height:1.4!important}
+html body#html-body .awa-b2b-promo-bar__cta{color:var(--awa-primary,#b73337)!important;border:1px solid var(--awa-primary,#b73337)!important;border-radius:6px!important;padding:4px 10px!important;font-weight:600!important;background-color:transparent!important;transition:background-color .18s ease,color .18s ease!important}
+html body#html-body .awa-b2b-promo-bar__cta:hover,
+html body#html-body .awa-b2b-promo-bar__cta:focus-visible{background:var(--awa-primary,#b73337)!important;color:var(--awa-text-inverse, #fff)!important;text-decoration:none!important}
+
+/* BUG-RED-USAGE-012: titulos de secao neutros */
+html body#html-body .page-wrapper .awa-home-section-title,
+html body#html-body .page-wrapper .awa-section-title,
+html body#html-body .page-wrapper .awa-carousel-title,
+html body#html-body .page-wrapper .awa-shelf-title,
+html body#html-body .page-wrapper .awa-tray-title,
+html body#html-body .page-wrapper .awa-section-heading,
+html body#html-body .page-wrapper .awa-title,
+html body#html-body .page-wrapper h2.awa-section-heading,
+html body#html-body .page-wrapper h2.awa-title,
+html body#html-body .page-wrapper h2.awa-tray-heading,
+html body#html-body .page-wrapper h2.awa-shelf-title{color:var(--awa-text-primary, #1a1a1a)!important;border-bottom:1px solid var(--awa-border, #e5e5e5)!important;padding-bottom:12px!important;margin-bottom:16px!important;font-weight:600!important;background:transparent!important;background-image:none!important}
+
+/* BUG-MOB-HERO-003: hero mobile */
+@media (max-width:767px){
+html body#html-body .page-wrapper .awa-hero-swiper,
+html body#html-body .page-wrapper .top-home-content .hero-section{max-height:320px!important;min-height:280px!important}
+html body#html-body .awa-site-header .header.awa-main-header{min-height:56px!important;max-height:80px!important;padding-block:4px!important}
+}
+
+/* BUG-ROUTE-CONSISTENCY-006: container */
+html body#html-body .page-wrapper>.page-main{max-inline-size: var(--awa-container-max, 1280px)!important;margin-inline:auto!important;padding-inline:clamp(16px,3.5vw,32px)!important;box-sizing:border-box!important}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion:reduce){
+html body#html-body .page-wrapper *,
+html body#html-body .page-wrapper *::before,
+html body#html-body .page-wrapper *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+

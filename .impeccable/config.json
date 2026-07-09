@@ -1,0 +1,23 @@
+{
+  "hook": {
+    "enabled": true,
+    "limits": {
+      "maxFindings": 5,
+      "maxChars": 8000
+    }
+  },
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [
+      "vendor/**",
+      "node_modules/**",
+      "pub/static/**",
+      "var/view_preprocessed/**",
+      "generated/**",
+      "app/code/Rokanthemes/**",
+      "**/*.min.css",
+      "**/*.min.js"
+    ],
+    "ignoreValues": []
+  }
+}

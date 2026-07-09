@@ -92,7 +92,8 @@ class RegistrationBackfillService
                 $report['no_razao_social']++;
             }
 
-            if ($this->validatorChecker->isCustomerValidatedInSectra($customerId)
+            if (
+                $this->validatorChecker->isCustomerValidatedInSectra($customerId)
                 && (trim((string) $customer->getData('b2b_phone')) === ''
                     || trim((string) $customer->getData('b2b_razao_social')) === '')
             ) {

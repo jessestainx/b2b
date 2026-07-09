@@ -139,4 +139,60 @@
             <column name="sku"/>
         </index>
     </table>
+
+    <table name="grupoawamotos_erp_customer_price_state" resource="default" engine="innodb"
+           comment="ERP Customer Price List State">
+        <column xsi:type="int" name="state_id" unsigned="true" nullable="false"
+                identity="true" comment="State ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false"
+                comment="Magento Customer ID"/>
+        <column xsi:type="varchar" name="erp_code" nullable="false" length="50"
+                comment="ERP Customer Code"/>
+        <column xsi:type="int" name="price_list_code" unsigned="true" nullable="false"
+                comment="ERP Price List Code (FATORPRECO)"/>
+        <column xsi:type="timestamp" name="synced_at" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="State Sync Timestamp"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false"
+                default="CURRENT_TIMESTAMP" on_update="true" comment="State Update Timestamp"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="state_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="UNQ_ERP_CUSTOMER_PRICE_STATE_CUSTOMER">
+            <column name="customer_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="UNQ_ERP_CUSTOMER_PRICE_STATE_ERP_CODE">
+            <column name="erp_code"/>
+        </constraint>
+        <index referenceId="IDX_ERP_CUSTOMER_PRICE_STATE_PRICE_LIST" indexType="btree">
+            <column name="price_list_code"/>
+        </index>
+        <index referenceId="IDX_ERP_CUSTOMER_PRICE_STATE_SYNCED_AT" indexType="btree">
+            <column name="synced_at"/>
+        </index>
+    </table>
+
+    <table name="grupoawamotos_erp_price_sync_state" resource="default" engine="innodb"
+           comment="ERP Price Sync State">
+        <column xsi:type="int" name="state_id" unsigned="true" nullable="false"
+                identity="true" comment="State ID"/>
+        <column xsi:type="varchar" name="sync_key" nullable="false" length="64"
+                comment="Sync State Key"/>
+        <column xsi:type="varchar" name="sync_value" nullable="true" length="255"
+                comment="Sync State Value"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false"
+                default="CURRENT_TIMESTAMP" on_update="true" comment="Last Update Timestamp"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Create Timestamp"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="state_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="UNQ_ERP_PRICE_SYNC_STATE_KEY">
+            <column name="sync_key"/>
+        </constraint>
+        <index referenceId="IDX_ERP_PRICE_SYNC_STATE_UPDATED_AT" indexType="btree">
+            <column name="updated_at"/>
+        </index>
+    </table>
 </schema>

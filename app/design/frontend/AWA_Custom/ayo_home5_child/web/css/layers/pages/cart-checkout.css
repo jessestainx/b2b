@@ -1,9 +1,7 @@
-/* AWA CSS Layers - Cart + Checkout */
-body.checkout-cart-index .cart-container,
-body.checkout-index-index .checkout-container,
-body.rokanthemes-onepagecheckout-index-index .checkout-container {
-    display: grid;
-    gap: var(--awa-layer-space-lg);
+/* AWA CSS Layers - Cart + Checkout spacing (layout structure: cart-checkout-premium.css) */
+/* gap de .checkout-container consolidado em awa-checkout-polish.css ("Checkout shell lock"). */
+body.checkout-cart-index .cart-container {
+    gap: var(--awa-layer-space-lg, 24px);
 }
 
 body.checkout-cart-index .cart.table-wrapper .product-item-details {

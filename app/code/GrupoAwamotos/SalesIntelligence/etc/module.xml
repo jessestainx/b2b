@@ -5,6 +5,7 @@
         <sequence>
             <module name="GrupoAwamotos_ERPIntegration"/>
             <module name="GrupoAwamotos_B2B"/>
+            <module name="GrupoAwamotos_Theme"/>
         </sequence>
     </module>
 </config>

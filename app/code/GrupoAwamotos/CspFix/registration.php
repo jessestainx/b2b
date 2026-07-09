@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * GrupoAwamotos_CspFix
  */
+
+declare(strict_types=1);
 
 use Magento\Framework\Component\ComponentRegistrar;
 

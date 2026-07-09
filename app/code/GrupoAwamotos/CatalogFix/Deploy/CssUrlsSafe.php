@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\CatalogFix\Deploy;
@@ -35,7 +36,7 @@ class CssUrlsSafe extends CssUrls
     {
         try {
             return parent::process($package, $options);
-        } catch (\Error|\TypeError $e) {
+        } catch (\Error | \TypeError $e) {
             $this->logger->warning(
                 'CssUrls post-processor skipped for ' . $package->getPath() . ': ' . $e->getMessage()
             );

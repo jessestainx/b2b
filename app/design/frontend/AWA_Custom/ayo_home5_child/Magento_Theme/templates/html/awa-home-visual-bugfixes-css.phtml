@@ -1,0 +1,33 @@
+<?php
+/**
+ * AWA — Home visual bugfixes (Phase 3D.2.6)
+ *
+ * Carrega o bundle `awa-home-visual-bugfixes-2026-06-28.min.css` apenas na home,
+ * após `awa-visual-qa-fixes-2026-06-17.min.css`, garantindo que regras
+ * de "terminal-wins" tenham prioridade na cascata CSS sem precisar de
+ * `!important` global.
+ *
+ * Resolve (consolidado 2026-06-28):
+ *   P2: BUG-MOB-SEARCH-001, BUG-MOB-TOP-002, BUG-MOB-HERO-003,
+ *       BUG-B2B-BAR-004, BUG-BP-360-009, BUG-ROUTE-CONSISTENCY-006,
+ *       BUG-RED-USAGE-012
+ *   P3: BUG-IMPORTANT-AUDIT-013
+ *
+ * Carregamento assíncrono via `media="print" onload="this.media='all'"` —
+ * não bloqueia o 1º paint. Crítico é coberto pelo anti-FOUC inline em
+ * awa-head-preload.phtml.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+declare(strict_types=1);
+$cssUrl = $block->getViewFileUrl('css/awa-home-visual-bugfixes-2026-06-28.min.css');
+?>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($cssUrl) ?>?v=20260629-home-premium-r3"
+      media="print"
+      onload="this.media='all'"
+      data-awa-home-visual-bugfixes="1" />
+<noscript>
+    <link rel="stylesheet"
+          href="<?= $block->escapeUrl($cssUrl) ?>?v=20260629-home-premium-r3" />
+</noscript>

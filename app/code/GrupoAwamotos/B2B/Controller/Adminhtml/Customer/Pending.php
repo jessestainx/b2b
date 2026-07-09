@@ -15,7 +15,7 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Pending extends Action implements HttpGetActionInterface
 {
-    const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::customer_approval';
+    public const ADMIN_RESOURCE = 'GrupoAwamotos_B2B::customer_approval';
 
     /**
      * @var PageFactory

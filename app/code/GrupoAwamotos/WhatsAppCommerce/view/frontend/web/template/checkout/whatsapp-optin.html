@@ -1,17 +1,17 @@
 <!-- WhatsApp opt-in LGPD checkbox for checkout -->
 <!-- ko if: isLoggedIn() -->
-<div class="whatsapp-optin-wrapper" style="margin: 12px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; background: #f9fdf9;">
+<div class="whatsapp-optin-wrapper">
     <div class="field choice">
         <input type="checkbox"
                id="whatsapp-optin-checkout"
                class="checkbox"
                data-bind="checked: isChecked, attr: { disabled: isSaving() }" />
-        <label for="whatsapp-optin-checkout" class="label" style="display: inline; cursor: pointer;">
-            <span style="vertical-align: middle;">&#x1F4F2;</span>
+        <label for="whatsapp-optin-checkout" class="label whatsapp-optin-wrapper__label">
+            <span aria-hidden="true">&#x1F4F2;</span>
             <span data-bind="i18n: 'Quero receber atualizações do meu pedido via WhatsApp'"></span>
         </label>
     </div>
-    <p style="margin: 4px 0 0 22px; font-size: 11px; color: #888;">
+    <p class="whatsapp-optin-wrapper__hint">
         <span data-bind="i18n: 'Você pode cancelar a qualquer momento na sua conta.'"></span>
     </p>
 </div>

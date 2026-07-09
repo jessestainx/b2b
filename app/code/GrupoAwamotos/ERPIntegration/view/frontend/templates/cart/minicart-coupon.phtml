@@ -27,11 +27,16 @@ $hasItems = $block->shouldDisplay();
                    autocomplete="off"
                    <?= $hasCoupon ? 'readonly' : '' ?>>
             <?php if ($hasCoupon): ?>
-                <button type="button" class="awa-minicart-coupon__btn awa-minicart-coupon__btn--remove" data-action="remove-coupon">
+                <button type="button"
+                        class="awa-minicart-coupon__btn awa-minicart-coupon__btn--remove"
+                        data-action="remove-coupon"
+                        aria-label="<?= $block->escapeHtmlAttr(__('Remover cupom de desconto')) ?>">
                     <?= $block->escapeHtml(__('Remover')) ?>
                 </button>
             <?php else: ?>
-                <button type="submit" class="awa-minicart-coupon__btn awa-minicart-coupon__btn--apply">
+                <button type="submit"
+                        class="awa-minicart-coupon__btn awa-minicart-coupon__btn--apply"
+                        aria-label="<?= $block->escapeHtmlAttr(__('Aplicar cupom de desconto')) ?>">
                     <?= $block->escapeHtml(__('Aplicar')) ?>
                 </button>
             <?php endif; ?>

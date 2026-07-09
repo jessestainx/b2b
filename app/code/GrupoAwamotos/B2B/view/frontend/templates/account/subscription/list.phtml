@@ -4,7 +4,8 @@ $subscriptions = $block->getSubscriptions();
 ?>
 <div class="b2b-subscriptions-list b2b-page-shell">
     <div class="b2b-section-header">
-        <h1><?= $block->escapeHtml(__('Minhas Assinaturas de Pedidos')) ?></h1>
+        <h1><?= $block->escapeHtml(__('Assinaturas de pedidos')) ?></h1>
+        <p class="section-subtitle"><?= $block->escapeHtml(__('Pedidos recorrentes gerados na frequência que você definir.')) ?></p>
         <div class="actions">
             <a href="<?= $block->escapeUrl($block->getUrl('b2b/subscription/create')) ?>" class="action primary">
                 <?= $block->escapeHtml(__('Nova Assinatura')) ?>
@@ -46,7 +47,7 @@ $subscriptions = $block->getSubscriptions();
                                 <a href="<?= $block->escapeUrl($block->getEditUrl($subscription)) ?>" class="action edit">
                                     <span><?= $block->escapeHtml(__('Editar')) ?></span>
                                 </a>
-                                <a href="<?= $block->escapeUrl($block->getDeleteUrl($subscription)) ?>" 
+                                <a href="<?= $block->escapeUrl($block->getDeleteUrl($subscription)) ?>"
                                    class="action delete"
                                    data-role="delete-subscription"
                                    data-subscription-id="<?= (int)$subscription->getId() ?>">
@@ -59,14 +60,14 @@ $subscriptions = $block->getSubscriptions();
             </table>
         </div>
     <?php else: ?>
-        <div class="message info empty">
-            <span><?= $block->escapeHtml(__('Você ainda não possui assinaturas de pedidos recorrentes.')) ?></span>
-        </div>
-        <div class="b2b-empty-state">
-            <p><?= $block->escapeHtml(__('Automatize suas compras frequentes e garanta seu estoque sempre em dia.')) ?></p>
-            <a href="<?= $block->escapeUrl($block->getUrl('b2b/subscription/create')) ?>" class="action secondary">
-                <?= $block->escapeHtml(__('Criar minha primeira assinatura')) ?>
-            </a>
+        <div class="awa-empty-state" role="status">
+            <p class="awa-empty-state__title"><?= $block->escapeHtml(__('Nenhuma assinatura ativa')) ?></p>
+            <p class="awa-empty-state__hint"><?= $block->escapeHtml(__('Crie uma assinatura para repetir pedidos automaticamente na frequência escolhida.')) ?></p>
+            <div class="awa-empty-state__actions">
+                <a href="<?= $block->escapeUrl($block->getUrl('b2b/subscription/create')) ?>" class="action primary">
+                    <?= $block->escapeHtml(__('Criar assinatura')) ?>
+                </a>
+            </div>
         </div>
     <?php endif; ?>
 </div>

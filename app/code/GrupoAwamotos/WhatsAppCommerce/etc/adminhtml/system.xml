@@ -55,6 +55,42 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
+            <group id="app_builder_offload" translate="label comment" type="text" sortOrder="25"
+                   showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Offload para Adobe App Builder</label>
+                <comment>Delega o envio da mensagem WhatsApp para uma action serverless (Adobe I/O Runtime), liberando o worker PHP-FPM do checkout/admin imediatamente em vez de esperar a resposta da API do WhatsApp. Se desabilitado ou se a chamada falhar, o envio síncrono atual continua funcionando normalmente (fallback automático).</comment>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Habilitar Offload</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="webhook_url" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>URL da Action (Adobe I/O Runtime)</label>
+                    <comment>Ex: https://SEU_NAMESPACE.adobeioruntime.net/api/v1/web/awa-whatsapp/notify-order</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="shared_secret" translate="label comment" type="obscure" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Segredo Compartilhado (HMAC)</label>
+                    <comment>Precisa ser idêntico ao input WEBHOOK_SHARED_SECRET configurado na action App Builder.</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="timeout_seconds" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Timeout da Chamada (segundos)</label>
+                    <comment>Tempo máximo de espera pela action antes de cair no fallback síncrono</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
                     <group id="b2b" translate="label" type="text" sortOrder="30"
                    showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>B2B WhatsApp (Fase 4)</label>

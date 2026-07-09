@@ -172,11 +172,11 @@ class Index extends AbstractIndex
             $collection = $layer->getProductCollection();
         }
 
-        //        if (strpos((string)$collection->getSelect(), '`e`') !== false) {
-        //            $this->context->getSearcher()->joinMatches($collection, 'e.entity_id');
-        //        } else {
-        //            $this->context->getSearcher()->joinMatches($collection, 'main_table.entity_id');
-        //        }
+        if (strpos((string)$collection->getSelect(), '`e`') !== false) {
+            $this->context->getSearcher()->joinMatches($collection, 'e.entity_id');
+        } else {
+            $this->context->getSearcher()->joinMatches($collection, 'main_table.entity_id');
+        }
 
         return $collection;
     }

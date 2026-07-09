@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Model;
@@ -31,7 +32,8 @@ class WhatsAppB2BReorder implements B2BReorderInterface
         private readonly Config $config,
         private readonly LoggerInterface $logger,
         private readonly ResourceConnection $resource,
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc
