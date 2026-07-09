@@ -98,6 +98,7 @@ docs/*
 !docs/b2b-adoption.md
 !docs/visual-qa/
 !docs/visual-qa/dead-css-manifest-2026-07-08.md
+!docs/product-design/
 relatorios/
 analise_visual/
 biblioteca/
@@ -222,6 +223,8 @@ checkout-desktop-snapshot.md
 *.png
 *.jpg
 *.jpeg
+!app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/web/images/product/placeholder/
+!app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Catalog/web/images/product/placeholder/*.jpg
 alignment-*.png
 header-*.png
 home-*.png

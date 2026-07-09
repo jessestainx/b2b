@@ -1,0 +1,62 @@
+name: product-design-qa
+
+on:
+  pull_request:
+
+concurrency:
+  group: product-design-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  product-design-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PLAYWRIGHT_BASE_URL: https://awamotos.com
+      ALLOW_PRODUCTION_VALIDATION: "true"
+      AWA_B2B_EMAIL: ${{ secrets.B2B_TEST_USER }}
+      AWA_B2B_PASSWORD: ${{ secrets.B2B_TEST_PASS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps
+
+      - name: Product Design QA (desktop-1440)
+        working-directory: tests/e2e
+        run: |
+          npx playwright test \
+            specs/product-design-qa.spec.ts \
+            --workers=1 \
+            --reporter=list \
+            --project=desktop-1440
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-design-qa-playwright-report
+          path: tests/e2e/playwright-report/
+          retention-days: 30
+
+      - name: Upload Product Design QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-design-qa-evidence
+          path: tests/e2e/test-results/product-design-qa/
+          retention-days: 30

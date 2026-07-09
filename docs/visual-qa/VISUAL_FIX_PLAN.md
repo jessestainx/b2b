@@ -622,3 +622,49 @@ Pagamento/segurança → Legal. Sem blocos vermelhos independentes por coluna.
 4. **Não corrigir nada ainda.** Próximo passo, quando autorizado: abrir branch `fix/plp-bagageiros-p0` e
    corrigir apenas os itens P0 listados, começando por `PLP-P0-005`/`006` (causa raiz já identificada e de
    baixo risco: uma linha de `referenceBlock remove="true"` em `catalog_category_view.xml`).
+
+---
+
+## Product Design QA (Fase PD0 — Foundation)
+
+Fase de **régua**, não de correção. Objetivo: estabelecer um critério objetivo ("premium" ou não) antes de qualquer correção visual em blocos (PD1+).
+
+Entregáveis desta fase:
+
+| ID | Descrição | Artefato |
+|---|---|---|
+| `PD0-001` | Product Design System criado | `docs/product-design/AWA_PRODUCT_DESIGN_SYSTEM.md` |
+| `PD0-002` | Checklist Product Design QA criado | `docs/product-design/PRODUCT_DESIGN_QA_CHECKLIST.md` |
+| `PD0-003` | Spec Playwright Product Design criado | `tests/e2e/specs/product-design-qa.spec.ts` |
+| `PD0-004` | Relatório Product Design criado | `docs/product-design/PRODUCT_DESIGN_AUDIT_REPORT.md` |
+| `PD0-005` | GitHub Actions Product Design proposto | `.github/workflows/product-design-qa.yml` |
+| `PD0-006` | Baseline visual pendente | `tests/e2e/test-results/product-design-qa/` (evidência ainda parcial — apenas rota `home` executada) |
+
+Comando validado de execução (mesmo ambiente já provado estável para `header-core-interactions-p0.spec.ts`):
+
+```bash
+cd tests/e2e
+PLAYWRIGHT_BASE_URL=https://awamotos.com ALLOW_PRODUCTION_VALIDATION=true \
+  npx playwright test specs/product-design-qa.spec.ts \
+    --workers=1 --reporter=list --project=desktop-1440
+```
+
+Achados reais desta fase (evidência real, não placeholder — ver `PRODUCT_DESIGN_AUDIT_REPORT.md` para detalhes completos):
+
+- `PD-BUG-001` (P0): 11 imagens quebradas na Home (produto + selos de pagamento/footer).
+- `PD-BUG-002` (P1): radius do input de busca em `0px` (alvo: 8px / `@awa-radius-md`).
+- `PD-BUG-003` (P0): menu vertical não confirmado como aberto após clique automatizado (mesma área já mapeada como `HEADER-P0-002`).
+- `PD-BUG-004` (P1): autocomplete não confirmado como aberto ao digitar.
+- `PD-BUG-005` (P2): falso-positivo de escopo do próprio spec (seletor `.b2b-btn-entrar` fora de contexto na Home).
+
+Próximas fases de correção (somente após aprovação, por bloco):
+
+```
+PD1 — Header premium e funcional
+PD2 — Home premium clean
+PD3 — PLP premium clean
+PD4 — Product card / B2B pricing
+PD5 — Footer premium clean
+PD6 — Formulários B2B
+PD7 — Checkout/carrinho, com cuidado
+```

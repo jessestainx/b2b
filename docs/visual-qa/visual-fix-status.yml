@@ -1002,3 +1002,109 @@ items:
     evidence_dir: docs/visual-qa/evidence/PLP-P2-004
     acceptance: ["Acao rapida de adicionar a lista de compras/cotacao disponivel a partir do card"]
     proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # FASE: Product Design QA (PD0 — Foundation)
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: PD0-001
+    title: "Product Design System criado"
+    phase: PD0
+    page_type: product-design
+    component: "docs/product-design"
+    route: "n/a"
+    status: TESTED_LOCAL
+    priority: high
+    source_files: [docs/product-design/AWA_PRODUCT_DESIGN_SYSTEM.md]
+    tests: { playwright: [] }
+    evidence_dir: docs/product-design
+    acceptance:
+      - "Documento cobre principios visuais, tokens (radius/spacing) e os 20 componentes obrigatorios"
+      - "Divergencia entre regua PD0 e _awa-variables.less real esta documentada"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    note: "Documento criado nesta sessao. Nao marcado CLOSED: falta revisao humana/PR."
+
+  - id: PD0-002
+    title: "Checklist Product Design QA criado"
+    phase: PD0
+    page_type: product-design
+    component: "docs/product-design"
+    route: "n/a"
+    status: TESTED_LOCAL
+    priority: high
+    source_files: [docs/product-design/PRODUCT_DESIGN_QA_CHECKLIST.md]
+    tests: { playwright: [] }
+    evidence_dir: docs/product-design
+    acceptance:
+      - "Checklist cobre Header, Busca, Formularios B2B, Menu vertical, Minicart, Login/Conta, Home, PLP, PDP, Carrinho, Checkout, Footer e Acessibilidade"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    note: "Documento criado nesta sessao. Nao marcado CLOSED: falta revisao humana/PR."
+
+  - id: PD0-003
+    title: "Spec Playwright Product Design criado"
+    phase: PD0
+    page_type: product-design
+    component: "tests/e2e/specs/product-design-qa.spec.ts"
+    route: "/, /bagageiros.html, /bauletos.html, /catalogsearch/result, /b2b/account/login/, /b2b/register, /checkout/cart, PDP auto-descoberta"
+    status: TESTED_LOCAL
+    priority: high
+    source_files: [tests/e2e/specs/product-design-qa.spec.ts, tests/e2e/support/awa-selectors.ts]
+    tests: { playwright: [tests/e2e/specs/product-design-qa.spec.ts] }
+    evidence_dir: tests/e2e/test-results/product-design-qa
+    acceptance:
+      - "npx playwright test specs/product-design-qa.spec.ts --list retorna 8 testes"
+      - "Smoke da rota home executado com exit code 0, sem Killed"
+    proof: { before_screenshot: null, after_screenshot: "desktop-1440__home-fullpage.png", ci_run: null, playwright_report: null, commit: null, pr: null }
+    note: >
+      Validado nesta sessao: --list retornou 8 testes em 1 arquivo; smoke da rota home
+      passou (1 passed, 59.2s, exit code 0). Rotas restantes (bagageiros, bauletos,
+      search-bagageiro, b2b-login, b2b-register, cart, PDP) ainda nao executadas.
+
+  - id: PD0-004
+    title: "Relatorio Product Design criado"
+    phase: PD0
+    page_type: product-design
+    component: "docs/product-design"
+    route: "n/a"
+    status: TESTED_LOCAL
+    priority: high
+    source_files: [docs/product-design/PRODUCT_DESIGN_AUDIT_REPORT.md]
+    tests: { playwright: [tests/e2e/specs/product-design-qa.spec.ts] }
+    evidence_dir: tests/e2e/test-results/product-design-qa
+    acceptance:
+      - "Relatorio lista PD-BUG-001..005 com evidencia real (screenshot/JSON) da execucao da rota home"
+    proof: { before_screenshot: null, after_screenshot: "desktop-1440__home-fullpage.png", ci_run: null, playwright_report: null, commit: null, pr: null }
+    note: "Bugs reportados sao reais (evidencia de execucao real), nao placeholders. Cobertura ainda parcial (so rota home)."
+
+  - id: PD0-005
+    title: "GitHub Actions Product Design proposto"
+    phase: PD0
+    page_type: product-design
+    component: ".github/workflows/product-design-qa.yml"
+    route: "n/a"
+    status: TESTED_LOCAL
+    priority: medium
+    source_files: [.github/workflows/product-design-qa.yml]
+    tests: { playwright: [] }
+    evidence_dir: n/a
+    acceptance:
+      - "Workflow novo, nao substitui playwright.yml / e2e-pr-smoke.yml / e2e-premerge-regression.yml / playwright-visual-qa.yml"
+      - "Roda em pull_request, npm ci, playwright install --with-deps, execucao dentro de tests/e2e, --workers=1, upload de playwright-report e test-results/product-design-qa como artifacts, secrets para B2B, sem imprimir senha"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    note: "Workflow criado mas ainda nao executado em CI real (precisa de PR aberto)."
+
+  - id: PD0-006
+    title: "Baseline visual pendente"
+    phase: PD0
+    page_type: product-design
+    component: "tests/e2e/test-results/product-design-qa"
+    route: "todas as rotas do spec"
+    status: TODO
+    priority: medium
+    source_files: []
+    tests: { playwright: [tests/e2e/specs/product-design-qa.spec.ts] }
+    evidence_dir: tests/e2e/test-results/product-design-qa
+    acceptance:
+      - "Executar todas as rotas do spec (nao so home) em pelo menos desktop-1440 e mobile-390"
+      - "Screenshots de menu-vertical-aberto e autocomplete-aberto gerados com sucesso (falha observada nesta sessao)"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    note: "Pendente por definicao explicita do escopo desta fase (nao rodar matriz completa ainda)."
