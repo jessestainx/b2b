@@ -1214,8 +1214,64 @@ items:
       na PD4 (ver PD4-001): era leitura do painel nativo vestigial, nao bug real; a busca
       funciona corretamente (273 resultados no autocomplete, 22 itens via redirect para
       /bagageiros.html). verticalMenu.bbox retornou null em uma execucao (timing residual,
-      nao investigado). Nao marcado CLOSED: falta execucao real em GitHub Actions com
-      artifact.
+      nao investigado). PD2-recheck (nova rodada com 3 termos - bagageiro/bauleto/retrovisor -
+      e 3 metodos independentes, ver PRODUCT_DESIGN_AUDIT_REPORT.md): reconfirmado no desktop
+      que o autocomplete Mirasvit abre corretamente para os 3 termos e Enter navega para a
+      categoria correta em todos eles; classificacao de causa raiz confirmada como A (falso
+      negativo do teste, ja corrigido). Validacao em mobile bloqueada por crash reprodutivel
+      do Chromium headless ao digitar na busca (390x844) - ver item PD2-002. Nao marcado
+      CLOSED: falta execucao real em GitHub Actions com artifact.
+
+
+  - id: PD2-002
+    title: "Bootstrap de intencao de busca bloqueia o main thread por 5-11s+ (crash em mobile via touch, degradacao em desktop)"
+    phase: PD2
+    page_type: product-design
+    component: "Busca / Autocomplete (bootstrap deferido search-intent do tema AWA_Custom)"
+    route: "/"
+    status: REPRODUCED
+    priority: high
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-home-bootstrap-defer.js
+    tests: { playwright: [] }
+    evidence_dir: tests/e2e/tmp
+    acceptance:
+      - "Causa raiz isolada com evidencia direta (nao assumida) - CONFIRMADO na PD5"
+      - "Distinguido bug real de produto (performance) vs comportamento do Chromium headless em touch vs harness vs VPS"
+      - "Registrado como pendencia explicita, nao mascarado nem ignorado"
+      - "Correcao dedicada planejada (PD6 - Search Intent Bootstrap Performance Fix)"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    root_cause_confirmed: >
+      PD5 (branch investigate/pd5-mobile-search-headless-crash) isolou a causa raiz com 12
+      experimentos controlados (uma variavel por experimento): o foco/toque no campo de busca
+      dispara awa-home-bootstrap-defer.js, que carrega e executa ~14+ scripts do tema AWA_Custom
+      de forma concentrada (awa-header-a11y-performance, awa-header-runtime-bootstrap,
+      awa-scroll-reveal, awa-card-enhance, awa-qty-control, awa-ux-enhancements,
+      awa-customer-sections-bootstrap, awa-home-deferred-widgets-bootstrap,
+      awa-header-minicart-ui-v2, awa-css-gate, cookie-consent, google-analytics, awa-toast,
+      awa-messages-interceptor) mais o bootstrap do Mirasvit. Essa execucao bloqueia o main
+      thread por segundos mensuraveis - confirmado tambem no DESKTOP (RTTs de page.evaluate()
+      de 5.9s/2.4s/2.3s nos primeiros ~13s apos o clique, sem crash). No MOBILE (touch via
+      tap()/keyboard.type()), a mesma lentidao faz o Chromium/CDP encerrar a sessao
+      ("Target page, context or browser has been closed") em vez de tolerar - confirmado que
+      isso so ocorre quando um comando CDP e enviado durante a janela de bloqueio (espera pura
+      de 26s sem chamada CDP NAO crasha). Bloquear TODO o JS ou so o JS de AWA_Custom evita o
+      crash; bloquear scripts individuais (mirasvit-init, search-autocomplete-compat,
+      header-a11y-performance) NAO evita - confirma que e o volume conjunto de scripts, nao um
+      arquivo unico. Digitar em input diferente (#newsletter) sem tocar o search antes nunca
+      crasha - confirma que e o bootstrap de busca especificamente, nao qualquer digitacao.
+    fix_applied: >
+      Nenhuma nesta fase (PD5 e diagnostico, nao correcao). Candidato a PD6: reduzir/escalonar
+      os scripts carregados no bootstrap de intencao de busca/interacao
+      (awa-home-bootstrap-defer.js), separando "intencao de busca" de "intencao de interacao
+      geral", e medir o bloqueio do main thread com Chrome DevTools Performance trace antes/
+      depois da correcao.
+    note: >
+      Bug real de performance no produto (bootstrap sincrono demais), amplificado em mobile
+      pelo comportamento do Chromium/CDP em touch. Nao e falso negativo do harness, nao e
+      causa isolada da VPS. Ver PD-BUG-006 em PRODUCT_DESIGN_AUDIT_REPORT.md para os 12
+      experimentos completos e tabela de resultados. Bloqueia validacao visual completa do
+      autocomplete em mobile ate correcao dedicada (PD6).
 
 
   # ══════════════════════════════════════════════════════════════════════════

@@ -315,6 +315,66 @@ apos a mudanca real na fonte do tema).
   sessao — pode ser timing residual da mesma familia de problema do PD1, mas nao foi
   investigado nesta branch (regra explicita: nao mexer em outros bugs).
 
+### Reconfirmacao — PD2-recheck (3 termos, 3 metodos independentes, 18 pontos de diagnostico)
+
+Nova rodada de verificacao rigorosa (sem assumir a causa ja registrada), usando os termos
+`bagageiro`, `bauleto`, `retrovisor` e tres metodos independentes por termo:
+
+- **Metodo A — DOM/runtime direto** (`page.evaluate`): `formExists`, `inputExists`,
+  `inputValue`, `activeElement`, `dropdownCandidates`, `computedStyles`, `boundingBoxes`,
+  `bodyOverflowX`.
+- **Metodo B — Locators Playwright diretos** (`isVisible()`, `boundingBox()`, `count()`,
+  sem depender de `waitFor({state:'visible'})` compartilhado).
+- **Metodo C — Network** (`page.on('request'|'response'|'requestfailed')`), confirmando
+  chamadas reais aos endpoints de sugestao/busca.
+
+**Resultado desktop-1440 (3/3 termos, dois runs independentes):**
+
+| Termo | Dropdown Mirasvit abre | Enter navega para |
+|---|---|---|
+| bagageiro | `true` | `/bagageiros.html` |
+| bauleto | `true` | `/bauletos.html` |
+| retrovisor | `true` | `/retrovisores.html` |
+
+Zero requisicoes com 4xx/5xx, zero console errors, zero page errors em todas as execucoes
+desktop bem-sucedidas. Reconfirmado tambem pelo harness oficial
+(`product-design-qa.spec.ts`, rota `home`): `autocomplete.opened: true`.
+
+**Classificacao da causa raiz (taxonomia A-J solicitada): `A. Falso negativo do teste`** —
+ja corrigido na fonte real na PD2 (`replayPendingQuery`); esta rodada apenas reconfirma
+com evidencia fresca e mais termos que o autocomplete funciona corretamente em producao
+para buscas reais.
+
+### Novo achado — crash reprodutivel do Chromium headless ao digitar em viewport mobile (390x844)
+
+Durante a tentativa de validar o mesmo fluxo em mobile (`390x844`, emulacao `devices['iPhone 14']`
+com `isMobile`/`hasTouch`), o processo do navegador Chromium fecha/crasha de forma consistente
+e reprodutivel especificamente ao digitar no campo de busca — nao ao focar, nao ao clicar/tocar.
+
+Isolado com 6 experimentos independentes:
+
+1. Controle (`example.com`, mesmo viewport 390x844) — sem crash.
+2. Apenas `focus()` no input (sem clique, sem digitacao) — sem crash.
+3. Apenas `click()`/`tap()` no input (sem digitacao) — sem crash.
+4. `click()` + 1 caractere digitado — **crash** (`Target page, context or browser has been closed`).
+5. Emulacao de dispositivo correta (`devices['iPhone 14']`, `tap()` + `keyboard.type()`) — **crash** (mesmo padrao, descarta erro de configuracao do script).
+6. `reducedMotion: 'reduce'` (para descartar transicoes/animacoes CSS pesadas) — **crash** persiste.
+
+Nenhum `console error`/`pageerror` foi capturado antes de qualquer um dos crashes (consistente
+com um crash no nivel do processo do navegador, que derruba a conexao CDP antes de qualquer
+mensagem JS poder ser relayada). Nenhum crash dump foi localizado em `/tmp` ou `dmesg`. Um
+evento adicional (nao reprodutivel isoladamente) de fechamento tambem ocorreu no desktop na
+3a chamada consecutiva de `chromium.launch()` no mesmo processo Node, mas isso nao se repetiu
+em retry isolado — indicio de flakiness generica de lancamento repetido, distinto do crash
+mobile (esse sim 100% reprodutivel em 3 tentativas separadas).
+
+**Este achado nao se encaixa em nenhuma das classificacoes A-J solicitadas** (nao e falso
+negativo do teste, nao e endpoint com erro, nao e CSS escondendo markup — e um crash do
+processo do navegador headless). Registrado como um novo item de backlog (`PD-BUG-006`,
+abaixo) e como pendencia explicita: **mobile foi testado, mas o resultado e um bloqueio de
+harness, nao uma validacao limpa** — consistente com o criterio de aceite que permite
+"mobile testado ou registrado como pendencia".
+
 ### Critério de aceite
 - [x] Causa raiz identificada e confirmada com evidencia direta (nao assumida)
 - [x] Correção aplicada na fonte canonica do tema (nao em `vendor/`, `pub/static` ou
@@ -408,6 +468,117 @@ para fechar o item do backlog de forma rastreável.
 - [x] Nenhuma alteração de código necessária (confirmado que não é bug)
 - [x] Registro anterior (PD2/PD-BUG-004) corrigido com a explicação real
 - [ ] Execução em GitHub Actions com artifact (não aplicável — não há mudança de código)
+
+---
+
+## PD-BUG-006 — Bootstrap de busca bloqueia o main thread por 5-11s+ (crash em mobile, degradacao severa em desktop)
+
+Status: REPRODUCED (causa raiz confirmada — sem correcao aplicada nesta fase)
+Prioridade: P1 (bloqueia validacao visual do autocomplete em mobile; degradacao de performance real tambem em desktop)
+Pagina: Home (`/`)
+Componente: Busca / Autocomplete (bootstrap deferido "search intent" do tema AWA_Custom)
+Viewport: mobile (390x844, 360x740, 430x932 — todos com `hasTouch`/`isMobile`) + desktop (1440x900, controle)
+Estado: guest
+
+### Investigacao PD5 (branch `investigate/pd5-mobile-search-headless-crash`)
+
+Fase dedicada de bissecao para isolar a causa exata do crash registrado no PD2-recheck.
+Uma variavel por experimento, resultado de cada um registrado abaixo.
+
+**Confirmacao do gatilho exato:**
+
+| # | Experimento | Resultado |
+|---|---|---|
+| 1 | Baseline (tap + digitar em `input#search`, mobile 390x844) | Crash reconfirmado, sempre na digitacao |
+| 2 | Digitar em input DIFERENTE na mesma Home (`#newsletter`, footer), sem nunca tocar o search | **Sem crash** — descarta "qualquer digitacao mobile crasha" |
+| 3 | Bloquear TODO o JS (`page.route` abort `*.js`) | **Sem crash** — confirma que a causa e JS, nao CSS/rendering puro |
+| 4 | Bloquear TODO o JS de `AWA_Custom/*.js` (mantendo Magento core + Mirasvit vendor) | **Sem crash** — confirma que a causa esta no tema (AWA_Custom), nao no core/vendor |
+| 5 | Bloquear so `awa-mirasvit-autocomplete-init.js` | Ainda crasha — nao e o unico/direto culpado |
+| 6 | Bloquear so `awa-search-autocomplete-compat.js` | Ainda crasha — nao e o unico/direto culpado |
+| 7 | Bloquear so `awa-header-a11y-performance.js` | Ainda crasha — nao e o unico/direto culpado |
+| 8 | Diff de requests "antes vs depois do tap" no search | Identificado grupo de **14 scripts AWA_Custom carregados so apos o toque** no campo de busca (bootstrap "search intent" generico, dispara para qualquer interacao, nao exclusivo do search) |
+| 9 | Tap no search + espera PURA de 26s (sem nenhuma chamada CDP durante a espera) | **Sem crash** — a pagina sobrevive sozinha; o problema so aparece quando um comando CDP (evaluate/type) e enviado |
+| 10 | Tap no search + polling de `page.evaluate()` a cada 300ms (mobile) | Primeira chamada `evaluate()` leva **22.4s** antes de retornar `"Target page, context or browser has been closed"` |
+| 11 | Mesmo polling de `page.evaluate()`, porem no **desktop** (click de mouse, sem touch) | **Sem crash** — mas RTTs de **5.9s, 2.4s e 2.3s** nas primeiras chamadas (main thread bloqueado por varios segundos), estabilizando para <15ms depois de ~13s |
+| 12 | Repeticao em 430x932 (mobile, touch) | Mesmo crash reproduzido |
+
+### Causa raiz confirmada
+
+O foco/toque no campo de busca (`#search`, dentro de `#search_mini_form`) dispara um bootstrap
+generico de "intencao de interacao" (`awa-home-bootstrap-defer.js`, eventos
+`pointerdown`/`keydown`/`touchstart`) que carrega e executa **~14+ scripts do tema AWA_Custom
+de forma concentrada** (`awa-header-a11y-performance`, `awa-header-runtime-bootstrap`,
+`awa-scroll-reveal`, `awa-card-enhance`, `awa-qty-control`, `awa-ux-enhancements`,
+`awa-customer-sections-bootstrap`, `awa-home-deferred-widgets-bootstrap`,
+`awa-header-minicart-ui-v2`, `awa-css-gate`, `cookie-consent`, `google-analytics`, `awa-toast`,
+`awa-messages-interceptor`), além do bootstrap do Mirasvit (`awa-mirasvit-autocomplete-init.js`
++ `Mirasvit_SearchAutocomplete/js/*`, já mapeado na PD2).
+
+Essa execução concentrada bloqueia o main thread do navegador por um período mensurável e
+real: **confirmado tambem no desktop** (RTTs de `page.evaluate()` de 5.9s, 2.4s e 2.3s nos
+primeiros ~13s apos o clique, antes de estabilizar) — ou seja, **não é um bug exclusivo do
+Chromium headless nem do viewport mobile**: é um problema real de performance no bootstrap de
+"intenção de busca" do tema, que bloqueia o main thread em qualquer contexto.
+
+O que **difere entre desktop e mobile** é a tolerância do Chromium/CDP a esse bloqueio:
+- **Desktop** (clique de mouse, sem touch): Chromium tolera o main thread ocupado por vários
+  segundos e o `page.evaluate()` eventualmente retorna com sucesso — degradação de
+  performance real, mas sem crash.
+- **Mobile** (`tap()`/toque, `hasTouch`/`isMobile`): o dispatch de eventos de toque via CDP
+  (`Input.dispatchTouchEvent` — usado tanto pelo `tap()` quanto pelo `keyboard.type()` em
+  contexto de touch) parece ter uma tolerância bem menor a um main thread ocupado, e a sessão
+  CDP/renderer é encerrada ("Target page, context or browser has been closed") em vez de
+  aguardar/recuperar — confirmado que isso só ocorre quando um comando CDP é enviado durante a
+  janela de bloqueio (espera pura de 26s sem nenhuma chamada CDP NÃO crasha).
+
+**Classificação (múltiplas categorias, não é uma causa única):**
+- ✅ **Bug real de produto/performance**: SIM — o bootstrap de "intenção de busca" executa
+  um volume de JS síncrono grande demais em um único burst, bloqueando o main thread por
+  segundos mensuráveis mesmo no desktop.
+- ✅ **Limitação/comportamento do Chromium headless em touch**: SIM — a mesma lentidão que o
+  desktop tolera graciosamente resulta em encerramento da sessão CDP quando o alvo usa
+  dispatch de touch, especificamente neste ambiente headless.
+- ❌ **Bug do harness Playwright**: NÃO — reproduzido de forma consistente com causa
+  identificada; não é falso-positivo/negativo do teste.
+- ⚠️ **Ambiente da VPS**: possível fator agravante (CPU compartilhada pode alongar o tempo de
+  bloqueio), mas não é a causa raiz — o padrão de bloqueio do main thread é real e
+  reproduzível independente da carga momentânea da máquina.
+
+### Correção aplicada
+Nenhuma nesta fase (escopo da PD5 é diagnóstico, não correção). A causa raiz agora está
+identificada com precisão suficiente para uma correção futura dedicada (candidata a **PD6**):
+reduzir/escalonar o número de scripts carregados sincronamente no bootstrap de "intenção de
+busca"/interação (`awa-home-bootstrap-defer.js` e o grupo de 14 scripts identificado), ou
+adiar ainda mais scripts não críticos para depois do primeiro paint útil do autocomplete.
+
+### Evidência
+- Scripts de diagnóstico temporários em `tests/e2e/tmp/` (git-ignored, não commitados):
+  `pd5-experiments.mjs` (bateria completa com 10 experimentos parametrizados),
+  `pd5-diff-before-after-tap.mjs`, `pd5-responsiveness-poll.mjs`,
+  `pd5-tap-then-pure-wait.mjs`, `pd5-desktop-responsiveness.mjs`,
+  `pd5-block-mirasvit-init-only.mjs`, `pd5-block-compat-only.mjs`, `pd5-block-a11y-fixed.mjs`.
+- `test-results/product-design-qa/pd5-experiments.json` — resultado estruturado de cada
+  experimento.
+- Logs brutos das 12 execuções (RTTs e timestamps) documentados na tabela acima.
+
+### Próximo passo recomendado
+Fase dedicada de correção (candidata a **PD6 — Search Intent Bootstrap Performance Fix**):
+1. Auditar `awa-home-bootstrap-defer.js` e reduzir o número de scripts que disparam no mesmo
+   evento de intenção de busca (separar "intenção de busca" de "intenção de interação geral").
+2. Medir o tempo de bloqueio do main thread antes/depois com Chrome DevTools Performance
+   trace (não apenas RTT de CDP) para quantificar o ganho real.
+3. Re-rodar esta mesma bateria de 12 experimentos da PD5 após a correção para confirmar que o
+   `page.evaluate()` no mobile responde em <1s após o toque, sem qualquer encerramento de
+   sessão.
+
+### Critério de aceite
+- [x] Causa raiz identificada e confirmada com evidência direta (não assumida) — bootstrap de
+      intenção de busca bloqueia o main thread por segundos, em qualquer viewport
+- [x] Uma variável por experimento, resultado de cada um registrado (12 experimentos)
+- [x] Distinguido: bug real de produto (performance) + comportamento do Chromium headless em
+      touch; descartado harness de teste e ambiente da VPS como causa raiz isolada
+- [ ] Correção aplicada — pendente, requer fase dedicada (PD6)
+- [ ] Execução em GitHub Actions com artifact (pendente — não fechar como CLOSED sem isso)
 
 ---
 
