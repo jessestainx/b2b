@@ -620,6 +620,78 @@ Fase dedicada de correção (candidata a **PD6 — Search Intent Bootstrap Perfo
 
 ---
 
+## PD6 — Search Intent Bootstrap Performance Fix (correcao aplicada)
+
+Status: TESTED_LOCAL (correcao real aplicada e testada localmente; nao elimina 100% do
+crash — ver classificacao Caso 2 da PD5)
+Prioridade: high
+Pagina: Home (`/`)
+Componente: Bootstrap de intencao de busca (`awa-custom-js-loader.phtml`)
+Branch: `fix/pd6-search-intent-bootstrap-performance`
+
+Documentacao completa (mecanismo real, correcao, deploy, medicao antes/depois):
+`docs/product-design/PD6_SEARCH_INTENT_BOOTSTRAP_PERFORMANCE_FIX.md`.
+
+### Resumo
+
+Investigacao encontrou que o arquivo originalmente suspeito (`awa-home-bootstrap-defer.js`,
+ja com uma correcao pre-existente nao commitada) esta **inativo em producao** — o plugin
+responsavel por injeta-lo (`DeferHomeScriptsPlugin`) depende de um padrao de bundle merge do
+Magento (`dev/js/merge_files`) que esta desabilitado neste ambiente, entao a injecao nunca
+dispara. O mecanismo REAL identificado foi `awa-custom-js-loader.phtml` — o orquestrador
+central de scripts comportamentais, onde 2 scripts escopados para busca
+(`awa-header-minicart-ui-v2.js`, `awa-header-a11y-performance.min.js`) mais 3 blocos
+genericos da Home (`awaCustomCompatBootstrap`, `awa-toast`/`awa-messages-interceptor`,
+`awa-scroll-reveal`) todos escutam os mesmos eventos (`pointerdown`/`touchstart`/`keydown`)
+no `document` e executam `appendScript()`/`require()` **sincronamente no mesmo tick** do
+evento que os disparou.
+
+### Correcao
+
+Adiado apenas o trabalho pesado (`appendScript()`/`require()`) via `requestIdleCallback`
+(fallback `setTimeout(fn, 0)`) em todos os 4 pontos afetados, mantendo `done`/`cleanup`
+imediatos (nenhuma mudanca em QUANDO o script "vai" carregar, so QUANDO o parser/executor
+roda). Nenhum script removido, nenhum comportamento desabilitado.
+
+### Resultado medido
+
+| Momento | Amostras | Crashes | Taxa |
+|---|---|---|---|
+| PD5 baseline | 19 | 4 | ~21% |
+| PD6 pos-correcao (2 rodadas de 10) | 20 | 2 | 10% |
+
+Reducao real de ~21% para ~10% (redução relativa de ~50%), mas **nao elimina o crash** —
+consistente com a classificacao Caso 2 da PD5 (limitacao do Chromium headless em touch sob
+main thread ocupado; reduzir volume de JS reduz a probabilidade da corrida de tempo, nao
+elimina a fragilidade do proprio Chromium).
+
+### Validacao funcional
+
+Autocomplete desktop (dropdown Mirasvit abre), minicart (painel abre), menu vertical (abre) —
+todos confirmados funcionando via Playwright real em producao apos o deploy. Zero console
+errors, zero page errors, sem novas entradas em exception.log/system.log.
+
+### Arquivos alterados
+
+- `app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Theme/templates/html/awa-custom-js-loader.phtml`
+  (correcao principal)
+- `app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-home-bootstrap-defer.js` + `.min.js`
+  (mantido, confirmado inativo)
+- `app/code/GrupoAwamotos/Theme/Plugin/Response/DeferHomeScriptsPlugin.php` (version bump,
+  mantido)
+
+### Criterio de aceite
+
+- [x] Causa raiz do mecanismo REAL identificada (nao o arquivo originalmente assumido)
+- [x] Correcao aplicada na fonte canonica (app/design, app/code)
+- [x] Autocomplete Mirasvit continua funcionando (nao desabilitado)
+- [x] Comportamento desktop preservado (validado via smoke test)
+- [x] Taxa de crash reduzida e medida (nao apenas assumida)
+- [ ] Taxa de crash NAO chegou a 0% — meta declarada da PD6 nao totalmente atingida
+- [ ] Execucao em GitHub Actions com artifact (pendente — nao fechar como CLOSED sem isso)
+
+---
+
 ## Pendências registradas (não bloqueiam PD0)
 
 1. **Breakpoints sem projeto Playwright exato:** `430x932` e `360x740` não têm projeto dedicado em `playwright.config.ts` hoje (mais próximos: `mobile-390` e `mobile-375`). Recomenda-se avaliar a criação de 2 novos projetos em fase futura (fora do escopo do PD0, que só documenta a régua).

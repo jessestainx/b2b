@@ -14,7 +14,7 @@ use Magento\Framework\View\Asset\Repository as AssetRepository;
 class DeferHomeScriptsPlugin
 {
     private const HOME_ACTION = 'cms_index_index';
-    private const HOME_BOOTSTRAP_VERSION = '20260703-carousel-contract-v9';
+    private const HOME_BOOTSTRAP_VERSION = '20260710-pd6-search-intent-defer-v1';
 
     /** Scripts que bloqueiam o parser na home — adiar com defer (stub permanece síncrono). */
     private const HOME_DEFER_SCRIPT_FRAGMENTS = [

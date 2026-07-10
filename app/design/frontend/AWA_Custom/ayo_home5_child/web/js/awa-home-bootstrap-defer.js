@@ -31,9 +31,28 @@
         ));
     }
 
-    function bootNow() {
+    /**
+     * PD6 (fix/pd6-search-intent-bootstrap-performance): quando o toque/foco que
+     * disparou o boot vem EXCLUSIVAMENTE do campo de busca, o trabalho pesado
+     * deste arquivo (merged bundle + hero slider + tema Rokan) e irrelevante
+     * para a busca funcionar e nao deve competir pelo main thread no mesmo tick
+     * da digitacao. Mirasvit (autocomplete real) tem seu proprio bootstrap
+     * independente em awa-mirasvit-autocomplete-init.js e NAO depende deste
+     * arquivo — so a carga pesada e generica (hero/tema/bundle) e adiada.
+     */
+    function isSearchOnlyIntent(evt) {
+        if (!evt || !evt.target || !evt.target.closest) {
+            return false;
+        }
+
+        return !!evt.target.closest(
+            '#search_mini_form, #search, .block-search, [data-awa-search-input="true"]'
+        );
+    }
+
+    function bootNow(deferHeavyWork) {
         userIntent = true;
-        boot(true);
+        boot(true, !!deferHeavyWork);
     }
 
     function runInline() {
@@ -311,8 +330,60 @@
         });
     }
 
-    function boot(force) {
+    var heavyWorkDone = false;
+    var heavyWorkIdleHandle = null;
+
+    function runHeavyBootWorkNow() {
+        runInline();
+        appendMerged(function () {
+            initRokanTheme(initHeroSliders);
+        });
+    }
+
+    /**
+     * PD6: idempotente e cancelavel. Se o trabalho pesado ja rodou (ou ja foi
+     * disparado), nao faz nada. Usado tanto pelo caminho adiado (idle callback)
+     * quanto pela escalada imediata quando uma interacao NAO relacionada a busca
+     * chega enquanto o idle callback ainda esta pendente (ver boot()).
+     */
+    function runHeavyBootWorkOnce() {
+        if (heavyWorkDone) {
+            return;
+        }
+
+        heavyWorkDone = true;
+
+        if (heavyWorkIdleHandle !== null) {
+            if (w.cancelIdleCallback) {
+                w.cancelIdleCallback(heavyWorkIdleHandle);
+            } else {
+                w.clearTimeout(heavyWorkIdleHandle);
+            }
+            heavyWorkIdleHandle = null;
+        }
+
+        runHeavyBootWorkNow();
+    }
+
+    function deferHeavyBootWork() {
+        if (w.requestIdleCallback) {
+            heavyWorkIdleHandle = w.requestIdleCallback(runHeavyBootWorkOnce, { timeout: 2000 });
+        } else {
+            heavyWorkIdleHandle = w.setTimeout(runHeavyBootWorkOnce, 0);
+        }
+    }
+
+    function boot(force, deferHeavyWork) {
         if (done) {
+            // PD6: o boot ja rodou. Se o trabalho pesado ainda esta pendente
+            // (idle callback agendado por uma intencao de busca anterior) e esta
+            // chamada NAO e apenas de busca (ex.: clique real no menu vertical,
+            // minicart, carrossel etc.), escalamos para rodar AGORA — preserva
+            // 100% o comportamento eager original para qualquer intencao real
+            // que nao seja exclusivamente de busca.
+            if (!deferHeavyWork) {
+                runHeavyBootWorkOnce();
+            }
             return;
         }
 
@@ -333,10 +404,12 @@
         cleanup();
         syncHeroA11yAndLcp();
         installHeroViewportSync();
-        runInline();
-        appendMerged(function () {
-            initRokanTheme(initHeroSliders);
-        });
+
+        if (deferHeavyWork) {
+            deferHeavyBootWork();
+        } else {
+            runHeavyBootWorkOnce();
+        }
     }
 
     w.__awaHomeBootstrapBoot = function (force) {
@@ -348,7 +421,7 @@
             return;
         }
 
-        bootNow();
+        bootNow(isSearchOnlyIntent(evt));
     }
 
     events.forEach(function (eventName) {
@@ -364,7 +437,11 @@
     ['pointerover', 'focusin'].forEach(function (eventName) {
         d.addEventListener(eventName, function (evt) {
             if (evt.target && evt.target.closest && evt.target.closest('.awa-site-header, [data-role="awa-vertical-menu"]')) {
-                bootNow();
+                // PD6: se o primeiro pointerover/focusin do header for no proprio
+                // campo de busca (ex.: usuario focou a busca antes de qualquer outra
+                // coisa), nao ha motivo para acordar o merged bundle/hero/tema aqui —
+                // isso e coberto pelo mesmo adiamento aplicado em onInteract().
+                bootNow(isSearchOnlyIntent(evt));
             }
         }, { passive: true, capture: true, once: true });
     });

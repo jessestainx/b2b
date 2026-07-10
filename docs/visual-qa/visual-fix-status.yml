@@ -1334,6 +1334,74 @@ items:
       (job existe mas e um scaffold, nao executavel ainda por causa do script git-ignored).
 
 
+  - id: PD6-001
+    title: "Search Intent Bootstrap Performance Fix: defer de appendScript/require via requestIdleCallback (reduz taxa de crash ~21% -> ~10%)"
+    phase: PD6
+    page_type: product-design
+    component: "Bootstrap de intencao de busca (awa-custom-js-loader.phtml)"
+    route: "/"
+    status: TESTED_LOCAL
+    priority: high
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/Magento_Theme/templates/html/awa-custom-js-loader.phtml
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-home-bootstrap-defer.js
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-home-bootstrap-defer.min.js
+      - app/code/GrupoAwamotos/Theme/Plugin/Response/DeferHomeScriptsPlugin.php
+    tests: { playwright: [] }
+    evidence_dir: tests/e2e/tmp
+    acceptance:
+      - "Mecanismo real identificado (awa-custom-js-loader.phtml, nao awa-home-bootstrap-defer.js que esta inativo)"
+      - "Correcao aplicada na fonte canonica (app/design, app/code)"
+      - "Autocomplete Mirasvit continua funcionando (validado)"
+      - "Comportamento desktop preservado (validado via smoke test)"
+      - "Taxa de crash medida antes/depois (nao apenas assumida)"
+      - "Nenhum script removido sem provar redundancia"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    root_cause_confirmed: >
+      O arquivo originalmente suspeito (awa-home-bootstrap-defer.js, ja com correcao
+      pre-existente nao commitada usando requestIdleCallback) esta CONFIRMADO INATIVO em
+      producao: DeferHomeScriptsPlugin so injeta o script via regex fallback quando encontra
+      um padrao de bundle merge do Magento (_cache/merged/*.js), mas dev/js/merge_files e
+      dev/js/enable_js_bundling estao desabilitados neste ambiente (confirmado via
+      config:show), entao a injecao nunca dispara (confirmado via grep no HTML real e via
+      Playwright real - zero requests para bootstrap-defer). O mecanismo REAL foi identificado
+      em awa-custom-js-loader.phtml: 2 scripts escopados para busca via
+      renderIntentScriptLoader() (awa-header-minicart-ui-v2.js, awa-header-a11y-performance.min.js)
+      mais 3 blocos genericos da Home (awaCustomCompatBootstrap, awa-toast +
+      awa-messages-interceptor, awa-scroll-reveal) escutam os mesmos eventos
+      pointerdown/touchstart/keydown no document e executam appendScript()/require()
+      SINCRONAMENTE no mesmo tick do evento — um unico toque no search dispara todos ao
+      mesmo tempo, competindo pelo main thread exatamente quando o Chromium ainda processa o
+      dispatch do evento de toque (mecanismo do crash confirmado na PD5).
+    fix_applied: >
+      Adiado apenas o trabalho pesado (appendScript()/require()/criacao do x-magento-init) via
+      requestIdleCallback (fallback setTimeout(fn,0) apenas quando requestIdleCallback nao
+      existe) em todos os 4 pontos afetados em awa-custom-js-loader.phtml, mantendo
+      done/cleanup imediatos e sincronos (nenhuma mudanca em QUANDO o script vai carregar, so
+      QUANDO o parser/executor roda). renderIdleScriptLoader() (compartilhada com footer) NAO
+      foi alterada - fora de escopo (footer explicitamente excluido). awa-home-bootstrap-defer.js
+      + DeferHomeScriptsPlugin.php mantidos como estavam (trabalho pre-existente correto, so
+      confirmado inativo, documentado para nao repetir o engano). .min.js regenerado com
+      terser. Deploy: static-content-deploy (nao atualizou pub/static mesmo com -f, causa nao
+      totalmente diagnosticada) + sincronizacao manual + regeneracao .br/.gz + view_preprocessed
+      atualizado para o .phtml + cache:clean block_html/full_page + restart php-fpm + Redis
+      FLUSHDB (DB1+DB2) + Varnish PURGE + restart nginx. Confirmado via curl/Playwright reais
+      que producao reflete a mudanca.
+    note: >
+      Taxa de crash medida: PD5 baseline 19 amostras/4 crashes (~21%) -> PD6 pos-correcao 20
+      amostras (2 rodadas de 10)/2 crashes (10%). Reducao real de ~50% relativo, mas NAO
+      elimina o crash - consistente com a classificacao Caso 2 da PD5 (limitacao do Chromium
+      headless em touch sob main thread ocupado; reduzir volume de JS reduz a probabilidade
+      da corrida de tempo, nao elimina a fragilidade do proprio Chromium). Amostra pequena
+      (N=10 por rodada) - recomendado N=30+ em fase futura/CI para confirmacao estatistica
+      mais robusta. Validacao funcional completa: autocomplete/minicart/menu vertical
+      continuam funcionando, zero console errors, zero novas entradas em
+      exception.log/system.log. PD2-002 e PD5-001 permanecem REPRODUCED (causa raiz
+      subjacente - limitacao do Chromium - nao foi eliminada, apenas mitigada). Ver
+      docs/product-design/PD6_SEARCH_INTENT_BOOTSTRAP_PERFORMANCE_FIX.md para o detalhe
+      completo. Nao marcado CLOSED: falta execucao real em GitHub Actions com artifact.
+
+
   # ══════════════════════════════════════════════════════════════════════════
   - id: PD3-001
     title: "Imagens quebradas na Home: falso-positivo do harness (lazy-load + carrossel fora de palco)"
