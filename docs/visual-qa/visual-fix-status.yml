@@ -1156,3 +1156,61 @@ items:
       header-core-interactions-p0.spec.ts (diagnostico - home) tambem passou (1 passed,
       exit code 0), confirmando ausencia de regressao. Nao marcado CLOSED: falta execucao
       real em GitHub Actions com artifact.
+
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # FASE: PD2 — Correcao P0 do Autocomplete da Busca
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: PD2-001
+    title: "Autocomplete: race condition real no bootstrap lazy-load do Mirasvit (corrigido)"
+    phase: PD2
+    page_type: product-design
+    component: "Busca / Autocomplete (Mirasvit_SearchAutocomplete)"
+    route: "/"
+    status: FIXED_SOURCE
+    priority: critical
+    source_files:
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-mirasvit-autocomplete-init.js
+      - app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-mirasvit-autocomplete-init.min.js
+      - tests/e2e/specs/product-design-qa.spec.ts
+    tests: { playwright: [tests/e2e/specs/product-design-qa.spec.ts, tests/e2e/specs/header-core-interactions-p0.spec.ts] }
+    evidence_dir: tests/e2e/test-results/product-design-qa
+    acceptance:
+      - "Digitar imediatamente apos clicar no campo de busca dispara sugestoes (sem depender de espera manual do usuario)"
+      - "autocomplete.opened = true no spec (via polling ate 6s, refletindo latencia real de rede)"
+      - "header-core-interactions-p0.spec.ts (diagnostico home) permanece passando (sem regressao)"
+      - "Nenhum arquivo em vendor/, pub/static ou var/view_preprocessed alterado como fonte"
+    proof: { before_screenshot: null, after_screenshot: "desktop-1440__autocomplete-aberto.png", ci_run: null, playwright_report: null, commit: null, pr: null }
+    root_cause_confirmed: >
+      Na Home, o bootstrap do autocomplete Mirasvit e deferido (por performance) ate o
+      primeiro focusin/pointerdown/touchstart no campo de busca, disparando ate 4
+      requisicoes de rede sequenciais (JS init, HTML templates, 2 modulos JS) antes do
+      componente estar pronto para reagir a digitacao. O tema tambem desabilita o
+      quickSearch nativo do Magento (minSearchLength=10000), removendo qualquer fallback.
+      Se o usuario digita antes do bootstrap terminar, as teclas sao perdidas
+      silenciosamente, sem nenhum indicador de carregamento. Confirmado com evidencia
+      direta: sem replay, 0 requisicoes de rede e painel fechado mesmo apos 6s; com o
+      fix, painel abre com resultados reais e requisicoes 200 mesmo com digitacao
+      imediata.
+    fix_applied: >
+      Adicionada funcao replayPendingQuery() em awa-mirasvit-autocomplete-init.js: apos
+      o componente Mirasvit terminar de inicializar, se o input ja tiver query com 2+
+      caracteres, dispara um evento input/keyup sintetico no proprio elemento para que
+      o componente ja inicializado processe o valor pendente. Nao chama nenhuma API
+      interna do modulo Mirasvit (vendor) — apenas simula o mesmo evento DOM que o
+      usuario geraria ao continuar digitando. .min.js regerado com terser (mesma
+      ferramenta do projeto). Deploy via setup:static-content:deploy + sincronizacao
+      manual do .min.js em pub/static + regeneracao .br/.gz + cache:flush + Redis
+      FLUSHDB (DB1/DB2) + PURGE Varnish + restart nginx. Confirmado via curl que o
+      asset publico reflete a correcao.
+      tests/e2e/specs/product-design-qa.spec.ts: troca de wait fixo (600ms, insuficiente)
+      por polling ate 6s na checagem de autocomplete, refletindo a latencia real
+      variavel (~2.6-3.5s medidos) da cadeia de bootstrap.
+    note: >
+      Validado localmente: product-design-qa.spec.ts (design QA - home) passou com
+      autocomplete.opened=true. header-core-interactions-p0.spec.ts (diagnostico - home)
+      permanece passando, sem regressao. Achados secundarios fora de escopo desta branch:
+      query "bagageiro" retornou "Nenhum resultado encontrado" (possivel gap de indexacao,
+      nao investigado); verticalMenu.bbox retornou null em uma execucao (timing residual,
+      nao investigado). Nao marcado CLOSED: falta execucao real em GitHub Actions com
+      artifact.

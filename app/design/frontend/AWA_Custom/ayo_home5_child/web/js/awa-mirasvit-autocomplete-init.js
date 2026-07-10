@@ -16,6 +16,37 @@
     var selector = cfg.selector || 'input#search, input#mobile_search, .minisearch input[type="text"]';
     var started = false;
 
+    /**
+     * PD2 fix (fix/pd2-search-autocomplete-p0): o bootstrap do autocomplete Mirasvit e
+     * assincrono (fetch de templates + require de modulos). Se o usuario digitar antes
+     * desse bootstrap terminar, as teclas sao perdidas silenciosamente (nenhum listener
+     * do componente ainda esta ligado ao input). Apos o componente terminar de
+     * inicializar, reproduzimos a query ja digitada disparando um evento "input"
+     * sintetico, para que o proprio componente processe o valor pendente.
+     */
+    function replayPendingQuery($searchInput) {
+        var value = ($searchInput.val() || '').trim();
+
+        if (value.length < 2) {
+            return;
+        }
+
+        window.setTimeout(function () {
+            var el = $searchInput.get(0);
+
+            if (!el) {
+                return;
+            }
+
+            if (typeof w.Event === 'function') {
+                el.dispatchEvent(new w.Event('input', { bubbles: true }));
+                el.dispatchEvent(new w.Event('keyup', { bubbles: true }));
+            } else {
+                $searchInput.trigger('input').trigger('keyup');
+            }
+        }, 0);
+    }
+
     function ensureTemplates(done) {
         if (d.getElementById('searchAutocompletePlaceholder')) {
             done();
@@ -72,6 +103,7 @@
 
                     $searchInput.data('awaMirasvitInPageInit', 1);
                     new InPage($searchInput, cfg.config);
+                    replayPendingQuery($searchInput);
                 });
             });
         });
@@ -108,6 +140,7 @@
                                 new typeahead($searchInput).init(cfg.config);
                             }
                             new autocomplete($searchInput).init(cfg.config);
+                            replayPendingQuery($searchInput);
                         });
                     });
                 });

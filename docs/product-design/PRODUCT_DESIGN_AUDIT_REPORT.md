@@ -157,33 +157,105 @@ conforme instrucao explicita de nao corrigir autocomplete nesta branch).
 
 ---
 
-## PD-BUG-004 — Autocomplete não abriu ao digitar
+## PD-BUG-004 — Autocomplete: race condition real no bootstrap lazy-load (Mirasvit)
 
-Status: REPRODUCED
-Prioridade: P1
+Status: FIXED_SOURCE (bug real de produto, corrigido)
+Prioridade: P0 (reclassificado de P1 apos confirmar impacto real no usuario)
 Página: Home (`/`)
-Componente: Busca / Autocomplete
+Componente: Busca / Autocomplete (Mirasvit_SearchAutocomplete)
 Viewport: desktop-1440
 Estado: guest
 
-### Problema
-Após preencher o campo de busca com "bagageiro" e aguardar 600ms, nenhum seletor de autocomplete conhecido (`#search_autocomplete`, `.search-autocomplete`, `.mirasvit-searchautocomplete`, `[data-role="search-autocomplete"]`, `.mst-searchautocomplete__autocomplete`) ficou visível.
+### Investigacao PD2 (causa raiz real, nao assumida)
 
-### Evidência
-- JSON attach: `pd0-home.json` (campo `autocomplete = {"opened": false}`)
-- Screenshot de tentativa: não gerado nesta execução (mesma observação de PD-BUG-003 — falha silenciosa na captura, investigar).
+Reproduzido com metodos independentes, seguindo a mesma disciplina da PD1:
 
-### Causa provável
-A avaliar: JS de autocomplete pode exigir mais tempo, evento diferente (`keyup` vs `input`), ou o seletor real do dropdown de sugestões difere dos candidatos testados.
+1. Script Playwright puro (clique + digitacao imediata, sem espera): **nenhuma requisicao
+   de rede disparada** para `/search/ajax/suggest` nem endpoints Mirasvit. Painel permanece
+   fechado (`display:none`, 0 filhos).
+2. Mesmo script, mas com **3 segundos de espera entre o clique e a digitacao**: a cadeia
+   completa dispara (`awa-mirasvit-autocomplete-init.min.js` -> fetch de
+   `mirasvit-ac-templates.pt_BR.html` -> require de `Mirasvit_SearchAutocomplete/js/autocomplete`
+   e `.../typeahead` -> AJAX `search/ajax/suggest` + `searchautocomplete/ajax/typeahead` ->
+   painel abre com classes `is-open active has-results`). Confirma que o **backend/endpoint
+   funciona corretamente** quando o frontend tem tempo de inicializar.
+3. Inspecao do codigo-fonte (`awa-mirasvit-autocomplete-init.js`): na Home
+   (`cfg.isHomePage`), o bootstrap do autocomplete e **deferido por design** (otimizacao de
+   performance) ate o primeiro sinal de intencao de busca (`focusin`/`pointerdown`/`touchstart`
+   no `#search_mini_form`). O bootstrap entao faz **ate 4 requisicoes de rede sequenciais**
+   (JS de init -> HTML de templates -> 2 modulos JS do Mirasvit) antes de o componente de
+   autocomplete estar pronto para reagir a digitacao. O tema tambem desabilita
+   intencionalmente o `quickSearch` nativo do Magento
+   (`$('#search_mini_form').prop('minSearchLength', 10000)`), entao **nao ha nenhum
+   fallback** enquanto o Mirasvit ainda esta carregando — se o usuario digitar antes do
+   bootstrap terminar, as teclas sao perdidas silenciosamente, sem nenhum indicador visual
+   de carregamento.
 
-### Correção recomendada
-Fase PD1 (Header/Busca): identificar seletor real do autocomplete em runtime antes de qualquer alteração.
+### Causa raiz confirmada
+Race condition real no tema: `bootstrap()` (deferido, disparado por intencao de foco) nao
+tinha nenhum mecanismo de "replay" do valor ja digitado apos terminar de inicializar. Um
+usuario real que comeca a digitar logo apos clicar no campo de busca da Home (comportamento
+comum) pode nunca ver sugestoes, sem qualquer feedback de que a busca esta carregando.
+**Este e um bug real de produto**, nao um falso-negativo do harness de teste (diferente da
+PD1).
+
+### Correção aplicada (fonte canonica do tema, sem tocar vendor/)
+Arquivo: `app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-mirasvit-autocomplete-init.js`
+(+ `.min.js` regerado com `terser -c -m`, mesma ferramenta ja usada no projeto —
+`scripts/tier1_js_minification.sh`).
+
+Adicionada funcao `replayPendingQuery($searchInput)`: apos o componente Mirasvit
+(`InPage`/`autocomplete`/`typeahead`) terminar de inicializar, se o input ja tiver uma
+query com 2+ caracteres, dispara um evento `input`/`keyup` sintetico no proprio elemento
+para que o componente (ja inicializado) processe o valor pendente — sem chamar nenhuma API
+interna do modulo Mirasvit (que e vendor), apenas simulando o mesmo evento DOM que o usuario
+geraria ao continuar digitando.
+
+Nao foi alterado nenhum arquivo em `vendor/`, nem Luma/Blank, nem `pub/static`/
+`var/view_preprocessed` como fonte (apenas republicados via `setup:static-content:deploy`
+apos a mudanca real na fonte do tema).
+
+### Deploy realizado
+- `terser` para regerar `.min.js` a partir da fonte corrigida.
+- `bin/magento setup:static-content:deploy pt_BR -f --theme AWA_Custom/ayo_home5_child`.
+- Sincronizacao manual do `.min.js` em `pub/static` (mesmo padrao ja usado no projeto para
+  bundles CSS) + regeneracao de `.br`/`.gz`.
+- `cache:flush`, `redis FLUSHDB` (DB1 cache + DB2 FPC), `PURGE` no Varnish (full page +
+  asset estatico especifico), `systemctl restart nginx` (limpar `open_file_cache`).
+- Confirmado via `curl` direto no asset publico que o novo conteudo esta servido.
+
+### Evidência — antes (bug reproduzido)
+- `NET_LOG: []` (nenhuma requisicao de suggest/typeahead disparada com digitacao imediata)
+- Painel: `display:none`, `childCount:0` mesmo apos 6+ segundos de espera.
+
+### Evidência — depois (corrigido)
+- Com clique + digitacao imediata (mesmo cenario que falhava antes): painel abre com
+  classes `is-open active has-results`, conteudo real de resultado
+  (`<div class="no-result">Nenhum resultado encontrado.</div>` para a query de teste), e
+  requisicao `search/ajax/suggest?q=bagageiro` -> `200`.
+- Via Playwright real (`product-design-qa.spec.ts`, rota `home`): `autocomplete.opened: true`
+  (spec ajustado de wait fixo de 600ms para polling de ate 6s, refletindo a latencia real
+  medida de ate ~2.6-3.5s da cadeia de bootstrap — ver nota tecnica no proprio spec).
+- Regressao: `header-core-interactions-p0.spec.ts` (`diagnostico — home`) permanece
+  passando (`1 passed`, exit code 0) apos a mudanca de JS.
+
+### Achado secundario (nao corrigido nesta fase, fora de escopo PD2)
+- Query de teste "bagageiro" retornou "Nenhum resultado encontrado" em uma das
+  investigacoes — pode ser um problema de indexacao/dados do catalogo, nao do
+  autocomplete em si. Registrar como candidato de investigacao futura (fora do escopo
+  desta branch, que e apenas sobre a race condition do autocomplete).
+- `verticalMenu.bbox` retornou `null` (com `visible:true`) em uma das execucoes desta
+  sessao — pode ser timing residual da mesma familia de problema do PD1, mas nao foi
+  investigado nesta branch (regra explicita: nao mexer em outros bugs).
 
 ### Critério de aceite
-- [ ] Autocomplete detectado como aberto pelo spec após digitação
-- [ ] Endpoint de sugestão validado
-- [ ] Playwright
-- [ ] Screenshot `autocomplete-aberto` gerado com sucesso
+- [x] Causa raiz identificada e confirmada com evidencia direta (nao assumida)
+- [x] Correção aplicada na fonte canonica do tema (nao em `vendor/`, `pub/static` ou
+      `var/view_preprocessed` como fonte)
+- [x] Screenshot depois (`autocomplete-aberto` gerado com painel de resultados reais)
+- [x] Playwright local passou (`product-design-qa.spec.ts` e `header-core-interactions-p0.spec.ts`)
+- [x] Sem erro de console/rede novo
+- [ ] Execução em GitHub Actions com artifact (pendente — não fechar como CLOSED sem isso)
 
 ---
 

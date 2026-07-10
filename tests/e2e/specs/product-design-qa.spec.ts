@@ -217,11 +217,29 @@ test.describe('Product Design QA (PD0) — diagnostico por rota', () => {
         const searchInput = page.locator(awaSelectors.search.input).first();
         if (await searchInput.isVisible().catch(() => false)) {
           await searchInput.fill('bagageiro').catch(() => {});
-          await page.waitForTimeout(600);
-          const autocompleteVisible = await isVisible(
-            page,
+          // PD2 fix: o autocomplete (Mirasvit) faz bootstrap assincrono sob demanda
+          // (fetch de templates + require de 4 modulos JS) na primeira interacao com a
+          // busca na Home. Medido empiricamente em runtime real: a cadeia completa
+          // (bootstrap -> AJAX suggest/typeahead -> render) leva ~2.6s. Um wait de 600ms
+          // gerava falso-negativo aqui (o produto ja respondia corretamente, o teste
+          // so nao esperava tempo suficiente) — ver PD-BUG-004 em
+          // PRODUCT_DESIGN_AUDIT_REPORT.md para o historico completo da investigacao
+          // (incluindo o bug real de race condition ja corrigido em
+          // awa-mirasvit-autocomplete-init.js).
+          // Polling em vez de sleep fixo: a cadeia assincrona (bootstrap -> ate 4
+          // requests de modulo/template -> AJAX suggest/typeahead -> render) variou
+          // entre ~2.6s e mais de 3.2s em execucoes reais desta mesma sessao — um
+          // unico wait fixo e inerentemente instavel contra latencia real de rede.
+          const autocompleteLocator = page.locator(
             '#search_autocomplete, .search-autocomplete, .mirasvit-searchautocomplete, [data-role="search-autocomplete"], .mst-searchautocomplete__autocomplete',
-          );
+          ).first();
+          let autocompleteVisible = false;
+          const autocompleteDeadline = Date.now() + 6_000;
+          while (Date.now() < autocompleteDeadline) {
+            autocompleteVisible = await autocompleteLocator.isVisible().catch(() => false);
+            if (autocompleteVisible) break;
+            await page.waitForTimeout(300);
+          }
           await snap(page, testInfo, 'autocomplete-aberto');
           autocompleteEvidence = { opened: autocompleteVisible };
           await searchInput.fill('').catch(() => {});
