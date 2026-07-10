@@ -43,7 +43,6 @@ import {
   collectConsoleErrors,
   collectNetworkErrors,
   checkOverflow,
-  findBrokenImages,
 } from '../helpers/deep-audit.helpers';
 import { getMultipleCSS, getBBox, isVisible } from '../helpers/header.helpers';
 import { COMMON } from '../helpers/visual-audit.helpers';
@@ -150,6 +149,70 @@ function classifyCspErrors(consoleErrors: Array<{ type: string; text: string }>)
   return consoleErrors.filter((e) => /content security policy|refused to (load|execute|connect)/i.test(e.text));
 }
 
+/**
+ * PD3 fix (fix/pd3-home-broken-images-p0): PD-BUG-001 (11 imagens "quebradas" na Home) era
+ * falso-positivo do harness de teste, nao bug de produto/tema/dado/CMS — confirmado com
+ * evidencia direta: todas as 11 URLs retornam HTTP 200 (curl) com content-type e tamanho
+ * corretos, e todas renderizam corretamente (naturalWidth/naturalHeight corretos) quando
+ * efetivamente colocadas na viewport. Duas causas de falso-positivo distintas:
+ *  1. Imagens do footer (9) usam loading="lazy" nativo e nao tinham sido roladas para a
+ *     viewport no momento da checagem original (findBrokenImages rodava logo apos o load,
+ *     antes de qualquer scroll).
+ *  2. Imagens de carrossel de produto (2+) ficam em slides "fora de palco"
+ *     (.awa-carousel-card-slot) com bounding box 0x0 ate o carrossel ativa-las — scroll
+ *     vertical nao resolve (carrossel e horizontal/JS-controlado), mas confirmam
+ *     naturalWidth/Height corretos quando trazidas para a viewport individualmente.
+ * Fix (escopo local a este spec — helpers/deep-audit.helpers.ts NAO foi alterado, pois e
+ * usado por 6+ outros specs fora do escopo desta branch):
+ *  - Scroll-through vertical (top->bottom->top) antes de checar imagens quebradas, para
+ *    disparar o lazy-load nativo de imagens verticais (resolve o caso do footer).
+ *  - Exigir bounding box > 0x0 (alem de complete && naturalWidth===0) para classificar uma
+ *    imagem como realmente quebrada — imagens 0x0 sao clones fora de palco (carrossel) ou
+ *    ainda nao roladas para perto da viewport, nao imagens com falha de carregamento.
+ */
+async function triggerLazyImages(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    const step = Math.max(300, Math.floor(window.innerHeight * 0.8));
+    const max = document.body.scrollHeight;
+    for (let y = 0; y < max; y += step) {
+      window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    window.scrollTo({ top: max, left: 0, behavior: 'instant' });
+    await new Promise((r) => setTimeout(r, 300));
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    // Garante que o scroll realmente voltou ao topo antes de seguir — alguns temas usam
+    // scroll-behavior:smooth via CSS, que faz scrollTo animar mesmo com behavior:'instant'
+    // sobrescrito por regra global; aqui fazemos polling curto para confirmar.
+    for (let i = 0; i < 10 && window.scrollY > 2; i += 1) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  }).catch(() => {});
+  await page.waitForTimeout(400);
+}
+
+async function findRealBrokenImages(page: Page): Promise<string[]> {
+  try {
+    return await Promise.race([
+      page.evaluate(() => {
+        const imgs = Array.from(document.querySelectorAll('img'));
+        return imgs
+          .filter((img) => {
+            if (!img.src || img.src.startsWith('data:')) return false;
+            const rect = img.getBoundingClientRect();
+            const hasLayoutBox = rect.width > 0 && rect.height > 0;
+            return hasLayoutBox && img.complete && img.naturalWidth === 0;
+          })
+          .map((img) => img.src);
+      }),
+      new Promise<string[]>((resolve) => setTimeout(() => resolve([]), 5_000)),
+    ]);
+  } catch {
+    return [];
+  }
+}
+
 /* ── Suite principal (uma rota por teste, sem loop de viewport manual —
      o breakpoint vem do --project=, evitando explosao combinatoria/Killed) ── */
 test.describe('Product Design QA (PD0) — diagnostico por rota', () => {
@@ -169,7 +232,8 @@ test.describe('Product Design QA (PD0) — diagnostico por rota', () => {
       }
 
       const overflow = await checkOverflow(page);
-      const brokenImages = await findBrokenImages(page);
+      await triggerLazyImages(page);
+      const brokenImages = await findRealBrokenImages(page);
       const componentEvidence = await collectComponentEvidence(page);
       const radiusEvidence = await collectRadiusEvidence(page);
       const viewportWidth = page.viewportSize()?.width ?? 0;
@@ -371,7 +435,8 @@ test.describe('Product Design QA (PD0) — diagnostico por rota', () => {
     }
 
     const overflow = await checkOverflow(page);
-    const brokenImages = await findBrokenImages(page);
+    await triggerLazyImages(page);
+    const brokenImages = await findRealBrokenImages(page);
     const componentEvidence = await collectComponentEvidence(page);
     const radiusEvidence = await collectRadiusEvidence(page);
     const screenshot = await snap(page, testInfo, 'pdp-fullpage');

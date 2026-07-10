@@ -1214,3 +1214,53 @@ items:
       nao investigado); verticalMenu.bbox retornou null em uma execucao (timing residual,
       nao investigado). Nao marcado CLOSED: falta execucao real em GitHub Actions com
       artifact.
+
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # FASE: PD3 — Imagens "quebradas" na Home
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: PD3-001
+    title: "Imagens quebradas na Home: falso-positivo do harness (lazy-load + carrossel fora de palco)"
+    phase: PD3
+    page_type: product-design
+    component: "Product card (carrossel) + Footer (teste, nao produto)"
+    route: "/"
+    status: RESOLVED_TEST_HARNESS
+    priority: critical
+    source_files:
+      - tests/e2e/specs/product-design-qa.spec.ts
+    tests: { playwright: [tests/e2e/specs/product-design-qa.spec.ts, tests/e2e/specs/header-core-interactions-p0.spec.ts] }
+    evidence_dir: tests/e2e/test-results/product-design-qa
+    acceptance:
+      - "HTTP 200 confirmado via curl para as 11 URLs antes de qualquer alteracao"
+      - "findRealBrokenImages retorna [] na Home apos scroll-through"
+      - "autocomplete.opened=true preservado (sem regressao do fix PD2)"
+      - "header-core-interactions-p0.spec.ts (diagnostico home) permanece passando"
+    proof: { before_screenshot: null, after_screenshot: "desktop-1440__home-fullpage.png", ci_run: null, playwright_report: null, commit: null, pr: null }
+    root_cause_confirmed: >
+      As 11 imagens reportadas como quebradas no PD0 retornam HTTP 200 com content-type e
+      tamanho corretos (confirmado via curl). Nao e bug de produto/tema/CMS/catalogo. Duas
+      causas de falso-positivo no findBrokenImages (helper compartilhado):
+      (1) 9 imagens do footer usam loading="lazy" nativo e nao tinham sido roladas para a
+      viewport no momento da checagem original — carregam corretamente apos scroll;
+      (2) 2+ imagens de produto ficam em slides de carrossel "fora de palco"
+      (.awa-carousel-card-slot) com bounding box 0x0 ate o carrossel ativa-las — scroll
+      vertical nao resolve, mas confirmado com scrollIntoViewIfNeeded() que carregam
+      corretamente (600x600) quando na viewport. Nenhum defeito real de produto encontrado.
+    fix_applied: >
+      Escopo limitado a tests/e2e/specs/product-design-qa.spec.ts: adicionadas funcoes
+      locais triggerLazyImages() (scroll-through vertical com behavior:'instant' e
+      confirmacao de retorno a scrollY=0) e findRealBrokenImages() (mesma logica do helper
+      original, mas exige bounding box > 0x0 alem de complete && naturalWidth===0). O
+      helper compartilhado tests/e2e/helpers/deep-audit.helpers.ts (findBrokenImages) NAO
+      foi alterado (usado por 6+ outros specs fora do escopo desta branch). Nenhum arquivo
+      de tema/CMS/catalogo/layout XML foi alterado — nao havia defeito de produto a
+      corrigir.
+    note: >
+      Validado localmente: product-design-qa.spec.ts (design QA - home) passou com
+      brokenImages=[] e autocomplete.opened=true preservado.
+      header-core-interactions-p0.spec.ts (diagnostico - home) permanece passando, sem
+      regressao. Efeito colateral (bbox do header com Y negativo apos o scroll-through)
+      identificado e corrigido na mesma sessao (scrollTo com behavior:'instant' +
+      polling de confirmacao). Nao marcado CLOSED: falta execucao real em GitHub Actions
+      com artifact.

@@ -11,40 +11,101 @@ Fonte de evidência: execução real do smoke `design QA — home` via
 
 ---
 
-## PD-BUG-001 — Imagens quebradas (produto e footer)
+## PD-BUG-001 — Imagens "quebradas": FALSO POSITIVO do harness de teste (nao e bug de produto)
 
-Status: REPRODUCED
-Prioridade: P0
+Status: RESOLVED_TEST_HARNESS (nao era bug do tema/CMS/dado/catalogo)
+Prioridade: P0 -> reclassificado apos investigacao PD3
 Página: Home (`/`)
-Componente: Product card (vitrine) + Footer (selos de pagamento/logo)
+Componente: Product card (vitrine/carrossel) + Footer (selos de pagamento/logo) — ambos no teste, nao no produto
 Viewport: desktop-1440 (1440x1000)
 Estado: guest
 
-### Problema
-`findBrokenImages` detectou 11 imagens com `naturalWidth === 0` (quebradas) na Home:
-- 2 imagens de produto (`.../10350_2.jpg`, `.../10401_2.jpg`)
-- `logo_rodape.png`
-- selos de pagamento: `visa.png`, `mastercard.png`, `elo.png`, `amex.png`, `diners-club.png`, `boleto.png`, `pix.png`
-- `logo_bluu.png`
+### Investigacao PD3 (causa raiz real, nao assumida)
 
-### Evidência
-- Screenshot: `test-results/product-design-qa/desktop-1440__home-fullpage.png`
-- JSON attach: `pd0-home.json` (campo `brokenImages`)
-- Console/network: 0 erros de console, 0 erros de rede nesta execução (as imagens carregam com status 200 mas renderizam com `naturalWidth: 0` — sugere problema de decodificação/formato/cache, não 404).
+Seguindo a mesma disciplina da PD1/PD2 — nada foi assumido antes de provar:
 
-### Causa provável
-A avaliar: cache de imagem corrompido, CDN/otimização de imagem, ou mudança de path não refletida. Não é claramente CSS/LESS/JS — requer inspeção de `pub/media/img/*` e do pipeline de otimização de imagem antes de qualquer correção.
+1. **Checagem HTTP direta (curl) das 11 URLs**: todas retornam `200 OK`, `content-type`
+   correto (`image/jpeg`/`image/png`) e tamanho de arquivo plausivel (2-20KB). Nenhuma
+   404/403/erro de servidor. Isso descarta imediatamente: imagem ausente, permissao,
+   cache corrompido, static-deploy quebrado, path errado.
+2. **Reproducao com o helper exato (`findBrokenImages`) na mesma posicao do spec real**:
+   as mesmas 11 URLs sao reportadas como "quebradas" de forma 100% reprodutivel — a
+   investigacao nao descartou o achado, apenas a causa assumida original.
+3. **Inspecao de runtime, item por item**:
+   - **9 imagens do footer** (`logo_rodape`, `visa`, `mastercard`, `elo`, `amex`,
+     `diners-club`, `boleto`, `pix`, `logo_bluu`): todas usam `loading="lazy"` nativo do
+     navegador. No momento em que `findBrokenImages` roda (logo apos o load, antes de
+     qualquer scroll), o navegador ainda nao iniciou o fetch (`complete:false`,
+     `naturalWidth:0`) — nao e "quebrada", e "ainda nao carregada". Apos rolar a pagina
+     ate o fim, TODAS carregam corretamente (`complete:true`, dimensoes corretas, ex.
+     142x81, 80x57, 88x46).
+   - **2+ imagens de produto em carrossel** (`10350_2.jpg`, `10401_2.jpg`, e mais
+     encontradas apos scroll-through: `11996_1.jpg`, `11974_1.jpg`, `10188_2.jpg`,
+     `11786_2.jpg`): todas dentro de slides `.awa-carousel-card-slot` "fora de palco"
+     (bounding box `0x0` ate o carrossel ativa-las — posicionadas fora da viewport
+     horizontalmente, ex. `x:1642` com viewport de `1440px`). Scroll vertical nao
+     resolve (o carrossel e horizontal/controlado por JS). Confirmado com
+     `scrollIntoViewIfNeeded()` individual: TODAS carregam corretamente
+     (`complete:true`, `naturalWidth:600`, `naturalHeight:600`) quando efetivamente
+     colocadas na viewport.
 
-### Correção recomendada
-Fora do escopo do PD0. Investigar na fase PD5 (Footer) e PD3 (PLP/Home product card).
+### Causa raiz confirmada
+`findBrokenImages` nao distinguia "imagem que falhou ao carregar" de "imagem lazy que
+ainda nao foi solicitada pelo navegador" nem de "clone de carrossel fora de palco com
+bounding box 0x0". As 11 imagens sao 100% funcionais — o produto/tema/catalogo/CMS estao
+corretos. **Este e um falso-positivo do harness de teste**, no mesmo padrao da PD1 (menu
+vertical), nao um bug de produto.
+
+### Correção aplicada (escopo local, sem tocar tema/CMS/catalogo/dado)
+Arquivo: `tests/e2e/specs/product-design-qa.spec.ts` (unico arquivo alterado). O helper
+compartilhado `tests/e2e/helpers/deep-audit.helpers.ts` (`findBrokenImages`) **NAO foi
+alterado** — e usado por 6+ outros specs (`smoke/home.spec.ts`, `smoke/footer.spec.ts`,
+`smoke/product.spec.ts`, `smoke/category.spec.ts`, `deep-visual/mobile.visual.spec.ts`,
+`impeccable-visual-deep-audit.spec.ts`) fora do escopo desta branch.
+
+Duas funcoes locais adicionadas, usadas apenas neste spec:
+- `triggerLazyImages(page)`: faz um scroll-through vertical (topo -> fim -> topo, com
+  `behavior:'instant'` e confirmacao de `window.scrollY` de volta a 0) antes de checar
+  imagens quebradas, disparando o lazy-load nativo de imagens verticais (resolve o caso
+  do footer).
+- `findRealBrokenImages(page)`: mesma logica do helper original, mas exige
+  **bounding box maior que 0x0** alem de `complete && naturalWidth===0` — uma imagem sem
+  caixa de layout (clone de carrossel fora de palco, ou imagem lazy nunca solicitada) nao
+  e classificada como "quebrada".
+
+### Deploy
+Nenhum — correcao e apenas no spec de teste, nao ha alteracao de fonte de tema/CMS para
+publicar.
+
+### Evidência — antes (falso-positivo reproduzido)
+- `brokenImages` com as mesmas 11 URLs, 100% reprodutivel via `findBrokenImages` na
+  posicao exata do spec.
+
+### Evidência — depois (corrigido no teste)
+- `product-design-qa.spec.ts` (rota `home`): `"brokenImages":[]` — nenhuma imagem
+  reportada.
+- `autocomplete.opened:true` (fix da PD2 preservado, sem regressao).
+- Screenshot: `test-results/product-design-qa/desktop-1440__home-fullpage.png`.
+- Regressao: `header-core-interactions-p0.spec.ts` (`diagnostico — home`) permanece
+  passando (`1 passed`, exit code 0) apos a mudanca.
+
+### Efeito colateral corrigido durante a implementacao
+A primeira versao de `triggerLazyImages` deixou a posicao de scroll ligeiramente
+diferente de 0 apos o scroll-through (provavel `scroll-behavior:smooth` do tema
+interferindo em `scrollTo`), causando bounding boxes com Y negativo em checagens
+subsequentes na mesma execucao. Corrigido usando `behavior:'instant'` explicito +
+polling de confirmacao de `window.scrollY` antes de prosseguir. Confirmado: header bbox
+volta a `{x:80, y:0, width:1280, height:156}` normalmente.
 
 ### Critério de aceite
-- [ ] `findBrokenImages` retorna `[]` na Home (desktop e mobile)
-- [ ] Playwright
-- [ ] Sem erro console
-- [ ] Sem 404/403
-- [ ] Sem erro em `exception.log`/`system.log`
-- [ ] Screenshot depois
+- [x] Causa raiz identificada e confirmada com evidencia direta (nao assumida)
+- [x] HTTP 200 confirmado via curl para as 11 URLs (antes de qualquer alteracao)
+- [x] Renderizacao visual confirmada (`naturalWidth`/`naturalHeight` corretos quando em
+      viewport)
+- [x] `findRealBrokenImages` retorna `[]` na Home (desktop)
+- [x] Playwright local passou (`product-design-qa.spec.ts` e `header-core-interactions-p0.spec.ts`)
+- [x] Sem erro de console/rede novo
+- [ ] Execução em GitHub Actions com artifact (pendente — não fechar como CLOSED sem isso)
 
 ---
 
