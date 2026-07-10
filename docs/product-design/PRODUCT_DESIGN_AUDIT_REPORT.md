@@ -561,6 +561,44 @@ adiar ainda mais scripts não críticos para depois do primeiro paint útil do a
   experimento.
 - Logs brutos das 12 execuções (RTTs e timestamps) documentados na tabela acima.
 
+### Atualizacao — matriz formal PD5 (31 experimentos, grupos A-G)
+
+Uma segunda rodada, mais formal e exaustiva (matriz de hipoteses H1-H10, 31 experimentos nos
+grupos A/B/C/D/F/G, JSON incremental, browser novo por experimento), foi executada na mesma
+branch. Resultado consolidado — ver detalhes completos em
+`docs/product-design/PD5_MOBILE_SEARCH_HEADLESS_CRASH_INVESTIGATION.md`:
+
+- **Taxa de crash quantificada**: 4 em 19 execucoes Chromium mobile+touch com JS ativo (~21%)
+  — confirma **nao-determinismo** (a mesma configuracao ora crasha, ora so fica lenta).
+- **WebKit (3 execucoes, mesma sequencia exata)**: **0 crashes**. Evidencia mais decisiva desta
+  fase — o crash e especifico do **Chromium**, nao do site, nao do harness em geral, nao da VPS.
+- **Sem `hasTouch`/`isMobile`** (viewport estreito, mas sem emulacao de toque): **0 crashes**
+  nas execucoes desta matriz — reforca que o vetor e o dispatch de eventos de toque via CDP,
+  nao apenas a largura do viewport.
+- **Bloquear JS inteiro, todo `AWA_Custom/*.js`, ou o grupo completo dos 14 scripts**: **0
+  crashes em 3/3** execucoes limpas — confirma de forma reprodutivel que o volume agregado de
+  JS do bootstrap de intencao de busca e o fator desencadeante real.
+- **Bloquear arquivos individuais** (mirasvit-init, header-a11y-performance, etc.): resultado
+  MISTO entre "lento" e "crash" ao longo das duas rodadas — nenhum arquivo isolado e
+  determinístico.
+- Grupos C (AJAX), G (terceiros/service worker/cache) e a maioria das flags de GPU do Grupo B:
+  **rejeitados como causa raiz isolada** — nenhum eliminou o crash de forma confiavel.
+
+**Classificacao final (taxonomia Caso 1-5 solicitada nesta rodada): Caso 2 — bug/limitacao do
+Chromium headless confirmado**, com fator agravante real de produto (o bootstrap de JS que cria
+a janela de bloqueio do main thread que torna a corrida de tempo do Chromium provavel de
+acontecer). Nao e Caso 1 puro (nenhum arquivo unico e a causa determinística), nao e Caso 3
+puro (nao e um bug generico do harness Playwright — o WebKit funciona perfeitamente), nao e
+Caso 4 puro (o mesmo padrao de lentidao do main thread tambem ocorre no desktop).
+
+Workaround recomendado: validar autocomplete mobile via WebKit em vez de Chromium nos specs que
+precisam de digitacao real; ou usar `fill()` em vez de `pressSequentially`/`keyboard.type()`
+quando o Chromium for exigido (nao crashou nos testes, embora precise de mais repeticoes para
+confirmacao estatistica). Job `pd5-mobile-search-crash-investigation` adicionado a
+`.github/workflows/product-design-qa.yml` (somente `workflow_dispatch`, scaffold pronto mas
+ainda nao executavel em CI ate o script ser promovido de `tests/e2e/tmp/` para um local
+versionado — limitacao registrada explicitamente no proprio workflow).
+
 ### Próximo passo recomendado
 Fase dedicada de correção (candidata a **PD6 — Search Intent Bootstrap Performance Fix**):
 1. Auditar `awa-home-bootstrap-defer.js` e reduzir o número de scripts que disparam no mesmo

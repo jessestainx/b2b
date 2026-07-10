@@ -1271,11 +1271,69 @@ items:
       pelo comportamento do Chromium/CDP em touch. Nao e falso negativo do harness, nao e
       causa isolada da VPS. Ver PD-BUG-006 em PRODUCT_DESIGN_AUDIT_REPORT.md para os 12
       experimentos completos e tabela de resultados. Bloqueia validacao visual completa do
-      autocomplete em mobile ate correcao dedicada (PD6).
+      autocomplete em mobile ate correcao dedicada (PD6). ATUALIZACAO: matriz formal
+      de 31 experimentos (grupos A-G, taxonomia H1-H10) executada - taxa de crash quantificada
+      em ~21% (4/19) no Chromium mobile+touch, 0% no WebKit (3/3) e 0% sem hasTouch/isMobile -
+      classificado como Caso 2 (bug/limitacao do Chromium headless no dispatch de touch sob
+      main thread ocupado), com o bootstrap de JS do tema como fator agravante real que cria
+      a janela de bloqueio. Ver PD5-001 e
+      docs/product-design/PD5_MOBILE_SEARCH_HEADLESS_CRASH_INVESTIGATION.md para o detalhe
+      completo dos 31 experimentos.
 
 
   # ══════════════════════════════════════════════════════════════════════════
   # FASE: PD3 — Imagens "quebradas" na Home
+  - id: PD5-001
+    title: "Matriz formal (31 experimentos, H1-H10): crash mobile e Caso 2 - limitacao do Chromium headless no dispatch de touch"
+    phase: PD5
+    page_type: product-design
+    component: "Busca / Autocomplete (harness de teste, Chromium headless + touch dispatch)"
+    route: "/"
+    status: REPRODUCED
+    priority: high
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: tests/e2e/tmp
+    acceptance:
+      - "Matriz de hipoteses H1-H10 criada e preenchida com decisao por evidencia"
+      - "Grupos A, B, C, D e F executados (31 experimentos totais, incluindo G)"
+      - "JSON incremental salvo (nenhum resultado perdido mesmo com crashes)"
+      - "Logs nativos/debug tentados e registrados (mesmo que inconclusivos)"
+      - "Versoes de Playwright/Chromium/Node registradas"
+      - "Causa classificada (Caso 2: browser/Chromium headless) com evidencia cross-engine"
+      - "Nenhuma correcao aplicada sem causa raiz"
+      - "GitHub Actions (workflow_dispatch) proposto, limitacao de script gitignored registrada"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    root_cause_confirmed: >
+      Matriz de 31 experimentos (grupos A-G) confirma: taxa de crash de ~21% (4/19) em
+      execucoes Chromium mobile com hasTouch/isMobile e JS ativo, sempre nao-deterministica
+      (mesma config ora crasha ora so fica lenta). Testado cross-engine: WebKit, mesma
+      sequencia exata, 0 crashes em 3 execucoes. Testado sem touch: viewport estreito sem
+      hasTouch/isMobile, 0 crashes. Bloquear JS inteiro, todo AWA_Custom/*.js, ou o grupo de 14
+      scripts do bootstrap de intencao de busca: 0 crashes em 3/3 execucoes limpas. Bloquear
+      arquivos individuais, endpoints AJAX, terceiros, service workers ou flags de GPU
+      isoladas: nenhum eliminou o crash de forma confiavel (resultado misto). CLASSIFICACAO:
+      Caso 2 (bug/limitacao do Chromium headless no dispatch de eventos de toque via CDP
+      quando o main thread esta ocupado por um periodo prolongado), com o bootstrap de JS do
+      tema como fator agravante real (cria a janela de bloqueio que torna a corrida de tempo
+      do Chromium provavel).
+    fix_applied: >
+      Nenhuma nesta fase (diagnostico apenas). Workaround de teste recomendado: usar WebKit em
+      vez de Chromium para validar autocomplete mobile com digitacao real, ou usar fill() em
+      vez de pressSequentially/keyboard.type() quando Chromium for exigido. Job
+      pd5-mobile-search-crash-investigation adicionado a
+      .github/workflows/product-design-qa.yml (workflow_dispatch apenas, scaffold - script
+      ainda vive em tests/e2e/tmp/ git-ignored, precisa ser promovido para rodar de fato em
+      CI). Candidata a correcao real de performance: PD6 (Search Intent Bootstrap Performance
+      Fix), reduzindo o volume de JS sincrono no bootstrap de intencao de busca.
+    note: >
+      Ver docs/product-design/PD5_MOBILE_SEARCH_HEADLESS_CRASH_INVESTIGATION.md para a tabela
+      completa dos 31 experimentos, matriz de hipoteses H1-H10 preenchida e classificacao
+      detalhada. PD-BUG-006 em PRODUCT_DESIGN_AUDIT_REPORT.md atualizado com o resumo desta
+      matriz formal. Nao marcado CLOSED - falta execucao real em GitHub Actions com artifact
+      (job existe mas e um scaffold, nao executavel ainda por causa do script git-ignored).
+
+
   # ══════════════════════════════════════════════════════════════════════════
   - id: PD3-001
     title: "Imagens quebradas na Home: falso-positivo do harness (lazy-load + carrossel fora de palco)"
