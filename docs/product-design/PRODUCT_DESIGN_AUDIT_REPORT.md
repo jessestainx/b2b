@@ -291,9 +291,16 @@ apos a mudanca real na fonte do tema).
 
 ### Evidência — depois (corrigido)
 - Com clique + digitacao imediata (mesmo cenario que falhava antes): painel abre com
-  classes `is-open active has-results`, conteudo real de resultado
-  (`<div class="no-result">Nenhum resultado encontrado.</div>` para a query de teste), e
-  requisicao `search/ajax/suggest?q=bagageiro` -> `200`.
+  classes `is-open active has-results` e conteudo real de resultado. **Correcao de
+  registro (ver PD4):** a mensagem `<div class="no-result">Nenhum resultado
+  encontrado.</div>` capturada em uma das evidencias vinha do painel nativo vestigial
+  `#search_autocomplete` (alimentado pelo endpoint `search/ajax/suggest`, que retorna
+  `[]` porque o `quickSearch` nativo esta intencionalmente desabilitado via
+  `minSearchLength: 10000`). O painel real do Mirasvit
+  (`.mst-searchautocomplete__autocomplete`) mostrou corretamente 273 produtos para
+  "bagageiro" — ver PD4 para a investigacao completa que corrigiu esse registro.
+  Requisicao `search/ajax/suggest?q=bagageiro` -> `200` (endpoint nativo, resposta `[]`
+  esperada por design).
 - Via Playwright real (`product-design-qa.spec.ts`, rota `home`): `autocomplete.opened: true`
   (spec ajustado de wait fixo de 600ms para polling de ate 6s, refletindo a latencia real
   medida de ate ~2.6-3.5s da cadeia de bootstrap — ver nota tecnica no proprio spec).
@@ -301,10 +308,9 @@ apos a mudanca real na fonte do tema).
   passando (`1 passed`, exit code 0) apos a mudanca de JS.
 
 ### Achado secundario (nao corrigido nesta fase, fora de escopo PD2)
-- Query de teste "bagageiro" retornou "Nenhum resultado encontrado" em uma das
-  investigacoes — pode ser um problema de indexacao/dados do catalogo, nao do
-  autocomplete em si. Registrar como candidato de investigacao futura (fora do escopo
-  desta branch, que e apenas sobre a race condition do autocomplete).
+- ~~Query de teste "bagageiro" retornou "Nenhum resultado encontrado"~~ — **investigado
+  e descartado na PD4**: era leitura do painel nativo vestigial, nao do Mirasvit real.
+  Sem bug de indexacao/catalogo. Ver `PD-BUG-005` abaixo.
 - `verticalMenu.bbox` retornou `null` (com `visible:true`) em uma das execucoes desta
   sessao — pode ser timing residual da mesma familia de problema do PD1, mas nao foi
   investigado nesta branch (regra explicita: nao mexer em outros bugs).
@@ -343,6 +349,65 @@ Ajustar `product-design-qa.spec.ts` (fase de refinamento do próprio PD0, sem im
 
 ### Critério de aceite
 - [ ] Spec não reporta falso-positivo para seletores fora de escopo da rota
+
+---
+
+## PD-BUG-005 — Investigação PD4: busca "bagageiro" NAO tem gap de indexação (achado da PD2 corrigido)
+
+Status: NOT_A_BUG (investigado e descartado)
+Prioridade: n/a
+Página: Home (`/`) + `/catalogsearch/result/?q=bagageiro`
+Componente: Busca / Autocomplete / Resultado de busca
+Viewport: desktop-1440
+Estado: guest
+
+### Contexto
+Durante a PD2, uma das evidências de autocomplete mostrou
+`<div class="no-result">Nenhum resultado encontrado.</div>` para a query "bagageiro",
+registrado como achado secundário não investigado ("possível gap de indexação").
+
+### Investigação PD4 (causa raiz real, não assumida)
+
+1. **Endpoint nativo Magento** (`GET /search/ajax/suggest?q=bagageiro`): retorna `[]`
+   (array vazio). Isso é **esperado por design** — o `quickSearch` nativo está
+   intencionalmente desabilitado via `$('#search_mini_form').prop('minSearchLength', 10000)`
+   em `awa-mirasvit-autocomplete-init.js` (ver PD2). O painel visual `#search_autocomplete`
+   ainda existe no DOM (vestigial) e mostra "Nenhum resultado encontrado" quando alimentado
+   por esse endpoint — foi ESSE painel vestigial que a evidência da PD2 capturou, não o
+   autocomplete real usado pelos usuários.
+2. **Endpoint real Mirasvit** (`GET /searchautocomplete/ajax/suggest/?q=bagageiro&store_id=1&...`):
+   retorna `totalItems: 319`, com `magento_catalog_product.totalItems: 273` — 273 produtos
+   reais, incluindo `"BAGAGEIRO CB 300 2009/2015 - CROMADO - ( MACIÇO )"` (SKU 3011).
+3. **Página de resultado completa** (`/catalogsearch/result/?q=bagageiro`, verificado via
+   Playwright real): **redireciona automaticamente para `/bagageiros.html`** (categoria
+   "Bagageiros"), mostrando `"Itens 1-12 de 22"` — 22 produtos. Esse é um comportamento
+   legítimo de "busca-para-categoria" (search-to-category redirect), uma funcionalidade
+   comum de e-commerce quando a query corresponde fortemente a uma categoria existente —
+   não é um bug, é uma melhoria de UX (evita uma página de resultado genérica quando a
+   categoria já responde exatamente à intenção de busca).
+
+### Causa raiz confirmada
+**Não há bug de indexação, catálogo ou busca.** O registro original na PD2 foi uma leitura
+equivocada de qual painel de autocomplete estava sendo inspecionado (o vestigial, não o
+real). A busca por "bagageiro" funciona corretamente em todos os níveis: autocomplete
+(273 resultados), busca completa com redirect inteligente para categoria (22 itens).
+
+### Correção aplicada
+Nenhuma — não há defeito de produto, tema, dado ou teste a corrigir. Apenas correção do
+registro/evidência anterior em `PD-BUG-004` (ver acima) e documentação desta investigação
+para fechar o item do backlog de forma rastreável.
+
+### Evidência
+- `curl https://awamotos.com/searchautocomplete/ajax/suggest/?q=bagageiro&store_id=1&currency=BRL&customer_group_id=0`
+  → `totalItems: 319`, `magento_catalog_product.totalItems: 273`.
+- Playwright real em `/catalogsearch/result/?q=bagageiro` → `location.href` resolve para
+  `/bagageiros.html`, `toolbar-amount` = `"Itens 1-12 de 22"`.
+
+### Critério de aceite
+- [x] Causa raiz identificada e confirmada com evidência direta (não assumida)
+- [x] Nenhuma alteração de código necessária (confirmado que não é bug)
+- [x] Registro anterior (PD2/PD-BUG-004) corrigido com a explicação real
+- [ ] Execução em GitHub Actions com artifact (não aplicável — não há mudança de código)
 
 ---
 

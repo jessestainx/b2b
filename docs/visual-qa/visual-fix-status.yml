@@ -1210,8 +1210,10 @@ items:
       Validado localmente: product-design-qa.spec.ts (design QA - home) passou com
       autocomplete.opened=true. header-core-interactions-p0.spec.ts (diagnostico - home)
       permanece passando, sem regressao. Achados secundarios fora de escopo desta branch:
-      query "bagageiro" retornou "Nenhum resultado encontrado" (possivel gap de indexacao,
-      nao investigado); verticalMenu.bbox retornou null em uma execucao (timing residual,
+      query "bagageiro" retornou "Nenhum resultado encontrado" em uma evidencia — CORRIGIDO
+      na PD4 (ver PD4-001): era leitura do painel nativo vestigial, nao bug real; a busca
+      funciona corretamente (273 resultados no autocomplete, 22 itens via redirect para
+      /bagageiros.html). verticalMenu.bbox retornou null em uma execucao (timing residual,
       nao investigado). Nao marcado CLOSED: falta execucao real em GitHub Actions com
       artifact.
 
@@ -1264,3 +1266,41 @@ items:
       identificado e corrigido na mesma sessao (scrollTo com behavior:'instant' +
       polling de confirmacao). Nao marcado CLOSED: falta execucao real em GitHub Actions
       com artifact.
+
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # FASE: PD4 — Investigacao: busca "bagageiro" sem resultados (achado da PD2)
+  # ══════════════════════════════════════════════════════════════════════════
+  - id: PD4-001
+    title: "Busca bagageiro sem resultados: investigado e descartado (nao e bug real)"
+    phase: PD4
+    page_type: product-design
+    component: "Busca / Autocomplete / Resultado de busca"
+    route: "/, /catalogsearch/result/?q=bagageiro"
+    status: NOT_A_BUG
+    priority: low
+    source_files: []
+    tests: { playwright: [] }
+    evidence_dir: n/a
+    acceptance:
+      - "Endpoint Mirasvit (searchautocomplete/ajax/suggest) retorna resultados reais para bagageiro"
+      - "Pagina de resultado redireciona corretamente para /bagageiros.html com itens reais"
+      - "Registro anterior (PD2/PD-BUG-004) corrigido com a explicacao real"
+    proof: { before_screenshot: null, after_screenshot: null, ci_run: null, playwright_report: null, commit: null, pr: null }
+    root_cause_confirmed: >
+      O registro original (PD2) de "Nenhum resultado encontrado" veio do painel nativo
+      vestigial #search_autocomplete (alimentado pelo endpoint nativo search/ajax/suggest,
+      que retorna [] por design, ja que o quickSearch nativo esta intencionalmente
+      desabilitado via minSearchLength=10000). O endpoint real do Mirasvit
+      (searchautocomplete/ajax/suggest) retorna totalItems=319 (273 produtos) para
+      "bagageiro", incluindo SKU 3011 "BAGAGEIRO CB 300 2009/2015 - CROMADO - ( MACICO )".
+      A pagina de resultado completa (/catalogsearch/result/?q=bagageiro) redireciona
+      automaticamente para /bagageiros.html (busca-para-categoria), mostrando "Itens 1-12
+      de 22". Confirmado: nao ha bug de indexacao, catalogo, busca ou autocomplete.
+    fix_applied: >
+      Nenhuma alteracao de codigo — nao havia defeito a corrigir. Apenas correcao do
+      registro/evidencia anterior em docs/product-design/PRODUCT_DESIGN_AUDIT_REPORT.md
+      (PD-BUG-004 atualizado, nova secao PD-BUG-005 documentando a investigacao completa).
+    note: >
+      Investigacao encerrada sem necessidade de branch de correcao de codigo (apenas
+      documentacao). Fecha o achado secundario pendente desde a PD2.
