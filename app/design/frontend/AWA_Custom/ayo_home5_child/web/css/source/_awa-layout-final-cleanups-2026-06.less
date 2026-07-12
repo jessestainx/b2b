@@ -93,15 +93,13 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
 
         > li.ui-menu-item.level0:is(.parent, .navigation__item--parent) > a.level-top::after,
         > li.ui-menu-item.level0:is(.parent, .navigation__item--parent) > a.navigation__link::after {
-            content: '>' !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            flex: 0 0 16px !important;
-            margin-inline-start: auto !important;
-            color: var(--awa-text-muted, CanvasText) !important;
-            font-size: 14px !important;
-            line-height: 1 !important;
+            content: none !important;
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         > li.ui-menu-item.level0:is(:hover, :focus-within, .awa-vmf-active, .vmm-active) > a.level-top,
@@ -2611,8 +2609,10 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
         background: var(--awa-bg-surface, Canvas) !important;
         padding: var(--awa-space-3, 12px) !important;
         gap: var(--awa-space-2, 8px) !important;
-        display: flex !important;
-        flex-wrap: wrap !important;
+        // HOME-P0-015: uma coluna explícita evita o CTA solto à esquerda após o grid.
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        align-items: stretch !important;
     }
 
     .awa-hero-benefits {
@@ -2625,7 +2625,7 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
         width: 100% !important;
     }
 
-    .awa-hero-benefits__item,
+    .awa-hero-benefits__item:not(.awa-hero-benefits__item--interactive),
     .awa-hero-benefits__link {
         display: flex !important;
         align-items: center !important;
@@ -2641,7 +2641,27 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
     }
 
     .awa-hero-benefits__item--interactive {
+        // HOME-P0-014: o link é o card; o <li> externo não pode duplicar borda/padding/altura.
+        align-self: stretch !important;
+        border: 0 !important;
+        background: transparent !important;
         cursor: pointer !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+    }
+
+    .awa-hero-benefits__item--interactive > .awa-hero-benefits__link {
+        height: 100% !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .awa-hero-b2b-cta__actions {
+        // HOME-P0-015: o CTA ocupa a linha própria e permanece centralizado em todos os breakpoints.
+        align-items: center !important;
+        justify-content: center !important;
+        margin-top: 0 !important;
+        width: 100% !important;
     }
 
     .awa-hero-benefits__item--interactive:hover,

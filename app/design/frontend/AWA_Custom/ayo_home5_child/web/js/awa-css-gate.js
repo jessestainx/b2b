@@ -28,6 +28,10 @@
     var HOME_AUTO_FALLBACK_ENABLED = true;
     var STANDARDIZE_TERMINAL_FRAGMENT = 'awa-home-standardize-terminal-wins';
     var ALIGN_GRID_TERMINAL_FRAGMENT = 'awa-align-grid-terminal-2026-06-11';
+    var AWA_CSS_GATE_DEBUG_VERSION = '20260711-header-geometry-v4';
+    var AWA_DEBUG_SESSION = 'ca59a1';
+    var AWA_DEBUG_INGEST_PATH = '/b2b/account/login/';
+    var gateInteractionDebugSent = false;
     var QUEUE_HEADER_FIRST_FRAGMENTS = [
         'awa-third-party-bundle',
         /* awa-carousel-bundle + awa-shelf-carousel: async imediato na home — vitrine é conteúdo primário */
@@ -36,6 +40,169 @@
     ];
     /* Home: bundles pesados retirados do idle gate — body-end via plugin (2026-06-13) */
     var QUEUE_HOME_LOAD_LAST_FRAGMENTS = [];
+
+    function sendCssGateDebug(hypothesisId, location, message, data) {
+        var payload;
+        var dataText;
+        var qs;
+        var url;
+        try {
+            payload = {
+                sessionId: AWA_DEBUG_SESSION,
+                runId: 'pre-fix',
+                hypothesisId: hypothesisId,
+                location: location,
+                message: message,
+                data: data || {},
+                timestamp: Date.now()
+            };
+            dataText = '';
+            try {
+                dataText = encodeURIComponent(JSON.stringify(payload.data).slice(0, 240));
+            } catch (e) {}
+            qs = '?awa_dbg=1'
+                + '&sid=' + encodeURIComponent(AWA_DEBUG_SESSION)
+                + '&run=' + encodeURIComponent(payload.runId)
+                + '&hyp=' + encodeURIComponent(payload.hypothesisId)
+                + '&loc=' + encodeURIComponent(payload.location)
+                + '&msg=' + encodeURIComponent(payload.message)
+                + '&ts=' + encodeURIComponent(String(payload.timestamp))
+                + '&transport=' + encodeURIComponent('css-gate')
+                + '&data=' + dataText;
+            url = AWA_DEBUG_INGEST_PATH + qs;
+            (new Image()).src = url;
+            if (navigator && typeof navigator.sendBeacon === 'function') {
+                try {
+                    navigator.sendBeacon(url, JSON.stringify(payload));
+                } catch (e2) {}
+            }
+        } catch (e3) {}
+    }
+
+    // #region agent log
+    sendCssGateDebug(
+        'H31',
+        'awa-css-gate.js:init',
+        'CSS gate script initialized',
+        {
+            href: window.location.href,
+            readyState: document.readyState,
+            stickyCount: document.querySelectorAll('.header-wrapper-sticky').length,
+            menuRootCount: document.querySelectorAll('[data-role="awa-vertical-menu"]').length,
+            gateVersion: AWA_CSS_GATE_DEBUG_VERSION
+        }
+    );
+    // #endregion
+
+    var headerGeometryStates = {};
+    var headerResizeProbeSent = false;
+
+    function getHeaderGeometry(selector) {
+        var element = document.querySelector(selector);
+        var rect;
+        var style;
+
+        if (!element) {
+            return null;
+        }
+
+        rect = element.getBoundingClientRect();
+        style = window.getComputedStyle(element);
+
+        return {
+            x: Math.round(rect.x),
+            y: Math.round(rect.y),
+            w: Math.round(rect.width),
+            h: Math.round(rect.height),
+            ml: style.marginLeft,
+            mr: style.marginRight,
+            mw: style.maxWidth,
+            tr: style.transform
+        };
+    }
+
+    function emitHeaderGeometry(reason) {
+        var search = document.getElementById('search');
+        var expanded = search ? search.getAttribute('aria-expanded') : '';
+        var stateKey = reason + ':' + expanded + ':' + window.innerWidth + ':' + window.scrollX;
+        var viewportData;
+        var mainData;
+        var navData;
+
+        if (headerGeometryStates[stateKey]) {
+            return;
+        }
+        headerGeometryStates[stateKey] = true;
+
+        viewportData = {
+            reason: reason,
+            vw: window.innerWidth,
+            vv: window.visualViewport ? Math.round(window.visualViewport.width) : null,
+            sx: Math.round(window.scrollX),
+            sw: document.documentElement.scrollWidth,
+            expanded: expanded
+        };
+        mainData = {
+            main: getHeaderGeometry('.awa-main-header .header-main > .container'),
+            inner: getHeaderGeometry('.awa-main-header__inner.wp-header'),
+            searchCol: getHeaderGeometry('.awa-header-search-col'),
+            search: getHeaderGeometry('#search')
+        };
+        navData = {
+            nav: getHeaderGeometry('.awa-nav-bar'),
+            container: getHeaderGeometry('.awa-nav-bar > .container'),
+            inner: getHeaderGeometry('.awa-nav-bar__inner')
+        };
+
+        // #region agent log
+        fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-Debug-Session-Id': 'ca59a1'},
+            body: JSON.stringify({
+                sessionId: 'ca59a1',
+                runId: 'header-geometry-pre-fix',
+                hypothesisId: 'H91-H94',
+                location: 'awa-css-gate.js:emitHeaderGeometry',
+                message: 'Header container origins and search state',
+                data: {viewport: viewportData, main: mainData, nav: navData},
+                timestamp: Date.now()
+            })
+        }).catch(function () {});
+        sendCssGateDebug('H91', 'awa-css-gate.js:header-geometry:viewport', 'Viewport geometry state', viewportData);
+        sendCssGateDebug('H92', 'awa-css-gate.js:header-geometry:main', 'Main header and search geometry', mainData);
+        sendCssGateDebug('H93', 'awa-css-gate.js:header-geometry:nav', 'Navigation container geometry', navData);
+        // #endregion
+    }
+
+    function installHeaderGeometryProbe() {
+        var search = document.getElementById('search');
+
+        emitHeaderGeometry('gate-init');
+
+        if (search) {
+            (new MutationObserver(function (mutations) {
+                if (mutations.some(function (mutation) {
+                    return mutation.attributeName === 'aria-expanded';
+                })) {
+                    window.requestAnimationFrame(function () {
+                        emitHeaderGeometry('search-expanded-change');
+                    });
+                }
+            })).observe(search, {attributes: true, attributeFilter: ['aria-expanded']});
+        }
+
+        window.addEventListener('resize', function () {
+            if (headerResizeProbeSent) {
+                return;
+            }
+            headerResizeProbeSent = true;
+            window.requestAnimationFrame(function () {
+                emitHeaderGeometry('first-resize');
+            });
+        }, {passive: true});
+    }
+
+    installHeaderGeometryProbe();
 
     function injectHomeFooterOverflowGuard() {
         var style;
@@ -67,11 +234,25 @@
         }
 
         target = event.target;
+        if (target && target.classList && (
+            target.classList.contains('awa-nav-bar')
+            || target.classList.contains('header-nav-global')
+        )) {
+            return true;
+        }
+        if (target && target.closest && target.closest(
+            '[data-awa-header-nav="true"], .header-control.header-nav.header-nav-global, .header-control.awa-nav-bar'
+        )) {
+            return true;
+        }
 
         return !!(target && target.closest && target.closest(
             'a, button, input, select, textarea, label, summary, [role="button"], [role="link"], ' +
             '.minicart-wrapper, .awa-header-account-prompt, #search_mini_form, .awa-hero-swiper__nav, ' +
-            '.swiper-pagination-bullet, .awa-category-carousel__item, .product-item, .item-product'
+            '.swiper-pagination-bullet, .awa-category-carousel__item, .product-item, .item-product, ' +
+            '.awa-nav-bar, [data-awa-header-nav="true"], [data-role="awa-vertical-menu"], ' +
+            '[data-role="awa-vertical-menu-trigger"], [data-role="awa-vertical-menu-panel"], ' +
+            '.navigation.verticalmenu.side-verticalmenu'
         ));
     }
 
@@ -84,6 +265,24 @@
     }
 
     function onGateInteraction(event) {
+        if (!gateInteractionDebugSent) {
+            gateInteractionDebugSent = true;
+            // #region agent log
+            sendCssGateDebug(
+                'H33',
+                'awa-css-gate.js:onGateInteraction',
+                'First gate interaction event observed',
+                {
+                    href: window.location.href,
+                    eventType: event && event.type ? event.type : '',
+                    targetTag: event && event.target && event.target.tagName ? event.target.tagName : '',
+                    targetClass: event && event.target && event.target.className ? String(event.target.className).slice(0, 120) : '',
+                    meaningfulIntent: isMeaningfulIntent(event),
+                    gateVersion: AWA_CSS_GATE_DEBUG_VERSION
+                }
+            );
+            // #endregion
+        }
         if (isHomePage() && !isMeaningfulIntent(event)) {
             return;
         }
@@ -920,6 +1119,8 @@
         var links;
         var i;
         var isHomeFallbackRun;
+        var queueNode;
+        var queueLength = 0;
 
         if (applied) {
             return;
@@ -951,6 +1152,48 @@
 
         for (i = 0; i < links.length; i += 1) {
             links[i].media = 'all';
+        }
+
+        if (isHomePage()) {
+            queueNode = document.getElementById('awa-css-gate-queue');
+            if (queueNode && queueNode.textContent) {
+                try {
+                    queueLength = JSON.parse(queueNode.textContent).length;
+                } catch (e) { /* noop */ }
+            }
+            // #region agent log
+            fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-Debug-Session-Id': 'ca59a1'},
+                body: JSON.stringify({
+                    sessionId: 'ca59a1',
+                    runId: 'post-fix',
+                    hypothesisId: 'H90',
+                    location: 'awa-css-gate.js:applyGatedCSS:home-footer-only',
+                    message: 'Home gate skipped late structural mutations',
+                    data: {
+                        triggerType: triggerType,
+                        queueLength: queueLength
+                    },
+                    timestamp: Date.now()
+                })
+            }).catch(function () {});
+            sendCssGateDebug(
+                'H90',
+                'awa-css-gate.js:applyGatedCSS:home-footer-only',
+                'Home gate skipped late structural mutations',
+                {triggerType: triggerType, queueLength: queueLength}
+            );
+            // #endregion
+            injectQueuedStylesheets().then(function () {
+                try {
+                    document.dispatchEvent(new CustomEvent('awa:css-gate-applied', {bubbles: true}));
+                } catch (e) { /* noop */ }
+            });
+            for (i = 0; i < GATE_EVENTS.length; i += 1) {
+                window.removeEventListener(GATE_EVENTS[i], onGateInteraction, true);
+            }
+            return;
         }
 
         injectQueuedStylesheets().then(function () {

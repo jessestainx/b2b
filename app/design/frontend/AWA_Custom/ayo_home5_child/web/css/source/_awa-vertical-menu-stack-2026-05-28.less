@@ -301,30 +301,55 @@ body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label::after {
         .navigation.verticalmenu.side-verticalmenu .level0.submenu,
     body .page-wrapper .awa-site-header .header-control.awa-nav-bar .menu_left_home1
         .navigation.verticalmenu.side-verticalmenu .level0 > .level0.submenu,
-    body .awa-vmf-portal.submenu:not(.awa-vmf-compact),
-    body .awa-vmf-portal.navigation__submenu:not(.awa-vmf-compact) {
-        width: ~"min(520px, calc(100vw - 280px))" !important;
-        min-width: 300px !important;
+    body .awa-vmf-portal,
+    body .awa-vmf-portal.submenu,
+    body .awa-vmf-portal.navigation__submenu {
+        width: ~"min(560px, calc(100vw - 280px))" !important;
+        min-width: 420px !important;
         max-height: ~"min(480px, calc(100vh - 120px))" !important;
+    }
+
+    body .awa-vmf-portal .row {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
     }
 
     body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-list--level1,
     body .page-wrapper .navigation.verticalmenu .level0.submenu .subchildmenu.mega-columns,
-    body .awa-vmf-portal:not(.awa-vmf-compact) .navigation__inner-list--level1 {
+    body .awa-vmf-portal .subchildmenu.navigation__inner-list.navigation__inner-list--level1,
+    body .awa-vmf-portal .navigation__inner-list--level1 {
         display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(120px, 160px) !important;
+        grid-template-columns: minmax(0, 1fr) minmax(124px, 140px) !important;
         grid-auto-rows: min-content !important;
         align-content: start !important;
-        gap: 0 16px !important;
+        gap: 8px 16px !important;
         min-height: 0 !important;
         height: auto !important;
-        padding: 16px 12px 14px 20px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 16px 12px 14px 16px !important;
+    }
+
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-title,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu
+        .navigation__inner-item--level1.subcategory-second-level,
+    body .page-wrapper .navigation.verticalmenu .level0.submenu .navigation__inner-item--all,
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-title,
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-second-level,
+    body .awa-vmf-portal .navigation__inner-item--all {
+        grid-column: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        display: block !important;
     }
 
     body .page-wrapper .navigation.verticalmenu .level0.submenu
         .navigation__inner-item--level1.subcategory-title span,
-    body .awa-vmf-portal:not(.awa-vmf-compact)
-        .navigation__inner-item--level1.subcategory-title span {
+    body .awa-vmf-portal .navigation__inner-item--level1.subcategory-title span {
         font-size: 17px !important;
         font-weight: 700 !important;
         line-height: 1.25 !important;
@@ -333,10 +358,14 @@ body .page-wrapper .navigation.verticalmenu .awa-vmenu__section-label::after {
 
     body .page-wrapper .navigation.verticalmenu .level0.submenu
         .navigation__inner-item--level1.imagem.img-subcategory,
-    body .awa-vmf-portal:not(.awa-vmf-compact)
-        .navigation__inner-item--level1.imagem.img-subcategory {
-        grid-column: 3 !important;
+    body .awa-vmf-portal .navigation__inner-item--level1.imagem.img-subcategory {
+        grid-column: 2 !important;
         grid-row: 1 / span 10 !important;
+        width: 140px !important;
+        min-width: 124px !important;
+        max-width: 140px !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     /* Compacto: categorias sparse */
@@ -500,6 +529,10 @@ body .page-wrapper .navigation.verticalmenu .level0.submenu a:focus-visible,
 body .awa-vmf-portal a:focus-visible {
     outline: 2px solid var(--awa-primary, @awa-color-primary) !important;
     outline-offset: 2px !important;
+}
+
+body .page-wrapper .navigation.verticalmenu .togge-menu a.level-top:focus {
+    outline: none !important;
 }
 
 /* Portal/flyout: scroll interno quando conteúdo excede viewport */
@@ -1112,6 +1145,8 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
         overflow-x: visible !important;
         overflow-y: auto !important;
         overscroll-behavior: contain !important;
+        padding-right: 12px !important;
+        scrollbar-gutter: stable both-edges !important;
     }
 
     #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
@@ -1120,6 +1155,11 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
         flex-shrink: 0 !important;
         content-visibility: auto;
         contain-intrinsic-size: auto 44px;
+    }
+
+    #html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu
+        > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link {
+        min-height: 44px !important;
     }
 
     /* Neutraliza grid 4-col / min-width do layout-bundle (legado) */
@@ -1420,3 +1460,4 @@ body .awa-vmf-portal.submenu img {
         pointer-events: none !important;
     }
 }
+

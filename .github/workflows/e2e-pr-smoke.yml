@@ -50,6 +50,29 @@ jobs:
             --reporter=line \
             --timeout=60000
 
+      - name: Header first-paint CLS regression
+        working-directory: tests/e2e
+        env:
+          PLAYWRIGHT_BASE_URL: https://awamotos.com
+          ALLOW_PRODUCTION_VALIDATION: "true"
+        run: |
+          npx playwright test \
+            specs/visual-audit-home-header-footer.spec.ts \
+            --project=notebook-1366 \
+            --project=firefox-notebook-1280 \
+            --project=webkit-notebook-1280 \
+            --project=mobile-390 \
+            -g "Header mantém geometria entre primeiro e segundo frame" \
+            --reporter=line \
+            --timeout=60000
+
+      - name: Header tablet rail regression
+        working-directory: tests/e2e
+        env:
+          PLAYWRIGHT_BASE_URL: https://awamotos.com
+          ALLOW_PRODUCTION_VALIDATION: "true"
+        run: node ../../.github/header-tablet-rail-regression.cjs
+
       - name: Dead CSS quarantine smoke (Fase 6A)
         working-directory: tests/e2e
         env:

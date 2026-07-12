@@ -2,13 +2,13 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
   --awa-home-corp-space-1: 4px;
   --awa-home-corp-space-2: 8px;
   --awa-home-corp-space-3: 12px;
-  --awa-home-corp-space-4: 16px;
+  --awa-home-corp-space-4: 14px;
   --awa-home-corp-shell: min(100%, 1280px);
   --awa-home-corp-gutter: 16px;
-  --awa-home-corp-gap: 12px;
-  --awa-home-corp-gap-wide: 16px;
-  --awa-home-corp-section-pad: 12px;
-  --awa-home-corp-section-pad-tight: 8px;
+  --awa-home-corp-gap: 10px;
+  --awa-home-corp-gap-wide: 12px;
+  --awa-home-corp-section-pad: 8px;
+  --awa-home-corp-section-pad-tight: 6px;
   --awa-home-corp-card-radius: 8px;
 }
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-site-header {
@@ -48,6 +48,9 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form {
   align-items: center;
   min-height: 44px;
+}
+body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-site-header .awa-header-search-col :is(form#search_mini_form, form#search_mini_form .field, form#search_mini_form .control, input#search) {
+  border-radius: var(--awa-search-radius, 8px) !important;
 }
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-site-header .awa-header-right-col {
   align-items: center !important;
@@ -122,6 +125,9 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
   flex-direction: column;
   gap: 0;
   overflow-x: hidden;
+}
+body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.awa-section-header, .awa-shelf__header, .awa-category-carousel__header) {
+  margin-bottom: var(--awa-home-corp-space-2) !important;
 }
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home > .top-home-content--above-fold,
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home > .ayo-home5-wrapper--template-driven,
@@ -523,7 +529,7 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.awa-category-card, .awa-category-carousel__item) {
   border: 1px solid var(--awa-border, var(--awa-border));
   border-radius: var(--awa-home-corp-card-radius);
-  min-height: 112px;
+  min-height: 104px;
   padding: var(--awa-home-corp-space-3) var(--awa-home-corp-space-2) !important;
 }
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home .awa-carousel-section {
@@ -561,7 +567,7 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
   flex-direction: column;
   gap: var(--awa-home-corp-space-2);
   height: 100%;
-  min-height: 252px;
+  min-height: 236px;
   padding: var(--awa-home-corp-space-2) !important;
 }
 /* FIX 2026-07-06 (Impeccable "Nested cards" — carrosseis mobile/home-critical-bundle):
@@ -617,8 +623,15 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.product-name a, .product-item-name a, .product-item-link, .product-item .product-item-link) {
+  min-height: 40px;
+  padding-block: 2px;
+}
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.price-box, .product-reviews-summary, .product-item-actions, .actions-primary, .actions-secondary) {
   margin-block: var(--awa-home-corp-space-1) 0 !important;
+}
+body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.awa-carousel-section, .awa-grid-section, .awa-home-niche-shelves, .awa-shelf--carousel) :is(.product-name a, .product-item-name a, .product-item-link, .product-item .product-item-link) {
+  min-height: 44px !important;
 }
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.product-item-actions, .actions-primary) {
   margin-top: auto !important;
@@ -638,6 +651,13 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
   margin: 0 !important;
   min-height: 56px;
   padding: var(--awa-home-corp-space-3) var(--awa-home-corp-space-4) !important;
+}
+body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home .awa-hero-b2b-cta__inner {
+  border-color: transparent;
+  border-image: none;
+  border-width: 0;
+  padding-block: 0 !important;
+  padding-inline: unset !important;
 }
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper :is(.page_footer, .page-footer) {
   box-sizing: border-box;
@@ -731,6 +751,9 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
   }
   body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.awa-product-card, .content-item-product, .item-product, .product-item-info) {
     min-height: 236px;
+  }
+  body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.product-name a, .product-item-name a, .product-item-link, .product-item .product-item-link) {
+    min-height: 44px !important;
   }
   body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home > .top-home-content--above-fold {
     height: auto !important;
@@ -990,4 +1013,10 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
     right: var(--awa-home-corp-space-3) !important;
     top: var(--awa-home-corp-space-2) !important;
   }
+}
+
+/* PD7-TOUCH-LOCK (2026-07-10): garante alvo mínimo de clique nos títulos dos cards da Home. */
+html body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+.page-wrapper .content-top-home .product-item-link {
+  min-height: 44px !important;
 }

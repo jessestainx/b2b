@@ -107,6 +107,17 @@ if ($banners = $block->getBannerCollection()):
         }
         return $rendered;
     };
+    $renderB2bCta = static function (string $link, $rawText) use ($block): string {
+        $path = (string) parse_url($link, PHP_URL_PATH);
+        if (rtrim($path, '/') !== '/b2b/register' || stripos((string) $rawText, 'slide-btn') !== false) {
+            return '';
+        }
+
+        return '<a href="' . $block->escapeUrl($link)
+            . '" class="action primary awa-hero-slide__cta">'
+            . $block->escapeHtml(__('Cadastrar no B2B'))
+            . '</a>';
+    };
 ?>
 <div class="wrapper_slider hidden-xs slider_<?php echo (int) $sliderId; ?>" data-awa-hero-variant="desktop">
     <div class="swiper awa-hero-swiper awa-hero-slider awa-hero__viewport" role="region" aria-roledescription="carrossel" aria-label="<?= $block->escapeHtmlAttr(__('Destaques principais')) ?>">
@@ -147,6 +158,7 @@ if ($banners = $block->getBannerCollection()):
                 <?php if ($text = $banner->getSlideText()): ?>
                 <div class="text-banner">
                     <?= $renderSafeSlideText($text) ?>
+                    <?= /* @noEscape */ $renderB2bCta($link, $text) ?>
                 </div>
                 <?php endif; ?>
             </div>
@@ -165,7 +177,7 @@ if ($banners = $block->getBannerCollection()):
                 aria-pressed="false"
                 data-pause-label="<?= $block->escapeHtmlAttr(__('Pausar apresentação')) ?>"
                 data-resume-label="<?= $block->escapeHtmlAttr(__('Retomar apresentação')) ?>">
-            <span class="awa-hero-pause-btn__icon" aria-hidden="true">&#9646;&#9646;</span>
+            <span class="awa-hero-pause-btn__icon" aria-hidden="true">&#9613;&#9613;</span>
         </button>
     </div>
 </div>
@@ -209,6 +221,7 @@ if ($banners = $block->getBannerCollection()):
                 <?php if ($text = $banner->getSlideText()): ?>
                 <div class="text-banner">
                     <?= $renderSafeSlideText($text) ?>
+                    <?= /* @noEscape */ $renderB2bCta($link, $text) ?>
                 </div>
                 <?php endif; ?>
             </div>
@@ -227,12 +240,406 @@ if ($banners = $block->getBannerCollection()):
                 aria-pressed="false"
                 data-pause-label="<?= $block->escapeHtmlAttr(__('Pausar apresentação')) ?>"
                 data-resume-label="<?= $block->escapeHtmlAttr(__('Retomar apresentação')) ?>">
-            <span class="awa-hero-pause-btn__icon" aria-hidden="true">&#9646;&#9646;</span>
+            <span class="awa-hero-pause-btn__icon" aria-hidden="true">&#9613;&#9613;</span>
         </button>
     </div>
 </div>
 <script type="application/json" id="awa-hero-slider-config-<?= (int) $sliderId ?>">
 <?= /* @noEscape */ json_encode(['sliderId' => (int) $sliderId, 'swiperConfig' => $swiperConfig], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+</script>
+<script>
+(function (w, d) {
+    'use strict';
+
+    var sent = 0;
+    var scheduled = false;
+    var reasons = [];
+    var lastSignature = '';
+
+    function box(element) {
+        var rect;
+
+        if (!element) {
+            return null;
+        }
+
+        rect = element.getBoundingClientRect();
+
+        return {
+            x: Math.round(rect.x),
+            y: Math.round(rect.y),
+            width: Math.round(rect.width),
+            height: Math.round(rect.height)
+        };
+    }
+
+    function imagePath(image) {
+        try {
+            return image ? (new URL(image.currentSrc || image.src, w.location.href)).pathname : '';
+        } catch (error) {
+            return '';
+        }
+    }
+
+    function snapshot(reason) {
+        var variant = w.innerWidth < 768 ? 'mobile' : 'desktop';
+        var wrapper = d.querySelector('[data-awa-hero-variant="' + variant + '"]');
+        var viewport = wrapper ? wrapper.querySelector('.awa-hero-swiper') : null;
+        var slide = viewport ? viewport.querySelector('.swiper-slide:first-child') : null;
+        var background = slide ? slide.querySelector('.banner_item_bg') : null;
+        var image = background ? background.querySelector('img') : null;
+        var nextSection = d.querySelector('.ayo-home5-wrapper--template-driven');
+        var data;
+        var signature;
+
+        if (!wrapper || !viewport || sent >= 6) {
+            return;
+        }
+
+        data = {
+            reason: reason,
+            readyState: d.readyState,
+            viewportWidth: w.innerWidth,
+            wrapper: box(wrapper),
+            viewport: box(viewport),
+            slide: box(slide),
+            background: box(background),
+            image: box(image),
+            nextSection: box(nextSection),
+            wrapperClass: wrapper.className,
+            viewportClass: viewport.className,
+            viewportInlineStyle: viewport.getAttribute('style') || '',
+            imageComplete: !!(image && image.complete),
+            imageNaturalWidth: image ? image.naturalWidth : 0,
+            imageNaturalHeight: image ? image.naturalHeight : 0,
+            imagePath: imagePath(image),
+            stylesheetCount: d.querySelectorAll('link[rel="stylesheet"]').length,
+            loadedStylesheetCount: Array.prototype.filter.call(
+                d.querySelectorAll('link[rel="stylesheet"]'),
+                function (link) {
+                    return !!link.sheet;
+                }
+            ).length
+        };
+        signature = JSON.stringify({
+            wrapper: data.wrapper,
+            viewport: data.viewport,
+            background: data.background,
+            image: data.image,
+            nextSection: data.nextSection,
+            viewportClass: data.viewportClass,
+            viewportInlineStyle: data.viewportInlineStyle,
+            imageComplete: data.imageComplete,
+            imageNaturalWidth: data.imageNaturalWidth,
+            imageNaturalHeight: data.imageNaturalHeight,
+            loadedStylesheetCount: data.loadedStylesheetCount
+        });
+
+        if (signature === lastSignature && reason !== 'load') {
+            return;
+        }
+
+        lastSignature = signature;
+        sent += 1;
+
+        // #region agent log
+        fetch('http://localhost:7480/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'hero-cls-baseline-v1',hypothesisId:'H145-H148',location:'slider_home5.phtml:hero-cls-probe',message:'Hero geometry lifecycle',data:data,timestamp:Date.now()})}).catch(function () {});
+        // #endregion
+
+        // #region agent log
+        (new Image()).src = '/b2b/account/login/?awa_dbg=1'
+            + '&sid=ca59a1&run=hero-cls-baseline-v1&hyp=H145-H148'
+            + '&loc=' + encodeURIComponent('slider_home5.phtml:hero-cls-same-origin')
+            + '&msg=' + encodeURIComponent('Hero geometry lifecycle')
+            + '&ts=' + Date.now()
+            + '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 1200));
+        // #endregion
+
+        // #region agent log
+        (new Image()).src = '/b2b/account/login/?awa_dbg=1'
+            + '&sid=ca59a1&run=home-p0-layout-baseline-v3&hyp=H149-H151'
+            + '&loc=' + encodeURIComponent('slider_home5.phtml:home-p0-shell-runtime')
+            + '&msg=' + encodeURIComponent('Home P0 shell runtime geometry')
+            + '&ts=' + Date.now()
+            + '&data=' + encodeURIComponent(JSON.stringify({
+                reason: reason,
+                viewportWidth: w.innerWidth,
+                document: box(d.documentElement),
+                header: box(d.querySelector('header.awa-site-header')),
+                sticky: box(d.querySelector('.header-wrapper-sticky')),
+                headerContainer: box(d.querySelector('#header.header-container')),
+                content: box(d.querySelector('.content-top-home')),
+                aboveFold: box(d.querySelector('.top-home-content--above-fold')),
+                hero: box(viewport)
+            }).slice(0, 1200));
+        // #endregion
+
+        // #region agent log
+        (new Image()).src = '/b2b/account/login/?awa_dbg=1'
+            + '&sid=ca59a1&run=home-p0-layout-baseline-v3&hyp=H152-H153'
+            + '&loc=' + encodeURIComponent('slider_home5.phtml:home-p0-components-runtime')
+            + '&msg=' + encodeURIComponent('Home P0 components runtime geometry')
+            + '&ts=' + Date.now()
+            + '&data=' + encodeURIComponent(JSON.stringify({
+                reason: reason,
+                viewportWidth: w.innerWidth,
+                cta: box(d.querySelector('.awa-hero-b2b-cta')),
+                benefits: box(d.querySelector('.awa-hero-benefits')),
+                benefitItems: Array.prototype.map.call(
+                    d.querySelectorAll('.awa-hero-benefits > li'),
+                    box
+                ),
+                pause: box(viewport.querySelector('.awa-hero-pause-btn')),
+                brokenImages: Array.prototype.filter.call(d.images, function (candidate) {
+                    return candidate.complete && candidate.naturalWidth === 0;
+                }).length
+            }).slice(0, 1200));
+        // #endregion
+    }
+
+    function schedule(reason) {
+        reasons.push(reason);
+        if (scheduled) {
+            return;
+        }
+
+        scheduled = true;
+        w.requestAnimationFrame(function () {
+            var pendingReasons = reasons.join(',');
+
+            scheduled = false;
+            reasons = [];
+            snapshot(pendingReasons);
+        });
+    }
+
+    w.requestAnimationFrame(function () {
+        var variant = w.innerWidth < 768 ? 'mobile' : 'desktop';
+        var wrapper = d.querySelector('[data-awa-hero-variant="' + variant + '"]');
+        var viewport = wrapper ? wrapper.querySelector('.awa-hero-swiper') : null;
+        var image = wrapper ? wrapper.querySelector('.swiper-slide:first-child img') : null;
+
+        snapshot('first-frame');
+
+        if (viewport && 'ResizeObserver' in w) {
+            (new ResizeObserver(function () {
+                schedule('hero-resize');
+            })).observe(viewport);
+        }
+
+        if (viewport) {
+            (new MutationObserver(function () {
+                schedule('hero-class-style-mutation');
+            })).observe(viewport, {
+                attributes: true,
+                attributeFilter: ['class', 'style']
+            });
+        }
+
+        if (image && !image.complete) {
+            image.addEventListener('load', function () {
+                schedule('first-image-load');
+            }, {once: true});
+        }
+    });
+    w.addEventListener('load', function () {
+        schedule('load');
+    }, {once: true});
+})(window, document);
+</script>
+<script id="awa-hero-home-p0-layout-probe">
+(function (w, d) {
+    'use strict';
+
+    var sent = 0;
+
+    function box(element) {
+        var rect;
+        var computed;
+
+        if (!element) {
+            return null;
+        }
+
+        rect = element.getBoundingClientRect();
+        computed = w.getComputedStyle(element);
+
+        return {
+            x: Math.round(rect.x * 10) / 10,
+            y: Math.round(rect.y * 10) / 10,
+            width: Math.round(rect.width * 10) / 10,
+            height: Math.round(rect.height * 10) / 10,
+            maxWidth: computed.maxWidth,
+            margin: computed.margin,
+            padding: computed.padding,
+            position: computed.position,
+            display: computed.display,
+            grid: computed.gridTemplateColumns,
+            gap: computed.gap
+        };
+    }
+
+    function capture(reason) {
+        var variant = w.innerWidth < 768 ? 'mobile' : 'desktop';
+        var hero = d.querySelector('[data-awa-hero-variant="' + variant + '"] .awa-hero-swiper');
+        var data;
+
+        if (!hero || sent >= 2) {
+            return;
+        }
+
+        sent += 1;
+        data = {
+            reason: reason,
+            readyState: d.readyState,
+            viewportWidth: w.innerWidth,
+            document: box(d.documentElement),
+            header: box(d.querySelector('header.awa-site-header')),
+            sticky: box(d.querySelector('.header-wrapper-sticky')),
+            headerContainer: box(d.querySelector('#header.header-container')),
+            content: box(d.querySelector('.content-top-home')),
+            aboveFold: box(d.querySelector('.top-home-content--above-fold')),
+            hero: box(hero),
+            cta: box(d.querySelector('.awa-hero-b2b-cta')),
+            benefits: box(d.querySelector('.awa-hero-benefits')),
+            benefitItems: Array.prototype.map.call(
+                d.querySelectorAll('.awa-hero-benefits > li'),
+                box
+            ),
+            pause: box(hero.querySelector('.awa-hero-pause-btn')),
+            brokenImages: Array.prototype.filter.call(d.images, function (image) {
+                return image.complete && image.naturalWidth === 0;
+            }).map(function (image) {
+                try {
+                    return (new URL(image.currentSrc || image.src, w.location.href)).pathname;
+                } catch (error) {
+                    return '';
+                }
+            })
+        };
+
+        // #region agent log
+        fetch('http://localhost:7480/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'home-p0-layout-baseline-v2',hypothesisId:'H149-H153',location:'slider_home5.phtml:home-p0-layout-probe',message:'Home P0 layout geometry',data:data,timestamp:Date.now()})}).catch(function () {});
+        // #endregion
+
+        // #region agent log
+        (new Image()).src = '/b2b/account/login/?awa_dbg=1'
+            + '&sid=ca59a1&run=home-p0-layout-baseline-v2&hyp=H149-H153'
+            + '&loc=' + encodeURIComponent('slider_home5.phtml:home-p0-layout-same-origin')
+            + '&msg=' + encodeURIComponent('Home P0 layout geometry')
+            + '&ts=' + Date.now()
+            + '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 5000));
+        // #endregion
+
+        // #region agent log
+        (new Image()).src = '/b2b/account/login/?awa_dbg=1'
+            + '&sid=ca59a1&run=home-p0-layout-baseline-v2&hyp=H149-H151'
+            + '&loc=' + encodeURIComponent('slider_home5.phtml:home-p0-shell-compact')
+            + '&msg=' + encodeURIComponent('Home P0 shell geometry compact')
+            + '&ts=' + Date.now()
+            + '&data=' + encodeURIComponent(JSON.stringify({
+                reason: data.reason,
+                viewportWidth: data.viewportWidth,
+                document: data.document,
+                header: data.header,
+                sticky: data.sticky,
+                headerContainer: data.headerContainer,
+                content: data.content,
+                aboveFold: data.aboveFold,
+                hero: data.hero
+            }).slice(0, 1200));
+        // #endregion
+
+        // #region agent log
+        (new Image()).src = '/b2b/account/login/?awa_dbg=1'
+            + '&sid=ca59a1&run=home-p0-layout-baseline-v2&hyp=H152-H153'
+            + '&loc=' + encodeURIComponent('slider_home5.phtml:home-p0-components-compact')
+            + '&msg=' + encodeURIComponent('Home P0 component geometry compact')
+            + '&ts=' + Date.now()
+            + '&data=' + encodeURIComponent(JSON.stringify({
+                reason: data.reason,
+                viewportWidth: data.viewportWidth,
+                cta: data.cta,
+                benefits: data.benefits,
+                benefitItems: data.benefitItems,
+                pause: data.pause,
+                brokenImages: data.brokenImages
+            }).slice(0, 1200));
+        // #endregion
+    }
+
+    w.requestAnimationFrame(function () {
+        capture('first-frame');
+    });
+    w.addEventListener('load', function () {
+        w.requestAnimationFrame(function () {
+            capture('window-load');
+        });
+    }, {once: true});
+}(window, document));
+</script>
+<script>
+(function (w, d) {
+    'use strict';
+
+    var sent = false;
+    var observer;
+
+    function probeActiveCta() {
+        var activeCta = d.querySelector(
+            '.wrapper_slider:not([style*="display: none"]) .swiper-slide-active .awa-hero-slide__cta'
+        );
+        var rect;
+        var style;
+
+        if (sent || !activeCta) {
+            return;
+        }
+
+        rect = activeCta.getBoundingClientRect();
+        style = w.getComputedStyle(activeCta);
+        if (rect.width <= 0 || rect.height <= 0) {
+            return;
+        }
+
+        sent = true;
+        if (observer) {
+            observer.disconnect();
+        }
+
+        // #region agent log
+        fetch('http://localhost:7480/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'post-fix',hypothesisId:'H116-H118',location:'slider_home5.phtml:hero-cta-probe',message:'Active B2B hero CTA runtime state',data:{viewportWidth:w.innerWidth,text:(activeCta.textContent||'').trim(),hrefPath:activeCta.pathname,width:Math.round(rect.width),height:Math.round(rect.height),display:style.display,visibility:style.visibility,opacity:style.opacity,slideOpacity:w.getComputedStyle(activeCta.closest('.swiper-slide')).opacity},timestamp:Date.now()})}).catch(function () {});
+        // #endregion
+
+        // #region agent log
+        (new Image()).src = '/b2b/account/login/?awa_dbg=1'
+            + '&sid=ca59a1&run=post-fix&hyp=H119'
+            + '&loc=' + encodeURIComponent('slider_home5.phtml:hero-cta-same-origin')
+            + '&msg=' + encodeURIComponent('Active B2B CTA same-origin fallback')
+            + '&ts=' + Date.now()
+            + '&transport=hero-cta-image'
+            + '&data=' + encodeURIComponent(JSON.stringify({
+                viewportWidth: w.innerWidth,
+                text: (activeCta.textContent || '').trim(),
+                hrefPath: activeCta.pathname,
+                width: Math.round(rect.width),
+                height: Math.round(rect.height),
+                display: style.display,
+                visibility: style.visibility,
+                opacity: style.opacity,
+                slideOpacity: w.getComputedStyle(activeCta.closest('.swiper-slide')).opacity
+            }).slice(0, 420));
+        // #endregion
+    }
+
+    observer = new MutationObserver(probeActiveCta);
+    observer.observe(d.documentElement, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['class']
+    });
+    w.requestAnimationFrame(probeActiveCta);
+})(window, document);
 </script>
 <script>
 (function (w, d) {

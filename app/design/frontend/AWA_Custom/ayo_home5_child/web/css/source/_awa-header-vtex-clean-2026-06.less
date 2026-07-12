@@ -1172,9 +1172,9 @@
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
-    /* AWA fix: canonical dark bg for promo bar wrapper (lock-parity block) */
-    background: var(--awa-b2b-promo-bg, #1a1a1a) !important;
-    color: var(--awa-text-inverse, #fff) !important;
+    /* Full-bleed utility surface; inner content stays constrained to the 1280px rail. */
+    background: var(--awa-bg, Canvas) !important;
+    color: var(--awa-text-secondary, CanvasText) !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)

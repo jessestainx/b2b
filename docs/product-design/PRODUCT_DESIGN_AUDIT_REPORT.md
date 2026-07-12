@@ -1,6 +1,6 @@
 # Product Design Audit Report — AWA Motos (Fase PD0)
 
-Última atualização: 2026-07-09
+Última atualização: 2026-07-10
 Fonte de evidência: execução real do smoke `design QA — home` via
 `tests/e2e/specs/product-design-qa.spec.ts` (`--project=desktop-1440`, exit code 0,
 "1 passed", sem `Killed`). Screenshots em `test-results/product-design-qa/`.
@@ -705,3 +705,170 @@ errors, zero page errors, sem novas entradas em exception.log/system.log.
 - Checklist: [`docs/product-design/PRODUCT_DESIGN_QA_CHECKLIST.md`](./PRODUCT_DESIGN_QA_CHECKLIST.md)
 - Spec Playwright: [`tests/e2e/specs/product-design-qa.spec.ts`](../../tests/e2e/specs/product-design-qa.spec.ts)
 - Evidências: `tests/e2e/test-results/product-design-qa/`
+
+
+---
+
+## PD6B — Mobile Search QA Stabilization & CI Policy
+
+Status: IN_PROGRESS (implementado em branch de teste, pendente rodada completa em CI com artifact)
+Prioridade: P0 (confiabilidade de validação e governança de merge)
+
+### O que foi implementado
+
+- Novo spec leve e dedicado: `tests/e2e/specs/pd6b-mobile-search-ci.spec.ts`
+  - escopo: apenas Home + abertura do autocomplete Mirasvit em mobile;
+  - evidência: screenshots + JSON dedicado;
+  - assert objetivo de abertura (`opened: true`).
+- Política CI formalizada (modo transicional na rodada atual):
+  - `mobile-390` (WebKit) como **stabilization non-gating**;
+  - `mobile-390-chromium` como **observabilidade não bloqueante**.
+
+### Racional técnico
+
+A investigação anterior mostrou que `mobile-390` já executava WebKit (não Chromium), e que parte relevante das falhas observadas era timeout/instabilidade de harness em cenário pesado. O PD6B separa validação funcional estável (gating) de telemetria do engine mais frágil (non-gating), preservando qualidade sem travar PR por ruído de infraestrutura/headless.
+
+### Critério de aceite PD6B
+
+- [x] Política documentada em `PD6B_MOBILE_SEARCH_QA_POLICY.md`
+- [x] Spec mobile dedicado implementado
+- [x] Execução Chromium marcada como observabilidade não bloqueante
+- [ ] Rodada em GitHub Actions com artifacts desta fase
+- [ ] Reclassificação dos itens legados (`PD2-002`, `PD5-001`, `PD6-001`) após evidência de CI
+
+
+### Ajuste PD6B (2026-07-10, rodada atual)
+
+- Spec dedicado `pd6b-mobile-search-ci.spec.ts` criado e validado em desktop (`1 passed`).
+- Execuções mobile locais (`mobile-390` WebKit e `mobile-390-chromium`) encerraram com `Killed` nesta VPS.
+- Política CI ajustada para modo transicional: jobs mobile executam com artifact e `continue-on-error` até estabilidade comprovada.
+- Critério de promoção para gating mobile: 2 rodadas consecutivas estáveis em CI sem `Killed`/`interrupted`.
+
+
+---
+
+## PD7 — Auditoria fina da Home (2026-07-10)
+
+Status: REPRODUCED (novos achados + reconfirmações com evidência técnica)
+Escopo: Home (`/`) em desktop e validações complementares mobile
+Evidências usadas:
+- Playwright spec oficial (`product-design-qa.spec.ts`, projeto `desktop-1440`)
+- Inspeção runtime em navegador (DOM/ARIA/targets/autocomplete)
+- Varredura de links principais da Home via fetch
+
+### Reconferência dos itens já abertos
+
+- **PD-BUG-002 (radius da busca)**: permanece **reproduzido**.
+  Evidência fresca do `[PD0-DIAG]`: `radius.input.borderRadius = "0px"` na Home (`desktop-1440`).
+- **PD-BUG-004 (autocomplete)**: fluxo principal segue funcional no desktop.
+  Evidência fresca: painel Mirasvit abriu com resultados (`opened:true`, contagem visível e lista de produtos para `bagageiro`).
+
+### Novos bugs encontrados na Home
+
+## PD-BUG-007 — CTA “Ver todos os mais vendidos” leva para página vazia
+
+Status: REPRODUCED
+Prioridade: P1
+Página: Home (`/`) -> link da seção “Mais Vendidos”
+Componente: CTA “Ver todos os mais vendidos”
+
+### Problema
+O CTA da Home aponta para `https://awamotos.com/ofertas.html`, porém a página de destino retorna estado vazio: **“Nenhum produto encontrado”**.
+
+### Evidência
+- Link da Home confirmado na inspeção da árvore de acessibilidade.
+- Conteúdo de `ofertas.html` via fetch: heading “Ofertas” + bloco “Nenhum produto encontrado”.
+
+### Impacto
+Usuário clica em um CTA de alto valor comercial e cai em página sem itens, reduzindo conversão e confiança no bloco “Mais Vendidos”.
+
+### Correção recomendada
+- Corrigir destino do CTA para uma página realmente populada de best-sellers, **ou**
+- Garantir indexação/população da rota `ofertas.html` antes de expor o CTA.
+
+### Critério de aceite
+- [ ] CTA “Ver todos os mais vendidos” abre página com produtos listados
+- [ ] Sem estado vazio para tráfego padrão (guest)
+
+---
+
+## PD-BUG-008 — Ícones de categorias sem atributo `alt` na Home
+
+Status: REPRODUCED
+Prioridade: P2
+Página: Home (`/`)
+Componente: Carrossel “Compre por categoria”
+
+### Problema
+A varredura de imagens da Home encontrou **13 imagens sem `alt`**.
+Dessas, **7 são ícones visíveis de categoria** (bauletos, guidões, retrovisores etc.) dentro de links navegáveis.
+
+### Evidência
+Inspeção runtime: imagens em `.../images/category-carousel/*.png` sem atributo `alt`.
+
+### Impacto
+Não conformidade de acessibilidade (WCAG/H37) e pior experiência para leitores de tela.
+
+### Correção recomendada
+- Para ícones informativos: definir `alt` descritivo por categoria.
+- Para ícones puramente decorativos: manter no link textual e usar `alt=""` + `aria-hidden="true"` quando aplicável.
+
+### Critério de aceite
+- [ ] 0 imagens sem atributo `alt` no bloco de categorias
+- [ ] Leitura de links de categoria permanece clara para tecnologias assistivas
+
+---
+
+## PD-BUG-009 — Alvos interativos abaixo de 44px no mobile em cards de produto
+
+Status: REPRODUCED
+Prioridade: P1
+Página: Home (`/`)
+Componente: Links de título nos cards (carrosséis de vitrine)
+Viewport: mobile `390x844`
+
+### Problema
+Na inspeção mobile, vários links de título nos cards renderizam com **altura ~35px** (abaixo da régua recomendada de 44px para touch).
+
+### Evidência
+Inspeção runtime mobile: `smallTargetCount: 18`; amostras dos links de produto com `height: 35`.
+
+### Impacto
+Aumenta erro de toque e fricção de navegação em dispositivos móveis.
+
+### Correção recomendada
+- Ajustar line-height/padding/área clicável dos links de título para mínimo de 44px em mobile.
+
+### Critério de aceite
+- [ ] Links de cards na Home com target >= 44px em mobile
+- [ ] Sem regressão visual de grid/carrossel
+
+---
+
+## PD-BUG-010 — Warning de preload não utilizado no slider da Home
+
+Status: REPRODUCED
+Prioridade: P3
+Página: Home (`/`)
+Componente: Hero/slider (`slidebanner`)
+
+### Problema
+Console registra aviso recorrente de preload não utilizado rapidamente após load:
+`slider_guidao_cb_300.jpg-1920w.webp was preloaded ... but not used within a few seconds`
+
+### Evidência
+Evento de console capturado durante inspeção runtime da Home.
+
+### Impacto
+Potencial desperdício de banda e degradação de performance/percepção (preload ineficiente).
+
+### Correção recomendada
+Revisar estratégia de preload do hero (ordem, `as`, prioridade real do slide inicial e timing de consumo).
+
+### Critério de aceite
+- [ ] Warning deixa de aparecer no console em carregamento normal da Home
+- [ ] LCP/hero não piora após ajuste
+
+### Nota técnica desta rodada
+- Execução oficial `design QA — home` (`desktop-1440`) passou com `httpStatus:200`, `brokenImages:[]`, `badAssets:[]`, `consoleErrorsCount:0`, `networkErrorsCount:0`.
+- O objetivo desta seção é registrar **bugs de UX/acessibilidade/performance fina** que não necessariamente quebram o smoke test funcional.

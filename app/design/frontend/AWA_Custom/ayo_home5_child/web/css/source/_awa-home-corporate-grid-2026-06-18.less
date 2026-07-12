@@ -21,8 +21,8 @@
     --awa-home-section-title: clamp(17px, 16px + 0.25vw, 19px);
     --awa-home-section-subtitle: ~"max(13px, 0.8125rem)";
     box-sizing: border-box;
-    margin-inline: auto;
-    max-width: var(--awa-home-shell-max);
+    margin-inline: 0;
+    max-width: none;
     padding-inline: 0;
     width: 100%;
 }
@@ -32,15 +32,15 @@
     > .top-home-content--above-fold {
         box-sizing: border-box;
         margin-inline: 0;
-        max-width: 100%;
-        padding-inline: var(--awa-home-shell-gutter) !important;
+        max-width: none;
+        padding-inline: 0 !important;
         width: 100%;
     }
 
     > .ayo-home5-wrapper--template-driven {
         box-sizing: border-box;
-        margin-inline: 0;
-        max-width: 100%;
+        margin-inline: auto;
+        max-width: var(--awa-home-shell-max);
         padding-inline: 0 !important;
         width: 100%;
     }
@@ -209,8 +209,27 @@
 
 // ── Hero above-fold: ritmo compacto ──
 @{awa-home-corp} .content-top-home > .top-home-content--above-fold {
-    margin-block: var(--awa-home-space-1) !important;
-    padding-block: var(--awa-home-space-1) !important;
+    margin-block: 0 !important;
+    padding-block: 0 !important;
+}
+
+@{awa-home-corp} .awa-hero-benefits {
+    > .awa-hero-benefits__item {
+        margin: 0 !important;
+        min-height: 86px !important;
+    }
+
+    .awa-hero-benefits__item--interactive > .awa-hero-benefits__link {
+        align-items: center !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        gap: 10px !important;
+        height: 100% !important;
+        min-height: 86px !important;
+        min-width: 0 !important;
+        padding: 10px 12px !important;
+        width: 100% !important;
+    }
 }
 
 @media (max-width: 767px) {
@@ -219,6 +238,11 @@
         --awa-home-pad-standard: 8px;
         --awa-home-pad-compact: 8px;
         --awa-home-shell-gutter: 16px;
+    }
+
+    @{awa-home-corp} .awa-hero-benefits
+    .awa-hero-benefits__item--interactive > .awa-hero-benefits__link {
+        height: auto !important;
     }
 }
 
@@ -230,6 +254,19 @@
 
 // ── Header home: rail único 16px (logo alinha ao conteúdo) ──
 @{awa-home-corp} .awa-site-header {
+    box-sizing: border-box;
+    margin-inline: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+
+    > .header-container,
+    > .header-wrapper-sticky {
+        box-sizing: border-box;
+        margin-inline: 0 !important;
+        max-width: none !important;
+        width: 100% !important;
+    }
+
     .header-wrapper-sticky:not(.is-sticky),
     .header.awa-main-header,
     .header_main.awa-main-header-inner-wrap,

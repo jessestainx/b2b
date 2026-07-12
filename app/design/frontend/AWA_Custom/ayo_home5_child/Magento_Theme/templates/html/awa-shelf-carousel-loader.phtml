@@ -25,13 +25,13 @@ $isHomePage = $request && $request->getFullActionName() === 'cms_index_index';
       href="<?= $block->escapeUrl($cssUrl) ?>"
       data-awa-shelf-js="<?= $block->escapeHtmlAttr($jsUrl) ?>"
       data-awa-shelf-loader="1"
-      media="print"
-      onload="this.media='all'"/>
+      media="<?= $isHomePage ? 'all' : 'print' ?>"
+      <?= $isHomePage ? 'data-awa-first-paint-critical="shelf-carousel"' : 'onload="this.media=\'all\'"' ?>/>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($contractCssUrl) ?>"
       data-awa-carousel-contract="1"
-      media="print"
-      onload="this.media='all'"/>
+      media="<?= $isHomePage ? 'all' : 'print' ?>"
+      <?= $isHomePage ? 'data-awa-first-paint-critical="carousel-contract"' : 'onload="this.media=\'all\'"' ?>/>
 <noscript>
     <link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/>
     <link rel="stylesheet" href="<?= $block->escapeUrl($contractCssUrl) ?>"/>

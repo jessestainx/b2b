@@ -847,7 +847,7 @@ html body#html-body .awa-search-action-wrapper .action.search {
 /* S2: Section gaps mobile normalizados */
 @media (max-width: 767px) {
     html body#html-body.cms-index-index .page-wrapper .awa-home-section,
-    html body#html-body.cms-index-index .page-wrapper .top-home-content {
+    html body#html-body.cms-index-index .page-wrapper .top-home-content:not(.top-home-content--above-fold) {
         margin-block: 16px !important;
         padding-block: 24px !important;
     }
@@ -1037,7 +1037,7 @@ html body#html-body .breadcrumbs li {
 html body#html-body .awa-home-section:not(.top-home-content--above-fold),
 html body#html-body .top-home-content:not(.top-home-content--above-fold),
 html body#html-body .ayo-home5-section:not(.top-home-content--above-fold) {
-    padding-block: clamp(32px, 4vw, 56px) !important;
+    padding-block: var(--awa-space-8, 40px) !important;
     padding-inline: var(--awa-home-pad, 16px) !important;
 }
 
@@ -1054,9 +1054,12 @@ html body#html-body .ayo-home5-section:not(.top-home-content--above-fold) {
 
 /* G1+G3: Reduzir gap entre sections no mobile */
 @media (max-width: 767px) {
-    html body#html-body.cms-index-index .page-wrapper .top-home-content--above-fold,
+    html body#html-body.cms-index-index .page-wrapper .top-home-content--above-fold {
+        margin-block: 0 !important;
+        padding-block: 0 !important;
+    }
     html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta {
-        margin-block-end: 12px !important;
+        margin-block: 0 12px !important;
         padding-block: 16px 12px !important;
     }
     html body#html-body.cms-index-index .page-wrapper .top-home-content--category-carousel,
@@ -1553,13 +1556,16 @@ html body#html-body#html-body#html-body input.input-text#search {
 
     /* Section gaps mobile controlados */
     @media (max-width: 767px) {
-        html body#html-body.cms-index-index .page-wrapper .top-home-content--above-fold,
+        html body#html-body.cms-index-index .page-wrapper .top-home-content--above-fold {
+            margin-block: 0 !important;
+            padding-block: 0 !important;
+        }
         html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta {
-            margin-block-end: 12px !important;
+            margin-block: 0 12px !important;
             padding-block: 16px 12px !important;
         }
         html body#html-body.cms-index-index .page-wrapper .awa-home-section,
-        html body#html-body.cms-index-index .page-wrapper .top-home-content {
+        html body#html-body.cms-index-index .page-wrapper .top-home-content:not(.top-home-content--above-fold) {
             margin-block: 16px !important;
             padding-block: 24px !important;
         }
@@ -2984,7 +2990,145 @@ html body#html-body#html-body#html-body input.input-text#search {
     html body#html-body .page-wrapper .awa-home-section:not(.top-home-content--above-fold),
     html body#html-body .page-wrapper .top-home-content:not(.top-home-content--above-fold),
     html body#html-body .page-wrapper section.awa-home-section:not(.top-home-content--above-fold) {
-        padding-block: clamp(32px, 4vw, 56px) !important;
+        padding-block: var(--awa-space-8, 40px) !important;
+    }
+
+    /* Hierarquia da Home: categorias e Mais Vendidos abrem grupos principais;
+       vitrines subsequentes mantêm densidade operacional mais compacta. */
+    html body#html-body.cms-index-index .page-wrapper
+    :is(.top-home-content--category-carousel, .awa-carousel-section--featured) {
+        padding-block: var(--awa-space-9, 48px) !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .content-top-home
+    :is(.awa-section-header__title, .awa-shelf__title) {
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        line-height: 1.25 !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper
+    :is(.top-home-content--category-carousel, .awa-carousel-section--featured)
+    :is(.awa-section-header__title, .awa-shelf__title) {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+    }
+
+    /* O bloco B2B recebe uma proposição de valor primária antes dos benefícios.
+       !important é necessário nesta camada para substituir os locks críticos
+       antigos que ainda chegam com a mesma importância. */
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__inner {
+        gap: var(--awa-space-4, 16px) !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__header {
+        align-items: center !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: var(--awa-space-4, 16px);
+        justify-content: space-between !important;
+        margin-block-end: 0 !important;
+        text-align: start !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__heading {
+        align-items: flex-start !important;
+        display: flex !important;
+        flex: 1 1 auto;
+        flex-direction: column !important;
+        gap: var(--awa-space-1, 4px);
+        min-width: 0;
+        text-align: start !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__title {
+        color: var(--awa-text, #333) !important;
+        font-size: 1.375rem !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        max-width: 32ch;
+        text-wrap: balance;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__subtitle {
+        color: var(--awa-text-secondary, #666);
+        font-size: 0.875rem;
+        line-height: 1.45;
+        margin: 0;
+        max-width: 65ch;
+        text-wrap: pretty;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper
+    .awa-hero-b2b-cta__header .awa-hero-b2b-cta__actions {
+        flex: 0 0 auto !important;
+        justify-content: flex-end !important;
+        width: auto !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta .awa-hero-benefits {
+        min-height: 0 !important;
+    }
+
+    html body#html-body.cms-index-index .page-wrapper
+    .awa-hero-b2b-cta .awa-hero-benefits > .awa-hero-benefits__item {
+        height: auto !important;
+        min-height: 96px !important;
+    }
+
+    @media (max-width: 991px) {
+        html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__header {
+            align-items: center !important;
+            flex-direction: column !important;
+            text-align: center !important;
+        }
+
+        html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__heading {
+            align-items: center !important;
+            text-align: center !important;
+        }
+
+        html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__title {
+            font-size: 1.25rem !important;
+            max-width: 32ch;
+        }
+    }
+
+    @media (max-width: 767px) {
+        html body#html-body.cms-index-index .page-wrapper
+        :is(.top-home-content--category-carousel, .awa-carousel-section--featured, .awa-grid-section--featured, .awa-home-niche-shelves) {
+            padding-block: var(--awa-space-6, 24px) !important;
+        }
+
+        html body#html-body.cms-index-index .page-wrapper .content-top-home
+        :is(.awa-section-header__title, .awa-shelf__title) {
+            font-size: 1.125rem !important;
+        }
+
+        html body#html-body.cms-index-index .page-wrapper
+        :is(.top-home-content--category-carousel, .awa-carousel-section--featured)
+        :is(.awa-section-header__title, .awa-shelf__title) {
+            font-size: 1.375rem !important;
+        }
+
+        html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__title {
+            font-size: 1.25rem !important;
+            max-width: none;
+        }
+
+        html body#html-body.cms-index-index .page-wrapper
+        .awa-hero-b2b-cta__header .awa-hero-b2b-cta__actions,
+        html body#html-body.cms-index-index .page-wrapper .awa-hero-b2b-cta__button {
+            justify-content: center !important;
+            width: 100% !important;
+        }
+
+        html body#html-body.cms-index-index .page-wrapper
+        .awa-hero-b2b-cta .awa-hero-benefits > .awa-hero-benefits__item {
+            min-height: 86px !important;
+        }
     }
 
     /* G3-desktop (2026-07-05): pricing-notice é um banner fino, não uma section

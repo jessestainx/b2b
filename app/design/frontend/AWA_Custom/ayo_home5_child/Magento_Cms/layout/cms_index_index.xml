@@ -56,6 +56,8 @@
     </head>
     <body>
         <attribute name="data-mage-init">{}</attribute>
+        <!-- Estado estrutural inicial: evita reflow quando o post-init habilita overflow visível. -->
+        <attribute name="class" value="awa-overflow-polish-ready"/>
         <!-- Remover sidebar padrão de reorder da Home Page (evita título quebrado gigante flutuando no layout) -->
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
         <!-- safe5: jsbuild poller (setInterval 25ms×200) trava Chrome com require-stub na home -->

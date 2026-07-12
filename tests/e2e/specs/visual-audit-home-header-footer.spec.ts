@@ -116,6 +116,98 @@ test.describe('Fase 1 — Header Premium', () => {
     expect(box.height, 'Header height >= 50px').toBeGreaterThanOrEqual(50);
   });
 
+  test('Header mantém geometria entre primeiro e segundo frame', async ({ browser, baseURL }) => {
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: true,
+      locale: 'pt-BR',
+    });
+    const page = await context.newPage();
+
+    await page.addInitScript(() => {
+      type HeaderFrame = {
+        reason: string;
+        promoHeight: number;
+        stickyY: number;
+        mainY: number;
+        navY: number;
+      };
+      type HeaderWindow = Window & { __awaHeaderFrames?: HeaderFrame[] };
+
+      const state = window as HeaderWindow;
+      state.__awaHeaderFrames = [];
+
+      const capture = (reason: string): void => {
+        const rect = (selector: string): DOMRect | null => (
+          document.querySelector(selector)?.getBoundingClientRect() ?? null
+        );
+        const promo = rect('#awa-b2b-promo-bar');
+        const sticky = rect('[data-awa-sticky-container="true"]');
+        const main = rect('[data-awa-header-main="true"]');
+        const nav = rect('[data-awa-header-nav="true"]');
+
+        if (!promo || !sticky || !main || !nav) {
+          return;
+        }
+
+        state.__awaHeaderFrames?.push({
+          reason,
+          promoHeight: Math.round(promo.height),
+          stickyY: Math.round(sticky.y),
+          mainY: Math.round(main.y),
+          navY: Math.round(nav.y),
+        });
+      };
+
+      const observer = new MutationObserver(() => {
+        if (
+          !document.querySelector('#awa-b2b-promo-bar')
+          || !document.querySelector('[data-awa-header-nav="true"]')
+        ) {
+          return;
+        }
+
+        observer.disconnect();
+        requestAnimationFrame(() => {
+          capture('first-frame');
+          requestAnimationFrame(() => capture('second-frame'));
+        });
+      });
+
+      observer.observe(document, { childList: true, subtree: true });
+    });
+
+    try {
+      const rootUrl = new URL('/', baseURL ?? 'https://awamotos.com').toString();
+      await page.goto(rootUrl, { waitUntil: 'load', timeout: 60_000 });
+      await page.waitForFunction(() => (
+        ((window as Window & { __awaHeaderFrames?: unknown[] }).__awaHeaderFrames?.length ?? 0) >= 2
+      ));
+
+      const frames = await page.evaluate(() => (
+        (window as Window & {
+          __awaHeaderFrames?: Array<{
+            reason: string;
+            promoHeight: number;
+            stickyY: number;
+            mainY: number;
+            navY: number;
+          }>;
+        }).__awaHeaderFrames ?? []
+      ));
+      const first = frames.find(frame => frame.reason === 'first-frame');
+      const second = frames.find(frame => frame.reason === 'second-frame');
+
+      expect(first, 'Primeiro frame do header deve ser capturado').toBeDefined();
+      expect(second, 'Segundo frame do header deve ser capturado').toBeDefined();
+      expect(first!.promoHeight, 'Barra B2B deve reservar altura no primeiro frame').toBeGreaterThanOrEqual(28);
+      expect(Math.abs(second!.stickyY - first!.stickyY), 'Sticky não deve saltar entre frames').toBeLessThanOrEqual(1);
+      expect(Math.abs(second!.mainY - first!.mainY), 'Header principal não deve saltar entre frames').toBeLessThanOrEqual(1);
+      expect(Math.abs(second!.navY - first!.navY), 'Navegação não deve saltar entre frames').toBeLessThanOrEqual(1);
+    } finally {
+      await context.close();
+    }
+  });
+
   test('Logo visível com dimensões corretas', async () => {
     const logo = homePage.locator(COMMON.logo).first();
     const visible = await Promise.race<boolean>([

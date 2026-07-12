@@ -143,17 +143,14 @@ $buildCarouselImage = function (string $asset, string $alt, int $idx = 0) use ($
 	$webpAsset = str_replace('.png', '.webp', $asset);
 	// Sprint perf (2026-06-28): eager APENAS na 1a imagem (LCP). Demais lazy.
 	$loadingAttr = ($idx === 0) ? 'eager' : 'lazy';
-	/* A11Y-001: alt="" (decorativo) — o <a> pai ja carrega aria-label com o nome
-	 * da categoria + contagem, entao repetir o mesmo texto no alt do icone e
-	 * redundante para leitores de tela (image-redundant-alt, Lighthouse).
-	 * $alt mantido no parametro por compatibilidade de assinatura/uso futuro. */
-	return '<picture>'
+        $altText = trim($alt) !== '' ? $alt : (string) __('Categoria');
+        return '<picture>'
 		. '<source srcset="'
 		. $block->escapeUrl($block->getViewFileUrl('images/category-carousel/' . $webpAsset))
 		. '" type="image/webp" />'
 		. '<img src="'
 		. $block->escapeUrl($block->getViewFileUrl('images/category-carousel/' . $asset))
-        . '" alt="" loading="' . $loadingAttr . '" decoding="async" width="'
+        . '" alt="' . $block->escapeHtmlAttr($altText) . '" loading="' . $loadingAttr . '" decoding="async" width="'
 		. $carouselIconSize
 		. '" height="'
 		. $carouselIconSize
@@ -239,7 +236,7 @@ $homeB2bHeroCtaHtml = trim((string) $block->getLayout()->createBlock(\Magento\Fr
 // URL para o CTA "Ver todas as categorias" da seção category-carousel
 $categoryCarouselUrl = $directUrl('catalogo');
 // URL para o CTA "Ver todos" da shelf Mais Vendidos
-$bestsellersVerTodosUrl = $superOffersUrl;
+$bestsellersVerTodosUrl = $directUrl('catalogo');
 
 
 $renderGuestPricingNotice = static function () use ($block, $homeGuestPricingViewModel): string {
@@ -464,3 +461,520 @@ if ($bestsellerBlock instanceof \GrupoAwamotos\Theme\Block\HomeBestsellerCarouse
 
 
 </div>
+<script>
+(function (w, d) {
+	'use strict';
+
+	var endpoint = 'http://localhost:7480/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3';
+	var runId = 'home-p0-layout-baseline-v1';
+	var sent = 0;
+	var scheduled = false;
+	var pendingReasons = [];
+	var lastSignature = '';
+
+	function rect(element) {
+		var box;
+
+		if (!element) {
+			return null;
+		}
+
+		box = element.getBoundingClientRect();
+
+		return {
+			x: Math.round(box.x * 10) / 10,
+			y: Math.round(box.y * 10) / 10,
+			width: Math.round(box.width * 10) / 10,
+			height: Math.round(box.height * 10) / 10
+		};
+	}
+
+	function style(element) {
+		var computed;
+
+		if (!element) {
+			return null;
+		}
+
+		computed = w.getComputedStyle(element);
+
+		return {
+			width: computed.width,
+			maxWidth: computed.maxWidth,
+			margin: computed.margin,
+			padding: computed.padding,
+			position: computed.position,
+			display: computed.display,
+			gridTemplateColumns: computed.gridTemplateColumns,
+			gap: computed.gap,
+			overflow: computed.overflow
+		};
+	}
+
+	function visible(element) {
+		var computed;
+
+		if (!element) {
+			return false;
+		}
+
+		computed = w.getComputedStyle(element);
+
+		return computed.display !== 'none'
+			&& computed.visibility !== 'hidden'
+			&& element.getBoundingClientRect().width > 0;
+	}
+
+	function snapshot(reason) {
+		var variant = w.innerWidth < 768 ? 'mobile' : 'desktop';
+		var header = d.querySelector('header.awa-site-header');
+		var sticky = d.querySelector('.header-wrapper-sticky');
+		var headerContainer = d.querySelector('#header.header-container');
+		var content = d.querySelector('.content-top-home');
+		var hero = d.querySelector('[data-awa-hero-variant="' + variant + '"] .awa-hero-swiper');
+		var benefits = d.querySelector('.awa-hero-benefits');
+		var benefitItems = benefits
+			? Array.prototype.map.call(benefits.children, function (item) {
+				return {box: rect(item), style: style(item)};
+			})
+			: [];
+		var cta = d.querySelector('.awa-hero-b2b-cta');
+		var pause = hero ? hero.querySelector('.awa-hero-pause-btn') : null;
+		var images = Array.prototype.filter.call(d.images, visible);
+		var brokenImages = images.filter(function (image) {
+			return image.complete && image.naturalWidth === 0;
+		}).map(function (image) {
+			try {
+				return (new URL(image.currentSrc || image.src, w.location.href)).pathname;
+			} catch (error) {
+				return '';
+			}
+		});
+		var data = {
+			reason: reason,
+			readyState: d.readyState,
+			viewport: {width: w.innerWidth, clientWidth: d.documentElement.clientWidth},
+			document: {box: rect(d.documentElement), style: style(d.documentElement)},
+			header: {box: rect(header), style: style(header)},
+			sticky: {box: rect(sticky), style: style(sticky)},
+			headerContainer: {box: rect(headerContainer), style: style(headerContainer)},
+			content: {box: rect(content), style: style(content)},
+			hero: {box: rect(hero), style: style(hero)},
+			cta: {box: rect(cta), style: style(cta)},
+			benefits: {box: rect(benefits), style: style(benefits), items: benefitItems},
+			pause: {box: rect(pause), style: style(pause)},
+			brokenImages: brokenImages,
+			stylesheets: Array.prototype.map.call(
+				d.querySelectorAll('link[rel="stylesheet"]'),
+				function (link) {
+					return {
+						path: link.href ? (new URL(link.href, w.location.href)).pathname : '',
+						media: link.media || 'all',
+						loaded: !!link.sheet
+					};
+				}
+			).filter(function (sheet) {
+				return /(?:critical-home|align-grid-terminal|home-density-grid|corporate-density-grid)/.test(sheet.path);
+			})
+		};
+		var signature = JSON.stringify(data);
+
+		if (sent >= 8 || signature === lastSignature) {
+			return;
+		}
+
+		sent += 1;
+		lastSignature = signature;
+
+		// #region agent log
+		fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:runId,hypothesisId:'H149-H153',location:'top-home.phtml:home-p0-layout-probe',message:'Home P0 geometry and cascade lifecycle',data:data,timestamp:Date.now()})}).catch(function () {});
+		// #endregion
+
+		// #region agent log
+		(new Image()).src = '/b2b/account/login/?awa_dbg=1'
+			+ '&sid=ca59a1&run=' + encodeURIComponent(runId)
+			+ '&hyp=H149-H153'
+			+ '&loc=' + encodeURIComponent('top-home.phtml:home-p0-layout-same-origin')
+			+ '&msg=' + encodeURIComponent('Home P0 geometry and cascade lifecycle')
+			+ '&ts=' + Date.now()
+			+ '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 6000));
+		// #endregion
+	}
+
+	function schedule(reason) {
+		pendingReasons.push(reason);
+		if (scheduled) {
+			return;
+		}
+
+		scheduled = true;
+		w.requestAnimationFrame(function () {
+			var reasonList = pendingReasons.join(',');
+
+			scheduled = false;
+			pendingReasons = [];
+			snapshot(reasonList);
+		});
+	}
+
+	w.requestAnimationFrame(function () {
+		var watched = [
+			d.querySelector('header.awa-site-header'),
+			d.querySelector('.content-top-home'),
+			d.querySelector('.awa-hero-benefits')
+		].filter(Boolean);
+
+		snapshot('first-frame');
+
+		if ('ResizeObserver' in w) {
+			watched.forEach(function (element) {
+				(new ResizeObserver(function () {
+					schedule('observed-resize');
+				})).observe(element);
+			});
+		}
+	});
+
+	w.addEventListener('load', function () {
+		schedule('window-load');
+	}, {once: true});
+
+	d.addEventListener('error', function (event) {
+		if (event.target && event.target.tagName === 'IMG') {
+			schedule('image-error');
+		}
+	}, true);
+}(window, document));
+</script>
+<script id="awa-home-visual-hierarchy-probe">
+(function (w, d) {
+	'use strict';
+
+	function captureHierarchy() {
+		var visible = function (element) {
+			var computed = w.getComputedStyle(element);
+			var rect = element.getBoundingClientRect();
+
+			return computed.display !== 'none'
+				&& computed.visibility !== 'hidden'
+				&& rect.width > 0
+				&& rect.height > 0;
+		};
+		var metrics = function (element) {
+			var computed = w.getComputedStyle(element);
+			var rect = element.getBoundingClientRect();
+
+			return {
+				x: Math.round(rect.x),
+				y: Math.round(rect.y),
+				width: Math.round(rect.width),
+				height: Math.round(rect.height),
+				fontSize: computed.fontSize,
+				fontWeight: computed.fontWeight,
+				lineHeight: computed.lineHeight,
+				padding: computed.padding,
+				margin: computed.margin,
+				background: computed.backgroundColor
+			};
+		};
+		var data = {
+			viewportWidth: w.innerWidth,
+			headings: Array.prototype.filter.call(
+				d.querySelectorAll('.content-top-home h2'),
+				visible
+			).slice(0, 12).map(function (heading) {
+				return {
+					text: (heading.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 80),
+					className: heading.className,
+					metrics: metrics(heading)
+				};
+			}),
+			sections: Array.prototype.filter.call(
+				d.querySelectorAll('.content-top-home .awa-home-section'),
+				visible
+			).slice(0, 12).map(function (section) {
+				return {
+					className: section.className,
+					metrics: metrics(section)
+				};
+			}),
+			b2b: {
+				container: metrics(d.querySelector('.awa-hero-b2b-cta')),
+				items: Array.prototype.map.call(
+					d.querySelectorAll('.awa-hero-benefits > li'),
+					metrics
+				)
+			}
+		};
+
+		// #region agent log
+		fetch('http://localhost:7788/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'hierarchy-baseline-v2',hypothesisId:'H162-H165',location:'top-home.phtml:visual-hierarchy-probe',message:'Home visual hierarchy runtime',data:data,timestamp:Date.now()})}).catch(function () {});
+		// #endregion
+
+		// #region agent log
+		(new Image()).src = '/b2b/account/login/?awa_dbg=1'
+			+ '&sid=ca59a1&run=hierarchy-baseline-v2&hyp=H162-H165'
+			+ '&loc=' + encodeURIComponent('top-home.phtml:visual-hierarchy-same-origin')
+			+ '&msg=' + encodeURIComponent('Home visual hierarchy runtime')
+			+ '&ts=' + Date.now()
+			+ '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 3200));
+		// #endregion
+	}
+
+	if (d.readyState === 'complete') {
+		w.requestAnimationFrame(captureHierarchy);
+		return;
+	}
+
+	w.addEventListener('load', function () {
+		w.requestAnimationFrame(captureHierarchy);
+	}, {once: true});
+}(window, document));
+</script>
+<script id="awa-header-gap-geometry-probe">
+(function (w, d) {
+	'use strict';
+
+	function capture() {
+		var select = function (selector) {
+			return d.querySelector(selector);
+		};
+		var metric = function (element) {
+			if (!element) {
+				return null;
+			}
+
+			var rect = element.getBoundingClientRect();
+			var style = w.getComputedStyle(element);
+
+			return {
+				x: Math.round(rect.x * 10) / 10,
+				y: Math.round(rect.y * 10) / 10,
+				width: Math.round(rect.width * 10) / 10,
+				height: Math.round(rect.height * 10) / 10,
+				display: style.display,
+				alignItems: style.alignItems,
+				columnGap: style.columnGap,
+				gridTemplateColumns: style.gridTemplateColumns,
+				padding: style.padding
+			};
+		};
+		var elements = {
+			inner: select('.awa-main-header__inner.wp-header'),
+			brand: select('.awa-header-brand-cell'),
+			search: select('.awa-header-search-col'),
+			form: select('#search_mini_form'),
+			actions: select('.awa-header-right-col'),
+			account: select('.awa-header-account-prompt'),
+			minicart: select('.awa-header-minicart')
+		};
+		var data = {
+			viewportWidth: w.innerWidth,
+			geometry: Object.keys(elements).reduce(function (result, key) {
+				result[key] = metric(elements[key]);
+				return result;
+			}, {})
+		};
+
+		// #region agent log
+		fetch('http://localhost:7788/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'header-gap-verify-v1',hypothesisId:'H166-H170',location:'top-home.phtml:header-gap-geometry-probe',message:'Header desktop geometry after layout stabilization',data:data,timestamp:Date.now()})}).catch(function () {});
+		// #endregion
+		// #region agent log
+		(new Image()).src = '/b2b/account/login/?awa_dbg=1'
+			+ '&sid=ca59a1&run=header-gap-verify-v1&hyp=H166-H170'
+			+ '&loc=' + encodeURIComponent('top-home.phtml:header-gap-geometry-same-origin')
+			+ '&msg=' + encodeURIComponent('Header desktop geometry after layout stabilization')
+			+ '&ts=' + Date.now()
+			+ '&transport=header-gap'
+			+ '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 2400));
+		// #endregion
+	}
+
+	if (d.readyState === 'complete') {
+		w.requestAnimationFrame(capture);
+		return;
+	}
+
+	w.addEventListener('load', function () {
+		w.requestAnimationFrame(capture);
+	}, {once: true});
+}(window, document));
+</script>
+<script id="awa-header-gap-lifecycle-probe">
+(function (w, d) {
+	'use strict';
+
+	var sent = 0;
+	var lastSignature = '';
+
+	function metric(selector) {
+		var element = d.querySelector(selector);
+		var rect;
+		var style;
+
+		if (!element) {
+			return null;
+		}
+
+		rect = element.getBoundingClientRect();
+		style = w.getComputedStyle(element);
+
+		return {
+			x: Math.round(rect.x * 10) / 10,
+			y: Math.round(rect.y * 10) / 10,
+			w: Math.round(rect.width * 10) / 10,
+			h: Math.round(rect.height * 10) / 10,
+			display: style.display,
+			grid: style.gridTemplateColumns,
+			gap: style.columnGap,
+			padding: style.padding
+		};
+	}
+
+	function capture(reason) {
+		var data = {
+			reason: reason,
+			readyState: d.readyState,
+			elapsed: Math.round(w.performance.now()),
+			viewport: {
+				width: w.innerWidth,
+				clientWidth: d.documentElement.clientWidth,
+				scale: w.visualViewport ? w.visualViewport.scale : 1,
+				dpr: w.devicePixelRatio
+			},
+			state: {
+				gatePending: d.documentElement.classList.contains('awa-css-gate-pending'),
+				gateApplied: d.documentElement.classList.contains('awa-css-gate-applied'),
+				bodyClass: d.body ? d.body.className : ''
+			},
+			geometry: {
+				sticky: metric('.header-wrapper-sticky'),
+				container: metric('.header-main > .container'),
+				inner: metric('.awa-main-header__inner.wp-header'),
+				brand: metric('.awa-header-brand-cell'),
+				search: metric('.awa-header-search-col'),
+				form: metric('#search_mini_form'),
+				actions: metric('.awa-header-right-col'),
+				navFrame: metric('.header-control.header-nav.awa-nav-bar'),
+				nav: metric('.awa-nav-bar__inner')
+			}
+		};
+		var signature = JSON.stringify(data.geometry);
+
+		if (sent >= 8 || (reason === 'resize-observer' && signature === lastSignature)) {
+			return;
+		}
+
+		sent += 1;
+		lastSignature = signature;
+
+		// #region agent log
+		fetch('http://localhost:7788/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'header-gap-lifecycle-v2',hypothesisId:'H171-H175',location:'top-home.phtml:header-gap-lifecycle-probe',message:'Header geometry lifecycle state',data:data,timestamp:Date.now()})}).catch(function () {});
+		// #endregion
+		// #region agent log
+		(new Image()).src = '/b2b/account/login/?awa_dbg=1'
+			+ '&sid=ca59a1&run=header-gap-lifecycle-v2&hyp=H171-H175'
+			+ '&loc=' + encodeURIComponent('top-home.phtml:header-gap-lifecycle-same-origin')
+			+ '&msg=' + encodeURIComponent('Header geometry lifecycle state')
+			+ '&ts=' + Date.now()
+			+ '&transport=header-gap-lifecycle'
+			+ '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 3000));
+		// #endregion
+	}
+
+	w.requestAnimationFrame(function () {
+		capture('first-animation-frame');
+	});
+	d.addEventListener('DOMContentLoaded', function () {
+		w.requestAnimationFrame(function () {
+			capture('dom-content-loaded');
+		});
+	}, {once: true});
+	w.addEventListener('load', function () {
+		w.requestAnimationFrame(function () {
+			capture('window-load');
+		});
+	}, {once: true});
+	d.addEventListener('awa:css-gate-applied', function () {
+		w.requestAnimationFrame(function () {
+			capture('css-gate-applied');
+		});
+	}, {once: true});
+
+	if ('ResizeObserver' in w) {
+		new ResizeObserver(function () {
+			w.requestAnimationFrame(function () {
+				capture('resize-observer');
+			});
+		}).observe(d.querySelector('.awa-main-header__inner.wp-header'));
+	}
+}(window, document));
+</script>
+<script id="awa-hero-css-delivery-probe">
+(function (w, d) {
+	'use strict';
+
+	function inspectDelivery() {
+		var links = Array.prototype.filter.call(
+			d.querySelectorAll('link[rel="stylesheet"]'),
+			function (link) {
+				return /(?:awa-align-grid-terminal|awa-head-preload-critical-home)\.min\.css/.test(link.href || '');
+			}
+		);
+
+		Promise.all(links.map(function (link) {
+			return fetch(link.href, {cache: 'no-store'})
+				.then(function (response) {
+					return response.text().then(function (text) {
+						return {
+							file: (new URL(link.href)).pathname.split('/').pop(),
+							status: response.status,
+							bytes: text.length,
+							hasFullWidthShell: text.indexOf('.content-top-home>.top-home-content--above-fold{box-sizing:border-box!important;margin:0!important;max-width:none!important;padding:0!important;width:100%!important}') !== -1,
+							hasB2bGrid: text.indexOf('.awa-hero-b2b-cta__inner{align-items:stretch!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important}') !== -1,
+							hasMobilePauseGuard: text.indexOf('.wrapper_slider.visible-xs .awa-hero-pause-btn{display:none!important;visibility:hidden!important}') !== -1
+						};
+					});
+				})
+				.catch(function () {
+					return {file: link.href, status: 0};
+				});
+		})).then(function (assets) {
+			var data = {
+				viewportWidth: w.innerWidth,
+				assets: assets,
+				inline: Array.prototype.filter.call(d.querySelectorAll('style'), function (style) {
+					return /content-top-home/.test(style.textContent || '');
+				}).map(function (style) {
+					var text = style.textContent || '';
+					return {
+						id: style.id || '',
+						oldContentCap: text.indexOf('max-width:min(100%,1280px)!important') !== -1,
+						newContentFull: text.indexOf('max-width:none!important') !== -1
+					};
+				}).slice(-8)
+			};
+
+			// #region agent log
+			fetch('http://localhost:7788/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'home-p0-css-delivery-v1',hypothesisId:'H154-H156',location:'top-home.phtml:css-delivery-probe',message:'Home P0 CSS delivery state',data:data,timestamp:Date.now()})}).catch(function () {});
+			// #endregion
+
+			// #region agent log
+			(new Image()).src = '/b2b/account/login/?awa_dbg=1'
+				+ '&sid=ca59a1&run=home-p0-css-delivery-v1&hyp=H154-H156'
+				+ '&loc=' + encodeURIComponent('top-home.phtml:css-delivery-same-origin')
+				+ '&msg=' + encodeURIComponent('Home P0 CSS delivery state')
+				+ '&ts=' + Date.now()
+				+ '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 1800));
+			// #endregion
+		});
+	}
+
+	if (d.readyState === 'complete') {
+		inspectDelivery();
+		return;
+	}
+
+	w.addEventListener('load', inspectDelivery, {once: true});
+}(window, document));
+</script>

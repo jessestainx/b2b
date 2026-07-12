@@ -14,5 +14,5 @@ if ($heroPreloadUrl === '') {
 $heroMobileUrl = $block->getHeroImageMobileUrl() ?: $heroPreloadUrl;
 ?>
 <!-- LCP Hero Image Preload — media queries + URL exata (sem imagesrcset; evita mismatch desktop 1920w vs preload 768w) -->
-<link rel="preload" href="<?= $block->escapeUrl($heroMobileUrl) ?>" as="image" media="(max-width: 767px)" fetchpriority="high"/>
-<link rel="preload" href="<?= $block->escapeUrl($heroPreloadUrl) ?>" as="image" media="(min-width: 768px)" fetchpriority="high"/>
+<link rel="prefetch" href="<?= $block->escapeUrl($heroMobileUrl) ?>" as="image" media="(max-width: 767px)" fetchpriority="low"/>
+<link rel="prefetch" href="<?= $block->escapeUrl($heroPreloadUrl) ?>" as="image" media="(min-width: 768px)" fetchpriority="low"/>

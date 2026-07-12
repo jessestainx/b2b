@@ -146,19 +146,21 @@ font-family: var(--awa-font-heading, "Rubik", system-ui, -apple-system, sans-ser
 line-height: 1.25 !important;
 text-wrap: balance;
 }
+
+/* PD7 TOUCH TARGET LOCK (2026-07-10): garante 44px nos links de titulo dos cards da home. */
+html body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home .awa-shelf--carousel :is(.product-name a,a.product-item-link,.product-item-link){min-height:44px!important;max-height:none!important}
 </style>
 <?php if ($isHomePage): ?>
 <?php
     $__l2cCssUrl = $block->getViewFileUrl('GrupoAwamotos_B2B::css/product/login-to-cart.css');
     // P4b: crítico home em arquivo externo (cacheável) — antes ~43KB inline no HTML/FPC
-    $__criticalHomeCssUrl = $block->getViewFileUrl('css/awa-head-preload-critical-home.min.css') . '?v=20260707-rating-home-critical';
+    $__criticalHomeCssUrl = $block->getViewFileUrl('css/awa-head-preload-critical-home.min.css') . '?v=20260712-header-icon-cleanup-v2';
     /* first-paint + header critical: awa-home-critical-stack.phtml (cms_index_index) */
 ?>
 <!-- awa-head-preload-critical-home: async stagger abaixo (anti-FOUC inline cobre 1º paint) -->
 <style id="awa-home-cls-critical-opt21">
 /* opt21 CLS — sync 1º paint (critical-home.min.css é async; gate ~5s dispara reflow) */
 html,body#html-body{margin:0!important;padding:0!important}
-@media(min-width:992px){html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header{display:block!important;box-sizing:border-box!important;min-height:241px!important;height:241px!important;max-height:241px!important;overflow:visible!important}html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header .header-wrapper-sticky{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;min-height:196px!important;height:196px!important;max-height:196px!important;padding:8px 16px!important;overflow:visible!important}html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header .header.awa-main-header{box-sizing:border-box!important;min-height:104px!important;height:104px!important;max-height:104px!important;padding:8px 16px!important;overflow:visible!important}html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header .header-control.awa-nav-bar{box-sizing:border-box!important;min-height:76px!important;height:76px!important;max-height:76px!important;padding:4px 16px!important;overflow:visible!important}}
 html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper :is(footer.page-footer,.page-footer,.page_footer,.footer-bottom){content-visibility:visible!important;contain-intrinsic-size:unset!important;height:auto!important;max-height:none!important}
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .content-top-home .product-thumb,
 :is(body.cms-index-index,body.cms-home,body.cms-homepage_ayo_home5) .content-top-home .product-image-container{aspect-ratio:1/1!important;min-height:var(--awa-home-product-media-min,120px)!important;display:block!important;width:100%!important;contain:layout!important}
@@ -1099,16 +1101,76 @@ $__emitDeferredCss = static function (
 <?php if ($isHomePage): ?>
 <?php
     $__homePolishCriticalUrl = $block->getViewFileUrl('css/awa-home-polish-critical.min.css');
-    ($__emitDeferredCss)($__criticalHomeCssUrl, false, false, false);
-    ($__emitDeferredCss)($__homePolishCriticalUrl, false, true, false);
 ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__criticalHomeCssUrl) ?>" media="all" data-awa-first-paint-critical="home"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__homePolishCriticalUrl) ?>" media="all" data-awa-first-paint-critical="polish"/>
+<script>
+// #region agent log
+(function (w, d) {
+    'use strict';
+    var cls = 0;
+    try {
+        new PerformanceObserver(function (list) {
+            list.getEntries().forEach(function (entry) {
+                if (!entry.hadRecentInput) {
+                    cls += entry.value;
+                }
+            });
+        }).observe({type: 'layout-shift', buffered: true});
+    } catch (error) {}
+    w.addEventListener('load', function () {
+        w.requestAnimationFrame(function () {
+            var nav = d.querySelector('.awa-nav-bar__inner');
+            var header = d.querySelector('.header-wrapper-sticky');
+            var panel = d.querySelector('[data-role="awa-vertical-menu-panel"]');
+            var critical = Array.prototype.map.call(
+                d.querySelectorAll('link[data-awa-first-paint-critical]'),
+                function (link) {
+                    return {
+                        file: (link.href || '').split('/').pop(),
+                        media: link.media
+                    };
+                }
+            );
+            fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Debug-Session-Id': 'ca59a1'
+                },
+                body: JSON.stringify({
+                    sessionId: 'ca59a1',
+                    runId: 'post-fix',
+                    hypothesisId: 'H76-H79',
+                    location: 'awa-head-preload.phtml:first-paint-verification',
+                    message: 'First-paint structural CSS verification',
+                    data: {
+                        cls: cls,
+                        navHeight: nav ? Math.round(nav.getBoundingClientRect().height) : null,
+                        headerHeight: header ? Math.round(header.getBoundingClientRect().height) : null,
+                        panelDisplay: panel ? w.getComputedStyle(panel).display : null,
+                        critical: critical,
+                        readyState: d.readyState
+                    },
+                    timestamp: Date.now()
+                })
+            }).catch(function () {});
+        });
+    }, {once: true});
+}(window, document));
+// #endregion
+</script>
 <?php endif; ?>
 <?php /* Auth B2B: login.css + critical inline — omitir styles-m/l (~12MB). */ ?>
 <?php if (!$isB2bAuthShell): ?>
 <?php /* Home: styles-m async stagger no head (não gate por clique — evita layout quebrado no 1º pointerdown). */ ?>
 <!-- AWA-BUGFIX-TERMINAL-MARKER -->
 <?php $__bugfixTerminalUrl = $block->getViewFileUrl('css/awa-bugfix-terminal-2026-06-12.css'); ?>
+<?php if ($isHomePage): ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__bugfixTerminalUrl) ?>" media="all" data-awa-first-paint-critical="bugfix-terminal"/>
+<?php else: ?>
 <?php ($__emitDeferredCss)($__bugfixTerminalUrl, false, true, false); ?>
+<?php endif; ?>
 <style id="awa-bugfix-terminal-inline">
 @layer awa-fixes {
 @media (max-width:991px){
@@ -1136,64 +1198,14 @@ html body#html-body.catalog-product-view .page-main .product.media .gallery-plac
 <?php /* Home mobile: sem <link> styles-l — Chrome/Lighthouse ainda baixavam ~3.8MB com media query desktop.
          Desktop home: injeta stylesheet só se matchMedia(768px). Demais páginas: link + media desktop. */ ?>
 <?php if ($isHomePage): ?>
-<script>
-(function (w, d) {
-    'use strict';
-    var href = <?= /* @noEscape */ json_encode($__stylesLUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
-    var done = false;
-
-    function inject() {
-        if (!w.matchMedia('(min-width: 768px)').matches) {
-            return;
-        }
-        if (d.querySelector('link[data-awa-styles-l="1"]')) {
-            return;
-        }
-        var link = d.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        link.media = 'print';
-        link.setAttribute('data-awa-styles-l', '1');
-        link.fetchPriority = 'low';
-        link.onload = function () {
-            link.media = 'screen and (min-width: 768px)';
-        };
-        d.head.appendChild(link);
-    }
-
-    function boot() {
-        if (done) {
-            return;
-        }
-        done = true;
-        inject();
-    }
-
-    function schedule() {
-        if ('requestIdleCallback' in w) {
-            w.requestIdleCallback(boot, { timeout: 2800 });
-        } else {
-            w.setTimeout(boot, 1800);
-        }
-    }
-
-    if (!w.matchMedia('(min-width: 768px)').matches) {
-        w.matchMedia('(min-width: 768px)').addEventListener('change', function (e) {
-            if (e.matches) {
-                schedule();
-            }
-        });
-        return;
-    }
-
-    if (d.readyState === 'complete') {
-        schedule();
-    } else {
-        w.addEventListener('load', schedule, { once: true, passive: true });
-    }
-})(window, document);
-</script>
-<noscript><link rel="stylesheet" href="<?= $block->escapeUrl($__stylesLUrl) ?>"/></noscript>
+<link rel="preload"
+      href="<?= $block->escapeUrl($__stylesLUrl) ?>"
+      as="style"
+      media="screen and (min-width: 768px)"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($__stylesLUrl) ?>"
+      media="screen and (min-width: 768px)"
+      data-awa-styles-l="1"/>
 <?php elseif ($isCartPageOnly): ?>
 <?php /* Cart mobile: styles-l omitido no 1º paint (critical inline cobre grid/empty). Desktop: idle + print swap. */ ?>
 <script>
@@ -1280,14 +1292,24 @@ html body#html-body.catalog-product-view .page-main .product.media .gallery-plac
          All files in css/ so relative URLs (../fonts/, images/) remain valid. */ ?>
 <?php if (!$__skipLegacyFlowCss):
     $__thirdPartyBundleUrl = $block->getViewFileUrl('css/awa-third-party-bundle.min.css');
-    ($__emitDeferredCss)($__thirdPartyBundleUrl, !$isHomePage, false, $__homeIdleCssGate);
     $__interactionWidgetsUrl = $block->getViewFileUrl('css/awa-interaction-widgets.min.css');
+    if ($isHomePage) {
+        echo '<link rel="stylesheet" href="' . $block->escapeUrl($__thirdPartyBundleUrl)
+            . '" media="all" data-awa-first-paint-critical="third-party"/>' . "\n";
+    } else {
+        ($__emitDeferredCss)($__thirdPartyBundleUrl, true, false, false);
+    }
     /* opt18: widgets (calendar/chosen/fancybox) irrelevantes na home CMS — fora da fila gate */
     if (!$isHomePage) {
         ($__emitDeferredCss)($__interactionWidgetsUrl, false, false, false);
     }
     $__themesUrl = $block->getViewFileUrl('css/themes.css') . '?v=20260616-bug31-nowrap';
-    ($__emitDeferredCss)($__themesUrl, false, true, $__homeIdleCssGate);
+    if ($isHomePage) {
+        echo '<link rel="stylesheet" href="' . $block->escapeUrl($__themesUrl)
+            . '" media="all" data-awa-first-paint-critical="themes"/>' . "\n";
+    } else {
+        ($__emitDeferredCss)($__themesUrl, false, true, false);
+    }
 endif; ?>
 <!-- AWA Async CSS Bundles — super-global + defer-global (P2: 1 request no lugar de ~30 print/defer XML) -->
 <!-- Anti-FOUC inline CSS cobre above-fold. Home: fila lazy (zero download Lighthouse). -->
@@ -1337,7 +1359,8 @@ endif; ?>
     /* CLS Fix v1.0 (2026-06-05): Corrige layout shift causado por anti-FOUC do Swiper
        Substitui display:none dos slides por layout estável pré-inicialização */
     $__homeSwiperClsFixUrl = $block->getViewFileUrl('css/awa-home-swiper-cls-fix.min.css');
-    ($__emitDeferredCss)($__homeSwiperClsFixUrl, false, false, $__homeCssInteractionGate);
+    echo '<link rel="stylesheet" href="' . $block->escapeUrl($__homeSwiperClsFixUrl)
+        . '" media="all" data-awa-first-paint-critical="swiper-cls"/>' . "\n";
     ?>
 <?php endif; ?>
 <?php /* Home page: B2B suggestion.css + carousel CSS removed from merged bundle 2026-05-09.
@@ -1352,8 +1375,9 @@ endif; ?>
         ($__emitDeferredCss)($__suggestionUrl, false, false, false);
     }
     $__carouselBundleUrl = $block->getViewFileUrl('css/awa-carousel-bundle.min.css');
-    /* Home: carousel CSS async imediato — gate escondia visual Swiper até interação */
-    ($__emitDeferredCss)($__carouselBundleUrl, false, false, false);
+    /* Home: geometria do carrossel precisa existir antes do primeiro paint. */
+    echo '<link rel="stylesheet" href="' . $block->escapeUrl($__carouselBundleUrl)
+        . '" media="all" data-awa-first-paint-critical="carousel"/>' . "\n";
     /* awa-shelf-carousel.min.css: NÃO reemitir aqui — bloco global awa.shelf.carousel
        (Magento_Theme::html/awa-shelf-carousel-loader.phtml, default.xml) já carrega este
        arquivo de forma assíncrona (media=print→all, sem gate de interação) em TODAS as
@@ -1412,7 +1436,8 @@ endif; ?>
     }
     /* Phase 3D.2.6 — Home visual bugfixes: BUG-MOB-HERO-003, BUG-B2B-BAR-004, BUG-MOB-TOP-002, BUG-MOB-SEARCH-001, BUG-BP-360-009 */
     $__homeVisualBugfixesUrl = $block->getViewFileUrl('css/awa-home-visual-bugfixes-2026-06-28.min.css');
-    ($__emitDeferredCss)($__homeVisualBugfixesUrl, false, false, false);
+    echo '<link rel="stylesheet" href="' . $block->escapeUrl($__homeVisualBugfixesUrl)
+        . '" media="all" data-awa-first-paint-critical="home-visual-bugfixes"/>' . "\n";
 endif; ?>
 <?php /* awa-vertical-menu-modern.css — substituído por awa-vertical-menu-stack (default.xml 2026-05-28).
          Stack = distill+harden+polish+adapt+optimize; modern causava conflitos (glass, side-stripes). */ ?>
@@ -1917,7 +1942,11 @@ $__impeccableLayoutUrl = $block->getViewFileUrl('css/awa-impeccable-layout-2026-
 if (!empty($__impeccableLayoutUrl)):
 ?>
 <link rel="preload" href="<?= $block->escapeUrl($__impeccableLayoutUrl) ?>" as="style" fetchpriority="high"/>
+<?php if ($isHomePage): ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($__impeccableLayoutUrl) ?>" media="all" data-awa-first-paint-critical="impeccable"/>
+<?php else: ?>
 <link rel="stylesheet" href="<?= $block->escapeUrl($__impeccableLayoutUrl) ?>" media="print" onload="this.media='all'"/>
+<?php endif; ?>
 <?php else: ?>
 <!-- AWA IMPECCABLE: getViewFileUrl returned empty for awa-impeccable-layout-2026-06-16.css -->
 <?php endif; ?>
@@ -2516,6 +2545,22 @@ html body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper 
     var reveal=function(){
         if(!d.body){return;}
         d.body.classList.add('awa-overflow-polish-ready');
+        if(!d.getElementById('awa-touch-target-post-lock')){
+            var style=d.createElement('style');
+            style.id='awa-touch-target-post-lock';
+            style.textContent='@media (max-width:767px){html body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home .product-item-link{min-height:44px!important;max-height:none!important}}';
+            d.head.appendChild(style);
+        }
+        var lockTouchTargets=function(){
+            var links=d.querySelectorAll('.content-top-home .product-item-link');
+            links.forEach(function(link){
+                link.style.setProperty('min-height','44px','important');
+                link.style.setProperty('max-height','none','important');
+            });
+        };
+        lockTouchTargets();
+        w.setTimeout(lockTouchTargets,300);
+        w.setTimeout(lockTouchTargets,1200);
     };
     /* DOMContentLoaded: HTML parseado, JS ainda não rodou — overflow:visible não causa CLS
        (nenhum elemento muda de posição no layout). Mais rápido que load+2500ms, garante

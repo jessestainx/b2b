@@ -46,6 +46,18 @@ jobs:
             --reporter=list \
             --project=desktop-1440
 
+      - name: PD6B Mobile Search QA (webkit, stabilization non-gating)
+        working-directory: tests/e2e
+        continue-on-error: true
+        run: |
+          npx playwright test             specs/pd6b-mobile-search-ci.spec.ts             --workers=1             --reporter=list             --project=mobile-390
+
+      - name: PD6B Mobile Search QA (chromium, observability non-gating)
+        working-directory: tests/e2e
+        continue-on-error: true
+        run: |
+          npx playwright test             specs/pd6b-mobile-search-ci.spec.ts             --workers=1             --reporter=list             --project=mobile-390-chromium
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4

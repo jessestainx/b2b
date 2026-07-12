@@ -39,7 +39,7 @@ final class HeaderImpeccableCascadeLockCss
     /** Subset leve (~6KB) — home/PLP/carrinho onde o cascade-lock completo é omitido. */
     public const HEADER_ESSENTIAL_STYLE_ID = 'awa-header-essential-terminal-v1';
 
-    public const GATE_SCRIPT_QUERY = '20260708-b2b-panel-mobile-fix-v2';
+    public const GATE_SCRIPT_QUERY = '20260711-header-geometry-v4';
 
     /**
      * Cache-busting para awa-visual-fixes-2026-06-29-final.min.css, aplicado
@@ -3810,8 +3810,11 @@ final class HeaderImpeccableCascadeLockCss
         $wrap = $home . ' .page-wrapper';
 
         return $wrap . ' .content-top-home{'
+            . 'box-sizing:border-box!important;margin-inline:0!important;'
+            . 'max-width:none!important;padding-inline:0!important;width:100%!important}'
+            . $wrap . ' .content-top-home>.ayo-home5-wrapper.ayo-home5-wrapper--template-driven{'
             . 'box-sizing:border-box!important;margin-inline:auto!important;'
-            . 'max-width:min(100%,1280px)!important;padding-inline:0!important;width:100%!important}'
+            . 'max-width:min(100%,1280px)!important;width:100%!important}'
             . $wrap . ' .awa-site-header :is(.header-main>.container,.header_main>.container){'
             . 'box-sizing:border-box!important;margin-inline:auto!important;'
             . 'max-width:min(100%,1280px)!important;padding-inline:0!important;width:100%!important}'

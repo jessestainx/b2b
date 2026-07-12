@@ -7,5 +7,5 @@
  */
 $url = $block->getViewFileUrl('css/awa-critical-fold.min.css');
 ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($url) ?>" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="<?= $block->escapeUrl($url) ?>" media="all" data-awa-first-paint-critical="critical-fold"/>
 <noscript><link rel="stylesheet" href="<?= $block->escapeUrl($url) ?>"/></noscript>

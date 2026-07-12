@@ -51,8 +51,24 @@ $renderBenefitIcon = static function (string $icon): string {
 };
 ?>
 
-<section class="awa-hero-b2b-cta awa-section" aria-label="<?= $block->escapeHtmlAttr(__('Cadastro e benefícios B2B')) ?>">
+<section class="awa-hero-b2b-cta awa-section" aria-labelledby="awa-b2b-benefits-title">
     <div class="awa-hero-b2b-cta__inner container awa-benefits__container awa-section__container">
+        <header class="awa-hero-b2b-cta__header">
+            <div class="awa-hero-b2b-cta__heading">
+                <h2 class="awa-hero-b2b-cta__title" id="awa-b2b-benefits-title">
+                    <?= $block->escapeHtml(__('Compre no atacado com condições para o seu negócio')) ?>
+                </h2>
+                <p class="awa-hero-b2b-cta__subtitle">
+                    <?= $block->escapeHtml(__('Cadastre seu CNPJ para acessar preços, crédito e atendimento comercial.')) ?>
+                </p>
+            </div>
+            <div class="awa-hero-b2b-cta__actions">
+                <a class="awa-hero-b2b-cta__button action primary"
+                   href="<?= $block->escapeUrl($registerUrl) ?>">
+                    <?= $block->escapeHtml(__('Quero ser revendedor B2B')) ?>
+                </a>
+            </div>
+        </header>
         <ul class="awa-hero-benefits awa-benefits__grid" aria-label="<?= $block->escapeHtmlAttr(__('Benefícios B2B AWA Motos')) ?>">
             <?php foreach ($benefits as $benefit): ?>
                 <?php
@@ -89,11 +105,5 @@ $renderBenefitIcon = static function (string $icon): string {
                 </li>
             <?php endforeach; ?>
         </ul>
-        <div class="awa-hero-b2b-cta__actions">
-            <a class="awa-hero-b2b-cta__button action primary"
-               href="<?= $block->escapeUrl($registerUrl) ?>">
-                <?= $block->escapeHtml(__('Quero ser revendedor B2B')) ?>
-            </a>
-        </div>
     </div>
 </section>

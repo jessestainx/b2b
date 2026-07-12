@@ -17,12 +17,19 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
     .awa-hero-b2b-cta__title {
         margin: 0;
         color: var(--awa-text, @awa-color-text-primary);
+        font-size: 1.375rem;
         font-weight: @awa-weight-bold;
+        line-height: 1.2;
+        text-wrap: balance;
     }
 
-    .awa-hero-b2b-cta__lead {
+    .awa-hero-b2b-cta__lead,
+    .awa-hero-b2b-cta__subtitle {
         margin: 0;
         color: var(--awa-text-secondary, @awa-color-text-muted);
+        font-size: 0.875rem;
+        line-height: 1.45;
+        text-wrap: pretty;
     }
 
     .awa-hero-benefits {
@@ -129,6 +136,27 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
 
 @media (min-width: @awa-bp-992) {
     html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-hero-b2b-cta {
+        .awa-hero-b2b-cta__header {
+            align-items: center;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-block-end: 0;
+            text-align: start;
+        }
+
+        .awa-hero-b2b-cta__heading {
+            align-items: flex-start;
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            gap: @awa-space-1;
+            min-width: 0;
+        }
+
+        .awa-hero-b2b-cta__title {
+            max-width: 32ch;
+        }
+
         .awa-hero-benefits {
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }

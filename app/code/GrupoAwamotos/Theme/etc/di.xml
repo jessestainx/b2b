@@ -79,7 +79,6 @@
                 type="GrupoAwamotos\Theme\Plugin\Response\DeferHomeScriptsPlugin"
                 sortOrder="15"/>
     </type>
-
     <type name="GrupoAwamotos\B2B\Model\PriceVisibility">
         <plugin name="grupoawamotos_theme_home_price_replacement_message"
                 type="GrupoAwamotos\Theme\Plugin\B2B\HomePriceReplacementMessagePlugin"

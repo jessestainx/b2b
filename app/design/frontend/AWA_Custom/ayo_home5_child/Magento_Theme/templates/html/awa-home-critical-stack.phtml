@@ -17,7 +17,7 @@ $stackUrl = $block->getViewFileUrl('css/awa-home-critical-stack-2026-06-11.min.c
 $stackEsc = $block->escapeUrl($stackUrl);
 ?>
 <link rel="preload" href="<?= $stackEsc ?>" as="style" fetchpriority="high"/>
-<link rel="stylesheet" href="<?= $stackEsc ?>" media="print" onload="window.__awaCssQ?__awaCssQ(this):(this.media='all')" id="awa-home-critical-stack" data-awa-bundle="home-critical-stack"/>
+<link rel="stylesheet" href="<?= $stackEsc ?>" media="all" id="awa-home-critical-stack" data-awa-bundle="home-critical-stack" data-awa-first-paint-critical="stack"/>
 <noscript><link rel="stylesheet" href="<?= $stackEsc ?>"/></noscript>
 <?php
 /** awa-home-corporate-density-grid: removido de cms_index_index.xml (era media="all" blocking), carregado aqui async */
@@ -26,7 +26,7 @@ $__corpGridUrl = $block->escapeUrl(
 );
 ?>
 <link rel="preload" href="<?= $__corpGridUrl ?>" as="style"/>
-<link rel="stylesheet" href="<?= $__corpGridUrl ?>" media="print" onload="window.__awaCssQ?__awaCssQ(this):(this.media='all')" data-awa-bundle="corp-grid"/>
+<link rel="stylesheet" href="<?= $__corpGridUrl ?>" media="all" data-awa-bundle="corp-grid" data-awa-first-paint-critical="corp-grid"/>
 <noscript><link rel="stylesheet" href="<?= $__corpGridUrl ?>"/></noscript>
 <?= $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
     ->setTemplate('Magento_Theme::html/awa-header-early-sticky-sync.phtml')

@@ -76,10 +76,20 @@
 // ============================================================================
 
 .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 {
+    box-sizing: border-box;
+    width: 100%;
+    height: var(--awa-vmenu-item-h, 48px);
+    min-height: var(--awa-vmenu-item-h, 48px);
+    margin: 0;
+    padding: 0;
 
     > a.level-top {
+        box-sizing: border-box;
         display: flex;
         align-items: center;
+        width: 100%;
+        height: 100%;
+        min-height: var(--awa-vmenu-item-h, 48px);
         gap: @ds-space-xs;
         padding: 0 @ds-space-sm;
         margin: 0;
@@ -169,6 +179,13 @@
             color: var(--awa-primary, @awa-color-primary);
         }
     }
+}
+
+.navigation.verticalmenu .togge-menu > li.awa-vem-extra-li {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 // ============================================================================
@@ -577,7 +594,7 @@
         > span:first-of-type:not(.arrow):not(.cat-label) {
             position: relative;
             padding-inline-start: var(--awa-page-pad-mobile, 16px);
-            
+
             &::before {
                 content: '';
                 position: absolute;
@@ -592,7 +609,7 @@
             }
         }
     }
-    
+
     &:hover:not(:has(.awa-vmenu-icon)):not(:has(.menu-thumb-icon)) {
         > span:first-of-type:not(.arrow):not(.cat-label)::before {
             background: var(--awa-primary, @awa-color-primary);
