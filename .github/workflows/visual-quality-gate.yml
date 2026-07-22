@@ -1,200 +1,32 @@
+# STATUS: QUARENTENA — NÃO EXECUTAR (Fase 1)
+# Ticket: CI-CONTAINMENT-FASE1-2026-07-22
+#
+# Motivo: vars.PLAYWRIGHT_BASE_URL_PR estava configurada como [REDACTED-PROD-HOST]
+# (produção). Resolver antigo liberava produção em push/schedule sem ack.
+# Input allow_production_validation removido — uma flag simples NÃO reabilita produção.
+#
+# Reativação (Fase 2+):
+#   1) vars apontando SOMENTE para staging isolado (nunca [REDACTED-PROD-HOST] / IP prod)
+#   2) environment GitHub com reviewers
+#   3) guard estático verde
+#   4) aprovação explícita
+# Sem workflow_dispatch enquanto produção NO-GO.
+
 name: "Visual QA & Lighthouse Gate"
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
-  schedule:
-    - cron: "0 6 * * *"
-  workflow_dispatch:
-    inputs:
-      base_url:
-        description: "URL base para testes (ex: https://staging.exemplo.com)"
-        required: true
-        type: string
-      playwright_config:
-        description: "Config Playwright a usar"
-        required: false
-        default: "pw-deep-audit.config.ts"
-        type: string
-      allow_production_validation:
-        description: "Permitir produção (awamotos.com)? Apenas para emergências."
-        required: false
-        default: "false"
-        type: choice
-        options:
-          - "false"
-          - "true"
+  workflow_call:
 
 permissions:
   contents: read
 
-concurrency:
-  group: visual-quality-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_VERSION: "20"
-  PLAYWRIGHT_CONFIG: ${{ inputs.playwright_config || 'pw-deep-audit.config.ts' }}
-  LHCI_RUNS: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && '3' || '1' }}
-
 jobs:
-  resolve-url:
-    name: Validate BASE_URL
+  quarantine-notice:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    outputs:
-      base_url: ${{ steps.resolve.outputs.resolved_base_url }}
-      safe_url: ${{ steps.resolve.outputs.safe_base_url }}
     steps:
-      - name: Resolve and validate BASE_URL (fail-fast)
-        id: resolve
+      - name: Quarantined
         run: |
-          python3 - <<'PYEOF'
-          import os, sys, re
-
-          event = os.environ.get("GITHUB_EVENT_NAME", "")
-          allow_prod = os.environ.get("DISPATCH_ALLOW_PROD", "false").lower() == "true" or event in ("push", "schedule")
-
-          # Resolve URL por evento
-          if event == "workflow_dispatch":
-              raw = os.environ.get("DISPATCH_BASE_URL", "").strip()
-          elif event == "pull_request":
-              raw = os.environ.get("PR_BASE_URL", "").strip()
-          elif event == "schedule":
-              raw = os.environ.get("NIGHTLY_BASE_URL", "").strip()
-          elif event == "push":
-              raw = os.environ.get("PUSH_BASE_URL", "").strip()
-          else:
-              raw = os.environ.get("DISPATCH_BASE_URL", "").strip()
-
-          if not raw:
-              print("::error::BASE_URL ausente para o evento '" + event + "'. Configure a variável correspondente ou forneça a URL no dispatch manual.")
-              sys.exit(1)
-
-          if not re.match(r"^https?://", raw):
-              print("::error::BASE_URL inválida: deve começar com http:// ou https://")
-              sys.exit(1)
-
-          host = re.sub(r"^https?://", "", raw).split("/")[0].split(":")[0].lower()
-          if "awamotos.com" in host and not allow_prod:
-              print("::error::URL de produção bloqueada. Para usar awamotos.com, defina allow_production_validation=true no dispatch.")
-              sys.exit(1)
-
-          safe = re.sub(r"^(https?://[^/]+).*", r"\1", raw)
-          if "awamotos.com" in host:
-              print("::warning::Produção permitida explicitamente. URL: " + safe)
-
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-              f.write("resolved_base_url=" + raw.rstrip("/") + "\n")
-              f.write("safe_base_url=" + safe + "\n")
-
-          print("BASE_URL validada: " + safe)
-          PYEOF
-        env:
-          DISPATCH_BASE_URL: ${{ inputs.base_url }}
-          DISPATCH_ALLOW_PROD: ${{ inputs.allow_production_validation || 'false' }}
-          PR_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL_PR || secrets.PLAYWRIGHT_BASE_URL_PR }}
-          NIGHTLY_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL_NIGHTLY }}
-          PUSH_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL_PUSH }}
-
-  playwright:
-    name: Playwright Visual QA
-    needs: resolve-url
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    steps:
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: tests/e2e/package-lock.json
-
-      - name: Install dependencies
-        working-directory: tests/e2e
-        run: npm ci
-
-      - name: Install Playwright browsers (Firefox only)
-        working-directory: tests/e2e
-        run: npx playwright install --with-deps firefox
-
-      - name: Run Playwright deep visual audit
-        working-directory: tests/e2e
-        env:
-          PLAYWRIGHT_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-          BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-          ALLOW_PRODUCTION_VALIDATION: ${{ inputs.allow_production_validation || 'false' }}
-        run: |
-          npx playwright test \
-            --config="${{ env.PLAYWRIGHT_CONFIG }}" \
-            --project=firefox-desktop-1366 \
-            --reporter=list,html \
-            --retries=1
-
-      - name: Run accessibility audit (axe-core)
-        working-directory: tests/e2e
-        env:
-          BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-        run: |
-          npx playwright test \
-            specs/accessibility.spec.ts \
-            --project=firefox-desktop-1366 \
-            --reporter=list \
-            --retries=0 \
-            --timeout=60000 || echo "::warning::Accessibility findings found — review report"
-
-      - name: Upload Playwright artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-visual-qa-${{ github.run_id }}
-          path: |
-            tests/e2e/test-results/**
-            tests/e2e/reports/**
-            tests/e2e/playwright-report/**
-          retention-days: 14
-
-  lighthouse:
-    name: Lighthouse Performance Gate
-    needs: resolve-url
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install Chrome
-        run: npx --yes @puppeteer/browsers install chrome@stable
-
-      - name: Lighthouse mobile
-        env:
-          LHCI_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-          LHCI_RUNS: ${{ env.LHCI_RUNS }}
-        run: |
-          npx --yes @lhci/cli@0.14.0 autorun \
-            --config=.github/lighthouse/lighthouserc.mobile.cjs
-
-      - name: Lighthouse desktop
-        env:
-          LHCI_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
-          LHCI_RUNS: ${{ env.LHCI_RUNS }}
-        run: |
-          npx --yes @lhci/cli@0.14.0 autorun \
-            --config=.github/lighthouse/lighthouserc.desktop.cjs
-
-      - name: Upload Lighthouse artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-${{ github.run_id }}
-          path: .lighthouseci/**
-          retention-days: 14
+          echo "STATUS: QUARENTENA — NÃO EXECUTAR"
+          echo "Produção NO-GO. Sem Playwright. Sem Lighthouse remoto."
+          exit 1

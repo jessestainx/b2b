@@ -1,134 +1,25 @@
+# STATUS: QUARENTENA — NÃO EXECUTAR
+# Ticket: CI-CONTAINMENT-FASE1-2026-07-22
+# Motivo: PLAYWRIGHT_BASE_URL=[REDACTED-PROD-HOST] + ALLOW_PRODUCTION_VALIDATION(true) + secrets B2B em PR
+# Required check: NÃO
+# Reativação: URL staging only + sem default de produção + project mobile-390-chromium alinhado em tests/e2e
+# Divergência documentada: mobile-390-chromium existe só em playwright.config.ts (raiz), não em tests/e2e/playwright.config.ts
+# Não copiar config nesta fase. Não usar workflow_dispatch enquanto produção NO-GO.
+
 name: product-design-qa
 
 on:
-  pull_request:
-  workflow_dispatch:
+  workflow_call:
 
-concurrency:
-  group: product-design-qa-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
-  product-design-qa:
+  quarantine-notice:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 40
-    env:
-      PLAYWRIGHT_BASE_URL: https://awamotos.com
-      ALLOW_PRODUCTION_VALIDATION: "true"
-      AWA_B2B_EMAIL: ${{ secrets.B2B_TEST_USER }}
-      AWA_B2B_PASSWORD: ${{ secrets.B2B_TEST_PASS }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: tests/e2e/package-lock.json
-
-      - name: Install dependencies
-        working-directory: tests/e2e
-        run: npm ci
-
-      - name: Install Playwright browsers
-        working-directory: tests/e2e
-        run: npx playwright install --with-deps
-
-      - name: Product Design QA (desktop-1440)
-        working-directory: tests/e2e
+      - name: Quarantined
         run: |
-          npx playwright test \
-            specs/product-design-qa.spec.ts \
-            --workers=1 \
-            --reporter=list \
-            --project=desktop-1440
-
-      - name: PD6B Mobile Search QA (webkit, stabilization non-gating)
-        working-directory: tests/e2e
-        continue-on-error: true
-        run: |
-          npx playwright test             specs/pd6b-mobile-search-ci.spec.ts             --workers=1             --reporter=list             --project=mobile-390
-
-      - name: PD6B Mobile Search QA (chromium, observability non-gating)
-        working-directory: tests/e2e
-        continue-on-error: true
-        run: |
-          npx playwright test             specs/pd6b-mobile-search-ci.spec.ts             --workers=1             --reporter=list             --project=mobile-390-chromium
-
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: product-design-qa-playwright-report
-          path: tests/e2e/playwright-report/
-          retention-days: 30
-
-      - name: Upload Product Design QA evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: product-design-qa-evidence
-          path: tests/e2e/test-results/product-design-qa/
-          retention-days: 30
-
-
-  pd5-mobile-search-crash-investigation:
-    # Somente via "Run workflow" manual (workflow_dispatch) - nao roda em todo PR
-    # por ser um diagnostico pesado (varios navegadores/flags, propenso a demorar).
-    #
-    # LIMITACAO CONHECIDA (registrada, nao escondida): o script
-    # tests/e2e/tmp/pd5-mobile-search-crash-matrix.mjs vive em tests/e2e/tmp/,
-    # que e propositalmente git-ignored (regra explicita da investigacao PD5:
-    # nao commitar scripts temporarios). Por isso este job, do jeito que esta,
-    # NAO vai encontrar o arquivo em um checkout limpo do CI. Este job e uma
-    # PROPOSTA/scaffold pronta para uso; para executar de fato, o script
-    # precisa ser promovido para um local versionado (ex.: tests/e2e/scripts/)
-    # em uma fase dedicada de "hardening" da investigacao PD5 em teste
-    # permanente de regressao - decisao que fica fora do escopo diagnostico
-    # desta fase (nao commitar workaround/scaffold sem essa decisao explicita).
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      PLAYWRIGHT_BASE_URL: https://awamotos.com
-      ALLOW_PRODUCTION_VALIDATION: "true"
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: tests/e2e/package-lock.json
-
-      - name: Install dependencies
-        working-directory: tests/e2e
-        run: npm ci
-
-      - name: Install Playwright browsers (chromium + webkit, para comparacao cross-engine)
-        working-directory: tests/e2e
-        run: npx playwright install --with-deps chromium webkit
-
-      - name: PD5 - matriz de experimentos (grupos A-G)
-        working-directory: tests/e2e
-        run: node tmp/pd5-mobile-search-crash-matrix.mjs
-        continue-on-error: true
-
-      - name: Upload matriz JSON + screenshots + logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pd5-mobile-search-crash-investigation-evidence
-          path: |
-            test-results/product-design-qa/pd5-mobile-search-crash-matrix.json
-            test-results/product-design-qa/pd5-matrix-*.png
-            test-results/product-design-qa/pd5-chromium-native-log.txt
-            test-results/product-design-qa/pd5-playwright-debug-log.txt
-          retention-days: 14
-          if-no-files-found: warn
+          echo "STATUS: QUARENTENA — NÃO EXECUTAR"
+          exit 1
