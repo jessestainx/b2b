@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   governance-and-syntax:
     runs-on: ubuntu-latest
@@ -36,6 +39,9 @@ jobs:
       - name: Validar referencias basicas de documentacao
         run: bash ./scripts/ci/validate-doc-links.sh
 
+      - name: Guard NO-GO producao (estatico)
+        run: bash ./scripts/ci/guard-no-production.sh
+
       - name: Validar sintaxe shell
         run: |
           set -euo pipefail
@@ -43,3 +49,4 @@ jobs:
           bash -n ./scripts/ci/validate-governance.sh
           bash -n ./scripts/ci/check-conventional-commits.sh
           bash -n ./scripts/ci/validate-doc-links.sh
+          bash -n ./scripts/ci/guard-no-production.sh

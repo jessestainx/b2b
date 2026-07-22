@@ -1,5 +1,8 @@
 name: sanity
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: ["**"]

@@ -1,27 +1,25 @@
+# STATUS: QUARENTENA — NÃO EXECUTAR
+# Ticket: CI-CONTAINMENT-FASE1-2026-07-22
+# Motivo: scaffold genérico; npm ci na raiz SEM @playwright/test; artefato playwright-report/ desalinhado
+# Configuração válida: tests/e2e/ (package.json + playwright.config.ts + pw-*.config.ts)
+# Não instalar Playwright na raiz só para “passar”. Não executar browser.
+# Contenção API: disabled_manually em remotes com admin (2026-07-22).
+
 name: Playwright Tests
+
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+  workflow_call:
+
+permissions:
+  contents: read
+
 jobs:
-  test:
-    timeout-minutes: 60
+  quarantine-notice:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - name: Quarantined
+        run: |
+          echo "STATUS: QUARENTENA — NÃO EXECUTAR"
+          echo "Use tests/e2e — não a raiz."
+          exit 1

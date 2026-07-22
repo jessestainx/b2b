@@ -29,8 +29,10 @@
             "@quality:php-syntax",
             "@quality:governance",
             "@quality:commits",
-            "@quality:docs"
-        ]
+            "@quality:docs",
+            "@quality:no-production"
+        ],
+        "quality:no-production": "bash ./scripts/ci/guard-no-production.sh"
     },
     "version": "2.4.8-p3",
     "require": {

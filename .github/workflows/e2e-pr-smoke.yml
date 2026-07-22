@@ -1,61 +1,28 @@
+# STATUS: QUARENTENA — NÃO EXECUTAR
+# Ticket: CI-CONTAINMENT-FASE1-2026-07-22
+# Motivo: apontava para [REDACTED-PROD-HOST] em PR + secrets B2B + ALLOW_PRODUCTION_VALIDATION(true)
+# Required check: NÃO (ver GITHUB_ACTIONS_CONTAINMENT_2026-07-22.md)
+# Reativação: staging isolado + environment aprovado + guard estático verde + aprovação explícita Fase 2+
+# Não usar workflow_dispatch enquanto produção permanecer NO-GO.
+#
+# Contenção adicional: workflow desabilitado via API GitHub (disabled_manually) em
+# awamotosbrand-prog/magento_b2b_awa e ecriativy-git/b2b (2026-07-22).
+
 name: e2e-pr-smoke
 
+# Triggers automáticos removidos. workflow_call sem callers = arquivo preservado, não executa.
 on:
-  pull_request:
+  workflow_call:
 
-concurrency:
-  group: e2e-pr-smoke-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
-  b2b-and-visual-smoke:
+  quarantine-notice:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 40
-    env:
-      TEST_USER: ${{ secrets.B2B_TEST_USER }}
-      TEST_PASS: ${{ secrets.B2B_TEST_PASS }}
-      TEST_PENDING_USER: ${{ secrets.B2B_TEST_PENDING_USER }}
-      TEST_PENDING_PASS: ${{ secrets.B2B_TEST_PENDING_PASS }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: tests/e2e/package-lock.json
-
-      - name: Install dependencies
-        working-directory: tests/e2e
-        run: npm ci
-
-      - name: Install Playwright browsers
-        working-directory: tests/e2e
-        run: npx playwright install --with-deps
-
-      - name: B2B smoke (notebook-1366)
-        working-directory: tests/e2e
-        run: npm run test:b2b-regression
-
-      - name: Visual smoke - CLS scroll stability
-        working-directory: tests/e2e
+      - name: Quarantined
         run: |
-          npx playwright test \
-            specs/visual-audit-cls-performance.spec.ts \
-            --project=notebook-1366 \
-            -g "Estabilidade no scroll" \
-            --reporter=line \
-            --timeout=60000
-
-      - name: Upload test artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-pr-smoke-artifacts
-          path: |
-            tests/e2e/test-results/**
-            tests/e2e/reports/**
-            tests/e2e/playwright-report/**
+          echo "STATUS: QUARENTENA — NÃO EXECUTAR"
+          exit 1
