@@ -259,3 +259,21 @@ Nenhuma alteração feita em produção neste ciclo:
 Alterações versionadas apenas no worktree da branch `feature/admin-menu-unification`.
 
 **Status: NO-GO em produção — mantido.**
+
+---
+
+## 10. Continuação (2026-07-22) — artefatos e bloqueio
+
+Próximo passo **bloqueado** por decisão humana de hostname/IP + custo.
+
+| Documento | Função |
+|---|---|
+| `ETAPA_1_5_GATE_HML_APROVACAO_2026-07-22.md` | Gate obrigatório antes de qualquer provisionamento |
+| `ETAPA_1_5_HML_RUNBOOK_PROVISIONAMENTO_2026-07-22.md` | Runbook HML (não executar sem gate) |
+| `ETAPA_1_5_JANELAS_PRODUCAO_DRAFT_2026-07-22.md` | Plano Janela 1/2 produção (rascunho; NO-GO) |
+| `dev/hml/hml-env-guard.sh` | Fail-fast pré-escrita |
+| `dev/hml/hml-test-menu-flags.sh` | Roteiro T1→T2→rollback (só HML) |
+
+Catálogo/preços Hostinger via MCP: autenticação de sessão incompleta no momento da coleta (`Unauthenticated` após `mcp_auth`). **Não** foi criado VPS. Preencher custo manualmente no gate (hPanel) ou reautenticar MCP e recolocar preços.
+
+**Ação humana imediata:** preencher o gate (hostname/IP/SKU/custo) e devolver GO de orçamento.
