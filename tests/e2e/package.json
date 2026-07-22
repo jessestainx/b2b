@@ -2,7 +2,7 @@
   "name": "awa-e2e",
   "version": "1.0.0",
   "private": true,
-  "description": "E2E visual regression tests for AWA Motos (awamotos.com)",
+  "description": "E2E visual regression tests for AWA Motos (staging-only; production NO-GO)",
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",

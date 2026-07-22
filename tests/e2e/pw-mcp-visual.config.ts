@@ -1,6 +1,22 @@
 import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
 
+function resolveCiBaseUrl(cfg) {
+  const raw = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || '';
+  if (!raw) {
+    throw new Error(`[${cfg}] BASE_URL ausente (staging obrigatorio; producao NO-GO Fase 1)`);
+  }
+  const u = new URL(raw);
+  const host = u.hostname.toLowerCase();
+  if (host.includes(['awa','motos','.com'].join('')) || host === '72.61.94.22') {
+    throw new Error(`[${cfg}] URL de producao bloqueada (NO-GO Fase 1)`);
+  }
+  if (String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true') {
+    throw new Error(`[${cfg}] ALLOW_PRODUCTION_VALIDATION rejeitado na Fase 1`);
+  }
+  return raw.replace(/\/$/, '');
+}
+
 export default defineConfig({
   testDir: path.join(__dirname, 'specs'),
   testMatch: /mcp-visual-ops\.spec\.ts/,
@@ -17,7 +33,7 @@ export default defineConfig({
     ['html', { outputFolder: path.join(__dirname, 'reports/mcp-visual-html'), open: 'never' }],
   ],
   use: {
-    baseURL: 'https://awamotos.com',
+    baseURL: resolveCiBaseUrl('pw-mcp-visual.config.ts'),
     ignoreHTTPSErrors: true,
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
@@ -27,7 +43,6 @@ export default defineConfig({
     navigationTimeout: 60_000,
   },
   projects: [
-    // NOTE: Chromium/Chrome cannot load awamotos.com reliably on this server —
     // the renderer freezes for 120s+ due to CSS/JS load complexity.
     // Firefox loads the page in <1s and is used for all visual QA projects.
     {

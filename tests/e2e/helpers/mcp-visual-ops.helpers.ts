@@ -44,20 +44,20 @@ export const MCP_COOKIE_SELECTORS = [
 
 export const DEFAULT_TARGETS: VisualTarget[] = [
   // Core pages
-  { slug: 'home', url: 'https://awamotos.com/', pageLabel: 'Home' },
+  { slug: 'home', url: '/', pageLabel: 'Home' },
   // Category / PLP
-  { slug: 'category-guidoes', url: 'https://awamotos.com/guidoes.html', pageLabel: 'PLP Guidoes' },
-  { slug: 'category-bagageiros', url: 'https://awamotos.com/bagageiros.html', pageLabel: 'PLP Bagageiros' },
+  { slug: 'category-guidoes', url: '/guidoes.html', pageLabel: 'PLP Guidoes' },
+  { slug: 'category-bagageiros', url: '/bagageiros.html', pageLabel: 'PLP Bagageiros' },
   // PDP
-  { slug: 'pdp-ret-biz', url: 'https://awamotos.com/ret-biz-100-cr-redondo-universal-2220.html', pageLabel: 'PDP Ret BIZ' },
+  { slug: 'pdp-ret-biz', url: '/ret-biz-100-cr-redondo-universal-2220.html', pageLabel: 'PDP Ret BIZ' },
   // Search
-  { slug: 'search-bagageiro', url: 'https://awamotos.com/catalogsearch/result/?q=bagageiro', pageLabel: 'Search Results' },
+  { slug: 'search-bagageiro', url: '/catalogsearch/result/?q=bagageiro', pageLabel: 'Search Results' },
   // Auth / Account
-  { slug: 'login', url: 'https://awamotos.com/customer/account/login/', pageLabel: 'Login' },
+  { slug: 'login', url: '/customer/account/login/', pageLabel: 'Login' },
   // Cart
-  { slug: 'cart', url: 'https://awamotos.com/checkout/cart/', pageLabel: 'Cart' },
+  { slug: 'cart', url: '/checkout/cart/', pageLabel: 'Cart' },
   // B2B
-  { slug: 'b2b-landing', url: 'https://awamotos.com/seja-cliente-b2b', pageLabel: 'B2B Landing' },
+  { slug: 'b2b-landing', url: '/seja-cliente-b2b', pageLabel: 'B2B Landing' },
 ];
 
 /**
@@ -89,8 +89,9 @@ export function ensureDir(dirPath: string): void {
 }
 
 export async function waitPageStable(page: Page): Promise<void> {
-  // page.goto already waits for domcontentloaded (with catch). Allow JS animations to start.
-  await page.waitForTimeout(2000);
+  // page.goto already passed a basic readiness gate in the spec.
+  // Keep this short to reduce time spent on routes that are partially loaded.
+  await page.waitForTimeout(1200).catch(() => {});
 }
 
 export async function dismissCookieBanner(page: Page): Promise<void> {
@@ -98,11 +99,20 @@ export async function dismissCookieBanner(page: Page): Promise<void> {
   const visible = await btn.isVisible({ timeout: 2_000 }).catch(() => false);
   if (visible) {
     await btn.click({ force: true }).catch(() => {});
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(300).catch(() => {});
   }
 }
 
 export async function stabilizeVisualSnapshot(page: Page): Promise<void> {
+  const domContentLoaded = await page
+    .waitForLoadState('domcontentloaded', { timeout: 3_000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!domContentLoaded || page.isClosed()) {
+    return;
+  }
+
   await Promise.race<void>([
     page
       .evaluate(() => {
@@ -227,7 +237,7 @@ export async function stabilizeVisualSnapshot(page: Page): Promise<void> {
   ]);
 
   // Allow the first stabilized frame to render
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(300).catch(() => {});
 }
 
 function sha256(filePath: string): string {
@@ -293,6 +303,26 @@ function pixelDiffRatio(actualPath: string, baselinePath: string): number {
   }
 }
 
+function copyFileWithFallback(sourcePath: string, destinationPath: string): void {
+  try {
+    fs.copyFileSync(sourcePath, destinationPath);
+    return;
+  } catch (error: unknown) {
+    const errorCode = typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code?: string }).code ?? '')
+      : '';
+
+    // Alguns mounts/overlays retornam EPERM em copy_file_range (usado por copyFileSync).
+    // Fallback explícito evita falha em atualização de baseline no VPS.
+    if (errorCode !== 'EPERM' && errorCode !== 'EXDEV' && errorCode !== 'EINVAL') {
+      throw error;
+    }
+  }
+
+  const bytes = fs.readFileSync(sourcePath);
+  fs.writeFileSync(destinationPath, bytes);
+}
+
 export function compareAgainstBaseline(
   actualPath: string,
   baselinePath: string,
@@ -302,7 +332,7 @@ export function compareAgainstBaseline(
   if (!baselineExists) {
     if (updateBaseline) {
       ensureDir(path.dirname(baselinePath));
-      fs.copyFileSync(actualPath, baselinePath);
+      copyFileWithFallback(actualPath, baselinePath);
       return { changed: false, baselineMissing: false, diffRatio: 0 };
     }
     return { changed: false, baselineMissing: true };
@@ -318,7 +348,7 @@ export function compareAgainstBaseline(
   const changed = diffRatio > MAX_DIFF_PIXEL_RATIO;
 
   if (updateBaseline) {
-    fs.copyFileSync(actualPath, baselinePath);
+    copyFileWithFallback(actualPath, baselinePath);
     return { changed: false, baselineMissing: false, diffRatio };
   }
 

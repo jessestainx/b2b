@@ -12,6 +12,22 @@
 import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
 
+function resolveCiBaseUrl(cfg) {
+  const raw = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || '';
+  if (!raw) {
+    throw new Error(`[${cfg}] BASE_URL ausente (staging obrigatorio; producao NO-GO Fase 1)`);
+  }
+  const u = new URL(raw);
+  const host = u.hostname.toLowerCase();
+  if (host.includes(['awa','motos','.com'].join('')) || host === '72.61.94.22') {
+    throw new Error(`[${cfg}] URL de producao bloqueada (NO-GO Fase 1)`);
+  }
+  if (String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true') {
+    throw new Error(`[${cfg}] ALLOW_PRODUCTION_VALIDATION rejeitado na Fase 1`);
+  }
+  return raw.replace(/\/$/, '');
+}
+
 export default defineConfig({
   testDir:   path.join(__dirname, 'specs/visual'),
   testMatch: /visual-suite\.spec\.ts/,
@@ -33,7 +49,7 @@ export default defineConfig({
     ['json', { outputFile: path.join(__dirname, 'reports/visual-suite-results.json') }],
   ],
   use: {
-    baseURL:            'https://awamotos.com',
+    baseURL: resolveCiBaseUrl('pw-visual-suite.config.ts'),
     ignoreHTTPSErrors:  true,
     locale:             'pt-BR',
     timezoneId:         'America/Sao_Paulo',

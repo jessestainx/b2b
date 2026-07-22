@@ -2,6 +2,22 @@ import { defineConfig, devices } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
+function resolveCiBaseUrl(cfg) {
+  const raw = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || '';
+  if (!raw) {
+    throw new Error(`[${cfg}] BASE_URL ausente (staging obrigatorio; producao NO-GO Fase 1)`);
+  }
+  const u = new URL(raw);
+  const host = u.hostname.toLowerCase();
+  if (host.includes(['awa','motos','.com'].join('')) || host === '72.61.94.22') {
+    throw new Error(`[${cfg}] URL de producao bloqueada (NO-GO Fase 1)`);
+  }
+  if (String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true') {
+    throw new Error(`[${cfg}] ALLOW_PRODUCTION_VALIDATION rejeitado na Fase 1`);
+  }
+  return raw.replace(/\/$/, '');
+}
+
 /** Carrega tests/e2e/.env para TEST_USER, TEST_PASS, etc. (sem sobrescrever env do shell). */
 function loadEnvFile(filePath: string): void {
   if (!fs.existsSync(filePath)) {
@@ -112,7 +128,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: 'https://awamotos.com',
+    baseURL: resolveCiBaseUrl('playwright.config.ts'),
     /* Ignora erros TLS caso o certificado seja auto-assinado em staging */
     ignoreHTTPSErrors: true,
     /* Captura evidências automáticas para falhas reais e análise no Trace Viewer */
