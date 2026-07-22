@@ -334,3 +334,97 @@ Magento storefront CSS/JS, banco, config app, docroot produção, credentials, e
 ### NO-GO
 
 Produção permanece NO-GO. Não iniciar Fase 2 automaticamente.
+
+---
+
+# FASE 1.1B — GATE HUMANO / PRÉ-MERGE (2026-07-22 22:37 UTC)
+
+## Status
+
+### FASE 1.1 — **NÃO CONCLUÍDA** (bloqueada no gate humano)
+
+Motivo: o repositório canônico `awamotosbrand-prog/magento_b2b_awa` possui **apenas um collaborator**
+(`awamotosbrand-prog`), que é também o **autor do PR #3**. Não há segundo usuário humano
+disponível para review request via API. CODEOWNERS cita `@jessessh`, mas a conta não é
+collaborator resolvível neste repo.
+
+**Merge não executado.** Auto-merge **não** habilitado.
+
+## Checklist do revisor humano (a confirmar)
+
+- [ ] Diff limitado à contenção (25 arquivos: workflows/guard/helpers e2e/docs/composer scripts)
+- [ ] `composer.json` só adiciona script `quality:no-production` — **sem** mudança de deps/versões
+- [ ] Nenhum `composer.lock` / `package-lock` no PR
+- [ ] Helpers/configs E2E fail-closed (BASE_URL obrigatório; produção rejeitada)
+- [ ] Nenhuma URL alternativa como novo default
+- [ ] Sem credenciais/secrets nos workflows; `.auth-state.json` só como path local (gitignored)
+- [ ] Quarentenados: **somente** `workflow_call` — sem `workflow_dispatch` / `push` / `pull_request` / `schedule` reais
+- [ ] Zero callers `uses: ./.github/workflows/`
+- [ ] `magento-ci.yml` **ausente** em main/PR → deploy inalcançável
+- [ ] `permissions: contents: read`
+- [ ] Cursor Bugbot: **sem checks reportados** neste repo/PR (não bloqueante aqui; em `ecriativy-git/b2b` Bugbot é required noutro contexto)
+
+## Pré-merge sync (2026-07-22 22:37 UTC)
+
+| Check | Resultado |
+|-------|-----------|
+| `origin/main` | `014d979c3` |
+| Branch baseada em main atual | **SIM** (merge-base == origin/main) |
+| PR mergeable | **MERGEABLE** / CLEAN |
+| YAML parse | OK (8) |
+| guard-no-production | OK |
+| URLs/IP proibidos no escopo | nenhum literal |
+| secrets nos workflows | nenhum |
+| callers | nenhum |
+| Bugbot/checks | nenhum check reportado |
+
+## Mapeamento de SHAs (importante)
+
+Os SHAs citados no plano original (`7ed0a2fde`, `d769d722c`, `256a7461c`, `aaa7f534f`)
+pertencem ao worktree precoce **antes** da recriação sobre `origin/main` e **não** estão
+no PR #3.
+
+SHAs reais do PR #3 (sobre `main`):
+
+| Papel | SHA |
+|-------|-----|
+| quarantine workflows | `c2129f8c3` |
+| remove prod from PRs + guard | `9738b357c` |
+| disable production defaults | `7275bc888` |
+| docs containment | `94956f594` |
+| fix guard escaping | `1f3c8f6f6` |
+| fix guard fail-closed | `b7f9cd5b7` |
+| docs 1.1 PR closure | `88b8ee915` |
+
+## Estratégia de merge (quando o humano aprovar)
+
+Preferência: **Create a merge commit** (`gh pr merge 3 --merge`).
+
+Se a política exigir squash/rebase: registrar método + SHA final + equivalência por diff;
+não contornar a política.
+
+## Rollback (sem reativar workflows perigosos)
+
+```bash
+# NÃO: gh api .../workflows/.../enable
+# NÃO: restaurar URLs de produção / ALLOW_PRODUCTION_VALIDATION
+
+# Após merge: abrir PR de revert do merge commit
+git fetch origin main
+git switch -c revert/ci-containment-fase1 origin/main
+git revert -m 1 <MERGE_SHA>   # ou reverts individuais se squash
+# manter disabled_manually nos remotes admin
+# repetir guard-no-production + revisão estática no PR de revert
+```
+
+Enquanto o PR #3 estiver aberto e não mergeado: fechar o PR ou reverter commits na branch
+sem tocar em `enable` de workflows.
+
+## Pós-merge (pendente)
+
+Worktree limpo de `origin/main`, ancestralidade/equivalência, disabled_manually,
+ausência de `PLAYWRIGHT_BASE_URL_PR`, comentário admin no PR, PR documental se necessário.
+
+## Decisão Fase 2
+
+### NO-GO
