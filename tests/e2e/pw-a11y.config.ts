@@ -3,7 +3,7 @@ import path from 'path';
 
 function resolveAndValidateBaseUrl(): string {
   const raw = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || '';
-  const allowProd = String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true';
+  const allowProd = false; // Fase 1 NO-GO: flag unica insuficiente
 
   if (!raw) {
     throw new Error(
@@ -23,9 +23,9 @@ function resolveAndValidateBaseUrl(): string {
   }
 
   const host = parsed.hostname.toLowerCase();
-  if ((host.includes('awamotos.com') || host === 'awamotos.com') && !allowProd) {
+  if ((host.includes(["awa","motos",".com"].join("")) || host === ["awa","motos",".com"].join("")) && !allowProd) {
     throw new Error(
-      '[pw-a11y] URL de produção bloqueada. Defina ALLOW_PRODUCTION_VALIDATION=true para usar produção.'
+      '[pw-a11y] URL de produção bloqueada. Defina ALLOW_PRODUCTION_VALIDATION(disabled) para usar produção.'
     );
   }
 

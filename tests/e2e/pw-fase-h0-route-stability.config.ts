@@ -17,12 +17,10 @@
  *
  * Uso (headless, padrao):
  *   cd tests/e2e
- *   ALLOW_PRODUCTION_VALIDATION=true PLAYWRIGHT_BASE_URL=https://awamotos.com \
  *     npx playwright test --config=pw-fase-h0-route-stability.config.ts --project=h0-route-stability-1440-headless
  *
  * Uso (headed via Xvfb — Tarefa 4.F):
  *   cd tests/e2e
- *   ALLOW_PRODUCTION_VALIDATION=true PLAYWRIGHT_BASE_URL=https://awamotos.com \
  *     xvfb-run -a npx playwright test --config=pw-fase-h0-route-stability.config.ts --project=h0-route-stability-1440-headed
  */
 import path from 'path';

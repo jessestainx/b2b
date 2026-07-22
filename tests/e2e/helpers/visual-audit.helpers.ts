@@ -84,7 +84,7 @@ export async function loginB2B(page: Page): Promise<boolean> {
     try {
       const saved = JSON.parse(fs.readFileSync(AUTH_STATE_FILE, 'utf8'));
       await page.context().addCookies(saved.cookies || []);
-      await page.goto('https://awamotos.com', { waitUntil: 'commit', timeout: 20_000 }).catch(() => {});
+      await page.goto('/', { waitUntil: 'commit', timeout: 20_000 }).catch(() => {});
       await sleep(1_000);
       // Verificar se está logado
       const accountLink = await page.locator('a[href*="customer/account"], .customer-welcome').first().isVisible().catch(() => false);
@@ -95,7 +95,7 @@ export async function loginB2B(page: Page): Promise<boolean> {
   if (!email || !pass) return false;
 
   // Login manual
-  await page.goto('https://awamotos.com/b2b/account/login/', { waitUntil: 'domcontentloaded', timeout: 60_000 }).catch(() => {});
+  await page.goto('/b2b/account/login/', { waitUntil: 'domcontentloaded', timeout: 60_000 }).catch(() => {});
   await sleep(1_000);
   await dismissCookie(page);
   await page.locator('#b2b-email').first().fill(email).catch(() => {});

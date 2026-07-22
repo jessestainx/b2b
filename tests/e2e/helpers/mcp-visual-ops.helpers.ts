@@ -44,20 +44,20 @@ export const MCP_COOKIE_SELECTORS = [
 
 export const DEFAULT_TARGETS: VisualTarget[] = [
   // Core pages
-  { slug: 'home', url: 'https://awamotos.com/', pageLabel: 'Home' },
+  { slug: 'home', url: '/', pageLabel: 'Home' },
   // Category / PLP
-  { slug: 'category-guidoes', url: 'https://awamotos.com/guidoes.html', pageLabel: 'PLP Guidoes' },
-  { slug: 'category-bagageiros', url: 'https://awamotos.com/bagageiros.html', pageLabel: 'PLP Bagageiros' },
+  { slug: 'category-guidoes', url: '/guidoes.html', pageLabel: 'PLP Guidoes' },
+  { slug: 'category-bagageiros', url: '/bagageiros.html', pageLabel: 'PLP Bagageiros' },
   // PDP
-  { slug: 'pdp-ret-biz', url: 'https://awamotos.com/ret-biz-100-cr-redondo-universal-2220.html', pageLabel: 'PDP Ret BIZ' },
+  { slug: 'pdp-ret-biz', url: '/ret-biz-100-cr-redondo-universal-2220.html', pageLabel: 'PDP Ret BIZ' },
   // Search
-  { slug: 'search-bagageiro', url: 'https://awamotos.com/catalogsearch/result/?q=bagageiro', pageLabel: 'Search Results' },
+  { slug: 'search-bagageiro', url: '/catalogsearch/result/?q=bagageiro', pageLabel: 'Search Results' },
   // Auth / Account
-  { slug: 'login', url: 'https://awamotos.com/customer/account/login/', pageLabel: 'Login' },
+  { slug: 'login', url: '/customer/account/login/', pageLabel: 'Login' },
   // Cart
-  { slug: 'cart', url: 'https://awamotos.com/checkout/cart/', pageLabel: 'Cart' },
+  { slug: 'cart', url: '/checkout/cart/', pageLabel: 'Cart' },
   // B2B
-  { slug: 'b2b-landing', url: 'https://awamotos.com/seja-cliente-b2b', pageLabel: 'B2B Landing' },
+  { slug: 'b2b-landing', url: '/seja-cliente-b2b', pageLabel: 'B2B Landing' },
 ];
 
 /**

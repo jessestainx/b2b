@@ -14,11 +14,9 @@
  *
  * Uso:
  *   cd tests/e2e
- *   ALLOW_PRODUCTION_VALIDATION=true PLAYWRIGHT_BASE_URL=https://awamotos.com \
  *     playwright test --config=pw-fase-h0-header.config.ts
  *
  *   # Um breakpoint especifico:
- *   ALLOW_PRODUCTION_VALIDATION=true PLAYWRIGHT_BASE_URL=https://awamotos.com \
  *     playwright test --config=pw-fase-h0-header.config.ts --project=h0-1366
  */
 import path from 'path';

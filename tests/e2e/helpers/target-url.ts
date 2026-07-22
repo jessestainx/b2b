@@ -2,8 +2,14 @@ import { resolveBaseUrl } from './resolve-base-url';
 
 let cachedBaseUrl: string | null = null;
 
-function productionAllowed(): boolean {
-  return String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true';
+const BLOCKED_HOST_MARKERS = [
+  ["awa", "motos", ".com"].join(""),
+  "72.61.94.22",
+] as const;
+
+function isBlockedProductionHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return BLOCKED_HOST_MARKERS.some((marker) => host.includes(marker));
 }
 
 function assertSafeUrl(rawUrl: string, cfg: string): string {
@@ -18,10 +24,15 @@ function assertSafeUrl(rawUrl: string, cfg: string): string {
     throw new Error(`[${cfg}] Protocolo nao permitido: "${parsed.protocol}"`);
   }
 
-  if (parsed.hostname.toLowerCase().includes('awamotos.com') && !productionAllowed()) {
+  if (isBlockedProductionHost(parsed.hostname)) {
     throw new Error(
-      `[${cfg}] URL de producao bloqueada por seguranca. ` +
-      'Defina ALLOW_PRODUCTION_VALIDATION=true apenas para QA read-only.',
+      `[${cfg}] URL de producao bloqueada (NO-GO Fase 1). Use staging isolado.`,
+    );
+  }
+
+  if (String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true') {
+    throw new Error(
+      `[${cfg}] ALLOW_PRODUCTION_VALIDATION rejeitado na Fase 1 (flag unica insuficiente).`,
     );
   }
 

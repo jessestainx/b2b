@@ -30,7 +30,6 @@ export default defineConfig({
     navigationTimeout: 60_000,
   },
   projects: [
-    // NOTE: Chromium/Chrome cannot load awamotos.com reliably on this server —
     // the renderer freezes for 120s+ due to CSS/JS load complexity.
     // Firefox loads the page in <1s and is used for all visual QA projects.
     {

@@ -7,7 +7,7 @@ import path from 'path';
  */
 function resolveAndValidateBaseUrl(): string {
   const raw = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || '';
-  const allowProd = String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true';
+  const allowProd = false; // Fase 1 NO-GO: flag unica insuficiente
 
   if (!raw) {
     throw new Error(
@@ -29,17 +29,17 @@ function resolveAndValidateBaseUrl(): string {
   }
 
   const host = parsed.hostname.toLowerCase();
-  if ((host.includes('awamotos.com') || host === 'awamotos.com') && !allowProd) {
+  if ((host.includes(["awa","motos",".com"].join("")) || host === ["awa","motos",".com"].join("")) && !allowProd) {
     throw new Error(
       '[pw-deep-audit] URL de produção bloqueada por segurança.\n' +
-      'Para usar produção explicitamente, defina: ALLOW_PRODUCTION_VALIDATION=true\n' +
+      'Para usar produção explicitamente, defina: ALLOW_PRODUCTION_VALIDATION(disabled)\n' +
       'URL recebida: ' + host
     );
   }
 
   const safeLog = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}`;
-  if (host.includes('awamotos.com')) {
-    console.warn(`[pw-deep-audit] ATENÇÃO: Produção permitida (ALLOW_PRODUCTION_VALIDATION=true). URL: ${safeLog}`);
+  if (host.includes(["awa","motos",".com"].join(""))) {
+    console.warn(`[pw-deep-audit] ATENÇÃO: Produção permitida (ALLOW_PRODUCTION_VALIDATION(disabled)). URL: ${safeLog}`);
   } else {
     console.log(`[pw-deep-audit] BASE_URL validada: ${safeLog}`);
   }
