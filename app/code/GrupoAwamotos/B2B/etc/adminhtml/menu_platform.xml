@@ -22,6 +22,23 @@
              action="awa_commercial/commercialdashboard/index"
              resource="GrupoAwamotos_B2B::commercial_dashboard"/>
 
+        <!--
+          A-PREP (Etapa 1.5): Meu Desempenho — somente navegação.
+          Parent deliberadamente NÃO é GrupoAwamotos_B2B::platform:
+          a raiz B2B exige ACL ::commercial; a role Atendente tem
+          ::attendant_self sem ::commercial e ficaria invisível.
+          Id com prefixo platform_ permanece sob o gate unified_menu_enabled
+          (PlatformMenuVisibilityPlugin).
+        -->
+        <add id="GrupoAwamotos_B2B::platform_meu_desempenho"
+             title="Meu Desempenho"
+             translate="title"
+             module="GrupoAwamotos_B2B"
+             sortOrder="15"
+             parent="Magento_Backend::admin"
+             action="grupoawamotos_b2b/attendant/dashboard"
+             resource="GrupoAwamotos_B2B::attendant_self"/>
+
         <add id="GrupoAwamotos_B2B::platform_orders"
              title="Pedidos B2B"
              translate="title"
