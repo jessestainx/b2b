@@ -45,8 +45,8 @@ check_pattern() {
 echo "=== guard-no-production (escopo ${#FILES[@]} arquivos) ==="
 
 # URL absolutas / host de producao
-check_pattern "url_producao" 'https?://([^/"'"'"'[:space:]]*\\.)?awamotos\\.com'
-check_pattern "ip_producao" '72\\.61\\.94\\.22'
+check_pattern "url_producao" "https?://[^\"[:space:]]*awamotos\.com"
+check_pattern "ip_producao" "72\.61\.94\.22"
 # Assignment that enables production (not mere mentions of the env name)
 check_pattern "allow_production_true_assign" 'ALLOW_PRODUCTION_VALIDATION([=:][[:space:]]*["'"'"']?true["'"'"']?|=\$\{[^}]*:-true\})'
 # SSH / deploy secrets still wired in active job steps (not comments-only quarantine files are ok if no pull_request)
