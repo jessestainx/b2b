@@ -428,3 +428,65 @@ ausência de `PLAYWRIGHT_BASE_URL_PR`, comentário admin no PR, PR documental se
 ## Decisão Fase 2
 
 ### NO-GO
+
+---
+
+# FASE 1.1B — PÓS-MERGE (2026-07-22 22:41 UTC)
+
+## FASE 1.1 — CONCLUÍDA
+
+| Campo | Valor |
+|-------|-------|
+| PR | https://github.com/awamotosbrand-prog/magento_b2b_awa/pull/3 |
+| Estado | MERGED |
+| Método | merge commit |
+| SHA final (`origin/main`) | `df3030ca414004de616d86006e8cd082faea3155` |
+| Merged by | `awamotosbrand-prog` |
+| Merged at | 2026-07-22T22:40:21Z |
+| Worktree validação | `/home/deploy/worktrees/ci-containment-postmerge-main-20260722` (limpo de `origin/main`) |
+
+## Ancestralidade (`git merge-base --is-ancestor` → `origin/main`)
+
+| SHA | exit | Nota |
+|-----|------|------|
+| c2129f8c3 | 0 | quarantine |
+| 9738b357c | 0 | PR security + guard |
+| 7275bc888 | 0 | disable defaults |
+| 94956f594 | 0 | docs |
+| 1f3c8f6f6 | 0 | guard fix |
+| b7f9cd5b7 | 0 | guard fail-closed |
+| 88b8ee915 | 0 | docs 1.1 |
+| c8794d686 | 0 | docs 1.1B gate |
+| 7ed0a2fde / d769d722c / 256a7461c / aaa7f534f | 1 | worktree precoce — **não** no PR |
+
+## disabled_manually (pós-merge)
+
+Ambos `awamotosbrand-prog/magento_b2b_awa` e `ecriativy-git/b2b`:
+
+- e2e-pr-smoke → disabled_manually
+- e2e-nightly-full → disabled_manually
+- e2e-premerge-regression → disabled_manually
+- playwright.yml → disabled_manually
+
+## Variáveis / secrets
+
+- `PLAYWRIGHT_BASE_URL_PR`: ausente (não recriada)
+- Secrets: sem adições novas (B2B_TEST_*, COMPOSER_AUTH permanecem; não referenciados pelos workflows de PR)
+
+## Validação estática pós-merge
+
+YAML OK · guard OK · sem callers · quarentena só workflow_call · magento-ci ausente · sem hardcode de produção no escopo do guard.
+
+## Rollback
+
+```bash
+git fetch origin main
+git switch -c revert/ci-containment-fase1 origin/main
+git revert -m 1 df3030ca414004de616d86006e8cd082faea3155
+# abrir PR de revert; NÃO enable workflows; NÃO restaurar URLs de produção
+# manter disabled_manually; repetir guard-no-production
+```
+
+## Fase 2
+
+### NO-GO
