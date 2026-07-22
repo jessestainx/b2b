@@ -244,88 +244,93 @@ Pré-requisitos sugeridos para futura Fase 2 (não iniciada):
 
 ---
 
-# FASE 1.1 — FECHAMENTO DA CONTENÇÃO (2026-07-22)
+---
 
-## Call graph (workflows)
+# FASE 1.1 — FECHAMENTO (atualizado pós-PR)
+
+## Call graph
 
 ```
-[nenhum caller encontrado]
-    X  uses: ./.github/workflows/<quarantined>
-    X  uses: owner/repo/.github/workflows/<quarantined>
-    X  secrets: inherit para quarentenados
-    X  secrets explicitamente transmitidos a quarentenados
+(nenhum caller)
+     X---- uses: ./.github/workflows/{e2e-pr-smoke,e2e-nightly-full,e2e-premerge-regression,playwright,copilot-setup-steps}
+     X---- uses: owner/repo/.github/workflows/...
+     X---- secrets: inherit / secrets explícitos para quarentenados
 
-Workflows em quarentena (workflow_call sem callers):
-  e2e-pr-smoke.yml
-  e2e-nightly-full.yml
-  e2e-premerge-regression.yml
-  playwright.yml
-  copilot-setup-steps.yml
+Quarentenados (workflow_call, sem callers) no PR:
+  e2e-pr-smoke.yml | e2e-nightly-full.yml | e2e-premerge-regression.yml
+  playwright.yml | copilot-setup-steps.yml
 
-Ausentes em origin/main (contenção por ausência — NÃO reintroduzidos no PR):
-  magento-ci.yml
-  menu-regression.yml
-  product-design-qa.yml
-  playwright-visual-qa.yml
-  visual-quality-gate.yml
+Ausentes em main (não reintroduzidos):
+  magento-ci.yml | menu-regression.yml | product-design-qa.yml
+  playwright-visual-qa.yml | visual-quality-gate.yml
 
-Gates estáticos ativos (unicos com pull_request apos merge do PR):
-  quality-gates.yml  --> scripts/ci/*.sh + guard-no-production.sh
+PR ativos após merge (somente estáticos):
+  quality-gates.yml (+ guard-no-production)
   sanity.yml
   cms-blocks-verify.yml
-  magento-ci validate  (N/A em main — arquivo ausente)
 ```
 
-## Callers encontrados
+## Callers
 
-**Ausência comprovada** nos três remotes (`awamotosbrand-prog/magento_b2b_awa@main`,
-`ecriativy-git/b2b@main`, `grupoawamarketing-wq/awa@ci/visual-quality-gate-autonomous`):
+**Ausência comprovada** em:
+- `awamotosbrand-prog/magento_b2b_awa@main` (canônico)
+- `ecriativy-git/b2b@main`
+- `grupoawamarketing-wq/awa@ci/visual-quality-gate-autonomous`
+- worktree do PR
 
-- zero `uses: ./.github/workflows/...`
-- zero `uses: owner/repo/.github/workflows/...`
-- zero `secrets: inherit` ligado a reusable workflows
-- `workflow_call` aparece apenas como trigger de quarentena nos proprios YAMLs (sem callers)
+Nenhum caller removido (não existia).
 
 ## Secrets transmitidos
 
-Nenhum (sem callers). YAMLs de PR apos contenção: sem `secrets.B2B_*` / `PROD_*` / `STAGING_*`.
-
-## Repositório canônico
-
-`awamotosbrand-prog/magento_b2b_awa` — default branch: **`main`**
-
-Commits de contenção **antes do PR**: **não** estavam em `main`.
+Nenhum. Workflows do PR: **zero** referências `secrets.*`.
 
 ## PR
 
-(preenchido apos abertura)
+- **URL:** https://github.com/awamotosbrand-prog/magento_b2b_awa/pull/3
+- **Base:** `main` (canônico `awamotosbrand-prog/magento_b2b_awa`)
+- **Head:** `security/ci-containment-fase1-20260722`
+- **Merge automático:** não
+- **Reviewers:** nenhum solicitado automaticamente (revisão humana pendente)
+- **SHA do merge:** _pendente revisão humana_
 
-## Reviewers / SHA merge
+## Commits no PR (sobre origin/main)
 
-Pendente revisão humana. **Sem merge automático.**
-
-## Estado disabled_manually (remotes admin, pre-merge)
-
-`e2e-pr-smoke`, `e2e-nightly-full`, `e2e-premerge-regression`, `playwright.yml`
-→ `disabled_manually` em `magento_b2b_awa` e `ecriativy-git/b2b`.
-
-## Escopo do PR (garantia)
-
-Somente CI/workflows/scripts de guard/helpers e2e/docs de contenção.
-**Não** altera Magento storefront CSS/JS, banco, docroot, credentials, environments, branch protection.
-
-## Rollback
-
-```bash
-gh pr close <PR> --comment "rollback containment"
-# ou apos merge:
-git revert -m 1 <MERGE_SHA>
-# re-enable workflows SOMENTE com aprovacao explicita (nao fazer):
-# gh api --method PUT repos/<repo>/actions/workflows/<file>/enable
 ```
+b7f9cd5b7 fix(ci): make no-production URL/IP patterns fail-closed
+1f3c8f6f6 fix(ci): correct no-production guard regex escaping
+94956f594 docs(ci): record containment and reactivation criteria
+7275bc888 security(test): disable production defaults
+9738b357c security(ci): remove production targets from pull requests
+c2129f8c3 chore(ci): quarantine production workflows
+```
+
+## Revisão estática (executada localmente; CI Actions NÃO disparada por nós)
+
+| Check | Resultado |
+|-------|-----------|
+| Diff YAML | OK — só workflows/guard/helpers/docs |
+| YAML parse | OK (8 workflows) |
+| guard-no-production | OK + prova fail-closed |
+| URLs/IP produção | sem literais `https://…awamotos.com` / IP; deny-list via join |
+| secrets | NONE nos workflows |
+| workflow_call callers | NONE |
+| permissions | `contents: read` nos workflows tocados |
+| triggers | quarentena=`workflow_call`; ativos=quality/sanity/cms |
+
+## Escopo — não altera
+
+Magento storefront CSS/JS, banco, config app, docroot produção, credentials, environments, branch protection: **confirmado pelo name-only do PR**.
+
+## Pós-merge (aguardar humano)
+
+1. Verificar commits em `main`
+2. Revalidar `disabled_manually`
+3. Rodar só `bash scripts/ci/guard-no-production.sh`
+4. Confirmar ausência de triggers perigosos
+5. Registrar SHA do merge neste relatório
 
 ## Decisão Fase 2
 
 ### NO-GO
 
-Produção permanece NO-GO. Fase 2 não inicia automaticamente.
+Produção permanece NO-GO. Não iniciar Fase 2 automaticamente.
