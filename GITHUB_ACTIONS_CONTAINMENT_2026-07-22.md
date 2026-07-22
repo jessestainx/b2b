@@ -490,3 +490,13 @@ git revert -m 1 df3030ca414004de616d86006e8cd082faea3155
 ## Fase 2
 
 ### NO-GO
+
+---
+
+# FASE 1.2 — TRIAGEM startup_failure (conclusão)
+
+Relatório completo: [`GITHUB_ACTIONS_STARTUP_FAILURE_TRIAGE_2026-07-22.md`](./GITHUB_ACTIONS_STARTUP_FAILURE_TRIAGE_2026-07-22.md)
+
+**Classificação:** P2 — workflow fantasma `BuildFailed` (`workflow_id` 305821273, `state: deleted`), existente desde 2026-07-02; **0 jobs** em todos os runs amostrados; App `github-actions`; YAMLs da contenção semanticamente OK; callers ausentes; `disabled_manually` intacto.
+
+**Não é P0.** Produção NO-GO. Fase 2 NO-GO.
