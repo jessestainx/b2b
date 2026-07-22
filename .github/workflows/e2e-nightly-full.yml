@@ -1,62 +1,26 @@
+# STATUS: QUARENTENA — NÃO EXECUTAR
+# Ticket: CI-CONTAINMENT-FASE1-2026-07-22
+# Motivo: npm scripts test:mcp-visual defaultavam produção; faltam tests/e2e/scripts/*.mjs
+# Caminhos ausentes (não criar stubs nesta fase):
+#   - tests/e2e/scripts/mcp-visual-report.mjs
+#   - tests/e2e/scripts/mcp-visual-autofix.mjs
+#   - tests/e2e/scripts/visual-baseline-guard.mjs
+# Contenção API: disabled_manually (2026-07-22). Sem workflow_dispatch (NO-GO produção).
+
 name: e2e-nightly-full
 
 on:
-  schedule:
-    - cron: "0 4 * * *"
-  workflow_dispatch:
+  workflow_call:
 
-concurrency:
-  group: e2e-nightly-full-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
-  nightly:
+  quarantine-notice:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 95
-    env:
-      MCP_VISUAL_UPDATE_BASELINE: "0"
-      TEST_USER: ${{ secrets.B2B_TEST_USER }}
-      TEST_PASS: ${{ secrets.B2B_TEST_PASS }}
-      TEST_PENDING_USER: ${{ secrets.B2B_TEST_PENDING_USER }}
-      TEST_PENDING_PASS: ${{ secrets.B2B_TEST_PENDING_PASS }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: tests/e2e/package-lock.json
-
-      - name: Install dependencies
-        working-directory: tests/e2e
-        run: npm ci
-
-      - name: Install Playwright browsers
-        working-directory: tests/e2e
-        run: npx playwright install --with-deps
-
-      - name: Full MCP visual suite
-        working-directory: tests/e2e
-        run: npm run test:mcp-visual
-
-      - name: Generate MCP visual report
-        working-directory: tests/e2e
-        run: npm run report:mcp-visual
-
-      - name: B2B regression suite (all projects)
-        working-directory: tests/e2e
-        run: npm run test:b2b-regression:all
-
-      - name: Upload nightly artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-nightly-full-artifacts
-          path: |
-            tests/e2e/test-results/**
-            tests/e2e/reports/**
-            tests/e2e/playwright-report/**
+      - name: Quarantined
+        run: |
+          echo "STATUS: QUARENTENA — NÃO EXECUTAR"
+          exit 1
