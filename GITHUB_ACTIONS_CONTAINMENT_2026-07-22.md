@@ -497,6 +497,21 @@ git revert -m 1 df3030ca414004de616d86006e8cd082faea3155
 
 Relatório completo: [`GITHUB_ACTIONS_STARTUP_FAILURE_TRIAGE_2026-07-22.md`](./GITHUB_ACTIONS_STARTUP_FAILURE_TRIAGE_2026-07-22.md)
 
-**Classificação:** P2 — workflow fantasma `BuildFailed` (`workflow_id` 305821273, `state: deleted`), existente desde 2026-07-02; **0 jobs** em todos os runs amostrados; App `github-actions`; YAMLs da contenção semanticamente OK; callers ausentes; `disabled_manually` intacto.
+**Classificação aprovada: P2**
 
-**Não é P0.** Produção NO-GO. Fase 2 NO-GO.
+**Terminologia:** registro residual de workflow com `state=deleted`, gerando check suites `startup_failure` antes da criação de jobs.
+
+- workflow_id **305821273**, path API `BuildFailed`, desde 2026-07-02  
+- **0 jobs** / **0 runners** / **0 check-runs** nos runs amostrados  
+- YAMLs da contenção semanticamente OK; callers ausentes; `disabled_manually` intacto  
+- **Não** declarar bug definitivo da plataforma sem GitHub Support  
+
+**Baseline monitoramento (GET):** **45** runs do workflow_id 305821273 (2026-07-22 23:15 UTC)
+
+| Fase | Status |
+|------|--------|
+| FASE 1 | CONCLUÍDA |
+| FASE 1.1 | CONCLUÍDA |
+| FASE 1.2 | CONCLUÍDA — P2 |
+| FASE 2 | NO-GO |
+| PRODUÇÃO | NO-GO |

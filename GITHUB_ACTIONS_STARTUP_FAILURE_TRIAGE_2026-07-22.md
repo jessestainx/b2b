@@ -15,7 +15,7 @@
 
 Os `startup_failure` observados após o merge **não** indicam contenção quebrada.
 
-Causa raiz comprovada: workflow fantasma **`BuildFailed`** (`workflow_id` **305821273**, `state: deleted`, path **`BuildFailed`** — **não** existe em `.github/workflows/` nem como arquivo no tree do merge SHA).
+Causa raiz observada: **registro residual de workflow** **`BuildFailed`** (`workflow_id` **305821273**, `state: deleted`, path **`BuildFailed`** — **não** existe em `.github/workflows/` nem como arquivo no tree do merge SHA).
 
 - Criado em **2026-07-02T07:37:28Z** (20 dias antes do merge de contenção).
 - **43/43** runs com `conclusion=startup_failure`.
@@ -26,9 +26,13 @@ Causa raiz comprovada: workflow fantasma **`BuildFailed`** (`workflow_id` **3058
 Validação semântica local dos 8 YAMLs em `main` no merge: **nenhum problema semântico encontrado**.  
 Callers de `workflow_call`: **zero** em `main` (canônico) e `ecriativy-git/b2b@main`.
 
-### Classificação final: **P2 — CHECK/EVENTO DE PLATAFORMA (workflow fantasma BuildFailed)**
+### Classificação final: **P2**
+
+**Terminologia aprovada:** registro residual de workflow com `state=deleted`, gerando check suites `startup_failure` antes da criação de jobs.
 
 Não P0 (contenção intacta). Não P1 (YAMLs da contenção semanticamente válidos; o path `BuildFailed` não é arquivo nosso).
+
+**Não se declara bug definitivo da plataforma GitHub** sem confirmação do GitHub Support.
 
 ---
 
@@ -118,7 +122,7 @@ Não há check run de Bugbot nesta suite do merge.
 | e2e-premerge-regression.yml | **disabled_manually** |
 | playwright.yml | **disabled_manually** |
 
-**Nota:** `quality-gates` / `sanity` / `cms-blocks-verify` **não** geraram runs com `head_sha=df3030ca…`. O único run desse SHA é o fantasma `BuildFailed`. Isso é consistente com falha de startup ao nível do serviço Actions, não com execução dos YAMLs de contenção.
+**Nota:** `quality-gates` / `sanity` / `cms-blocks-verify` **não** geraram runs com `head_sha=df3030ca…`. O único run desse SHA é o registro residual `BuildFailed`. Isso é consistente com falha de startup ao nível do serviço Actions, não com execução dos YAMLs de contenção.
 
 ### Triggers dos quarentenados (versão no merge SHA)
 
@@ -168,7 +172,7 @@ Portanto: **não** há evidência de “YAML válido porém workflow semanticame
 
 | Horário (UTC) | Evento |
 |---------------|--------|
-| 2026-07-02T07:37:28Z | Workflow fantasma `BuildFailed` (id 305821273) criado; 1º run `schedule` `startup_failure`, 0 jobs |
+| 2026-07-02T07:37:28Z | Registro residual de workflow `BuildFailed` (id 305821273) criado; 1º run `schedule` `startup_failure`, 0 jobs |
 | 2026-07-02 → 2026-07-22 | 43 runs `BuildFailed`, 100% `startup_failure`, eventos schedule/push/pull_request |
 | 2026-07-07 | Até workflows reais (`e2e-nightly-full` via `workflow_dispatch`) retornam `startup_failure` com **0 jobs** |
 | 2026-07-22T22:40:21Z | **Merge** PR #3 → `df3030ca4` (committer GitHub) |
@@ -176,7 +180,7 @@ Portanto: **não** há evidência de “YAML válido porém workflow semanticame
 | 2026-07-22T22:40:24Z | Run 29963661902 (`BuildFailed`, pull_request na branch do PR) |
 | 2026-07-22T22:41:37–40Z | Runs `BuildFailed` no push/PR do PR documental #4 |
 
-Origem do run do merge: **push do merge commit em `main`**, registrado sob o workflow fantasma `BuildFailed` (App GitHub Actions), **não** sob os YAMLs de e2e/produção.
+Origem do run do merge: **push do merge commit em `main`**, registrado sob o registro residual de workflow `BuildFailed` (App GitHub Actions), **não** sob os YAMLs de e2e/produção.
 
 ---
 
@@ -203,9 +207,9 @@ Origem do run do merge: **push do merge commit em `main`**, registrado sob o wor
 |------|---------|
 | A) workflow semanticamente inválido (nossos YAMLs) | **Não** |
 | B) workflow ativo ainda acionável (perigoso) | **Não** (quarentena + disabled_manually) |
-| C) GitHub App / check externo | **Parcial:** App é **GitHub Actions**, via registro fantasma `BuildFailed` |
-| D) estado histórico/transitório da plataforma | **Sim (principal):** fantasma `deleted` desde 02/07; 0 jobs recorrente |
-| E) outra causa | Fantasma `BuildFailed` + falha de startup pré-job |
+| C) GitHub App / check externo | **Parcial:** App é **GitHub Actions**, via registro registro residual `BuildFailed` |
+| D) estado histórico/transitório / registro residual | **Sim (principal):** registro residual `state=deleted` desde 02/07; 0 jobs recorrente — **sujeito a confirmação do GitHub Support** |
+| E) outra causa | Registro residual `BuildFailed` + `startup_failure` pré-job |
 
 ---
 
@@ -255,3 +259,71 @@ A triagem **não** libera Fase 2. Produção permanece NO-GO.
 | Produção NO-GO | **OK** |
 
 **FASE 1.2 — CONCLUÍDA (read-only).**
+
+---
+
+## Encerramento formal (2026-07-22 23:15 UTC)
+
+**Terminologia aprovada (P2):** registro residual de workflow com `state=deleted`, gerando check suites `startup_failure` antes da criação de jobs.
+
+Não se declara bug definitivo da plataforma GitHub sem confirmação do GitHub Support.
+
+### Preservação de evidência
+
+Não apagar / não re-run:
+
+- workflow runs (incl. 29963661843 e série BuildFailed);
+- check suites (incl. 81177329108);
+- comentários dos PRs #3 e #4;
+- este relatório e `GITHUB_ACTIONS_CONTAINMENT_2026-07-22.md`;
+- respostas sanitizadas da API já registradas.
+
+### Baseline de monitoramento (leitura apenas)
+
+| Métrica | Valor | Momento |
+|---------|-------|---------|
+| Runs do workflow_id 305821273 (`BuildFailed`) | **45** | 2026-07-22 23:15 UTC (GET `.../actions/workflows/305821273/runs`) |
+
+- **Não** criar workflow de monitoramento.
+- **Não** polling automático.
+- Recontar somente em próximo ciclo administrativo aprovado (GET read-only).
+
+### Rascunho para GitHub Support — **NÃO ENVIAR** sem aprovação humana
+
+```text
+Subject: Actions startup_failure for deleted workflow path "BuildFailed" (0 jobs)
+
+Repository: awamotosbrand-prog/magento_b2b_awa (private)
+
+We observe recurring GitHub Actions runs that never create jobs.
+
+Details:
+- workflow_id: 305821273
+- workflow state: deleted
+- workflow path/name reported by API: BuildFailed
+- No corresponding file on the default branch (main); path is not under .github/workflows/
+- First observed occurrence (API created_at): 2026-07-02T07:37:28Z
+- At triage time: 43/43 runs with conclusion=startup_failure (baseline recount at close: 45)
+- Merge-related run id: 29963661843
+  - head_sha: df3030ca414004de616d86006e8cd082faea3155
+  - event: push (main)
+  - jobs.total_count: 0
+  - no runners assigned
+  - associated check suite latest_check_runs_count: 0
+- No manual workflow_dispatch / re-run was used during investigation (read-only GET only)
+- Our repository containment workflows remain intact (dangerous e2e workflows disabled_manually; no job execution observed for these startup_failure runs)
+
+Please advise whether this deleted/residual workflow registration can be cleared and why startup_failure check suites continue to be created without jobs.
+
+(No tokens, auth headers, secrets, or personal data included.)
+```
+
+### Status final das fases
+
+| Fase | Status |
+|------|--------|
+| FASE 1 | **CONCLUÍDA** |
+| FASE 1.1 | **CONCLUÍDA** |
+| FASE 1.2 | **CONCLUÍDA — P2** |
+| FASE 2 | **NO-GO** |
+| PRODUÇÃO | **NO-GO** |
