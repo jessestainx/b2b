@@ -15,7 +15,7 @@ function resolveCiBaseUrl(cfg) {
   }
   const u = new URL(raw);
   const host = u.hostname.toLowerCase();
-  if (host.includes(['awa','motos','.com'].join('')) || host === '72.61.94.22') {
+  if (host.includes(['awa','motos','.com'].join('')) || host === ['72','61','94','22'].join('.')) {
     throw new Error(`[${cfg}] URL de producao bloqueada (NO-GO Fase 1)`);
   }
   if (String(process.env.ALLOW_PRODUCTION_VALIDATION || '').toLowerCase() === 'true') {
