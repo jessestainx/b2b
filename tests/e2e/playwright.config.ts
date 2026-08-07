@@ -144,6 +144,14 @@ export default defineConfig({
         launchOptions: chromiumLaunchOptions,
       },
     },
+    {
+      name: 'desktop-1920',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        launchOptions: chromiumLaunchOptions,
+      },
+    },
 
     /* ── TABLET ────────────────────────────────────────────── */
     {

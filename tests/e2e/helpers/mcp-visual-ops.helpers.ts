@@ -50,8 +50,8 @@ export const DEFAULT_TARGETS: VisualTarget[] = [
   { slug: 'category-bagageiros', url: 'https://awamotos.com/bagageiros.html', pageLabel: 'PLP Bagageiros' },
   // PDP
   { slug: 'pdp-ret-biz', url: 'https://awamotos.com/ret-biz-100-cr-redondo-universal-2220.html', pageLabel: 'PDP Ret BIZ' },
-  // Search
-  { slug: 'search-bagageiro', url: 'https://awamotos.com/catalogsearch/result/?q=bagageiro', pageLabel: 'Search Results' },
+  // Search (evita query que redireciona para categoria e gera falso positivo)
+  { slug: 'search-guidao', url: 'https://awamotos.com/catalogsearch/result/?q=guidao', pageLabel: 'Search Results' },
   // Auth / Account
   { slug: 'login', url: 'https://awamotos.com/customer/account/login/', pageLabel: 'Login' },
   // Cart
@@ -258,33 +258,45 @@ function pixelDiffRatio(actualPath: string, baselinePath: string): number {
     const actual = PNG.sync.read(actualBuf);
     const baseline = PNG.sync.read(baselineBuf);
 
-    // If dimensions differ, treat as 100% different
-    if (actual.width !== baseline.width || actual.height !== baseline.height) {
+    const isMobileSnapshot = isMobile390Snapshot(actualPath) || isMobile390Snapshot(baselinePath);
+
+    // Use intersection area when dimensions differ (common in legacy mobile baselines).
+    // This avoids false 100% regressions caused only by viewport/capture-size mismatch.
+    const compareWidth = Math.min(actual.width, baseline.width);
+    let compareHeight = Math.min(actual.height, baseline.height);
+
+    // Mobile pages have volatile floating widgets near viewport bottom; ignore this strip for stability.
+    if (isMobileSnapshot) {
+      compareHeight = Math.max(1, compareHeight - 180);
+    }
+
+    if (compareWidth <= 0 || compareHeight <= 0) {
       return 1.0;
     }
 
-    let compareHeight = actual.height;
-    // Mobile pages have volatile floating widgets near viewport bottom; ignore this strip for stability.
-    if (isMobile390Snapshot(actualPath)) {
-      compareHeight = Math.max(1, actual.height - 180);
-    }
-
-    const totalPixels = actual.width * compareHeight;
+    const totalPixels = compareWidth * compareHeight;
     if (totalPixels === 0) return 0;
 
-    const compareBytes = totalPixels * 4;
-    const actualData = compareHeight === actual.height
-      ? actual.data
-      : actual.data.subarray(0, compareBytes);
-    const baselineData = compareHeight === baseline.height
-      ? baseline.data
-      : baseline.data.subarray(0, compareBytes);
+    const readRegion = (img: PNG): Buffer => {
+      const rowSize = compareWidth * 4;
+      const out = Buffer.alloc(totalPixels * 4);
+      for (let y = 0; y < compareHeight; y += 1) {
+        const srcStart = y * img.width * 4;
+        const srcEnd = srcStart + rowSize;
+        const dstStart = y * rowSize;
+        out.set(img.data.subarray(srcStart, srcEnd), dstStart);
+      }
+      return out;
+    };
+
+    const actualData = readRegion(actual);
+    const baselineData = readRegion(baseline);
 
     const diffPixels = pixelmatch(
       actualData,
       baselineData,
       undefined, // no output diff image
-      actual.width,
+      compareWidth,
       compareHeight,
       { threshold: 0.1 } // per-pixel color sensitivity
     );

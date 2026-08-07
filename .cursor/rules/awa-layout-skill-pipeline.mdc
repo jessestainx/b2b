@@ -1,0 +1,71 @@
+---
+description: Pipeline definitivo de skills para layout Magento 2 storefront (ayo_home5_child) — conjunto mínimo, autoridade visual e sequência obrigatória
+alwaysApply: true
+---
+
+# AWA — Pipeline de skills para layout Magento 2
+
+Use este pipeline em tarefas de **layout / UX / UI / CSS / LESS / PHTML / layout XML** do storefront (`AWA_Custom/ayo_home5_child` e módulos de tema relacionados).
+
+Não apague as demais skills instaladas. Apenas **não as ative** nesta sessão de layout.
+
+Continua valendo: produção somente leitura por padrão; alterações exigem autorização explícita, backup e `awa-production-safety`.
+
+## Conjunto principal (ativar)
+
+| Skill | Responsabilidade |
+|-------|------------------|
+| **awa** | Autoridade do projeto: tema `ayo_home5_child`, estrutura Magento, arquivos existentes, padrões AWA |
+| **flex-grid-flow** | Somente responsividade, grids, espaçamentos fluidos e comportamento desktop / tablet / mobile |
+| **impeccable** | Autoridade visual principal: direção de design e UX durante a construção |
+| **polish** | Só no fim: alinhamento, consistência de espaçamento, estados, ícones, bordas, tipografia, microdefeitos |
+| **awa-magento-performance** | Etapa separada: LCP, CLS, JS, imagens, fontes, cache — o visual não pode piorar CWV |
+| **review-agent** | Revisão final do diff: regressões e problemas objetivos antes de aplicar / encerrar |
+| **awa-production-audit** | Antes e depois, **somente leitura**: baseline e confirmação do que mudou |
+
+## Autoridade visual (não misturar)
+
+- **impeccable** = autoridade visual (tipografia, cor, hierarquia, componentes de storefront).
+- **ui-ux-pro-max** = só referência opcional; **sem poder de decisão**.
+- **interface-design** = **desativada** nesta pipeline (mais orientada a dashboards / Admin).
+
+Nunca ativar `ui-ux-pro-max`, `impeccable` e `interface-design` juntos na mesma sessão de layout.
+
+## Skills fora do fluxo de layout (não ativar)
+
+Podem permanecer instaladas; não participar da construção visual:
+
+- `awa-linux-devops`
+- `awa-magento-b2b`
+- `automate` / `autopilot`
+- `appbuilder-*`
+- `canvas`
+- `create-hook` / `create-rule` / `create-skill`
+- `loop`
+- `sdk`
+- `split-to-prs`
+- `statusline`
+- `update-cursor-settings`
+- `review-security` / `review-bugbot`
+
+Exceção: se o usuário pedir explicitamente uma dessas skills na mesma conversa.
+
+## Sequência obrigatória
+
+1. **awa-production-audit** — mapear estado atual sem alterar.
+2. **awa** — arquitetura do tema e arquivos corretos.
+3. **impeccable** — sistema visual e experiência.
+4. **flex-grid-flow** — responsividade e ritmo fluido.
+5. **awa-magento-performance** — desempenho e Core Web Vitals.
+6. **polish** — acabamento final.
+7. **review-agent** — revisar o diff inteiro.
+8. **awa-production-audit** — confirmar o que realmente mudou (somente leitura).
+
+Não pule etapas. Não inicie polish antes de impeccable + flex-grid-flow. Não declare “pronto” sem review-agent + audit final.
+
+## Arquivos e cascata (lembrete AWA)
+
+- Editar fonte em `app/design/frontend/AWA_Custom/ayo_home5_child/` (ou `app/code/GrupoAwamotos/` quando for módulo).
+- Nunca editar `app/code/Rokanthemes/*`, core Magento ou `vendor/`.
+- Tokens `var(--awa-*)`; sem hex hardcoded sem justificativa.
+- Bundles / align-grid: seguir `awa-css-governance` e `awa-design-system` (minificar, `.br`/`.gz`, bust de query, sync `pub/static` / `view_preprocessed` quando autorizado).

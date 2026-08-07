@@ -1,0 +1,82 @@
+---
+description: Segurança obrigatória para qualquer tarefa no servidor de produção AWA.
+globs:
+alwaysApply: true
+---
+
+# AWA — Segurança de produção
+
+O diretório remoto da Awamotos é PRODUÇÃO.
+
+## Comportamento padrão
+
+Trabalhar em modo SOMENTE LEITURA.
+
+Antes de qualquer ação, confirmar:
+
+- hostname;
+- diretório real com `readlink -f`;
+- DocumentRoot;
+- branch e commit;
+- `git status --short`;
+- ambiente e base URL.
+
+## Permitido sem nova autorização
+
+Somente diagnóstico de leitura, incluindo:
+
+- `pwd`, `readlink`, `stat`, `sha256sum`;
+- `git status`, `git diff`, `git log`, `git show`;
+- `rg`, `grep`, `find`, `sed -n`, `cat`, `head`, `tail`;
+- `ps`, `ss`, `systemctl status`, `systemctl cat`, `journalctl`;
+- GET e HEAD com `curl`;
+- SELECT, SHOW, DESCRIBE e EXPLAIN no banco;
+- comandos Magento estritamente informativos.
+
+Não exibir senhas, tokens, chaves, cookies ou segredos de `env.php`.
+
+## Exige autorização explícita
+
+Nunca executar automaticamente:
+
+- editar, criar, remover, mover ou renomear arquivos;
+- escrita no banco;
+- `cache:clean` ou `cache:flush`;
+- `setup:upgrade`;
+- `setup:di:compile`;
+- `setup:static-content:deploy`;
+- reindexação;
+- Composer mutável;
+- Git mutável;
+- alterações em Redis;
+- purge ou ban de Varnish;
+- reload ou restart de serviços;
+- alteração de permissões ou proprietário;
+- edição de `vendor/` ou `pub/static`.
+
+## Antes de uma alteração autorizada
+
+1. Listar o escopo exato.
+2. Mostrar diff.
+3. Registrar hash, mtime, proprietário e permissões.
+4. Repetir hashes após pelo menos 15 segundos.
+5. Abortar se houver escrita concorrente.
+6. Criar backup fora do DocumentRoot.
+7. Preparar rollback byte a byte.
+8. Alterar somente os arquivos aprovados.
+9. Usar substituição atômica quando aplicável.
+
+Nunca usar `Revert All`, `git reset` ou `git checkout` como rollback de um
+worktree sujo.
+
+## Após a operação
+
+Entregar:
+
+- arquivos alterados;
+- comandos executados;
+- hashes antes e depois;
+- diff efetivo;
+- caches e serviços afetados;
+- testes realizados;
+- status: SUCESSO, ROLLBACK ou ABORTADO.

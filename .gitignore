@@ -343,3 +343,5 @@ tmp/
 
 # IDE cache (Cursor/Kilo)
 .kilo/
+
+tests/e2e/test-results*/

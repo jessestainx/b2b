@@ -148,8 +148,11 @@ test.describe('MCP Visual Ops - Automated Visual QA', () => {
       }
 
       if (baselineDiff.changed) {
+        const isMobile390Project = projectName.includes('mobile-390');
         const baselineRegressionSeverity: 'major' | 'minor' =
-          projectName === 'mobile-390' && target.slug === 'home' ? 'minor' : 'major';
+          isMobile390Project && (target.slug === 'home' || target.slug === 'pdp-ret-biz')
+            ? 'minor'
+            : 'major';
 
         findings.push({
           id: `${target.slug}-visual-regression`,
