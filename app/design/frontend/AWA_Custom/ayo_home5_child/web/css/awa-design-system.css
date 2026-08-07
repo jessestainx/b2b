@@ -285,7 +285,12 @@
     max-height: none !important;
     overflow: visible !important;
   }
-  html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs,
+  /* v3.2 — o proprio .wrapper_slider tambem precisa do booster de 12 IDs:
+     na v3.1 ele entrou SEM o :is(#awa-boostx12) e perdeu para a regra inline
+     do inimigo (10-11 IDs reais). Por isso o wrapper continuou 331px. */
+  html body .page-wrapper .top-home-content--above-fold
+  :is(.wrapper_slider.hidden-xs,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost),
   html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs
   :is(.awa-hero-swiper, .swiper-wrapper,
       #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
