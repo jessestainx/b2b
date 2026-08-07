@@ -285,6 +285,7 @@
     max-height: none !important;
     overflow: visible !important;
   }
+  html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs,
   html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs
   :is(.awa-hero-swiper, .swiper-wrapper,
       #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
