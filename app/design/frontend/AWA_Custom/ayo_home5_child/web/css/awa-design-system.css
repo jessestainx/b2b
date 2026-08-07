@@ -266,24 +266,34 @@
 }
 
 /* ==========================================================================
-   10. FIX — Hero: banner cortando texto nas laterais (Onda 2C)
-   Causa: imagem 1200x294 dentro de caixa de altura fixa; o object-fit: cover
-   corta as laterais. Solução: a caixa do slide respeita a proporção da
-   imagem (aspect-ratio). !important desarma locks de altura do legado.
-   Escopo: .hidden-xs (desktop) — lock de 176px do mobile preservado.
+   10. FIX v2 — Hero: banner cortando texto nas laterais (Onda 2C)
+   Diagnóstico (via Playwright, 08/08): o slider de desktop (.hidden-xs) está
+   travado em 331px por regra INLINE com ~10 IDs repetidos + !important, que
+   inclusive zera o aspect-ratio (aspect-ratio:unset!important).
+   Contra-medida: reforço :is(…, #awa-boost×12) — especificidade de 12 IDs
+   sem repetir IDs reais. Hack isolado e documentado APENAS nesta seção.
+   O lock de 176px do mobile (.visible-xs) não é tocado (media query).
    ========================================================================== */
 @media (min-width: 768px) {
-  body .wrapper_slider.hidden-xs .banner_item_bg {
+  html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs
+  :is(.awa-hero-swiper, .swiper-wrapper, .swiper-slide, .banner_item, .banner_item_bg,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    aspect-ratio: 1200 / 294;
   }
-  body .wrapper_slider.hidden-xs .banner_item_bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+  html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs
+  :is(.banner_item_bg,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    aspect-ratio: 1200 / 294 !important;
+  }
+  html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs .banner_item_bg
+  :is(img, picture img,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
   }
 }
 
