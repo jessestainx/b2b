@@ -1,0 +1,253 @@
+/* ==========================================================================
+   AWA MOTOS · DESIGN SYSTEM + ONDA 1 — Correção de layout
+   Tema alvo: app/design/frontend/AWA_Custom/ayo_home5_child
+   --------------------------------------------------------------------------
+   POR QUE ESTE ARQUIVO EXISTE
+   Hoje o site carrega 6+ CSSs de correção com nome de data
+   (awa-home-critical-stack-2026-06-11, awa-home-polish-critical,
+   awa-home-launches-toggle-fix...) e seletores com body#html-body
+   repetido 11x + !important. Isso é a causa raiz da inconsistência:
+   cada correção luta contra a anterior. Este arquivo SUBSTITUI
+   esse modelo: a partir de agora, TODA correção visual entra AQUI.
+
+   REGRAS PERMANENTES (não quebrar, inclusive ao pedir ajuda de IA):
+   1. Este é o ÚNICO arquivo de override visual. Patch novo = seção nova aqui.
+   2. Proibido repetir ID para ganhar especificidade (body#html-body#html-body...).
+   3. !important só na SEÇÃO 8 (desarme de legado) e sempre comentado.
+   4. Cor, fonte, espaçamento e raio SEMPRE vêm dos tokens da SEÇÃO 1.
+   5. Comente o que cada bloco corrige. Futuro você agradece.
+
+   INSTALAÇÃO
+   A) TESTE RÁPIDO (sem deploy): Admin → Rokanthemes Theme Options →
+      Custom CSS → colar o conteúdo → salvar → limpar cache.
+      Para desfazer: apagar o campo. Rollback em segundos.
+   B) DEFINITIVO (Cursor/VS Code):
+      1. Copiar para: app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-design-system.css
+      2. Registrar como ÚLTIMO css em: Magento_Theme/layout/default_head_blocks.xml
+         <css src="css/awa-design-system.css"/>
+      3. Deploy (SSH na raiz do Magento):
+         php bin/magento setup:static-content:deploy pt_BR -f
+         php bin/magento cache:flush
+      (O versionamento de estáticos já está ativo — version17xxxx — então
+       o navegador dos clientes recebe a versão nova automaticamente.)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. TOKENS — única fonte de verdade visual
+   ========================================================================== */
+   :root {
+    /* Marca */
+    --awa-brand:        #b73337;   /* vermelho AWA (extraído do tema) */
+    --awa-brand-dark:   #8e2629;   /* hover/ativo */
+    --awa-ink:          #333333;
+    --awa-ink-soft:     #6b7280;
+    --awa-line:         #e7e7ea;
+    --awa-surface:      #ffffff;
+    --awa-surface-alt:  #f7f7f8;
+
+    /* Tipografia (fontes já carregadas pelo tema) */
+    --awa-font-display: 'Rubik', sans-serif;
+    --awa-font-body:    'Source Sans 3', sans-serif;
+
+    /* Raios e alturas de controle */
+    --awa-radius-s:     6px;
+    --awa-radius-m:     12px;
+    --awa-radius-pill:  999px;
+    --awa-h-control:    40px;      /* altura padrão de botão circular */
+    --awa-h-cta:        34px;      /* altura padrão de CTA pill */
+
+    /* Espaçamento */
+    --awa-sp-1: 4px;  --awa-sp-2: 8px;  --awa-sp-3: 12px;
+    --awa-sp-4: 16px; --awa-sp-5: 24px; --awa-sp-6: 32px;
+
+    /* Sombra única do sistema */
+    --awa-shadow-card:  0 1px 2px rgba(16,24,40,.06), 0 2px 8px rgba(16,24,40,.08);
+  }
+
+
+  /* ==========================================================================
+     2. FIX — Topbar B2B: botão "Cadastre agora" sobrepondo o texto
+     Causa: CTA inline dentro de um <p> longo; sem separação garantida.
+     Solução: flexbox com gap — itens flex NUNCA se sobrepõem.
+     ========================================================================== */
+  body .awa-b2b-promo-bar__text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;                 /* mobile: quebra em 2 linhas em vez de sobrepor */
+    gap: var(--awa-sp-3);
+    margin: 0;
+  }
+  body .awa-b2b-promo-bar__cta {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  @media (max-width: 767px) {
+    body .awa-b2b-promo-bar__text { font-size: 12px; gap: var(--awa-sp-2); }
+  }
+
+
+  /* ==========================================================================
+     3. FIX — Selo "Novo" sobrepondo a REF do produto
+     Causa: .hot-onsale sem ancoragem clara dentro do card.
+     Solução: badge vira pill ancorado no topo da imagem.
+     ========================================================================== */
+  body .awa-product-card .product-thumb { position: relative; }
+  body .awa-product-card .hot-onsale {
+    position: absolute;
+    top: var(--awa-sp-2);
+    left: var(--awa-sp-2);
+    z-index: 2;
+    margin: 0;
+  }
+  body .awa-product-card .onsale.new-lable .sale-bg { display: none; } /* mata o shape legado que vazava */
+  body .awa-product-card .onsale.new-lable .sale-text label {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 10px;
+    background: var(--awa-brand);
+    color: #fff;
+    border-radius: var(--awa-radius-pill);
+    font-family: var(--awa-font-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+  }
+
+
+  /* ==========================================================================
+     4. FIX — Carrossel de categorias: último item cortado + barra cinza
+     Causa: viewport com overflow escondido e trilho width:max-content —
+     o item final ficava "entre páginas". A barra cinza é o container de
+     dots renderizando VAZIO.
+     ========================================================================== */
+  body .awa-category-carousel__viewport {
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;                    /* Firefox: sem barra visível */
+    padding-bottom: var(--awa-sp-1);
+  }
+  body .awa-category-carousel__viewport::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+  body .awa-category-carousel__item { scroll-snap-align: start; }
+
+  /* Barra cinza: container de dots vazio não deve ocupar espaço na página */
+  body .awa-category-carousel__dots:empty { display: none; }
+
+
+  /* ==========================================================================
+     5. SISTEMA DE BOTÕES — hoje existem 4 estilos diferentes na home.
+     A partir daqui: 3 padrões oficiais e nada mais.
+     ========================================================================== */
+
+  /* 5a. CTA pill (ações principais) — ex: "Cadastre agora" */
+  body .awa-b2b-promo-bar__cta {
+    display: inline-flex;
+    align-items: center;
+    height: var(--awa-h-cta);
+    padding: 0 var(--awa-sp-4);
+    background: var(--awa-brand);
+    color: #fff;
+    border: none;
+    border-radius: var(--awa-radius-pill);
+    font-family: var(--awa-font-display);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .2s ease;
+  }
+  body .awa-b2b-promo-bar__cta:hover { background: var(--awa-brand-dark); color: #fff; }
+  body .awa-b2b-promo-bar__cta strong { font-weight: 600; }
+
+  /* 5b. Botão circular de navegação (setas de carrossel) */
+  body .awa-category-carousel__prev,
+  body .awa-category-carousel__next {
+    width: var(--awa-h-control);
+    height: var(--awa-h-control);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--awa-surface);
+    color: var(--awa-ink);
+    border: 1px solid var(--awa-line);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: border-color .2s ease, color .2s ease;
+  }
+  body .awa-category-carousel__prev:hover,
+  body .awa-category-carousel__next:hover {
+    border-color: var(--awa-brand);
+    color: var(--awa-brand);
+  }
+
+  /* 5c. Botão circular flutuante sobre imagem (pause do hero) */
+  body .awa-hero-pause-btn {
+    width: var(--awa-h-control);
+    height: var(--awa-h-control);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.92);
+    color: var(--awa-ink);
+    border: none;
+    border-radius: 50%;
+    box-shadow: var(--awa-shadow-card);
+    cursor: pointer;
+    transition: color .2s ease;
+  }
+  body .awa-hero-pause-btn:hover { color: var(--awa-brand); }
+
+
+  /* ==========================================================================
+     6. TIPOGRAFIA DE SEÇÃO + CARD DE PRODUTO — base da consistência
+     ========================================================================== */
+  body .awa-section-header__title {
+    font-family: var(--awa-font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--awa-ink);
+    margin: 0;
+  }
+  body .awa-section-header__subtitle {
+    font-family: var(--awa-font-body);
+    font-size: 14px;
+    color: var(--awa-ink-soft);
+  }
+  body .awa-product-card {
+    background: var(--awa-surface);
+    border: 1px solid var(--awa-line);
+    border-radius: var(--awa-radius-m);
+    padding: var(--awa-sp-4);
+    transition: box-shadow .2s ease;
+  }
+  body .awa-product-card:hover { box-shadow: var(--awa-shadow-card); }
+  body .awa-product-card .product-item-link {
+    font-family: var(--awa-font-body);
+    font-size: 14px;
+    color: var(--awa-ink);
+  }
+
+
+  /* ==========================================================================
+     7. ESPAÇAMENTO ENTRE SEÇÕES — ritmo vertical único
+     ========================================================================== */
+  body .awa-home-section { margin-bottom: var(--awa-sp-6); }
+
+
+  /* ==========================================================================
+     8. DESARME DE LEGADO — ÚNICA seção onde !important é permitido.
+     Motivo: os patches antigos usam !important com especificidade
+     inflada (body#html-body repetido); a única forma de neutralizar
+     uma declaração !important é outra !important carregada depois.
+     Cada regra aqui precisa citar o que está desarmando.
+     ========================================================================== */
+
+  /* Desarma "overflow travado" do patch awa-head-preload-critical-home,
+     que impedia o scroll-snap da SEÇÃO 4 e causava o item cortado. */
+  body .top-home-content--category-carousel .awa-category-carousel__viewport {
+    overflow-x: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */

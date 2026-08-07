@@ -25,7 +25,8 @@ status() {
   cursor_mb=$(echo "$ps_data" | grep -E 'cursor-server|vscode-server' | grep -v grep | awk '{s+=$6} END {printf "%.0f", s/1024+0}')
   chrome_count=$(echo "$ps_data" | grep -c '[c]hrome' 2>/dev/null || true)
   chrome_count=${chrome_count:-0}
-  ext_hosts=$(echo "$ps_data" | grep -c 'extensionHost' || echo 0)
+  ext_hosts=$(echo "$ps_data" | grep -F 'type=extensionHost' | grep -vc grep || true)
+  ext_hosts=${ext_hosts:-0}
 
   echo "Chrome headless:     ${chrome_mb:-0} MB (${chrome_count} processos)"
   echo "MCP externo (Node):  ${mcp_mb:-0} MB"
@@ -85,20 +86,23 @@ apply_hostinger_mcp() {
   }
 }
 EOF
-  cp "$CURSOR_MCP" "$CURSOR_MCP_GLOBAL"
+  # Global vazio: evita user-hostinger-mcp + project-hostinger-mcp ao mesmo tempo
+  cat > "$CURSOR_MCP_GLOBAL" <<'EOF'
+{
+  "_comment": "Vazio de propósito. Hostinger MCP só no projeto (.cursor/mcp.json).",
+  "concurrency": 1,
+  "browserInstances": 1,
+  "parallelJobs": 1,
+  "timeoutSeconds": 45,
+  "retries": 1,
+  "enableQueue": true,
+  "mcpServers": {}
+}
+EOF
   cat > "$PROJECT_MCP" <<'EOF'
 {
-	"_comment": "Legado VS Code — canônico: .cursor/mcp.json (perfil serial Hostinger)",
-	"servers": {
-		"hostinger-mcp": {
-			"type": "stdio",
-			"command": "/home/deploy/.cursor/bin/hostinger-mcp.sh",
-			"args": [],
-			"env": {
-				"NODE_OPTIONS": "--max-old-space-size=128"
-			}
-		}
-	},
+	"_comment": "Legado VS Code — canônico: .cursor/mcp.json do projeto. Servers vazios anti-duplicata.",
+	"servers": {},
 	"inputs": []
 }
 EOF

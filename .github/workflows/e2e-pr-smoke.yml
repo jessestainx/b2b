@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
+      # Produção NÃO é o alvo padrão (Fase 4). Defina vars.E2E_BASE_URL (staging/HML).
+      PLAYWRIGHT_BASE_URL: ${{ vars.E2E_BASE_URL }}
+      ALLOW_PRODUCTION_VALIDATION: ${{ vars.ALLOW_PRODUCTION_VALIDATION || 'false' }}
       TEST_USER: ${{ secrets.B2B_TEST_USER }}
       TEST_PASS: ${{ secrets.B2B_TEST_PASS }}
       TEST_PENDING_USER: ${{ secrets.B2B_TEST_PENDING_USER }}
@@ -21,7 +24,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
+      - name: Guard — BASE_URL obrigatória e produção só com opt-in
+        id: guard
+        run: |
+          set -euo pipefail
+          if [ -z "${PLAYWRIGHT_BASE_URL:-}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::E2E_BASE_URL ausente — smoke E2E ignorado. Produção não é o alvo padrão; configure staging/HML."
+            exit 0
+          fi
+          host="$(python3 - <<'PY'
+          from urllib.parse import urlparse
+          import os
+          print(urlparse(os.environ["PLAYWRIGHT_BASE_URL"]).hostname or "")
+          PY
+          )"
+          echo "E2E host=$host allow_prod=${ALLOW_PRODUCTION_VALIDATION}"
+          if echo "$host" | grep -qi 'awamotos.com'; then
+            if [ "${ALLOW_PRODUCTION_VALIDATION}" != "true" ]; then
+              echo "::error::awamotos.com bloqueado. Defina ALLOW_PRODUCTION_VALIDATION=true apenas em emergência."
+              exit 1
+            fi
+            echo "::warning::Rodando smoke contra produção com opt-in explícito."
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
       - name: Setup Node.js
+        if: steps.guard.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -29,18 +58,35 @@ jobs:
           cache-dependency-path: tests/e2e/package-lock.json
 
       - name: Install dependencies
+        if: steps.guard.outputs.skip != 'true'
         working-directory: tests/e2e
         run: npm ci
 
       - name: Install Playwright browsers
+        if: steps.guard.outputs.skip != 'true'
         working-directory: tests/e2e
         run: npx playwright install --with-deps
 
       - name: B2B smoke (notebook-1366)
+        if: steps.guard.outputs.skip != 'true'
         working-directory: tests/e2e
         run: npm run test:b2b-regression
 
+      - name: CSS cascade contract (Fase 4)
+        if: steps.guard.outputs.skip != 'true'
+        working-directory: tests/e2e
+        run: |
+          npx playwright test \
+            specs/css-cascade-contract.spec.ts \
+            --project=mobile-390 \
+            --project=tablet-768 \
+            --project=notebook-1366 \
+            --project=desktop-1920 \
+            --reporter=line \
+            --timeout=90000
+
       - name: Visual smoke - CLS scroll stability
+        if: steps.guard.outputs.skip != 'true'
         working-directory: tests/e2e
         run: |
           npx playwright test \
@@ -51,10 +97,8 @@ jobs:
             --timeout=60000
 
       - name: Header first-paint CLS regression
+        if: steps.guard.outputs.skip != 'true'
         working-directory: tests/e2e
-        env:
-          PLAYWRIGHT_BASE_URL: https://awamotos.com
-          ALLOW_PRODUCTION_VALIDATION: "true"
         run: |
           npx playwright test \
             specs/visual-audit-home-header-footer.spec.ts \
@@ -67,17 +111,13 @@ jobs:
             --timeout=60000
 
       - name: Header tablet rail regression
+        if: steps.guard.outputs.skip != 'true'
         working-directory: tests/e2e
-        env:
-          PLAYWRIGHT_BASE_URL: https://awamotos.com
-          ALLOW_PRODUCTION_VALIDATION: "true"
         run: node ../../.github/header-tablet-rail-regression.cjs
 
       - name: Dead CSS quarantine smoke (Fase 6A)
+        if: steps.guard.outputs.skip != 'true'
         working-directory: tests/e2e
-        env:
-          PLAYWRIGHT_BASE_URL: https://awamotos.com
-          ALLOW_PRODUCTION_VALIDATION: "true"
         run: |
           npx playwright test \
             specs/dead-css-quarantine.spec.ts \
@@ -86,7 +126,7 @@ jobs:
             --timeout=55000
 
       - name: Upload test artifacts
-        if: always()
+        if: always() && steps.guard.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: e2e-pr-smoke-artifacts

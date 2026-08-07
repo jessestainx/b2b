@@ -16,8 +16,215 @@
       "generated/**",
       "app/code/Rokanthemes/**",
       "**/*.min.css",
-      "**/*.min.js"
+      "**/*.min.js",
+      "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-align-grid-terminal-2026-06-11.css",
+      "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-align-grid-terminal-2026-06-11.min.css",
+      "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-visual-fixes-2026-06-29-final.css",
+      "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/awa-defer-global-bundle.css"
     ],
-    "ignoreValues": []
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-refine-terminal.less",
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-stack.less",
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_header-professional.less"
+        ],
+        "createdAt": "2026-07-30T07:32:08.621Z",
+        "reason": "User GO 2026-07-30: legacy header LESS SSOT ghost; findings pre-existentes intencionais no tema AWA"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-refine-terminal.less",
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-stack.less",
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_header-professional.less"
+        ],
+        "createdAt": "2026-07-30T07:32:08.682Z",
+        "reason": "User GO 2026-07-30: legacy header LESS SSOT ghost; findings pre-existentes intencionais no tema AWA"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-stack.less"
+        ],
+        "createdAt": "2026-07-30T07:32:08.738Z",
+        "reason": "User GO 2026-07-30: legacy header LESS SSOT ghost; findings pre-existentes intencionais no tema AWA"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#b73337",
+        "createdAt": "2026-07-30T07:32:08.799Z",
+        "reason": "User GO: AWA primary brand #b73337 is intentional SSOT"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-refine-2026-05.less"
+        ],
+        "createdAt": "2026-07-30T07:33:41.010Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost alignment"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-refine-2026-05.less"
+        ],
+        "createdAt": "2026-07-30T07:33:41.069Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost alignment"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-refine-2026-05.less"
+        ],
+        "createdAt": "2026-07-30T07:34:02.709Z",
+        "reason": "User GO 2026-07-30: legacy header LESS; layout-transition pre-existente intencional"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-vtex-clean-2026-06.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.336Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-vtex-clean-2026-06.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.390Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-vtex-clean-2026-06.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.451Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-vtex-final-polish-2026-06-24.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.514Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-vtex-final-polish-2026-06-24.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.570Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-vtex-final-polish-2026-06-24.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.620Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-consistency-2026-06.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.688Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-consistency-2026-06.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.750Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-consistency-2026-06.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.811Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-premium.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.891Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-premium.less"
+        ],
+        "createdAt": "2026-07-30T07:34:46.945Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-header-premium.less"
+        ],
+        "createdAt": "2026-07-30T07:34:47.004Z",
+        "reason": "User GO 2026-07-30: header LESS SSOT ghost (lupa/minicart)"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-08-03T03:33:04.756Z",
+        "reason": "HTML email requires web-safe fonts; user authorized AWA email branding"
+      },
+      {
+        "rule": "overused-font",
+        "value": "helvetica",
+        "createdAt": "2026-08-03T03:33:04.812Z",
+        "reason": "HTML email requires web-safe fonts; user authorized AWA email branding"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#d52f33",
+        "createdAt": "2026-08-03T03:33:04.861Z",
+        "reason": "Official AWA logo red sampled from user-provided brand asset; authorized for email templates"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#e30613",
+        "createdAt": "2026-08-03T03:33:04.909Z",
+        "reason": "Legacy AWA red token used in storefront; authorized for email brand bar"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#0f172a",
+        "createdAt": "2026-08-05T15:19:22.918Z",
+        "reason": "Pre-existing fallback value in var(--awa-text-primary, #0f172a) — AWA dark text token hardcoded fallback, already in production"
+      }
+    ]
   }
 }

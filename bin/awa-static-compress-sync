@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# awa-static-compress-sync — regenera .gz/.br defasados em pub/static (boa prática nginx brotli_static)
+# Uso:
+#   bin/awa-static-compress-sync                         # tema filho AWA (default)
+#   bin/awa-static-compress-sync pub/static/frontend/... # path custom
+#   bin/awa-static-compress-sync --all                   # todo pub/static/frontend
+#   bin/awa-static-compress-sync --purge-orphans         # também remove .br/.gz sem base
+#   bin/awa-static-compress-sync --all --purge-orphans
+set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+PURGE_ORPHANS=0
+TARGET="pub/static/frontend/AWA_Custom/ayo_home5_child"
+ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --all) TARGET="pub/static/frontend" ;;
+    --purge-orphans) PURGE_ORPHANS=1 ;;
+    -*)
+      echo "ERROR: unknown flag: $arg" >&2
+      exit 1
+      ;;
+    *) ARGS+=("$arg") ;;
+  esac
+done
+if [[ ${#ARGS[@]} -gt 0 ]]; then
+  TARGET="${ARGS[0]}"
+fi
+if [[ ! -d "$TARGET" ]]; then
+  echo "ERROR: target not found: $TARGET" >&2
+  exit 1
+fi
+
+if ! command -v brotli >/dev/null || ! command -v gzip >/dev/null; then
+  echo "ERROR: brotli and gzip required" >&2
+  exit 1
+fi
+
+rebuilt=0
+skipped=0
+missing_base=0
+purged=0
+
+while IFS= read -r -d '' base; do
+  [[ -f "$base" ]] || continue
+  case "$base" in
+    *.br|*.gz) continue ;;
+  esac
+  # only compressible text assets
+  case "$base" in
+    *.js|*.css|*.json|*.svg|*.html|*.txt|*.xml|*.map|*.mjs) ;;
+    *) continue ;;
+  esac
+
+  gz="${base}.gz"
+  br="${base}.br"
+  need=0
+  if [[ ! -f "$gz" || "$base" -nt "$gz" ]]; then need=1; fi
+  if [[ ! -f "$br" || "$base" -nt "$br" ]]; then need=1; fi
+  if [[ "$need" -eq 0 ]]; then
+    skipped=$((skipped+1))
+    continue
+  fi
+
+  gzip -c9 "$base" > "$gz"
+  brotli -f -q 11 -o "$br" "$base"
+  chmod 664 "$gz" "$br" 2>/dev/null || true
+  if id www-data >/dev/null 2>&1; then
+    chown www-data:www-data "$gz" "$br" 2>/dev/null || true
+  fi
+  rebuilt=$((rebuilt+1))
+done < <(find "$TARGET" -type f \( -name '*.js' -o -name '*.css' -o -name '*.json' -o -name '*.svg' -o -name '*.mjs' \) -print0)
+
+# orphan compressed without base
+while IFS= read -r -d '' orphan; do
+  base="${orphan%.br}"
+  base="${base%.gz}"
+  if [[ ! -f "$base" ]]; then
+    missing_base=$((missing_base+1))
+    if [[ "$PURGE_ORPHANS" -eq 1 ]]; then
+      rm -f "$orphan"
+      purged=$((purged+1))
+    fi
+  fi
+done < <(find "$TARGET" -type f \( -name '*.br' -o -name '*.gz' \) -print0)
+
+echo "[awa-static-compress-sync] target=$TARGET rebuilt=$rebuilt skipped_fresh=$skipped orphan_compressed=$missing_base purged_orphans=$purged"

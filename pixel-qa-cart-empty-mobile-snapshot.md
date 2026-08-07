@@ -1,0 +1,64 @@
+- generic [active] [ref=f2e1] [box=0,0,390,1452]:
+  - link "Ir para o conteúdo principal" [ref=f2e2] [cursor=pointer] [box=-1,-1,1,1]:
+    - /url: "#maincontent"
+  - link "Ir para a navegação" [ref=f2e4] [cursor=pointer] [box=-1,-1,1,1]:
+    - /url: "#awa-primary-navigation"
+  - generic [ref=f2e6] [box=0,0,390,1452]:
+    - banner [ref=f2e7] [box=0,0,390,128]:
+      - complementary "Ambiente exclusivo para empresas" [ref=f2e10] [box=0,0,390,40]:
+        - generic [ref=f2e11] [box=0,0,390,40]:
+          - paragraph [ref=f2e12] [box=42,-4,270,48]:
+            - generic [ref=f2e13] [box=83,12,68,16]: Vendas B2B
+            - link "Cadastre agora — Cadastre-se no Cadastro B2B" [ref=f2e15] [cursor=pointer] [box=159,-2,103,44]:
+              - /url: https://awamotos.com/b2b/register/
+          - button "Fechar" [ref=f2e17] [cursor=pointer] [box=346,-4,44,44]: ×
+      - generic [ref=f2e18] [box=0,40,390,88]:
+        - generic [ref=f2e23] [box=16,40,358,96]:
+          - generic [ref=f2e24] [box=0,0,0,0]:
+            - button "Abrir menu de navegação" [ref=f2e25] [box=28,44,44,44]
+            - link "Ir para a página inicial da AWA Motos" [ref=f2e29] [cursor=pointer] [box=155,40,81,52]:
+              - /url: https://awamotos.com/
+          - search "Busca de produtos" [ref=f2e32] [box=28,92,334,44]:
+            - generic [ref=f2e33] [box=28,92,334,44]
+          - link "Ver carrinho de compras" [ref=f2e51] [cursor=pointer] [box=318,50,44,44]:
+            - /url: https://awamotos.com/checkout/cart/
+            - generic [ref=f2e52] [box=275,39,69,67]: Carrinho de compras
+            - generic [ref=f2e57] [box=385,62,20,20]: "0"
+        - navigation "Navegação principal da loja" [ref=f2e59] [box=16,128,229,107]:
+          - generic [ref=f2e61] [box=32,129,197,106]:
+            - generic [box=32,160,0,44]
+            - navigation "Links rápidos de categorias" [ref=f2e62] [box=72,129,157,106]
+    - main [ref=f2e71] [box=0,256,390,1124]:
+      - heading "Carrinho vazio" [level=1] [ref=f2e73] [box=16,256,173,28]
+      - generic [box=16,312,358,0]:
+        - generic [box=16,312,358,0]:
+          - alert [box=16,312,358,0]
+      - generic "Seu carrinho está vazio" [ref=f2e77] [box=32,368,327,964]:
+        - complementary "Selos de confiança" [ref=f2e78] [box=57,485,277,167]:
+          - list [ref=f2e79] [box=70,498,251,141]:
+            - listitem [ref=f2e80] [box=70,498,117,64]
+            - listitem [ref=f2e88] [box=203,498,117,64]
+            - listitem [ref=f2e95] [box=70,574,117,64]
+            - listitem [ref=f2e105] [box=203,574,117,64]
+        - generic [ref=f2e113] [box=57,663,277,287]:
+          - paragraph [ref=f2e119] [box=59,775,271,34]: Seu carrinho está vazio
+          - paragraph [ref=f2e120] [box=57,829,277,47]: Adicione peças ao carrinho para seguir à finalização do pedido B2B.
+          - group "Próximos passos" [ref=f2e121] [box=57,912,277,38]:
+            - link "Ajuda para cotação (abre no WhatsApp em nova aba)" [ref=f2e123] [cursor=pointer] [box=109,912,171,38]:
+              - /url: https://wa.me/5516997367588?text=Ol%C3%A1%2C%20acabei%20de%20fazer%20um%20pedido%20B2B%20e%20preciso%20de%20ajuda.
+        - generic "Comece por estas categorias" [ref=f2e127] [box=57,986,277,198]:
+          - heading "Comece por estas categorias" [level=2] [ref=f2e128] [box=57,1015,277,23]
+          - generic [ref=f2e129] [box=57,1052,277,96]:
+            - link "Bauletos" [ref=f2e130] [cursor=pointer] [box=102,1052,77,44]:
+              - /url: https://awamotos.com/bauletos
+            - link "Retrovisores" [ref=f2e131] [cursor=pointer] [box=187,1052,100,44]:
+              - /url: https://awamotos.com/retrovisores
+            - link "Bagageiros" [ref=f2e132] [cursor=pointer] [box=106,1104,92,44]:
+              - /url: https://awamotos.com/bagageiros
+            - link "Manetes" [ref=f2e133] [cursor=pointer] [box=206,1104,77,44]:
+              - /url: https://awamotos.com/manetes
+          - link "Ver todas as categorias" [ref=f2e134] [cursor=pointer] [box=115,1162,159,22]:
+            - /url: https://awamotos.com/catalogo
+        - paragraph [ref=f2e135] [box=57,1236,277,47]: Ambiente seguro B2B · Faturamento via CNPJ
+    - text: "* * * Ao cadastrar, você concorda com nossa Política de Privacidade + + +"
+    - navigation "Navegação Móvel" [ref=f2e139] [box=0,763,390,81]: 

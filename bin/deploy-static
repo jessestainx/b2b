@@ -32,4 +32,19 @@ echo "[deploy-static] $FIXED symlinks corrigidos."
 echo "[deploy-static] Limpando cache..."
 sudo -u www-data php bin/magento cache:clean full_page block_html layout
 
+
+echo "[deploy-static] Regenerando .gz/.br (nginx brotli_static)..."
+"$ROOT_DIR/bin/awa-static-compress-sync" --purge-orphans pub/static/frontend/AWA_Custom/ayo_home5_child || true
+
+# Symlink version{deployed} -> . (convenção Magento; nginx também reescreve version*)
+if [[ -f pub/static/deployed_version.txt ]]; then
+  VER="$(tr -d '[:space:]' < pub/static/deployed_version.txt)"
+  if [[ -n "$VER" ]]; then
+    find pub/static -maxdepth 1 -type l -name 'version*' ! -name "version${VER}" -delete 2>/dev/null || true
+    ln -sfn . "pub/static/version${VER}"
+    chown -h www-data:www-data "pub/static/version${VER}" 2>/dev/null || true
+    echo "[deploy-static] version symlink: version${VER} -> ."
+  fi
+fi
+
 echo "[deploy-static] Concluido."

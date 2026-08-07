@@ -5,8 +5,9 @@
 # Gera arquivos .br (Brotli nível 11) e .gz (Gzip nível 9) para CSS/JS/SVG
 # para uso com brotli_static on e gzip_static on no Nginx.
 #
-# Uso: bash scripts/precompress-static.sh [--pub-only]
-#   --pub-only: comprime apenas pub/static (uso pós-deploy em produção)
+# Uso: bash scripts/precompress-static.sh [--pub-only|--check]
+#   (padrão) / --pub-only: comprime apenas pub/static (pós-deploy)
+#   --check: valida sidecars em pub e ausência de .br/.gz no tema (somente leitura)
 #
 # Requer: brotli (apt install brotli)
 # =============================================================================
@@ -30,7 +31,12 @@ PUB_STATIC="$PROJECT_ROOT/pub/static/frontend/AWA_Custom/ayo_home5_child/pt_BR"
 USER_PATH="/home/user/htdocs/srv1113343.hstgr.cloud"
 
 PUB_ONLY=false
+if [[ "${1:-}" == "--check" ]]; then
+  # Validação somente leitura (Fase 5) — não comprime.
+  exec bash "$(dirname "$0")/check-awa-static-sidecars.sh" --check
+fi
 [[ "${1:-}" == "--pub-only" ]] && PUB_ONLY=true
+[[ "${1:-}" == "" ]] && PUB_ONLY=true  # default seguro: nunca escrever no tema
 
 compress_file() {
     local f="$1"

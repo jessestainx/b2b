@@ -1,0 +1,17 @@
+Fundo rosado
+vinha do token --awa-bg: oklch(0.992 0.006 27) no lock inline awa-crosspage-shell-lock-r64;
+os cards herdavam isso.
+
+Align-grid no browser estava em cache immutable sem a regra branca
+
+O HTML live ainda mostra r64 e a query antiga (OPcache). Com CSS fresco o branco já vence.
+
+Para fechar a causa raiz e forçar cache-bust em quem
+
+
+Ainda tem CSS antigo ou em cache?
+Ainda tem Fundo rosado?
+tem certeza?
+
+
+

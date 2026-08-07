@@ -1,0 +1,210 @@
+[
+  {
+    "name": "minScore",
+    "expected": 0.9,
+    "actual": 0.42,
+    "values": [
+      0.42
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "error",
+    "url": "https://awamotos.com/"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 2000,
+    "actual": 2580,
+    "values": [
+      2580
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "first-contentful-paint",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "First Contentful Paint",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint/"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 2800,
+    "actual": 3405,
+    "values": [
+      3405
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "largest-contentful-paint",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Largest Contentful Paint",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/lighthouse-largest-contentful-paint/"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 300,
+    "actual": 33937.5,
+    "values": [
+      33937.5
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "total-blocking-time",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Total Blocking Time",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/lighthouse-total-blocking-time/"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 0.1,
+    "actual": 0.15031385685869814,
+    "values": [
+      0.15031385685869814
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "cumulative-layout-shift",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Cumulative Layout Shift",
+    "auditDocumentationLink": "https://web.dev/articles/cls"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 3000,
+    "actual": 21564.76396498681,
+    "values": [
+      21564.76396498681
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "speed-index",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Speed Index",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/speed-index/"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 300000,
+    "actual": 414878,
+    "values": [
+      414878
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditProperty": "stylesheet.size",
+    "auditId": "resource-summary",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Resources Summary"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.9,
+    "actual": 0.5,
+    "values": [
+      0.5
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditId": "uses-responsive-images",
+    "level": "warn",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Properly size images",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/uses-responsive-images/"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.9,
+    "actual": 0.5,
+    "values": [
+      0.5
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditId": "modern-image-formats",
+    "level": "warn",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Serve images in next-gen formats",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/uses-webp-images/"
+  },
+  {
+    "name": "maxLength",
+    "expected": 2,
+    "actual": 4,
+    "values": [
+      4
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "render-blocking-resources",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Eliminate render-blocking resources",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/render-blocking-resources/"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 1000,
+    "actual": 1570.1999999999973,
+    "values": [
+      1570.1999999999973
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "bootup-time",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Reduce JavaScript execution time",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/bootup-time/"
+  },
+  {
+    "name": "maxNumericValue",
+    "expected": 2000,
+    "actual": 80110.0439999999,
+    "values": [
+      80110.0439999999
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "mainthread-work-breakdown",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Minimize main-thread work",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/mainthread-work-breakdown/"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.9,
+    "actual": 0.5,
+    "values": [
+      0.5
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditId": "font-display",
+    "level": "error",
+    "url": "https://awamotos.com/",
+    "auditTitle": "Ensure text remains visible during webfont load",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/font-display/"
+  },
+  {
+    "name": "auditRan",
+    "expected": 1,
+    "actual": 0,
+    "values": [
+      0
+    ],
+    "operator": ">=",
+    "passed": false,
+    "message": "\"preload-lcp-image\" is not a known audit.",
+    "auditId": "preload-lcp-image",
+    "level": "warn",
+    "url": "https://awamotos.com/"
+  }
+]

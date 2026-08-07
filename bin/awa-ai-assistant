@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# AWA Ops AI Assistant — thin launcher (delega ao root wrapper)
+set -euo pipefail
+exec sudo /usr/local/sbin/awa-hermes-run "$@"

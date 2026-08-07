@@ -1,18 +1,75 @@
-# Reduz carga do fileWatcher do Cursor Remote-SSH
+# AWA Motos — Cursor ignore (Remote-SSH / fileWatcher / index)
+# 2026-08-02 — alinhado Magento 2: NÃO ignorar .cursor/rules nem .cursor/skills
+
+# Magento gerado / deps
 .git/
 vendor/
+vendor-bak-*/
 generated/
 var/
 pub/static/
 pub/media/
+pub/import/
+pub/screenshots/
 node_modules/
+
+# Backups e artefatos locais (multi-GB)
+_backups/
 backups/
+_arquivos_tema_Ayo/
+_disabled/
 artifacts/
+audit/
+biblioteca/
+relatorios/
+test-results/
+coverage/
+dummy-opensearch/
+
+# Tooling / agentes / worktrees (exceto .cursor — rules/skills precisam ser lidos)
+.kilo/
+.claude/
+.codacy/
+.agents/
+.agent/
+.anima/
+.antigravity/
+.continue/
+.gemini/
+.kodacy/
+.mcp-debug-tools/
 .playwright-mcp/
-lib/
+.trae/
+.windsurf/
+.github/
+vscode-copilot-autonomo/
+
+# Docs / design / integrações pesadas
 docs/
+design-system/
+integrations/
+lib/
+ops/
+phpserver/
 scripts/
+setup/
+dev/
 tests/
+e2e/
+infra/
+
+# Tema/módulos de terceiros (não editar)
 app/code/Rokanthemes/
 app/code/Mirasvit/
+app/code/Apptrian/
+app/code/Meta/
+app/code/MSP/
 app/design/frontend/ayo/
+
+# CSV / dumps / noise
+_csv/
+.csv/
+*.min.js
+*.min.css
+*.log
+*.map
