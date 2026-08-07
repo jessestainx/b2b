@@ -12,6 +12,7 @@ var config = {
             awaLegacySwiper: 'GrupoAwamotos_Theme/js/awa-legacy-swiper-init',
             awaHeroSlider: 'GrupoAwamotos_Theme/js/awa-hero-slider',
             awaFooterInteractions: 'GrupoAwamotos_Theme/js/awa-footer-interactions',
+            awaCatalogFlipbook: 'GrupoAwamotos_Theme/js/catalogo-flipbook',
             'Rokanthemes_LayeredAjax/js/layeredajax': 'GrupoAwamotos_Theme/js/awa-layeredajax-stub',
             'Rokanthemes_LayeredAjax/js/price/layeredajaxslider': 'GrupoAwamotos_Theme/js/awa-layeredajax-stub'
         }

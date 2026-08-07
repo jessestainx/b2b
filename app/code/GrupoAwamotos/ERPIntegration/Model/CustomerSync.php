@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Model;
 
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
+
 use GrupoAwamotos\ERPIntegration\Api\CustomerSyncInterface;
 use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
@@ -682,10 +684,21 @@ class CustomerSync implements CustomerSyncInterface
             $updated = true;
         }
 
-        // Corrige clientes em grupo B2B aprovado (4=Atacado, 5=VIP, 6=Revendedor)
+        // Corrige clientes em grupos B2B comerciais elegíveis ao Sectra
         // que ainda tenham b2b_approval_status='pending' por terem sido criados
         // antes desta correção ou por terem chegado via import sem o atributo.
-        $approvedGroups = [4, 5, 6];
+        $approvedGroups = [];
+        if ($this->customerGroupManager !== null) {
+            foreach (B2bGroupIds::ELIGIBLE_GROUP_CODES as $groupCode) {
+                $groupId = $this->customerGroupManager->getGroupIdByName($groupCode);
+                if ($groupId !== null) {
+                    $approvedGroups[] = $groupId;
+                }
+            }
+        }
+        if ($approvedGroups === []) {
+            $approvedGroups = [4, 5, 6, 8];
+        }
         if (in_array((int)$customer->getGroupId(), $approvedGroups, true)) {
             $approvalAttr = $customer->getCustomAttribute('b2b_approval_status');
             if (!$approvalAttr || $approvalAttr->getValue() !== 'approved') {

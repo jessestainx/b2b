@@ -108,12 +108,18 @@ class HeroResponsiveImage implements ArgumentInterface
             return $this->getOriginalUrl($slideImagePath);
         }
 
-        return $mobile ? ($urls[768] ?? $urls[480] ?? reset($urls)) : ($urls[1920] ?? end($urls));
+        // r44: desktop tipico (~1350px) usa 1200w (23KB) em vez de 1920w (49KB).
+        return $mobile
+            ? ($urls[768] ?? $urls[480] ?? reset($urls))
+            : ($urls[1200] ?? $urls[1920] ?? end($urls));
     }
 
     public function getSizesAttribute(bool $mobileSlider): string
     {
-        return $mobileSlider ? '100vw' : '(min-width: 1200px) 1920px, 100vw';
+        // r44: tipico desktop PSI (~1350) → 1200px; sem 100vw (evita 1340→1920).
+        return $mobileSlider
+            ? '100vw'
+            : '(min-width: 1600px) 1920px, 1200px';
     }
 
     /**
@@ -129,25 +135,68 @@ class HeroResponsiveImage implements ArgumentInterface
             return '';
         }
 
-        $srcset = $this->buildSrcset($slideImagePath);
         $urls = $this->resolveVariantUrls($slideImagePath);
         $sizes = $this->getSizesAttribute($mobileSlider);
         $defaultSrc = $urls === []
             ? $this->getOriginalUrl($slideImagePath)
-            : ($mobileSlider ? ($urls[768] ?? $urls[480] ?? reset($urls)) : ($urls[1920] ?? end($urls)));
+            : ($mobileSlider
+                ? ($urls[768] ?? $urls[480] ?? reset($urls))
+                : ($urls[1200] ?? $urls[1920] ?? end($urls)));
 
+        // r44: só o candidato LCP é eager; demais slides lazy (evita concorrência ~100KB).
         $loading = $isLcpCandidate ? 'eager' : 'lazy';
-        // fetchpriority só no slider mobile visível — desktop usa <link rel=preload> (P9 dedup)
-        $priority = ($isLcpCandidate && $mobileSlider) ? ' fetchpriority="high"' : '';
-        $width = $mobileSlider ? 768 : 1920;
-        $height = $mobileSlider ? 400 : 470;
-        // async: preload no início do head traz o recurso cedo; sync bloqueia main thread (TBT/INP).
-        $decoding = 'async';
+        // LCP: fetchpriority=high só no candidato (1 img). Preload no head reforça com media query.
+        $priority = $isLcpCandidate ? ' fetchpriority="high"' : '';
+        $width = $mobileSlider ? 768 : 1200;
+        $height = $mobileSlider ? 400 : 294;
+        // r44c: sync no LCP reduz render-delay (img pronta ~400ms mas LCP ~2.8s em lab).
+        // Demais slides: async para não competir na main thread.
+        $decoding = $isLcpCandidate ? 'sync' : 'async';
 
         $altEsc = htmlspecialchars(strip_tags($alt), ENT_QUOTES, 'UTF-8');
 
+        
+        $sources = '';
+        if ($urls !== []) {
+            if ($mobileSlider) {
+                // Mobile: só até 768w (evita eager hidden-xs baixar 1920 no desktop).
+                $mobParts = [];
+                foreach ([480, 768] as $w) {
+                    if (isset($urls[$w])) {
+                        $mobParts[] = $urls[$w] . ' ' . $w . 'w';
+                    }
+                }
+                if ($mobParts === [] && isset($urls[1200])) {
+                    $mobParts[] = $urls[1200] . ' 1200w';
+                }
+                if ($mobParts !== []) {
+                    $sources .= '<source type="image/webp" srcset="'
+                        . htmlspecialchars(implode(', ', $mobParts), ENT_QUOTES, 'UTF-8')
+                        . '" sizes="' . $sizes . '">';
+                }
+            } else {
+                // Desktop: 1920 só em viewports largos; tipico PSI (~1350) fica no 1200w.
+                if (isset($urls[1920])) {
+                    $sources .= '<source type="image/webp" media="(min-width: 1600px)" srcset="'
+                        . htmlspecialchars($urls[1920] . ' 1920w', ENT_QUOTES, 'UTF-8')
+                        . '" sizes="1920px">';
+                }
+                $deskParts = [];
+                foreach ([480, 768, 1200] as $w) {
+                    if (isset($urls[$w])) {
+                        $deskParts[] = $urls[$w] . ' ' . $w . 'w';
+                    }
+                }
+                if ($deskParts !== []) {
+                    $sources .= '<source type="image/webp" srcset="'
+                        . htmlspecialchars(implode(', ', $deskParts), ENT_QUOTES, 'UTF-8')
+                        . '" sizes="' . $sizes . '">';
+                }
+            }
+        }
+
         return '<picture>'
-            . ($srcset !== '' ? '<source type="image/webp" srcset="' . htmlspecialchars($srcset, ENT_QUOTES, 'UTF-8') . '" sizes="' . $sizes . '">' : '')
+            . $sources
             . '<img src="' . htmlspecialchars($defaultSrc, ENT_QUOTES, 'UTF-8') . '"'
             . ' alt="' . $altEsc . '"'
             . ' loading="' . $loading . '"'

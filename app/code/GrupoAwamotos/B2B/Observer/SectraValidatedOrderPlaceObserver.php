@@ -22,8 +22,6 @@ use Psr\Log\LoggerInterface;
  */
 class SectraValidatedOrderPlaceObserver implements ObserverInterface
 {
-    private const B2B_GROUP_IDS = [4, 5, 6];
-
     public function __construct(
         private readonly B2bConfig $b2bConfig,
         private readonly B2bOrderPullCustomerDataInterface $orderPullCustomerData,

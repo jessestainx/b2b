@@ -69,7 +69,7 @@ body[class*="b2b-"] .sidebar .block-collapsible-nav,
 body[class*="b2b-"] .block.block-collapsible-nav {
     background: var(--awa-bg-subtle, var(--awa-gray-50, #f7f7f7)) !important;
     border: 1px solid var(--awa-border, #e5e5e5) !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     padding: 6px 0 !important;
     width: 100%;
 }
@@ -113,7 +113,7 @@ body[class*="b2b-"] .account-nav-item .account-nav-link {
     border: 0 !important;
     border-left: 0 !important;
     border-inline-start: 0 !important;
-    border-radius: 4px;
+    border-radius: 8px;
     transition: background-color 200ms ease-out, color 200ms ease-out, box-shadow 200ms ease-out;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -206,7 +206,7 @@ body[class*="b2b-"] .sidebar .block.block-reorder {
     padding: 6px !important;
     background: var(--awa-bg-subtle, var(--awa-gray-50, #f7f7f7)) !important;
     border: 1px solid var(--awa-border, #e5e5e5) !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
 }
 
 body.account .sidebar .block-reorder .block-title,
@@ -251,7 +251,7 @@ body[class*="b2b-"] .sidebar .block-reorder .product-item:last-child {
 
 body.account .sidebar .block-reorder .product-item-name,
 body[class*="b2b-"] .sidebar .block-reorder .product-item-name {
-    font-size: 11px !important;
+    font-size: max(12px, 0.75rem) !important;
     line-height: 1.3 !important;
     margin-bottom: 2px !important;
 }
@@ -277,7 +277,7 @@ body.account .sidebar .block-reorder .actions-toolbar button,
 body.account .sidebar .block-reorder .actions-toolbar .action,
 body[class*="b2b-"] .sidebar .block-reorder .actions-toolbar button,
 body[class*="b2b-"] .sidebar .block-reorder .actions-toolbar .action {
-    font-size: 10px !important;
+    font-size: max(12px, 0.75rem) !important;
     padding: 3px 6px !important;
 }
 
@@ -313,7 +313,7 @@ body[class*="b2b-"] .column.main > form,
 body[class*="b2b-"] .column.main > .table-wrapper {
     background: var(--awa-bg, #fff);
     border: 1px solid var(--awa-border, #e5e5e5);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 16px 20px;
     margin-bottom: 12px;
 }
@@ -341,7 +341,7 @@ body[class*="b2b-"] .column.main > .block .block-title strong {
     max-width: 42rem;
     padding: 20px 22px;
     border: 1px solid var(--awa-border-subtle, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
     background: var(--awa-bg, #fff);
     box-shadow: none;
 }
@@ -374,7 +374,7 @@ body.account .message.info,
 body[class*="b2b-"] .message.info {
     background: var(--awa-info-bg, #f0f9ff) !important;
     border: 1px solid #bae6fd !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     padding: 10px 14px !important;
     color: var(--awa-info, #0369a1) !important;
     font-size: 13px !important;
@@ -394,7 +394,7 @@ body[class*="b2b-"] :is(.table-wrapper, .shoppinglist-items-table-wrapper) {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border: 1px solid var(--awa-border-subtle, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
     background: var(--awa-bg, #fff);
 }
 
@@ -465,7 +465,7 @@ body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.s
     body.account :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody td::before,
     body[class*="b2b-"] :is(table.table, table.data.table, table.data-table, table.shoppinglist-items-table) tbody td::before {
         content: attr(data-th);
-        font-size: 11px;
+        font-size: max(12px, 0.75rem);
         font-weight: 600;
         text-transform: none;
         letter-spacing: normal;
@@ -489,7 +489,7 @@ body[class*="b2b-"] .action.primary,
 body[class*="b2b-"] button.action.primary {
     background: var(--awa-primary, #b73337) !important;
     border-color: var(--awa-primary, #b73337) !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     min-height: 44px !important;
     font-size: 14px !important;
     padding: 10px 18px !important;
@@ -574,8 +574,8 @@ body[class*="b2b-"] .sidebar .block:not(.block-collapsible-nav):not(.block-reord
     padding: 6px 10px !important;
     background: var(--awa-bg-subtle, var(--awa-gray-50, #f7f7f7)) !important;
     border: 1px solid var(--awa-border, #e5e5e5) !important;
-    border-radius: 4px !important;
-    font-size: 11px !important;
+    border-radius: 8px !important;
+    font-size: max(12px, 0.75rem) !important;
 }
 
 body.account .sidebar .block:not(.block-collapsible-nav):not(.block-reorder) .block-title strong,
@@ -634,7 +634,7 @@ body[class*="b2b-"] .field .control select,
 body[class*="b2b-"] .field .control textarea {
     min-height: 44px !important;
     border: 1.5px solid var(--awa-neutral-300, #d1d5db) !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     padding: 10px 14px !important;
     font-size: 14px !important;
     transition: border-color 200ms ease-out, box-shadow 200ms ease-out !important;
@@ -938,7 +938,7 @@ body.customer-address-index .column.main > .block-addresses-default,
 body.customer-address-index .column.main > .block-addresses-list {
     background: var(--awa-bg, #fff);
     border: 1px solid var(--awa-border, #e5e5e5);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 16px 20px;
     margin-bottom: 12px;
 }
@@ -948,7 +948,7 @@ body.account .block-dashboard-addresses .box,
 body.customer-address-index .block-addresses-default .box {
     background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 45%, transparent);
     border: 1px solid #eee;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 14px 16px;
     margin-bottom: 10px;
 }
@@ -991,7 +991,7 @@ body.customer-account-index .awa-account-credit-teaser {
     gap: 8px;
     padding: 18px 20px;
     border: 1px solid var(--awa-border-subtle, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
     background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 35%, var(--awa-bg, #fff));
 }
 
@@ -1032,7 +1032,7 @@ body.customer-account-index .b2b-shortcut-card {
     text-decoration: none;
     background: var(--awa-bg, #fff);
     border: 1px solid var(--awa-border, #e5e5e5);
-    border-radius: 4px;
+    border-radius: 8px;
     transition: border-color 200ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out;
 }
 
@@ -1057,7 +1057,7 @@ body.customer-account-index .b2b-shortcut-icon {
     width: 28px;
     height: 28px;
     margin: 0;
-    border-radius: 4px;
+    border-radius: 8px;
     background: color-mix(in srgb, var(--awa-primary, #b73337) 12%, transparent);
 }
 
@@ -1160,7 +1160,7 @@ body.sales-order-view .block-order-details-view .block-content {
 body.sales-order-view .block-order-details-view .box {
     background: color-mix(in srgb, var(--awa-neutral-50, #f8f8f8) 45%, transparent);
     border: 1px solid #eee;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 14px 16px;
     margin: 0;
 }
@@ -1197,7 +1197,7 @@ body.sales-order-view .order-details-items .order-title {
 
 body.sales-order-view .table-wrapper.order-items {
     border: 1px solid var(--awa-border-subtle, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
     overflow-x: auto;
     background: var(--awa-bg, #fff);
 }
@@ -1258,24 +1258,25 @@ body#html-body .page-wrapper .b2b-page-shell :is(
     .table-wrapper,
     .b2b-section
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     background-image: none !important;
 }
 
-body#html-body .page-wrapper .b2b-page-shell :is(.badge, .badge--admin, .badge--approver) {
-    border-radius: 4px !important;
+body#html-body .page-wrapper .b2b-page-shell :is(.badge, .badge--admin, .badge--approver, .role-badge) {
+    border-radius: 8px !important;
     text-transform: none !important;
     letter-spacing: normal !important;
     font-weight: 600 !important;
+    font-size: max(12px, 0.75rem) !important;
 }
 
 body#html-body .page-wrapper .b2b-credit-page .credit-card {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
 }
 
 body#html-body .page-wrapper .b2b-credit-page :is(.credit-usage-bar__track, .credit-usage-bar__fill) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
 }
 
 body#html-body .page-wrapper .b2b-credit-page .credit-usage-bar__fill {
@@ -1290,7 +1291,7 @@ body#html-body .page-wrapper .b2b-credit-page .credit-card__label {
 
 body#html-body .page-wrapper .b2b-page-shell :is(.action.primary, .btn-add-user, .btn-save) {
     min-height: 44px !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
 }
@@ -1302,11 +1303,11 @@ body#html-body .page-wrapper .b2b-page-shell table :is(th, thead th) {
 }
 
 body#html-body.sales-order-view .table-wrapper.order-items {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
 }
 
 body#html-body.sales-order-view .block-order-details-view .box {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
 }
 
 /* ============================================================================
@@ -1326,13 +1327,13 @@ body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .account-nav-title st
 }
 
 body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .account-nav-link {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     border-left: 0 !important;
 }
 
 body.account .sidebar .block-reorder,
 body[class*="b2b-"] .sidebar .block-reorder {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
 }
 
 /* ============================================================================
@@ -1385,7 +1386,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell 
     .data.table-wrapper,
     .table-wrapper
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -1429,7 +1430,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-page-shell 
     .company-users-section,
     .b2b-cotacao-card
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     background-image: none !important;
 }
@@ -1463,7 +1464,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
     .awa-empty-state,
     .b2b-empty-state
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
 }
@@ -1474,7 +1475,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
     button.action.secondary
 ) {
     min-height: 44px !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     text-transform: none !important;
 }
 
@@ -1559,7 +1560,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
     button.action.secondary
 ) {
     min-height: 44px !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     text-transform: none !important;
     box-shadow: none !important;
 }
@@ -1640,7 +1641,23 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .b2b-breadcrumbs
         flex-direction: column !important;
         gap: var(--awa-account-section-gap) !important;
         width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
         margin: 0 !important;
+        overflow-x: clip !important;
+    }
+
+    /* themes.css força flex:0 0 auto → col-main ~590px / sidebar ~189px no mobile. */
+    html body#html-body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > :is(
+        .sidebar, .sidebar-main, .sidebar.sidebar-main, .col-lg-2, [class*="col-sm-3"],
+        .column.main, .col-main, .col-lg-10, [class*="col-sm-9"], [class*="col-"]
+    ) {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        float: none !important;
+        box-sizing: border-box !important;
     }
 }
 
@@ -1851,10 +1868,131 @@ body[class*="b2b-"] .b2b-finance-badge--aberto {
 
 /* ==========================================================================
    §9.2 — FINANCEIRO (modal de impressão de boleto)
+   ==========================================================================
+   Runtime evidence (2026-07-16): styles-m.css is NOT loaded on B2B account
+   pages, so Magento's `.modal-popup { position:fixed; inset:0 }` never
+   applies. Combined with awa-impeccable `contain:layout` on `.modal-popup`,
+   the print modal rendered in document flow at ~2600px (below the fold)
+   with overlay height 0. Restore viewport-fixed positioning here.
    ========================================================================== */
+
+/* Neutralize layout containment that traps position:fixed descendants. */
+html body#html-body .modals-wrapper:has(.b2b-finance-print-modal-wrap),
+html body#html-body .modals-wrapper:has(.b2b-finance-print-modal-wrap) .modals-overlay,
+html body#html-body .modal-popup.b2b-finance-print-modal-wrap {
+    contain: none !important; /* override awa-impeccable contain:layout */
+    overflow: visible !important;
+}
+
+/* Header AWA account usa z-index ~100120; modal Magento padrao fica abaixo
+   e o usuario consegue clicar busca/carrinho por cima do overlay. Empurrar
+   o stack do modal acima do header (evidencia 2026-07-16: header z=100120,
+   modal z=100008, headerAboveModal=true). */
+html body#html-body._has-modal.account .awa-site-header,
+html body#html-body._has-modal.account .awa-site-header.awa-account-header {
+    z-index: 1 !important;
+}
+
+/* styles-m ausente: Magento nao aplica body._has-modal { overflow:hidden }.
+   Sem isso a pagina account continua scrollavel sob o modal de boleto. */
+html body#html-body._has-modal.account {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+}
+
+html body#html-body .modals-wrapper:has(.b2b-finance-print-modal-wrap) {
+    z-index: 100200 !important;
+}
+
+/* Overlay SEMPRE abaixo do dialog (Magento grava z-index inline invertido). */
+html body#html-body .modals-wrapper:has(.b2b-finance-print-modal-wrap) .modals-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    background-color: rgba(51, 51, 51, 0.55);
+    z-index: 100200 !important;
+}
+
+html body#html-body .modal-popup.b2b-finance-print-modal-wrap {
+    position: fixed !important;
+    inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    z-index: 100220 !important;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: auto !important;
+}
+
+html body#html-body .modal-popup.b2b-finance-print-modal-wrap._show {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 .b2b-finance-print-modal-wrap .modal-inner-wrap {
     max-width: 820px;
     width: 92%;
+    margin-inline: auto;
+    transform: none;
+    position: relative;
+}
+
+/* Restore Magento action-close (styles-m ausente nas paginas account).
+   Sem isso o botao vira um "Fechar" vermelho grande desalinhado. */
+html body#html-body .b2b-finance-print-modal-wrap .modal-header {
+    position: relative;
+    padding-inline-end: 48px;
+}
+
+html body#html-body .b2b-finance-print-modal-wrap .action-close {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    left: auto !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--awa-text-secondary, #666) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 2;
+    line-height: 1 !important;
+    font-size: 0 !important; /* esconde texto "Fechar"; icone via ::before */
+}
+
+html body#html-body .b2b-finance-print-modal-wrap .action-close > span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    border: 0 !important;
+}
+
+html body#html-body .b2b-finance-print-modal-wrap .action-close::before {
+    content: "\00d7";
+    font-size: 28px !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    color: inherit !important;
+}
+
+html body#html-body .b2b-finance-print-modal-wrap .action-close:hover,
+html body#html-body .b2b-finance-print-modal-wrap .action-close:focus {
+    background: var(--awa-bg-muted, #f5f5f5) !important;
+    color: var(--awa-text-primary, #1a1a1a) !important;
 }
 
 .b2b-finance-print-modal {
@@ -1874,6 +2012,24 @@ body[class*="b2b-"] .b2b-finance-badge--aberto {
     font-size: 13px;
     color: var(--awa-text-muted, #666);
     background: var(--awa-bg-muted, #fafafa);
+    z-index: 2;
+}
+
+.b2b-finance-print-modal__loading.is-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+.b2b-finance-print-modal__notice {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid #f0c36d;
+    border-radius: 6px;
+    background: #fff8e8;
+    color: var(--awa-text-primary, #1a1a1a);
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 .b2b-finance-print-modal__frame {
@@ -1889,6 +2045,37 @@ body[class*="b2b-"] .b2b-finance-badge--aberto {
    §9.3 — FINANCEIRO (página de impressão do boleto)
    Migração dos estilos antes inline em print-boleto.phtml para CSS modular.
    ============================================================================ */
+
+/* Skip links / nav mobile / chrome do tema vazam dentro do iframe do modal. */
+html body#html-body.b2b-finance-printboleto :is(
+    .skip-link,
+    .awa-skip-link,
+    .awa-skip-to-main,
+    a.action.skip,
+    .skip-to-main-content,
+    .fixed-bottom,
+    .link-on-bottom,
+    .awa-back-to-top,
+    nav.fixed-bottom,
+    .sidebar,
+    .block-reorder,
+    #authenticationPopup,
+    .authentication-popup-shell,
+    #awa-cookie-banner,
+    .awa-pwa-install-prompt,
+    .awa-toast-container,
+    .ajaxsuite-popup-wrapper
+) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .b2b-print-boleto {
     max-width: 760px;
     margin: 0 auto;
@@ -1917,6 +2104,29 @@ body[class*="b2b-"] .b2b-finance-badge--aberto {
 
 .b2b-print-boleto__btn:hover {
     background: var(--awa-red-dark, #931f18);
+}
+
+.b2b-print-boleto__no-preview {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #f0c36d;
+    border-radius: 6px;
+    background: #fff8e8;
+    color: var(--awa-text-primary, #1a1a1a);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Iframe do modal (?embed=1): sem botao Imprimir interno. */
+.b2b-print-boleto.is-embed .b2b-print-boleto__toolbar,
+body.b2b-print-boleto-embed .b2b-print-boleto__toolbar {
+    display: none !important;
+}
+
+@media print {
+    .b2b-print-boleto__no-preview {
+        display: none !important;
+    }
 }
 
 .b2b-print-boleto__brand {
@@ -1978,7 +2188,7 @@ body[class*="b2b-"] .b2b-finance-badge--aberto {
 }
 
 .b2b-print-boleto__meta dt {
-    font-size: 10.5px;
+    font-size: max(12px, 0.75rem);
     text-transform: uppercase;
     letter-spacing: .04em;
     color: var(--awa-text-subtle, #888);
@@ -2021,10 +2231,28 @@ body[class*="b2b-"] .b2b-finance-badge--aberto {
     word-break: break-word;
 }
 
+/* ITF usa barras pretas (rgb 0,0,0). No printboleto o body/tema pode ter
+   fundo escuro — sem fundo branco o codigo de barras some (evidencia 2026-07-16). */
 .b2b-print-boleto__barcode {
     margin: 0 0 20px;
-    padding: 4px 0 0;
+    padding: 16px 12px;
     overflow-x: auto;
+    background: #fff;
+    border: 1px solid var(--awa-border-subtle, #e5e5e5);
+    border-radius: 6px;
+}
+
+html body#html-body.b2b-finance-printboleto,
+html body#html-body.b2b-finance-printboleto .page-wrapper,
+html body#html-body.b2b-finance-printboleto .page-main {
+    background: #fff !important;
+    color: var(--awa-text-primary, #1a1a1a);
+}
+
+#b2b-boleto-barcode {
+    min-height: 60px;
+    background: #fff;
+    line-height: 0;
 }
 
 .b2b-print-boleto__aviso {
@@ -2038,13 +2266,48 @@ body[class*="b2b-"] .b2b-finance-badge--aberto {
 }
 
 .b2b-print-boleto__footer-note {
-    font-size: 11px;
+    font-size: max(12px, 0.75rem);
     color: var(--awa-text-subtle, #999);
     text-align: center;
     margin-top: 8px;
 }
 
 @media print {
+    /* So o boleto deve ir para a impressora — chrome Magento/AWA some. */
+    html body#html-body.b2b-finance-printboleto :is(
+        .awa-site-header,
+        .toki_header,
+        header.page-header,
+        .page-footer,
+        footer,
+        .breadcrumbs,
+        .sidebar,
+        .block-reorder,
+        .fixed-bottom,
+        .awa-skip-to-main,
+        .awa-back-to-top,
+        #awa-cookie-banner,
+        .awa-pwa-install-prompt,
+        #authenticationPopup,
+        .modals-wrapper,
+        .b2b-print-boleto__toolbar
+    ) {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    html body#html-body.b2b-finance-printboleto,
+    html body#html-body.b2b-finance-printboleto .page-wrapper,
+    html body#html-body.b2b-finance-printboleto .page-main,
+    html body#html-body.b2b-finance-printboleto .columns,
+    html body#html-body.b2b-finance-printboleto .column.main {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        background: #fff !important;
+    }
+
     .b2b-print-boleto {
         padding: 0;
         max-width: none;

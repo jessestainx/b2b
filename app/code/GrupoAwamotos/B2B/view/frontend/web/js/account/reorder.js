@@ -109,7 +109,7 @@ define(['jquery', 'mage/translate', 'mage/cookies'], function ($, $t, _cookies) 
         $card.addClass('reorder-card--prices-failed');
         updatePricesStatus(
             $card,
-            $t('Preços indisponíveis. Você pode adicionar ao carrinho; o valor final é confirmado no checkout.')
+            $t('Preços indisponíveis. Você pode adicionar ao carrinho; o valor final é confirmado na finalização do pedido.')
         );
         ensureRetryButton($root, $card, pricesUrl);
     }

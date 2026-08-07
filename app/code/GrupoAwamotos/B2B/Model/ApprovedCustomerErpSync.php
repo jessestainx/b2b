@@ -28,12 +28,14 @@ class ApprovedCustomerErpSync
     public const ACTION_NOT_APPLICABLE_PULL_ORDER = 'not_applicable_pull_order';
     public const ACTION_LINKED_EXISTING = 'linked_existing';
     public const ACTION_LINKED_BY_CNPJ = 'linked_by_cnpj';
+    public const ACTION_CREATED_ERP_PROSPECT = 'created_erp_prospect';
     /** @deprecated Legacy action — no longer returned for new approvals */
     public const ACTION_PENDING_ERP_CREATION = 'pending_erp_creation';
     public const ACTION_SKIPPED = 'skipped';
 
     private const PULL_ORDER_MESSAGE = 'Aguardando pedido para integração via pull Sectra.';
     private const XML_PATH_LINK_EXISTING_ERP = 'grupoawamotos_b2b/customer_approval/link_existing_erp_on_approval';
+    private const XML_PATH_CREATE_ERP_PROSPECT_STUB = 'grupoawamotos_b2b/customer_approval/create_erp_prospect_stub_on_approval';
 
     public function __construct(
         private readonly CustomerRepositoryInterface $customerRepository,
@@ -167,6 +169,19 @@ class ApprovedCustomerErpSync
         $erpCustomerByCnpj = $this->erpIntegration->findErpCustomerByCnpj($cnpjDigits);
         $erpCodeFromCnpj = $erpCustomerByCnpj ? (int) ($erpCustomerByCnpj['CODIGO'] ?? 0) : null;
         $targetErpCode = $existingErpCode ?? ($erpCodeFromCnpj > 0 ? $erpCodeFromCnpj : null);
+        $createdProspect = false;
+
+        // Autonomy: create FN prospect stub when CNPJ is absent from ERP (no Sectra desktop).
+        if (($targetErpCode === null || $targetErpCode <= 0) && $this->isCreateErpProspectStubOnApproval()) {
+            $createdCode = $this->b2bClientRegistration->createErpProspectStub(
+                $cnpjDigits,
+                $this->buildErpProspectProfile($customer)
+            );
+            if ($createdCode !== null && $createdCode > 0) {
+                $targetErpCode = $createdCode;
+                $createdProspect = true;
+            }
+        }
 
         if ($targetErpCode === null || $targetErpCode <= 0) {
             return null;
@@ -192,25 +207,44 @@ class ApprovedCustomerErpSync
             return null;
         }
 
-        $syncStatus = $existingErpCode !== null
-            ? ErpCustomerSyncStatus::LINKED_EXISTING
-            : ErpCustomerSyncStatus::LINKED_BY_CNPJ;
-        $action = $existingErpCode !== null ? self::ACTION_LINKED_EXISTING : self::ACTION_LINKED_BY_CNPJ;
+        if ($createdProspect) {
+            $syncStatus = ErpCustomerSyncStatus::LINKED_BY_CNPJ;
+            $action = self::ACTION_CREATED_ERP_PROSPECT;
+        } elseif ($existingErpCode !== null) {
+            $syncStatus = ErpCustomerSyncStatus::LINKED_EXISTING;
+            $action = self::ACTION_LINKED_EXISTING;
+        } else {
+            $syncStatus = ErpCustomerSyncStatus::LINKED_BY_CNPJ;
+            $action = self::ACTION_LINKED_BY_CNPJ;
+        }
 
         $this->ensureErpValidatorRegistration($customer, (string) $targetErpCode, $newGroupId);
-        $erpValidated = $this->b2bClientRegistration->isClientRegistered($targetErpCode);
+        // Cadastro de Cliente (7D4C6FBD) — not prospect-only — gates Importar Pedidos.
+        $erpValidated = $this->b2bClientRegistration->isClientReadyForSectraOrderImport($targetErpCode);
         $erpSyncStatus = $erpValidated
             ? ErpCustomerSyncStatus::CUSTOMER_VALIDATED_IN_ERP
             : ErpCustomerSyncStatus::CUSTOMER_PENDING_ERP_VALIDATION;
         $this->setCustomerSyncStatus($customer, $erpSyncStatus);
         $this->syncCreditLimit($customer);
 
-        $message = $erpValidated
-            ? sprintf('Cliente já existia no ERP — vínculo #%d (validado para Importar Pedidos).', $targetErpCode)
-            : sprintf(
-                'Cliente vinculado ao ERP #%d — aguardando Exportar Clientes no Sectra (Cadastro de Cliente).',
+        if ($createdProspect && $erpValidated) {
+            $message = sprintf(
+                'Prospect criado no ERP #%d (autonomia Magento) e validado para Importar Pedidos.',
                 $targetErpCode
             );
+        } elseif ($createdProspect) {
+            $message = sprintf(
+                'Prospect criado no ERP #%d — Cadastro de Cliente pendente no validador.',
+                $targetErpCode
+            );
+        } elseif ($erpValidated) {
+            $message = sprintf('Cliente já existia no ERP — vínculo #%d (validado para Importar Pedidos).', $targetErpCode);
+        } else {
+            $message = sprintf(
+                'Cliente vinculado ao ERP #%d — aguardando Cadastro de Cliente no validador (auto via write_connection ou Exportar Clientes).',
+                $targetErpCode
+            );
+        }
         $this->logger->info(sprintf('[B2B-ERP-Sync] Customer #%d: %s', $customerId, $message));
         $this->logSyncAttempt($customerId, 'success', $message, (string) $targetErpCode, $cnpjDigits);
 
@@ -224,6 +258,90 @@ class ApprovedCustomerErpSync
             'erp_customer_sync_status' => $erpSyncStatus,
             'message' => $message,
             'last_sync_at_updated' => true,
+        ];
+    }
+
+    private function isCreateErpProspectStubOnApproval(): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_CREATE_ERP_PROSPECT_STUB, ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * @return array{
+     *     razao: string,
+     *     fantasia: string,
+     *     ie: string,
+     *     endereco: string,
+     *     numero: string,
+     *     bairro: string,
+     *     cidade: string,
+     *     cep: string,
+     *     uf: string
+     * }
+     */
+    private function buildErpProspectProfile(CustomerInterface $customer): array
+    {
+        $razao = (string) ($customer->getCustomAttribute('b2b_razao_social')?->getValue() ?? '');
+        $fantasia = (string) ($customer->getCustomAttribute('b2b_nome_fantasia')?->getValue() ?? '');
+        $ie = (string) ($customer->getCustomAttribute('b2b_inscricao_estadual')?->getValue() ?? 'ISENTO');
+        if ($razao === '') {
+            $razao = trim(($customer->getFirstname() ?? '') . ' ' . ($customer->getLastname() ?? ''));
+        }
+        if ($fantasia === '') {
+            $fantasia = $razao;
+        }
+
+        $endereco = '.';
+        $numero = '.';
+        $bairro = '.';
+        $cidade = 'ARARAQUARA';
+        $cep = '';
+        $uf = 'SP';
+
+        try {
+            $addresses = $customer->getAddresses() ?? [];
+            $address = $addresses[0] ?? null;
+            if ($address !== null) {
+                $street = $address->getStreet() ?? [];
+                $line1 = trim((string) ($street[0] ?? ''));
+                if ($line1 !== '') {
+                    $endereco = $line1;
+                }
+                $line2 = trim((string) ($street[1] ?? ''));
+                if ($line2 !== '' && preg_match('/^\d+/', $line2) === 1) {
+                    $numero = $line2;
+                } elseif ($line2 !== '') {
+                    $bairro = $line2;
+                }
+                $city = trim((string) ($address->getCity() ?? ''));
+                if ($city !== '') {
+                    $cidade = $city;
+                }
+                $cep = (string) ($address->getPostcode() ?? '');
+                $region = $address->getRegion();
+                $regionCode = is_object($region) ? (string) ($region->getRegionCode() ?? '') : '';
+                if (strlen($regionCode) === 2) {
+                    $uf = strtoupper($regionCode);
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->logger->warning(sprintf(
+                '[B2B-ERP-Sync] Customer #%d: falha ao ler endereço para prospect ERP — %s',
+                (int) $customer->getId(),
+                $e->getMessage()
+            ));
+        }
+
+        return [
+            'razao' => $razao,
+            'fantasia' => $fantasia,
+            'ie' => $ie !== '' ? $ie : 'ISENTO',
+            'endereco' => $endereco,
+            'numero' => $numero,
+            'bairro' => $bairro,
+            'cidade' => $cidade,
+            'cep' => $cep,
+            'uf' => $uf,
         ];
     }
 
@@ -251,7 +369,7 @@ class ApprovedCustomerErpSync
             return;
         }
 
-        if ($this->b2bClientRegistration->isClientRegistered($erpCodeInt)) {
+        if ($this->b2bClientRegistration->hasCadastroCliente($erpCodeInt)) {
             return;
         }
 

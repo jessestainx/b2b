@@ -3,7 +3,7 @@
  * Campos brasileiros para formulário de edição de conta
  * @var \GrupoAwamotos\BrazilCustomer\Block\Customer\BrazilFields $block
  */
-$personType = $block->getCustomerAttributeValue('person_type') ?: 'pf';
+$personType = $block->getResolvedPersonType();
 $cpf = $block->getCustomerAttributeValue('cpf');
 $rg = $block->getCustomerAttributeValue('rg');
 $cnpj = $block->getCustomerAttributeValue('cnpj');

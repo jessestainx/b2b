@@ -54,7 +54,7 @@ $loginUrl = $block->escapeUrl($block->getUrl('b2b/account/login'));
                 <?php elseif (!$canShowPrice): ?>
                 <div class="rx-pdp-price rx-pdp-price--hidden b2b-login-to-see-price">
                     <a class="rx-pdp-login-link" href="<?= /* @noEscape */ $loginUrl ?>">
-                        <?= $block->escapeHtml(__('Faça login')) ?>
+                        <?= $block->escapeHtml(__('Entrar')) ?>
                     </a>
                     <span class="rx-pdp-login-suffix"><?= $block->escapeHtml(__('para ver preços')) ?></span>
                 </div>

@@ -55,12 +55,12 @@ if (!empty($suggestedCart['sections'])) {
     <!-- Customer Welcome & RFM Badge -->
     <div class="erp-customer-header<?= $rfmData ? '' : ' erp-customer-header--minimal' ?>">
         <div class="erp-welcome">
-            <h2><?php if ($rfmData): ?>Olá, <?= $block->escapeHtml($suggestedCart['customer']['trade_name'] ?? $suggestedCart['customer']['name'] ?? 'Cliente') ?>!<?php else: ?>Carrinho Sugerido Personalizado<?php endif; ?></h2>
+            <h1 class="erp-welcome-title"><?php if ($rfmData): ?>Olá, <?= $block->escapeHtml($block->getWelcomeCustomerName($suggestedCart)) ?>!<?php else: ?>Carrinho Sugerido Personalizado<?php endif; ?></h1>
             <p>Preparamos sugestões personalizadas baseadas no seu histórico de compras.</p>
         </div>
         <?php if ($rfmData): ?>
         <div class="erp-rfm-badge" style="--erp-seg-color:<?= $block->escapeHtmlAttr($rfmData['segment_color'] ?? '#666') ?>">
-            <span class="erp-badge-icon">🏆</span>
+            <span class="erp-badge-icon erp-badge-icon--trophy" aria-hidden="true"></span>
             <span class="erp-badge-text"><?= $block->escapeHtml($rfmData['segment_label'] ?? 'Cliente') ?></span>
         </div>
         <?php endif; ?>
@@ -70,8 +70,8 @@ if (!empty($suggestedCart['sections'])) {
     <?php if (!empty($summary)): ?>
     <div class="erp-summary-card">
         <h3 class="erp-section-title">
-            <span class="icon">📊</span>
-            Resumo das suas Compras
+            <span class="icon erp-icon erp-icon--chart" aria-hidden="true"></span>
+            <?= $block->escapeHtml(__('Resumo das suas Compras')) ?>
         </h3>
         <div class="erp-summary-grid">
             <div class="erp-summary-item">
@@ -99,9 +99,9 @@ if (!empty($suggestedCart['sections'])) {
     <div class="erp-filtered-history-card" id="erp-filtered-history">
         <div class="erp-filter-header" id="erp-filter-toggle">
             <h3 class="erp-section-title erp-filter-title">
-                <span class="icon">🔍</span>
-                Explorar Histórico de Compras
-                <span class="erp-toggle-icon" id="erp-toggle-icon">▶</span>
+                <span class="icon erp-icon erp-icon--search" aria-hidden="true"></span>
+                <?= $block->escapeHtml(__('Explorar Histórico de Compras')) ?>
+                <span class="erp-toggle-icon" id="erp-toggle-icon" aria-hidden="true">›</span>
             </h3>
         </div>
 
@@ -182,7 +182,7 @@ if (!empty($suggestedCart['sections'])) {
                 <div class="erp-filter-results-header">
                     <span id="erp-results-count"></span>
                     <button type="button" class="erp-btn erp-btn-primary erp-btn-small" id="erp-add-filtered-to-cart" style="display:none;">
-                        🛒 Adicionar Selecionados
+                        <?= $block->escapeHtml(__('Adicionar Selecionados')) ?>
                     </button>
                 </div>
                 <div class="erp-filter-results-loading" id="erp-filter-loading" style="display:none;">
@@ -204,7 +204,7 @@ if (!empty($suggestedCart['sections'])) {
     <div class="erp-suggested-cart">
         <div class="erp-cart-header">
             <div class="erp-cart-title">
-                <h3>🛒 Carrinho Sugerido para Você</h3>
+                <h3><?= $block->escapeHtml(__('Carrinho Sugerido para Você')) ?></h3>
                 <p>Baseado no seu histórico e padrão de compras</p>
             </div>
             <div class="erp-cart-summary-mini">
@@ -219,7 +219,8 @@ if (!empty($suggestedCart['sections'])) {
             <div class="erp-cart-section" data-section="<?= $block->escapeHtmlAttr($sectionKey) ?>">
                 <div class="erp-section-header">
                     <div class="erp-section-info">
-                        <span class="erp-section-icon"><?= /* @noEscape */ $block->getSectionIcon($sectionKey) ?></span>
+                        <span class="erp-section-icon erp-section-icon--<?= $block->escapeHtmlAttr($block->getSectionIcon($sectionKey)) ?>"
+                              aria-label="<?= $block->escapeHtmlAttr($block->getSectionIconLabel($sectionKey)) ?>"></span>
                         <div class="erp-section-text">
                             <span class="erp-section-name"><?= $block->escapeHtml($section['title']) ?></span>
                             <span class="erp-section-subtitle"><?= $block->escapeHtml($section['subtitle']) ?></span>
@@ -298,8 +299,8 @@ if (!empty($suggestedCart['sections'])) {
                         <div class="erp-item-actions">
                             <a href="<?= $block->escapeUrl($item['url'] ?? '#') ?>"
                                class="erp-btn erp-btn-small erp-btn-outline"
-                               title="Ver produto">
-                                👁️
+                               title="<?= $block->escapeHtmlAttr(__('Ver produto')) ?>">
+                                <?= $block->escapeHtml(__('Ver')) ?>
                             </a>
                         </div>
                     </div>
@@ -318,25 +319,32 @@ if (!empty($suggestedCart['sections'])) {
                 </div>
                 <?php if (($suggestedCart['summary']['subtotal'] ?? 0) >= ($suggestedCart['summary']['free_shipping_threshold'] ?? 1500)): ?>
                 <div class="erp-totals-row erp-free-shipping">
-                    <span>🚚 Frete Grátis!</span>
+                    <span><?= $block->escapeHtml(__('Frete Grátis!')) ?></span>
                     <span class="erp-shipping-value">R$ 0,00</span>
                 </div>
                 <?php else: ?>
                 <div class="erp-totals-row erp-shipping-info">
-                    <span>Falta <?= /* @noEscape */ $block->formatPrice(($suggestedCart['summary']['free_shipping_threshold'] ?? 1500) - ($suggestedCart['summary']['subtotal'] ?? 0)) ?> para frete grátis</span>
+                    <span><?= $block->escapeHtml(__('Falta')) ?> <?= /* @noEscape */ $block->formatPrice(($suggestedCart['summary']['free_shipping_threshold'] ?? 1500) - ($suggestedCart['summary']['subtotal'] ?? 0)) ?> <?= $block->escapeHtml(__('para frete grátis')) ?></span>
+                </div>
+                <?php endif; ?>
+                <?php $estimatedShipping = (float) ($suggestedCart['summary']['estimated_shipping'] ?? 0); ?>
+                <?php if ($estimatedShipping > 0 && (($suggestedCart['summary']['subtotal'] ?? 0) < ($suggestedCart['summary']['free_shipping_threshold'] ?? 1500))): ?>
+                <div class="erp-totals-row erp-shipping-estimate">
+                    <span><?= $block->escapeHtml(__('Frete estimado')) ?></span>
+                    <span><?= /* @noEscape */ $block->formatPrice($estimatedShipping) ?></span>
                 </div>
                 <?php endif; ?>
                 <div class="erp-totals-row erp-total-row">
-                    <span>Total Estimado</span>
-                    <span class="erp-total-value"><?= /* @noEscape */ $block->formatPrice(($suggestedCart['summary']['subtotal'] ?? 0) + ($suggestedCart['summary']['estimated_shipping'] ?? 0)) ?></span>
+                    <span><?= $block->escapeHtml(__('Total Estimado')) ?></span>
+                    <span class="erp-total-value"><?= /* @noEscape */ $block->formatPrice(($suggestedCart['summary']['subtotal'] ?? 0) + ((($suggestedCart['summary']['subtotal'] ?? 0) >= ($suggestedCart['summary']['free_shipping_threshold'] ?? 1500)) ? 0 : ($suggestedCart['summary']['estimated_shipping'] ?? 0))) ?></span>
                 </div>
             </div>
             <div class="erp-cart-actions">
                 <button type="button" class="erp-btn erp-btn-secondary" id="erp-select-all">
-                    ✓ Selecionar Todos
+                    <?= $block->escapeHtml(__('Selecionar Todos')) ?>
                 </button>
                 <button type="button" class="erp-btn erp-btn-primary erp-btn-large" id="erp-add-all-to-cart">
-                    🛒 Adicionar Selecionados ao Carrinho
+                    <?= $block->escapeHtml(__('Adicionar Selecionados ao Carrinho')) ?>
                 </button>
             </div>
         </div>
@@ -353,8 +361,8 @@ if (!empty($suggestedCart['sections'])) {
     <?php if (!empty($lastOrders)): ?>
     <div class="erp-orders-card">
         <h3 class="erp-section-title">
-            <span class="icon">📋</span>
-            Últimos Pedidos
+            <span class="icon erp-icon erp-icon--orders" aria-hidden="true"></span>
+            <?= $block->escapeHtml(__('Últimos Pedidos')) ?>
         </h3>
         <div class="erp-orders-table-wrapper">
             <table class="erp-orders-table">

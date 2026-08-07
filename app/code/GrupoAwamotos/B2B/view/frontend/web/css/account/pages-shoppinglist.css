@@ -21,7 +21,7 @@
 .b2b-shoppinglist-index .shoppinglist-create-form {
     background: var(--awa-b2b-soft);
     border: 1px solid var(--awa-b2b-border);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 20px;
     margin-bottom: 24px;
 }
@@ -42,7 +42,7 @@
 .b2b-shoppinglist-index .shoppinglist-create-form textarea {
     width: 100%;
     border: 1px solid var(--awa-border, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 10px 12px;
     font-size: 14px;
 }
@@ -63,7 +63,7 @@
 .b2b-shoppinglist-index .shoppinglist-card {
     background: var(--awa-bg-surface, #fff);
     border: 1px solid var(--awa-b2b-border);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 20px;
     transition: border-color 0.2s ease;
 }
@@ -100,9 +100,9 @@
 .b2b-shoppinglist-view .default-badge {
     background: color-mix(in srgb, var(--awa-primary, #b73337) 10%, #ffffff);
     color: var(--awa-primary, #b73337);
-    font-size: 11px;
+    font-size: max(12px, 0.75rem);
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 8px;
     font-weight: 600;
     text-transform: none;
 }
@@ -147,7 +147,7 @@
     justify-content: center;
     min-height: 44px;
     padding: 8px 14px;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 13px;
     text-decoration: none;
     cursor: pointer;
@@ -243,7 +243,7 @@
 }
 
 .b2b-shoppinglist-view .shoppinglist-items-table .col-image img {
-    border-radius: 4px;
+    border-radius: 8px;
     object-fit: cover;
 }
 
@@ -267,7 +267,7 @@
     width: 60px;
     padding: 6px 8px;
     border: 1px solid var(--awa-border, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
     text-align: center;
     font-size: 14px;
 }
@@ -284,7 +284,7 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    border-radius: 4px;
+    border-radius: 8px;
     background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, #fff);
     color: var(--awa-primary-hover, #8e2629);
     text-decoration: none;
@@ -333,7 +333,7 @@
     justify-content: center;
     min-height: 44px;
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 8px;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
@@ -362,7 +362,7 @@
 .b2b-shoppinglist-view .recurring-config-section {
     background: var(--awa-b2b-soft);
     border: 1px solid var(--awa-b2b-border);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 16px 20px;
     margin-bottom: 20px;
 }
@@ -428,7 +428,7 @@
         margin-bottom: 16px;
         padding: 12px;
         border: 1px solid var(--awa-border, #e5e7eb);
-        border-radius: 4px;
+        border-radius: 8px;
     }
 
     .b2b-shoppinglist-view .shoppinglist-items-table tbody td {
@@ -533,7 +533,7 @@
     background: var(--awa-primary, #b73337);
     color: #ffffff !important;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.9375rem;
     font-weight: 600;
     text-decoration: none;
@@ -558,7 +558,7 @@
     background: transparent;
     color: var(--awa-text-primary, #333333);
     border: 1px solid var(--awa-border, #e5e7eb);
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.9375rem;
     font-weight: 600;
     cursor: pointer;
@@ -576,7 +576,7 @@
     background: transparent;
     border: 1px solid var(--awa-border, #e5e7eb);
     color: var(--awa-text-muted, #666666);
-    border-radius: 6px;
+    border-radius: 8px;
     min-height: 36px;
     padding: 0 12px;
     font-size: 0.8125rem;

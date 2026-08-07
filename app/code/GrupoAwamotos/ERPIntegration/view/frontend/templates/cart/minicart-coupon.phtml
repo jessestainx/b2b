@@ -14,7 +14,7 @@ $hasItems = $block->shouldDisplay();
           action="<?= $block->escapeUrl($block->getApplyUrl()) ?>"
           method="post"
           novalidate>
-        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKeyValue()) ?>">
+        <input type="hidden" name="form_key" value="" autocomplete="off">
         <input type="hidden" name="remove" class="awa-minicart-coupon__remove" value="0">
         <label class="awa-sr-only" for="awa-minicart-coupon-code"><?= $block->escapeHtml(__('Código do cupom')) ?></label>
         <div class="awa-minicart-coupon__row">

@@ -400,10 +400,20 @@ HTML;
 <div class="newsletter">
     <h3>{$title}</h3>
     <form class="newsletter-form" action="{$baseUrl}newsletter/subscriber/new/" method="post">
+        <input type="hidden" name="form_key" value="">
         <input type="email" name="email" placeholder="Seu melhor e-mail" required>
         <button type="submit">{$button}</button>
     </form>
 </div>
+<script>
+(function () {
+    var form = document.querySelector('.newsletter-form');
+    if (!form) return;
+    var key = (document.cookie.match(/(?:^|; )form_key=([^;]*)/) || [])[1] || '';
+    var input = form.querySelector('input[name="form_key"]');
+    if (input && key) input.value = decodeURIComponent(key);
+})();
+</script>
 HTML;
     }
 

@@ -23,7 +23,7 @@
                        name="auth.logo"
                        as="auth_logo"
                        template="GrupoAwamotos_B2B::html/auth-logo.phtml"/>
-                <block class="Magento\Framework\View\Element\Messages"
+                <block class="GrupoAwamotos\B2B\Block\Account\SessionMessages"
                        name="b2b_login_messages"
                        as="b2b_login_messages"
                        template="GrupoAwamotos_B2B::account/login-messages.phtml"/>

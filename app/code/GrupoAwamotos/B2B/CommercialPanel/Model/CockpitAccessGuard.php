@@ -15,6 +15,12 @@ class CockpitAccessGuard
 
     /** @var string[] */
     private const ALLOWED_FULL_PATHS = [
+        // Magento backend route id is "adminhtml" (not "admin").
+        'adminhtml/auth/logout',
+        'adminhtml/auth/deniedcookie',
+        'adminhtml/denied/index',
+        'adminhtml/noroute/index',
+        // Legacy aliases kept for safety.
         'admin/auth/logout',
         'admin/auth/deniedcookie',
         'admin/denied/index',

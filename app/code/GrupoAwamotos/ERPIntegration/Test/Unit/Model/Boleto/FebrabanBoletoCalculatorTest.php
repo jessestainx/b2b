@@ -56,4 +56,46 @@ class FebrabanBoletoCalculatorTest extends TestCase
 
         $this->calculator->build('001', '9', new \DateTimeImmutable('2026-08-06'), 100.0, '123');
     }
+
+    public function testCampoLivreSicoobBateComBoletoRealSectra190239(): void
+    {
+        // FN_RECEBERBOLETO.RECEBER=190239 — CEDENTE 118181 + DIG 5, nosso 0000348-9
+        $campoLivre = $this->calculator->buildCampoLivreSicoob(
+            '1',
+            '3041',
+            '01',
+            '118181',
+            '5',
+            '00000348'
+        );
+
+        $this->assertSame('1181815', $this->calculator->normalizeCedenteSicoob('118181', '5'));
+        $this->assertSame('9', $this->calculator->digitoNossoNumeroSicoob('3041', '1181815', '0000348'));
+        $this->assertSame('1304101118181500003489001', $campoLivre);
+    }
+
+    public function testCampoLivreSicoobBoomerangCc23(): void
+    {
+        $campoLivre = $this->calculator->buildCampoLivreSicoob(
+            '1',
+            '3041',
+            '01',
+            '47747',
+            '8',
+            '0000005736'
+        );
+
+        $this->assertSame('1304101047747800057360001', $campoLivre);
+        $result = $this->calculator->build(
+            '756',
+            '9',
+            new \DateTimeImmutable('2026-09-04'),
+            3433.68,
+            $campoLivre
+        );
+        $this->assertSame(
+            '75691.30417 01047.747801 00573.600012 7 15590000343368',
+            $result['linha_digitavel']
+        );
+    }
 }

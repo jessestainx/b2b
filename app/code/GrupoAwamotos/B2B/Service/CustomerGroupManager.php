@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Service;
 
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\GroupManagementInterface;
 use Magento\Customer\Model\ResourceModel\Group\Collection as GroupCollection;
@@ -36,6 +37,14 @@ class CustomerGroupManager
 
     public function assignToApprovedGroup(int $customerId): void
     {
+        // Align with approveCustomer() default commercial group (B2B Atacado),
+        // so SyncGroups does not move customers into "B2B Aprovado" outside Sectra scope.
+        $commercialGroup = $this->getGroupIdByName('B2B Atacado');
+        if ($commercialGroup !== null) {
+            $this->assignToGroup($customerId, 'B2B Atacado');
+            return;
+        }
+
         $this->assignToGroup($customerId, self::GROUP_NAME_APPROVED);
     }
 
@@ -57,8 +66,14 @@ class CustomerGroupManager
     {
         try {
             $customer = $this->customerRepository->getById($customerId);
-            $approvedGroupId = $this->getGroupIdByName(self::GROUP_NAME_APPROVED);
-            return $approvedGroupId !== null && (int)$customer->getGroupId() === $approvedGroupId;
+            $groupId = (int) $customer->getGroupId();
+            foreach (B2bGroupIds::ELIGIBLE_GROUP_CODES as $code) {
+                $eligibleId = $this->getGroupIdByName($code);
+                if ($eligibleId !== null && $groupId === $eligibleId) {
+                    return true;
+                }
+            }
+            return false;
         } catch (\Exception $e) {
             return false;
         }

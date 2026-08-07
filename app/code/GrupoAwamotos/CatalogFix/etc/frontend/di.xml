@@ -49,4 +49,10 @@
                 type="GrupoAwamotos\CatalogFix\Plugin\PageCache\HttpPluginFpcGuardPlugin"
                 sortOrder="1"/>
     </type>
+
+    <type name="Magento\Catalog\Model\Layer\Filter\Price\Render">
+        <plugin name="grupoawamotos_catalogfix_price_range_label_decode"
+                type="GrupoAwamotos\CatalogFix\Plugin\Catalog\Layer\Filter\PriceRangeLabelPlugin"
+                sortOrder="10"/>
+    </type>
 </config>

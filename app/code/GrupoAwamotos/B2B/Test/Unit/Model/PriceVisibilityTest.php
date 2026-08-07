@@ -435,6 +435,8 @@ class PriceVisibilityTest extends TestCase
         $service = $this->createService();
         $msg = $service->getPriceReplacementMessage();
         $this->assertStringContainsString('login', $msg);
+        $this->assertStringContainsString('b2b-register-cta', $msg);
+        $this->assertStringContainsString('https://awamotos.com.br/customer/account/create', $msg);
     }
 
     // ====================================================================

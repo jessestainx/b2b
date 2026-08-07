@@ -21,12 +21,16 @@ use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\CatalogInventory\Helper\Stock as StockHelper;
 use Magento\Framework\App\ActionInterface;
+use Magento\Framework\DB\Sql\Expression;
 use Magento\Framework\Registry;
 use Magento\Framework\Url\Helper\Data as UrlHelper;
 
 class Related extends AbstractProduct
 {
     private const MAX_ITEMS = 8;
+
+    /** Over-fetch so we can drop items without catalog images and still fill MAX_ITEMS. */
+    private const CANDIDATE_ITEMS = 32;
 
     /**
      * @var CollectionFactory
@@ -118,6 +122,7 @@ class Related extends AbstractProduct
 
         $collection = $this->collectionFactory->create();
         $collection->addAttributeToSelect($this->catalogConfig->getProductAttributes());
+        $collection->addAttributeToSelect(['image', 'small_image', 'thumbnail']);
         $collection->addMinimalPrice();
         $collection->addFinalPrice();
         $collection->addTaxPercents();
@@ -125,14 +130,74 @@ class Related extends AbstractProduct
         $collection->addFieldToFilter('entity_id', ['neq' => $currentProduct->getId()]);
         $collection->setVisibility($this->catalogProductVisibility->getVisibleInCatalogIds());
         $collection->addWebsiteFilter();
-        $collection->setPageSize(self::MAX_ITEMS);
+        $collection->setPageSize(self::CANDIDATE_ITEMS);
         $collection->setOrder('updated_at', 'DESC');
 
         // Carrega status de estoque para que isSaleable() funcione corretamente em cada produto
         $this->stockHelper->addStockStatusToProducts($collection);
 
-        $this->collection = $collection;
+        $this->collection = $this->filterProductsWithCatalogImage($collection);
         return $this->collection;
+    }
+
+    /**
+     * Keep only products that have a real catalog image (not Magento placeholder).
+     *
+     * SKUs without image/small_image/thumbnail (null or no_selection) otherwise
+     * render Magento_Catalog/.../placeholder/small_image.jpg in the PDP shelf.
+     */
+    private function filterProductsWithCatalogImage(Collection $collection): Collection
+    {
+        $keepIds = [];
+        foreach ($collection as $product) {
+            if (!$product instanceof Product) {
+                continue;
+            }
+            if (!$this->hasUsableCatalogImage($product)) {
+                continue;
+            }
+            $keepIds[] = (int) $product->getId();
+            if (count($keepIds) >= self::MAX_ITEMS) {
+                break;
+            }
+        }
+
+        if ($keepIds === []) {
+            $empty = $this->collectionFactory->create();
+            $empty->addFieldToFilter('entity_id', ['null' => true]);
+            return $empty;
+        }
+
+        $ordered = $this->collectionFactory->create();
+        $ordered->addAttributeToSelect($this->catalogConfig->getProductAttributes());
+        $ordered->addAttributeToSelect(['image', 'small_image', 'thumbnail']);
+        $ordered->addMinimalPrice();
+        $ordered->addFinalPrice();
+        $ordered->addTaxPercents();
+        $ordered->addFieldToFilter('entity_id', ['in' => $keepIds]);
+        $ordered->setVisibility($this->catalogProductVisibility->getVisibleInCatalogIds());
+        $ordered->addWebsiteFilter();
+        $ordered->getSelect()->order(
+            new Expression('FIELD(e.entity_id,' . implode(',', $keepIds) . ')')
+        );
+        $this->stockHelper->addStockStatusToProducts($ordered);
+
+        return $ordered;
+    }
+
+    /**
+     * @param Product $product
+     */
+    private function hasUsableCatalogImage(Product $product): bool
+    {
+        foreach (['small_image', 'thumbnail', 'image'] as $attributeCode) {
+            $value = trim((string) $product->getData($attributeCode));
+            if ($value !== '' && $value !== 'no_selection') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

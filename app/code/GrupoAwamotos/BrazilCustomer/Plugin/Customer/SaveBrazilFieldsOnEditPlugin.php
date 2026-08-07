@@ -71,7 +71,23 @@ class SaveBrazilFieldsOnEditPlugin
             $customerId = $this->customerSession->getCustomerId();
             $customer = $this->customerRepository->getById($customerId);
             $updated = false;
-            $personType = (string) $this->request->getParam('person_type', 'pf');
+
+            $existingBrazilType = strtolower((string) (
+                $customer->getCustomAttribute('person_type')?->getValue() ?? ''
+            ));
+            $existingB2bType = strtolower((string) (
+                $customer->getCustomAttribute('b2b_person_type')?->getValue() ?? ''
+            ));
+            $requestType = strtolower(trim((string) $this->request->getParam('person_type', '')));
+            if ($requestType === 'pj' || $requestType === 'pf') {
+                $personType = $requestType;
+            } elseif ($existingB2bType === 'pj') {
+                $personType = 'pj';
+            } elseif ($existingBrazilType === 'pj' || $existingBrazilType === 'pf') {
+                $personType = $existingBrazilType;
+            } else {
+                $personType = 'pf';
+            }
 
             foreach (self::BRAZIL_ATTRIBUTES as $attributeCode) {
                 $value = $this->request->getParam($attributeCode);
@@ -96,7 +112,21 @@ class SaveBrazilFieldsOnEditPlugin
                 $updated = true;
             }
 
+            // Keep B2B SSOT in sync when Brazil fields are edited
             if ($updated) {
+                $customer->setCustomAttribute('b2b_person_type', $personType);
+                if ($personType === 'pj') {
+                    $cnpjAttr = $customer->getCustomAttribute('cnpj');
+                    $cnpjValue = $cnpjAttr ? (string) $cnpjAttr->getValue() : '';
+                    if ($cnpjValue !== '') {
+                        $customer->setCustomAttribute('b2b_cnpj', $cnpjValue);
+                    }
+                    $razaoAttr = $customer->getCustomAttribute('company_name');
+                    $razaoValue = $razaoAttr ? (string) $razaoAttr->getValue() : '';
+                    if ($razaoValue !== '') {
+                        $customer->setCustomAttribute('b2b_razao_social', $razaoValue);
+                    }
+                }
                 $this->updateTaxvat($customer, $personType);
                 $this->customerRepository->save($customer);
             }

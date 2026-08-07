@@ -97,6 +97,7 @@ $customClass = $block->getCustomClass();
                                   action="<?= $block->escapeUrl((string) $postParams['action']) ?>"
                                   method="post"
                                   class="rexis-item-cart-form">
+                                <?= $block->getBlockHtml('formkey') ?>
                                 <?php foreach ($postParams['data'] as $key => $value): ?>
                                     <input type="hidden"
                                            name="<?= $block->escapeHtmlAttr((string) $key) ?>"

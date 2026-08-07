@@ -146,7 +146,7 @@ class ProductFaq extends Template
             ],
             [
                 'question' => 'Quais formas de pagamento são aceitas?',
-                'answer' => 'Aceitamos Pix (com 5% de desconto à vista), boleto bancário, cartão de crédito (parcelado em até 6x sem juros para clientes B2B aprovados) e transferência bancária. Para CNPJ, oferecemos também faturamento com prazo negociado.',
+                'answer' => 'Aceitamos Pix, boleto bancário e pagamento à vista. Condições a prazo dependem de análise financeira — consulte um de nossos atendentes.',
             ],
             [
                 'question' => 'A nota fiscal é emitida?',

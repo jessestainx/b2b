@@ -66,7 +66,8 @@ if ($shouldRenderErpPanel) {
         <div class="b2b-dashboard-header">
             <div class="b2b-welcome b2b-dashboard-welcome">
                 <h1 id="b2b-dashboard-title"><?= $block->escapeHtml(__('Painel B2B')) ?></h1>
-                <p class="b2b-welcome-sub"><?= $block->escapeHtml(__('Olá, %1!', $block->formatDisplayName($customer ? $customer->getFirstname() : ''))) ?>
+                <p class="b2b-welcome-sub">
+                    <span class="b2b-welcome-hello"><?= $block->escapeHtml(__('Olá, %1!', $block->formatDisplayName($customer ? $customer->getFirstname() : ''))) ?></span>
                     <span class="b2b-member-since"><?= $block->escapeHtml(__('Cliente desde %1', $block->getRegistrationDate())) ?></span>
                     <button type="button"
                             class="action secondary trigger-b2b-tour b2b-tour-link"
@@ -678,7 +679,7 @@ if ($shouldRenderErpPanel) {
                     </svg>
                     <span><?= $block->escapeHtml(__('Meus Pedidos')) ?></span>
                 </a>
-                <a href="<?= $block->escapeUrl($block->getUrl('sales/invoice')) ?>" class="action-item">
+                <a href="<?= $block->escapeUrl($block->getUrl('b2b/finance/index')) ?>" class="action-item">
                     <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>

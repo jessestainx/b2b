@@ -35,6 +35,43 @@ class BrazilFields extends Template
         return $data[$attributeCode] ?? '';
     }
 
+    /**
+     * Resolved person type for account edit UI.
+     *
+     * B2B attribute (b2b_person_type) and CNPJ evidence win over a stale
+     * BrazilCustomer person_type=pf left from older registrations.
+     */
+    public function getResolvedPersonType(): string
+    {
+        $data = $this->getCustomerData();
+        $b2b = strtolower(trim($data['b2b_person_type'] ?? ''));
+        if ($b2b === 'pj') {
+            return 'pj';
+        }
+
+        $brazil = strtolower(trim($data['person_type'] ?? ''));
+        if ($brazil === 'pj' || $brazil === 'pf') {
+            // Prefer evidence of CNPJ even when Brazil attr says pf
+            if ($brazil === 'pf' && $this->hasCnpjEvidence($data)) {
+                return 'pj';
+            }
+            return $brazil;
+        }
+
+        return $this->hasCnpjEvidence($data) ? 'pj' : 'pf';
+    }
+
+    private function hasCnpjEvidence(array $data): bool
+    {
+        foreach (['cnpj', 'b2b_cnpj', 'taxvat'] as $code) {
+            $digits = preg_replace('/\D+/', '', (string) ($data[$code] ?? ''));
+            if (is_string($digits) && strlen($digits) === 14) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private function getCustomerData(): array
     {
         if ($this->customerData !== null) {
@@ -49,12 +86,40 @@ class BrazilFields extends Template
                 return $this->customerData;
             }
 
-            $customer = $this->customerRepository->getById($customerId);
-            $attributes = ['person_type', 'cpf', 'rg', 'cnpj', 'ie', 'company_name', 'trade_name'];
+            $customer = $this->customerRepository->getById((int) $customerId);
+            $attributes = [
+                'person_type',
+                'b2b_person_type',
+                'cpf',
+                'rg',
+                'cnpj',
+                'b2b_cnpj',
+                'ie',
+                'company_name',
+                'trade_name',
+                'b2b_razao_social',
+                'taxvat',
+            ];
 
             foreach ($attributes as $code) {
                 $attr = $customer->getCustomAttribute($code);
                 $this->customerData[$code] = $attr ? (string) $attr->getValue() : '';
+            }
+
+            // taxvat is a native customer field, not always a custom attribute
+            if (($this->customerData['taxvat'] ?? '') === '' && method_exists($customer, 'getTaxvat')) {
+                $this->customerData['taxvat'] = (string) ($customer->getTaxvat() ?? '');
+            }
+
+            // Bridge B2B attrs into BrazilCustomer form fields for display
+            if (($this->customerData['cnpj'] ?? '') === '' && ($this->customerData['b2b_cnpj'] ?? '') !== '') {
+                $this->customerData['cnpj'] = $this->customerData['b2b_cnpj'];
+            }
+            if (($this->customerData['cnpj'] ?? '') === '' && $this->hasCnpjEvidence($this->customerData)) {
+                $this->customerData['cnpj'] = $this->customerData['taxvat'] ?? '';
+            }
+            if (($this->customerData['company_name'] ?? '') === '' && ($this->customerData['b2b_razao_social'] ?? '') !== '') {
+                $this->customerData['company_name'] = $this->customerData['b2b_razao_social'];
             }
         } catch (\Exception $e) {
             // Customer not found or attribute error - return defaults

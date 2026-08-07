@@ -1681,8 +1681,8 @@ body#html-body.account.b2b-account-dashboard .section-header h3 {
    ═══════════════════════════════════════════════════════════════════ */
 
 body#html-body.account.b2b-account-dashboard .b2b-dashboard-header h1 {
-    font-size: clamp(1.375rem, 1.15rem + 0.75vw, 1.75rem) !important;
-    margin: 0 0 6px !important;
+    font-size: var(--awa-b2b-page-title-size, clamp(1.125rem, 1rem + 0.35vw, 1.375rem)) !important;
+    margin: 0 0 4px !important;
     color: var(--b2b-dash-text) !important;
 }
 
@@ -1704,7 +1704,7 @@ body#html-body.account.b2b-account-dashboard .b2b-badges {
 
 body#html-body.account.b2b-account-dashboard .b2b-summary-cards--kpi-strip .card-content h4 {
     margin: 0 0 8px !important;
-    font-size: 11px !important;
+    font-size: max(12px, 0.75rem) !important;
     font-weight: 600 !important;
     letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
@@ -1758,7 +1758,7 @@ body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav .it
 }
 
 body#html-body.account.b2b-account-dashboard .block-collapsible-nav .title strong {
-    font-size: 11px !important;
+    font-size: max(12px, 0.75rem) !important;
     font-weight: 700 !important;
     letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
@@ -1780,7 +1780,7 @@ body#html-body.account.b2b-account-dashboard :is(
 }
 
 body#html-body.account.b2b-account-dashboard .b2b-quick-actions--toolbar .b2b-toolbar-label {
-    font-size: 11px !important;
+    font-size: max(12px, 0.75rem) !important;
     letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
     font-weight: 600 !important;
@@ -2768,7 +2768,7 @@ body#html-body.account.b2b-account-dashboard .sidebar-main-1 .block.block-collap
 body#html-body.account.b2b-account-dashboard .sidebar.sidebar-main .block.block-collapsible-nav,
 body#html-body.account.b2b-account-dashboard .sidebar-main .block.block-collapsible-nav {
     border: 1px solid var(--b2b-dash-border, var(--awa-border, #e5e5e5)) !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     background: var(--b2b-dash-surface, var(--awa-bg-surface, #ffffff)) !important;
     overflow: visible !important;
@@ -3334,7 +3334,7 @@ body#html-body.account.b2b-account-dashboard .b2b-welcome-sub .trigger-b2b-tour 
 }
 
 /* ── 3. ERP product meta — 11px → 12px (floor de legibilidade) ───────────────
-   dashboard.css define font-size: 11px; nenhuma regra audit sobrescreve.
+   dashboard.css define font-size: max(12px, 0.75rem); nenhuma regra audit sobrescreve.
    Minimum legível para labels é 12px. Também normaliza font-style italic
    que adiciona ruído visual sem valor informacional.
    ─────────────────────────────────────────────────────────────────────────── */

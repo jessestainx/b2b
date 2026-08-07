@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Cron;
 
 use GrupoAwamotos\B2B\Helper\Config as B2bConfig;
+use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ErpCustomerSyncStatus;
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
 use GrupoAwamotos\B2B\Model\Sectra\OrderImportGate;
 use GrupoAwamotos\B2B\Model\Sectra\ProspectPipeline;
 use GrupoAwamotos\B2B\Model\Sectra\SectraImportStatus;
 use GrupoAwamotos\B2B\Model\Sectra\StuckOrderCleanup;
 use GrupoAwamotos\ERPIntegration\Helper\Data as ErpHelper;
 use GrupoAwamotos\ERPIntegration\Model\CronFileLock;
-use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ErpCustomerSyncStatus;
 use Magento\Framework\App\ResourceConnection;
 use Psr\Log\LoggerInterface;
 
@@ -100,11 +101,12 @@ class SyncSectraProspectStatus
             return true;
         }
 
+        $groupIn = B2bGroupIds::toSqlInList($this->resourceConnection);
         $stuckOrders = (int) $connection->fetchOne(
             "SELECT COUNT(*)
              FROM sales_order so
              INNER JOIN customer_entity ce ON ce.entity_id = so.customer_id
-             WHERE ce.group_id IN (4, 5, 6)
+             WHERE ce.group_id IN ($groupIn)
                AND so.state NOT IN ('canceled', 'closed', 'complete')
                AND (so.sectra_import_status IS NULL
                     OR so.sectra_import_status IN (?, ?))",

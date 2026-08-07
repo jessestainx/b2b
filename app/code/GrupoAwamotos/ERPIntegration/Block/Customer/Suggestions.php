@@ -409,16 +409,30 @@ class Suggestions extends Template
     }
 
     /**
-     * Get section icon
+     * Get section icon CSS modifier (no emoji — use CSS/text for a11y)
      */
     public function getSectionIcon(string $type): string
     {
         return match ($type) {
-            'reorder' => '🔄',
-            'cross_sell' => '🔗',
-            'similar_customers' => '👥',
-            'dormant' => '⏰',
-            default => '💡',
+            'reorder' => 'reorder',
+            'cross_sell' => 'cross-sell',
+            'similar_customers' => 'similar',
+            'dormant' => 'dormant',
+            default => 'idea',
+        };
+    }
+
+    /**
+     * Accessible label for section type icon
+     */
+    public function getSectionIconLabel(string $type): string
+    {
+        return match ($type) {
+            'reorder' => (string) __('Reposição'),
+            'cross_sell' => (string) __('Cross-sell'),
+            'similar_customers' => (string) __('Clientes semelhantes'),
+            'dormant' => (string) __('Inativo'),
+            default => (string) __('Sugestão'),
         };
     }
 
@@ -543,5 +557,33 @@ class Suggestions extends Template
     public function getOpportunityClassifierUrl(): string
     {
         return $this->getUrl('erpintegration/customer/opportunityClassifier');
+    }
+
+    /**
+     * Display name for welcome header (ERP trade/name, then Magento firstname).
+     * Empty strings from ERP must not win over null-coalesce fallbacks.
+     */
+    public function getWelcomeCustomerName(array $suggestedCart = []): string
+    {
+        $candidates = [
+            (string) ($suggestedCart['customer']['trade_name'] ?? ''),
+            (string) ($suggestedCart['customer']['name'] ?? ''),
+        ];
+
+        $erpInfo = $this->getErpCustomerInfo();
+        if (is_array($erpInfo)) {
+            $candidates[] = (string) ($erpInfo['trade_name'] ?? $erpInfo['fantasia'] ?? '');
+            $candidates[] = (string) ($erpInfo['name'] ?? $erpInfo['razao_social'] ?? '');
+        }
+
+        foreach ($candidates as $candidate) {
+            $name = trim($candidate);
+            if ($name !== '') {
+                return $name;
+            }
+        }
+
+        $firstname = trim((string) $this->customerSession->getCustomer()->getFirstname());
+        return $firstname !== '' ? $firstname : (string) __('Cliente');
     }
 }

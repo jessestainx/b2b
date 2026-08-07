@@ -40,6 +40,15 @@
     color: var(--erp-cart-c19);
 }
 
+/* Dark surfaces — force white text on navy widget header */
+html body#html-body .page-wrapper .erp-widget-header,
+html body#html-body .page-wrapper .erp-widget-header :is(h1, h2, h3, h4, p, span, a, div, strong),
+html body#html-body .page-wrapper .erp-widget-add-btn,
+html body#html-body .page-wrapper .erp-sidebar-add {
+    color: #fff !important;
+}
+
+
 .erp-widget-title {
     margin: 0;
     font-size: 16px;

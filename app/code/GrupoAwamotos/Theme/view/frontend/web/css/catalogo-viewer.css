@@ -260,6 +260,62 @@ body.catalogo-revista-index .page-main {
     padding: 12px;
 }
 
+.awa-catalogo-page__preview-status {
+    align-items: center;
+    color: var(--awa-text-muted, #666);
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+    min-height: 280px;
+    padding: 32px 16px;
+    text-align: center;
+}
+
+.awa-catalogo-page__preview-status p {
+    margin: 0;
+}
+
+.awa-catalogo-page__preview-spinner {
+    animation: awa-catalogo-spin 0.8s linear infinite;
+    border: 3px solid rgba(183, 51, 55, 0.18);
+    border-radius: 50%;
+    border-top-color: var(--awa-red, #b73337);
+    height: 36px;
+    width: 36px;
+}
+
+@keyframes awa-catalogo-spin {
+    to { transform: rotate(360deg); }
+}
+
+.awa-catalogo-page__preview-stage {
+    display: grid;
+    gap: 16px;
+}
+
+.awa-catalogo-page__preview-canvas {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgb(15 23 42 / 8%);
+    display: block;
+    height: auto;
+    margin-inline: auto;
+    max-width: min(100%, 640px);
+    object-fit: contain;
+    width: 100%;
+}
+
+.awa-catalogo-page__preview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.awa-catalogo-page__viewer .is-hidden {
+    display: none !important;
+}
+
 .awa-catalogo-page__frame {
     background: #fff;
     border: 0;
@@ -358,6 +414,14 @@ body.catalogo-revista-index .page-main {
 
     .awa-catalog-flipbook__controls {
         scroll-margin-bottom: calc(var(--awa-catalog-mobile-reserve, 85px) + 20px);
+    }
+
+    .awa-catalogo-page__preview-actions {
+        flex-direction: column;
+    }
+
+    .awa-catalogo-page__preview-actions .awa-catalogo-page__cta {
+        width: 100%;
     }
 
     .awa-catalogo-page__frame {

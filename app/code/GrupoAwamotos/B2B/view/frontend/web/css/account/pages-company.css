@@ -12,7 +12,7 @@
 .b2b-company-page .company-info-card {
     background: var(--awa-bg-surface, #ffffff);
     border: 1px solid var(--awa-b2b-border);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 24px;
 }
 
@@ -62,7 +62,7 @@
 .b2b-company-page .btn-save,
 .b2b-company-page .btn-remove {
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
 }
@@ -81,7 +81,7 @@
 .b2b-company-page .add-user-form {
     background: var(--awa-b2b-soft);
     border: 1px solid var(--awa-b2b-border);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;
 }
@@ -100,7 +100,7 @@
 .b2b-company-page .form-row .select,
 .b2b-company-page .select-sm {
     border: 1px solid var(--awa-border, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 .b2b-company-page .form-row .input-text,
@@ -221,3 +221,10 @@
     .b2b-company-page .btn-save {
         width: 100%;
     }
+
+
+/* SSOT badge floor */
+.b2b-company-page :is(.badge, .role-badge, [class*="badge"]) {
+    font-size: max(12px, 0.75rem) !important;
+    border-radius: 8px !important;
+}

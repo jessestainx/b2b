@@ -149,11 +149,40 @@ class CnpjValidator extends AbstractHelper
             $endpoint = rtrim($this->getLookupApiUrl(), '/') . '/' . $cnpjClean;
             $this->curl->get($endpoint);
 
+            $httpStatus = (int) $this->curl->getStatus();
             $response = (string) $this->curl->getBody();
             $data = json_decode($response, true);
 
+            if ($this->isRateLimitedResponse($httpStatus, is_array($data) ? $data : null)) {
+                $this->audit('api_rate_limited', $cnpjClean, ['http_status' => $httpStatus]);
+                // Do not cache rate-limit as success — try BrasilAPI, else null
+                $fallbackPayload = $this->fetchFromBrasilApi($cnpjClean);
+                if ($fallbackPayload !== null) {
+                    $this->saveToCache($cnpjClean, $fallbackPayload);
+                    $this->audit('api_rate_limited_fallback_ok', $cnpjClean);
+                    return $fallbackPayload;
+                }
+
+                return null;
+            }
+
             if (!is_array($data) || (isset($data['status']) && strtoupper((string) $data['status']) === 'ERROR')) {
                 $this->audit('api_not_found_or_error', $cnpjClean);
+                return null;
+            }
+
+            if (!$this->isCompleteCompanyPayload($data)) {
+                $this->audit('api_incomplete_payload', $cnpjClean, [
+                    'http_status' => $httpStatus,
+                    'message' => (string) ($data['message'] ?? ''),
+                ]);
+                $fallbackPayload = $this->fetchFromBrasilApi($cnpjClean);
+                if ($fallbackPayload !== null) {
+                    $this->saveToCache($cnpjClean, $fallbackPayload);
+                    $this->audit('api_incomplete_fallback_ok', $cnpjClean);
+                    return $fallbackPayload;
+                }
+
                 return null;
             }
 
@@ -422,12 +451,178 @@ class CnpjValidator extends AbstractHelper
 
         $decoded['source'] = 'cache';
 
+        // Reject poisoned cache (rate-limit / incomplete saved as valid=true historically)
+        if ($this->isPoisonedCachePayload($decoded)) {
+            $this->cache->remove($this->getCacheId($cnpj));
+            $this->audit('cache_poison_ignored', $cnpj);
+            return null;
+        }
+
         return $decoded;
+    }
+
+    /**
+     * True when HTTP/body indicates ReceitaWS rate limiting.
+     *
+     * @param array<string, mixed>|null $data
+     */
+    private function isRateLimitedResponse(int $httpStatus, ?array $data): bool
+    {
+        if ($httpStatus === 429) {
+            return true;
+        }
+
+        if ($data === null) {
+            return false;
+        }
+
+        $message = strtolower((string) ($data['message'] ?? ''));
+        if ($message !== '' && str_contains($message, 'too many requests')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * ReceitaWS success payloads include company identity fields.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function isCompleteCompanyPayload(array $data): bool
+    {
+        if (isset($data['nome']) && trim((string) $data['nome']) !== '') {
+            return true;
+        }
+
+        if (isset($data['atividade_principal']) && is_array($data['atividade_principal']) && $data['atividade_principal'] !== []) {
+            return true;
+        }
+
+        // BrasilAPI-shaped (if primary URL was swapped)
+        if (isset($data['razao_social']) && trim((string) $data['razao_social']) !== '') {
+            return true;
+        }
+
+        if (isset($data['cnae_fiscal'])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function isPoisonedCachePayload(array $payload): bool
+    {
+        if (($payload['valid'] ?? null) === false) {
+            return false;
+        }
+
+        $data = $payload['data'] ?? null;
+        if (!is_array($data)) {
+            // Local fallback payloads without data are allowed (api_error path)
+            return false;
+        }
+
+        if ($this->isRateLimitedResponse(0, $data)) {
+            return true;
+        }
+
+        return !$this->isCompleteCompanyPayload($data);
+    }
+
+    /**
+     * Full company lookup via BrasilAPI when ReceitaWS is rate-limited or incomplete.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function fetchFromBrasilApi(string $cnpjClean): ?array
+    {
+        try {
+            $fallbackCurl = clone $this->curl;
+            $fallbackCurl->setOption(CURLOPT_TIMEOUT, $this->getLookupTimeout());
+            $fallbackCurl->setOption(CURLOPT_SSL_VERIFYPEER, true);
+            $fallbackCurl->setHeaders(['Accept' => 'application/json']);
+            $fallbackCurl->get(self::FALLBACK_API_URL . $cnpjClean);
+
+            $status = (int) $fallbackCurl->getStatus();
+            $body = (string) $fallbackCurl->getBody();
+            $fallbackData = json_decode($body, true);
+
+            if ($status >= 400 || !is_array($fallbackData) || !$this->isCompleteCompanyPayload($fallbackData)) {
+                $this->audit('brasilapi_unavailable', $cnpjClean, ['http_status' => $status]);
+                return null;
+            }
+
+            $situacao = $fallbackData['descricao_situacao_cadastral']
+                ?? $fallbackData['situacao_cadastral']
+                ?? '';
+            if (is_numeric($situacao)) {
+                $situacao = ((int) $situacao === 2) ? 'ATIVA' : (string) $situacao;
+            }
+
+            $cnaeCode = isset($fallbackData['cnae_fiscal'])
+                ? (string) $fallbackData['cnae_fiscal']
+                : '';
+            $cnaeText = (string) ($fallbackData['cnae_fiscal_descricao'] ?? '');
+
+            // Keep BrasilAPI keys in data so CnaeClassifier::extractCnaeCode works,
+            // and also expose ReceitaWS-compatible atividade_principal for callers.
+            if ($cnaeCode !== '' && !isset($fallbackData['atividade_principal'])) {
+                $fallbackData['atividade_principal'] = [
+                    [
+                        'code' => $cnaeCode,
+                        'text' => $cnaeText,
+                    ],
+                ];
+            }
+            if (!isset($fallbackData['nome']) && isset($fallbackData['razao_social'])) {
+                $fallbackData['nome'] = $fallbackData['razao_social'];
+            }
+            if ($situacao !== '' && !isset($fallbackData['situacao'])) {
+                $fallbackData['situacao'] = strtoupper((string) $situacao);
+            }
+
+            return [
+                'valid' => true,
+                'source' => 'brasilapi',
+                'razao_social' => (string) ($fallbackData['razao_social'] ?? $fallbackData['nome'] ?? ''),
+                'nome_fantasia' => (string) ($fallbackData['nome_fantasia'] ?? $fallbackData['fantasia'] ?? ''),
+                'cnpj' => $cnpjClean,
+                'situacao' => strtoupper((string) ($fallbackData['situacao'] ?? $situacao)),
+                'tipo' => (string) ($fallbackData['descricao_tipo_de_logradouro'] ?? ''),
+                'porte' => (string) ($fallbackData['porte'] ?? ''),
+                'natureza_juridica' => (string) ($fallbackData['natureza_juridica'] ?? ''),
+                'atividade_principal' => $cnaeText,
+                'logradouro' => (string) ($fallbackData['logradouro'] ?? ''),
+                'numero' => (string) ($fallbackData['numero'] ?? ''),
+                'complemento' => (string) ($fallbackData['complemento'] ?? ''),
+                'bairro' => (string) ($fallbackData['bairro'] ?? ''),
+                'municipio' => (string) ($fallbackData['municipio'] ?? ''),
+                'uf' => (string) ($fallbackData['uf'] ?? ''),
+                'cep' => (string) ($fallbackData['cep'] ?? ''),
+                'telefone' => (string) ($fallbackData['ddd_telefone_1'] ?? ''),
+                'email' => (string) ($fallbackData['email'] ?? ''),
+                'data' => $fallbackData,
+            ];
+        } catch (\Throwable $e) {
+            $this->_logger->warning('BrasilAPI full lookup failed: ' . $e->getMessage());
+            $this->audit('brasilapi_exception', $cnpjClean, ['error' => $e->getMessage()]);
+            return null;
+        }
     }
 
     private function saveToCache(string $cnpj, array $payload, ?int $ttlOverride = null): void
     {
         if (!$this->isLookupCacheEnabled()) {
+            return;
+        }
+
+        // Never persist rate-limit / incomplete bodies as successful company data
+        if ($this->isPoisonedCachePayload($payload)) {
+            $this->audit('cache_skip_poison', $cnpj);
             return;
         }
 

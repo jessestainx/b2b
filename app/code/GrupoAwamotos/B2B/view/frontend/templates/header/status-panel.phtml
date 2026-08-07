@@ -14,11 +14,32 @@
 <?php
     $company = trim((string) ($data['company'] ?? ''));
     $firstName = (string) ($data['first_name'] ?? ''); // raw — escaped at output via escapeHtml()
+    $fullName = trim((string) ($data['full_name'] ?? ''));
     $badgeColor = $block->escapeHtmlAttr($data['group_badge']['color']);
     $badgeIcon = $block->escapeHtmlAttr($data['group_badge']['icon']);
     $groupName = $block->escapeHtml($data['group_name']);
     $discount = (int) $data['discount'];
     $logoutUrl = $block->getUrl('customer/account/logout');
+    $normalizeIdentity = static function (string $value): string {
+        return mb_strtolower(trim(preg_replace('/\s+/u', ' ', $value) ?? ''));
+    };
+    $nameEqualsCompany = $company !== '' && $fullName !== ''
+        && $normalizeIdentity($fullName) === $normalizeIdentity($company);
+    $displayName = ($nameEqualsCompany && $firstName !== '')
+        ? $firstName
+        : ($fullName !== '' ? $fullName : $firstName);
+    $showCompanyLine = $company !== ''
+        && $normalizeIdentity($displayName) !== $normalizeIdentity($company);
+    $companyStartsWithFirst = $normalizeIdentity($firstName) !== ''
+        && $normalizeIdentity($company) !== ''
+        && str_starts_with($normalizeIdentity($company), $normalizeIdentity($firstName));
+    $triggerCompanyVisible = $company !== '' && !$companyStartsWithFirst;
+    $triggerAria = trim((string) __('Olá, %1', $firstName));
+    if ($triggerCompanyVisible) {
+        $triggerAria .= ' — ' . $company;
+    } elseif ((string) ($data['group_name'] ?? '') !== '') {
+        $triggerAria .= ' — ' . (string) $data['group_name'];
+    }
 ?>
 <div class="b2b-status-panel"
      data-mage-init='{"GrupoAwamotos_B2B/js/header-status-panel": {}}'
@@ -30,13 +51,14 @@
             class="b2b-status-trigger"
             aria-expanded="false"
             aria-controls="b2b-status-dropdown"
-            aria-haspopup="true">
-        <span class="status-badge" style="--badge-color: <?= $badgeColor ?>">
+            aria-haspopup="true"
+            aria-label="<?= $block->escapeHtmlAttr($triggerAria) ?>">
+        <span class="status-badge" style="--badge-color: <?= $badgeColor ?>" aria-hidden="true">
             <i class="fa fa-<?= /* @noEscape */ $badgeIcon ?>" aria-hidden="true"></i>
         </span>
-        <span class="status-info">
+        <span class="status-info" aria-hidden="true">
             <span class="status-greeting"><?= $block->escapeHtml(__('Olá, %1', $firstName)) ?></span>
-            <?php if ($company): ?>
+            <?php if ($triggerCompanyVisible): ?>
             <span class="status-company"><?= $block->escapeHtml($company) ?></span>
             <?php endif; ?>
             <span class="status-group">
@@ -59,8 +81,8 @@
                     <?= $block->escapeHtml(mb_strtoupper(mb_substr($data['first_name'], 0, 1))) ?>
                 </div>
                 <div class="user-details">
-                    <span class="user-name"><?= $block->escapeHtml($data['full_name']) ?></span>
-                    <?php if ($company): ?>
+                    <span class="user-name"><?= $block->escapeHtml($displayName) ?></span>
+                    <?php if ($showCompanyLine): ?>
                     <span class="user-company">
                         <i class="fa fa-building-o" aria-hidden="true"></i>
                         <?= $block->escapeHtml($company) ?>

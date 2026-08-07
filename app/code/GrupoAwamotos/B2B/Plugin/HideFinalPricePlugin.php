@@ -39,16 +39,10 @@ class HideFinalPricePlugin
             if (!$this->priceVisibility->canViewPrices()) {
                 $replacementMessage = $this->priceVisibility->getPriceReplacementMessage();
 
-                if ($this->isHomeCompactPriceMessage($replacementMessage)) {
-                    return '<div class="b2b-login-to-see-price price-box">'
-                        . $replacementMessage
-                        . '</div>';
-                }
-
-                return '<div class="b2b-login-to-see-price price-box">'
-                    . '<span class="price-label">'
+                // Sem wrapper .price-label: evita texto duplicado no a11y e CTA falso via CSS ::after.
+                return '<div class="b2b-login-to-see-price price-box" data-awa-b2b-price-gate="1">'
                     . $replacementMessage
-                    . '</span></div>';
+                    . '</div>';
             }
 
             return $proceed();
@@ -62,9 +56,4 @@ class HideFinalPricePlugin
         }
     }
 
-    private function isHomeCompactPriceMessage(string $message): bool
-    {
-        return str_contains($message, 'class="b2b-login-link"')
-            && str_contains($message, 'aria-describedby="awa-home-pricing-notice"');
-    }
 }

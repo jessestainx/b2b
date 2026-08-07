@@ -9,10 +9,10 @@ use Magento\Framework\App\ResourceConnection;
 use Psr\Log\LoggerInterface;
 
 /**
- * Resolves the assigned attendant for a customer by phone number.
+ * Resolves the assigned attendant for a customer by phone number or customer ID.
  *
  * Lookup chain:
- * 1. Find customer by phone (billing address)
+ * 1. (getByPhone only) Find customer by phone (billing address)
  * 2. Check grupoawamotos_b2b_customer_attendant mapping
  * 3. If not mapped, check ERP VENDPREF → match to erp_seller_code
  * 4. If no match, return round-robin fallback
@@ -46,7 +46,6 @@ class WhatsAppAttendant implements AttendantInterface
 
         $connection = $this->resource->getConnection();
 
-        // 1. Find customer by phone
         $customerId = $this->findCustomerByPhone($connection, $phone);
 
         if (!$customerId) {
@@ -59,14 +58,28 @@ class WhatsAppAttendant implements AttendantInterface
             return ['found' => false, 'message' => 'Nenhum atendente disponível', 'source' => 'no_attendant'];
         }
 
-        // 2. Check direct assignment in customer_attendant table
+        return $this->getByCustomerId($customerId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getByCustomerId(int $customerId): array
+    {
+        if ($customerId <= 0) {
+            return ['found' => false, 'message' => 'Customer ID inválido', 'source' => 'invalid_customer'];
+        }
+
+        $connection = $this->resource->getConnection();
+
+        // 1. Check direct assignment in customer_attendant table
         $attendant = $this->getAssignedAttendant($connection, $customerId);
         if ($attendant) {
             $attendant['message'] = 'Atendente designada do cliente';
             return $attendant;
         }
 
-        // 3. Check ERP VENDPREF via customer attribute or erp_data
+        // 2. Check ERP VENDPREF via customer attribute or erp_data
         $attendant = $this->getAttendantFromErpSeller($connection, $customerId);
         if ($attendant) {
             // Also save the assignment for next time
@@ -75,7 +88,7 @@ class WhatsAppAttendant implements AttendantInterface
             return $attendant;
         }
 
-        // 4. Fallback — round-robin
+        // 3. Fallback — round-robin
         $attendant = $this->getDefaultAttendant($connection);
         if ($attendant) {
             $this->saveAssignment($connection, $customerId, (int) $attendant['attendant_id']);
@@ -155,6 +168,8 @@ class WhatsAppAttendant implements AttendantInterface
                 'attendant_id' => (int) $row['attendant_id'],
                 'name' => $row['name'],
                 'email' => $row['email'],
+                'phone' => $row['phone'],
+                'whatsapp' => $row['whatsapp'],
                 'source' => 'assigned'
             ];
         }
@@ -180,7 +195,7 @@ class WhatsAppAttendant implements AttendantInterface
         $select = $connection->select()
             ->from(
                 $this->resource->getTableName('grupoawamotos_b2b_attendants'),
-                ['attendant_id', 'name', 'email', 'erp_seller_code']
+                ['attendant_id', 'name', 'email', 'phone', 'whatsapp', 'erp_seller_code']
             )
             ->where('is_active = ?', 1)
             ->where('erp_seller_code = ?', $erpCode);
@@ -192,6 +207,8 @@ class WhatsAppAttendant implements AttendantInterface
                 'attendant_id' => (int) $row['attendant_id'],
                 'name' => $row['name'],
                 'email' => $row['email'],
+                'phone' => $row['phone'],
+                'whatsapp' => $row['whatsapp'],
                 'source' => 'erp_vendpref'
             ];
         }
@@ -251,7 +268,7 @@ class WhatsAppAttendant implements AttendantInterface
         $select = $connection->select()
             ->from(
                 $this->resource->getTableName('grupoawamotos_b2b_attendants'),
-                ['attendant_id', 'name', 'email', 'customer_count']
+                ['attendant_id', 'name', 'email', 'phone', 'whatsapp', 'customer_count']
             )
             ->where('is_active = ?', 1)
             ->where('department = ?', 'sales')
@@ -265,6 +282,8 @@ class WhatsAppAttendant implements AttendantInterface
                 'attendant_id' => (int) $row['attendant_id'],
                 'name' => $row['name'],
                 'email' => $row['email'],
+                'phone' => $row['phone'],
+                'whatsapp' => $row['whatsapp'],
                 'source' => 'round_robin'
             ];
         }

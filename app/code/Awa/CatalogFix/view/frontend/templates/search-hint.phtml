@@ -1,0 +1,30 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Awa\CatalogFix\Block\SearchHint $viewModel */
+$viewModel = $block->getData('view_model');
+if (!$viewModel || !$viewModel->shouldRender()) {
+    return;
+}
+$query = $viewModel->getQuery();
+$exactUrl = $viewModel->getExactUrl();
+$label = $viewModel->getLandingLabel();
+?>
+<div class="awa-search-hint"
+     role="status"
+     aria-live="polite"
+     data-awa-component="search-hint">
+    <p class="awa-search-hint__text">
+        <?= $block->escapeHtml(__('Você pesquisou por:')) ?>
+        <strong class="awa-search-hint__query">“<?= $block->escapeHtml($query) ?>”</strong>
+        <?php if ($label !== ''): ?>
+            <span class="awa-search-hint__sep">—</span>
+            <span class="awa-search-hint__label"><?= $block->escapeHtml(__('exibindo landing: %1', $label)) ?></span>
+        <?php endif; ?>
+    </p>
+    <?php if ($exactUrl !== ''): ?>
+        <a class="awa-search-hint__exact"
+           href="<?= $block->escapeUrl($exactUrl) ?>">
+            <?= $block->escapeHtml(__('Ver resultados exatos')) ?>
+        </a>
+    <?php endif; ?>
+</div>

@@ -15,6 +15,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Message\ManagerInterface;
 
 class Respond implements HttpPostActionInterface
@@ -28,12 +29,18 @@ class Respond implements HttpPostActionInterface
         private readonly B2bCustomerResource $b2bCustomerResource,
         private readonly ManagerInterface $messageManager,
         private readonly RequestInterface $request,
-        private readonly GuestLoginRedirect $guestLoginRedirect
+        private readonly GuestLoginRedirect $guestLoginRedirect,
+        private readonly FormKeyValidator $formKeyValidator
     ) {
     }
 
     public function execute(): ResultInterface
     {
+        if (!$this->formKeyValidator->validate($this->request)) {
+            $this->messageManager->addErrorMessage(__('Formulário inválido. Atualize a página e tente novamente.'));
+            return $this->redirectFactory->create()->setPath('b2b/cotacao');
+        }
+
         if (!$this->customerSession->isLoggedIn()) {
             $id = (int) $this->request->getPost('cotacao_id');
             return $this->guestLoginRedirect->create('b2b/cotacao/view', $id > 0 ? ['id' => $id] : []);

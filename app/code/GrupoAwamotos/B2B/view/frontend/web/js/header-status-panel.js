@@ -97,6 +97,13 @@ define([
                     self.close();
                 }
             });
+
+            // Exclusividade: foco/digitação na busca fecha o painel B2B
+            $(document).on('focusin.b2bPanel input.b2bPanel', '#search, .form.minisearch input[name="q"]', function () {
+                if (self.isOpen) {
+                    self.close();
+                }
+            });
         },
 
         /**
@@ -196,12 +203,60 @@ define([
         },
 
         /**
+         * Close search autocomplete so it cannot stack over the B2B panel.
+         * Mirrors AWA header exclusivity (minicart/search/menu) for B2B.
+         * @private
+         */
+        _closeSearchAutocomplete: function () {
+            var form = document.querySelector('.form.minisearch, form#search_mini_form');
+            var input = document.querySelector('#search, .form.minisearch input[name="q"]');
+            var panels = document.querySelectorAll(
+                '#search_autocomplete, .mst-searchautocomplete__autocomplete, ' +
+                '.searchsuite-autocomplete, .search-autocomplete'
+            );
+
+            if (form) {
+                form.setAttribute('data-awa-panel-closed', 'true');
+                form.classList.remove('is-open', 'has-results');
+            }
+
+            if (input) {
+                input.setAttribute('aria-expanded', 'false');
+                if (document.activeElement === input) {
+                    input.blur();
+                }
+            }
+
+            panels.forEach(function (panel) {
+                panel.classList.remove('is-open', 'has-results', '_active', 'active');
+                if (panel.getAttribute('aria-hidden') !== 'true') {
+                    panel.setAttribute('aria-hidden', 'true');
+                }
+                panel.style.setProperty('display', 'none', 'important');
+                panel.style.setProperty('visibility', 'hidden', 'important');
+                panel.style.setProperty('opacity', '0', 'important');
+                panel.style.setProperty('pointer-events', 'none', 'important');
+            });
+
+            if (document.body) {
+                document.body.classList.remove('searchautocomplete__active');
+            }
+
+            document.dispatchEvent(new CustomEvent('awa:close-search-overlay', {
+                bubbles: true,
+                detail: { source: 'b2b-status-panel' }
+            }));
+        },
+
+        /**
          * Open dropdown
          */
         open: function () {
             if (this.isOpen) {
                 return;
             }
+
+            this._closeSearchAutocomplete();
 
             this.isOpen = true;
             this._suppressLegacyShadowOverlay();

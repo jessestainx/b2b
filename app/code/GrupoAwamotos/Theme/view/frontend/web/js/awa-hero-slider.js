@@ -129,6 +129,29 @@ define([], function () {
         return '/static/frontend/AWA_Custom/ayo_home5_child/pt_BR/GrupoAwamotos_Theme/js/vendor/swiper-bundle.min.js';
     }
 
+    function afterHeroLcp(fn)
+    {
+        var done = false;
+        function run(why)
+        {
+            if (done) {
+                return;
+            }
+            done = true;
+fn();
+        }
+        try {
+            new PerformanceObserver(function (list) {
+                if (list.getEntries().at(-1)) {
+                    window.requestAnimationFrame(function () {
+                        window.requestAnimationFrame(function () { run('lcp'); });
+                    });
+                }
+            }).observe({ type: 'largest-contentful-paint', buffered: true });
+        } catch (_e) {}
+        window.setTimeout(function () { run('timeout'); }, 2200);
+    }
+
     function loadSwiperAsset()
     {
         var existing;
@@ -146,20 +169,25 @@ define([], function () {
         }
 
         swiperAssetLoading = true;
-        script = document.createElement('script');
-        script.id = 'awa-swiper-runtime-script';
-        script.async = true;
-        script.fetchPriority = 'high';
-        script.setAttribute('fetchpriority', 'high');
-        script.src = resolveSwiperAssetUrl();
-        script.onload = function () {
-            swiperAssetLoading = false;
-        };
-        script.onerror = function () {
-            swiperAssetLoading = false;
-        };
-
-        document.head.appendChild(script);
+        afterHeroLcp(function () {
+            if (getSwiperCtor()) {
+                swiperAssetLoading = false;
+                return;
+            }
+            script = document.createElement('script');
+            script.id = 'awa-swiper-runtime-script';
+            script.async = true;
+            script.fetchPriority = 'low';
+            script.setAttribute('fetchpriority', 'low');
+            script.src = resolveSwiperAssetUrl();
+            script.onload = function () {
+                swiperAssetLoading = false;
+            };
+            script.onerror = function () {
+                swiperAssetLoading = false;
+            };
+            document.head.appendChild(script);
+        });
     }
 
     function getHeroState(rawId)

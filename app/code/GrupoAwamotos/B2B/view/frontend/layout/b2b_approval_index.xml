@@ -6,6 +6,8 @@
         <css src="GrupoAwamotos_B2B::css/account/pages-approval.css"/>
     </head>
     <body>
+        <!-- Evita H1 duplicado: título vem do template approval.phtml -->
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Account\Approval"
                    name="b2b.approval.index"

@@ -148,6 +148,10 @@ class CustomerFinanceDataTest extends TestCase
             'beneficiario_endereco' => '',
             'sacado_nome' => '',
             'sacado_cnpj' => '',
+            'sicoob_agencia' => '',
+            'sicoob_cedente' => '',
+            'sicoob_dig_cedente' => '',
+            'sicoob_modalidade' => '',
         ]);
 
         $result = $this->model->getBoletoImprimivel(24616);
@@ -156,5 +160,45 @@ class CustomerFinanceDataTest extends TestCase
         $this->assertFalse($result['supported'], 'Filial 1 ainda nao validada -- deve cair em fallback sem barcode.');
         $this->assertNull($result['linha_digitavel']);
         $this->assertNull($result['barcode']);
+    }
+
+    public function testGetBoletoImprimivelCalculaBarcodeParaSicoob756Carteira1(): void
+    {
+        $this->customerSession->method('isLoggedIn')->willReturn(true);
+        $this->customerSession->method('getCustomerId')->willReturn(17426);
+        $this->validatorChecker->method('getCustomerErpCode')->willReturn(17426);
+
+        $this->boletoSync->method('getBoletoPrintableRawData')->willReturn([
+            'codigo' => 247016,
+            'filial' => 2,
+            'pedido' => 193135,
+            'banco' => '756',
+            'carteira' => '1',
+            'cc' => 23,
+            'nro_boleto' => '0000005736',
+            'nro_documento' => 'NF:000018516/B',
+            'data_vencimento' => '2026-09-04',
+            'valor_devido' => 3433.68,
+            'beneficiario_nome' => 'BOOMERANG MOTO PECAS',
+            'beneficiario_cnpj' => '10.350.477/0001-50',
+            'beneficiario_endereco' => 'RUA PROFESSORA ERGILIA MICELLI',
+            'sacado_nome' => 'MY SOLUTIONS SHOP LTDA',
+            'sacado_cnpj' => '57.709.326/0001-00',
+            'sicoob_agencia' => '3041',
+            'sicoob_cedente' => '47747',
+            'sicoob_dig_cedente' => '8',
+            'sicoob_modalidade' => '01',
+        ]);
+
+        $result = $this->model->getBoletoImprimivel(247016);
+
+        $this->assertNotNull($result);
+        $this->assertTrue($result['supported']);
+        $this->assertSame(
+            '75691.30417 01047.747801 00573.600012 7 15590000343368',
+            $result['linha_digitavel']
+        );
+        $this->assertNotNull($result['barcode']);
+        $this->assertSame(44, strlen((string) $result['barcode']));
     }
 }

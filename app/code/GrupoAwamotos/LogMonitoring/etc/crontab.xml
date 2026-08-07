@@ -6,20 +6,32 @@
         <job name="awa_log_monitoring_analyze" instance="GrupoAwamotos\LogMonitoring\Cron\LogAnalysis" method="execute">
             <schedule>*/15 * * * *</schedule>
         </job>
-        
+
         <!-- System health check every 30 minutes -->
         <job name="awa_log_monitoring_health" instance="GrupoAwamotos\LogMonitoring\Cron\SystemHealthCheck" method="execute">
             <schedule>*/30 * * * *</schedule>
         </job>
-        
+
         <!-- Alert processing every 5 minutes -->
         <job name="awa_log_monitoring_alerts" instance="GrupoAwamotos\LogMonitoring\Cron\AlertProcessor" method="execute">
             <schedule>*/5 * * * *</schedule>
         </job>
-        
+
         <!-- Cleanup old data daily at 2 AM -->
         <job name="awa_log_monitoring_cleanup" instance="GrupoAwamotos\LogMonitoring\Cron\DataCleanup" method="execute">
             <schedule>0 2 * * *</schedule>
+        </job>
+
+        <!--
+            Magento stores ProductAlert schedule under jobs/catalog_product_alert, which the
+            DB cron reader also exposes as a job code without callbacks. Bind a no-op so
+            nightly schedules do not fail; Magento\ProductAlert\Model\Observer still runs
+            via the XML job name "product_alert".
+        -->
+        <job name="catalog_product_alert"
+             instance="GrupoAwamotos\LogMonitoring\Cron\NoopCatalogProductAlert"
+             method="execute">
+            <config_path>crontab/default/jobs/catalog_product_alert/schedule/cron_expr</config_path>
         </job>
     </group>
 </config>

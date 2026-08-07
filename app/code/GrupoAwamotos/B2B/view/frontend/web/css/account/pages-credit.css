@@ -16,7 +16,7 @@
 .b2b-credit-page .credit-card {
     background: var(--awa-bg-surface, #ffffff);
     border: 1px solid var(--awa-b2b-border);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 20px;
     text-align: center;
 }
@@ -113,7 +113,7 @@
 .b2b-credit-page .txn-type {
     font-size: 12px;
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 8px;
     font-weight: 600;
     text-transform: none;
     background: var(--awa-bg-muted, #f3f4f6);

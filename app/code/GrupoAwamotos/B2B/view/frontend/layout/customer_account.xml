@@ -174,16 +174,6 @@
                 </arguments>
             </block>
 
-            <!-- Financeiro: boletos (aberto/vencido/a vencer) + acesso a NF-e por pedido -->
-            <block class="Magento\Customer\Block\Account\SortLink"
-                   name="customer-account-navigation-b2b-finance-link">
-                <arguments>
-                    <argument name="label" xsi:type="string" translate="true">Financeiro</argument>
-                    <argument name="path" xsi:type="string">b2b/finance/index</argument>
-                    <argument name="sortOrder" xsi:type="number">285</argument>
-                </arguments>
-            </block>
-
             <!-- Aprovações de Pedidos — gate via grupoawamotos_b2b/order_approval/enabled (hoje em 1) -->
             <block class="GrupoAwamotos\B2B\Block\Link\B2bAccountLink"
                    name="customer-account-navigation-b2b-approval-link">

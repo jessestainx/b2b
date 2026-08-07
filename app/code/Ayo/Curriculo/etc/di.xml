@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Ayo\Curriculo\Api\Data\SubmissionInterface" type="Ayo\Curriculo\Model\Submission"/>
-    
+
     <virtualType name="Ayo\Curriculo\Model\ResourceModel\Submission\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>
             <argument name="mainTable" xsi:type="string">ayo_curriculo_submissions</argument>
             <argument name="resourceModel" xsi:type="string">Ayo\Curriculo\Model\ResourceModel\Submission</argument>
         </arguments>
     </virtualType>
-    
+
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">

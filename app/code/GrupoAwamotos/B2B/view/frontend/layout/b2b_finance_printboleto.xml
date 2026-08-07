@@ -17,6 +17,29 @@
         <referenceBlock name="toki_header" remove="true"/>
         <referenceContainer name="awa.layout.compat" remove="true"/>
         <referenceContainer name="page.top" remove="true"/>
+        <!-- Skip links / breadcrumbs / footer nao fazem sentido na impressao (nem no iframe do modal). -->
+        <referenceBlock name="skip_to_content" remove="true"/>
+        <referenceBlock name="skip.links" remove="true"/>
+        <referenceBlock name="breadcrumbs" remove="true"/>
+        <referenceContainer name="footer" remove="true"/>
+        <referenceContainer name="footer-container" remove="true"/>
+        <referenceBlock name="form.subscribe" remove="true"/>
+        <referenceBlock name="cookie_status" remove="true"/>
+        <!-- Nav mobile ("Início") e awa-master-fix.js (injeta .awa-skip-to-main) vazam no iframe. -->
+        <referenceBlock name="awa.mobile.nav" remove="true"/>
+        <referenceBlock name="awa.master.fix.js" remove="true"/>
+        <referenceBlock name="awa.back.to.top" remove="true"/>
+        <referenceBlock name="awa.card.enhance" remove="true"/>
+        <referenceBlock name="awa.a11y.product.links" remove="true"/>
+        <referenceBlock name="awa.a11y.nav.links" remove="true"/>
+        <referenceBlock name="awa.custom.global.js.loader" remove="true"/>
+        <referenceBlock name="awa.cookie.consent.defer.loader" remove="true"/>
+        <referenceBlock name="meta.pixel.idle" remove="true"/>
+        <referenceBlock name="sale.reorder.sidebar" remove="true"/>
+        <referenceBlock name="awa.pwa.install" remove="true"/>
+        <referenceBlock name="authentication-popup" remove="true"/>
+        <referenceContainer name="sidebar.main" remove="true"/>
+        <referenceContainer name="sidebar.additional" remove="true"/>
         <!-- AWA: o print.xml nativo injeta um script que chama window.print() automaticamente
              ao carregar (Magento_Theme::html/print.phtml). Removido aqui porque esta pagina agora
              tambem e aberta dentro de um iframe num modal (ver print-modal.js); sem remover,

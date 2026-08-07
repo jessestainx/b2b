@@ -76,7 +76,15 @@ class  EngineProvider extends InstantProvider
         $this->setMustCondition($indexIdentifier);
 
         if ($indexIdentifier === 'magento_catalog_product') {
-            $this->setBuckets();
+            // [AWA][SRCH-005] Instant fast-mode always called setBuckets(), even when
+            // displayFilters=disable. Text buckets (marca_moto/modelo_moto/ano_moto)
+            // then throw illegal_argument_exception and getResults() swallows it into
+            // totalItems=0 — autocomplete empty while OpenSearch/PLP still work.
+            // Only build aggregations when Instant UI actually consumes them.
+            $layeredNav = $this->configProvider->getLayeredNavigationPosition();
+            if ($layeredNav === 'filters_top' || $layeredNav === 'filters_sidebar') {
+                $this->setBuckets();
+            }
 
             if ($this->getCategoryId()) {
                 $this->query['body']['query']['bool']['must'][] = [
@@ -431,11 +439,22 @@ class  EngineProvider extends InstantProvider
     {
         $esConfig = $this->configProvider->getEngineConnection();
 
-        if (class_exists('Elastic\Elasticsearch\ClientBuilder')) { // ES8
+        // [AWA][SRCH-006] OpenSearch rejects the Elasticsearch PHP v8 client Content-Type
+        // (application/vnd.elasticsearch+json; compatible-with=8) with HTTP 406.
+        // Prefer OpenSearch\ClientBuilder, then ES7 client. ES8 only as last resort.
+        if (class_exists('OpenSearch\ClientBuilder')) {
+            return \OpenSearch\ClientBuilder::fromConfig($esConfig, true);
+        }
+
+        if (class_exists('Elasticsearch\ClientBuilder')) {
+            return \Elasticsearch\ClientBuilder::fromConfig($esConfig, true);
+        }
+
+        if (class_exists('Elastic\Elasticsearch\ClientBuilder')) {
             return \Elastic\Elasticsearch\ClientBuilder::fromConfig($esConfig, true);
         }
 
-        return \Elasticsearch\ClientBuilder::fromConfig($esConfig, true);
+        throw new \RuntimeException('No compatible search client for InstantProvider');
     }
 
     private function prepareTermSuggestQuery(string $query): array

@@ -1,0 +1,57 @@
+// Awa_CatalogFix — Search Landing hint (aligned to B2B gate accent)
+.awa-search-hint {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--awa-primary, #cc0000) 6%, #fff);
+    border: 1px solid color-mix(in srgb, var(--awa-primary, #cc0000) 18%, #e5e5e5);
+    border-inline-start: 4px solid var(--awa-primary, #cc0000);
+    border-radius: 0 8px 8px 0;
+    color: #333;
+    box-sizing: border-box;
+
+    &__text {
+        margin: 0;
+        flex: 1 1 auto;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    &__query {
+        font-weight: 700;
+        color: var(--awa-primary, #cc0000);
+    }
+
+    &__sep {
+        margin: 0 6px;
+        opacity: 0.55;
+    }
+
+    &__label {
+        color: #555;
+    }
+
+    &__exact {
+        flex: 0 0 auto;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--awa-primary, #cc0000);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+
+        &:hover,
+        &:focus {
+            color: var(--awa-primary-hover, #990000);
+        }
+    }
+}
+
+@media (max-width: 479px) {
+    .awa-search-hint {
+        display: none;
+    }
+}

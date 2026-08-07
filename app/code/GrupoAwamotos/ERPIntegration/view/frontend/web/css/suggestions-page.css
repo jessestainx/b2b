@@ -86,6 +86,7 @@
     box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
 }
 
+.erp-welcome h1.erp-welcome-title,
 .erp-welcome h2 {
     margin: 0 0 5px;
     font-size: 22px;
@@ -113,6 +114,14 @@
     font-size: 18px;
 }
 
+/* Decorative icon slots — text labels only (no emoji) */
+.erp-badge-icon:empty,
+.erp-icon:empty,
+.erp-section-icon:empty {
+    display: none;
+}
+
+
 .erp-badge-text {
     font-size: 14px;
 }
@@ -138,13 +147,28 @@
     background: linear-gradient(135deg, var(--awa-primary) 0%, var(--erp-sug-c6) 100%);
     color: white;
     padding: clamp(22px, 3vw, 32px);
-    border-radius: 18px;
+    border-radius: var(--awa-radius-sm, 8px);
     margin-bottom: 0;
 }
 
 .erp-summary-card .erp-section-title {
     color: white;
     border-color: rgb(255 255 255 / 30%);
+}
+
+/* Dark surfaces — force white text (vence .column.main h3 / html body h3 !important) */
+html body#html-body .page-wrapper .erp-summary-card,
+html body#html-body .page-wrapper .erp-summary-card :is(h1, h2, h3, h4, p, span, a, div, strong, label),
+html body#html-body .page-wrapper .erp-cart-header,
+html body#html-body .page-wrapper .erp-cart-header :is(h1, h2, h3, p, span, a, div, strong),
+html body#html-body .page-wrapper .erp-rfm-badge,
+html body#html-body .page-wrapper .erp-rfm-badge :is(span, strong),
+html body#html-body .page-wrapper .erp-btn-primary,
+html body#html-body .page-wrapper .erp-btn-primary :is(span, strong) {
+    color: #fff !important;
+}
+html body#html-body .page-wrapper .erp-summary-card .erp-section-title {
+    border-color: rgb(255 255 255 / 30%) !important;
 }
 
 .erp-summary-grid {
@@ -188,8 +212,19 @@
     padding: clamp(20px, 2.8vw, 28px) clamp(20px, 3vw, 32px);
     background: linear-gradient(135deg, var(--erp-sug-c19) 0%, var(--erp-sug-c15) 100%);
     color: white;
-    border-radius: 18px 18px 0 0;
+    border-radius: var(--awa-radius-sm, 8px) var(--awa-radius-sm, 8px) 0 0;
 }
+
+/* Cart header on dark navy — force white text (col-main h3/p global force dark oklch) */
+html body#html-body .page-wrapper .erp-cart-header,
+html body#html-body .page-wrapper .erp-cart-header :is(h1, h2, h3, p, span, a, div, strong) {
+    color: #fff !important;
+}
+html body#html-body .page-wrapper .erp-cart-header .erp-cart-title p,
+html body#html-body .page-wrapper .erp-cart-header .erp-cart-items {
+    opacity: 0.85;
+}
+
 
 .erp-cart-title h3 {
     margin: 0 0 5px;
@@ -297,7 +332,7 @@
     color: var(--awa-text-muted);
     background: var(--awa-border);
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: 8px;
     margin-right: 10px;
 }
 
@@ -382,7 +417,7 @@
     width: 70px;
     padding: 8px;
     border: 1px solid var(--erp-sug-c29);
-    border-radius: 6px;
+    border-radius: 8px;
     text-align: center;
     font-size: 14px;
 }
@@ -419,10 +454,12 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
     padding: clamp(20px, 3vw, 28px);
     background: var(--erp-sug-c13);
     border-top: 2px solid var(--erp-sug-c26);
-    border-radius: 0 0 18px 18px;
+    border-radius: 0 0 var(--awa-radius-sm, 8px) var(--awa-radius-sm, 8px);
 }
 
 .erp-cart-totals {
@@ -689,7 +726,7 @@
     width: 100%;
     padding: 10px 12px;
     border: 1px solid var(--erp-sug-c29);
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
     background: white;
     transition: border-color 0.2s;
@@ -839,7 +876,7 @@
     width: 60px;
     padding: 6px;
     border: 1px solid var(--erp-sug-c29);
-    border-radius: 6px;
+    border-radius: 8px;
     text-align: center;
     font-size: 13px;
 }
@@ -918,4 +955,46 @@
     .erp-filter-actions {
         flex-direction: column;
     }
+}
+
+
+/* Secondary CTA — vence themes/custom_default "button{background:primary}" */
+html body#html-body .page-wrapper .erp-suggestions-wrapper .erp-btn.erp-btn-secondary,
+html body#html-body .page-wrapper #erp-suggestions-container .erp-btn.erp-btn-secondary {
+    background: var(--awa-bg-subtle, #f3f4f6) !important;
+    background-color: var(--awa-bg-subtle, #f3f4f6) !important;
+    color: var(--awa-text, #1f2937) !important;
+    border: 1px solid var(--awa-border, #e5e7eb) !important;
+    box-shadow: none !important;
+}
+html body#html-body .page-wrapper .erp-suggestions-wrapper .erp-btn.erp-btn-secondary:hover,
+html body#html-body .page-wrapper #erp-suggestions-container .erp-btn.erp-btn-secondary:hover {
+    background: var(--awa-border, #e5e7eb) !important;
+    background-color: var(--awa-border, #e5e7eb) !important;
+    color: var(--awa-text, #1f2937) !important;
+}
+
+/* Compact qty column */
+.erp-item-qty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+}
+.erp-qty-input {
+    width: 64px;
+    min-height: 44px;
+    height: 44px;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+/* SSOT surface radii */
+.erp-orders-card,
+.erp-filtered-history-card,
+.erp-customer-header,
+.erp-summary-card {
+    border-radius: var(--awa-radius-sm, 8px);
 }

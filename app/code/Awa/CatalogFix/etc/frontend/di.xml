@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Mirasvit\SearchLanding\Observer\OnCatalogSearch">
+        <plugin name="awa_catalogfix_search_landing_skip_exact"
+                type="Awa\CatalogFix\Plugin\Mirasvit\SearchLandingSkipExactPlugin"
+                sortOrder="10"/>
+    </type>
+    <type name="Mirasvit\Misspell\Observer\OnCatalogSearchObserver">
+        <plugin name="awa_catalogfix_misspell_skip_exact"
+                type="Awa\CatalogFix\Plugin\Mirasvit\MisspellSkipExactPlugin"
+                sortOrder="10"/>
+    </type>
+</config>

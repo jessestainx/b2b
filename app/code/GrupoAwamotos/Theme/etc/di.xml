@@ -42,46 +42,11 @@
                 type="GrupoAwamotos\Theme\Plugin\SlideBanner\HeroPreloadPlugin"
                 sortOrder="5"/>
     </type>
-    <!-- Proxy para HttpRequest em plugins de Response — previne dependência circular Bootstrap -->
-    <type name="GrupoAwamotos\Theme\Plugin\Response\PatchHomeHeaderHtmlPlugin">
-        <arguments>
-            <argument name="request" xsi:type="object">Magento\Framework\App\Request\Http\Proxy</argument>
-        </arguments>
-    </type>
-
-    <type name="GrupoAwamotos\Theme\Plugin\Response\OptimizeHeadStylesPlugin">
-        <arguments>
-            <argument name="request" xsi:type="object">Magento\Framework\App\Request\Http\Proxy</argument>
-        </arguments>
-    </type>
-
-    <type name="GrupoAwamotos\Theme\Plugin\Response\DeferHomeScriptsPlugin">
-        <arguments>
-            <argument name="request" xsi:type="object">Magento\Framework\App\Request\Http\Proxy</argument>
-        </arguments>
-    </type>
-
-    <type name="Magento\Framework\View\Page\Config\Renderer">
-        <plugin name="grupoawamotos_theme_head_asset_rubik_async"
-                type="GrupoAwamotos\Theme\Plugin\Framework\View\Page\Config\HeadAssetRendererPlugin"
-                sortOrder="5"/>
-    </type>
-    <type name="Magento\Framework\HTTP\PhpEnvironment\Response">
-        <plugin name="grupoawamotos_theme_patch_home_header_on_set_body"
-                type="GrupoAwamotos\Theme\Plugin\Response\PatchHomeHeaderHtmlPlugin"
-                sortOrder="50"/>
-        <plugin name="grupoawamotos_theme_optimize_head_styles"
-                type="GrupoAwamotos\Theme\Plugin\Response\OptimizeHeadStylesPlugin"
-                sortOrder="998"/>
-    </type>
-    <type name="Magento\Framework\App\Response\Http">
-        <plugin name="grupoawamotos_theme_defer_home_scripts"
-                type="GrupoAwamotos\Theme\Plugin\Response\DeferHomeScriptsPlugin"
-                sortOrder="15"/>
-    </type>
+    <!-- Response/head storefront plugins: etc/frontend/di.xml (não rodar no adminhtml) -->
     <type name="GrupoAwamotos\B2B\Model\PriceVisibility">
         <plugin name="grupoawamotos_theme_home_price_replacement_message"
                 type="GrupoAwamotos\Theme\Plugin\B2B\HomePriceReplacementMessagePlugin"
                 sortOrder="20"/>
     </type>
 </config>
+

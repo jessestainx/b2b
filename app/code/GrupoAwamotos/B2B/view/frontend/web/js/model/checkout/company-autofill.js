@@ -83,7 +83,7 @@ define([
                     }
 
                     if (hasAutofilledAnyField) {
-                        announceAutofill($t('Dados da empresa preenchidos automaticamente no checkout.'));
+                        announceAutofill($t('Dados da empresa preenchidos automaticamente na finalização do pedido.'));
                     }
                 }
             }

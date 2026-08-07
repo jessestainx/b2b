@@ -89,16 +89,24 @@ class WhatsAppCart implements CartInterface
         try {
             $maskedId = $this->getCartIdForPhone($phone);
 
+            if ($maskedId !== null) {
+                $quoteId = $this->maskedQuoteIdToQuoteId->execute($maskedId);
+                $quote = $this->cartRepository->get($quoteId);
+                if (!$quote->getIsActive()) {
+                    $maskedId = null;
+                }
+            }
+
             if ($maskedId === null) {
                 $result = $this->createCart($phone);
                 if (isset($result['error'])) {
                     return $result;
                 }
                 $maskedId = $result['cart_id'];
+                $quoteId = $this->maskedQuoteIdToQuoteId->execute($maskedId);
+                $quote = $this->cartRepository->get($quoteId);
             }
 
-            $quoteId = $this->maskedQuoteIdToQuoteId->execute($maskedId);
-            $quote = $this->cartRepository->get($quoteId);
             $product = $this->productRepository->get($sku);
 
             $quote->addProduct($product, $qty);

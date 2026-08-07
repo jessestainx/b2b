@@ -82,14 +82,57 @@ $mode = $isGuest ? 'guest' : 'pending';
 </div>
 <?php endif; ?>
 
+<?php
+$l2cConfig = [
+    'mode' => $mode,
+    'pdpButtonText' => (string) ($isGuest ? __('Entrar para Comprar') : __('Aguardando Aprovação')),
+    'listingButtonText' => (string) ($isGuest ? __('Entrar para Comprar') : __('Aguardando Aprovação')),
+];
+$isHomePage = $block->getRequest()
+    && $block->getRequest()->getFullActionName() === 'cms_index_index';
+?>
+<?php if ($isHomePage): ?>
+<script type="application/json" id="awa-l2c-home-defer-json"><?= /* @noEscape */ json_encode(
+    $l2cConfig,
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP
+) ?></script>
+<script>
+(function (w, d) {
+    'use strict';
+    var done = false;
+    var events = ['pointerdown', 'keydown', 'touchstart'];
+    function boot() {
+        var el, cfg, s;
+        if (done) { return; }
+        if (typeof w.require !== 'function') {
+            w.setTimeout(boot, 200);
+            return;
+        }
+        done = true;
+        events.forEach(function (n) { w.removeEventListener(n, boot, true); });
+        el = d.getElementById('awa-l2c-home-defer-json');
+        if (!el || !el.textContent) { return; }
+        try { cfg = JSON.parse(el.textContent); } catch (e) { return; }
+        s = d.createElement('script');
+        s.type = 'text/x-magento-init';
+        s.textContent = JSON.stringify({ '*': { 'GrupoAwamotos_B2B/js/login-to-cart': cfg } });
+        d.body.appendChild(s);
+        w.require(['mage/apply/main']);
+    }
+    events.forEach(function (n) {
+        w.addEventListener(n, boot, { capture: true, passive: n !== 'keydown', once: true });
+    });
+})(window, document);
+</script>
+<?php else: ?>
 <script type="text/x-magento-init">
 {
     "*": {
-        "GrupoAwamotos_B2B/js/login-to-cart": {
-            "mode": "<?= $escaper->escapeJs($mode) ?>",
-            "pdpButtonText": "<?= $escaper->escapeJs($isGuest ? __('Entrar para Comprar') : __('Aguardando Aprovação')) ?>",
-            "listingButtonText": "<?= $escaper->escapeJs($isGuest ? __('Entrar para Comprar') : __('Aguardando Aprovação')) ?>"
-        }
+        "GrupoAwamotos_B2B/js/login-to-cart": <?= /* @noEscape */ json_encode(
+            $l2cConfig,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP
+        ) ?>
     }
 }
 </script>
+<?php endif; ?>

@@ -18,7 +18,7 @@
                 <whatsapp_hide_account>0</whatsapp_hide_account>
                 <quote_fab_enabled>0</quote_fab_enabled>
                 <phone>+5516997367588</phone>
-                <email>contato@awamotos.com.br</email>
+                <email>awamotos@awamotos.com.br</email>
             </contact>
             <header_experiment>
                 <enabled>1</enabled>
@@ -36,6 +36,12 @@ Nossas Marcas|nossas-marcas
 Lançamentos|lancamentos
 Contato|contato
 Cadastro B2B|route:b2b/register]]></nav_links>
+                <pdf_path>awa/catalogo/catalogo-2026.pdf</pdf_path>
+                <cover_path>import/catalog/banners/catalogo-2026.jpg</cover_path>
+                <page_preview_path>awa/catalogo/catalogo-2026-cover.jpg</page_preview_path>
+                <mobile_cover_path>import/catalog/banners/banner-mobile-catalogo-2026.jpg</mobile_cover_path>
+                <home_b2b_banner_path>import/catalog/banners/home-b2b-atacado-2026.jpg</home_b2b_banner_path>
+                <home_b2b_banner_mobile_path>import/catalog/banners/home-b2b-atacado-2026-mobile.jpg</home_b2b_banner_mobile_path>
             </catalogo>
         </grupoawamotos_theme>
     </default>

@@ -8,10 +8,51 @@ if ($boleto === null) {
 }
 
 $supported = !empty($boleto['supported']);
+$barcodeSvg = $supported ? $block->getBarcodeSvgHtml() : '';
 ?>
+<script>
+/* Iframe do modal: esconde toolbar antes do paint (FPC pode ignorar ?embed=1). */
+(function () {
+    try {
+        if (window.self !== window.top || /[?&]embed=1(?:&|$)/.test(window.location.search || '')) {
+            document.documentElement.classList.add('b2b-print-boleto-embed');
+        }
+    } catch (e) {
+        document.documentElement.classList.add('b2b-print-boleto-embed');
+    }
+})();
+</script>
+<style>
+/* Critical: contraste do barcode no iframe/modal (fundo escuro do tema). */
+.b2b-print-boleto__barcode {
+    margin: 0 0 20px;
+    padding: 16px 12px;
+    background: #fff !important;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+}
+.b2b-print-boleto__barcode svg {
+    display: block;
+    width: 100%;
+    max-width: 760px;
+    height: auto;
+    background: #fff;
+}
+html.b2b-print-boleto-embed .b2b-print-boleto__toolbar,
+.b2b-print-boleto.is-embed .b2b-print-boleto__toolbar {
+    display: none !important;
+}
+html body#html-body.b2b-finance-printboleto,
+html body#html-body.b2b-finance-printboleto .page-wrapper,
+html body#html-body.b2b-finance-printboleto .page-main {
+    background: #fff !important;
+}
+</style>
 <div id="b2b-print-boleto-root"
      class="b2b-print-boleto"
-     data-mage-init='{"GrupoAwamotos_B2B/js/finance/print-boleto-page": {}}'>
+     data-mage-init='{"GrupoAwamotos_B2B/js/finance/print-boleto-page": {}}'
+     data-boleto-supported="<?= $supported ? '1' : '0' ?>"
+     data-boleto-banco="<?= $escaper->escapeHtmlAttr((string) ($boleto['banco'] ?? '')) ?>">
     <div class="b2b-print-boleto__toolbar">
         <button type="button" class="b2b-print-boleto__btn" data-action="print-boleto">
             <?= $escaper->escapeHtml(__('Imprimir')) ?>
@@ -62,13 +103,20 @@ $supported = !empty($boleto['supported']);
         </section>
 
         <section class="b2b-print-boleto__barcode">
-            <div id="b2b-boleto-barcode" data-barcode="<?= $escaper->escapeHtmlAttr($boleto['barcode']) ?>"></div>
+            <?php if ($barcodeSvg !== ''): ?>
+                <div id="b2b-boleto-barcode" data-barcode="<?= $escaper->escapeHtmlAttr((string) $boleto['barcode']) ?>">
+                    <?= /* @noEscape */ $barcodeSvg ?>
+                </div>
+            <?php else: ?>
+                <div id="b2b-boleto-barcode" data-barcode="<?= $escaper->escapeHtmlAttr((string) ($boleto['barcode'] ?? '')) ?>"></div>
+            <?php endif; ?>
         </section>
 
         <p class="b2b-print-boleto__footer-note">
             <?= $escaper->escapeHtml(__('Documento gerado eletronicamente a partir dos dados do título financeiro. Confira sempre o valor e o vencimento antes de efetuar o pagamento.')) ?>
         </p>
 
+        <?php if ($barcodeSvg === ''): ?>
         <script type="text/x-magento-init">
         {
             "#b2b-boleto-barcode": {
@@ -76,6 +124,7 @@ $supported = !empty($boleto['supported']);
             }
         }
         </script>
+        <?php endif; ?>
     <?php else: ?>
         <div class="b2b-print-boleto__card">
             <section class="b2b-print-boleto__header">
@@ -101,7 +150,18 @@ $supported = !empty($boleto['supported']);
             </dl>
         </div>
         <p class="b2b-print-boleto__aviso">
-            <?= $escaper->escapeHtml(__('Impressão do código de barras ainda não disponível para este banco/filial. Entre em contato com o financeiro para receber o boleto.')) ?>
+            <?php
+            $bancoLabel = trim((string) ($boleto['banco'] ?? ''));
+            $aviso = $bancoLabel !== ''
+                ? __(
+                    'Impressão do código de barras ainda não disponível para o banco %1. Entre em contato com o financeiro para receber o boleto.',
+                    $bancoLabel
+                )
+                : __('Impressão do código de barras ainda não disponível para este banco/filial. Entre em contato com o financeiro para receber o boleto.');
+            ?>
+            <?= $escaper->escapeHtml($aviso) ?>
         </p>
     <?php endif; ?>
 </div>
+<?php
+?>

@@ -129,9 +129,19 @@
                 <field id="link_existing_erp_on_approval" translate="label comment" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Vincular ERP existente na aprovação (opcional)</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Se o CNPJ já existir em FN_FORNECEDORES, cria vínculo automaticamente. Novos clientes integram via pull de pedido — cadastro manual no ERP não é exigido.]]></comment>
+                    <comment><![CDATA[Se o CNPJ já existir em FN_FORNECEDORES, cria vínculo Magento↔ERP e tenta gravar Cadastro de Cliente no validador (write_connection) — sem depender do botão Exportar Clientes no desktop Sectra. Novos CNPJs (sem ERP) seguem pipeline de prospect / pull de pedido.]]></comment>
                     <depends>
                         <field id="require_approval">1</field>
+                    </depends>
+                </field>
+
+                <field id="create_erp_prospect_stub_on_approval" translate="label comment" type="select" sortOrder="85" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Criar prospect no ERP se CNPJ não existir</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Autonomia Magento: se o CNPJ aprovado não estiver em FN_FORNECEDORES, cria stub CKPROSPECT=S (mesmo contrato do Importar Clientes Prospect) + Cadastro no validador via write_connection. Não depende do desktop Sectra.]]></comment>
+                    <depends>
+                        <field id="require_approval">1</field>
+                        <field id="link_existing_erp_on_approval">1</field>
                     </depends>
                 </field>
             </group>

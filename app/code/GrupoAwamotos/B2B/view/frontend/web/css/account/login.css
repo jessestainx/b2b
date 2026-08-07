@@ -10,7 +10,8 @@
     --b2b-auth-gap-block: var(--b2b-auth-gap-md);
     --b2b-auth-gap-field: var(--b2b-auth-gap-xs);
     --b2b-auth-gap-inline: var(--b2b-auth-gap-sm);
-    --b2b-auth-shell-pad-x: clamp(12px, 3vw, 16px);
+    /* PIXEL-QA: gutter shell 16 mobile / 24 desktop */
+    --b2b-auth-shell-pad-x: clamp(16px, 3vw, 24px);
     --b2b-auth-shell-pad-y: clamp(12px, 2vh, 16px);
     --b2b-auth-card-pad-x: 16px;
     --b2b-auth-card-pad-y: 16px;

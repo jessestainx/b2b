@@ -28,6 +28,7 @@
                 <notify_admin_new_customer>1</notify_admin_new_customer>
                 <admin_email>b2b.awamotos@gmail.com</admin_email>
                 <link_existing_erp_on_approval>1</link_existing_erp_on_approval>
+                <create_erp_prospect_stub_on_approval>1</create_erp_prospect_stub_on_approval>
             </customer_approval>
             <minimum_qty>
                 <enabled>1</enabled>

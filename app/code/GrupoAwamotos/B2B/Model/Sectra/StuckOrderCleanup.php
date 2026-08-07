@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model\Sectra;
 
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\OrderRetry as OrderRetryResource;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -17,8 +18,6 @@ use Psr\Log\LoggerInterface;
 class StuckOrderCleanup
 {
     public const REASON_CUSTOMER_NOT_VALIDATED = 'customer_not_validated_in_erp';
-
-    private const B2B_GROUP_IDS = [4, 5, 6];
 
     /**
      * Grace period for legacy statuses only. Normal B2B orders must stay available
@@ -54,12 +53,13 @@ class StuckOrderCleanup
         ];
 
         $connection = $this->resourceConnection->getConnection();
+        $groupIn = B2bGroupIds::toSqlInList($this->resourceConnection);
         $rows = $connection->fetchAll(
             "SELECT so.entity_id, so.increment_id, so.customer_id, so.sectra_import_status,
                     so.state, so.total_paid
              FROM sales_order so
              INNER JOIN customer_entity ce ON ce.entity_id = so.customer_id
-             WHERE ce.group_id IN (4, 5, 6)
+             WHERE ce.group_id IN ($groupIn)
                AND so.state NOT IN ('canceled', 'closed', 'complete')
                AND so.created_at < DATE_SUB(NOW(), INTERVAL " . self::MIN_ORDER_AGE_DAYS . " DAY)
               AND so.sectra_import_status IN (?, ?)",

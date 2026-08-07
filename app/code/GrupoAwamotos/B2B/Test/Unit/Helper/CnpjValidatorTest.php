@@ -284,7 +284,7 @@ class CnpjValidatorTest extends TestCase
             'uf' => 'SP',
             'cep' => '14800000',
             'telefone' => '(16) 3333-3333',
-            'email' => 'contato@awamotos.com.br'
+            'email' => 'awamotos@awamotos.com.br'
         ]);
 
         $this->scopeConfig->method('isSetFlag')->willReturnCallback(function (string $path) {

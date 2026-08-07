@@ -200,12 +200,19 @@ class ContactInfo implements ArgumentInterface
             return '';
         }
 
+        if ((bool) preg_match(
+            '/^(?:contato|atacado|privacidade|suporte|entregas|sac|falecom|teste|oportunidades|admin|rh|vendas|noreply|monitoring|awamotos)@(?:awamotos\.com\.br|awamotos\.com|grupoawamotos\.com\.br)$/i',
+            $email
+        )) {
+            return 'awamotos@awamotos.com.br';
+        }
+
         if ((bool) preg_match('/^[^@\s]+@grupoawamotos\.com\.br$/i', $email)) {
             $email = (string) preg_replace('/@grupoawamotos\.com\.br$/i', '@awamotos.com.br', $email);
         }
 
-        if ((bool) preg_match('/^[^@\s]+@awamotos\.com(?:\.br)*/i', $email)) {
-            $email = (string) preg_replace('/@awamotos\.com(?:\.br)*/i', '@awamotos.com.br', $email);
+        if ((bool) preg_match('/^[^@\s]+@awamotos\.com(?:\.br)?$/i', $email)) {
+            $email = (string) preg_replace('/@awamotos\.com(?:\.br)?$/i', '@awamotos.com.br', $email);
         }
 
         return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : '';

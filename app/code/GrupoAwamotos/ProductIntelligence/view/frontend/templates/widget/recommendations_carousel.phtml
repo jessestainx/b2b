@@ -102,6 +102,7 @@ $carouselConfig = [
                                           action="<?= $block->escapeUrl((string) $postParams['action']) ?>"
                                           method="post"
                                           class="rexis-card-cart-form">
+                                        <?= $block->getBlockHtml('formkey') ?>
                                         <?php foreach ($postParams['data'] as $key => $value): ?>
                                             <input type="hidden"
                                                    name="<?= $block->escapeHtmlAttr((string) $key) ?>"

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Console\Command;
 
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
 use GrupoAwamotos\B2B\Model\Sectra\CheckoutBlockMessage;
 use GrupoAwamotos\B2B\Model\Sectra\ProspectEvent;
 use GrupoAwamotos\B2B\Model\Sectra\SectraImportStatus;
@@ -233,6 +234,7 @@ class ValidateSectraFlowCommand extends Command
     private function findValidatedCustomerId(): int
     {
         $connection = $this->resourceConnection->getConnection();
+        $groupIn = B2bGroupIds::toSqlInList($this->resourceConnection);
         $id = $connection->fetchOne(
             "SELECT ce.entity_id
              FROM customer_entity ce
@@ -244,7 +246,7 @@ class ValidateSectraFlowCommand extends Command
                ON conf.customer_id=COALESCE(NULLIF(CAST(erp_attr.value AS UNSIGNED), 0), map.old_oc_customer_id)
              INNER JOIN customer_entity_varchar appr ON appr.entity_id=ce.entity_id
                AND appr.attribute_id=142 AND appr.value='approved'
-             WHERE ce.group_id IN (4,5,6)
+             WHERE ce.group_id IN ($groupIn)
              ORDER BY ce.entity_id DESC LIMIT 1"
         );
 

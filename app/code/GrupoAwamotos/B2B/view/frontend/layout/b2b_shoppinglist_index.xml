@@ -6,10 +6,13 @@
         <css src="GrupoAwamotos_B2B::css/account/pages-shoppinglist.css"/>
     </head>
     <body>
+        <!-- Evita H1 duplicado: título vem do template shoppinglist/index.phtml -->
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Customer\ShoppingList\ListBlock"
                    name="b2b.shopping.list.index"
-                   template="GrupoAwamotos_B2B::customer/shoppinglist/index.phtml">
+                   template="GrupoAwamotos_B2B::customer/shoppinglist/index.phtml"
+                   cacheable="false">
                 <arguments>
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\ShoppingListViewModel</argument>
                 </arguments>

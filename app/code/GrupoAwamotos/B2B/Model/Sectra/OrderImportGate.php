@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Model\Sectra;
 
 use GrupoAwamotos\B2B\Helper\Config as B2bConfig;
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
+use GrupoAwamotos\ERPIntegration\Api\ConnectionInterface as ErpConnectionInterface;
+use GrupoAwamotos\ERPIntegration\Api\OrderPullInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
@@ -15,7 +18,6 @@ use Psr\Log\LoggerInterface;
  */
 class OrderImportGate
 {
-    private const B2B_GROUP_IDS = [4, 5, 6];
     private const OC_ORDER_ID_OFFSET = 200000;
 
     public function __construct(
@@ -23,6 +25,8 @@ class OrderImportGate
         private readonly SectraSyncLogger $syncLogger,
         private readonly B2bConfig $b2bConfig,
         private readonly ResourceConnection $resourceConnection,
+        private readonly ErpConnectionInterface $erpConnection,
+        private readonly OrderPullInterface $orderPull,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -33,11 +37,12 @@ class OrderImportGate
     public function backfillOrderImportStatus(): int
     {
         $connection = $this->resourceConnection->getConnection();
+        $groupIn = B2bGroupIds::toSqlInList($this->resourceConnection);
         $rows = $connection->fetchAll(
             "SELECT so.entity_id, so.customer_id, so.sectra_import_status
              FROM sales_order so
              INNER JOIN customer_entity ce ON ce.entity_id = so.customer_id
-             WHERE ce.group_id IN (4, 5, 6, 7)
+             WHERE ce.group_id IN ($groupIn)
                AND so.state NOT IN ('canceled', 'closed')
                AND (so.sectra_import_status IS NULL
                    OR so.sectra_import_status IN (?, ?, ?))",
@@ -114,7 +119,7 @@ class OrderImportGate
                          NULLIF(CAST(erp_attr.value AS UNSIGNED), 0),
                          map.old_oc_customer_id
                      )
-                 WHERE ce.group_id IN (4, 5, 6, 7)
+                 WHERE ce.group_id IN (" . B2bGroupIds::toSqlInList($this->resourceConnection) . ")
                    AND so.state IN ('new', 'pending_payment', 'processing')
                    AND so.sectra_import_status IN (?, ?, ?)
                    AND NOT EXISTS (
@@ -307,6 +312,7 @@ class OrderImportGate
      */
     public function syncImportedOrderFlags(): int
     {
+        $reconciled = $this->reconcileOrdersAlreadyInErp();
         $connection = $this->resourceConnection->getConnection();
         $rows = $connection->fetchAll(
             'SELECT oi.order_id, so.entity_id, so.increment_id, so.customer_id
@@ -337,7 +343,125 @@ class OrderImportGate
             $updated++;
         }
 
-        return $updated;
+        return $reconciled + $updated;
+    }
+
+    /**
+     * Reconcile orders imported by the Sectra desktop when it does not write
+     * the local oc_order_imported ACK.
+     *
+     * The ACK is generated only after customer, header total, item count,
+     * quantity and item total match exactly (within currency tolerance).
+     */
+    private function reconcileOrdersAlreadyInErp(): int
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $candidates = $connection->fetchAll(
+            'SELECT oo.order_id, oo.customer_id, oo.total,
+                    so.entity_id, so.increment_id,
+                    COUNT(soi.item_id) AS item_count,
+                    COALESCE(SUM(soi.qty_ordered), 0) AS qty_total,
+                    COALESCE(SUM(soi.row_total), 0) AS items_total
+             FROM oc_order oo
+             INNER JOIN sales_order so ON so.entity_id = oo.order_id - ?
+             LEFT JOIN sales_order_item soi
+                ON soi.order_id = so.entity_id
+                AND soi.parent_item_id IS NULL
+             GROUP BY oo.order_id, oo.customer_id, oo.total, so.entity_id, so.increment_id
+             ORDER BY oo.order_id
+             LIMIT 50',
+            [self::OC_ORDER_ID_OFFSET]
+        );
+
+        if ($candidates === []) {
+            return 0;
+        }
+
+        $webOrderIds = array_map(
+            static fn (array $row): string => (string) (int) $row['order_id'],
+            $candidates
+        );
+        $placeholders = implode(',', array_fill(0, count($webOrderIds), '?'));
+        $erpRows = $this->erpConnection->query(
+            "SELECT p.CODIGO, p.PEDIDOWEB, p.CLIENTE, p.VLRTOTAL,
+                    COUNT(i.CODIGO) AS item_count,
+                    COALESCE(SUM(i.QTDE), 0) AS qty_total,
+                    COALESCE(SUM(i.VLRTOTAL), 0) AS items_total
+             FROM VE_PEDIDO p
+             LEFT JOIN VE_PEDIDOITENS i ON i.PEDIDO = p.CODIGO
+             WHERE p.PEDIDOWEB IN ({$placeholders})
+             GROUP BY p.CODIGO, p.PEDIDOWEB, p.CLIENTE, p.VLRTOTAL",
+            $webOrderIds
+        );
+
+        /** @var array<string, array<int, array<string, mixed>>> $erpRowsByWebOrder */
+        $erpRowsByWebOrder = [];
+        foreach ($erpRows as $erpRow) {
+            $webOrderId = trim((string) ($erpRow['PEDIDOWEB'] ?? ''));
+            if ($webOrderId !== '') {
+                $erpRowsByWebOrder[$webOrderId][] = $erpRow;
+            }
+        }
+
+        $reconciled = 0;
+        $mismatches = 0;
+        $duplicates = 0;
+        $errors = 0;
+
+        foreach ($candidates as $candidate) {
+            $webOrderId = (string) (int) $candidate['order_id'];
+            $matches = $erpRowsByWebOrder[$webOrderId] ?? [];
+            if ($matches === []) {
+                continue;
+            }
+
+            if (count($matches) !== 1) {
+                $duplicates++;
+                $this->logger->error('[B2B-Sectra] Duplicate PEDIDOWEB found; automatic ACK skipped', [
+                    'oc_order_id' => $webOrderId,
+                    'matches' => count($matches),
+                ]);
+                continue;
+            }
+
+            $erpRow = $matches[0];
+            $isExactMatch =
+                (int) ($erpRow['CLIENTE'] ?? 0) === (int) $candidate['customer_id']
+                && abs((float) ($erpRow['VLRTOTAL'] ?? 0) - (float) $candidate['total']) <= 0.01
+                && (int) ($erpRow['item_count'] ?? 0) === (int) $candidate['item_count']
+                && abs((float) ($erpRow['qty_total'] ?? 0) - (float) $candidate['qty_total']) <= 0.0001
+                && abs((float) ($erpRow['items_total'] ?? 0) - (float) $candidate['items_total']) <= 0.01;
+
+            if (!$isExactMatch) {
+                $mismatches++;
+                $this->logger->warning('[B2B-Sectra] Existing ERP order differs from Magento; ACK skipped', [
+                    'oc_order_id' => $webOrderId,
+                    'erp_order_id' => (int) ($erpRow['CODIGO'] ?? 0),
+                ]);
+                continue;
+            }
+
+            try {
+                $response = $this->orderPull->acknowledgeOrder(
+                    (string) $candidate['increment_id'],
+                    (string) (int) $erpRow['CODIGO'],
+                    'ACK reconciliado automaticamente após importação pelo desktop Sectra'
+                );
+                if (($response[0]['success'] ?? false) === true) {
+                    $reconciled++;
+                } else {
+                    $errors++;
+                }
+            } catch (\Throwable $exception) {
+                $errors++;
+                $this->logger->error('[B2B-Sectra] Automatic ACK reconciliation failed', [
+                    'oc_order_id' => $webOrderId,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        return $reconciled;
     }
 
     private function isB2bCustomer(int $customerId): bool
@@ -348,7 +472,7 @@ class OrderImportGate
             [$customerId]
         );
 
-        return in_array($groupId, self::B2B_GROUP_IDS, true);
+        return B2bGroupIds::contains($this->resourceConnection, $groupId);
     }
 
     private function setOrderImportStatus(int $orderId, string $status): void

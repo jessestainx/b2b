@@ -30,7 +30,7 @@ class FooterData implements ArgumentInterface
 
     private const DEFAULT_PHONE = '(16) 3322-0000';
     private const DEFAULT_WHATSAPP = '(16) 99736-7588';
-    private const DEFAULT_EMAIL = 'contato@awamotos.com.br';
+    private const DEFAULT_EMAIL = 'awamotos@awamotos.com.br';
     private const DEFAULT_STREET = 'Rua Castro Alves, 1234';
     private const DEFAULT_CITY = 'Araraquara-SP';
     private const DEFAULT_POSTCODE = '';
@@ -422,12 +422,19 @@ class FooterData implements ArgumentInterface
             return '';
         }
 
+        if ((bool) preg_match(
+            '/^(?:contato|atacado|privacidade|suporte|entregas|sac|falecom|teste|oportunidades|admin|rh|vendas|noreply|monitoring|awamotos)@(?:awamotos\.com\.br|awamotos\.com|grupoawamotos\.com\.br)$/i',
+            $email
+        )) {
+            return self::DEFAULT_EMAIL;
+        }
+
         if ((bool) preg_match('/^[^@\s]+@grupoawamotos\.com\.br$/i', $email)) {
             $email = (string) preg_replace('/@grupoawamotos\.com\.br$/i', '@awamotos.com.br', $email);
         }
 
-        if ((bool) preg_match('/^[^@\s]+@awamotos\.com(?:\.br)*/i', $email)) {
-            $email = (string) preg_replace('/@awamotos\.com(?:\.br)*/i', '@awamotos.com.br', $email);
+        if ((bool) preg_match('/^[^@\s]+@awamotos\.com(?:\.br)?$/i', $email)) {
+            $email = (string) preg_replace('/@awamotos\.com(?:\.br)?$/i', '@awamotos.com.br', $email);
         }
 
         return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : self::DEFAULT_EMAIL;

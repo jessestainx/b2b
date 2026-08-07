@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Platform\Dashboard;
 
 use GrupoAwamotos\B2B\CommercialPanel\Api\PortfolioScopeInterface;
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 
@@ -13,13 +14,24 @@ use Magento\Framework\DB\Select;
  */
 class B2bDashboardScopeHelper
 {
-    /** @var int[] */
-    public const B2B_GROUP_IDS = [4, 5, 6];
+    /**
+     * @deprecated Use B2bGroupIds::resolve() — kept for BC of call sites expecting a const.
+     * @var int[]
+     */
+    public const B2B_GROUP_IDS = [4, 5, 6, 8];
 
     public function __construct(
         private readonly PortfolioScopeInterface $portfolioScope,
         private readonly ResourceConnection $resourceConnection
     ) {
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function getB2bGroupIds(): array
+    {
+        return B2bGroupIds::resolve($this->resourceConnection);
     }
 
     public function canBypassPortfolioScope(): bool
@@ -55,7 +67,7 @@ class B2bDashboardScopeHelper
         $select = $connection->select()
             ->from(['so' => $orderTable])
             ->joinInner(['ce' => $customerTable], 'ce.entity_id = so.customer_id', [])
-            ->where('ce.group_id IN (?)', self::B2B_GROUP_IDS);
+            ->where('ce.group_id IN (?)', $this->getB2bGroupIds());
 
         return $this->applyOrderCustomerScope($select);
     }
@@ -70,7 +82,7 @@ class B2bDashboardScopeHelper
 
         $select = $connection->select()
             ->from(['ce' => $customerTable])
-            ->where('ce.group_id IN (?)', self::B2B_GROUP_IDS);
+            ->where('ce.group_id IN (?)', $this->getB2bGroupIds());
 
         return $this->applyCustomerScope($select);
     }

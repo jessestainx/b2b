@@ -260,7 +260,7 @@ body#html-body.account.b2b-account-dashboard .b2b-dashboard-header {
 
 body#html-body.account.b2b-account-dashboard .summary-card,
 body#html-body.account.b2b-account-dashboard .summary-card:hover {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
     background-image: none !important;
@@ -293,7 +293,7 @@ body#html-body.account.b2b-account-dashboard .quotes-stats .stat {
 
 body#html-body.account.b2b-account-dashboard :is(.action-item, .actions-grid > a),
 body#html-body.account.b2b-account-dashboard :is(.action-item, .actions-grid > a):hover {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
     background-image: none !important;
@@ -454,7 +454,7 @@ body#html-body.account.b2b-account-dashboard :is(
     .sidebar .block-collapsible-nav,
     .account-nav-wrapper
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -462,7 +462,7 @@ body#html-body.account.b2b-account-dashboard .suggestion-card,
 body#html-body.account.b2b-account-dashboard .b2b-suggestions-section .suggestion-card,
 body#html-body.account.b2b-account-dashboard .suggestion-card:hover,
 body#html-body.account.b2b-account-dashboard .b2b-suggestions-section .suggestion-card:hover {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
     background-image: none !important;
@@ -482,7 +482,7 @@ body#html-body.account.b2b-account-dashboard .category-chip:hover {
 }
 
 body#html-body.account.b2b-account-dashboard :is(.erp-product-card, .erp-product-card:hover) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
 }
@@ -696,7 +696,7 @@ body#html-body.account.b2b-account-dashboard .account-nav-item .account-nav-link
 }
 
 body#html-body.account.b2b-account-dashboard :is(.block.block-collapsible-nav, .sidebar .block-collapsible-nav) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -713,12 +713,12 @@ body#html-body.account.b2b-account-dashboard :is(
     .message.info,
     .b2b-erp-pending-banner
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
 body#html-body.account.b2b-account-dashboard .b2b-discount-badge {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     background-image: none !important;
 }
@@ -777,7 +777,7 @@ body#html-body.account.b2b-account-dashboard :is(
     .block.block-collapsible-nav,
     .sidebar .block-collapsible-nav
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -788,7 +788,7 @@ body#html-body.account.b2b-account-dashboard :is(
     .b2b-empty-state,
     .message.info
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -809,7 +809,7 @@ body#html-body.account.b2b-account-dashboard :is(.view-all:focus-visible, .check
 }
 
 body#html-body.account.b2b-account-dashboard :is(.intelligence-card, .b2b-rexis-card, .b2b-rexis-stat) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -846,14 +846,14 @@ body#html-body.account.b2b-account-dashboard :is(
     .b2b-company-info,
     .attendant-section
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     background-image: none !important;
 }
 
 body#html-body.account.b2b-account-dashboard .summary-card,
 body#html-body.account.b2b-account-dashboard .summary-card:hover {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
 }
@@ -893,7 +893,7 @@ body#html-body.account.b2b-account-dashboard .b2b-suggestions-section .suggestio
 
 body#html-body.account.b2b-account-dashboard .page-wrapper .block-customer-login,
 body#html-body.account.b2b-account-dashboard .page-wrapper .block.block-customer-login {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -1019,7 +1019,7 @@ body#html-body.account.b2b-account-dashboard :is(
     .b2b-rexis-card,
     .b2b-chart-container
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
 }
@@ -1089,14 +1089,14 @@ body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-dashboard-header
 
 body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-dashboard-header .b2b-discount-badge {
     flex: 0 0 auto !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
 body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-welcome h1 {
-    margin: 0 0 6px !important;
-    font-size: clamp(1.25rem, 1.1rem + 0.4vw, 1.5rem) !important;
-    line-height: 1.25 !important;
+    margin: 0 0 4px !important;
+    font-size: var(--awa-b2b-page-title-size, clamp(1.125rem, 1rem + 0.35vw, 1.375rem)) !important;
+    line-height: 1.3 !important;
 }
 
 body#html-body.account.b2b-account-dashboard .page-wrapper :is(
@@ -1124,7 +1124,7 @@ body#html-body.account.b2b-account-dashboard .page-wrapper :is(
     .b2b-dashboard-details,
     .category-chip
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
 }
@@ -1156,9 +1156,11 @@ html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .minicart
 
     html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .sidebar-main .nav.item,
     html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper #block-collapsible-nav li.nav.item {
-        flex: 0 0 100% !important;
+        /* width full; NÃO flex-basis 100% — em flex-direction:column isso vira altura 100% do ul */
+        flex: 0 0 auto !important;
         width: 100% !important;
         max-width: 100% !important;
+        height: auto !important;
     }
 }
 
@@ -1176,14 +1178,14 @@ body#html-body.account.b2b-account-dashboard .page-wrapper :is(
     .b2b-quick-actions,
     .orders-section
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     transform: none !important;
 }
 
 body#html-body.account.b2b-account-dashboard .page-wrapper .block.block-collapsible-nav,
 body#html-body.account.b2b-account-dashboard .page-wrapper #block-collapsible-nav {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     overflow: visible !important;
 }
@@ -1216,13 +1218,13 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main {
 
 body#html-body.account.b2b-account-dashboard .block.block-collapsible-nav,
 body#html-body.account.b2b-account-dashboard .sidebar .block-collapsible-nav {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
     overflow: visible !important;
 }
 
 html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .awa-empty-state {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -1375,7 +1377,7 @@ html body#html-body:is(.account, [class*="b2b-"]) .page-wrapper :is(
     .approval-section,
     .company-users-section
 ) {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -1460,7 +1462,7 @@ body#html-body.account.b2b-account-dashboard .page-wrapper .suggestion-card {
     flex-direction: column !important;
     gap: 12px !important;
     padding: clamp(12px, 1.5vw, 16px) !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -1505,7 +1507,7 @@ body#html-body.account.b2b-account-dashboard .page-wrapper .onboarding-header {
 
 body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-chart-container {
     max-height: 320px !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -1519,7 +1521,7 @@ body#html-body.account.b2b-account-dashboard .page-wrapper .erp-reorder-item {
     gap: 12px !important;
     min-height: 0 !important;
     padding: 10px 12px !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     box-shadow: none !important;
 }
 
@@ -1968,3 +1970,313 @@ html body#html-body#html-body.b2b-account-dashboard .page-wrapper .section-heade
    Fix: sobrescrever com spec (0,2,4,3) > phases (0,1,4,1), carregamento posterior.
    2026-06-17 */
 html body#html-body#html-body.b2b-account-dashboard .page-wrapper .orders-table .status-badge{white-space:nowrap!important;min-width:max-content!important;overflow-wrap:normal!important;word-break:normal!important}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Fix 2026-07-16 — contraste + overflow B2B (debug session 4b8a04)
+   Causa: prefers-color-scheme:dark / awa-dark-mode aplica texto claro
+   (#e2e8f0) enquanto late CSS mantém cards brancos → contraste ~1.1.
+   RFM tag: color:white sobre bg dinâmico claro (ciano) → contraste ~1.45.
+   Onboarding: min-width implícito do grid estoura viewport mobile.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Texto legível em cards claros (tema claro / sem dark) */
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section,
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .onboarding-header,
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .onboarding-header h2,
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .onboarding-title,
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .progress-text,
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .checklist-item,
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .checklist-content,
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .checklist-label,
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .checklist-desc {
+    color: #1f2937 !important;
+}
+
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .checklist-desc {
+    color: #4b5563 !important;
+}
+
+html body#html-body.account.b2b-account-dashboard:not(.awa-dark-mode) .page-wrapper .b2b-onboarding-section .progress-percent {
+    color: var(--awa-primary, #b73337) !important;
+}
+
+/* RFM tag: late.css força bg saturado + texto branco. color-mix pode falhar no
+   valor computed de --b2b-rfm-tag-bg; usar fundo claro fixo + accent na borda. */
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-intelligence-section :is(.rfm-tag, .intelligence-badge),
+html body#html-body#html-body.awa-dark-mode.account.b2b-account-dashboard .page-wrapper .b2b-intelligence-section :is(.rfm-tag, .intelligence-badge) {
+    color: #0f172a !important;
+    background-color: #e2e8f0 !important;
+    background-image: none !important;
+    border: 1px solid #94a3b8 !important;
+    border-left: 4px solid var(--b2b-rfm-tag-bg, #64748b) !important;
+    font-weight: 700 !important;
+}
+
+/* Nav conta: labels com contraste AA em fundo claro */
+html body#html-body.account .page-wrapper .sidebar .nav.item a,
+html body#html-body.account .page-wrapper .block-collapsible-nav .item a,
+html body#html-body.awa-dark-mode.account .page-wrapper .sidebar .nav.item a,
+html body#html-body.awa-dark-mode.account .page-wrapper .block-collapsible-nav .item a {
+    color: var(--awa-text, #1f2937) !important;
+}
+
+/* Overflow mobile: themes.css força flex:0 0 auto no col-main → largura intrínseca (~586px)
+   estoura .columns (~351px). Forçar width 100% + min-width 0 no shell da conta. */
+@media (max-width: 768px) {
+    html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .page-main > :is(.columns, .columns.layout, .columns.row, .columns.layout.row) {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: clip !important;
+    }
+
+    html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .page-main > .columns > :is(
+        .sidebar, .sidebar-main, .sidebar.sidebar-main, .col-lg-2, [class*="col-sm-3"],
+        .column.main, .col-main, .col-lg-10, [class*="col-sm-9"], [class*="col-"]
+    ) {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        float: none !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper :is(.column.main, .col-main, .b2b-dashboard, .b2b-onboarding-section) {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        overflow-x: clip !important;
+    }
+
+    html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-onboarding-section .onboarding-header,
+    html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-onboarding-section .checklist-item {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-onboarding-section .checklist-content {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+}
+
+/* Dark mode contrast — terminal (vence oklch/#333 dos audits anteriores) */
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-breadcrumbs-container,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .breadcrumbs.b2b-breadcrumbs {
+    background: #0f172a !important;
+    background-color: #0f172a !important;
+    color: #cbd5e1 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-breadcrumbs a,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .breadcrumbs.b2b-breadcrumbs a {
+    color: #e2e8f0 !important;
+}
+
+/* current strong usava var(--awa-text) claro-tema → oklch escuro no fundo dark */
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-breadcrumbs .item.current strong,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .breadcrumbs .item.current strong,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-breadcrumbs .item,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-breadcrumbs .item + .item::before {
+    color: #e2e8f0 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-breadcrumbs .item.current strong {
+    color: #f1f5f9 !important;
+}
+
+/* Header account: sticky pad+inner 68px vazavam sobre breadcrumbs */
+/* overflow:visible — overflow:hidden clipava #b2b-status-dropdown (position:fixed) */
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .awa-account-header .header-wrapper-sticky {
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    padding-block: 0 !important;
+    height: 68px !important;
+    min-height: 68px !important;
+    max-height: 68px !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .awa-account-header .header-wrapper-sticky .header.awa-main-header,
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .awa-account-header .header-wrapper-sticky .header_main,
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .awa-account-header .header-wrapper-sticky .header-main,
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .awa-account-header .header-wrapper-sticky .container {
+    padding-block: 0 !important;
+    margin: 0 !important;
+    height: 68px !important;
+    min-height: 68px !important;
+    max-height: 68px !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .awa-account-header .header-wrapper-sticky .awa-main-header__inner.wp-header,
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .awa-account-header .header-wrapper-sticky .awa-main-header__inner {
+    height: 68px !important;
+    min-height: 68px !important;
+    max-height: 68px !important;
+    padding-block: 0 !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+
+/* Breadcrumbs densos — links não precisam de 44px de altura no strip */
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-breadcrumbs .item a,
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-breadcrumbs .item.current strong {
+    min-height: 0 !important;
+    height: auto !important;
+    line-height: 1.35 !important;
+    padding-block: 4px !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .b2b-breadcrumbs-container,
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .breadcrumbs.b2b-breadcrumbs {
+    margin-top: 0 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard .page-wrapper .breadcrumbs.b2b-breadcrumbs {
+    padding-block: 8px !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+/* Dark: escurece superfícies que ainda vinham brancas (texto #f1f5f9 → contraste ~1.1) */
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-company-info {
+    background: #1e293b !important;
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .onboarding-header,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .onboarding-header h2,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .onboarding-header h3,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .onboarding-title,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .onboarding-title,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .progress-text,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .company-info-title {
+    color: #f1f5f9 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .checklist-item,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .checklist-item.done,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .checklist-item.pending {
+    background: #0f172a !important;
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+    opacity: 1 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .checklist-content,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .checklist-label,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-company-info .detail-item .label,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-company-info .detail-item .value {
+    color: #e2e8f0 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .checklist-desc {
+    color: #94a3b8 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-onboarding-section .progress-percent {
+    color: #fca5a5 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .summary-card,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .credit-card,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .purchases-card {
+    background: #1e293b !important;
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .summary-card .card-title {
+    color: #cbd5e1 !important;
+}
+
+/* Dark: sidebar da conta (ficava oklch claro enquanto o header ia dark) */
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .sidebar .block-collapsible-nav,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .sidebar-main .block-collapsible-nav,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .block.block-collapsible-nav {
+    background: #1e293b !important;
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .block-collapsible-nav .item a,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .block-collapsible-nav .item > a,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .sidebar .nav.item a,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .block-collapsible-nav .title,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .block-collapsible-nav .title strong,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .account-nav-title,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .account-nav-title strong {
+    color: #e2e8f0 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .block-collapsible-nav .item.current > a,
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .block-collapsible-nav .item > a.current {
+    color: #fca5a5 !important;
+}
+
+/* Dark: restante do maincontent — prefers-color-scheme pintava texto #e2e8f0
+   mas late CSS mantinha fundo branco (contraste ~1.23). */
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper :is(
+    .b2b-dashboard-header,
+    .b2b-intelligence-section,
+    .attendant-section,
+    .b2b-quick-actions,
+    .b2b-suggestions-section,
+    .erp-suggestions-section,
+    .erp-reorder-section,
+    .b2b-section
+) {
+    background: #1e293b !important;
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper :is(
+    .b2b-dashboard-header h1,
+    .b2b-welcome h1,
+    .b2b-section > h2,
+    .b2b-section > h3,
+    .section-header h2,
+    .section-header h3,
+    .attendant-name,
+    .card-value,
+    .credit-value,
+    .detail-item .value
+) {
+    color: #f1f5f9 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper :is(
+    .b2b-welcome-sub,
+    .b2b-member-since,
+    .card-title,
+    .card-content h3,
+    .card-content h4,
+    .credit-label,
+    .detail-item .label,
+    .attendant-department
+) {
+    color: #cbd5e1 !important;
+}
+
+html body#html-body#html-body.account.b2b-account-dashboard.awa-dark-mode .page-wrapper .b2b-dashboard-header .action.secondary {
+    background: #0f172a !important;
+    color: #f1f5f9 !important;
+    border-color: #475569 !important;
+}

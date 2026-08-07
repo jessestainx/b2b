@@ -94,6 +94,10 @@ class InstantProvider
             if ($indexIdentifier == 'mst_misspell_index') {
                 continue;
             }
+            // [AWA] Omit CMS "Informações" from Instant autocomplete (DOM/JSON + B2B focus).
+            if ($indexIdentifier === 'magento_cms_page') {
+                continue;
+            }
             if ($indexIdentifier == 'catalogsearch_fulltext') {
                 $indexIdentifier = 'magento_catalog_product';
             }
@@ -111,6 +115,24 @@ class InstantProvider
             foreach ($results['items'] as $key => $item) {
                 if (isset($item['price']) && isset($item['price'][$this->getCurrency()])) {
                     $results['items'][$key]['price'] = $item['price'][$this->getCurrency()];
+                }
+                // [AWA] Compact Instant payload — flags show_description/rating/cart are off.
+                if ($indexIdentifier === 'magento_catalog_product') {
+                    unset(
+                        $results['items'][$key]['description'],
+                        $results['items'][$key]['rating'],
+                        $results['items'][$key]['reviews'],
+                        $results['items'][$key]['addToCartUrl']
+                    );
+                    // [AWA][B2B] Strip price from Instant JSON.
+                    // instant.json has is_show_price=false; Instant bypasses Magento DI/HidePricePlugin.
+                    // Always omit so guests cannot read wholesale prices from the network payload.
+                    unset($results['items'][$key]['price']);
+                    if (!empty($results['items'][$key]['name']) && is_string($results['items'][$key]['name'])) {
+                        $results['items'][$key]['name'] = trim(
+                            preg_replace('/\s+/u', ' ', $results['items'][$key]['name']) ?? $results['items'][$key]['name']
+                        );
+                    }
                 }
             }
 

@@ -6,6 +6,7 @@ namespace GrupoAwamotos\B2B\Model\Sectra;
 
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ApprovalStatus;
 use GrupoAwamotos\B2B\Model\Customer\Attribute\Source\ErpCustomerSyncStatus;
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
 use GrupoAwamotos\B2B\Model\CustomerCnpjResolver;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
@@ -18,8 +19,6 @@ use Psr\Log\LoggerInterface;
 class ProspectPipeline
 {
     private const OC_CUSTOMER_ID_OFFSET = 200000;
-    private const B2B_GROUP_IDS = [4, 5, 6];
-
     /** Keep the cron short; each validator lookup can take close to one second. */
     private const POLL_BATCH_SIZE = 10;
     private const POLL_COOLDOWN_HOURS = 24;
@@ -68,7 +67,7 @@ class ProspectPipeline
             return $result;
         }
 
-        if (!in_array((int) $customer->getGroupId(), self::B2B_GROUP_IDS, true)) {
+        if (!B2bGroupIds::contains($this->resourceConnection, (int) $customer->getGroupId())) {
             $result['message'] = 'Cliente não pertence a grupo B2B.';
             return $result;
         }

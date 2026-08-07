@@ -5,32 +5,25 @@ declare(strict_types=1);
 namespace GrupoAwamotos\ERPIntegration\Block\Cart;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Framework\Data\Form\FormKey;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
 /**
  * Campo rápido de cupom no painel do minicart.
+ *
+ * form_key NÃO é gerado no PHP (páginas com FPC). O JS sincroniza do cookie no submit.
  */
 class MinicartCoupon extends Template
 {
     private CheckoutSession $checkoutSession;
-    private FormKey $formKey;
 
     public function __construct(
         Context $context,
         CheckoutSession $checkoutSession,
-        FormKey $formKey,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->checkoutSession = $checkoutSession;
-        $this->formKey = $formKey;
-    }
-
-    public function getFormKeyValue(): string
-    {
-        return $this->formKey->getFormKey();
     }
 
     public function shouldDisplay(): bool

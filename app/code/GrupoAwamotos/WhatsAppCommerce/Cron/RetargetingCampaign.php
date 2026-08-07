@@ -25,7 +25,6 @@ class RetargetingCampaign
 {
     private const MAX_PER_SEGMENT = 30;
     private const OPTIN_ATTRIBUTE = 'whatsapp_optin';
-    private const PHONE_ATTRIBUTE = 'telefone_celular';
 
     public function __construct(
         private readonly ResourceConnection $resource,
@@ -149,9 +148,8 @@ class RetargetingCampaign
         string $notPurchasedSince,
     ): array {
         $optinId = $this->getAttributeId($connection, self::OPTIN_ATTRIBUTE);
-        $phoneId = $this->getAttributeId($connection, self::PHONE_ATTRIBUTE);
 
-        if ($optinId === 0 || $phoneId === 0) {
+        if ($optinId === 0) {
             return [];
         }
 
@@ -171,13 +169,13 @@ class RetargetingCampaign
                 []
             )
             ->join(
-                ['phone' => $this->resource->getTableName('customer_entity_varchar')],
-                'phone.entity_id = ce.entity_id AND phone.attribute_id = ' . $phoneId,
-                ['phone' => 'phone.value']
+                ['ca' => $this->resource->getTableName('customer_address_entity')],
+                'ca.entity_id = ce.default_billing',
+                ['phone' => 'ca.telephone']
             )
             ->where('optin.value = 1')
-            ->where('phone.value IS NOT NULL')
-            ->where('phone.value != ?', '')
+            ->where('ca.telephone IS NOT NULL')
+            ->where('ca.telephone != ?', '')
             // Has orders in the "purchased after" window
             ->where('EXISTS (?)', new \Zend_Db_Expr(
                 $connection->select()
@@ -227,9 +225,8 @@ class RetargetingCampaign
         \Magento\Framework\DB\Adapter\AdapterInterface $connection,
     ): array {
         $optinId = $this->getAttributeId($connection, self::OPTIN_ATTRIBUTE);
-        $phoneId = $this->getAttributeId($connection, self::PHONE_ATTRIBUTE);
 
-        if ($optinId === 0 || $phoneId === 0) {
+        if ($optinId === 0) {
             return [];
         }
 
@@ -250,9 +247,9 @@ class RetargetingCampaign
                 []
             )
             ->join(
-                ['phone' => $this->resource->getTableName('customer_entity_varchar')],
-                'phone.entity_id = ce.entity_id AND phone.attribute_id = ' . $phoneId,
-                ['phone' => 'phone.value']
+                ['ca' => $this->resource->getTableName('customer_address_entity')],
+                'ca.entity_id = ce.default_billing',
+                ['phone' => 'ca.telephone']
             )
             ->join(
                 ['so' => $this->resource->getTableName('sales_order')],
@@ -260,8 +257,8 @@ class RetargetingCampaign
                 []
             )
             ->where('optin.value = 1')
-            ->where('phone.value IS NOT NULL')
-            ->where('phone.value != ?', '')
+            ->where('ca.telephone IS NOT NULL')
+            ->where('ca.telephone != ?', '')
             // No orders in last 90 days
             ->where('NOT EXISTS (?)', new \Zend_Db_Expr(
                 $connection->select()

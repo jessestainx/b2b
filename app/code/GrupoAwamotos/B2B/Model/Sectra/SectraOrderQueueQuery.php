@@ -214,7 +214,7 @@ class SectraOrderQueueQuery
                 'cnpj_attr.entity_id = ce.entity_id AND cnpj_attr.attribute_id = ' . $cnpjAttrId,
                 ['b2b_cnpj' => 'cnpj_attr.value']
             )
-            ->where('ce.group_id IN (?)', B2bDashboardScopeHelper::B2B_GROUP_IDS)
+            ->where('ce.group_id IN (?)', $this->scopeHelper->getB2bGroupIds())
             ->where('so.state IN (?)', ['new', 'pending_payment', 'processing'])
             ->where(
                 '(so.sectra_import_status IS NULL OR so.sectra_import_status NOT IN (?))',

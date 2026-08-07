@@ -785,11 +785,9 @@ html body .page-wrapper .b2b-register-page .terms-section .b2b-terms-input {
 }
 
 html body .page-wrapper .b2b-register-page .terms-section .label {
-    display: grid !important;
-    grid-template-columns: 22px minmax(0, 1fr);
-    align-items: flex-start;
-    gap: 10px;
-    width: 100%;
+    display: block !important;
+    grid-template-columns: none !important;
+    width: auto;
     max-width: none;
     margin: 0;
     padding: 0 !important;

@@ -23,13 +23,20 @@ use Psr\Log\LoggerInterface;
 class CustomerFinanceData
 {
     /**
-     * Escopo validado da Fase 4 (ver BOLETOS_NFE_IMPLEMENTACAO.md): geracao de codigo de
-     * barras/linha digitavel SOMENTE para FILIAL=2 (Boomerang) + Banco do Brasil (001) +
-     * carteira 017/17. Qualquer outra combinacao cai no fallback informativo (sem barcode).
+     * Escopos validados para geracao de codigo de barras/linha digitavel:
+     * - BB 001 + carteira 017/17 + FILIAL=2 (convenio config)
+     * - Sicoob 756 + carteira 1 com CC_CARTEIRA/CC_CC resolvidos via FN_RECEBER.CC
+     * Qualquer outra combinacao cai no fallback informativo (sem barcode).
      */
     private const SUPPORTED_FILIAL = 2;
-    private const SUPPORTED_BANCO = '001';
-    private const SUPPORTED_CARTEIRAS = ['017', '17'];
+    private const SUPPORTED_BANCO_BB = '001';
+    private const SUPPORTED_CARTEIRAS_BB = ['017', '17'];
+    private const SUPPORTED_BANCO_SICOOB = '756';
+    private const SUPPORTED_CARTEIRAS_SICOOB = ['1'];
+    /** @deprecated Use SUPPORTED_BANCO_BB */
+    private const SUPPORTED_BANCO = self::SUPPORTED_BANCO_BB;
+    /** @deprecated Use SUPPORTED_CARTEIRAS_BB */
+    private const SUPPORTED_CARTEIRAS = self::SUPPORTED_CARTEIRAS_BB;
     private const CONFIG_PATH_CONVENIO_FILIAL_2 = 'grupoawamotos_b2b/finance/bb_convenio_filial_2';
     private const DEFAULT_PAGE_SIZE = 50;
     private const MAX_PAGE_SIZE = 500;
@@ -185,9 +192,16 @@ class CustomerFinanceData
         }
 
         $carteiraTrim = trim((string) $raw['carteira']);
-        $supported = (int) $raw['filial'] === self::SUPPORTED_FILIAL
-            && (string) $raw['banco'] === self::SUPPORTED_BANCO
-            && in_array($carteiraTrim, self::SUPPORTED_CARTEIRAS, true);
+        $banco = (string) $raw['banco'];
+        $isBbSupported = (int) $raw['filial'] === self::SUPPORTED_FILIAL
+            && $banco === self::SUPPORTED_BANCO_BB
+            && in_array($carteiraTrim, self::SUPPORTED_CARTEIRAS_BB, true);
+        $isSicoobSupported = $banco === self::SUPPORTED_BANCO_SICOOB
+            && in_array($carteiraTrim, self::SUPPORTED_CARTEIRAS_SICOOB, true)
+            && trim((string) ($raw['sicoob_agencia'] ?? '')) !== ''
+            && trim((string) ($raw['sicoob_cedente'] ?? '')) !== ''
+            && trim((string) ($raw['sicoob_modalidade'] ?? '')) !== '';
+        $supported = $isBbSupported || $isSicoobSupported;
 
         $vencimento = $raw['data_vencimento'];
         $vencimentoFmt = $this->formatDate($vencimento);
@@ -204,13 +218,14 @@ class CustomerFinanceData
             'beneficiario_endereco' => $raw['beneficiario_endereco'],
             'sacado_nome' => $raw['sacado_nome'],
             'sacado_cnpj' => $raw['sacado_cnpj'],
-            'banco' => $raw['banco'],
+            'banco' => $banco,
             'carteira' => $carteiraTrim,
             'linha_digitavel' => null,
             'barcode' => null,
         ];
 
         if (!$supported) {
+
             return $result;
         }
 
@@ -219,21 +234,32 @@ class CustomerFinanceData
                 ? $vencimento
                 : new \DateTimeImmutable((string) $vencimento);
 
-            $convenio = (string) $this->scopeConfig->getValue(self::CONFIG_PATH_CONVENIO_FILIAL_2);
-            if ($convenio === '') {
-                $this->logger->warning('[B2B-Finance] Convenio Banco do Brasil (filial 2) nao configurado -- fallback sem codigo de barras');
-                $result['supported'] = false;
-                return $result;
+            if ($isSicoobSupported) {
+                $campoLivre = $this->febrabanCalculator->buildCampoLivreSicoob(
+                    $carteiraTrim,
+                    (string) $raw['sicoob_agencia'],
+                    (string) $raw['sicoob_modalidade'],
+                    (string) $raw['sicoob_cedente'],
+                    (string) ($raw['sicoob_dig_cedente'] ?? ''),
+                    (string) $raw['nro_boleto']
+                );
+            } else {
+                $convenio = (string) $this->scopeConfig->getValue(self::CONFIG_PATH_CONVENIO_FILIAL_2);
+                if ($convenio === '') {
+                    $this->logger->warning('[B2B-Finance] Convenio Banco do Brasil (filial 2) nao configurado -- fallback sem codigo de barras');
+                    $result['supported'] = false;
+                    return $result;
+                }
+
+                $campoLivre = $this->febrabanCalculator->buildCampoLivreBancoBrasil(
+                    $convenio,
+                    $raw['nro_boleto'],
+                    $raw['carteira']
+                );
             }
 
-            $campoLivre = $this->febrabanCalculator->buildCampoLivreBancoBrasil(
-                $convenio,
-                $raw['nro_boleto'],
-                $raw['carteira']
-            );
-
             $calculo = $this->febrabanCalculator->build(
-                $raw['banco'],
+                $banco,
                 '9',
                 $vencimentoDate,
                 $raw['valor_devido'],
@@ -242,6 +268,7 @@ class CustomerFinanceData
 
             $result['linha_digitavel'] = $calculo['linha_digitavel'];
             $result['barcode'] = $calculo['barcode'];
+
         } catch (\Exception $e) {
             $this->logger->error('[B2B-Finance] Falha ao calcular boleto (titulo ' . $receberCodigo . '): ' . $e->getMessage());
             $result['supported'] = false;

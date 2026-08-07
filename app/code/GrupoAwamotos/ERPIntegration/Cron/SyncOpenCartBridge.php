@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\ERPIntegration\Cron;
 
+use GrupoAwamotos\B2B\Model\Customer\B2bGroupIds;
+use GrupoAwamotos\B2B\Service\CustomerGroupManager;
 use GrupoAwamotos\ERPIntegration\Helper\Data as Helper;
 use GrupoAwamotos\ERPIntegration\Model\B2BClientRegistration;
 use Magento\Framework\App\ResourceConnection;
@@ -36,8 +38,9 @@ class SyncOpenCartBridge
     /** @var int Offset applied to Magento entity_id to generate OpenCart-compatible customer_id */
     private const OC_CUSTOMER_ID_OFFSET = 200000;
 
-    /** @var int[] B2B customer group IDs */
-    private const B2B_GROUP_IDS = [4, 5, 6, 7];
+    /**
+     * Bridge includes commercial groups + pending (prospects), resolved dynamically.
+     */
 
     private const ATTR_CODE_B2B_CNPJ         = 'b2b_cnpj';
     private const ATTR_CODE_B2B_RAZAO_SOCIAL = 'b2b_razao_social';
@@ -98,6 +101,7 @@ class SyncOpenCartBridge
             $mapped = $this->syncCustomerIdMap();
             $confirmed = $this->syncB2bConfirmed();
             $synced = $this->syncCustomerTable();
+            $priceGroups = $this->syncOcCustomerPriceGroupsFromErp();
             $preReg = $this->syncPreRegistration();
             $preRegRemoved = $this->removeResolvedCustomersFromPreRegistration();
             $recovered = $this->recoverAfterTruncate();
@@ -108,6 +112,7 @@ class SyncOpenCartBridge
                 $mapped > 0
                 || $confirmed > 0
                 || $synced > 0
+                || $priceGroups > 0
                 || $preReg > 0
                 || $preRegRemoved > 0
                 || $recovered > 0
@@ -118,6 +123,7 @@ class SyncOpenCartBridge
                     'new_mappings' => $mapped,
                     'new_confirmations' => $confirmed,
                     'customer_table_synced' => $synced,
+                    'price_groups_synced' => $priceGroups,
                     'pre_registration_synced' => $preReg,
                     'pre_registration_removed_resolved' => $preRegRemoved,
                     'truncate_recovery' => $recovered,
@@ -141,7 +147,7 @@ class SyncOpenCartBridge
     private function syncCustomerIdMap(): int
     {
         $connection = $this->resourceConnection->getConnection();
-        $groupIds = implode(',', self::B2B_GROUP_IDS);
+        $groupIds = implode(',', $this->getBridgeB2bGroupIds());
 
         $sql = "
             INSERT INTO oc_customer_id_map (old_oc_customer_id, old_email, old_cnpj, magento_customer_id)
@@ -178,7 +184,7 @@ class SyncOpenCartBridge
     private function syncB2bConfirmed(): int
     {
         $connection = $this->resourceConnection->getConnection();
-        $groupIds = implode(',', self::B2B_GROUP_IDS);
+        $groupIds = implode(',', $this->getBridgeB2bGroupIds());
 
         $erpCodeAttrId = $this->getAttributeId(self::ATTR_CODE_ERP_CODE);
         if ($erpCodeAttrId <= 0) {
@@ -211,15 +217,24 @@ class SyncOpenCartBridge
         }
         $registeredCodes = array_fill_keys($registeredCodeList, true);
 
+        // Chave em oc_customer_b2b_confirmed DEVE ser a mesma usada por
+        // ValidatorChecker::resolveSectraChave() e pela view oc_order:
+        // COALESCE(erp_code, old_oc_customer_id). Preferir erp_code.
         $desiredIds = [];
         foreach ($mappedRows as $row) {
             $erpCode = (int) ($row['erp_code'] ?? 0);
+            $mapCustomerId = (int) ($row['customer_id'] ?? 0);
             if ($erpCode <= 0) {
                 continue;
             }
 
             if (isset($registeredCodes[$erpCode])) {
-                $desiredIds[(int) $row['customer_id']] = true;
+                $desiredIds[$erpCode] = true;
+            }
+
+            // Legado: alguns mapas usam old_oc_customer_id == código Sectra.
+            if ($mapCustomerId > 0 && isset($registeredCodes[$mapCustomerId])) {
+                $desiredIds[$mapCustomerId] = true;
             }
         }
 
@@ -357,7 +372,6 @@ class SyncOpenCartBridge
                 email = VALUES(email),
                 telephone = VALUES(telephone),
                 custom_field = VALUES(custom_field),
-                customer_group_id = VALUES(customer_group_id),
                 safe = 1
         ";
 
@@ -367,6 +381,73 @@ class SyncOpenCartBridge
         ]);
 
         return (int) $stmt->rowCount();
+    }
+
+    /**
+     * Align oc_customer.customer_group_id with ERP FATORPRECO (lista de preço Sectra).
+     *
+     * The Magento→oc_customer upsert must not overwrite this field; Sectra Importar Pedidos
+     * expects customer_group_id == FN_FORNECEDORES.FATORPRECO when VE_FATORPRECO.CKATIVO='S'.
+     */
+    private function syncOcCustomerPriceGroupsFromErp(): int
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $erpAttrId = $this->getAttributeId(self::ATTR_CODE_ERP_CODE);
+        if ($erpAttrId <= 0) {
+            return 0;
+        }
+
+        $rows = $connection->fetchAll(
+            "SELECT DISTINCT CAST(erp_attr.value AS UNSIGNED) AS erp_code,
+                    map.old_oc_customer_id AS map_customer_id
+             FROM customer_entity_varchar erp_attr
+             INNER JOIN customer_entity ce ON ce.entity_id = erp_attr.entity_id
+             LEFT JOIN oc_customer_id_map map ON map.magento_customer_id = ce.entity_id
+             WHERE erp_attr.attribute_id = ?
+               AND erp_attr.value REGEXP '^[0-9]+$'
+               AND ce.group_id IN (" . implode(',', $this->getBridgeB2bGroupIds()) . ')',
+            [$erpAttrId]
+        );
+
+        $erpCodes = [];
+        foreach ($rows as $row) {
+            $erpCode = (int) ($row['erp_code'] ?? 0);
+            if ($erpCode > 0) {
+                $erpCodes[$erpCode] = true;
+            }
+        }
+        if ($erpCodes === []) {
+            return 0;
+        }
+
+        $fatorByCode = $this->b2bRegistration->getActiveFatorPrecoByClientCodes(array_keys($erpCodes));
+        if ($fatorByCode === []) {
+            return 0;
+        }
+
+        $changes = 0;
+        foreach ($rows as $row) {
+            $erpCode = (int) ($row['erp_code'] ?? 0);
+            $mapId = (int) ($row['map_customer_id'] ?? 0);
+            $fator = (int) ($fatorByCode[$erpCode] ?? 0);
+            if ($erpCode <= 0 || $fator <= 0) {
+                continue;
+            }
+
+            foreach (array_unique(array_filter([$erpCode, $mapId])) as $customerId) {
+                $updated = (int) $connection->update(
+                    'oc_customer',
+                    ['customer_group_id' => $fator],
+                    [
+                        'customer_id = ?' => $customerId,
+                        'customer_group_id != ?' => $fator,
+                    ]
+                );
+                $changes += $updated;
+            }
+        }
+
+        return $changes;
     }
 
     /**
@@ -395,7 +476,7 @@ class SyncOpenCartBridge
     private function syncPreRegistration(): int
     {
         $connection = $this->resourceConnection->getConnection();
-        $groupIds   = implode(',', self::B2B_GROUP_IDS);
+        $groupIds   = implode(',', $this->getBridgeB2bGroupIds());
         $cnpjAttrId = $this->getAttributeId(self::ATTR_CODE_B2B_CNPJ);
         $razaoAttrId = $this->getAttributeId(self::ATTR_CODE_B2B_RAZAO_SOCIAL);
         $erpCodeAttrId = $this->getAttributeId(self::ATTR_CODE_ERP_CODE);
@@ -689,10 +770,6 @@ class SyncOpenCartBridge
         $viewRow = $connection->fetchRow('SHOW CREATE VIEW oc_order');
         $viewSql = strtolower((string) ($viewRow['Create View'] ?? ''));
 
-        if (str_contains($viewSql, 'oc_customer_b2b_confirmed')) {
-            return false;
-        }
-
         $sql = "
             CREATE OR REPLACE VIEW oc_order AS
             SELECT
@@ -702,7 +779,11 @@ class SyncOpenCartBridge
                 COALESCE(bridge_customer.store_id, 0) AS store_id,
                 'AWA MOTOS' AS store_name,
                 'https://awamotos.com.br/' AS store_url,
-                COALESCE(m.old_oc_customer_id, (so.customer_id + 200000)) AS customer_id,
+                COALESCE(
+                    NULLIF(CAST(erp_attr.value AS UNSIGNED), 0),
+                    m.old_oc_customer_id,
+                    (so.customer_id + 200000)
+                ) AS customer_id,
                 bridge_customer.customer_group_id AS customer_group_id,
                 COALESCE(so.customer_firstname, '') AS firstname,
                 COALESCE(so.customer_lastname, '') AS lastname,
@@ -726,7 +807,8 @@ class SyncOpenCartBridge
                 COALESCE(ba.region, '') AS payment_zone,
                 COALESCE(bz.zone_id, 0) AS payment_zone_id,
                 '' AS payment_address_format,
-                '' AS payment_custom_field,
+                COALESCE(bridge_customer.custom_field, '{\"6\":\"\",\"2\":\"\",\"3\":\"\",\"1\":\"\"}')
+                    AS payment_custom_field,
                 COALESCE(sop.method, '') AS payment_method,
                 COALESCE(sop.method, '') AS payment_code,
                 COALESCE(sa.firstname, so.customer_firstname, '') AS shipping_firstname,
@@ -745,7 +827,8 @@ class SyncOpenCartBridge
                 COALESCE(sa.region, '') AS shipping_zone,
                 COALESCE(sz.zone_id, 0) AS shipping_zone_id,
                 '' AS shipping_address_format,
-                '' AS shipping_custom_field,
+                COALESCE(bridge_customer.custom_field, '{\"6\":\"\",\"2\":\"\",\"3\":\"\",\"1\":\"\"}')
+                    AS shipping_custom_field,
                 COALESCE(so.shipping_method, '') AS shipping_method,
                 COALESCE(so.shipping_method, '') AS shipping_code,
                 '' AS comment,
@@ -782,13 +865,32 @@ class SyncOpenCartBridge
                 AND sz.country_id = 30
             LEFT JOIN oc_customer_id_map m
                 ON m.magento_customer_id = so.customer_id
+            LEFT JOIN customer_entity_varchar erp_attr
+                ON erp_attr.entity_id = so.customer_id
+                AND erp_attr.attribute_id = (
+                    SELECT ea.attribute_id
+                    FROM eav_attribute ea
+                    INNER JOIN eav_entity_type et ON et.entity_type_id = ea.entity_type_id
+                    WHERE ea.attribute_code = 'erp_code'
+                      AND et.entity_type_code = 'customer'
+                )
+                AND erp_attr.value REGEXP '^[0-9]+$'";
+        $sql .= "
             INNER JOIN oc_customer bridge_customer
-                ON bridge_customer.customer_id = COALESCE(m.old_oc_customer_id, (so.customer_id + 200000))
+                ON bridge_customer.customer_id = COALESCE(
+                    NULLIF(CAST(erp_attr.value AS UNSIGNED), 0),
+                    m.old_oc_customer_id,
+                    (so.customer_id + 200000)
+                )
             INNER JOIN oc_customer_b2b_confirmed b2b_confirmed
-                ON b2b_confirmed.customer_id = COALESCE(m.old_oc_customer_id, (so.customer_id + 200000))
+                ON b2b_confirmed.customer_id = COALESCE(
+                    NULLIF(CAST(erp_attr.value AS UNSIGNED), 0),
+                    m.old_oc_customer_id,
+                    (so.customer_id + 200000)
+                )
             WHERE so.customer_id IS NOT NULL
               AND so.state IN ('new', 'pending_payment', 'processing')
-              AND bridge_customer.customer_group_id = 2
+              AND so.sectra_import_status = 'ready_for_import'
               AND JSON_UNQUOTE(JSON_EXTRACT(bridge_customer.custom_field, '$.\"6\"')) <> ''
               AND NOT EXISTS (
                   SELECT 1
@@ -796,6 +898,17 @@ class SyncOpenCartBridge
                   WHERE oi.order_id = (so.entity_id + 200000)
               )
         ";
+
+        // VIEW está atualizada quando: tem todas as cláusulas obrigatórias
+        // E usa subquery dinâmica para attribute_id (contém eav_attribute).
+        $hasRequiredClauses = str_contains($viewSql, 'oc_customer_b2b_confirmed')
+            && str_contains($viewSql, 'sectra_import_status')
+            && str_contains($viewSql, 'erp_attr');
+        $usesDynamicAttrId = str_contains($viewSql, 'eav_attribute');
+
+        if ($hasRequiredClauses && $usesDynamicAttrId) {
+            return false;
+        }
 
         $connection->query($sql);
 
@@ -856,4 +969,24 @@ class SyncOpenCartBridge
             fclose($handle);
         }
     }
+
+    /**
+     * @return list<int>
+     */
+    private function getBridgeB2bGroupIds(): array
+    {
+        $ids = B2bGroupIds::resolve($this->resourceConnection);
+        $pendingId = (int) $this->resourceConnection->getConnection()->fetchOne(
+            $this->resourceConnection->getConnection()->select()
+                ->from($this->resourceConnection->getTableName('customer_group'), 'customer_group_id')
+                ->where('customer_group_code = ?', CustomerGroupManager::GROUP_NAME_PENDING)
+        );
+        if ($pendingId > 0) {
+            $ids[] = $pendingId;
+        }
+
+        return array_values(array_unique(array_map('intval', $ids)));
+    }
+
+
 }

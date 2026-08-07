@@ -11,10 +11,12 @@
     <update handle="customer_account"/>
 
     <body>
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\ERPIntegration\Block\Customer\Suggestions"
                    name="erp.customer.suggestedcart.page"
-                   template="GrupoAwamotos_ERPIntegration::customer/suggestions.phtml"/>
+                   template="GrupoAwamotos_ERPIntegration::customer/suggestions.phtml"
+                   cacheable="false"/>
         </referenceContainer>
     </body>
 </page>

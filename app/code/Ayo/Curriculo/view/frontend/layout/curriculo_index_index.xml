@@ -10,7 +10,8 @@
         <attribute name="class" value="curriculo-page" />
         <referenceBlock name="page.main.title" remove="true" />
         <referenceContainer name="content">
-            <block class="Ayo\Curriculo\Block\Form" name="curriculo.form" template="Ayo_Curriculo::form.phtml" />
+            <!-- cacheable=false: evita FPC com form_key stale (CSRF Invalid Form Key) -->
+            <block class="Ayo\Curriculo\Block\Form" name="curriculo.form" template="Ayo_Curriculo::form.phtml" cacheable="false" />
         </referenceContainer>
         <referenceContainer name="after.body.start">
             <block class="Magento\Framework\View\Element\Template" name="curriculo.schema.jobposting" template="Ayo_Curriculo::jobposting.phtml" />

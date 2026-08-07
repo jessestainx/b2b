@@ -99,6 +99,22 @@ class PatchHomeHeaderHtmlPlugin
                 $html = HeaderImpeccableCascadeLockCss::injectBeforeBodyClose($html);
             }
 
+            /*
+             * O shell cross-page é a única camada terminal compartilhada. Este
+             * plugin pode reinjetar o cascade-lock depois do Optimize; portanto
+             * reposiciona o mesmo bloco, sem duplicá-lo, no fim do body.
+             */
+            $shellStyleId = HeaderImpeccableCascadeLockCss::CROSSPAGE_SHELL_STYLE_ID;
+            if (preg_match(
+                '/<style id="' . preg_quote($shellStyleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+                $html,
+                $shellMatch
+            ) === 1) {
+                $html = str_replace($shellMatch[0], '', $html);
+                $moved = preg_replace('/<\/body>/i', $shellMatch[0] . "\n</body>", $html, 1);
+                $html = is_string($moved) ? $moved : $html;
+            }
+
             $subject->setBody($html);
             // Não sobrescrever headers especializados (v12-auth, v12-b2b-account) setados pelo OptimizeHeadStylesPlugin.
             $existingHeader = $subject->getHeader('X-Awa-Header-Optimize');

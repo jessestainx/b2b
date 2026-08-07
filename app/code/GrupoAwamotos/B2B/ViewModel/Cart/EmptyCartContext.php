@@ -100,7 +100,7 @@ class EmptyCartContext implements ArgumentInterface
     public function getMinOrderHint(): string
     {
         return (string) __(
-            'Pedido mínimo B2B: %1. Adicione peças ao carrinho para seguir ao checkout.',
+            'Pedido mínimo B2B: %1. Adicione peças ao carrinho para seguir à finalização do pedido.',
             $this->getMinOrderAmountFormatted()
         );
     }
@@ -144,7 +144,7 @@ class EmptyCartContext implements ArgumentInterface
     public function getExpressCheckoutNotice(): string
     {
         return (string) __(
-            'Você veio do checkout expresso. Adicione peças ao carrinho para continuar.'
+            'Você veio da finalização expressa. Adicione peças ao carrinho para continuar.'
         );
     }
 
@@ -157,7 +157,7 @@ class EmptyCartContext implements ArgumentInterface
         }
 
         return (string) __(
-            'Adicione peças ao carrinho para seguir ao checkout B2B.'
+            'Adicione peças ao carrinho para seguir à finalização do pedido B2B.'
         );
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\WhatsAppCommerce\Observer;
 
+use GrupoAwamotos\WhatsAppCommerce\Api\AttendantInterface;
 use GrupoAwamotos\WhatsAppCommerce\Helper\Config;
 use GrupoAwamotos\WhatsAppCommerce\Model\MessageSender;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -18,6 +19,7 @@ class OrderNotification implements ObserverInterface
         private readonly Config $config,
         private readonly MessageSender $messageSender,
         private readonly CustomerRepositoryInterface $customerRepository,
+        private readonly AttendantInterface $attendantResolver,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -29,11 +31,30 @@ class OrderNotification implements ObserverInterface
         }
 
         $event = $observer->getEvent();
-        $eventName = $observer->getEvent()->getName();
+        $eventName = $event->getName();
+
+        $type = $this->mapEventToType($eventName);
+        if ($type === null) {
+            return;
+        }
 
         $order = $this->extractOrder($event, $eventName);
-
         if (!$order) {
+            return;
+        }
+
+        $this->notifyCustomer($order, $type);
+
+        // Vendedora is notified only for the "placed" trigger, regardless of
+        // whether the customer has WhatsApp opt-in/phone available.
+        if ($type === 'placed') {
+            $this->notifyAttendant($order);
+        }
+    }
+
+    private function notifyCustomer(OrderInterface $order, string $type): void
+    {
+        if (!$this->isNotificationEnabled($type)) {
             return;
         }
 
@@ -46,15 +67,6 @@ class OrderNotification implements ObserverInterface
             $this->logger->debug('WhatsApp notification skipped - no opt-in', [
                 'order_id' => $order->getIncrementId(),
             ]);
-            return;
-        }
-
-        $type = $this->mapEventToType($eventName);
-        if ($type === null) {
-            return;
-        }
-
-        if (!$this->isNotificationEnabled($type)) {
             return;
         }
 
@@ -76,6 +88,42 @@ class OrderNotification implements ObserverInterface
             $this->logger->error('WhatsApp order notification failed: ' . $e->getMessage(), [
                 'order_id' => $order->getIncrementId(),
                 'type' => $type,
+            ]);
+        }
+    }
+
+    /**
+     * Notify the attendant ("vendedora") assigned to the customer that placed the order.
+     */
+    private function notifyAttendant(OrderInterface $order): void
+    {
+        if (!$this->config->isNotifyAttendantOnOrderPlacedEnabled()) {
+            return;
+        }
+
+        $customerId = $order->getCustomerId();
+        if (!$customerId) {
+            return;
+        }
+
+        try {
+            $attendant = $this->attendantResolver->getByCustomerId((int) $customerId);
+            if (empty($attendant['found']) || empty($attendant['whatsapp'])) {
+                return;
+            }
+
+            $message = sprintf(
+                '🛒 Novo pedido #%s de %s - R$ %s',
+                $order->getIncrementId(),
+                $order->getCustomerFirstname() ?: 'Cliente',
+                number_format((float) $order->getGrandTotal(), 2, ',', '.')
+            );
+
+            $this->messageSender->send((string) $attendant['whatsapp'], $message);
+        } catch (\Exception $e) {
+            $this->logger->error('WhatsApp attendant order notification failed: ' . $e->getMessage(), [
+                'order_id' => $order->getIncrementId(),
+                'customer_id' => $customerId,
             ]);
         }
     }

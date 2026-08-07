@@ -13,6 +13,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Newsletter\Model\SubscriberFactory;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -46,24 +47,32 @@ class Subscribe implements HttpPostActionInterface
     private LoggerInterface $logger;
 
     /**
+     * @var FormKeyValidator
+     */
+    private FormKeyValidator $formKeyValidator;
+
+    /**
      * @param RequestInterface $request
      * @param JsonFactory $resultJsonFactory
      * @param SubscriberFactory $subscriberFactory
      * @param ScopeConfigInterface $scopeConfig
      * @param LoggerInterface $logger
+     * @param FormKeyValidator $formKeyValidator
      */
     public function __construct(
         RequestInterface $request,
         JsonFactory $resultJsonFactory,
         SubscriberFactory $subscriberFactory,
         ScopeConfigInterface $scopeConfig,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        FormKeyValidator $formKeyValidator
     ) {
         $this->request = $request;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->subscriberFactory = $subscriberFactory;
         $this->scopeConfig = $scopeConfig;
         $this->logger = $logger;
+        $this->formKeyValidator = $formKeyValidator;
     }
 
     /**
@@ -74,6 +83,13 @@ class Subscribe implements HttpPostActionInterface
     public function execute()
     {
         $resultJson = $this->resultJsonFactory->create();
+
+        if (!$this->formKeyValidator->validate($this->request)) {
+            return $resultJson->setData([
+                'success' => false,
+                'message' => __('Formulário inválido. Atualize a página e tente novamente.')
+            ]);
+        }
 
         // Check if newsletter is enabled for maintenance mode
         $newsletterEnabled = $this->scopeConfig->getValue(

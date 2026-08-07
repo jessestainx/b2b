@@ -267,18 +267,18 @@
     min-height: var(--awa-control-height);
 }
 
-/* Esconder form original de add to cart para guests E não-aprovados */
-/* Fix: seletor direto para PDP (sem form[data-role=tocart-form] que não existe no HTML do Ayo) */
-body.b2b-restricted-mode .product-add-form .box-tocart .actions button.tocart,
-body.b2b-restricted-mode .product-add-form .actions button.tocart,
-body.b2b-restricted-mode #product-addtocart-button,
-/* Seletores legacy com form wrapper */
-body.b2b-restricted-mode .product-add-form form[data-role="tocart-form"] .actions button.tocart,
-body.b2b-restricted-mode .product-item .actions-primary > .stock.unavailable + form .tocart,
-body.b2b-restricted-mode .product-item-actions .actions-primary form .tocart,
-body.b2b-restricted-mode .product-info-cart .actions-primary form .tocart,
-body.b2b-restricted-mode .product-info-cart form[data-role="tocart-form"] button.tocart,
-body.b2b-restricted-mode .item-product .product-info-cart form[data-role="tocart-form"] button.tocart {
+/* Esconder form original de add to cart para guests E não-aprovados.
+   Especificidade #html-body: vencer align-grid/structural (display:inline-flex!important). */
+html body#html-body.b2b-restricted-mode .product-add-form .box-tocart .actions button.tocart,
+html body#html-body.b2b-restricted-mode .product-add-form .actions button.tocart,
+html body#html-body.b2b-restricted-mode #product-addtocart-button,
+html body#html-body.b2b-restricted-mode .product-add-form form[data-role="tocart-form"] .actions button.tocart,
+html body#html-body.b2b-restricted-mode .product-item .actions-primary > .stock.unavailable + form .tocart,
+html body#html-body.b2b-restricted-mode .product-item-actions .actions-primary form .tocart,
+html body#html-body.b2b-restricted-mode .product-info-cart .actions-primary form .tocart,
+html body#html-body.b2b-restricted-mode .product-info-cart form[data-role="tocart-form"] button.tocart,
+html body#html-body.b2b-restricted-mode .item-product .product-info-cart form[data-role="tocart-form"] button.tocart,
+html body#html-body.b2b-restricted-mode [data-b2b-original-hidden="1"] {
     display: none !important;
 }
 
@@ -557,4 +557,40 @@ body.b2b-restricted-mode .block-minicart .subtotal .price-wrapper {
     .b2b-login-to-buy-btn:hover {
         transform: none !important;
     }
+}
+
+
+/* AWA L2C hide terminal 20260807 — beat align-grid body#html-body x4 + display:flex!important on qty */
+html body#html-body#html-body#html-body#html-body.b2b-restricted-mode.catalog-product-view .page-wrapper .product-info-main .product-add-form .box-tocart #product-addtocart-button,
+html body#html-body#html-body#html-body#html-body.b2b-restricted-mode.catalog-product-view .page-wrapper .product-info-main .product-add-form .box-tocart .action.tocart,
+html body#html-body#html-body#html-body#html-body.b2b-restricted-mode.catalog-product-view .page-wrapper .product-info-main .product-add-form .box-tocart .field.qty,
+html body#html-body#html-body#html-body#html-body.b2b-restricted-mode [data-b2b-original-hidden="1"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+}
+
+html body#html-body#html-body#html-body#html-body.b2b-restricted-mode.catalog-product-view .page-wrapper .product-info-main .product-add-form .box-tocart.b2b-login-to-buy-mode .fieldset {
+    display: block !important;
+    grid-template-columns: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body.b2b-restricted-mode.catalog-product-view .page-wrapper .product-info-main .product-add-form .box-tocart.b2b-login-to-buy-mode .actions {
+    display: flex !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body.b2b-restricted-mode.catalog-product-view .page-wrapper .product-info-main .product-add-form .box-tocart.b2b-login-to-buy-mode .b2b-login-to-buy-btn {
+    display: flex !important;
+    width: 100% !important;
+    min-height: 44px !important;
 }

@@ -387,7 +387,7 @@ class CustomerApprovalTest extends TestCase
     {
         $customer = $this->createCustomerMock();
         $this->customerRepository->method('getById')->willReturn($customer);
-        $this->config->method('getAdminEmail')->willReturn('admin@awamotos.com.br');
+        $this->config->method('getAdminEmail')->willReturn('awamotos@awamotos.com.br');
 
         $store = $this->createMock(\Magento\Store\Model\Store::class);
         $store->method('getId')->willReturn(1);

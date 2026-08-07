@@ -34,6 +34,12 @@
             <group id="notifications" translate="label" type="text" sortOrder="20"
                    showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Notificações por WhatsApp</label>
+                <field id="customer_registered" translate="label comment" type="select" sortOrder="5"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Cliente Cadastrado</label>
+                    <comment>Avisa a vendedora vinculada via WhatsApp quando um novo cliente se cadastra (não envia mensagem ao cliente, pois o cadastro não coleta telefone)</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="order_placed" translate="label" type="select" sortOrder="10"
                        showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Pedido Confirmado</label>
@@ -52,6 +58,12 @@
                 <field id="order_refunded" translate="label" type="select" sortOrder="40"
                        showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Reembolso Processado</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="notify_attendant_order_placed" translate="label comment" type="select" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Avisar Vendedora no Pedido</label>
+                    <comment>Além de notificar o cliente, envia um aviso via WhatsApp para a vendedora vinculada ao cliente quando um pedido é realizado</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>

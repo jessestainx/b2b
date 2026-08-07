@@ -6,11 +6,11 @@
             <argument name="logger" xsi:type="object">Meta\BusinessExtension\Logger\VirtualLogger</argument>
         </arguments>
     </type>
-    <virtualType name="Meta\BusinessExtension\Logger\VirtualLogger" type="Magento\Framework\Logger\Monolog">
+    <virtualType name="Meta\BusinessExtension\Logger\VirtualLogger" type="Monolog\Logger">
         <arguments>
             <argument name="name" xsi:type="string">meta_fbe</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">Meta\BusinessExtension\Logger\Handler\VirtualHandler</item>
+                <item name="file" xsi:type="object">Meta\BusinessExtension\Logger\Handler\VirtualHandler</item>
             </argument>
         </arguments>
     </virtualType>

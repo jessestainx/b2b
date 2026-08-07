@@ -102,6 +102,7 @@ foreach ($products as $_item) {
                                       class="catalogfix-tocart-form"
                                       action="<?php echo $block->escapeUrl((string) $postDataConfig['action']); ?>"
                                       method="post">
+                                    <?php echo $block->getBlockHtml('formkey'); ?>
                                     <?php foreach ($postDataConfig['data'] as $key => $value): ?>
                                         <input type="hidden"
                                                name="<?php echo $block->escapeHtmlAttr((string) $key); ?>"

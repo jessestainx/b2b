@@ -6,6 +6,8 @@
         <css src="GrupoAwamotos_B2B::css/account/pages-company.css"/>
     </head>
     <body>
+        <!-- Evita H1 duplicado: título vem do template company.phtml -->
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Account\CompanyBlock"
                    name="b2b.company.index"

@@ -109,6 +109,31 @@
                     <label>Links do menu lateral</label>
                     <comment><![CDATA[Um link por linha: Rótulo|identificador. Use route:b2b/register para rotas Magento. Exemplo: Condições Atacado|atacado/condicoes]]></comment>
                 </field>
+                <field id="pdf_path" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Caminho do PDF (media)</label>
+                    <comment>Relativo a pub/media. Ex.: awa/catalogo/catalogo-2026.pdf</comment>
+                </field>
+                <field id="cover_path" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Capa desktop (media)</label>
+                </field>
+                <field id="page_preview_path" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Prévia da 1ª página (media)</label>
+                </field>
+                <field id="mobile_cover_path" translate="label comment" type="text" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Capa mobile (media)</label>
+                </field>
+                <field id="home_b2b_banner_path" translate="label comment" type="text" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Banner B2B home desktop (media)</label>
+                </field>
+                <field id="home_b2b_banner_mobile_path" translate="label comment" type="text" sortOrder="70"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Banner B2B home mobile (media)</label>
+                </field>
             </group>
         </section>
     </system>

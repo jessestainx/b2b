@@ -613,7 +613,7 @@ class Dashboard extends Template
             $this->buildChecklistItem('approval', 'Conta B2B aprovada', $this->isApproved(), 'Aguardando aprovação...', ''),
             $this->buildChecklistItem('address', 'Endereço de entrega cadastrado', $this->customerHasAddress(), 'Adicionar Endereço', 'customer/address/new'),
             $this->buildChecklistItem('order', 'Primeiro pedido realizado', $this->getRecentOrders(1)->getSize() > 0, 'Ver Catálogo', 'catalogsearch/result/?q='),
-            $this->buildChecklistItem('list', 'Lista de compras criada', $this->hasShoppingLists(), 'Criar Lista', 'b2b/shoppinglist/create'),
+            $this->buildChecklistItem('list', 'Lista de compras criada', $this->hasShoppingLists(), 'Criar Lista', 'b2b/shoppinglist'),
         ];
     }
 
@@ -759,7 +759,7 @@ class Dashboard extends Template
             'title' => __('Organize seus produtos favoritos'),
             'description' => __('Crie listas de compras para agilizar pedidos recorrentes da sua empresa.'),
             'action_label' => __('Criar Lista de Compras'),
-            'action_url' => $this->getUrl('b2b/shoppinglist/create'),
+            'action_url' => $this->getUrl('b2b/shoppinglist'),
             'priority' => 4,
         ];
     }

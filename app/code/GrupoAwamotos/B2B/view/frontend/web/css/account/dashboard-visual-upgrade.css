@@ -450,120 +450,118 @@
 }
 
 /* =================================================================
-   §17 — DARK MODE (prefers-color-scheme: dark)
+   §17 — DARK MODE
+   Antes: @media (prefers-color-scheme: dark) aplicava color:#e2e8f0
+   sem vencer fundos brancos do late CSS → contraste ~1.2.
+   Agora: só com body.awa-dark-mode (toggle AWA).
    ================================================================= */
 
-@media (prefers-color-scheme: dark) {
-    .b2b-dashboard {
-        --b2b-dark-bg: #1a1a2e;
-        --b2b-dark-card: #16213e;
-        --b2b-dark-border: #2a2a4a;
-        --b2b-dark-text: #e2e8f0;
-        --b2b-dark-text-muted: #94a3b8;
-    }
+html body.awa-dark-mode .b2b-dashboard {
+    --b2b-dark-bg: #1a1a2e;
+    --b2b-dark-card: #16213e;
+    --b2b-dark-border: #2a2a4a;
+    --b2b-dark-text: #e2e8f0;
+    --b2b-dark-text-muted: #94a3b8;
+}
 
-    .b2b-dashboard-header,
-    .b2b-company-info,
-    .summary-card,
-    .b2b-section,
-    .b2b-quick-actions,
-    .b2b-onboarding-section,
-    .erp-product-card,
-    .suggestion-card,
-    .checklist-item {
-        background: var(--b2b-dark-card);
-        border-color: var(--b2b-dark-border);
-        color: var(--b2b-dark-text);
-    }
+html body.awa-dark-mode .b2b-dashboard-header,
+html body.awa-dark-mode .b2b-company-info,
+html body.awa-dark-mode .summary-card,
+html body.awa-dark-mode .b2b-section,
+html body.awa-dark-mode .b2b-quick-actions,
+html body.awa-dark-mode .b2b-onboarding-section,
+html body.awa-dark-mode .erp-product-card,
+html body.awa-dark-mode .suggestion-card,
+html body.awa-dark-mode .checklist-item {
+    background: var(--b2b-dark-card);
+    border-color: var(--b2b-dark-border);
+    color: var(--b2b-dark-text);
+}
 
-    .b2b-welcome h1,
-    .section-header :is(h2, h3),
-    .b2b-company-info :is(h2, h3),
-    .b2b-quick-actions :is(h2, h3),
-    .card-content .card-value,
-    .detail-item .value,
-    .attendant-name,
-    .erp-product-name,
-    .erp-product-name a,
-    .suggestion-content h4 {
-        color: var(--b2b-dark-text);
-    }
+html body.awa-dark-mode .b2b-welcome h1,
+html body.awa-dark-mode .section-header :is(h2, h3),
+html body.awa-dark-mode .b2b-company-info :is(h2, h3),
+html body.awa-dark-mode .b2b-quick-actions :is(h2, h3),
+html body.awa-dark-mode .card-content .card-value,
+html body.awa-dark-mode .detail-item .value,
+html body.awa-dark-mode .attendant-name,
+html body.awa-dark-mode .erp-product-name,
+html body.awa-dark-mode .erp-product-name a,
+html body.awa-dark-mode .suggestion-content h4 {
+    color: var(--b2b-dark-text);
+}
 
-    .b2b-welcome-sub,
-    .card-content :is(h3, h4),
-    .detail-item .label,
-    .credit-row .credit-label,
-    .data-table td,
-    .suggestion-content p,
-    .attendant-department,
-    .checklist-label,
-    .erp-product-sku {
-        color: var(--b2b-dark-text-muted);
-    }
+html body.awa-dark-mode .b2b-welcome-sub,
+html body.awa-dark-mode .card-content :is(h3, h4),
+html body.awa-dark-mode .detail-item .label,
+html body.awa-dark-mode .credit-row .credit-label,
+html body.awa-dark-mode .data-table td,
+html body.awa-dark-mode .suggestion-content p,
+html body.awa-dark-mode .attendant-department,
+html body.awa-dark-mode .checklist-label,
+html body.awa-dark-mode .erp-product-sku {
+    color: var(--b2b-dark-text-muted);
+}
 
-    .data-table th {
-        background: rgb(255 255 255 / 4%);
-        color: var(--b2b-dark-text-muted);
-    }
+html body.awa-dark-mode .data-table th {
+    background: rgb(255 255 255 / 4%);
+    color: var(--b2b-dark-text-muted);
+}
 
-    .data-table th,
-    .data-table td {
-        border-bottom-color: var(--b2b-dark-border);
-    }
+html body.awa-dark-mode .data-table th,
+html body.awa-dark-mode .data-table td {
+    border-bottom-color: var(--b2b-dark-border);
+}
 
-    .action-item {
-        background: var(--b2b-dark-card);
-        border-color: var(--b2b-dark-border);
-        color: var(--b2b-dark-text);
-    }
+html body.awa-dark-mode .action-item {
+    background: var(--b2b-dark-card);
+    border-color: var(--b2b-dark-border);
+    color: var(--b2b-dark-text);
+}
 
-    .action-item:hover {
-        background: rgb(255 255 255 / 5%);
-        border-color: var(--b2b-ayo-primary);
-    }
+html body.awa-dark-mode .action-item:hover {
+    background: rgb(255 255 255 / 5%);
+    border-color: var(--b2b-ayo-primary);
+}
 
-    .category-chip {
-        background: var(--b2b-dark-card);
-        border-color: var(--b2b-dark-border);
-        color: var(--b2b-dark-text);
-    }
+html body.awa-dark-mode .category-chip {
+    background: var(--b2b-dark-card);
+    border-color: var(--b2b-dark-border);
+    color: var(--b2b-dark-text);
+}
 
-    .category-chip:hover {
-        background: rgb(183 51 55 / 10%);
-        border-color: var(--b2b-ayo-primary);
-    }
+html body.awa-dark-mode .category-chip:hover {
+    background: rgb(183 51 55 / 10%);
+    border-color: var(--b2b-ayo-primary);
+}
 
-    .contact-link {
-        background: var(--b2b-dark-card);
-        border-color: var(--b2b-dark-border);
-        color: var(--b2b-dark-text-muted);
-    }
+html body.awa-dark-mode .contact-link {
+    background: var(--b2b-dark-card);
+    border-color: var(--b2b-dark-border);
+    color: var(--b2b-dark-text-muted);
+}
 
-    .summary-card {
-        background: rgb(22 33 62 / 90%);
-    }
+html body.awa-dark-mode .summary-card {
+    background: rgb(22 33 62 / 90%);
+}
 
-    /* Progress/credit bars in dark */
-    .progress-bar,
-    .credit-bar {
-        background: var(--b2b-dark-border);
-    }
+html body.awa-dark-mode .progress-bar,
+html body.awa-dark-mode .credit-bar {
+    background: var(--b2b-dark-border);
+}
 
-    /* Scrollbar dark */
-    .data-table::-webkit-scrollbar-track {
-        background: var(--b2b-dark-card);
-    }
+html body.awa-dark-mode .data-table::-webkit-scrollbar-track {
+    background: var(--b2b-dark-card);
+}
 
-    .data-table::-webkit-scrollbar-thumb {
-        background: var(--b2b-dark-border);
-    }
+html body.awa-dark-mode .data-table::-webkit-scrollbar-thumb {
+    background: var(--b2b-dark-border);
+}
 
-    /* Separator gradient in dark */
-    .b2b-company-info::after,
-    .b2b-summary-cards + .b2b-section::before,
-    .b2b-quick-actions::before {
-        background: linear-gradient(to right, transparent, var(--b2b-dark-border) 20%, var(--b2b-dark-border) 80%, transparent);
-    }
+html body.awa-dark-mode .b2b-company-info::after,
+html body.awa-dark-mode .b2b-summary-cards + .b2b-section::before,
+html body.awa-dark-mode .b2b-quick-actions::before {
+    background: linear-gradient(to right, transparent, var(--b2b-dark-border) 20%, var(--b2b-dark-border) 80%, transparent);
 }
 
 /* =================================================================

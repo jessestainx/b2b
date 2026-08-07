@@ -169,7 +169,7 @@ class EmailNotifier extends AbstractHelper
                 ])
                 ->setTemplateVars($templateVars)
                 ->setFromByScope([
-                    'email' => 'noreply@grupoawamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'name' => 'Product Intelligence - Sistema de Recomendacoes'
                 ])
                 ->addTo(explode(',', $emailTo))
@@ -190,7 +190,7 @@ class EmailNotifier extends AbstractHelper
                     ])
                     ->setTemplateVars($templateVars)
                     ->setFromByScope([
-                        'email' => 'noreply@grupoawamotos.com.br',
+                        'email' => 'awamotos@awamotos.com.br',
                         'name' => 'Product Intelligence - Sistema de Recomendacoes'
                     ])
                     ->addTo(explode(',', $emailTo))

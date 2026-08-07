@@ -242,7 +242,8 @@ class PriceVisibility implements PriceVisibilityInterface
         $message = $this->config->getLoginMessage();
 
         if (empty($message)) {
-            $message = '<a href="{{login_url}}">Faça login</a> para ver os preços';
+            $message = '<a href="{{login_url}}">' . (string) __('Entrar') . '</a> '
+                . (string) __('para ver os preços');
         }
 
         // Substituir placeholders
@@ -258,6 +259,24 @@ class PriceVisibility implements PriceVisibilityInterface
             [$loginUrl, $registerUrl],
             $message
         );
+
+        // Guest PDP/PLP: CTA de cadastro real no HTML (não via CSS content).
+        if (
+            !$this->isLoggedInContext()
+            && !preg_match('#/(?:b2b/register|customer/account/create)(?:/|"|\\s|>|\\?)#i', $message)
+        ) {
+            $safeRegisterUrl = htmlspecialchars($registerUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $registerLabel = htmlspecialchars(
+                (string) __('Novo cliente? Cadastre-se grátis →'),
+                ENT_QUOTES | ENT_SUBSTITUTE,
+                'UTF-8'
+            );
+            $message .= sprintf(
+                ' <a href="%s" class="b2b-register-cta">%s</a>',
+                $safeRegisterUrl,
+                $registerLabel
+            );
+        }
 
         return $message;
     }

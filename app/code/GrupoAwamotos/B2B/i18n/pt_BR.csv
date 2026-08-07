@@ -282,7 +282,7 @@
 "Table Headers","Cabeçalhos de Tabela"
 "ID","ID"
 "Name","Nome"
-"Email","Email"
+"Email","E-mail"
 "Date","Data"
 "Status","Status"
 "Action","Ação"
@@ -399,3 +399,13 @@
 "Savings","Economia"
 "%1+ units","%1+ unidades"
 "Buy more, save more!","Compre mais, economize mais!"
+
+"The account sign-in was incorrect or your account is disabled temporarily. Please wait and try again later.","E-mail/CNPJ ou senha incorretos, ou sua conta está temporariamente desativada. Aguarde e tente novamente."
+
+"Logradouro e número","Logradouro e número"
+
+"Complemento","Complemento"
+
+"Bairro","Bairro"
+
+"Referência","Referência"

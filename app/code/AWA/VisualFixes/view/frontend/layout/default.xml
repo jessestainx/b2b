@@ -21,14 +21,11 @@
                    name="awa.view.transitions"
                    template="Magento_Theme::html/awa-view-transitions.phtml"
                    after="awa.inline.js.extract"/>
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.dark.mode.toggle"
-                   template="Magento_Theme::html/awa-dark-mode-toggle.phtml"
-                   after="awa.view.transitions"/>
+            <!-- AWA 2026-07-16: modo escuro desativado — bloco awa.dark.mode.toggle removido -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.pwa.install"
                    template="Magento_Theme::html/awa-pwa-install.phtml"
-                   after="awa.dark.mode.toggle"/>
+                   after="awa.view.transitions"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.ab.testing"
                    template="Magento_Theme::html/awa-ab-testing.phtml"

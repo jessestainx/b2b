@@ -314,7 +314,7 @@ class UpdateInstitutionalPages implements DataPatchInterface
     "https://www.facebook.com/awamotos",
     "https://www.youtube.com/@awamotos"
   ],
-  "taxID": "06.093.812/0001-05"
+  "taxID": "51.274.901/0001-02"
 }
 </script>
 HTML;
@@ -352,7 +352,7 @@ HTML;
       <ul>
         <li><strong>Telefone:</strong> {{config path="general/store_information/phone"}}</li>
         <li><strong>WhatsApp:</strong> <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">(16) 99736-7588</a></li>
-        <li><strong>E-mail:</strong> <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a></li>
+        <li><strong>E-mail:</strong> <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a></li>
       </ul>
     </div>
   </div>
@@ -438,13 +438,13 @@ HTML;
   <h1>Política de Privacidade e Cookies</h1>
 
   <div class="awa-summary">
-    <p><strong>Resumo:</strong> Coletamos seus dados cadastrais e de navegação para processar pedidos, melhorar sua experiência e cumprir obrigações legais. Você tem direito de acessar, corrigir e excluir seus dados a qualquer momento. Nosso canal de privacidade é <a href="mailto:privacidade@awamotos.com.br">privacidade@awamotos.com.br</a>.</p>
+    <p><strong>Resumo:</strong> Coletamos seus dados cadastrais e de navegação para processar pedidos, melhorar sua experiência e cumprir obrigações legais. Você tem direito de acessar, corrigir e excluir seus dados a qualquer momento. Nosso canal de privacidade é <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a>.</p>
     <ul>
       <li><strong>O que coletamos:</strong> nome, CPF/CNPJ, e-mail, telefone, endereço, dados de navegação (cookies, IP) e histórico de compras.</li>
       <li><strong>Por quê:</strong> processar pedidos, emitir notas fiscais, entregar produtos, prestar suporte e melhorar o site.</li>
       <li><strong>Base legal:</strong> execução de contrato, obrigação legal, legítimo interesse e consentimento (Art. 7º LGPD).</li>
       <li><strong>Seus direitos:</strong> acesso, correção, exclusão, portabilidade, revogação do consentimento.</li>
-      <li><strong>Contato:</strong> <a href="mailto:privacidade@awamotos.com.br">privacidade@awamotos.com.br</a> (prazo de até 15 dias úteis).</li>
+      <li><strong>Contato:</strong> <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a> (prazo de até 15 dias úteis).</li>
     </ul>
   </div>
 
@@ -582,7 +582,7 @@ HTML;
   <h2>9. Como exercer seus direitos</h2>
   <p>Para exercer qualquer um dos direitos acima:</p>
   <ul>
-    <li><strong>E-mail do Encarregado (DPO):</strong> <a href="mailto:privacidade@awamotos.com.br">privacidade@awamotos.com.br</a></li>
+    <li><strong>E-mail do Encarregado (DPO):</strong> <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a></li>
     <li><strong>Formulário de contato:</strong> <a href="{{store url='contact'}}">Fale Conosco</a> (selecione o assunto "Privacidade / LGPD")</li>
     <li><strong>Prazo de resposta:</strong> até 15 dias úteis a partir da confirmação da sua identidade.</li>
   </ul>
@@ -647,7 +647,7 @@ HTML;
     </div>
     <div class="awa-card">
       <h3>E-mail</h3>
-      <p><a href="mailto:contato@awamotos.com.br"><strong>contato@awamotos.com.br</strong></a></p>
+      <p><a href="mailto:awamotos@awamotos.com.br"><strong>awamotos@awamotos.com.br</strong></a></p>
       <p>Respondemos em até 1 dia útil.</p>
     </div>
     <div class="awa-card">
@@ -671,7 +671,7 @@ HTML;
   <div class="awa-b2b">
     <p>Se você é <strong>revendedor, oficina ou distribuidor</strong>, temos um canal dedicado:</p>
     <ul>
-      <li><strong>E-mail B2B:</strong> <a href="mailto:atacado@awamotos.com.br">atacado@awamotos.com.br</a></li>
+      <li><strong>E-mail B2B:</strong> <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a></li>
       <li><strong>WhatsApp Comercial:</strong> <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">(16) 99736-7588</a></li>
       <li><strong>Cotação personalizada:</strong> <a href="{{store url='b2b/quote/index'}}">Solicitar cotação</a></li>
     </ul>
@@ -684,8 +684,8 @@ HTML;
       <tr><th>Canal</th><th>Dias</th><th>Horário</th></tr>
     </thead>
     <tbody>
-      <tr><td>Telefone</td><td>Segunda a sexta</td><td>9h às 17h</td></tr>
-      <tr><td>WhatsApp</td><td>Segunda a sexta</td><td>9h às 17h</td></tr>
+      <tr><td>Telefone</td><td>Segunda a sexta</td><td>2ª a 5ª: 8h às 18h; sexta: 8h às 17h</td></tr>
+      <tr><td>WhatsApp</td><td>Segunda a sexta</td><td>2ª a 5ª: 8h às 18h; sexta: 8h às 17h</td></tr>
       <tr><td>E-mail / Formulário</td><td>24 horas</td><td>Resposta em até 1 dia útil</td></tr>
     </tbody>
   </table>
@@ -707,7 +707,7 @@ HTML;
     "@type": "Organization",
     "name": "Grupo Awamotos",
     "telephone": "+55-16-3301-1890",
-    "email": "contato@awamotos.com.br",
+    "email": "awamotos@awamotos.com.br",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+55-16-3301-1890",
@@ -732,8 +732,8 @@ HTML;
             '@type'    => 'FAQPage',
             'mainEntity' => [
                 $this->faqItem('Como acompanho meu pedido?', 'Acesse "Minha Conta" e vá em "Meus Pedidos". Se comprou como visitante, use a página Rastrear Pedido informando e-mail e número do pedido.'),
-                $this->faqItem('Posso alterar ou cancelar um pedido depois de confirmado?', 'Sim, desde que o pedido ainda não tenha sido faturado ou despachado. Entre em contato pelo WhatsApp (16) 99736-7588 ou e-mail contato@awamotos.com.br o mais rápido possível.'),
-                $this->faqItem('Quais formas de pagamento são aceitas?', 'Aceitamos Pix (3% de desconto), boleto bancário, cartão de crédito (até 6x sem juros) e cartão de débito. As opções disponíveis aparecem no checkout.'),
+                $this->faqItem('Posso alterar ou cancelar um pedido depois de confirmado?', 'Sim, desde que o pedido ainda não tenha sido faturado ou despachado. Entre em contato pelo WhatsApp (16) 99736-7588 ou e-mail awamotos@awamotos.com.br o mais rápido possível.'),
+                $this->faqItem('Quais formas de pagamento são aceitas?', 'Aceitamos Pix, boleto bancário e pagamento à vista. Condições a prazo dependem de análise financeira — consulte um de nossos atendentes.'),
                 $this->faqItem('O pagamento por Pix é seguro?', 'Sim. O Pix é regulamentado pelo Banco Central e nosso QR Code é gerado pelo gateway de pagamento com chave vinculada ao CNPJ da empresa.'),
                 $this->faqItem('Qual o prazo de entrega?', 'Depende da região e da modalidade escolhida. PAC: 5 a 15 dias úteis. SEDEX: 1 a 5 dias úteis. Retirada na loja: após confirmação do pagamento. Consulte a página Frete e Entrega para detalhes.'),
                 $this->faqItem('Vocês entregam em todo o Brasil?', 'Sim, enviamos para todos os estados brasileiros pelos Correios e por transportadoras parceiras.'),
@@ -741,7 +741,7 @@ HTML;
                 $this->faqItem('Quem paga o frete da devolução?', 'Em caso de arrependimento, o frete de retorno é por conta do comprador. Em caso de defeito ou erro no envio, o Grupo Awamotos arca com o frete.'),
                 $this->faqItem('Qual a garantia dos produtos?', 'Todos os produtos têm garantia legal de 30 dias (CDC). Alguns itens possuem garantia estendida do fabricante. Consulte a página de Garantia para saber como acionar.'),
                 $this->faqItem('Como faço para comprar no atacado?', 'É necessário ter CNPJ ativo e se cadastrar no programa B2B. Após aprovação (até 24h úteis), você acessa preços diferenciados, condições de pagamento especiais e frete CIF. Saiba mais em Condições para Atacado.'),
-                $this->faqItem('Qual o pedido mínimo para atacado?', 'Primeiro pedido: R$ 500,00. Pedidos seguintes: R$ 300,00. Frete grátis em pedidos acima de R$ 1.500,00.'),
+                $this->faqItem('Qual o pedido mínimo para atacado?', 'Primeiro pedido: R$ 1.500,00. Frete grátis em pedidos acima de R$ 1.500,00.'),
                 $this->faqItem('Como escolho a peça certa para minha moto?', 'Use o campo de busca informando o modelo e ano da moto, ou o código da peça. Se tiver dúvida, entre em contato pelo WhatsApp (16) 99736-7588 com o modelo, ano e a peça que procura.'),
             ],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -763,7 +763,7 @@ HTML;
     </div>
     <div class="awa-faq-item">
       <h3>Posso alterar ou cancelar um pedido depois de confirmado?</h3>
-      <p>Sim, desde que o pedido ainda não tenha sido faturado ou despachado. Entre em contato pelo <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">WhatsApp (16) 99736-7588</a> ou e-mail <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a> o mais rápido possível.</p>
+      <p>Sim, desde que o pedido ainda não tenha sido faturado ou despachado. Entre em contato pelo <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">WhatsApp (16) 99736-7588</a> ou e-mail <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a> o mais rápido possível.</p>
     </div>
     <div class="awa-faq-item">
       <h3>Como escolho a peça certa para minha moto?</h3>
@@ -776,7 +776,7 @@ HTML;
   <div class="awa-faq-category">
     <div class="awa-faq-item">
       <h3>Quais formas de pagamento são aceitas?</h3>
-      <p>Aceitamos <strong>Pix</strong> (3% de desconto), <strong>boleto bancário</strong>, <strong>cartão de crédito</strong> (até 6x sem juros) e <strong>cartão de débito</strong>. As opções disponíveis aparecem no checkout.</p>
+      <p>Aceitamos <strong>Pix</strong>, <strong>boleto bancário</strong> e <strong>pagamento à vista</strong>. Condições a <strong>prazo</strong> dependem de análise financeira — consulte um de nossos atendentes.</p>
     </div>
     <div class="awa-faq-item">
       <h3>O pagamento por Pix é seguro?</h3>
@@ -840,11 +840,11 @@ HTML;
     </div>
     <div class="awa-faq-item">
       <h3>Qual o pedido mínimo para atacado?</h3>
-      <p>Primeiro pedido: <strong>R$ 500,00</strong>. Pedidos seguintes: <strong>R$ 300,00</strong>. Frete grátis em pedidos acima de R$ 1.500,00.</p>
+      <p>Primeiro pedido: <strong>R$ 1.500,00</strong>. Frete grátis em pedidos acima de R$ 1.500,00.</p>
     </div>
     <div class="awa-faq-item">
       <h3>Como solicito uma cotação personalizada?</h3>
-      <p>Use o <a href="{{store url='b2b/quote/index'}}">formulário de cotação</a> ou envie sua lista de peças para <a href="mailto:atacado@awamotos.com.br">atacado@awamotos.com.br</a>. Respondemos em até 1 dia útil.</p>
+      <p>Use o <a href="{{store url='b2b/quote/index'}}">formulário de cotação</a> ou envie sua lista de peças para <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a>. Respondemos em até 1 dia útil.</p>
     </div>
   </div>
 
@@ -1074,29 +1074,9 @@ HTML;
     {
         return <<<'HTML'
 <div class="awa-inst" role="main" aria-label="Frete e Entrega">
-  <h1>Frete e Entrega</h1>
 
   <div class="awa-summary">
-    <p>Enviamos para todo o Brasil. Confira abaixo as modalidades de frete, prazos estimados por região e condições para frete grátis.</p>
-  </div>
-
-  <h2>Modalidades de entrega</h2>
-  <div class="awa-grid">
-    <div class="awa-card">
-      <h3>Correios PAC</h3>
-      <p>Entrega econômica para todo o Brasil.</p>
-      <p><strong>Prazo:</strong> 5 a 15 dias úteis</p>
-    </div>
-    <div class="awa-card">
-      <h3>Correios SEDEX</h3>
-      <p>Entrega expressa com rastreamento.</p>
-      <p><strong>Prazo:</strong> 1 a 5 dias úteis</p>
-    </div>
-    <div class="awa-card">
-      <h3>Retirada na loja</h3>
-      <p>Retire gratuitamente em Araraquara–SP.</p>
-      <p><strong>Custo:</strong> Grátis</p>
-    </div>
+    <p>Enviamos para todo o Brasil. Confira abaixo as condições de frete grátis e as opções para clientes B2B.</p>
   </div>
 
   <h2>Frete grátis</h2>
@@ -1127,46 +1107,6 @@ HTML;
     </tbody>
   </table>
 
-  <h2>Prazos estimados por região</h2>
-  <p>Os prazos abaixo são contados em <strong>dias úteis</strong> a partir da confirmação do pagamento e despacho:</p>
-  <table class="awa-table">
-    <thead>
-      <tr>
-        <th>Região</th>
-        <th>PAC</th>
-        <th>SEDEX</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Sudeste (SP, RJ, MG, ES)</td>
-        <td>3 a 7 dias</td>
-        <td>1 a 2 dias</td>
-      </tr>
-      <tr>
-        <td>Sul (PR, SC, RS)</td>
-        <td>5 a 8 dias</td>
-        <td>2 a 3 dias</td>
-      </tr>
-      <tr>
-        <td>Centro-Oeste</td>
-        <td>7 a 12 dias</td>
-        <td>3 a 5 dias</td>
-      </tr>
-      <tr>
-        <td>Nordeste</td>
-        <td>10 a 15 dias</td>
-        <td>4 a 6 dias</td>
-      </tr>
-      <tr>
-        <td>Norte</td>
-        <td>12 a 18 dias</td>
-        <td>5 a 8 dias</td>
-      </tr>
-    </tbody>
-  </table>
-  <p><small>Prazos estimados pelos Correios, sujeitos a alterações. Consulte o valor e prazo exatos no carrinho de compras.</small></p>
-
   <h2>Frete para clientes B2B</h2>
   <div class="awa-b2b">
     <p>Clientes cadastrados no programa B2B contam com condições especiais de frete:</p>
@@ -1181,16 +1121,16 @@ HTML;
   <h2>Rastreamento</h2>
   <ul>
     <li>Após o despacho, você recebe o <strong>código de rastreamento por e-mail</strong>.</li>
-    <li>Acompanhe pelo site dos Correios ou em <a href="{{store url='customer/account'}}">"Minha Conta" &gt; "Meus Pedidos"</a>.</li>
+    <li>Acompanhe em <a href="{{store url='customer/account'}}">"Minha Conta" &gt; "Meus Pedidos"</a>.</li>
     <li>Comprou como visitante? Use a página <a href="{{store url='sales/guest/form'}}">Rastrear Pedido</a>.</li>
   </ul>
 
   <h2>Informações importantes</h2>
   <ul>
     <li>Produtos volumosos ou pesados podem ter frete calculado separadamente.</li>
-    <li>Em caso de ausência, os Correios realizam até 3 tentativas de entrega.</li>
+    <li>Em caso de ausência no endereço, a transportadora pode realizar novas tentativas de entrega conforme a política do serviço contratado.</li>
     <li>Confira o produto no ato da entrega. Se houver avaria na embalagem, recuse e entre em contato conosco.</li>
-    <li>O prazo de entrega não inclui fins de semana, feriados e eventuais greves dos Correios.</li>
+    <li>O prazo de entrega não inclui fins de semana e feriados.</li>
   </ul>
 
   <div class="awa-cta">
@@ -1260,7 +1200,7 @@ HTML;
     </div>
     <div class="awa-contact-channel">
       <strong>E-mail</strong>
-      <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
+      <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a>
     </div>
   </div>
   <p><small>Horário de atendimento: {{config path="general/store_information/hours"}}. E-mails e formulários enviados fora do expediente serão respondidos no próximo dia útil.</small></p>
@@ -1276,7 +1216,7 @@ HTML;
     "@type": "Organization",
     "name": "Grupo Awamotos",
     "telephone": "+55-16-3301-1890",
-    "email": "contato@awamotos.com.br"
+    "email": "awamotos@awamotos.com.br"
   }
 }
 </script>

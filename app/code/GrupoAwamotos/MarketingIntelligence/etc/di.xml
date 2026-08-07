@@ -156,12 +156,13 @@
             <argument name="fileName" xsi:type="string">/var/log/marketing_intelligence.log</argument>
         </arguments>
     </virtualType>
+    <!-- Use Monolog\Logger so handlers do not merge into the global Magento logger. -->
     <virtualType name="MarketingIntelligenceLogger"
-                 type="Magento\Framework\Logger\Monolog">
+                 type="Monolog\Logger">
         <arguments>
             <argument name="name" xsi:type="string">marketing_intelligence</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">MarketingIntelligenceLogHandler</item>
+                <item name="file" xsi:type="object">MarketingIntelligenceLogHandler</item>
             </argument>
         </arguments>
     </virtualType>

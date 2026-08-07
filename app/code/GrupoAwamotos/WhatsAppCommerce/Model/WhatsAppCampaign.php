@@ -119,7 +119,7 @@ class WhatsAppCampaign implements CampaignInterface
             $allOptin = (int) $connection->fetchOne(
                 $connection->select()
                     ->from(
-                        ['cev' => $connection->getTableName('customer_entity_varchar')],
+                        ['cev' => $connection->getTableName('customer_entity_int')],
                         [new \Zend_Db_Expr('COUNT(DISTINCT cev.entity_id)')]
                     )
                     ->where('cev.attribute_id = ?', $optinAttrId)
@@ -133,7 +133,7 @@ class WhatsAppCampaign implements CampaignInterface
                         [new \Zend_Db_Expr('COUNT(DISTINCT so.customer_id)')]
                     )
                     ->join(
-                        ['cev' => $connection->getTableName('customer_entity_varchar')],
+                        ['cev' => $connection->getTableName('customer_entity_int')],
                         'cev.entity_id = so.customer_id',
                         []
                     )
@@ -153,7 +153,7 @@ class WhatsAppCampaign implements CampaignInterface
                             [new \Zend_Db_Expr('COUNT(DISTINCT ce.entity_id)')]
                         )
                         ->join(
-                            ['cev' => $connection->getTableName('customer_entity_varchar')],
+                            ['cev' => $connection->getTableName('customer_entity_int')],
                             'cev.entity_id = ce.entity_id',
                             []
                         )
@@ -191,63 +191,55 @@ class WhatsAppCampaign implements CampaignInterface
     {
         $connection = $this->resource->getConnection();
         $optinAttrId = $this->getOptinAttributeId($connection);
-        $phoneAttrId = $this->getPhoneAttributeId($connection);
 
-        if ($optinAttrId === 0 || $phoneAttrId === 0) {
+        if ($optinAttrId === 0) {
             return [];
         }
 
         $select = $connection->select()
             ->from(
-                ['cev_phone' => $connection->getTableName('customer_entity_varchar')],
-                ['phone' => 'cev_phone.value']
-            )
-            ->join(
-                ['cev_optin' => $connection->getTableName('customer_entity_varchar')],
-                'cev_optin.entity_id = cev_phone.entity_id',
+                ['ce' => $connection->getTableName('customer_entity')],
                 []
             )
-            ->where('cev_phone.attribute_id = ?', $phoneAttrId)
+            ->join(
+                ['cev_optin' => $connection->getTableName('customer_entity_int')],
+                'cev_optin.entity_id = ce.entity_id',
+                []
+            )
+            ->join(
+                ['ca' => $connection->getTableName('customer_address_entity')],
+                'ca.entity_id = ce.default_billing',
+                ['phone' => 'ca.telephone']
+            )
             ->where('cev_optin.attribute_id = ?', $optinAttrId)
-            ->where('cev_optin.value = ?', '1')
-            ->where('cev_phone.value IS NOT NULL')
-            ->where("cev_phone.value != ''");
+            ->where('cev_optin.value = ?', 1)
+            ->where('ca.telephone IS NOT NULL')
+            ->where("ca.telephone != ''");
 
         if ($segment === 'recent_90d') {
             $select->join(
                 ['so' => $connection->getTableName('sales_order')],
-                'so.customer_id = cev_phone.entity_id',
+                'so.customer_id = ce.entity_id',
                 []
             )
             ->where('so.created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)')
             ->where('so.state NOT IN (?)', ['canceled'])
-            ->group('cev_phone.entity_id');
+            ->group('ce.entity_id');
         } elseif ($segment === 'b2b') {
             $b2bGroupIds = $this->getB2BGroupIds();
             if (empty($b2bGroupIds)) {
                 return [];
             }
-            $select->join(
-                ['ce' => $connection->getTableName('customer_entity')],
-                'ce.entity_id = cev_phone.entity_id',
-                []
-            )
-            ->where('ce.group_id IN (?)', $b2bGroupIds);
+            $select->where('ce.group_id IN (?)', $b2bGroupIds);
         }
 
         $select->limit($limit);
 
         $phones = $connection->fetchCol($select);
 
-        return array_filter($phones, fn(string $p) => strlen(preg_replace('/\D/', '', $p)) >= 10);
+        return array_filter($phones, fn(string $p) => strlen(preg_replace('/\D/', '', $p) ?? '') >= 10);
     }
 
-    /**
-     * Get the EAV attribute ID for whatsapp_optin
-     *
-     * @param \Magento\Framework\DB\Adapter\AdapterInterface $connection
-     * @return int
-     */
     private function getOptinAttributeId(\Magento\Framework\DB\Adapter\AdapterInterface $connection): int
     {
         return (int) $connection->fetchOne(
@@ -264,22 +256,6 @@ class WhatsAppCampaign implements CampaignInterface
      *
      * @param \Magento\Framework\DB\Adapter\AdapterInterface $connection
      * @return int
-     */
-    private function getPhoneAttributeId(\Magento\Framework\DB\Adapter\AdapterInterface $connection): int
-    {
-        return (int) $connection->fetchOne(
-            $connection->select()
-                ->from($this->resource->getTableName('eav_attribute'), ['attribute_id'])
-                ->where('attribute_code = ?', 'telephone')
-                ->where('entity_type_id = ?', 1)
-                ->limit(1)
-        );
-    }
-
-    /**
-     * Get B2B customer group IDs from config
-     *
-     * @return int[]
      */
     private function getB2BGroupIds(): array
     {

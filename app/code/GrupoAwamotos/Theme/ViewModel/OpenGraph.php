@@ -17,8 +17,10 @@ use Magento\Store\Model\StoreManagerInterface;
 
 final class OpenGraph implements ArgumentInterface
 {
-    private const DEFAULT_DESCRIPTION = 'Distribuidora B2B de peças e acessórios para motos. Bauletos, retrovisores, guidões e mais. Preços exclusivos para lojistas.';
-    private const DEFAULT_IMAGE_PATH = '/media/logo/stores/1/logo-awa.png';
+    private const DEFAULT_DESCRIPTION = 'AWA Motos — Especialistas em peças e acessórios para motos. Baús, bagageiros, retrovisores, luvas e muito mais. Entrega para todo o Brasil.';
+    private const DEFAULT_IMAGE_PATH = '/media/logo/stores/1/awamotos-og-default.jpg';
+    private const DEFAULT_IMAGE_WIDTH = '1200';
+    private const DEFAULT_IMAGE_HEIGHT = '630';
 
     private ?Store $store = null;
 
@@ -191,13 +193,22 @@ final class OpenGraph implements ArgumentInterface
         $title = $this->getPageTitle();
         $description = $this->getPageDescription();
         $image = $this->getDefaultImage();
+        $storeName = $this->getStoreName() !== '' ? $this->getStoreName() : 'AWA Motos';
+
+        // Home: título social de marca (não o <title> SEO longo)
+        if ($this->isHomepage()) {
+            $title = $storeName . ' — Peças e Acessórios para Motos';
+        }
+
         $meta = [
             'type' => 'website',
             'title' => $title !== '' ? $title : 'AWA Motos | Peças e Acessórios para Motos',
             'description' => $description,
             'image' => $image,
+            'image_width' => self::DEFAULT_IMAGE_WIDTH,
+            'image_height' => self::DEFAULT_IMAGE_HEIGHT,
             'url' => $this->getCurrentUrl(),
-            'site_name' => $this->getStoreName() !== '' ? $this->getStoreName() : 'AWA Motos',
+            'site_name' => $storeName,
             'locale' => 'pt_BR',
             'image_alt' => $title !== '' ? $title : 'AWA Motos',
         ];
@@ -207,7 +218,11 @@ final class OpenGraph implements ArgumentInterface
             $meta['type'] = 'product';
             $meta['title'] = $this->normalizeText((string) $product->getName()) ?: $meta['title'];
             $meta['description'] = $this->resolveProductDescription($product);
-            $meta['image'] = $this->getProductImageUrl($product) ?: $meta['image'];
+            $productImage = $this->getProductImageUrl($product);
+            if ($productImage !== '') {
+                $meta['image'] = $productImage;
+                unset($meta['image_width'], $meta['image_height']);
+            }
             $meta['image_alt'] = $meta['title'];
 
             $finalPrice = (float) $product->getFinalPrice();
@@ -234,6 +249,7 @@ final class OpenGraph implements ArgumentInterface
             $categoryImage = (string) $category->getImageUrl();
             if ($categoryImage !== '') {
                 $meta['image'] = $categoryImage;
+                unset($meta['image_width'], $meta['image_height']);
             }
         }
 

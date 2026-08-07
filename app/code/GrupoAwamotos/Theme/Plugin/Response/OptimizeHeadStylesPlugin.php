@@ -5,14 +5,20 @@ declare(strict_types=1);
 namespace GrupoAwamotos\Theme\Plugin\Response;
 
 use GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss;
+use GrupoAwamotos\Theme\Model\MinicartAssetVersion;
+use Magento\Framework\App\Area;
 use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Framework\App\Response\HttpInterface;
+use Magento\Framework\App\State as AppState;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Performance — dedupe CSS async + gate bundles grandes na home (Sprint 3 / PSI).
  */
 class OptimizeHeadStylesPlugin
 {
+    private const AGENT_DEBUG_LOG_PATH = '/home/jessessh/htdocs/srv1113343.hstgr.cloud/.cursor/debug-f5fb4a.log';
+    private const AGENT_DEBUG_SESSION_ID = 'f5fb4a';
     private const HOME_ACTION = 'cms_index_index';
     /** 404/URL inexistente — sem cobertura de defer; cai no fallback total-blocking (BUG-404-CSS). */
     private const NOROUTE_ACTION = 'cms_noroute_index';
@@ -33,9 +39,10 @@ class OptimizeHeadStylesPlugin
      */
     private const B2B_MARKETING_LANDING_ACTION = 'b2b_marketing_landing';
     private const HOME_DENSITY_GRID_FILE = 'awa-home-density-grid-20260611.min.css';
-    private const HOME_DENSITY_GRID_QUERY = '?v=20260623-shell1280-r20';
+    private const HOME_DENSITY_GRID_QUERY = '?v=20260803-pdp-shell24c';
     private const HEADER_CONTRACT_GRID_FILE = 'awa-header-contract-grid-20260626.min.css';
-    private const HEADER_CONTRACT_GRID_QUERY = '?v=20260626-phase3d24-r2';
+    /** BUG-SHELL-GEOM-TOKEN-001 — bust immutable após SSOT de geometria. */
+    private const HEADER_CONTRACT_GRID_QUERY = '?v=20260805-dead-niche-r13';
     // MORTO: awa-catalog-density-grid-20260611.min.css → _deprecated/
     private const CATALOG_DENSITY_GRID_FILE = '';
     private const CATALOG_DENSITY_GRID_QUERY = '';
@@ -84,6 +91,51 @@ class OptimizeHeadStylesPlugin
         'social-proof.css',
         'gallery.css',
         'awa-pdp-shell-final',
+    ];
+
+    /**
+     * Home — folhas sync pesadas (PSI Style&Layout). Critical-home + polish + inline
+     * cobrem above-fold; estas entram em print→all sem tocar PLP/PDP/B2B/boleto.
+     *
+     * @var string[]
+     */
+    private const HOME_DEFER_CSS_FRAGMENTS = [
+        'awa-visual-fixes-2026-06-29-final',
+        'awa-dark-mode.css',
+        'awa-visual-noise-2026-07-15',
+        'awa-cookie-fab-collision-fix',
+        'awa-home-visual-bugfixes',
+        'awa-impeccable-layout-2026-06-16',
+        'awa-visual-qa-fixes',
+        'awa-home-swiper-cls-fix',
+        'awa-shelf-carousel',
+        'awa-carousel-contract',
+        'awa-home-corporate-density-grid',
+        // themes.css + third-party NÃO entram aqui — UI interativa (minicart/modal) depende deles.
+    ];
+
+    /**
+     * Home: fragmentos absorvidos por awa-home-deferred-stack.min.css
+     * (scripts/build-awa-home-deferred-stack.sh). Fora: align-grid, refine, themes, criticals.
+     *
+     * @var string[]
+     */
+    private const HOME_DEFERRED_STACK_FRAGMENTS = [
+        'awa-bugfix-terminal-2026-06-12',
+        'awa-home-swiper-cls-fix',
+        'awa-carousel-bundle',
+        'awa-shelf-carousel',
+        'awa-carousel-contract',
+        'awa-home-visual-bugfixes',
+        'awa-impeccable-layout-2026-06-16',
+        'awa-visual-qa-fixes',
+        'awa-visual-noise-2026-07-15',
+        'awa-cookie-fab-collision-fix',
+        'awa-cookie-consent-fix',
+        'awa-home-corporate-density-grid',
+        'awa-home-density-grid-20260611',
+        'awa-header-contract-grid-20260626',
+        'awa-visual-fixes-2026-06-29-final',
     ];
 
     /** Menu v2 — inline critical cobre mobile drawer + preflight dept; folha completa async. */
@@ -208,6 +260,14 @@ class OptimizeHeadStylesPlugin
         'awa-ui-simplify-terminal',
         'awa-home-standardize-terminal-wins',
         'awa-footer-terminal-lock-v1',
+        /* Pesados: idle/intent via awa-css-gate (inline lock + critical cobrem 1º paint). */
+        'awa-align-grid-terminal-2026-06-11',
+        'awa-commerce-impeccable-refine',
+        /* Residuais home — polish B2B / themeoption / L2C (não bloqueiam LCP). */
+        'custom_default.css',
+        'product/login-to-cart',
+        'css/header/status-panel',
+        'awa-b2b-status-panel',
     ];
 
     /** Folhas que permanecem no head (async stagger) — nunca remover para fila idle. */
@@ -216,10 +276,8 @@ class OptimizeHeadStylesPlugin
         'styles-l.css',
         'awa-carousel-bundle',
         'awa-shelf-carousel',
-        'awa-align-grid-terminal-2026-06-11',
-        'awa-commerce-impeccable-refine',
-        'awa-home-density-grid-20260611',
-        'awa-header-contract-grid-20260626',
+        /* align-grid + refine: agora no HOME_GATE (idle) — removidos daqui */
+        /* density/contract: absorvidos por awa-home-deferred-stack */
         'awa-home-critical-stack-2026-06-11',
         'awa-home-critical-stack',
         'awa-home-body-end-bundle',
@@ -228,6 +286,10 @@ class OptimizeHeadStylesPlugin
         'awa-visual-bugfix.css',
         'awa-ui-ux-pro-max-header-2026-05-19',
         'awa-structural-fix-2026-05-20',
+        'awa-home-deferred-stack',
+        'awa-third-party-bundle',
+        'themes.min.css',
+        'themes.css',
     ];
 
     /**
@@ -244,7 +306,11 @@ class OptimizeHeadStylesPlugin
         'awa-master-fix.min.js',
     ];
 
-    /** Checkout/auth/conta: hidratação B2B não é necessária e aumenta trabalho no main thread. */
+    /**
+     * Auth/checkout de pagamento/conta: hidratação B2B não é necessária.
+     * NÃO incluir checkout_cart_index — no carrinho o painel B2B some se o script
+     * for removido (CDP AUDIT30: hasB2bTrigger=false, htmlHasHydrate=false).
+     */
     private const CHECKOUT_AUTH_STRIP_SCRIPT_FRAGMENTS = [
         'GrupoAwamotos_B2B/js/b2b-panel-hydrate.min.js',
         'GrupoAwamotos_B2B/js/b2b-panel-hydrate.js',
@@ -252,6 +318,7 @@ class OptimizeHeadStylesPlugin
 
     public function __construct(
         private readonly HttpRequest $request,
+        private readonly AppState $appState,
     ) {
     }
 
@@ -261,21 +328,70 @@ class OptimizeHeadStylesPlugin
             return;
         }
 
+        // Defesa: nunca injetar CSS/JS de storefront (ex.: js/awa-minicart-position) no admin.
+        try {
+            if ($this->appState->getAreaCode() !== Area::AREA_FRONTEND) {
+                return;
+            }
+        } catch (LocalizedException) {
+            return;
+        }
+
+        $fullAction = $this->request->getFullActionName();
+        $probeVars = $this->resolveAxisProbeQueryVars();
+        $probeParam = $probeVars['probeParam'];
+        $probeParamAlias = $probeVars['probeParamAlias'];
+        $probePingParam = $probeVars['probePingParam'];
+        $probePingParamAlias = $probeVars['probePingParamAlias'];
+        $probeNoscriptParam = $probeVars['probeNoscriptParam'];
+        $probeNoscriptParamAlias = $probeVars['probeNoscriptParamAlias'];
+        $probeDomParam = $probeVars['probeDomParam'];
+        $runTraceToken = $probeVars['runTraceToken'];
+        $probeTraceParam = $probeVars['probeTraceParam'];
+        $hasProbeSignal = $probeParam !== ''
+            || $probeParamAlias !== ''
+            || $probePingParam !== ''
+            || $probePingParamAlias !== ''
+            || $probeNoscriptParam !== ''
+            || $probeNoscriptParamAlias !== ''
+            || $probeDomParam !== '';
+
+        if ($hasProbeSignal) {
+            $contentTypeProbe = $subject->getHeader('Content-Type');
+            $bodyProbe = (string) $subject->getBody();
+}
+
+        $this->captureClientAxisProbeFromQuery(
+            $probeParam !== '' ? $probeParam : $probeParamAlias,
+            $fullAction
+        );
+        $this->captureClientAxisProbeHeartbeatFromQuery(
+            $probePingParam !== '' ? $probePingParam : $probePingParamAlias,
+            $probeNoscriptParam !== '' ? $probeNoscriptParam : $probeNoscriptParamAlias,
+            $probeDomParam,
+            $probeTraceParam,
+            $fullAction
+        );
+
         $contentType = $subject->getHeader('Content-Type');
         if ($contentType && stripos($contentType->getFieldValue(), 'text/html') === false) {
+            if ($hasProbeSignal) {
+}
             return;
         }
 
         $html = (string) $subject->getBody();
         if ($html === '') {
+            if ($hasProbeSignal) {
+}
             return;
         }
+
 
         $html = $this->stripRedundantAsyncNoscript($html);
         $html = $this->normalizeCssStaggerOnloadHandlers($html);
         $html = $this->appendVisualFixesCacheBuster($html);
         $html = $this->appendMasterFixCacheBuster($html);
-        $fullAction = $this->request->getFullActionName();
 
         if ($fullAction === self::CART_ACTION) {
             $html = $this->stripStylesheetFragments($html, self::CART_STRIP_CSS_FRAGMENTS);
@@ -387,8 +503,7 @@ class OptimizeHeadStylesPlugin
             }
         }
 
-        // Converte footer terminal inline (~58KB) para link async externo — footer é below-fold.
-        $html = $this->convertFooterCssToAsync($html);
+        $html = HeaderImpeccableCascadeLockCss::injectFooterCategoriesDesktopLayoutScript($html);
 
         $html = $this->dedupeStylesheetHrefs($html);
         $isAuthFocusPage = in_array($fullAction, HeaderImpeccableCascadeLockCss::AUTH_FOCUS_ACTIONS, true)
@@ -407,12 +522,14 @@ class OptimizeHeadStylesPlugin
         }
         if (!$isAuthFocusPage && !$isB2bAccountFocusPage) {
             $html = $this->consolidateAlignGridToBodyTerminal($html, $fullAction);
+            $html = $this->consolidateM2VisualSsotTerminal($html, $fullAction);
             if (!in_array($fullAction, self::CHECKOUT_FOCUS_ACTIONS, true)) {
                 $html = $this->injectSiteShellInlineLock($html, $fullAction);
             }
             $html = $this->injectAlignGridHeaderContainerTerminal($html);
             $html = $this->injectHeaderSimplifyUiTerminalLock($html);
             $html = $this->injectMainContentSkipTargetTabindex($html);
+            $html = $this->injectSearchAutocompleteCompactStyles($html);
         } else {
             // Auth / painel B2B: critical inline define layout — omitir locks globais + folhas pesadas.
             $html = preg_replace('/<style id="awa-align-grid-inline-lock[^"]*"[^>]*>.*?<\/style>/s', '', $html) ?? $html;
@@ -458,25 +575,84 @@ class OptimizeHeadStylesPlugin
 
         /* Home: gate após body-terminal — folhas pesadas entram na fila idle (PSI/TBT). */
         if ($fullAction === self::HOME_ACTION) {
-            $html = $this->deferStylesheetsByFragments($html, ['custom_default.css']);
+            $html = $this->deferStylesheetsByFragments(
+                $html,
+                array_merge(['custom_default.css'], self::HOME_DEFER_CSS_FRAGMENTS)
+            );
             $html = $this->gateHomeLargeStylesheets($html);
             $html = $this->pruneHomeNeverGateQueueUrls($html);
             $html = $this->removePrintLinksListedInGateQueue($html);
             $html = $this->stripHomeGatedNoscriptFallbacks($html);
             $html = $this->synchronizeHomeRefineStylesheet($html);
+            $html = $this->consolidateHomeDeferredStylesheetStack($html);
             $html = $this->dedupeStylesheetHrefs($html);
+            /* BUG-SHELL-GEOM-TOKEN-001: stack absorve/strip o contract; reinjeta SSOT geom depois. */
+            $html = $this->injectHeaderContractGeomSsotForHome($html);
         }
 
+        // Executa após o gate da home para a folha estrutural síncrona não ser reclassificada como pesada.
+        $html = $this->convertFooterCssToAsync($html);
+
         $html = $this->injectHeaderVisualAuditFixes($html, $fullAction, $isAuthFocusPage, $isB2bAccountFocusPage);
-        $html = $this->injectHomeGapMarginHotfix($html, $fullAction);
+        // r44f: probe f5fb4a desligado — inline no </body> + measure@DCL correlacionava com
+        // longtask ~2.2s (CPU profile: awamotos.com anonymous) e LCP render ~2.8s.
+        // $html = $this->injectPlpAxisRuntimeProbeScript($html, $fullAction);
+        $styleProbe = [
+            'found' => false,
+            'len' => 0,
+            'hasPlpPatch' => false,
+            'hasHome24' => false,
+            'hasTablet16' => false,
+            'hasAxisProbeScript' => false,
+        ];
+        if (preg_match('/<style id="awa-header-visual-audit-fixes-20260630"[^>]*>(.*?)<\/style>/s', $html, $styleMatch) === 1) {
+            $cssProbe = (string) ($styleMatch[1] ?? '');
+            $styleProbe['found'] = true;
+            $styleProbe['len'] = strlen($cssProbe);
+            $styleProbe['hasPlpPatch'] = str_contains(
+                $cssProbe,
+                '.catalog-category-view) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-control.header-nav.awa-nav-bar>.container'
+            );
+            $styleProbe['hasHome24'] = str_contains(
+                $cssProbe,
+                '.header-control.awa-nav-bar .awa-nav-bar__inner{padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;box-sizing:border-box!important}'
+            );
+            $styleProbe['hasTablet16'] = str_contains(
+                $cssProbe,
+                '.header-control.header-nav.awa-nav-bar>.container,' . $this->buildShellSelector() . ' .awa-nav-bar__inner{display:flex!important;align-items:center!important;height:48px!important;min-height:48px!important;max-height:48px!important;overflow:visible!important;width:100%!important;max-width:100%!important;padding-inline:16px!important}'
+            );
+        }
+        $styleProbe['hasAxisProbeScript'] = str_contains($html, 'id="awa-agent-axis-runtime-probe-f5fb4a"');
+$html = $this->injectHomeGapMarginHotfix($html, $fullAction);
         $html = $this->injectVisualBugfixTerminalStyles($html, $fullAction);
+        $html = $this->injectMinicartOpenTerminalStyles($html, $fullAction);
         $html = $this->injectHomeCompactSpacingTerminalStyles($html, $fullAction);
 
         if ($fullAction === self::HOME_ACTION) {
             $html = $this->moveHomeCriticalInlineStylesToHead($html);
             $html = $this->stripEmptyHomePriceShells($html);
+            $html = $this->injectHomeHiddenUiGuardStyles($html);
+            // CSS/JS terminais grandes → arquivos externos cacheáveis (HTML −~140KB).
+            $html = $this->convertHomeHeavyTerminalsToExternal($html);
+            $html = $this->injectShelfViewAllMobileHideR18($html, $fullAction);
+            $html = $this->injectCategoryCarouselDotsR24b($html, $fullAction);
         }
 
+        $html = $this->injectFooterStoreFlatR21b($html);
+        $html = $this->injectFooterCnpjFlatR26($html);
+        $html = $this->injectB2bPromoContrastR27($html);
+        $html = $this->injectFooterSealsPayFlatR28($html);
+        $html = $this->injectFooterNewsletterFormR29($html);
+        $html = $this->injectMobileFabStackR30($html);
+        $html = $this->injectDesktopFabStackR33($html);
+        $html = $this->injectMobileToggleFlatR34($html);
+        $html = $this->injectMobileBottomNavEqualR35($html);
+        $html = $this->injectOwlProgressRadiusR35($html, $fullAction);
+        $html = $this->injectCarouselNavRadiusR36($html, $fullAction);
+        $html = $this->injectCarouselToggleGutterR38($html, $fullAction);
+        $html = $this->injectB2bPromoShellR40($html);
+        $html = $this->injectMobileBottomNavInactiveR37($html);
+        $html = $this->injectFooterTrustIconFlatR31($html);
         if (
             $fullAction === self::HOME_ACTION
             || in_array($fullAction, self::CATALOG_STACK_ACTIONS, true)
@@ -486,14 +662,606 @@ class OptimizeHeadStylesPlugin
         ) {
             $html = $this->stripScriptFragments($html, self::HEAVY_LEGACY_SCRIPT_FRAGMENTS);
         }
+        // Carrinho precisa do hydrate (trigger "Olá, …"); checkout/auth/conta não.
         if (
-            in_array($fullAction, self::CHECKOUT_FOCUS_ACTIONS, true)
+            (
+                in_array($fullAction, self::CHECKOUT_FOCUS_ACTIONS, true)
+                && $fullAction !== self::CART_ACTION
+            )
             || $isAuthFocusPage
             || $isB2bAccountFocusPage
         ) {
             $html = $this->stripScriptFragments($html, self::CHECKOUT_AUTH_STRIP_SCRIPT_FRAGMENTS);
         }
+
+        // Última camada: unifica overflow/bg do .page-wrapper e sticky entre rotas.
+        $html = $this->injectCrossPageShellLock($html);
+        /* PIXEL-QA r5: AFTER audit/normalize — senão IDs colapsam p/ 3 e audit (7×) vence. */
+        $html = $this->injectPixelQaGutterLock($html);
+        /* WCAG 2.5.8 — touch ≥44 (sorter/breadcrumb/footer); body-end vence locks inline. */
+        $html = $this->injectTouch44Terminal($html);
+        /* Hero home: border-box + full-bleed (evita clip 16px / imgOverflow). */
+        $html = $this->injectHeroBoxTerminal($html);
+        /* Home section headers: título+subtítulo empilhados (sem wrap lateral). */
+        $html = $this->injectSectionHeaderStackTerminal($html);
+        /* PLP: .col-main flex-shrink:0 (page-products) estourava ~18px além do gutter. */
+        $html = $this->injectPlpColContainTerminal($html);
+
+        /* ÚLTIMA camada chrome: depois de audit/minicart-open/pixel-qa (senão primary vence). */
+        if (!$isAuthFocusPage && !$isB2bAccountFocusPage
+            && !in_array($fullAction, self::CHECKOUT_FOCUS_ACTIONS, true)
+        ) {
+            $html = $this->injectGlobalHeaderChromeFoucStyles($html);
+        }
+
+        /* B2B ops density: ÚLTIMO terminal da home — depois de align-grid/section-header/chrome. */
+        if ($fullAction === self::HOME_ACTION) {
+            $html = $this->injectHomeB2bOpsDensityTerminalStyles($html, $fullAction);
+        }
+
+        $this->allowDebugLoopbackConnectSrc($subject);
         $subject->setBody($html);
+    }
+
+    /**
+     * Seletor-base reutilizado apenas para inspeção de string em debug.
+     */
+    private function buildShellSelector(): string
+    {
+        return 'html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]';
+    }
+
+    /**
+     * Agent debug logger (NDJSON) para sessões de runtime evidence.
+     */
+    private function agentDebugLog(
+        string $runId,
+        string $hypothesisId,
+        string $location,
+        string $message,
+        array $data = []
+    ): void {
+        // Production hygiene: never write agent debug payloads to disk.
+        return;
+    }
+
+    /**
+     * Resolve parâmetros de probe com fallback no query string bruto.
+     *
+     * @return array{
+     *   probeParam:string,
+     *   probeParamAlias:string,
+     *   probePingParam:string,
+     *   probePingParamAlias:string,
+     *   probeNoscriptParam:string,
+     *   probeNoscriptParamAlias:string,
+     *   probeDomParam:string,
+     *   runTraceToken:string,
+     *   probeTraceParam:string,
+     *   usedRawFallback:bool
+     * }
+     */
+    private function resolveAxisProbeQueryVars(): array
+    {
+        $vars = [
+            'probeParam' => (string) $this->request->getParam('awa_axis_probe', ''),
+            'probeParamAlias' => (string) $this->request->getParam('aap', ''),
+            'probePingParam' => (string) $this->request->getParam('awa_axis_probe_ping', ''),
+            'probePingParamAlias' => (string) $this->request->getParam('aap_ping', ''),
+            'probeNoscriptParam' => (string) $this->request->getParam('awa_axis_probe_noscript', ''),
+            'probeNoscriptParamAlias' => (string) $this->request->getParam('aap_ns', ''),
+            'probeDomParam' => (string) $this->request->getParam('aap_dom', ''),
+            'runTraceToken' => (string) $this->request->getParam('f5fb4a_user_run', ''),
+            'probeTraceParam' => (string) $this->request->getParam('trace', ''),
+            'usedRawFallback' => false,
+        ];
+
+        $queryString = (string) $this->request->getServer('QUERY_STRING');
+        if ($queryString === '') {
+            $requestUri = (string) $this->request->getRequestUri();
+            $queryFromUri = parse_url($requestUri, PHP_URL_QUERY);
+            if (is_string($queryFromUri)) {
+                $queryString = $queryFromUri;
+            }
+        }
+        if ($queryString === '') {
+            return $vars;
+        }
+
+        $queryData = [];
+        parse_str($queryString, $queryData);
+        if (!is_array($queryData) || $queryData === []) {
+            return $vars;
+        }
+
+        $map = [
+            'probeParam' => 'awa_axis_probe',
+            'probeParamAlias' => 'aap',
+            'probePingParam' => 'awa_axis_probe_ping',
+            'probePingParamAlias' => 'aap_ping',
+            'probeNoscriptParam' => 'awa_axis_probe_noscript',
+            'probeNoscriptParamAlias' => 'aap_ns',
+            'probeDomParam' => 'aap_dom',
+            'runTraceToken' => 'f5fb4a_user_run',
+            'probeTraceParam' => 'trace',
+        ];
+        foreach ($map as $target => $queryKey) {
+            if ($vars[$target] !== '') {
+                continue;
+            }
+            if (!array_key_exists($queryKey, $queryData)) {
+                continue;
+            }
+            $value = $this->extractScalarQueryParam($queryData[$queryKey]);
+            if ($value !== '') {
+                $vars[$target] = $value;
+                $vars['usedRawFallback'] = true;
+            }
+        }
+
+        return $vars;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private function extractScalarQueryParam(mixed $value): string
+    {
+        if (is_string($value)) {
+            return $value;
+        }
+        if (is_int($value) || is_float($value) || is_bool($value)) {
+            return (string) $value;
+        }
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                $scalar = $this->extractScalarQueryParam($item);
+                if ($scalar !== '') {
+                    return $scalar;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Runtime probe (cliente) para capturar axis/header/nav no navegador real do usuário.
+     */
+    private function injectPlpAxisRuntimeProbeScript(string $html, string $fullAction): string
+    {
+        // r44f: desativado — instrumentação de sessão f5fb4a não deve rodar em produção.
+        return $html;
+
+        $eligibleActions = [
+            self::HOME_ACTION,
+            'catalog_category_view',
+            'catalogsearch_result_index',
+        ];
+        if (!in_array($fullAction, $eligibleActions, true)) {
+            return $html;
+        }
+
+        $scriptId = 'awa-agent-axis-runtime-probe-f5fb4a';
+        $html = preg_replace(
+            '/<script id="' . preg_quote($scriptId, '/') . '"[^>]*>.*?<\/script>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $fullActionJson = json_encode($fullAction, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($fullActionJson)) {
+            return $html;
+        }
+        $traceTokenSeed = preg_replace('/[^a-zA-Z0-9_.:-]/', '', (string) $this->request->getParam('f5fb4a_user_run', ''));
+        if (!is_string($traceTokenSeed)) {
+            $traceTokenSeed = '';
+        }
+        $traceTokenJson = json_encode($traceTokenSeed, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($traceTokenJson)) {
+            $traceTokenJson = '""';
+        }
+
+        $script = '<script id="' . $scriptId . '">(function(){'
+            . '"use strict";'
+            . 'var collector="/b2b/account/login/";'
+            . 'var sessionId=' . json_encode(self::AGENT_DEBUG_SESSION_ID) . ';'
+            . 'var runId="run-active";'
+            . 'var hypothesisId="H4-H5-client-axis-runtime";'
+            . 'var fullAction=' . $fullActionJson . ';'
+            . 'var traceTokenSeed=' . $traceTokenJson . ';'
+            . 'var traceFromUrl="";'
+            . 'try{var searchParams=new URLSearchParams(location.search||"");traceFromUrl=(searchParams.get("f5fb4a_user_run")||searchParams.get("trace")||"");}catch(_e){traceFromUrl="";}'
+            . 'traceFromUrl=(traceFromUrl||"").replace(/[^a-zA-Z0-9_.:-]/g,"");'
+            . 'var traceToken=(traceTokenSeed||traceFromUrl||"");'
+            . 'var traceSource=traceTokenSeed?"server":"client";'
+            . 'window.__awaAxisProbePings=window.__awaAxisProbePings||[];'
+            . 'var ping=(new Image());window.__awaAxisProbePings.push(ping);'
+            . 'ping.src=collector+"?aap_ping=js-start&trace="+encodeURIComponent(traceToken||"none")+"&_="+Date.now();'
+            . 'function encodePayload(payload){'
+            . 'try{return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));}catch(_e){return"";}}'
+            . 'function post(payload){'
+            . 'var encoded=encodePayload(payload);'
+            . 'if(!encoded){return;}'
+            . 'var beacon=new Image();'
+            . 'window.__awaAxisProbePings.push(beacon);'
+            . 'beacon.src=collector+"?aap="+encodeURIComponent(encoded)+"&trace="+encodeURIComponent(traceToken||"none")+"&_="+Date.now();'
+            . '}'
+            . 'function measure(stage){'
+            . 'try{'
+            . 'var header=document.querySelector(".awa-site-header .awa-main-header__inner.wp-header,.awa-site-header .awa-main-header__inner");'
+            . 'var menuCandidates=[].slice.call(document.querySelectorAll("[data-role=\'awa-vertical-menu-trigger\']"));'
+            . 'function isVisibleTrigger(el){'
+            . 'if(!el){return false;}'
+            . 'var r=el.getBoundingClientRect();'
+            . 'if(r.width<=0||r.height<=0){return false;}'
+            . 'var cs=getComputedStyle(el);'
+            . 'if(cs.display==="none"||cs.visibility==="hidden"||cs.opacity==="0"){return false;}'
+            . 'if(el.closest("[hidden],[inert],[aria-hidden=\'true\']")){return false;}'
+            . 'return true;'
+            . '}'
+            . 'var menu=null;'
+            . 'var menuChosenMode="none";'
+            . 'for(var mc=0;mc<menuCandidates.length;mc++){'
+            . 'if(isVisibleTrigger(menuCandidates[mc])){menu=menuCandidates[mc];menuChosenMode="visible";break;}'
+            . '}'
+            . 'if(!menu&&menuCandidates.length){menu=menuCandidates[0];menuChosenMode="fallback-first";}'
+            . 'var menuChosenIdx=menu?menuCandidates.indexOf(menu):-1;'
+            . 'var menuAllAxes=[];'
+            . 'for(var mx=0;mx<menuCandidates.length&&mx<4;mx++){'
+            . 'var mr=menuCandidates[mx].getBoundingClientRect();'
+            . 'menuAllAxes.push(mx+":"+mr.x.toFixed(2)+":"+mr.width.toFixed(2));'
+            . '}'
+            . 'var navContainer=document.querySelector(".awa-site-header .header-control.header-nav.awa-nav-bar>.container,.awa-site-header .header-control.awa-nav-bar>.container");'
+            . 'var navInner=document.querySelector(".awa-site-header .awa-nav-bar__inner,.awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner");'
+            . 'var hx=header?header.getBoundingClientRect().x:0;'
+            . 'var hp=header?parseFloat(getComputedStyle(header).paddingInlineStart||"0"):0;'
+            . 'var headerAxis=+(hx+hp).toFixed(2);'
+            . 'var navAxis=menu?+menu.getBoundingClientRect().x.toFixed(2):null;'
+            . 'var menuChosenDisplay=menu?getComputedStyle(menu).display:null;'
+            . 'var menuChosenVisibility=menu?getComputedStyle(menu).visibility:null;'
+            . 'var menuChosenOpacity=menu?getComputedStyle(menu).opacity:null;'
+            . 'var menuChosenHiddenTree=menu?!!menu.closest("[hidden],[inert],[aria-hidden=\'true\']"):null;'
+            . 'var menuTextEl=null;'
+            . 'if(menu){'
+            . 'var nodes=menu.querySelectorAll("*");'
+            . 'for(var ni=0;ni<nodes.length;ni++){'
+            . 'var t=(nodes[ni].textContent||"").trim();'
+            . 'if(t&&/depart/i.test(t)){menuTextEl=nodes[ni];break;}'
+            . '}'
+            . '}'
+            . 'if(!menuTextEl&&menu){menuTextEl=menu;}'
+            . 'var menuTextAxis=menuTextEl?+menuTextEl.getBoundingClientRect().x.toFixed(2):null;'
+            . 'var menuText=(menuTextEl&&(menuTextEl.textContent||"").trim())||"";'
+            . 'post({'
+            . 'sessionId:sessionId,'
+            . 'runId:runId,'
+            . 'hypothesisId:hypothesisId,'
+            . 'location:"OptimizeHeadStylesPlugin.php:injectPlpAxisRuntimeProbeScript",'
+            . 'message:"client-axis-probe",'
+            . 'data:{'
+            . 'stage:stage,'
+            . 'fullAction:fullAction,'
+            . 'trace:traceToken||null,'
+            . 'traceSource:traceSource,'
+            . 'clientRunToken:traceFromUrl||null,'
+            . 'path:location.pathname,'
+            . 'queryLength:location.search.length,'
+            . 'querySample:(location.search||"").slice(0,180),'
+            . 'viewport:{w:window.innerWidth,h:window.innerHeight,dpr:window.devicePixelRatio||1},'
+            . 'axis:navAxis===null?null:+(navAxis-headerAxis).toFixed(2),'
+            . 'headerAxis:headerAxis,'
+            . 'navAxis:navAxis,'
+            . 'menuTextAxis:menuTextAxis,'
+            . 'axisText:menuTextAxis===null?null:+(menuTextAxis-headerAxis).toFixed(2),'
+            . 'menuText:menuText,'
+            . 'containerPadInlineStart:navContainer?getComputedStyle(navContainer).paddingInlineStart:null,'
+            . 'innerPadInlineStart:navInner?getComputedStyle(navInner).paddingInlineStart:null,'
+            . 'filtersExpanded:!!document.querySelector(".filter-title [aria-expanded=\'true\']"),'
+            . 'menuExpanded:!!document.querySelector("[data-role=\'awa-vertical-menu-trigger\'][aria-expanded=\'true\']"),'
+            . 'menuCandidateCount:menuCandidates.length,'
+            . 'menuChosenMode:menuChosenMode,'
+            . 'menuChosenIdx:menuChosenIdx,'
+            . 'menuChosenDisplay:menuChosenDisplay,'
+            . 'menuChosenVisibility:menuChosenVisibility,'
+            . 'menuChosenOpacity:menuChosenOpacity,'
+            . 'menuChosenHiddenTree:menuChosenHiddenTree,'
+            . 'menuAllAxes:menuAllAxes.join("|")'
+            . '},'
+            . 'timestamp:Date.now()'
+            . '});'
+            . '}catch(_err){}'
+            . '}'
+            . 'function afterLayout(stage){window.requestAnimationFrame(function(){window.requestAnimationFrame(function(){measure(stage);});});}'
+            . 'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){afterLayout("dom-ready");},{once:true});}'
+            . 'else{afterLayout("ready");}'
+            . 'window.addEventListener("load",function(){afterLayout("load");},{once:true,passive:true});'
+            . 'var resizeQueued=false;'
+            . 'window.addEventListener("resize",function(){'
+            . 'if(resizeQueued){return;}'
+            . 'resizeQueued=true;'
+            . 'window.requestAnimationFrame(function(){resizeQueued=false;afterLayout("resize");});'
+            . '},{passive:true});'
+            . 'document.addEventListener("click",function(ev){'
+            . 'var target=ev&&ev.target&&ev.target.closest?ev.target:null;'
+            . 'if(!target){return;}'
+            . 'if(target.closest(".filter-title")||target.closest("[data-role=\'awa-vertical-menu-trigger\']")){'
+            . 'afterLayout("interaction-toggle");'
+            . '}'
+            . '},{passive:true});'
+            . '}());</script>';
+        $traceQuery = rawurlencode($traceTokenSeed !== '' ? $traceTokenSeed : 'none');
+        $domPing = '<img src="/b2b/account/login/?aap_dom=1&trace=' . $traceQuery . '" alt="" width="1" height="1" style="position:absolute;left:-9999px;top:-9999px;opacity:0;border:0;pointer-events:none;" />';
+        $noscript = '<noscript><img src="/b2b/account/login/?aap_ns=1&trace=' . $traceQuery . '" alt="" width="1" height="1" style="position:absolute;left:-9999px;top:-9999px;opacity:0;border:0;" /></noscript>';
+
+        $injected = preg_replace('/<\/body>/i', $script . "\n" . $domPing . "\n" . $noscript . "\n</body>", $html, 1);
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Recebe probe de axis enviado pelo navegador (query string) e grava no NDJSON de debug.
+     */
+    private function captureClientAxisProbeFromQuery(string $probeParam, string $fullAction): void
+    {
+        if ($probeParam === '') {
+            return;
+        }
+
+        $decoded = base64_decode($probeParam, true);
+        if (!is_string($decoded) || $decoded === '') {
+            $this->agentDebugLog(
+                'run-active',
+                'H4-H5-client-axis-runtime',
+                'OptimizeHeadStylesPlugin.php:captureClientAxisProbeFromQuery',
+                'client-axis-probe-invalid-base64',
+                [
+                    'fullAction' => $fullAction,
+                    'requestUri' => (string) $this->request->getRequestUri(),
+                    'probeLength' => strlen($probeParam),
+                ]
+            );
+
+            return;
+        }
+
+        $payload = json_decode($decoded, true);
+        if (!is_array($payload)) {
+            $this->agentDebugLog(
+                'run-active',
+                'H4-H5-client-axis-runtime',
+                'OptimizeHeadStylesPlugin.php:captureClientAxisProbeFromQuery',
+                'client-axis-probe-invalid-json',
+                [
+                    'fullAction' => $fullAction,
+                    'requestUri' => (string) $this->request->getRequestUri(),
+                    'decodedLength' => strlen($decoded),
+                ]
+            );
+
+            return;
+        }
+
+        $metric = is_array($payload['data'] ?? null) ? $payload['data'] : $payload;
+        $axis = $metric['axis'] ?? null;
+        $axisText = $metric['axisText'] ?? null;
+        $headerAxis = $metric['headerAxis'] ?? null;
+        $navAxis = $metric['navAxis'] ?? null;
+        $menuTextAxis = $metric['menuTextAxis'] ?? null;
+        $menuText = (string) ($metric['menuText'] ?? '');
+        if (strlen($menuText) > 120) {
+            $menuText = substr($menuText, 0, 120);
+        }
+        $containerPad = $metric['containerPadInlineStart'] ?? null;
+        $innerPad = $metric['innerPadInlineStart'] ?? null;
+        $viewport = is_array($metric['viewport'] ?? null) ? $metric['viewport'] : [];
+        $trace = (string) ($metric['trace'] ?? (string) $this->request->getParam('trace', ''));
+        $trace = preg_replace('/[^a-zA-Z0-9_.:-]/', '', $trace ?? '');
+        if (!is_string($trace)) {
+            $trace = '';
+        }
+        $traceSource = (string) ($metric['traceSource'] ?? '');
+        $traceSource = preg_replace('/[^a-zA-Z0-9_.:-]/', '', $traceSource ?? '');
+        if (!is_string($traceSource)) {
+            $traceSource = '';
+        }
+        $clientRunToken = (string) ($metric['clientRunToken'] ?? '');
+        $clientRunToken = preg_replace('/[^a-zA-Z0-9_.:-]/', '', $clientRunToken ?? '');
+        if (!is_string($clientRunToken)) {
+            $clientRunToken = '';
+        }
+        $querySample = (string) ($metric['querySample'] ?? '');
+        if (strlen($querySample) > 220) {
+            $querySample = substr($querySample, 0, 220);
+        }
+        $menuChosenMode = (string) ($metric['menuChosenMode'] ?? '');
+        $menuChosenMode = preg_replace('/[^a-zA-Z0-9_.:-]/', '', $menuChosenMode ?? '');
+        if (!is_string($menuChosenMode)) {
+            $menuChosenMode = '';
+        }
+        $menuAllAxes = (string) ($metric['menuAllAxes'] ?? '');
+        if (strlen($menuAllAxes) > 220) {
+            $menuAllAxes = substr($menuAllAxes, 0, 220);
+        }
+
+        $this->agentDebugLog(
+            'run-active',
+            'H4-H5-client-axis-runtime',
+            'OptimizeHeadStylesPlugin.php:captureClientAxisProbeFromQuery',
+            'client-axis-probe-received',
+            [
+                'receiverAction' => $fullAction,
+                'receiverRequestUri' => (string) $this->request->getRequestUri(),
+                'stage' => (string) ($metric['stage'] ?? ''),
+                'sourceAction' => (string) ($metric['fullAction'] ?? ''),
+                'sourceRequestUri' => '',
+                'trace' => $trace,
+                'traceSource' => $traceSource,
+                'clientRunToken' => $clientRunToken !== '' ? $clientRunToken : null,
+                'path' => (string) ($metric['path'] ?? ''),
+                'queryLength' => is_numeric($metric['queryLength'] ?? null) ? (int) $metric['queryLength'] : null,
+                'querySample' => $querySample !== '' ? $querySample : null,
+                'viewport' => $viewport,
+                'axis' => is_numeric($axis) ? (float) $axis : null,
+                'axisText' => is_numeric($axisText) ? (float) $axisText : null,
+                'headerAxis' => is_numeric($headerAxis) ? (float) $headerAxis : null,
+                'navAxis' => is_numeric($navAxis) ? (float) $navAxis : null,
+                'menuTextAxis' => is_numeric($menuTextAxis) ? (float) $menuTextAxis : null,
+                'menuText' => $menuText,
+                'containerPadInlineStart' => is_string($containerPad) ? $containerPad : null,
+                'innerPadInlineStart' => is_string($innerPad) ? $innerPad : null,
+                'filtersExpanded' => (bool) ($metric['filtersExpanded'] ?? false),
+                'menuExpanded' => (bool) ($metric['menuExpanded'] ?? false),
+                'menuCandidateCount' => is_numeric($metric['menuCandidateCount'] ?? null) ? (int) $metric['menuCandidateCount'] : null,
+                'menuChosenMode' => $menuChosenMode !== '' ? $menuChosenMode : null,
+                'menuChosenIdx' => is_numeric($metric['menuChosenIdx'] ?? null) ? (int) $metric['menuChosenIdx'] : null,
+                'menuChosenDisplay' => is_string($metric['menuChosenDisplay'] ?? null) ? (string) $metric['menuChosenDisplay'] : null,
+                'menuChosenVisibility' => is_string($metric['menuChosenVisibility'] ?? null) ? (string) $metric['menuChosenVisibility'] : null,
+                'menuChosenOpacity' => is_string($metric['menuChosenOpacity'] ?? null) ? (string) $metric['menuChosenOpacity'] : null,
+                'menuChosenHiddenTree' => array_key_exists('menuChosenHiddenTree', $metric) ? (bool) $metric['menuChosenHiddenTree'] : null,
+                'menuAllAxes' => $menuAllAxes !== '' ? $menuAllAxes : null,
+                'userAgent' => substr((string) $this->request->getServer('HTTP_USER_AGENT'), 0, 220),
+            ]
+        );
+    }
+
+    /**
+     * Heartbeat de execução do probe para diferenciar JS bloqueado x beacon bloqueado.
+     */
+    private function captureClientAxisProbeHeartbeatFromQuery(
+        string $pingParam,
+        string $noscriptParam,
+        string $domParam,
+        string $traceParam,
+        string $fullAction
+    ): void {
+        $trace = preg_replace('/[^a-zA-Z0-9_.:-]/', '', $traceParam);
+        if (!is_string($trace)) {
+            $trace = '';
+        }
+        if ($pingParam !== '') {
+            $ping = preg_replace('/[^a-zA-Z0-9_.:-]/', '', $pingParam);
+            $this->agentDebugLog(
+                'run-active',
+                'H6-client-probe-heartbeat',
+                'OptimizeHeadStylesPlugin.php:captureClientAxisProbeHeartbeatFromQuery',
+                'client-probe-heartbeat-js',
+                [
+                    'receiverAction' => $fullAction,
+                    'receiverRequestUri' => (string) $this->request->getRequestUri(),
+                    'ping' => is_string($ping) && $ping !== '' ? $ping : 'unknown',
+                    'trace' => $trace,
+                    'userAgent' => substr((string) $this->request->getServer('HTTP_USER_AGENT'), 0, 220),
+                ]
+            );
+        }
+
+        if ($noscriptParam !== '') {
+            $this->agentDebugLog(
+                'run-active',
+                'H6-client-probe-heartbeat',
+                'OptimizeHeadStylesPlugin.php:captureClientAxisProbeHeartbeatFromQuery',
+                'client-probe-heartbeat-noscript',
+                [
+                    'receiverAction' => $fullAction,
+                    'receiverRequestUri' => (string) $this->request->getRequestUri(),
+                    'noscript' => true,
+                    'trace' => $trace,
+                    'userAgent' => substr((string) $this->request->getServer('HTTP_USER_AGENT'), 0, 220),
+                ]
+            );
+        }
+
+        if ($domParam !== '') {
+            $dom = preg_replace('/[^a-zA-Z0-9_.:-]/', '', $domParam);
+            $this->agentDebugLog(
+                'run-active',
+                'H6-client-probe-heartbeat',
+                'OptimizeHeadStylesPlugin.php:captureClientAxisProbeHeartbeatFromQuery',
+                'client-probe-heartbeat-dom-img',
+                [
+                    'receiverAction' => $fullAction,
+                    'receiverRequestUri' => (string) $this->request->getRequestUri(),
+                    'dom' => is_string($dom) && $dom !== '' ? $dom : '1',
+                    'trace' => $trace,
+                    'userAgent' => substr((string) $this->request->getServer('HTTP_USER_AGENT'), 0, 220),
+                ]
+            );
+        }
+    }
+
+    /**
+     * Garante contrato visual do shell (.page-wrapper + sticky) em qualquer fullAction.
+     */
+    private function injectCrossPageShellLock(string $html): string
+    {
+        if (
+            !str_contains($html, 'page-wrapper')
+            || !HeaderImpeccableCascadeLockCss::htmlHasSiteHeader($html)
+        ) {
+            return $html;
+        }
+
+        $styleId = HeaderImpeccableCascadeLockCss::CROSSPAGE_SHELL_STYLE_ID;
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::crossPageShellLockRules()
+            . HeaderImpeccableCascadeLockCss::headerChromeCanonicalRules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : ($html . "\n" . $css);
+    }
+
+    /**
+     * Em modo debug explícito (?awa_debug_logs=1), permite loopback do coletor local
+     * sem abrir connect-src globalmente para tráfego normal.
+     */
+    private function allowDebugLoopbackConnectSrc(\Magento\Framework\HTTP\PhpEnvironment\Response $subject): void
+    {
+        $debugParam = strtolower(trim((string) $this->request->getParam('awa_debug_logs', '')));
+        if ($debugParam === '' || $debugParam === '0' || $debugParam === 'false') {
+            return;
+        }
+
+        $cspHeader = $subject->getHeader('Content-Security-Policy');
+        if (!$cspHeader) {
+            return;
+        }
+
+        $cspValue = (string) $cspHeader->getFieldValue();
+        if ($cspValue === '' || stripos($cspValue, 'connect-src') === false) {
+            return;
+        }
+
+        if (
+            stripos($cspValue, 'http://localhost:7438') !== false
+            || stripos($cspValue, 'http://127.0.0.1:7438') !== false
+        ) {
+            return;
+        }
+
+        $updated = preg_replace_callback(
+            '/connect-src\s+([^;]+)/i',
+            static function (array $matches): string {
+                $sources = trim($matches[1]);
+
+                return 'connect-src ' . $sources . ' http://localhost:7438 http://127.0.0.1:7438';
+            },
+            $cspValue,
+            1
+        );
+
+        if (!is_string($updated) || $updated === '') {
+            return;
+        }
+
+        $subject->setHeader('Content-Security-Policy', $updated, true);
     }
 
     private function moveHomeCriticalInlineStylesToHead(string $html): string
@@ -558,15 +1326,16 @@ class OptimizeHeadStylesPlugin
      */
     private function appendVisualFixesCacheBuster(string $html): string
     {
-        $needle = 'awa-visual-fixes-2026-06-29-final.min.css';
-        if (strpos($html, $needle) === false) {
+        $assetBase = 'awa-visual-fixes-2026-06-29-final';
+        if (strpos($html, $assetBase) === false) {
             return $html;
         }
 
         $query = HeaderImpeccableCascadeLockCss::VISUAL_FIXES_CSS_QUERY;
+        $assetPattern = preg_quote($assetBase, '/') . '(?:\.min)?\.css';
 
         return preg_replace_callback(
-            '/<link\s[^>]*href=["\']([^"\']*' . preg_quote($needle, '/') . ')(\?[^"\']*)?["\'][^>]*\/?>/i',
+            '/<link\s[^>]*href=["\']([^"\']*' . $assetPattern . ')(\?[^"\']*)?["\'][^>]*\/?>/i',
             static function (array $m) use ($query): string {
                 if (stripos($m[0], 'rel="stylesheet"') === false && stripos($m[0], "rel='stylesheet'") === false) {
                     return $m[0];
@@ -619,9 +1388,332 @@ class OptimizeHeadStylesPlugin
      * normalização de especificidade e acumula regras legadas; este estilo curto
      * precisa ser parseado por inteiro e carregado por último.
      */
+    /**
+     * Drawer do minicart — super-global é omitido na home (PSI); sem estas regras o painel
+     * fica preso em 44×44 e o conteúdo vaza no hero (BUG 2026-07-17).
+     */
+    private function injectMinicartOpenTerminalStyles(string $html, string $fullAction): string
+    {
+        if (
+            $fullAction === self::NOROUTE_ACTION
+            || in_array($fullAction, self::CHECKOUT_FOCUS_ACTIONS, true)
+            || HeaderImpeccableCascadeLockCss::isAuthShellHtml($html)
+        ) {
+            return $html;
+        }
+
+        $styleId = 'awa-minicart-open-terminal-20260717j';
+        $html = preg_replace('/<style id="awa-minicart-open-terminal-20260717[a-z]?"[^>]*>.*?<\/style>\s*/is', '', $html) ?? $html;
+        $html = preg_replace('/<script id="awa-minicart-anchor-terminal-20260717[a-z0-9]*"[^>]*>.*?<\/script>\s*/is', '', $html) ?? $html;
+        $html = preg_replace('/<script id="awa-minicart-anchor-terminal-20260801v22"[^>]*>.*?<\/script>\s*/is', '', $html) ?? $html;
+
+        // Painel ancorado à direita — CSS fixed + shell sticky limpo (fechado fora do fluxo).
+        $css = '<style id="' . $styleId . '">'
+            . 'html body#html-body.awa-minicart-overlay-active{overflow:hidden!important}'
+            . 'html body#html-body.awa-minicart-overlay-active :is(#awa-back-to-top,.awa-whatsapp-float,[class*="whatsapp-float"]){'
+            . 'opacity:0!important;visibility:hidden!important;pointer-events:none!important;transform:translateY(8px)!important}'
+            . 'html body#html-body:has(.minicart-wrapper:is(.active,.show,.is-open) .block-minicart)'
+            . ' :is(#awa-back-to-top,.awa-whatsapp-float,[class*="whatsapp-float"]){'
+            . 'opacity:0!important;visibility:hidden!important;pointer-events:none!important;transform:translateY(8px)!important}'
+            . 'html body#html-body:has(.block-minicart._active),'
+            . 'html body#html-body:has(.block-minicart.active),'
+            . 'html body#html-body:has(.block-minicart.is-open){'
+            . '--awa-minicart-fallback-open:1}'
+            . 'html body#html-body:has(.block-minicart._active) :is(#awa-back-to-top,.awa-whatsapp-float,[class*="whatsapp-float"]),'
+            . 'html body#html-body:has(.block-minicart.active) :is(#awa-back-to-top,.awa-whatsapp-float,[class*="whatsapp-float"]),'
+            . 'html body#html-body:has(.block-minicart.is-open) :is(#awa-back-to-top,.awa-whatsapp-float,[class*="whatsapp-float"]){'
+            . 'opacity:0!important;visibility:hidden!important;pointer-events:none!important;transform:translateY(8px)!important}'
+            /* Fechado: fora do fluxo/texto do header_main (evita lixo no shell 68px) */
+            . 'html body#html-body .page-wrapper .minicart-wrapper:not(.active):not(.show):not(.is-open) .block-minicart,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart:not(.awa-header-minicart--expanded) .block-minicart:not(._active):not(.is-open){'
+            . 'display:none!important;visibility:hidden!important;pointer-events:none!important;'
+            . 'position:absolute!important;inset:auto!important;width:0!important;height:0!important;'
+            . 'min-width:0!important;min-height:0!important;max-width:0!important;max-height:0!important;'
+            . 'overflow:hidden!important;opacity:0!important;margin:0!important;padding:0!important;border:0!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:not(.active):not(.show):not(.is-open) .awa-minicart-footer,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart:not(.awa-header-minicart--expanded) .awa-minicart-footer{'
+            . 'display:none!important}'
+            /* Sticky/header: overflow visível quando aberto (vence overflow:hidden do shell 68px) */
+            . 'html body#html-body.awa-minicart-overlay-active .page-wrapper .awa-site-header,'
+            . 'html body#html-body.awa-minicart-overlay-active .page-wrapper .header-wrapper-sticky,'
+            . 'html body#html-body.awa-minicart-overlay-active .page-wrapper .header.awa-main-header,'
+            . 'html body#html-body.awa-minicart-overlay-active .page-wrapper .header_main.awa-main-header-inner-wrap,'
+            . 'html body#html-body.awa-minicart-overlay-active .page-wrapper .awa-main-header__inner,'
+            . 'html body#html-body .page-wrapper .awa-site-header:has(.minicart-wrapper:is(.active,.show,.is-open)),'
+            . 'html body#html-body .page-wrapper .header-wrapper-sticky:has(.minicart-wrapper:is(.active,.show,.is-open)),'
+            . 'html body#html-body .page-wrapper .header_main.awa-main-header-inner-wrap:has(.minicart-wrapper:is(.active,.show,.is-open)),'
+            . 'html body#html-body .page-wrapper .awa-main-header__inner:has(.minicart-wrapper:is(.active,.show,.is-open)){'
+            . 'overflow:visible!important;contain:none!important}'
+            /* Ancestrais do ícone não podem prender o painel em 44×44 quando aberto */
+            . 'html body#html-body .page-wrapper .awa-site-header :is(.minicart-wrapper.active,.minicart-wrapper.show,.minicart-wrapper.is-open),'
+            . 'html body#html-body .page-wrapper .awa-site-header .awa-header-minicart--expanded,'
+            . 'html body#html-body .page-wrapper .awa-site-header .awa-header-minicart:has(.minicart-wrapper.active),'
+            . 'html body#html-body .page-wrapper .awa-site-header .awa-header-minicart:has(.minicart-wrapper.show),'
+            . 'html body#html-body .page-wrapper .awa-site-header .awa-header-minicart:has(.minicart-wrapper.is-open),'
+            . 'html body#html-body .page-wrapper .awa-site-header :is(.minicart-wrapper.active,.minicart-wrapper.show,.minicart-wrapper.is-open) :is(.mini-carts,#awa-minicart-panel){'
+            . 'width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;'
+            . 'min-height:0!important;max-height:none!important;overflow:visible!important;align-self:auto!important;'
+            . 'contain:none!important}'
+            /* Painel: fixed + âncora direita no 1º frame */
+            /* jQuery UI dialog shell não pode ficar display:none com o painel aberto */
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .ui-dialog.mage-dropdown-dialog,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart--expanded .ui-dialog.mage-dropdown-dialog{'
+            . 'display:block!important;visibility:visible!important;opacity:1!important;position:static!important;'
+            . 'width:auto!important;height:auto!important;overflow:visible!important;inset:auto!important;'
+            . 'background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart,'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart._active,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart{'
+            . 'display:flex!important;flex-direction:column!important;visibility:visible!important;opacity:1!important;'
+            . 'pointer-events:auto!important;box-sizing:border-box!important;contain:none!important;'
+            . 'position:fixed!important;top:calc(var(--awa-header-main-row-h,96px) + 8px)!important;'
+            . 'right:16px!important;left:auto!important;transform:none!important;'
+            . 'width:min(380px,calc(100vw - 32px))!important;min-width:min(280px,calc(100vw - 32px))!important;'
+            . 'max-width:min(380px,calc(100vw - 32px))!important;bottom:auto!important;min-height:0!important;'
+            . 'height:calc(100vh - var(--awa-header-desktop-bottom,68px))!important;'
+            . 'height:calc(100dvh - var(--awa-header-desktop-bottom,68px))!important;'
+            . 'max-height:calc(100vh - var(--awa-header-desktop-bottom,68px))!important;'
+            . 'max-height:calc(100dvh - var(--awa-header-desktop-bottom,68px))!important;'
+            . 'overflow:hidden!important;'
+            . 'background:var(--awa-bg-surface,#fff)!important;color:var(--awa-text,#0f172a)!important;'
+            . 'border:1px solid var(--awa-border,#e2e8f0)!important;border-radius:12px!important;'
+            . 'box-shadow:0 16px 48px rgb(15 23 42/22%)!important;z-index:var(--awa-z-minicart,1300)!important;'
+            . 'padding:0!important;margin:0!important}'
+            /* v7: :has() remove CB do sticky enquanto o drawer está aberto (CSS-only). */
+            . 'html body#html-body .page-wrapper .header-wrapper-sticky:has(.minicart-wrapper:is(.active,.show,.is-open)),'
+            . 'html body#html-body .page-wrapper .header-wrapper-sticky:has(.block-minicart._active),'
+            . 'html body#html-body .page-wrapper .awa-site-header:has(.awa-header-minicart--expanded) .header-wrapper-sticky,'
+            . 'html body#html-body .page-wrapper .awa-site-header:has(.minicart-wrapper:is(.active,.show,.is-open)) .header-wrapper-sticky{'
+            . 'backdrop-filter:none!important;-webkit-backdrop-filter:none!important}'
+            /* Conta/B2B: reforço (mesmo dock; radius 0 + full-bleed right). */
+            . 'html body#html-body:is(.account,.b2b-account-shell,.awa-account-operational,.b2b-account-dashboard,[class*="b2b-"])'
+            . ' .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart,'
+            . 'html body#html-body:is(.account,.b2b-account-shell,.awa-account-operational,.b2b-account-dashboard,[class*="b2b-"])'
+            . ' .page-wrapper .awa-header-minicart--expanded .block-minicart{'
+            . 'top:var(--awa-header-desktop-bottom,68px)!important;bottom:auto!important;'
+            . 'height:calc(100vh - var(--awa-header-desktop-bottom,68px))!important;'
+            . 'height:calc(100dvh - var(--awa-header-desktop-bottom,68px))!important;'
+            . 'max-height:calc(100vh - var(--awa-header-desktop-bottom,68px))!important;'
+            . 'max-height:calc(100dvh - var(--awa-header-desktop-bottom,68px))!important;'
+            . 'min-height:0!important;border-radius:0!important;right:0!important;'
+            . 'width:min(380px,100vw)!important;max-width:min(380px,100vw)!important}'
+            . 'html body#html-body .page-wrapper .block-minicart > h2#minicart-title.awa-sr-only{'
+            . 'position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;'
+            . 'overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;'
+            . 'font-size:0!important;line-height:0!important;color:transparent!important}'
+            . '@media(max-width:767px){'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart,'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart._active,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart{'
+            . 'left:16px!important;right:16px!important;transform:none!important;'
+            . 'width:calc(100vw - 32px)!important;min-width:0!important;max-width:none!important}'
+            . '}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) #minicart-content-wrapper{'
+            . 'display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;'
+            . 'max-height:100%!important;overflow:hidden!important;width:100%!important;max-width:100%!important;'
+            . 'min-width:0!important;box-sizing:border-box!important;padding:0!important;margin:0!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .block-title{'
+            . 'display:flex!important;align-items:center!important;justify-content:space-between!important;'
+            . 'flex:0 0 auto!important;box-sizing:border-box!important;max-width:100%!important;min-width:0!important;'
+            . 'padding:12px 14px!important;margin:0!important;font-size:16px!important;font-weight:700!important;'
+            . 'border-bottom:1px solid var(--awa-border,#e2e8f0)!important;background:inherit!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .block-content{'
+            . 'flex:1 1 auto!important;box-sizing:border-box!important;max-width:100%!important;min-width:0!important;'
+            . 'max-height:100%!important;overflow-x:clip!important;overflow-y:auto!important;padding:12px 14px!important;'
+            . 'min-height:0!important;gap:10px!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart.empty .subtitle.empty{'
+            . 'display:block!important;padding:24px 8px!important;text-align:center!important;'
+            . 'color:var(--awa-text-muted,#64748b)!important;font-size:14px!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart:not(.empty) .subtitle.empty{'
+            . 'display:none!important}'
+            /* ALIGN: remover paddings aninhados e alinhar qty/ações na largura útil. */
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .minicart-items-wrapper,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .minicart-items-wrapper{'
+            . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important;'
+            . 'padding:0!important;margin:0!important;min-height:0!important;flex:1 1 auto!important;'
+            . 'overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart #mini-cart,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart #mini-cart{'
+            . 'margin:0!important;padding:0!important;width:100%!important;max-width:100%!important;'
+            . 'box-sizing:border-box!important;position:relative!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart #mini-cart > li.item,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart #mini-cart > li.item{'
+            . 'display:flex!important;flex-direction:column!important;gap:8px!important;'
+            . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important;'
+            . 'padding:10px 0!important;margin:0!important;border-bottom:1px solid var(--awa-border,#e2e8f0)!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart #mini-cart > li.item:last-child,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart #mini-cart > li.item:last-child{'
+            . 'border-bottom:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .product-item-details,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .product-item-details{'
+            . 'display:flex!important;flex-direction:column!important;flex:1 1 auto!important;'
+            . 'min-width:0!important;width:auto!important;max-width:none!important;gap:4px!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .product-item-pricing,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .product-item-pricing{'
+            . 'display:flex!important;flex-direction:column!important;align-items:stretch!important;'
+            . 'gap:6px!important;width:100%!important;margin:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .product.actions,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .product.actions{'
+            . 'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;'
+            . 'align-items:center!important;justify-content:flex-start!important;gap:8px!important;'
+            . 'width:100%!important;max-width:100%!important;margin:4px 0 0!important;padding:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .product.actions .secondary,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .product.actions .secondary{'
+            . 'display:contents!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .product.actions :is(.action.edit,.action.delete,a.awa-minicart-item-delete),'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .product.actions :is(.action.edit,.action.delete,a.awa-minicart-item-delete){'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'gap:6px!important;height:36px!important;min-height:36px!important;padding:0 12px!important;'
+            . 'margin:0!important;box-sizing:border-box!important;flex:0 0 auto!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .awa-minicart-subtotal,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .awa-minicart-subtotal{'
+            . 'display:flex!important;align-items:center!important;justify-content:space-between!important;'
+            . 'gap:8px!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;'
+            . 'padding:10px 0!important;margin:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .block-content > .actions,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .block-content > .actions{'
+            . 'width:100%!important;max-width:100%!important;margin:0!important;padding:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .block-content > .actions .primary,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .block-content > .actions .secondary,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .block-content > .actions .primary,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .block-content > .actions .secondary{'
+            . 'width:100%!important;max-width:100%!important;margin:0 0 8px!important;padding:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .block-content > .actions :is(#top-cart-btn-checkout,a.action.viewcart,button.action.checkout),'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .block-content > .actions :is(#top-cart-btn-checkout,a.action.viewcart,button.action.checkout){'
+            . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important;margin:0!important}'
+            /* H-D: stepper do minicart sem display:flex empilha −/input/+ (~132px). */
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .awa-minicart-qty,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .awa-minicart-qty{'
+            . 'display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;'
+            . 'align-items:center!important;gap:8px!important;height:auto!important;min-height:0!important;'
+            . 'width:100%!important;max-width:100%!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .awa-minicart-qty-stepper,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .awa-minicart-qty-stepper,'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .control.awa-qty-stepper,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .control.awa-qty-stepper{'
+            . 'display:inline-flex!important;flex-direction:row!important;align-items:center!important;'
+            . 'justify-content:flex-start!important;gap:0!important;box-sizing:border-box!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;width:auto!important;'
+            . 'flex:0 0 auto!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .awa-minicart-qty-stepper .awa-qty-btn,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .awa-minicart-qty-stepper .awa-qty-btn{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:44px!important;min-width:44px!important;height:44px!important;flex:0 0 44px!important}'
+            . 'html body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .awa-minicart-qty-stepper .cart-item-qty,'
+            . 'html body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .awa-minicart-qty-stepper .cart-item-qty{'
+            . 'display:inline-block!important;width:52px!important;min-width:44px!important;max-width:64px!important;'
+            . 'height:44px!important;margin:0!important;text-align:center!important;box-sizing:border-box!important}'
+            /* Global button{display:inline-flex!important} vence style="display:none" do Magento. */
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart button.update-cart-item[style*="display: none"],'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart button.update-cart-item[style*="display:none"],'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart button.update-cart-item[style*="display: none"],'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart button.update-cart-item[style*="display:none"]{'
+            . 'display:none!important;width:0!important;min-width:0!important;max-width:0!important;'
+            . 'height:0!important;min-height:0!important;margin:0!important;padding:0!important;'
+            . 'overflow:hidden!important;border:0!important;visibility:hidden!important;pointer-events:none!important}'
+            /* IMG: regras .product-item da home (height:100%) esticam thumb do minicart (~56x179). */
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart .product,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart .product{'
+            . 'display:flex!important;align-items:flex-start!important;gap:10px!important;'
+            . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important;'
+            . 'grid-template-columns:none!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart :is(.product-item-photo,.product-image-container,.product-image-wrapper),'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart :is(.product-item-photo,.product-image-container,.product-image-wrapper){'
+            . 'display:block!important;box-sizing:border-box!important;flex:0 0 56px!important;'
+            . 'width:56px!important;min-width:56px!important;max-width:56px!important;'
+            . 'height:56px!important;min-height:56px!important;max-height:56px!important;'
+            . 'padding:0!important;padding-bottom:0!important;aspect-ratio:1/1!important;'
+            . 'overflow:hidden!important;align-self:flex-start!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .minicart-wrapper:is(.active,.show,.is-open) .block-minicart :is(img.product-image-photo,.product-image-wrapper img),'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-header-minicart--expanded .block-minicart :is(img.product-image-photo,.product-image-wrapper img){'
+            . 'display:block!important;width:56px!important;height:56px!important;'
+            . 'max-width:56px!important;max-height:56px!important;object-fit:contain!important;'
+            . 'position:static!important;inset:auto!important}'
+            . 'html body#html-body .modals-wrapper{position:relative;z-index:900}'
+            . 'html body#html-body .modals-overlay{position:fixed;inset:0;background:rgb(15 23 42/45%);z-index:899}'
+            . 'html body#html-body .modal-popup{z-index:901}'
+            . '</style>';
+
+        // Inline: dialog pai visível + âncora direita + patch AMD (CDN antigo).
+        $js = '<script id="awa-minicart-anchor-terminal-20260801v22">'
+            . '(function(){var w=window,d=document,tid=0;function hdr(trigger){'
+            . 'if(trigger){var tr=trigger.getBoundingClientRect();if(tr.width>0&&tr.height>0)return tr.bottom}'
+            . 'var s=[".header-wrapper-sticky.is-sticky",'
+            . '".header-wrapper-sticky",".awa-site-header"],b=0,i,el,r;for(i=0;i<s.length;i++){el=d.querySelector(s[i]);'
+            . 'if(!el)continue;r=el.getBoundingClientRect();if(r.height>0&&r.top<160&&r.bottom>b)b=r.bottom}'
+            . 'return b>0?b:64}function isOpen(){return!!d.querySelector(".minicart-wrapper.is-open,.minicart-wrapper.active,'
+            . '.minicart-wrapper.show,.awa-header-minicart--expanded,.block-minicart._active")}function unlockDialog(p){'
+            . 'var dialog=p&&p.closest?p.closest(".ui-dialog,.mage-dropdown-dialog"):null;if(!dialog||!dialog.style)return;'
+            . 'dialog.style.setProperty("display","block","important");dialog.style.setProperty("visibility","visible","important");'
+            . 'dialog.style.setProperty("opacity","1","important");dialog.style.setProperty("position","static","important");'
+            . 'dialog.style.setProperty("width","auto","important");dialog.style.setProperty("height","auto","important");'
+            . 'dialog.style.setProperty("overflow","visible","important");dialog.style.setProperty("inset","auto","important")}'
+            . 'function anchor(){var p=d.querySelector(".minicart-wrapper.is-open .block-minicart,.minicart-wrapper.active .block-minicart,'
+            . '.minicart-wrapper.show .block-minicart,.block-minicart._active,.awa-header-minicart--expanded .block-minicart");'
+            . 'if(!p||!p.style||!isOpen())return null;unlockDialog(p);var t=d.querySelector("[data-block=\\"minicart\\"] .action.showcart,'
+            . '.minicart-wrapper .action.showcart,a.action.showcart");p.style.setProperty("position","fixed","important");'
+            . 'var root=p.offsetParent,rr=root?root.getBoundingClientRect():{top:0,right:d.documentElement.clientWidth,width:d.documentElement.clientWidth},'
+            . 'hb=hdr(t),top=Math.max(0,hb+8-rr.top),g=16,narrow=w.innerWidth<768,'
+            . 'pw=Math.min(380,Math.max(280,w.innerWidth-g*2)),right=g,tr;'
+            . 'p.style.setProperty("display","flex","important");p.style.setProperty("visibility","visible","important");'
+            . 'p.style.setProperty("opacity","1","important");p.style.setProperty("contain","none","important");'
+            . 'p.style.setProperty("top",top+"px","important");'
+            . 'p.style.setProperty("transform","none","important");p.style.setProperty("z-index","var(--awa-z-minicart,1300)","important");'
+            . 'if(narrow){p.style.setProperty("left",g+"px","important");p.style.setProperty("right",g+"px","important");'
+            . 'p.style.setProperty("width","auto","important");p.style.setProperty("min-width","0","important")}'
+            . 'else{if(t){tr=t.getBoundingClientRect();if(tr.width>0)right=Math.max(g,rr.right-tr.right);'
+            . 'if(right+pw>rr.width-g)right=Math.max(g,rr.width-g-pw)}'
+            . 'p.style.setProperty("right",right+"px","important");p.style.setProperty("left","auto","important");'
+            . 'p.style.setProperty("width",pw+"px","important");p.style.setProperty("min-width","280px","important")}'
+            . 'return {anchored:true,right:right,top:top,rootTop:rr.top,headerBottom:hb}}'
+            . 'function schedule(){anchor();[0,32,100,250,600,1200,2000].forEach('
+            . 'function(ms){w.setTimeout(anchor,ms)})}function patchAmd(){if(typeof w.require!=="function"||w.require._awaStub)return;'
+            . 'try{w.require(["js/awa-minicart-position"],function(m){if(!m||m.__awaAnchored)return;m.__awaAnchored=1;'
+            . 'm.centerOpenMinicartPanel=function(){return anchor()};m.scheduleCenterOpenMinicartPanel=function(){schedule()};'
+            . 'm.centerCurrentMinicart=function(){schedule()}})}catch(e){}}'
+            . 'd.addEventListener("click",function(e){var el=e&&e.target;if(!el||!el.closest)return;'
+            . 'if(el.closest(".action.showcart,.showcart,[data-awa-minicart-defer=\\"trigger\\"]")){schedule();patchAmd()}},true);'
+            . '[0,800,2000,4000].forEach(function(ms){w.setTimeout(patchAmd,ms)});'
+            . 'w.addEventListener("resize",function(){if(isOpen())anchor()},{passive:true});'
+            . 'w.addEventListener("scroll",function(){if(!isOpen())return;if(tid)w.clearTimeout(tid);tid=w.setTimeout(anchor,50)},{passive:true})'
+            . '})();</script>';
+
+        // Preferir JS externo (fix Fechar/reopen). O convertHomeHeavyTerminalsToExternal
+        // só roda na HOME — PLP/PDP/CMS ficavam com este stub inline antigo sem forceClose.
+        $scriptId = 'awa-minicart-anchor-terminal-20260801v22';
+        if (preg_match(
+            '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/(?:pt_BR|en_US)/#',
+            $html,
+            $versionMatch
+        )) {
+            $locale = str_contains($html, '/frontend/AWA_Custom/ayo_home5_child/en_US/') ? 'en_US' : 'pt_BR';
+            if (preg_match(
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/(pt_BR|en_US)/#',
+                $html,
+                $m2
+            )) {
+                $locale = $m2[2];
+            }
+            $staticBase = '/static/' . $versionMatch[1] . '/frontend/AWA_Custom/ayo_home5_child/' . $locale . '/';
+            $js = '<script id="' . $scriptId . '" defer src="' . $staticBase . 'js/' . $scriptId
+                . '.js' . MinicartAssetVersion::query() . '"></script>';
+        } else {
+            $js = '<script id="' . $scriptId . '" defer src="/static/frontend/AWA_Custom/ayo_home5_child/pt_BR/js/'
+                . $scriptId . '.js' . MinicartAssetVersion::query() . '"></script>';
+        }
+
+        $injected = preg_replace('/<\/body>/i', $css . $js . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
     private function injectVisualBugfixTerminalStyles(string $html, string $fullAction): string
     {
-        if ($fullAction !== self::HOME_ACTION && !in_array($fullAction, self::CATALOG_HEADER_ACTIONS, true)) {
+        // Footer surface precisa ser idêntica em qualquer rota storefront (home/PLP/PDP/CMS).
+        $hasFooterMarkup = str_contains($html, 'footer-bottom')
+            || str_contains($html, 'page_footer')
+            || str_contains($html, 'page-footer');
+        if (!$hasFooterMarkup) {
             return $html;
         }
 
@@ -630,29 +1722,55 @@ class OptimizeHeadStylesPlugin
         $html = preg_replace('/<style id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is', '', $html) ?? $html;
         $html = preg_replace('/<script id="' . preg_quote($scriptId, '/') . '"[^>]*>.*?<\/script>\s*/is', '', $html) ?? $html;
 
-        $targetScope = 'html body#html-body#html-body#html-body'
-            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5,.catalog-category-view,.catalogsearch-result-index) .page-wrapper';
+        $targetScope = 'html body#html-body#html-body#html-body .page-wrapper';
         $catalogScope = 'html body#html-body#html-body#html-body'
             . ':is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper';
 
         $css = '<style id="' . $styleId . '">'
             . $targetScope . ' :is(footer.page-footer,.page_footer,.page-footer){'
-            . 'box-sizing:border-box!important;background:var(--awa-bg-soft,var(--awa-bg,Canvas))!important;'
-            . 'background-color:var(--awa-bg-soft,var(--awa-bg,Canvas))!important;color:var(--awa-text,CanvasText)!important;'
-            . 'height:auto!important;min-height:0!important;max-width:100%!important;overflow-x:clip!important;padding-block:0!important}'
+            . 'box-sizing:border-box!important;background:var(--awa-bg,Canvas)!important;'
+            . 'background-color:var(--awa-bg,Canvas)!important;color:var(--awa-text,CanvasText)!important;'
+            /* PIXEL-QA 2026-07-25: shell 1280 centrado — max-width:100% quebrava eixo H/C/F na PDP. */
+            . 'height:auto!important;min-height:0!important;max-width:none!important;width:100%!important;'
+            . 'margin-inline:0!important;overflow-x:clip!important;padding-block:0!important;padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+            . $targetScope . ' :is(footer.page-footer,.page_footer,.page-footer) :is(section.awa-footer-trust-bar,.awa-footer-trust-bar){'
+            . 'width:100%!important;max-width:none!important;margin-inline:0!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) section.awa-footer-trust-bar,'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-footer-trust-bar{'
+            . 'display:block!important;background:var(--awa-primary,#b73337)!important;'
+            . 'background-color:var(--awa-primary,#b73337)!important;color:#fff!important}'
             . $targetScope . ' :is(footer.page-footer,.page_footer,.page-footer) '
-            . ':is(#footer,.footer-container,.footer.content,.footer-top,.footer-middle,.footer-content,.row,.rowFlexMargin,.velaBlock,.velaContent,.awa-footer-newsletter){'
-            . 'background:transparent!important;background-color:transparent!important;color:var(--awa-text,CanvasText)!important;min-height:0!important}'
+            . ':is(#footer,.footer-container,.footer.content,.footer-top,.footer-middle,.footer-content,.row,.rowFlexMargin,.velaBlock,.velaContent,.vela-content,.vela-content.velaFooterMenu,.awa-footer-atendimento,.awa-footer-newsletter){'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;color:var(--awa-text,CanvasText)!important;min-height:0!important}'
+            /* H12: vence styles-l/themes (background:var(--awa-primary) nas .vela-content) */
+            . $targetScope . ' :is(.page_footer,.page-footer) :is(.vela-content,.vela-content.velaFooterMenu,.vela-content.awa-footer-atendimento){'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'color:var(--awa-text,CanvasText)!important;box-shadow:none!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) :is(.velaFooterTitle,h4.velaFooterTitle,[id^=awa-footer-title-],.velaFooterLinks a,.awa-footer-atendimento p,.awa-footer-atendimento__label,.awa-footer-atendimento__phone,.awa-footer-atendimento__email,a){'
+            . 'color:var(--awa-text,CanvasText)!important;text-shadow:none!important;-webkit-text-fill-color:currentColor!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-footer-atendimento__store{'
+            . 'background:var(--awa-bg,Canvas)!important;background-color:var(--awa-bg,Canvas)!important;color:var(--awa-text,CanvasText)!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-footer-atendimento__store :is(p,a,span,strong){'
+            . 'color:var(--awa-text,CanvasText)!important;-webkit-text-fill-color:currentColor!important}'
             . $targetScope . ' :is(footer.page-footer,.page_footer,.page-footer) '
             . ':is(a,p,li,span,strong,h2,h3,h4,.footer-title,.awa-footer-title,.footer.links a,.footer-content a){'
             . 'color:var(--awa-text,CanvasText)!important;text-shadow:none!important}'
             . $targetScope . ' :is(.page_footer,.page-footer) .footer-bottom{'
-            . 'box-sizing:border-box!important;background:var(--awa-bg,Canvas)!important;background-color:var(--awa-bg,Canvas)!important;'
-            . 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 14%,Canvas))!important;border-radius:8px!important;'
-            . 'color:var(--awa-text,CanvasText)!important;margin-inline:auto!important;max-width:calc(100% - 32px)!important;'
-            . 'overflow:hidden!important;padding:clamp(16px,2vw,24px)!important;width:min(100%,1248px)!important;box-shadow:none!important}'
+            . 'box-sizing:border-box!important;background:#fff!important;'
+            . 'background-color:#fff!important;'
+            . 'border:0!important;border-radius:0!important;'
+            . 'color:var(--awa-text,CanvasText)!important;margin-inline:0!important;'
+            /* PIXEL-QA: filho do shell — sem pad/margin extra (Ft=F). */
+            . 'max-width:100%!important;width:100%!important;'
+            . 'overflow:visible!important;padding-block:clamp(16px,2vw,24px)!important;padding-inline:0!important;'
+            . 'padding-left:0!important;padding-right:0!important;box-shadow:none!important}'
             . $targetScope . ' :is(.page_footer,.page-footer) .footer-bottom>.container{'
             . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:100%!important;padding-inline:0!important;width:100%!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .footer-bottom .footer-bottom-inner{'
+            . 'box-sizing:border-box!important;max-width:100%!important;padding-inline:0!important;width:100%!important}'
+            . $targetScope . ' footer.page-footer :is(.page_footer,#footer,.footer-container){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'max-width:100%!important;margin-inline:0!important;box-sizing:border-box!important}'
             . $catalogScope . ' .products-grid .product-thumb{position:relative!important;overflow:hidden!important}'
             . $catalogScope . ' .products-grid .quickview-link{'
             . 'box-sizing:border-box!important;inline-size:40px!important;block-size:40px!important;max-width:40px!important;'
@@ -662,28 +1780,78 @@ class OptimizeHeadStylesPlugin
             . $catalogScope . ' .filter-options-content li.item:has(> a[href*="cat=89"]),'
             . $catalogScope . ' .filter-options-content a[href*="cat=89"]{display:none!important}'
             . '@media(max-width:767px){'
-            . $targetScope . ' :is(.page_footer,.page-footer) .footer-bottom{max-width:calc(100% - 24px)!important;padding:16px!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .footer-bottom{max-width:100%!important;padding-inline:0!important;padding-block:16px!important}'
             . $catalogScope . ' .toolbar.toolbar-products{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important}'
             . $catalogScope . ' .toolbar.toolbar-products :is(.modes,.toolbar-sorter,.field.limiter,.pages){'
             . 'box-sizing:border-box!important;display:flex!important;flex-wrap:wrap!important;width:100%!important;max-width:100%!important;min-width:0!important}'
             . $catalogScope . ' .toolbar.toolbar-products :is(.sorter-options,select.limiter-options){'
             . 'box-sizing:border-box!important;flex:1 1 160px!important;min-width:0!important;max-width:100%!important}}'
+            /* H10B: newsletter compacto — mata LGPD no ::before do .actions (visual-fixes) e reposiciona abaixo. */
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-newsletter-form-container .field.newsletter{'
+            . 'display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;'
+            . 'gap:8px!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;'
+            . 'padding:0!important;min-height:0!important;height:auto!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-newsletter-form-container .field.newsletter :is(.control,.actions){'
+            . 'width:auto!important;max-width:100%!important;min-width:0!important;height:auto!important;margin:0!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-newsletter-form-container .field.newsletter .control{grid-column:1!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-newsletter-form-container .field.newsletter .actions{grid-column:2!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-newsletter-form-container .field.newsletter .action.subscribe{'
+            . 'width:auto!important;max-width:none!important;white-space:nowrap!important;min-height:44px!important;height:44px!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-newsletter-form-container .newsletter-footer .actions::before,'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-newsletter-form-container .field.newsletter .actions::before,'
+            . $targetScope . ' :is(.page_footer,.page-footer) .newsletter-footer .actions::before,'
+            . $targetScope . ' :is(.page_footer,.page-footer) .newsletter form .actions::before{'
+            . 'content:none!important;display:none!important;margin:0!important;padding:0!important;font-size:0!important;'
+            . 'height:0!important;width:0!important;overflow:hidden!important;position:absolute!important}'
+            . $targetScope . ' :is(.page_footer,.page-footer) .awa-newsletter-form-container .field.newsletter::after{'
+            . 'content:"* Ao cadastrar, você concorda com nossa Política de Privacidade"!important;'
+            . 'grid-column:1/-1!important;display:block!important;font-size:11px!important;line-height:1.35!important;'
+            . 'color:var(--awa-text-muted,var(--awa-text-secondary))!important;font-style:italic!important;margin:0!important;padding:0!important}'
             . '</style>';
 
+        /* H10A: setProperty('background',…) expande longhands vazios no style attr
+         * e o rAF forçava height fixa (~1481px). Usar color+image:none; height:auto. */
         $script = '<script id="' . $scriptId . '">(function(){'
             . '"use strict";'
             . 'function s(e,p,v){if(e){e.style.setProperty(p,v,"important");}}'
+            /* Nunca removeProperty("background") após setar longhands — no Chrome isso zera color/image. */
+            . 'function clearBg(e){if(!e||!e.style){return;}'
+            . '["background-image","background-position","background-position-x","background-position-y",'
+            . '"background-size","background-repeat","background-attachment","background-origin","background-clip"]'
+            . '.forEach(function(p){var v=(e.style.getPropertyValue(p)||"").trim();if(v===""){e.style.removeProperty(p);}});}'
+            . 'function surface(e,color){if(!e){return;}'
+            . 'e.style.removeProperty("background");clearBg(e);'
+            . 's(e,"background-color",color);s(e,"background-image","none");}'
             . 'function f(){'
             . 'document.querySelectorAll(".page_footer,footer.page-footer,.page-footer").forEach(function(e){'
-            . 's(e,"background","var(--awa-bg,var(--awa-bg-surface,Canvas))");'
-            . 's(e,"background-color","var(--awa-bg,var(--awa-bg-surface,Canvas))");'
-            . 's(e,"color","var(--awa-text,CanvasText)");s(e,"min-height","0");s(e,"height","auto");s(e,"overflow-x","clip");});'
+            . '["background","background-color","background-image","color","min-height","height","max-height","overflow","overflow-x","overflow-y","padding-block","margin-top","margin-bottom","max-width"]'
+            . '.forEach(function(p){e.style.removeProperty(p);});'
+            . 'if(!(e.getAttribute("style")||"").trim()){e.removeAttribute("style");}'
+            . '});'
+            . 'document.querySelectorAll(".page_footer .awa-footer-trust-bar,.page-footer .awa-footer-trust-bar").forEach(function(e){'
+            . '["background","background-color","background-image","color","display","padding-block","margin-bottom"]'
+            . '.forEach(function(p){e.style.removeProperty(p);});'
+            . 'if(!(e.getAttribute("style")||"").trim()){e.removeAttribute("style");}});'
+            . 'document.querySelectorAll(".page_footer .awa-footer-section__toggle,.page-footer .awa-footer-section__toggle,.page_footer .velaContent a,.page-footer .velaContent a").forEach(function(e){'
+            . 's(e,"color","#333333");s(e,"-webkit-text-fill-color","#333333");});'
             . 'document.querySelectorAll(".page_footer #footer,.page-footer #footer,.page_footer .footer-container,.page-footer .footer-container").forEach(function(e){'
-            . 's(e,"background","transparent");s(e,"background-color","transparent");s(e,"color","var(--awa-text,CanvasText)");s(e,"min-height","0");});'
+            . 'surface(e,"transparent");s(e,"color","var(--awa-text,CanvasText)");s(e,"min-height","0");});'
+            /* H12: colunas .vela-content (hífen) — H10 só limpava .velaContent (camelCase errado) */
+            . 'document.querySelectorAll(".page_footer .vela-content,.page-footer .vela-content,.page_footer .velaFooterMenu,.page-footer .awa-footer-atendimento").forEach(function(e){'
+            . 'surface(e,"transparent");s(e,"color","var(--awa-text,CanvasText)");s(e,"box-shadow","none");});'
+            . 'document.querySelectorAll(".page_footer .velaFooterTitle,.page-footer .velaFooterLinks a,.page-footer .awa-footer-atendimento p,.page-footer .awa-footer-atendimento__label").forEach(function(e){'
+            . 's(e,"color","var(--awa-text,CanvasText)");s(e,"-webkit-text-fill-color","var(--awa-text,CanvasText)");});'
+            . 'document.querySelectorAll(".page_footer .awa-footer-atendimento__store").forEach(function(e){'
+            . 'surface(e,"var(--awa-bg,Canvas)");s(e,"color","var(--awa-text,CanvasText)");});'
+            . 'document.querySelectorAll(".page_footer .awa-footer-atendimento__store p,.page_footer .awa-footer-atendimento__store-name,.page_footer .awa-footer-atendimento__store-address").forEach(function(e){'
+            . 's(e,"color","var(--awa-text,CanvasText)");s(e,"-webkit-text-fill-color","var(--awa-text,CanvasText)");});'
             . 'document.querySelectorAll(".page_footer .footer-bottom,.page-footer .footer-bottom").forEach(function(e){'
-            . 's(e,"box-sizing","border-box");s(e,"background","var(--awa-bg,Canvas)");s(e,"background-color","var(--awa-bg,Canvas)");'
-            . 's(e,"color","var(--awa-text,CanvasText)");s(e,"margin-inline","auto");s(e,"max-width","calc(100% - 32px)");'
-            . 's(e,"width","min(100%,1248px)");s(e,"overflow","hidden");s(e,"box-shadow","none");});'
+            . 's(e,"box-sizing","border-box");surface(e,"#fff");s(e,"border","0");s(e,"border-radius","0");'
+            . 's(e,"color","var(--awa-text,CanvasText)");s(e,"margin-inline","0");s(e,"max-width","100%");'
+            /* PIXEL-QA: pad horizontal no shell; nested 0 (evita H/C/F +16). */
+            . 's(e,"width","100%");s(e,"padding-inline","0");s(e,"overflow","visible");s(e,"box-shadow","none");});'
+            . 'document.querySelectorAll(".page_footer .footer-bottom .footer-bottom-inner,.page-footer .footer-bottom .footer-bottom-inner").forEach(function(e){'
+            . 's(e,"box-sizing","border-box");s(e,"max-width","100%");s(e,"padding-inline","0");s(e,"width","100%");});'
             . 'document.querySelectorAll(".products-grid .product-thumb").forEach(function(e){s(e,"position","relative");s(e,"overflow","hidden");});'
             . 'document.querySelectorAll(".products-grid .quickview-link").forEach(function(e){s(e,"box-sizing","border-box");s(e,"inline-size","40px");'
             . 's(e,"block-size","40px");s(e,"max-width","40px");s(e,"min-width","0");s(e,"right","0");s(e,"inset-inline-end","0");});'
@@ -693,6 +1861,453 @@ class OptimizeHeadStylesPlugin
             . '}());</script>';
 
         $injected = preg_replace('/<\/body>/i', $css . "\n" . $script . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Home: FABs com [hidden] devem sumir de verdade.
+     *
+     * Round 19 (visual-fixes) forçava display:flex !important no back-to-top
+     * mobile e vencía o atributo HTML hidden — oval vermelho fantasma na home.
+     */
+
+    private function injectShelfViewAllMobileHideR18(string $html, string $fullAction): string
+    {
+        if ($fullAction !== self::HOME_ACTION) {
+            return $html;
+        }
+
+        $styleId = 'awa-shelf-viewall-mobile-hide-r18';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        // Strip legacy debug probe if a cached HTML still carries it.
+        $html = preg_replace(
+            '/<script\s+id="' . preg_quote($styleId . '-dbg', '/') . '"[^>]*>.*?<\/script>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::shelfViewAllMobileHideR18Rules()
+            . HeaderImpeccableCascadeLockCss::shelfCarouselMobileChromeHideR19Rules()
+            . HeaderImpeccableCascadeLockCss::footerAtendimentoStoreFlatR21Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+
+    private function injectFooterStoreFlatR21b(string $html): string
+    {
+        $styleId = 'awa-footer-store-flat-r21b';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::footerAtendimentoStoreFlatR21Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Flatten CNPJ badge soft-card (r26) — dedicated style id so terminal link cannot skip it.
+     */
+    private function injectFooterCnpjFlatR26(string $html): string
+    {
+        $styleId = 'awa-footer-cnpj-flat-r26';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::footerCnpjBadgeFlatR26Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Mobile B2B promo contrast (r27) — light bar + dark/brand text for short labels.
+     */
+    private function injectB2bPromoContrastR27(string $html): string
+    {
+        $styleId = 'awa-b2b-promo-contrast-r27';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::b2bPromoContrastR27Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Flatten footer seals/pay soft-cards (r28).
+     */
+    private function injectFooterSealsPayFlatR28(string $html): string
+    {
+        $styleId = 'awa-footer-seals-pay-flat-r28';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::footerSealsPayFlatR28Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Newsletter form polish (r29) — uniform border, mobile stack, flat icon.
+     */
+    private function injectFooterNewsletterFormR29(string $html): string
+    {
+        $styleId = 'awa-footer-newsletter-r29';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::footerNewsletterFormR29Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Mobile FAB stack (r30) — back-to-top above WhatsApp, no overlap.
+     */
+    private function injectMobileFabStackR30(string $html): string
+    {
+        $styleId = 'awa-mobile-fab-stack-r30';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::mobileFabStackR30Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Desktop FAB stack (r33) — back-to-top above WhatsApp when both visible.
+     */
+    private function injectDesktopFabStackR33(string $html): string
+    {
+        $styleId = 'awa-desktop-fab-stack-r33';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::desktopFabStackR33Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Mobile hamburger flat icon (r34) — remove soft chip chrome.
+     */
+    private function injectMobileToggleFlatR34(string $html): string
+    {
+        $styleId = 'awa-ham-flat-r34';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::mobileToggleFlatR34Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Mobile bottom nav equal 4-column grid (r35a).
+     */
+    private function injectMobileBottomNavEqualR35(string $html): string
+    {
+        $styleId = 'awa-bottom-nav-equal-r35';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::mobileBottomNavEqualR35Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Home shelf progress radius 8px instead of pill (r35b).
+     */
+    private function injectOwlProgressRadiusR35(string $html, string $fullAction): string
+    {
+        if ($fullAction !== self::HOME_ACTION) {
+            return $html;
+        }
+
+        $styleId = 'awa-owl-progress-radius-r35';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::owlProgressRadiusR35Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Home carousel nav: 8px radius instead of pill/circle (r36).
+     */
+    private function injectCarouselNavRadiusR36(string $html, string $fullAction): string
+    {
+        if ($fullAction !== self::HOME_ACTION) {
+            return $html;
+        }
+
+        $styleId = 'awa-carousel-nav-radius-r36';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::carouselNavRadiusR36Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Home carousel: park autoplay toggle in bottom-right gutter (r38).
+     */
+    private function injectCarouselToggleGutterR38(string $html, string $fullAction): string
+    {
+        if ($fullAction !== self::HOME_ACTION) {
+            return $html;
+        }
+
+        $styleId = 'awa-carousel-toggle-gutter-r71';
+        $html = preg_replace(
+            '/<style\s+id="awa-carousel-toggle-gutter-r38c?"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        // Strip leftover debug probe from prior r71 deploys
+        $html = preg_replace(
+            '/<script\s+id="awa-debug-cf2f85-r71"[^>]*>.*?<\/script>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::carouselToggleGutterR38Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Desktop B2B promo shell (r40c) — 44px soft white full-bleed; mobile keeps r27.
+     */
+    private function injectB2bPromoShellR40(string $html): string
+    {
+        foreach (['awa-b2b-promo-shell-r40', 'awa-b2b-promo-shell-r40b', 'awa-b2b-promo-shell-r40c'] as $styleId) {
+            $html = preg_replace(
+                '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+        }
+
+        $styleId = 'awa-b2b-promo-shell-r40c';
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::b2bPromoShellR40Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Mobile bottom nav: mute inactive items (r37).
+     */
+    private function injectMobileBottomNavInactiveR37(string $html): string
+    {
+        $styleId = 'awa-bottom-nav-inactive-r37';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::mobileBottomNavInactiveR37Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+
+
+
+
+
+    /**
+     * Flatten trust-bar icon soft chips (r31).
+     */
+    private function injectFooterTrustIconFlatR31(string $html): string
+    {
+        $styleId = 'awa-footer-trust-icon-flat-r31';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::footerTrustIconFlatR31Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+
+    /**
+     * Home mobile: category carousel dots compact (r24b).
+     * Dedicated style id — awa-home-impeccable-terminal-v1 LINK blocks PHP re-inject of r22/r24 rules.
+     */
+    private function injectCategoryCarouselDotsR24b(string $html, string $fullAction): string
+    {
+        if ($fullAction !== self::HOME_ACTION) {
+            return $html;
+        }
+
+        $styleId = 'awa-cat-dots-r24b';
+        $html = preg_replace(
+            '/<style\s+id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . HeaderImpeccableCascadeLockCss::categoryCarouselDotsCompactR24Rules()
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    private function injectHomeHiddenUiGuardStyles(string $html): string
+    {
+        $styleId = 'awa-home-hidden-ui-guard-20260717';
+        $html = preg_replace('/<style id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is', '', $html) ?? $html;
+
+        $css = '<style id="' . $styleId . '">'
+            . 'html body#html-body .page-wrapper :is(#awa-back-to-top,.awa-back-to-top)[hidden],'
+            . 'html body#html-body .page-wrapper :is(#awa-back-to-top,.awa-back-to-top)[aria-hidden="true"]:not(.is-visible),'
+            . 'html body#html-body .page-wrapper .awa-dark-mode-toggle[hidden],'
+            . 'html body#html-body .page-wrapper .awa-dark-mode-toggle[aria-hidden="true"]:not(.is-visible){'
+            . 'display:none!important;visibility:hidden!important;opacity:0!important;'
+            . 'pointer-events:none!important;width:0!important;height:0!important;'
+            . 'min-width:0!important;min-height:0!important;overflow:hidden!important;'
+            . 'border:0!important;padding:0!important;margin:0!important;box-shadow:none!important}'
+            /* H26: promo B2B oculta com painel/login — zerar shell .header-content fantasma */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.customer-logged-in '
+            . '.page-wrapper .awa-site-header #header.header-container,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.customer-logged-in '
+            . '.page-wrapper .awa-site-header #header.header-container>.header-content,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:has(.b2b-status-panel) '
+            . '.page-wrapper .awa-site-header #header.header-container,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:has(.b2b-status-panel) '
+            . '.page-wrapper .awa-site-header #header.header-container>.header-content{'
+            . 'display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;'
+            . 'max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index) '
+            . '.page-wrapper .awa-site-header[data-awa-header-mode=default] .header-wrapper-sticky.is-sticky,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index) '
+            . '.page-wrapper .awa-site-header[data-awa-header-mode=default] .header-wrapper-sticky.awa-is-sticky{'
+            . 'position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;'
+            . 'z-index:1000!important;overflow:visible!important;contain:none!important;will-change:auto!important;transform:none!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper .awa-site-header .header-wrapper-sticky{contain:none!important;will-change:auto!important}'
+            . '</style>';
+
+        $injected = preg_replace('/<\/head>/i', $css . "\n</head>", $html, 1);
 
         return is_string($injected) ? $injected : $html;
     }
@@ -722,11 +2337,15 @@ class OptimizeHeadStylesPlugin
             . $scope . '{--awa-home-compact-section-pad:clamp(10px,1.4vw,18px);'
             . '--awa-home-compact-tight-gap:clamp(8px,1vw,12px);'
             . '--awa-home-compact-group-gap:clamp(12px,1.6vw,20px)}'
-            . $scope . ' .content-top-home :is(.top-home-content,.awa-home-section,.awa-carousel-section,'
-            . '.awa-grid-section,.awa-carousel-section--featured,.awa-grid-section--featured,.awa-home-niche-shelves,'
+            . $scope . ' .content-top-home :is(.top-home-content,.awa-home-section,'
+            . '.awa-grid-section,.awa-grid-section--featured,.awa-home-niche-shelves,'
             . '.awa-home-pricing-notice,.awa-product-promo-banners,.top-home-content--category-carousel)'
-            . ':not(.top-home-content--above-fold,.awa-hero-b2b-cta){'
+            . ':not(.top-home-content--above-fold,.awa-hero-b2b-cta,.awa-carousel-section,.awa-carousel-section--featured){'
             . 'margin-block:0!important;padding-block:var(--awa-home-compact-section-pad)!important}'
+            /* r59 CLS: shelf padding-block clamp→0 @~2.5s (container 77→89 / 1248→1232). Final=0. */
+            . $scope . ' .content-top-home :is(.awa-carousel-section,.awa-carousel-section--featured,'
+            . '.top-home-content.awa-carousel-section){'
+            . 'margin-block:0!important;padding:0!important;padding-block:0!important;padding-inline:0!important}'
             . $scope . ' .content-top-home :is(.awa-section-header,.awa-shelf__header,.rokan-product-heading){'
             . 'gap:8px 12px!important;margin-block:0 8px!important}'
             . $scope . ' .top-home-content--above-fold{margin-block-end:0!important;padding-block-end:clamp(4px,.8vw,8px)!important}'
@@ -766,10 +2385,12 @@ class OptimizeHeadStylesPlugin
             . '@media(max-width:767px){'
             . $scope . '{--awa-home-compact-section-pad:10px;--awa-home-compact-tight-gap:8px;'
             . '--awa-home-compact-group-gap:10px}'
-            . $scope . ' .content-top-home :is(.top-home-content,.awa-home-section,.awa-carousel-section,'
-            . '.awa-grid-section,.awa-carousel-section--featured,.awa-grid-section--featured,.awa-home-niche-shelves,'
+            . $scope . ' .content-top-home :is(.top-home-content,.awa-home-section,'
+            . '.awa-grid-section,.awa-grid-section--featured,.awa-home-niche-shelves,'
             . '.awa-home-pricing-notice,.awa-product-promo-banners,.top-home-content--category-carousel)'
-            . ':not(.top-home-content--above-fold,.awa-hero-b2b-cta){padding-block:10px!important}'
+            . ':not(.top-home-content--above-fold,.awa-hero-b2b-cta,.awa-carousel-section,.awa-carousel-section--featured){padding-block:10px!important}'
+            . $scope . ' .content-top-home :is(.awa-carousel-section,.awa-carousel-section--featured,'
+            . '.top-home-content.awa-carousel-section){padding:0!important;padding-block:0!important;padding-inline:0!important}'
             . $scope . ' :is(.top-home-content--above-fold,'
             . '.top-home-content--above-fold>.banner-slider.banner-slider2){'
             . 'height:auto!important;min-height:clamp(252px,74vw,288px)!important;max-height:none!important}'
@@ -795,10 +2416,14 @@ class OptimizeHeadStylesPlugin
             . 'align-items:stretch!important;display:flex!important;overflow-x:auto!important;overflow-y:hidden!important;'
             . 'scroll-snap-type:x proximity!important}'
             . $scope . ' .top-home-content--category-carousel :is(.awa-category-carousel__item,.awa-category-carousel__link){'
-            . 'flex:0 0 clamp(104px,30vw,128px)!important;max-width:128px!important;'
-            . 'min-height:96px!important;min-width:104px!important;padding-block:8px!important;scroll-snap-align:start!important}'
+            . 'flex:0 0 clamp(128px,12vw,152px)!important;max-width:152px!important;'
+            . 'min-height:168px!important;min-width:128px!important;padding-block:10px!important;scroll-snap-align:start!important}'
             . $scope . ' .top-home-content--category-carousel .awa-category-carousel__icon{'
-            . 'height:44px!important;margin-inline:auto!important;width:44px!important}'
+            . 'height:88px!important;margin-inline:auto!important;width:88px!important;'
+            . 'min-height:88px!important;min-width:88px!important;max-height:88px!important;max-width:88px!important}'
+            . $scope . ' .top-home-content--category-carousel .awa-category-carousel__icon :is(picture,img,svg){'
+            . 'display:block!important;height:88px!important;width:88px!important;'
+            . 'max-height:88px!important;max-width:88px!important;object-fit:contain!important}'
             . $scope . ' .top-home-content--category-carousel '
             . ':is(.awa-category-carousel__label,.awa-category-carousel__title,.awa-category-carousel__name){'
             . '-webkit-line-clamp:2!important;display:-webkit-box!important;overflow:hidden!important;'
@@ -831,6 +2456,43 @@ class OptimizeHeadStylesPlugin
      * aplica margin-block-start/end:16px em .top-home-content/.awa-home-section no mobile,
      * somando com gap do wrapper e gerando espaçamento visual excessivo.
      */
+    private function injectHomeB2bOpsDensityTerminalStyles(string $html, string $fullAction): string
+    {
+        if (!in_array($fullAction, ['cms_index_index', 'cms_home_index', 'cms_page_view'], true)
+            && !str_contains($html, 'cms-index-index')
+            && !str_contains($html, 'cms-homepage_ayo_home5')
+        ) {
+            return $html;
+        }
+
+        $styleId = 'awa-home-b2b-ops-density-20260805';
+        $html = preg_replace(
+            '/<style id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<link[^>]*\bid="' . preg_quote($styleId, '/') . '"[^>]*>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $path = BP . '/app/design/frontend/AWA_Custom/ayo_home5_child/web/css/' . $styleId . '.css';
+        if (!is_readable($path)) {
+            return $html;
+        }
+
+        $css = (string) file_get_contents($path);
+        if ($css === '') {
+            return $html;
+        }
+
+        // Terminal final: após align-grid / themes deferred, vence whitespace B2B.
+        $tag = '<style id="' . $styleId . '" data-awa-terminal="b2b-ops-density-r5">' . $css . '</style>';
+        $replaced = preg_replace('/<\/body>/i', $tag . '</body>', $html, 1);
+        return is_string($replaced) ? $replaced : $html;
+    }
+
     private function injectHomeGapMarginHotfix(string $html, string $fullAction): string
     {
         if ($fullAction !== self::HOME_ACTION) {
@@ -886,6 +2548,18 @@ class OptimizeHeadStylesPlugin
         return preg_replace_callback(
             '/<style\b[^>]*>.*?<\/style>/is',
             static function (array $matches): string {
+                if (str_contains($matches[0], HeaderImpeccableCascadeLockCss::FOOTER_CRITICAL_STYLE_ID)) {
+                    return $matches[0];
+                }
+                /* PIXEL-QA: manter especificidade alta do gutter lock (vence audit 7×ID). */
+                if (str_contains($matches[0], 'awa-pixel-qa-catalog-hdr-gutter-16')) {
+                    return $matches[0];
+                }
+                /* r43b: geometry guard precisa vencer padding-block:8px do terminal inline. */
+                if (str_contains($matches[0], 'awa-home-cls-geometry-guard')) {
+                    return $matches[0];
+                }
+
                 return preg_replace('/(?:#html-body){4,}/i', '#html-body#html-body#html-body', $matches[0]) ?? $matches[0];
             },
             $html
@@ -1009,6 +2683,10 @@ class OptimizeHeadStylesPlugin
             . '.page-wrapper header.awa-site-header[data-awa-header-mode="default"]';
         $home = 'html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
             . '.page-wrapper .awa-site-header[data-awa-header-mode="default"]';
+        $plpCategory = 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view) '
+            . '.page-wrapper .awa-site-header[data-awa-header-mode="default"]';
+        $plpCategoryAudit = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view) '
+            . '.page-wrapper header.awa-site-header[data-awa-header-mode="default"]';
         $plp = 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index) '
             . '.page-wrapper ';
         $hide = 'display:none!important;visibility:hidden!important;pointer-events:none!important;'
@@ -1049,27 +2727,32 @@ class OptimizeHeadStylesPlugin
             . 'align-items:stretch!important;display:flex!important;grid-column:2!important;height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'margin:0!important;min-width:48px!important;max-width:48px!important;padding:0!important;position:static!important;width:48px!important}'
             . $shell . ' .awa-header-search-col form#search_mini_form :is(button.action.search,.action.search){'
-            . 'align-items:center!important;background:var(--awa-primary,var(--awa-red))!important;border:0!important;border-radius:0!important;'
-            . 'box-shadow:none!important;color:var(--awa-text-inverse,var(--awa-white))!important;display:flex!important;'
+            . 'align-items:center!important;background:transparent!important;background-color:transparent!important;border:0!important;border-radius:0!important;'
+            . 'box-shadow:none!important;color:var(--awa-primary,var(--awa-red))!important;display:flex!important;'
             . 'height:44px!important;justify-content:center!important;margin:0!important;min-height:44px!important;max-height:44px!important;'
             . 'min-width:48px!important;max-width:48px!important;opacity:1!important;padding:0!important;position:static!important;transform:none!important;width:48px!important}'
             . $shell . ' .awa-header-search-col form#search_mini_form button.action.search::before,'
             . $shell . ' .awa-header-search-col form#search_mini_form button.action.search::after{content:none!important;display:none!important}'
             . $shell . ' .awa-header-search-col form#search_mini_form button.action.search svg{display:block!important;margin:0!important;position:static!important}'
+            /* r73 polish: 220+overflow:hidden espremia ícone+pill; dar respiro no cluster. */
             . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"]{'
             . 'align-items:center!important;background:transparent!important;border:0!important;box-shadow:none!important;display:inline-flex!important;'
-            . 'height:44px!important;min-height:44px!important;max-height:44px!important;max-width:220px!important;overflow:hidden!important;padding:0!important}'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'max-width:252px!important;min-width:0!important;overflow:visible!important;padding:0!important;gap:8px!important}'
             . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] :is(.awa-header-account-prompt__text,'
             . '.awa-header-account-prompt__line2,.awa-header-account-prompt__actions){display:inline-flex!important;align-items:center!important;flex-direction:row!important;height:auto!important;min-height:0!important;line-height:1.3!important;max-height:none!important;overflow:visible!important;white-space:nowrap!important}'
-            /* .guest é o container que empilha __line1 ("Para ver os preços faça o") sobre
-             * __line2 ("Login ou cadastre-se") — precisa ser column, não herdar o row/44px
-             * de altura fixa do bloco acima (que ainda serve .text/.line2/.actions, usados
-             * como filas internas de uma única linha). */
+            /* .guest empilha __line1 sobre __line2 — column, não herdar row do bloco acima. */
             . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__guest{'
             . 'display:inline-flex!important;flex-direction:column!important;align-items:flex-start!important;'
-            . 'justify-content:center!important;gap:1px!important;height:44px!important;max-height:44px!important;overflow:visible!important;white-space:nowrap!important}'
-            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__link{height:auto!important;line-height:1.3!important;min-height:0!important;padding-inline:0!important}'
-            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__separator{height:auto!important;line-height:1.3!important;padding-inline:2px!important}'
+            . 'justify-content:center!important;gap:2px!important;height:44px!important;max-height:44px!important;overflow:visible!important;white-space:nowrap!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__line2{'
+            . 'gap:6px!important;padding:0!important;min-height:28px!important;overflow:visible!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__link--login{'
+            . 'min-width:0!important;padding-inline:0!important;height:auto!important;line-height:1.2!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__link{height:auto!important;line-height:1.3!important;min-height:0!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__separator{height:auto!important;line-height:1.3!important;padding-inline:0!important}'
+            . $shell . ' .awa-header-right-col{'
+            . 'gap:10px!important;min-width:0!important;max-width:none!important}'
             . $shell . ' .awa-b2b-promo-close{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important}'
             . '}'
             . '@media(min-width:768px) and (max-width:991px){'
@@ -1088,13 +2771,15 @@ class OptimizeHeadStylesPlugin
             . $shell . ' .header-control.header-nav.awa-nav-bar>.container{gap:0!important}'
             . $shell . ' .awa-nav-bar__inner{gap:12px!important}'
             . $shell . ' .awa-header-categories.menu_left_home1{display:flex!important;flex:0 0 196px!important;width:196px!important;max-width:196px!important;height:44px!important;overflow:visible!important}'
+            . $shell . ' .awa-header-primary-nav.menu_primary[data-awa-topnav-empty="1"],'
             . $shell . ' .awa-header-primary-nav.menu_primary:has(nav.top-menu:empty){' . $hide . '}'
             . $shell . ' .awa-nav-quick-links{display:flex!important;align-items:center!important;flex:1 1 auto!important;gap:8px!important;min-width:0!important;overflow:hidden!important}'
             . $shell . ' .awa-nav-quick-links__link{display:inline-flex!important;align-items:center!important;height:44px!important;min-height:44px!important;padding-inline:10px!important;white-space:nowrap!important}'
             . '}'
             . '@media(max-width:767px){'
-            . $shell . ' .header-wrapper-sticky .awa-main-header__inner.wp-header{grid-template-areas:"primary" "search" "actions"!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto auto!important;padding:12px!important;row-gap:8px!important}'
-            . $shell . ' .awa-header-primary-row{display:grid!important;grid-area:primary!important;grid-template-columns:44px minmax(0,1fr) 44px!important;grid-template-areas:"toggle brand cart"!important;align-items:center!important;column-gap:8px!important;width:100%!important}'
+            /* sticky já aplica gutter 16 — inner horizontal 0 (evita 16+12 no cart). */
+            . $shell . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-main-header__inner.wp-header{grid-template-areas:"primary" "search" "actions"!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto auto!important;padding-block:12px!important;padding-inline:0!important;row-gap:8px!important}'
+            . $shell . ':not(.awa-header-condensed) .awa-header-primary-row{display:grid!important;grid-area:primary!important;grid-template-columns:44px minmax(0,1fr) 44px!important;grid-template-areas:"toggle brand cart"!important;align-items:center!important;column-gap:8px!important;width:100%!important}'
             . $shell . ' .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important}'
             . $shell . ' .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important}'
             . $shell . ' .awa-header-cart-link{grid-area:cart!important;justify-self:end!important}'
@@ -1157,43 +2842,93 @@ class OptimizeHeadStylesPlugin
             . $auditLock . ','
             . $auditLock . ' :is(.header-content,.header-wrapper-sticky,.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container){'
             . 'box-sizing:border-box!important;margin-inline:0!important;max-width:100%!important;width:100%!important}'
-            . $auditLock . ' .header-wrapper-sticky div.awa-main-header__inner.wp-header,'
-            . $auditLock . ' .header-wrapper-sticky div.awa-main-header__inner[data-awa-header-row="brand-search"]{'
+            /* Rest 2-row — NÃO aplicar em .awa-header-condensed (BUG-SHELL-MOBILE-CONDENSED-1ROW). */
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky div.awa-main-header__inner.wp-header,'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky div.awa-main-header__inner[data-awa-header-row="brand-search"]{'
             . 'align-items:center!important;box-sizing:border-box!important;display:grid!important;gap:8px 8px!important;'
             . 'grid-template:"toggle brand cart" auto "search search search" auto / 44px minmax(0,1fr) 44px!important;'
             . 'height:auto!important;margin:0!important;max-height:none!important;max-width:100%!important;min-height:0!important;overflow:visible!important;'
-            . 'padding:8px 12px 10px!important;width:100%!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-primary-row{display:contents!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important;align-self:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important;align-self:center!important;min-width:0!important;max-width:160px!important;width:auto!important;height:44px!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;display:block!important;justify-self:stretch!important;min-width:0!important;max-width:100%!important;width:100%!important;height:44px!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-right-col{grid-area:cart!important;align-items:center!important;display:flex!important;justify-content:flex-end!important;justify-self:end!important;min-width:44px!important;max-width:44px!important;width:44px!important;height:44px!important;overflow:visible!important}'
-            // BUG-B2B-PANEL-MOBILE-2026-07-07: $auditLock tem especificidade maior que o
-            // contrato mais novo (enforcePrimaryRowResponsiveContract) e por isso vence a
-            // cascata — precisa do mesmo ajuste para não colapsar o painel B2B (largura 0).
-            . $auditLock . ' .header-wrapper-sticky:has(.b2b-status-panel) div.awa-main-header__inner.wp-header,'
-            . $auditLock . ' .header-wrapper-sticky:has(.b2b-status-panel) div.awa-main-header__inner[data-awa-header-row="brand-search"]{grid-template-columns:44px minmax(0,1fr) minmax(44px,auto)!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel){min-width:44px!important;max-width:min(150px,40vw)!important;width:auto!important;gap:4px!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel) .b2b-status-panel{width:auto!important;max-width:none!important;overflow:visible!important}'
+            . 'padding:8px 0 10px!important;padding-inline:0!important;width:100%!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-primary-row{display:contents!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important;align-self:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important;align-self:center!important;min-width:0!important;max-width:160px!important;width:auto!important;height:44px!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;display:block!important;justify-self:stretch!important;min-width:0!important;max-width:100%!important;width:100%!important;height:44px!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-right-col{grid-area:cart!important;align-items:center!important;display:flex!important;justify-content:flex-end!important;justify-self:end!important;min-width:44px!important;max-width:44px!important;width:44px!important;height:44px!important;overflow:visible!important}'
+            // BUG-B2B-PANEL-MOBILE-2026-07-07 + AUDIT30-2026-07-16:
+            // $auditLock (8× #html-body) vence a cascata. grid-template-columns sozinho
+            // NÃO sobrescreve o shorthand com 3ª track 44px — o painel estoura p/ esquerda
+            // sobre o logo (CDP: logoR=219, trigL=213, overlap=true). Reaplica shorthand.
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky:has(.b2b-status-panel) div.awa-main-header__inner.wp-header,'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky:has(.b2b-status-panel) div.awa-main-header__inner[data-awa-header-row="brand-search"]{'
+            . 'grid-template:"toggle brand cart" auto "search search search" auto / 44px minmax(0,1fr) minmax(96px,auto)!important;'
+            . 'grid-template-columns:44px minmax(0,1fr) minmax(96px,auto)!important}'
+            . $auditLock . ' .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel){'
+            . 'min-width:96px!important;max-width:min(140px,38vw)!important;width:auto!important;gap:2px!important;'
+            . 'overflow:hidden!important;justify-self:end!important}'
+            . $auditLock . ' .header-wrapper-sticky:has(.b2b-status-panel) .awa-header-brand-cell{'
+            . 'max-width:min(120px,32vw)!important;overflow:hidden!important;min-width:0!important}'
+            . $auditLock . ' .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel) .b2b-status-panel{'
+            . 'width:auto!important;max-width:min(88px,24vw)!important;min-width:0!important;overflow:hidden!important}'
+            . $auditLock . ' .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel) .b2b-status-trigger{'
+            . 'color:var(--awa-text-primary,#0f172a)!important;background:transparent!important;max-width:100%!important}'
+            . $auditLock . ' .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel) '
+            . ':is(.b2b-status-trigger__line1,.b2b-status-trigger__text){color:var(--awa-text-primary,#0f172a)!important;max-width:6ch!important}'
+            // Promo bar: ocultar quando painel B2B está presente (cliente logado)
+            . $auditLock . ':has(.b2b-status-panel) #awa-b2b-promo-bar,'
+            . $auditLock . ':has(.b2b-status-panel) .awa-b2b-promo-bar{'
+            . 'display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;'
+            . 'overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}'
             . $auditLock . ' .header-wrapper-sticky .awa-header-cart-link{display:none!important;visibility:hidden!important;pointer-events:none!important}'
             . $auditLock . ' .header-wrapper-sticky .awa-header-right-col .awa-header-account-prompt{display:none!important;visibility:hidden!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-minicart,'
-            . $auditLock . ' .header-wrapper-sticky .minicart-wrapper,'
-            . $auditLock . ' .header-wrapper-sticky .minicart-wrapper .showcart{width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-search-col :is(.block-search,.block-content){display:block!important;width:100%!important;max-width:100%!important;min-width:0!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-search-col form#search_mini_form{'
+            // Ícone 44px só no estado FECHADO — wrapper aberto precisa expandir (drawer).
+            . $auditLock . ' .header-wrapper-sticky .awa-header-minicart:not(:has(.minicart-wrapper.active)):not(:has(.minicart-wrapper.show)):not(:has(.minicart-wrapper.is-open)),'
+            . $auditLock . ' .header-wrapper-sticky .minicart-wrapper:not(.active):not(.show):not(.is-open),'
+            . $auditLock . ' .header-wrapper-sticky .minicart-wrapper:not(.active):not(.show):not(.is-open) .showcart{width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-search-col :is(.block-search,.block-content){display:block!important;width:100%!important;max-width:100%!important;min-width:0!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-search-col form#search_mini_form{'
             . 'display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;height:44px!important;min-height:44px!important;'
             . 'max-height:44px!important;overflow:hidden!important;padding:0!important;width:100%!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-search-col form#search_mini_form :is(.field.search,.field.search .control){grid-column:1!important;height:44px!important;margin:0!important;min-width:0!important;overflow:hidden!important;padding:0!important;width:100%!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-search-col form#search_mini_form input#search{height:44px!important;line-height:44px!important;min-width:0!important;padding:0 12px!important;position:static!important;width:100%!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-search-col form#search_mini_form .actions{display:flex!important;grid-column:2!important;height:44px!important;margin:0!important;min-width:44px!important;max-width:44px!important;padding:0!important;position:static!important;width:44px!important}'
-            . $auditLock . ' .header-wrapper-sticky .awa-header-search-col form#search_mini_form :is(button.action.search,.action.search){height:44px!important;min-height:44px!important;max-height:44px!important;min-width:44px!important;max-width:44px!important;padding:0!important;position:static!important;transform:none!important;width:44px!important}'
-            . $auditLock . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__text{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:0!important;max-width:calc(100% - 52px)!important;overflow:hidden!important;white-space:nowrap!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-search-col form#search_mini_form :is(.field.search,.field.search .control){grid-column:1!important;height:44px!important;margin:0!important;min-width:0!important;overflow:hidden!important;padding:0!important;width:100%!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-search-col form#search_mini_form input#search{height:44px!important;line-height:44px!important;min-width:0!important;padding:0 12px!important;position:static!important;width:100%!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-search-col form#search_mini_form .actions{display:flex!important;grid-column:2!important;height:44px!important;margin:0!important;min-width:44px!important;max-width:44px!important;padding:0!important;position:static!important;width:44px!important}'
+            . $auditLock . ':not(.awa-header-condensed) .header-wrapper-sticky .awa-header-search-col form#search_mini_form :is(button.action.search,.action.search){height:44px!important;min-height:44px!important;max-height:44px!important;min-width:44px!important;max-width:44px!important;padding:0!important;position:static!important;transform:none!important;width:44px!important}'
+            . $auditLock . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__text{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;height:48px!important;min-height:48px!important;max-height:48px!important;min-width:0!important;max-width:calc(100% - 52px)!important;overflow:visible!important;white-space:nowrap!important}'
             . $auditLock . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__lead{display:inline-flex!important;align-items:center!important;min-width:0!important;max-width:96px!important;overflow:hidden!important;visibility:visible!important}'
             . $auditLock . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__lead-short{display:inline!important;height:auto!important;max-width:96px!important;opacity:1!important;overflow:visible!important;position:static!important;visibility:visible!important;width:auto!important;clip:auto!important;clip-path:none!important}'
             . $auditLock . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__lead-long,'
             . $auditLock . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__cta-long{display:none!important;visibility:hidden!important}'
             . $auditLock . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__cta-short{display:inline!important;opacity:1!important;visibility:visible!important}'
+            /* BUG-SHELL-MOBILE-CONDENSED-1ROW 2026-08-05: sticky ≤767 → 1 linha ícone (vence locks 2-row). */
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky{'
+            . 'height:auto!important;min-height:56px!important;max-height:56px!important;overflow:visible!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'display:grid!important;grid-template-areas:"toggle brand search cart"!important;'
+            . 'grid-template-columns:44px minmax(0,1fr) 44px 44px!important;grid-template-rows:44px!important;'
+            . 'gap:0 8px!important;height:56px!important;min-height:56px!important;max-height:56px!important;'
+            . 'padding:6px 12px!important;box-sizing:border-box!important;align-items:center!important;overflow:visible!important}'
+            /* primary-row vira contents — senão grid-area:primary cria linha fantasma sob o shell 56px. */
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky .awa-header-primary-row{'
+            . 'display:contents!important;grid-area:unset!important;grid-template:none!important;'
+            . 'height:auto!important;min-height:0!important;max-height:none!important;width:auto!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky :is(.awa-header-search-col,.top-search){'
+            . 'grid-area:search!important;display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;'
+            . 'min-height:44px!important;max-height:44px!important;overflow:visible!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky .awa-header-search-col form#search_mini_form{'
+            . 'display:flex!important;width:44px!important;min-width:44px!important;max-width:44px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important;'
+            . 'border:0!important;background:transparent!important;overflow:visible!important;grid-template-columns:none!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky .awa-header-search-col :is(.field.search,.field.search .control,.block-search .label,input#search){'
+            . 'position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;'
+            . 'overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky .awa-header-search-col .actions{'
+            . 'display:flex!important;margin:0!important;padding:0!important;width:44px!important;height:44px!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky .awa-header-search-col :is(button.action.search,.action.search){'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important;align-self:center!important}'
+            . $auditLock . '.awa-header-condensed .header-wrapper-sticky :is(.awa-header-minicart,.awa-header-right-col){grid-area:cart!important;justify-self:end!important}'
             . '}'
             . '/* FIX 2026-07-07: Impeccable home polish. !important vence locks finais inline/styles-l.css já marcados como important. */'
             . $home . '{display:block!important;width:100%!important;overflow:visible!important}'
@@ -1202,14 +2937,75 @@ class OptimizeHeadStylesPlugin
             . $home . ' .header-content{height:44px!important;min-height:44px!important;max-height:44px!important;padding-block:0!important}'
             . $home . ' .header-control.header-nav{padding-inline:0!important;box-sizing:border-box!important}'
             . $home . ' .header-control.header-nav>.container{padding:0!important;box-sizing:border-box!important}'
+            /* P2.1 2026-07-28: home logo↔Departamentos — gutter 24 só no inner (bar/container=0). PLP intacto. */
+            . '@media(min-width:768px){'
+            . $home . ' .header-control.header-nav.awa-nav-bar,'
+            . $home . ' .header-control.awa-nav-bar{padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+            . $home . ' .header-control.header-nav.awa-nav-bar>.container,'
+            . $home . ' .header-control.awa-nav-bar>.container{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'gap:0!important;column-gap:0!important;row-gap:0!important}'
+            . $home . ' .awa-nav-bar__inner,'
+            . $home . ' .header-control.awa-nav-bar .awa-nav-bar__inner{'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            . $home . ' .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row],'
+            . '.awa-main-header__inner){padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important}}'
+            /* P2.1-B 2026-07-28: PLP tablet — alinhar eixo logo↔Departamentos (container=0, inner=24). */
+            . '@media(min-width:768px) and (max-width:991px){'
+            . $plpCategory . ' .header-control.header-nav.awa-nav-bar>.container,'
+            . $plpCategory . ' .header-control.awa-nav-bar>.container{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+            . $plpCategory . ' .awa-nav-bar__inner,'
+            . $plpCategory . ' .header-control.awa-nav-bar .awa-nav-bar__inner{'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            . $plpCategoryAudit . ' .awa-header-categories.menu_left_home1 button.our_categories.title-category-dropdown[data-role="awa-vertical-menu-trigger"]{'
+            . 'padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important}'
+            . '}'
             . 'html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
             . '.page-wrapper div.awa-hero-b2b-cta__inner.container{box-sizing:border-box!important}'
-            . '@media(max-width:767px){@layer awa-header-first-paint-lock{'
+                        . '/* FIX 2026-08-02: PLP compact stack (all viewports) — tokens AWA 12px. */'
+            . $plp . '{--awa-plp-stack-gap:var(--awa-stack-tight,var(--awa-space-3,12px))}'
+            . $plp . ' .nav-breadcrumbs{margin:0!important;margin-block:0!important;padding:0!important;'
+            . 'min-height:0!important;height:auto!important}'
+            . $plp . ' .nav-breadcrumbs .breadcrumbs{margin:0!important;margin-block:0!important;padding-block:0!important;'
+            . 'min-height:0!important;height:auto!important}'
+            . $plp . ' #maincontent.page-main{padding-top:var(--awa-plp-stack-gap,12px)!important}'
+            . $plp . ' .category-view-move{height:auto!important;min-height:0!important;padding:0!important;'
+            . 'margin:0 0 var(--awa-plp-stack-gap,12px)!important}'
+            . $plp . ' .category-view-move .awa-category-hero{height:auto!important;min-height:112px!important;max-height:140px!important;'
+            . 'margin:0!important;margin-block:0!important;margin-block-end:0!important;'
+            . 'overflow:hidden!important;display:flex!important;align-items:flex-end!important;'
+            . 'box-sizing:border-box!important;padding-block:var(--awa-space-3,12px)!important}'
+            . $plp . ' .category-view-move .awa-category-hero__bg-image,'
+            . $plp . ' .category-view-move .awa-category-hero__overlay{height:100%!important;min-height:112px!important;max-height:none!important}'
+            . $plp . ' .mst_categorySearch{display:block!important;margin:0 0 var(--awa-plp-stack-gap,12px)!important;'
+            . 'min-height:0!important;height:auto!important}'
+            . $plp . ' .mst_categorySearch #mst_categorySearch{min-height:44px!important;height:44px!important;'
+            . 'max-height:44px!important;line-height:44px!important;width:100%!important;margin:0!important;'
+            . 'box-sizing:border-box!important}'
+            . $plp . ' .awa-plp-b2b-gate-banner{display:block!important;padding:0!important;border:0!important;'
+            . 'background:transparent!important;margin:0 0 var(--awa-plp-stack-gap,12px)!important;'
+            . 'min-height:0!important;height:auto!important;box-sizing:border-box!important}'
+            . $plp . ' .shop-tab-title{margin:0 0 var(--awa-plp-stack-gap,12px)!important}'
+
+. '@media(max-width:767px){@layer awa-header-first-paint-lock{'
+            /* r57 CLS: pagination bottom:-44 (fora do hero) → relative @~2.5s (y 488→374, CLS ~0.023).
+             * Lock overlay final DENTRO do hero 288 desde o first paint. */
             . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
-            . '.page-wrapper .top-home-content--above-fold .awa-hero__viewport .awa-hero__pagination{'
-            . 'inset:auto 16px -44px 16px!important;top:auto!important;bottom:-44px!important;height:44px!important;'
+            . '.page-wrapper .top-home-content--above-fold :is(.awa-hero__viewport .awa-hero__pagination,'
+            . '.wrapper_slider.visible-xs .swiper-pagination.awa-hero__pagination,'
+            . '.wrapper_slider.visible-xs .awa-hero__pagination){'
+            . 'position:absolute!important;inset:auto 0 12px 0!important;top:auto!important;bottom:12px!important;'
+            . 'left:0!important;right:0!important;height:44px!important;'
             . 'min-height:44px!important;max-height:44px!important;display:flex!important;align-items:center!important;'
-            . 'justify-content:center!important;gap:8px!important;z-index:2!important}'
+            . 'justify-content:center!important;gap:8px!important;z-index:2!important;margin:0!important;'
+            . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
+            . '.page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs :is(.awa-hero-swiper,.swiper){'
+            . 'height:176px!important;min-height:176px!important;max-height:176px!important;overflow:hidden!important;'
+            . 'box-sizing:border-box!important}'
             . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
             . '.page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs .text-banner{'
             . 'top:-24px!important;bottom:auto!important;height:48px!important;max-height:48px!important;'
@@ -1220,33 +3016,49 @@ class OptimizeHeadStylesPlugin
             . '.page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs .text-banner '
             . ':is(.slide-title,.slide-desc,.button-slider){display:none!important}'
             . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
-            . '.page-wrapper .top-home-content--above-fold .awa-hero__viewport .awa-hero__pagination .swiper-pagination-bullet{'
+            . '.page-wrapper .top-home-content--above-fold :is(.awa-hero__viewport .awa-hero__pagination,'
+            . '.wrapper_slider.visible-xs .swiper-pagination.awa-hero__pagination) .swiper-pagination-bullet{'
             . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
             . 'max-width:44px!important;max-height:44px!important;padding:0!important;margin:0!important;'
             . 'box-sizing:border-box!important;background:transparent!important;border:0!important;box-shadow:none!important;opacity:1!important}'
             . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
-            . '.page-wrapper .top-home-content--above-fold .awa-hero__viewport .awa-hero__pagination .swiper-pagination-bullet::before{'
+            . '.page-wrapper .top-home-content--above-fold :is(.awa-hero__viewport .awa-hero__pagination,'
+            . '.wrapper_slider.visible-xs .swiper-pagination.awa-hero__pagination) .swiper-pagination-bullet::before{'
             . 'width:8px!important;height:8px!important;min-width:8px!important;min-height:8px!important;'
             . 'box-shadow:0 0 0 1px rgba(183,51,55,.22)!important}'
             . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
-            . '.page-wrapper .top-home-content--above-fold .awa-hero__viewport .awa-hero-pause-btn{'
-            . 'top:auto!important;bottom:-44px!important;left:auto!important;right:16px!important;width:44px!important;'
+            . '.page-wrapper .top-home-content--above-fold :is(.awa-hero__viewport .awa-hero-pause-btn,'
+            . '.wrapper_slider.visible-xs .awa-hero-pause-btn){'
+            . 'top:auto!important;bottom:12px!important;left:auto!important;right:16px!important;width:44px!important;'
             . 'height:44px!important;min-width:44px!important;min-height:44px!important;max-width:44px!important;'
             . 'max-height:44px!important;z-index:3!important;opacity:.85!important}'
-            . '/* FIX 2026-07-07: PLP mobile first fold compact. */'
-            . $plp . '.category-view-move{height:auto!important;min-height:0!important;padding:0!important;margin:0 0 8px!important}'
-            . $plp . '.category-view-move .awa-category-hero{height:72px!important;min-height:72px!important;max-height:72px!important;margin:0!important}'
+            . '/* FIX 2026-07-16: PLP mobile hero — 72px cortava H1; busca de categoria visível. */'
+            . '/* FIX 2026-08-02: PLP compact stack — tokens AWA 12px. */'
+            . $plp . '{--awa-plp-stack-gap:var(--awa-stack-tight,var(--awa-space-3,12px))}'
+            . $plp . '.breadcrumbs{margin:0 0 var(--awa-plp-stack-gap,12px)!important;padding-block:0!important;'
+            . 'min-height:0!important;height:auto!important}'
+            . $plp . '.category-view-move{height:auto!important;min-height:0!important;padding:0!important;'
+            . 'margin:0 0 var(--awa-plp-stack-gap,12px)!important}'
+            . $plp . '.category-view-move .awa-category-hero{height:auto!important;min-height:112px!important;max-height:140px!important;'
+            . 'margin:0!important;margin-block:0!important;margin-block-end:0!important;'
+            . 'overflow:hidden!important;display:flex!important;align-items:flex-end!important;'
+            . 'box-sizing:border-box!important;padding-block:var(--awa-space-3,12px)!important}'
             . $plp . '.category-view-move .awa-category-hero__bg-image,'
-            . $plp . '.category-view-move .awa-category-hero__overlay{height:72px!important;min-height:72px!important;max-height:72px!important}'
-            . $plp . '.category-view-move .awa-category-hero__content{height:72px!important;min-height:72px!important;max-height:72px!important;'
-            . 'padding:8px 12px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}'
-            . $plp . '.category-view-move .awa-category-hero__title{font-size:17px!important;line-height:1.2!important;margin:0!important}'
+            . $plp . '.category-view-move .awa-category-hero__overlay{height:100%!important;min-height:112px!important;max-height:none!important}'
+            . $plp . '.category-view-move .awa-category-hero__content{height:auto!important;min-height:0!important;max-height:none!important;'
+            . 'padding:var(--awa-space-2,8px) var(--awa-space-3,12px)!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important}'
+            . $plp . '.category-view-move .awa-category-hero__title{font-size:17px!important;line-height:1.2!important;margin:0!important;'
+            . 'overflow:visible!important;white-space:normal!important}'
             . $plp . '.category-view-move .awa-category-hero__count{font-size:12px!important;line-height:1.3!important;margin:4px 0 0!important}'
-            . $plp . '.mst_categorySearch{display:none!important}'
+            . $plp . '.mst_categorySearch{display:block!important;margin:0 0 var(--awa-plp-stack-gap,12px)!important;'
+            . 'min-height:0!important;height:auto!important}'
+            . $plp . '.mst_categorySearch #mst_categorySearch{min-height:44px!important;height:44px!important;'
+            . 'max-height:44px!important;line-height:44px!important;width:100%!important;margin:0!important;'
+            . 'box-sizing:border-box!important}'
             . '/* FIX 2026-07-08: PLP mobile toolbar — grid estável (cc2a40: absolute center + sr-only pages vazava). */'
             . $plp . '.shop-tab-title{height:auto!important;min-height:0!important;max-height:none!important;margin:0 0 8px!important;overflow:visible!important}'
             . $plp . '.shop-tab-title .toolbar.toolbar-products{height:auto!important;min-height:0!important;max-height:none!important;'
-            . 'padding:8px!important;margin:0!important;position:relative!important;overflow:visible!important;display:flex!important;flex-direction:column!important}'
+            . 'padding:8px 0!important;padding-inline:0!important;margin:0!important;position:relative!important;overflow:visible!important;display:flex!important;flex-direction:column!important}'
             . $plp . '.shop-tab-title .toolbar.toolbar-products>.center{display:grid!important;grid-template-columns:minmax(0,1fr)!important;'
             . 'grid-template-rows:auto auto!important;gap:8px!important;position:static!important;top:auto!important;left:auto!important;right:auto!important;'
             . 'width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;align-items:stretch!important}'
@@ -1255,7 +3067,9 @@ class OptimizeHeadStylesPlugin
             . 'display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:8px!important;overflow:visible!important;'
             . 'clip:auto!important;clip-path:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}'
             . $plp . '.shop-tab-title .toolbar.toolbar-products .modes .modes-label{visibility:visible!important;opacity:1!important;'
-            . 'width:auto!important;height:auto!important;min-height:36px!important;max-width:100%!important;white-space:normal!important}'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:auto!important;height:auto!important;min-height:44px!important;min-width:44px!important;'
+            . 'box-sizing:border-box!important;padding-block:10px!important;max-width:100%!important;white-space:normal!important}'
             . $plp . '.shop-tab-title .toolbar.toolbar-products .pages{display:none!important;visibility:hidden!important;'
             . 'width:0!important;height:0!important;overflow:hidden!important;pointer-events:none!important}'
             . $plp . '.shop-tab-title .toolbar.toolbar-products .pages :is(.pages-items,.item,a,strong){display:none!important;visibility:hidden!important}'
@@ -1264,9 +3078,11 @@ class OptimizeHeadStylesPlugin
             . 'max-height:none!important;padding:0!important;margin:0!important;grid-row:2!important}'
             . $plp . '.shop-tab-title .toolbar.toolbar-products .sorter-label{height:auto!important;min-height:0!important;font-size:11px!important;'
             . 'line-height:1.2!important;margin:0!important;white-space:normal!important;flex:0 0 auto!important}'
-            . $plp . '.shop-tab-title .toolbar.toolbar-products .sorter-options{flex:1 1 auto!important;min-width:0!important;height:40px!important;'
-            . 'min-height:40px!important;max-height:44px!important;margin:0!important;padding:6px 10px!important}'
-            . $plp . '.awa-plp-b2b-gate-banner{display:block!important;padding:8px!important;margin-bottom:8px!important;min-height:0!important;height:auto!important}'
+            . $plp . '.shop-tab-title .toolbar.toolbar-products .sorter-options{flex:1 1 auto!important;min-width:0!important;height:44px!important;'
+            . 'min-height:44px!important;max-height:none!important;margin:0!important;padding:6px 10px!important;box-sizing:border-box!important}'
+            . $plp . '.awa-plp-b2b-gate-banner{display:block!important;padding:0!important;border:0!important;'
+            . 'background:transparent!important;margin:0 0 var(--awa-plp-stack-gap,12px)!important;'
+            . 'min-height:0!important;height:auto!important;box-sizing:border-box!important}'
             . $plp . '.awa-plp-b2b-gate-banner__badge{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;'
             . 'clip-path:inset(50%)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}'
             . $plp . '.awa-plp-b2b-gate-banner__actions{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;'
@@ -1274,6 +3090,13 @@ class OptimizeHeadStylesPlugin
             . $plp . '.awa-plp-b2b-gate-banner__action{height:44px!important;min-height:44px!important;padding:8px!important;'
             . 'font-size:12px!important;line-height:1.1!important;white-space:nowrap!important}'
             . '}}'
+            /* BUG-IMPECCABLE-REFINE-CONDENSED 2026-08-05: awa-commerce-impeccable-refine.css seta
+               border:2px!important no form de busca na home page com especificidade (0,11,3),
+               vencendo o lock condensado de (0,3,1). Esta regra usa auditLock+condensed
+               resultando em (0,13,4) e garante border:0 no estado ícone em todas as viewports. */
+            . $auditLock . '.awa-header-condensed .awa-header-search-col :is(form#search_mini_form,form.minisearch),'
+            . $auditLock . '.awa-header-condensed .awa-header-search-col :is(form#search_mini_form,form.minisearch):focus-within{'
+            . 'border:0!important;background:transparent!important;box-shadow:none!important}'
             . '</style>';
 
         $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
@@ -1305,11 +3128,160 @@ class OptimizeHeadStylesPlugin
     }
 
     /**
+     * FOUC do chrome do header — GLOBAL (home/PLP/PDP/B2B storefront).
+     * Não amarrar a cms-index-index: Adobe trata header como componente compartilhado.
+     * Auth/B2B focus / checkout já ficam de fora pelo caller.
+     *
+     * Minicart/lupa: sem @layer — regras #html-body unlayered !important venciam o layer
+     * awa-header-chrome-fouc-global (evidência PDP 2026-07-30: bg oklch vermelho).
+     *
+     * A regra vem do mesmo SSOT usado pelo cascade-lock terminal. Aqui emitimos
+     * apenas a cópia crítica no head; a antiga cópia idêntica no body era
+     * redundante e adicionava dívida de cascata.
+     */
+    private function injectGlobalHeaderChromeFoucStyles(string $html): string
+    {
+        if (
+            !str_contains($html, 'awa-site-header')
+            && !str_contains($html, 'awa-header-account-prompt')
+            && !str_contains($html, 'header-mini-cart')
+        ) {
+            return $html;
+        }
+
+        $html = preg_replace(
+            '/<style id="(?:awa-header-chrome-fouc-global-20260730[^"]*|awa-header-chrome-critical-ssot-r1)"'
+            . '[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $rules = HeaderImpeccableCascadeLockCss::headerChromeCanonicalRules();
+        $headCss = '<style id="awa-header-chrome-critical-ssot-r1">' . $rules . '</style>';
+
+        /* First paint: head (antes de parsear o sticky header no body). */
+        if (stripos($html, '</head>') !== false) {
+            $withHead = preg_replace('/<\/head>/i', $headCss . "\n</head>", $html, 1);
+            $html = is_string($withHead) ? $withHead : $html;
+        }
+
+        return $html;
+    }
+
+    /**
+     * Autocomplete Mirasvit — título+SKU compactos e esconde CMS "Informações".
+     * Final-wins sobre align-grid (:is(.title){padding:4px 8px}) e refine (thumb 64px).
+     * Cores/radius do design system AWA (DESIGN.md / .impeccable/design.json).
+     */
+    private function injectSearchAutocompleteCompactStyles(string $html): string
+    {
+        if (
+            !str_contains($html, 'mst-searchautocomplete')
+            && !str_contains($html, 'search_mini_form')
+            && !str_contains($html, 'block-search')
+        ) {
+            return $html;
+        }
+
+        $styleId = 'awa-search-autocomplete-compact-20260730';
+        $html = preg_replace(
+            '/<style id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $root = 'html body#html-body#html-body .page-wrapper .mst-searchautocomplete__autocomplete';
+        $item = $root . ' .mst-searchautocomplete__item.magento_catalog_product';
+
+        $css = '<style id="' . $styleId . '">'
+            . $root . ' .mst-searchautocomplete__index.magento_cms_page{display:none!important}'
+            . $item . '{align-items:center!important;gap:10px!important;min-height:0!important;'
+            . 'padding:8px 12px!important}'
+            . $item . '>a{'
+            . 'flex:0 0 48px!important;display:block!important;width:48px!important;max-width:48px!important;'
+            . 'height:48px!important;max-height:48px!important;text-decoration:none!important}'
+            . $item . ' .mst-product-image-wrapper{'
+            . 'flex:0 0 48px!important;display:grid!important;place-items:center!important;'
+            . 'width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;'
+            . 'margin:0!important;overflow:hidden!important;border:1px solid #e5e5e5!important;'
+            . 'border-radius:8px!important;background:#f7f7f7!important}'
+            . $item . ' .mst-product-image-wrapper img{'
+            . 'display:block!important;width:100%!important;height:100%!important;'
+            . 'max-width:48px!important;max-height:48px!important;object-fit:contain!important}'
+            . $item . ' .description,' . $item . ' .rating{display:none!important}'
+            . $item . ' .title{'
+            . 'display:flex!important;flex-direction:column!important;align-items:flex-start!important;'
+            . 'gap:2px!important;margin:0!important;padding:0!important;min-height:0!important;'
+            . 'background:transparent!important;border:0!important;box-shadow:none!important}'
+            . $item . ' .title>a{'
+            . 'flex:0 1 auto!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;'
+            . '-webkit-line-clamp:2!important;max-width:100%!important;margin:0!important;padding:0!important;'
+            . 'overflow:hidden!important;color:#333333!important;font-size:13px!important;font-weight:600!important;'
+            . 'line-height:1.25!important;text-decoration:none!important}'
+            . $item . ' .title .sku{'
+            . 'display:inline-flex!important;align-items:center!important;box-sizing:border-box!important;'
+            . 'height:18px!important;min-height:0!important;max-height:18px!important;margin:0!important;'
+            . 'padding:0 6px!important;border-radius:8px!important;background:#f7f7f7!important;'
+            . 'border:1px solid #e5e5e5!important;color:#666666!important;font-size:10px!important;'
+            . 'font-weight:600!important;letter-spacing:.02em!important;line-height:18px!important;'
+            . 'white-space:nowrap!important}'
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
      * Lock inline — última camada da cascata; eixo 1280px site-wide (vence page-containers async).
      */
     private function injectSiteShellInlineLock(string $html, string $fullAction): string
     {
         $html = preg_replace('/<style id="awa-align-grid-inline-lock[^"]*"[^>]*>.*?<\/style>/s', '', $html) ?? $html;
+
+        /* Home: ~80–93KB inline duplicava o align-grid já no CSS gate. Mantém só shell
+         * first-paint; o restante entra via awa-align-grid-terminal (idle/gate). */
+        if ($fullAction === self::HOME_ACTION) {
+            $slim = '<style id="awa-align-grid-inline-lock-20260626-phase3d22b">'
+                . 'html body#html-body#html-body{--awa-grid-shell-max:min(100%,1280px);--awa-grid-container-pad:16px;'
+                . '--awa-grid-card-gap:12px;--awa-grid-col-gap:12px;--awa-grid-section-gap:16px}'
+                . 'html body#html-body#html-body .page-wrapper .awa-site-header'
+                . ' :is(.header-main,.header_main)>.container,html body#html-body#html-body .page-wrapper #header'
+                . ' :is(.header-main,.header_main)>.container{padding-inline:0!important;max-width:100%!important;'
+                . 'width:100%!important;margin-inline:0!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body .page-wrapper .awa-site-header'
+                . ' :is(.awa-main-header__inner,.awa-header-inner,.header-content){box-sizing:border-box!important;'
+                . 'margin-inline:auto!important;max-width:min(100%,1280px)!important;'
+                . 'padding-inline:16px!important;width:100%!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.rokanthemes-onepagecheckout)'
+                . ' .page-wrapper :is(.page-main.container,#maincontent.page-main.container,#maincontent#maincontent.page-main.container){'
+                . 'box-sizing:border-box!important;margin-inline:auto!important;'
+                . 'max-width:100%!important;padding-inline:16px!important;width:min(100%,1280px)!important}'
+                . 'html body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) #footer.footer-container,'
+                . 'html body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) #footer .footer-container{'
+                . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:min(100%,1280px)!important;'
+                . 'padding-inline:16px!important;width:100%!important}'
+                . 'html body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) .footer-bottom{'
+                . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:min(100%,1280px)!important;'
+                . 'padding-inline:16px!important;width:100%!important}'
+                . 'html body#html-body#html-body .page-wrapper .content-top-home,'
+                . 'html body#html-body#html-body .page-wrapper .ayo-home5-wrapper{'
+                . 'box-sizing:border-box!important;max-width:min(100%,1280px)!important;margin-inline:auto!important;width:100%!important}'
+                . '@media(max-width:767px){'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
+                . '.page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__item{'
+                . 'min-height:72px!important;padding:12px!important;gap:10px!important;'
+                . 'flex-direction:row!important;align-items:flex-start!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
+                . '.page-wrapper .awa-hero-b2b-cta .awa-hero-benefits__icon{'
+                . 'flex:0 0 44px!important;width:44px!important;height:44px!important;'
+                . 'min-width:44px!important;min-height:44px!important}}'
+                . '</style>';
+            $injected = preg_replace('/<\/body>/i', $slim . "
+</body>", $html, 1);
+
+            return is_string($injected) ? $injected : $html;
+        }
 
         $css = '<style id="awa-align-grid-inline-lock-20260626-phase3d22b">'
             . 'html body#html-body#html-body{--awa-grid-shell-max:min(100%,1280px);--awa-grid-container-pad:16px;'
@@ -1339,30 +3311,57 @@ class OptimizeHeadStylesPlugin
             . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:100%!important;'
             . 'padding-inline:0!important;width:100%!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) .footer-bottom{'
-            . 'box-sizing:border-box!important;margin:0!important;margin-left:0!important;margin-right:0!important;'
-            . 'max-width:100%!important;padding:0!important;padding-left:0!important;padding-right:0!important;'
-            . 'width:100%!important}'
+            . 'box-sizing:border-box!important;margin-inline:auto!important;'
+            . 'max-width:min(100%,1280px)!important;padding-block:clamp(16px,2vw,24px)!important;'
+            . 'padding-inline:16px!important;width:100%!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) .footer-bottom>.container{'
             . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:100%!important;'
-            . 'padding:0!important;width:min(100%,1280px)!important}'
+            . 'padding:0!important;width:100%!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) .footer-bottom .footer-bottom-inner{'
             . 'box-sizing:border-box!important;display:grid!important;gap:10px!important;'
             . 'grid-template-columns:minmax(0,1fr)!important;justify-items:stretch!important;'
-            . 'margin:0!important;max-width:none!important;padding:12px 16px!important;width:100%!important}'
+            . 'margin:0!important;max-width:none!important;padding-block:12px!important;padding-inline:0!important;width:100%!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             . '.footer-bottom .footer-bottom-inner>.row.awa-footer-bottom__row{'
             . 'box-sizing:border-box!important;display:grid!important;'
-            . 'grid-template-columns:minmax(88px,118px) minmax(220px,1fr) minmax(180px,240px)!important;'
-            . 'align-items:center!important;gap:10px 18px!important;justify-self:center!important;'
-            . 'margin:0 auto!important;max-width:760px!important;min-width:0!important;width:100%!important}'
+            . 'grid-template-columns:minmax(96px,auto) minmax(0,1fr) minmax(0,1fr)!important;'
+            . 'align-items:start!important;justify-items:center!important;gap:10px 24px!important;'
+            . 'justify-self:stretch!important;margin:0!important;max-width:none!important;'
+            . 'min-width:0!important;width:100%!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
+            . '.footer-bottom .footer-bottom-inner>.row.awa-footer-bottom__row>[class*="col-"]:first-child{'
+            . 'align-self:center!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             . '.footer-bottom .footer-bottom-inner>.row.awa-footer-bottom__row>[class*="col-"]{'
             . 'box-sizing:border-box!important;float:none!important;margin:0!important;max-width:none!important;'
-            . 'min-width:0!important;padding-inline:0!important;width:auto!important}'
+            . 'min-width:0!important;padding-inline:0!important;width:auto!important;'
+            . 'justify-self:center!important;text-align:center!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
+            . '.footer-bottom :is(.awa-footer-pay-sec,.awa-footer-sec){'
+            . 'display:flex!important;flex-direction:column!important;align-items:center!important;'
+            . 'text-align:center!important;width:100%!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
+            . '.footer-bottom :is(.awa-footer-pay-logos,.awa-footer-sec-seals){'
+            . 'display:flex!important;justify-content:center!important;align-items:center!important;'
+            . 'flex-wrap:wrap!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             . '.footer-bottom .awa-footer-bottom__copyright{'
-            . 'box-sizing:border-box!important;justify-self:center!important;margin:0!important;'
-            . 'max-width:1040px!important;width:100%!important}'
+            . 'box-sizing:border-box!important;justify-self:stretch!important;margin:0!important;'
+            . 'max-width:none!important;padding:12px!important;text-align:center!important;width:100%!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
+            . '.footer-bottom .awa-footer-cnpj-badge{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:fit-content!important;max-width:100%!important;margin-inline:auto!important;'
+            . 'margin-block:0!important;vertical-align:baseline!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
+            . '.footer-bottom .awa-footer-copyright__legal{'
+            . 'display:flex!important;flex-direction:column!important;align-items:center!important;'
+            . 'justify-content:center!important;gap:6px!important;text-align:center!important;'
+            . 'width:100%!important;max-width:none!important;margin-inline:0!important;line-height:1.5!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
+            . '.footer-bottom .awa-footer-copyright__disclaimer{'
+            . 'display:block!important;width:100%!important;max-width:none!important;'
+            . 'margin-inline:0!important;text-align:center!important;line-height:1.5!important}'
             . '@media(max-width:991px){'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             . '.footer-bottom .footer-bottom-inner>.row.awa-footer-bottom__row{'
@@ -1373,7 +3372,7 @@ class OptimizeHeadStylesPlugin
             . '}'
             . 'html body#html-body#html-body.checkout-cart-index .page-wrapper .cart-container{'
             . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:min(100%,1280px)!important;'
-            . 'padding-inline:16px!important;width:100%!important}'
+            . 'padding-inline:0!important;width:100%!important}'
             . 'html body#html-body#html-body.checkout-cart-index .page-wrapper :is(.page-main.container,#maincontent.page-main.container){'
             . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:min(100%,1280px)!important;'
             . 'padding-inline:16px!important;width:100%!important}'
@@ -1541,18 +3540,21 @@ class OptimizeHeadStylesPlugin
                 . $catalogScope . ' :is(.page_footer,.page-footer) :is(h2,h3,h4,.footer-title,.awa-footer-title,a,p,li,span,.footer.links a,.footer-content a){'
                 . 'color:var(--awa-text,CanvasText)!important}'
                 . $catalogScope . ' :is(.page_footer,.page-footer) .footer-bottom{'
-                . 'box-sizing:border-box!important;background:var(--awa-bg,Canvas)!important;border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 14%,Canvas))!important;'
-                . 'border-radius:8px!important;color:var(--awa-text,CanvasText)!important;margin:0 auto!important;max-width:calc(100% - 32px)!important;'
-                . 'overflow:hidden!important;padding:clamp(16px,2vw,24px)!important;width:min(100%,1248px)!important;box-shadow:none!important}'
+                . 'box-sizing:border-box!important;background:#fff!important;background-color:#fff!important;border:0!important;'
+                . 'border-radius:0!important;color:var(--awa-text,CanvasText)!important;margin-inline:auto!important;'
+                . 'max-width:min(100%,1280px)!important;width:100%!important;'
+                . 'overflow:hidden!important;padding-block:clamp(16px,2vw,24px)!important;padding-inline:16px!important;box-shadow:none!important}'
                 . $catalogScope . ' :is(.page_footer,.page-footer) .footer-bottom>.container{'
                 . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:100%!important;padding-inline:0!important;width:100%!important}'
+                . $catalogScope . ' :is(.page_footer,.page-footer) .footer-bottom .footer-bottom-inner{'
+                . 'box-sizing:border-box!important;max-width:100%!important;padding-inline:0!important;width:100%!important}'
                 . '@media(max-width:767px){' . $catalogScope . ' .toolbar.toolbar-products{'
                 . 'display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-items:stretch!important;gap:10px!important}'
                 . $catalogScope . ' .toolbar.toolbar-products :is(.modes,.toolbar-sorter,.field.limiter,.pages){'
                 . 'box-sizing:border-box!important;display:flex!important;flex-wrap:wrap!important;width:100%!important}'
                 . $catalogScope . ' .toolbar.toolbar-products :is(.sorter-options,select.limiter-options){'
                 . 'box-sizing:border-box!important;flex:1 1 160px!important;min-width:0!important;max-width:100%!important}'
-                . $catalogScope . ' :is(.page_footer,.page-footer) .footer-bottom{max-width:calc(100% - 24px)!important;padding:16px!important}}';
+                . $catalogScope . ' :is(.page_footer,.page-footer) .footer-bottom{max-width:min(100%,1280px)!important;padding-inline:12px!important;padding-block:16px!important}}';
         }
 
         if ($fullAction === 'catalog_product_view') {
@@ -1565,25 +3567,29 @@ class OptimizeHeadStylesPlugin
                 . 'max-width:min(100%,1280px)!important;padding-inline:16px!important;width:100%!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .page-title-wrapper .page-title{'
                 . 'font-family:var(--awa-font-heading,"Rubik",system-ui,sans-serif)!important;'
-                . 'font-weight:600!important;font-size:clamp(1.375rem,1.1rem + 1.2vw,1.75rem)!important;'
-                . 'line-height:1.25!important;margin-block-end:12px!important}'
+                . 'font-weight:700!important;font-size:clamp(1.375rem,1.1rem + 1.2vw,1.75rem)!important;'
+                . 'line-height:1.25!important;margin:0!important;margin-block:0!important;'
+                . 'hyphens:none!important;-webkit-hyphens:none!important}'
+                . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main .page-title-wrapper{'
+                . 'margin:0!important;padding-block:8px 12px!important;gap:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main{'
                 . 'display:flex!important;flex-direction:column!important;gap:12px!important;min-width:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main'
                 . ' :is(.product-info-stock-sku,.product-info-price){margin:0!important;padding:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-info-price{'
                 . 'display:grid!important;gap:8px!important;margin-block-end:8px!important}'
+                /* H-pdp-info-declutter (e86806): sem moldura em tocart/add-form; gap 0 no shell unificado */
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart{'
-                . 'border:1px solid var(--awa-border,#e5e5e5)!important;border-radius:8px!important;'
-                . 'background:var(--awa-bg,#ffffff)!important;padding:8px!important;margin:0!important}'
+                . 'border:0!important;border-radius:0!important;'
+                . 'background:transparent!important;padding:0!important;margin:0!important;box-shadow:none!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart .fieldset{'
                 . 'display:grid!important;grid-template-columns:minmax(84px,108px) minmax(0,1fr)!important;'
                 . 'gap:8px!important;align-items:end!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main .box-tocart'
                 . ' :is(.field.qty,.actions){margin:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-add-form{'
-                . 'margin:0!important;padding:8px!important;border:1px solid var(--awa-border,#e5e5e5)!important;'
-                . 'border-radius:8px!important;background:var(--awa-bg,#ffffff)!important}'
+                . 'margin:0!important;padding:0!important;border:0!important;'
+                . 'border-radius:0!important;background:transparent!important;box-shadow:none!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-add-form'
                 . ' form#product_addtocart_form{display:grid!important;grid-template-columns:minmax(84px,108px) minmax(0,1fr)!important;'
                 . 'gap:8px!important;align-items:end!important}'
@@ -1593,17 +3599,18 @@ class OptimizeHeadStylesPlugin
                 . ' form#product_addtocart_form>.actions .action.tocart{width:100%!important;max-width:none!important;'
                 . 'display:inline-flex!important;justify-content:center!important}'
                 . '@media(max-width:991px){html body#html-body.catalog-product-view .page-wrapper .main-detail>.row{'
-                . 'display:flex!important;flex-direction:column!important;gap:12px!important;align-items:stretch!important;'
+                . 'display:flex!important;flex-direction:column!important;gap:0!important;align-items:stretch!important;'
                 . 'grid-template-columns:none!important;margin-inline:0!important;padding-inline:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .main-detail>.row>:is(.col-md-6,.col-sm-6){'
                 . 'flex:0 0 100%!important;width:100%!important;max-width:100%!important;min-width:0!important}}'
                 . '@media(min-width:992px){html body#html-body.catalog-product-view .page-wrapper .main-detail>.row{'
-                . 'display:flex!important;flex-wrap:nowrap!important;gap:12px!important;align-items:flex-start!important;'
+                . 'display:flex!important;flex-wrap:nowrap!important;gap:0!important;align-items:stretch!important;'
                 . 'grid-template-columns:none!important;margin-inline:0!important;padding-inline:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .main-detail>.row>.col-md-6.col-sm-6.col-xs-12:first-child{'
-                . 'flex:1 1 54%!important;max-width:54%!important;min-width:0!important;width:auto!important}'
+                . 'flex:1 1 55%!important;max-width:58%!important;min-width:0!important;width:auto!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .main-detail>.row>.col-md-6.col-sm-6.col-xs-12:last-child{'
-                . 'flex:1 1 46%!important;max-width:46%!important;min-width:0!important;width:auto!important}}'
+                . 'flex:1 1 45%!important;max-width:48%!important;min-width:0!important;width:auto!important;'
+                . 'border-inline-start:1px solid var(--awa-border,#e2e8f0)!important}}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .main-detail>.row>.col-md-6:last-child .product-info-main,'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main.detail-info{'
                 . 'width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}'
@@ -1620,10 +3627,12 @@ class OptimizeHeadStylesPlugin
                 . 'html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-add-form'
                 . ' form#product_addtocart_form{grid-template-columns:minmax(0,1fr)!important;gap:8px!important}}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product.info.detailed{'
-                . 'box-sizing:border-box!important;margin-top:clamp(12px,2vw,20px)!important;margin-bottom:clamp(8px,1.5vw,12px)!important;padding:12px!important;'
-                . 'border:1px solid var(--awa-border)!important;border-radius:8px!important;background:var(--awa-bg)!important}'
+                . 'box-sizing:border-box!important;margin-top:0!important;margin-block-start:0!important;'
+                . 'margin-bottom:0!important;margin-block-end:0!important;padding:0!important;'
+                . 'border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product.data.items{'
-                . 'box-sizing:border-box!important;margin-top:0!important;margin-bottom:0!important}'
+                . 'box-sizing:border-box!important;margin-top:0!important;margin-bottom:0!important;'
+                . 'border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product.data.items>.item.title{'
                 . 'margin:0!important;min-height:40px!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product.data.items>.item.title>.switch{'
@@ -1632,6 +3641,31 @@ class OptimizeHeadStylesPlugin
                 . 'html body#html-body.catalog-product-view .page-wrapper .product.data.items>.item.content{'
                 . 'box-sizing:border-box!important;padding:12px!important;border:1px solid var(--awa-border)!important;'
                 . 'border-radius:0 8px 8px 8px!important;background:var(--awa-bg)!important;font-size:13px!important;line-height:1.45!important}'
+                /* H-pdp-shell7-inline: attr nest + FAQ + spacing + thumb/related (vence CSS apos align-grid) */
+                . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+                . ' .page-wrapper .product.data.items>.item.content'
+                . ' .additional-attributes-wrapper.table-wrapper{'
+                . 'border:0!important;box-shadow:none!important;background:transparent!important;'
+                . 'padding:0!important;margin:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+                . ' .page-wrapper .awa-pdp-faq{border:0!important;box-shadow:none!important;'
+                . 'background:transparent!important;padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+                . ' .page-wrapper .main-detail{padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+                . ' .page-wrapper .product-info-main{padding:12px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+                . ' .page-wrapper .awa-pdp-related,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+                . ' .page-wrapper .column.main>.awa-pdp-related{'
+                . 'border:0!important;border-block-start:0!important;border-top:0!important;'
+                . 'box-shadow:none!important;padding-top:12px!important;padding-block-start:12px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+                . ' .page-wrapper .rx-pdp-crosssell{border:0!important;box-shadow:none!important;'
+                . 'padding-block-start:12px!important;padding-top:12px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+                . ' .page-wrapper .product.media :is(.fotorama__thumb,.fotorama__nav__frame--thumb .fotorama__thumb){'
+                . 'border:0!important;border-width:0!important;box-shadow:none!important;outline:none!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product.data.items'
                 . ' :is(table,table.additional-attributes,.additional-attributes){width:100%!important;max-width:100%!important;'
                 . 'font-size:13px!important;line-height:1.4!important}'
@@ -1645,7 +3679,7 @@ class OptimizeHeadStylesPlugin
                 . ' .product.data.items .additional-attributes :is(th,td){display:table-cell!important;'
                 . 'padding:8px 12px!important;margin:0!important;line-height:1.4!important}}'
                 . '@media(max-width:767px){html body#html-body.catalog-product-view .page-wrapper .product.info.detailed{'
-                . 'margin-top:12px!important;padding:8px!important}'
+                . 'margin-top:0!important;margin-block-start:0!important;padding:0!important;border:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product.data.items>.item.content{padding:8px!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .product.data.items :is(th,td){padding:8px!important}}'
                 . '@media(max-width:991px){html body#html-body.catalog-product-view .page-wrapper'
@@ -1666,6 +3700,105 @@ class OptimizeHeadStylesPlugin
                 . 'html body#html-body.catalog-product-view .page-wrapper .main-detail:has(.b2b-login-to-see-price) .product.media'
                 . ' .fotorama__nav__frame{height:52px!important}}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .col-main>.product-view{margin-bottom:0!important}'
+                // FIX 2026-08-02: PDP stack 12px SSOT (row-gap era 24 + mt 12 = 36).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view{'
+                . '--awa-pdp-stack-gap:var(--awa-stack-tight,var(--awa-space-3,12px))}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view '
+                . '.page-wrapper :is(.column.main,.col-main){'
+                . 'row-gap:var(--awa-pdp-stack-gap,12px)!important;gap:var(--awa-pdp-stack-gap,12px) 0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view '
+                . '.page-wrapper :is(.column.main,.col-main) > :is(.product-view,.product.info.detailed,.awa-pdp-faq,.awa-pdp-related,'
+                . '.block.related,.block.upsell){'
+                . 'margin:0!important;margin-block:0!important;margin-top:0!important;margin-bottom:0!important;'
+                . 'margin-block-start:0!important;margin-block-end:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view '
+                . '.page-wrapper :is(.awa-pdp-faq,.awa-pdp-related){padding-block:0!important;padding-top:0!important;padding-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view '
+                . '.page-wrapper .awa-pdp-related{margin:0!important;margin-block:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view '
+                . '.page-wrapper .nav-breadcrumbs{margin:0!important;padding:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view '
+                . '.page-wrapper .breadcrumbs{margin:0!important;padding-block:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view '
+                . '.page-wrapper #maincontent.page-main{padding-top:var(--awa-pdp-stack-gap,12px)!important;'
+                . 'padding-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view '
+                . '.page-wrapper .columns{margin-bottom:0!important}'
+                // Em Cascade L5, !important em @layer awa-fixes vence unlayered.
+                // bugfix: footer.page-footer{margin-top:8px} está em awa-fixes.
+                // Storefront unificado (PLP/busca/PDP/CMS/home/cart) — audit PLP/cart footerMt 8 + mainPb 16 = 24.
+                . '@layer awa-fixes{'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view,.checkout-cart-index,.cms-page-view,.cms-noroute-index,.cms-index-index,.cms-home,.cms-homepage_ayo_home5,.contact-index-index,.curriculo-index-index,.curriculo-index-status) '
+                . '.page-wrapper :is(.page-footer,.page_footer),'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view,.checkout-cart-index,.cms-page-view,.cms-noroute-index,.cms-index-index,.cms-home,.cms-homepage_ayo_home5,.contact-index-index,.curriculo-index-index,.curriculo-index-status) '
+                . '.page-wrapper footer.page-footer{margin-top:var(--awa-stack-tight,var(--awa-space-3,12px))!important;'
+                . 'margin-block-start:var(--awa-stack-tight,var(--awa-space-3,12px))!important}'
+                . '}'
+                // PLP shell: main pb 0 + toolbar/shop margins 12.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-category-view '
+                . '.page-wrapper #maincontent.page-main{padding-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-category-view '
+                . '.page-wrapper .toolbar.toolbar-products{margin-top:0!important;margin-bottom:var(--awa-plp-stack-gap,12px)!important;'
+                . 'margin-block:0 var(--awa-plp-stack-gap,12px)!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-category-view '
+                . '.page-wrapper .shop-tab-title{margin:0 0 var(--awa-plp-stack-gap,12px)!important;'
+                . 'margin-block:0 var(--awa-plp-stack-gap,12px)!important}'
+                // FIX 2026-08-02: cart shell stack 12px (footerMt8+mainPb16=24; gap16; empty mb16).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index{'
+                . '--awa-cart-stack-gap:var(--awa-stack-tight,var(--awa-space-3,12px))}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index '
+                . '.page-wrapper #maincontent.page-main{padding-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index '
+                . '.page-wrapper .columns{margin-bottom:0!important;margin-block-end:0!important;'
+                . 'gap:var(--awa-cart-stack-gap,12px)!important;row-gap:var(--awa-cart-stack-gap,12px)!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index '
+                . '.page-wrapper .column.main{gap:var(--awa-cart-stack-gap,12px)!important;'
+                . 'row-gap:var(--awa-cart-stack-gap,12px)!important;padding-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index '
+                . '.page-wrapper .cart-empty.awa-cart-empty{margin-top:0!important;margin-bottom:0!important;'
+                . 'margin-block:0!important;gap:var(--awa-cart-stack-gap,12px)!important;'
+                . 'row-gap:var(--awa-cart-stack-gap,12px)!important}'
+                // FIX 2026-08-02: CMS shell stack 12px (flex gap 16+h1 mb12=28; columns mb32+pb16+footer8=56).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-page-view,.cms-noroute-index,.contact-index-index,.curriculo-index-index,.curriculo-index-status){'
+                . '--awa-cms-stack-gap:var(--awa-stack-tight,var(--awa-space-3,12px))}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-page-view,.cms-noroute-index,.contact-index-index,.curriculo-index-index,.curriculo-index-status) '
+                . '.page-wrapper .nav-breadcrumbs{margin:0!important;margin-block:0!important;padding-block:0!important;min-height:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-page-view,.cms-noroute-index,.contact-index-index,.curriculo-index-index,.curriculo-index-status) '
+                . '.page-wrapper .breadcrumbs{margin:0!important;margin-block:0!important;padding-block:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-page-view,.cms-noroute-index,.contact-index-index,.curriculo-index-index,.curriculo-index-status) '
+                . '.page-wrapper #maincontent.page-main{padding-top:var(--awa-cms-stack-gap,12px)!important;padding-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-page-view,.cms-noroute-index,.contact-index-index,.curriculo-index-index,.curriculo-index-status) '
+                . '.page-wrapper .columns{margin-bottom:0!important;margin-block-end:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-page-view,.cms-noroute-index,.contact-index-index,.curriculo-index-index,.curriculo-index-status) '
+                . '.page-wrapper .column.main{gap:var(--awa-cms-stack-gap,12px)!important;row-gap:var(--awa-cms-stack-gap,12px)!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-page-view,.cms-noroute-index,.contact-index-index,.curriculo-index-index,.curriculo-index-status) '
+                . '.page-wrapper .column.main :is(.awa-institutional-h1,h1){margin-block:0!important;margin-top:0!important;margin-bottom:0!important}'
+                // FIX 2026-08-02: search stack 12px (Mirasvit tabs mb20 + toolbar 4/8 + mainPb16).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index{'
+                . '--awa-search-stack-gap:var(--awa-stack-tight,var(--awa-space-3,12px));'
+                . '--awa-plp-stack-gap:var(--awa-search-stack-gap)}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index '
+                . '.page-wrapper #maincontent.page-main{padding-top:var(--awa-search-stack-gap,12px)!important;padding-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index '
+                . '.page-wrapper .page-title-wrapper{margin-bottom:0!important;margin-block-end:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index '
+                . '.page-wrapper .columns.layout-2-col{row-gap:0!important;column-gap:var(--awa-search-stack-gap,12px)!important;'
+                . 'gap:0 var(--awa-search-stack-gap,12px)!important;margin-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index '
+                . '.page-wrapper .mst-search-in__wrapper{margin:0 0 var(--awa-search-stack-gap,12px)!important;'
+                . 'margin-block:0 var(--awa-search-stack-gap,12px)!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index '
+                . '.page-wrapper .mst-search__result-tabs{margin:0 0 var(--awa-search-stack-gap,12px)!important;'
+                . 'margin-block:0 var(--awa-search-stack-gap,12px)!important;padding-block-end:0!important;padding-bottom:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index '
+                . '.page-wrapper .search.results{margin-bottom:0!important;margin-block-end:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index '
+                . '.page-wrapper .toolbar.toolbar-products{margin-top:0!important;'
+                . 'margin-bottom:var(--awa-search-stack-gap,12px)!important;'
+                . 'margin-block:0 var(--awa-search-stack-gap,12px)!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body.catalogsearch-result-index '
+                . '.page-wrapper .shop-tab-title{margin:0 0 var(--awa-search-stack-gap,12px)!important;'
+                . 'margin-block:0 var(--awa-search-stack-gap,12px)!important}'
                 // FIX 2026-07-06: a margem negativa de -140px sobrepunha o buy-box
                 // (QTD + Adicionar ao Carrinho) por 116px em produtos B2B — o gap que
                 // ela fechava (~301px) encolheu para ~24px depois que caixa de
@@ -1673,7 +3806,7 @@ class OptimizeHeadStylesPlugin
                 // coluna do buy-box. Confirmado via Playwright (overlap de 116px
                 // idêntico em 3/3 produtos testados). Regra removida.
                 . 'html body#html-body.catalog-product-view .page-wrapper .awa-pdp-related{'
-                . 'margin-top:clamp(16px,2.5vw,24px)!important;margin-bottom:clamp(16px,2.5vw,24px)!important}'
+                . 'margin-top:0!important;margin-bottom:0!important}'
                 . 'html body#html-body.catalog-product-view .page-wrapper .awa-pdp-related.awa-shelf--carousel .awa-carousel__viewport{'
                 . 'display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;overflow-x:auto!important;'
                 . 'width:100%!important;gap:0!important;padding-block:8px!important}'
@@ -1788,11 +3921,11 @@ class OptimizeHeadStylesPlugin
                 . 'overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important}'
                 . '@media(max-width:767px){html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
                 . '.page-wrapper :is(.top-home-content--above-fold,.top-home-content--above-fold>.banner-slider.banner-slider2){'
-                . 'box-sizing:border-box!important;height:auto!important;min-height:336px!important;max-height:none!important}'
+                . 'box-sizing:border-box!important;height:auto!important;min-height:176px!important;max-height:none!important}'
                 . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
-                . '.page-wrapper .wrapper_slider.visible-xs{min-height:288px!important}'
+                . '.page-wrapper .wrapper_slider.visible-xs{min-height:176px!important}'
                 . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
-                . '.page-wrapper .wrapper_slider.visible-xs .awa-hero-swiper{min-height:288px!important;height:288px!important}'
+                . '.page-wrapper .wrapper_slider.visible-xs .awa-hero-swiper{min-height:176px!important;height:176px!important}'
                 . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
                 . '.page-wrapper .awa-product-promo-banners{overflow-x:clip!important}'
                 . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
@@ -1942,8 +4075,20 @@ class OptimizeHeadStylesPlugin
                 . '.awa-shelf--carousel .product-rating{align-items:center!important;display:flex!important;'
                 . 'min-height:18px!important;margin-top:6px!important;max-width:100%!important;overflow:hidden!important}'
                 . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
+                . '.awa-shelf--carousel .product-rating:has(.product-reviews-summary.empty),'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
+                . '.awa-shelf--carousel .product-rating:empty{'
+                . 'display:none!important;min-height:0!important;margin:0!important;overflow:hidden!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
+                . '.awa-shelf--carousel .product-reviews-summary.empty{display:none!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
                 . '.awa-shelf--carousel :is(.product-reviews-summary,.rating-summary,.reviews-actions){'
                 . 'align-items:center!important;display:inline-flex!important;line-height:1!important;margin:0!important;min-height:18px!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
+                . '.awa-shelf--carousel .product-reviews-summary.empty,'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
+                . '.awa-shelf--carousel .product-reviews-summary.empty :is(.rating-summary,.reviews-actions){'
+                . 'display:none!important;min-height:0!important}'
                 . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
                 . '.awa-shelf--carousel :is(.reviews-actions,.review-count){font-size:11px!important;line-height:1!important;'
                 . 'max-width:9ch!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}'
@@ -1982,10 +4127,12 @@ class OptimizeHeadStylesPlugin
             . 'html body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) p.awa-footer-atendimento__store-address{'
             . 'line-height:1.45!important}'
             . 'html body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) p.awa-footer-copyright__disclaimer{'
-            . 'line-height:1.45!important;margin-inline:auto!important;max-width:min(110ch,100%)!important;text-wrap:pretty!important}'
+            . 'line-height:1.45!important;margin-inline:0!important;max-width:none!important;width:100%!important;'
+            . 'text-align:center!important;text-wrap:pretty!important}'
             . 'html body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             . '.footer-bottom .awa-footer-bottom__copyright p.awa-footer-copyright__disclaimer{'
-            . 'line-height:1.45!important;margin-inline:auto!important;max-width:min(110ch,100%)!important;width:auto!important;text-wrap:pretty!important}'
+            . 'line-height:1.45!important;margin-inline:0!important;max-width:none!important;width:100%!important;'
+            . 'text-align:center!important;text-wrap:pretty!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column .page-wrapper '
             . '.awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__cta strong.awa-b2b-promo-bar__cta-long{'
             . 'color:Canvas!important;text-shadow:none!important}'
@@ -2020,6 +4167,36 @@ class OptimizeHeadStylesPlugin
             . 'color:inherit!important}'
             . '@media(min-width:768px) and (max-width:991px){'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header :is(#header.header-container,#awa-b2b-promo-bar.awa-b2b-promo-bar){'
+            . 'height:48px!important;min-height:48px!important;max-height:48px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout,'
+            . '.awa-b2b-promo-bar__text){height:48px!important;min-height:48px!important;max-height:48px!important;'
+            . 'line-height:48px!important;overflow:visible!important}'
+            /* H23: tablet — NÃO esconder lead-long (impeccable já esconde lead-short).
+               Altura 32px + ellipsis; evita “só Cadastre agora”. */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar.awa-b2b-promo-bar{'
+            . 'height:32px!important;min-height:32px!important;max-height:32px!important;overflow:hidden!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar.awa-b2b-promo-bar '
+            . ':is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout,.awa-b2b-promo-bar__text){'
+            . 'height:32px!important;min-height:32px!important;max-height:32px!important;line-height:32px!important;overflow:hidden!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar.awa-b2b-promo-bar '
+            . '.awa-b2b-promo-bar__text>.awa-b2b-promo-bar__lead{'
+            . 'display:inline-flex!important;align-items:center!important;flex:0 1 auto!important;min-width:0!important;max-width:42%!important;'
+            . 'overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar.awa-b2b-promo-bar '
+            . '.awa-b2b-promo-bar__text>.awa-b2b-promo-bar__lead .awa-b2b-promo-bar__lead-long{'
+            . 'display:inline-block!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;'
+            . 'white-space:nowrap!important;visibility:visible!important;width:auto!important;height:auto!important;position:static!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header #awa-b2b-promo-bar.awa-b2b-promo-bar .awa-b2b-promo-bar__cta{'
+            . 'height:28px!important;min-height:28px!important;max-height:28px!important;line-height:1!important}}'
+            . '@media(min-width:768px) and (max-width:991px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
             . '.page-wrapper .awa-site-header .header-wrapper-sticky{display:flex!important;flex-direction:column!important;'
             . 'height:auto!important;min-height:calc(56px + 48px)!important;max-height:none!important;overflow:visible!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
@@ -2028,9 +4205,33 @@ class OptimizeHeadStylesPlugin
             . 'max-height:48px!important;overflow:visible!important;pointer-events:auto!important}}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
             . '.page-wrapper .awa-site-header .awa-header-account-prompt :is(.awa-header-account-prompt__link--login,'
-            . '.awa-header-account-prompt__link--register,.awa-header-account-prompt__link){'
-            . 'display:inline-flex!important;align-items:center!important;min-height:44px!important;height:44px!important;'
-            . 'box-sizing:border-box!important;line-height:1.2!important;padding:0 4px!important}'
+            . '.awa-header-account-prompt__link):not(.awa-header-account-prompt__link--register){'
+            . 'display:inline-flex!important;align-items:center!important;min-height:0!important;height:auto!important;'
+            . 'box-sizing:border-box!important;line-height:1.2!important;padding:0 2px!important;'
+            . 'background:transparent!important}'
+            /* r72: cadastre-se pill — vence css-gate transparent */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header a.awa-header-account-prompt__link--register{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'min-height:28px!important;height:auto!important;max-height:none!important;'
+            . 'padding:4px 12px!important;border-radius:999px!important;'
+            . 'background:var(--awa-primary,#b73337)!important;background-color:var(--awa-primary,#b73337)!important;'
+            . 'color:var(--awa-on-primary,#fff)!important;border:1px solid var(--awa-primary,#b73337)!important;'
+            . 'font-size:12px!important;font-weight:700!important;line-height:1.2!important;'
+            . 'text-decoration:none!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header .awa-header-account-prompt__line2{'
+            . 'overflow:visible!important;min-height:28px!important;align-items:center!important;gap:6px!important;padding:0!important}'
+            /* r73 polish lock — cluster conta+carrinho */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header .awa-header-account-prompt[data-awa-auth-state="guest"]{'
+            . 'max-width:252px!important;overflow:visible!important;gap:8px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header .awa-header-right-col{'
+            . 'gap:10px!important;max-width:none!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
+            . '.page-wrapper .awa-site-header .awa-header-account-prompt__guest{gap:2px!important;overflow:visible!important}'
+
             . '@media(min-width:768px){html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index.page-layout-1column '
             . '.page-wrapper .awa-site-header #awa-b2b-promo-bar .awa-b2b-promo-bar__cta strong.awa-b2b-promo-bar__cta-long{'
             . 'color:var(--awa-on-primary,Canvas)!important;text-shadow:none!important}}'
@@ -2172,9 +4373,15 @@ class OptimizeHeadStylesPlugin
 @media(min-width:1200px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]{--awa-header-main-row-h:68px!important;--awa-header-nav-h:48px!important;--awa-header-shell-pad:24px!important;--awa-header-col-gap:24px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .header.awa-main-header{height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;padding:0 var(--awa-header-shell-pad)!important;box-sizing:border-box!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container,.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;box-sizing:border-box!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template-columns:minmax(140px,172px) minmax(360px,1fr) minmax(240px,300px)!important;grid-template-areas:"brand search actions"!important;align-items:center!important;column-gap:var(--awa-header-col-gap)!important;width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;padding-inline:var(--awa-header-shell-pad)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;height:var(--awa-header-main-row-h)!important;min-height:0!important;max-height:var(--awa-header-main-row-h)!important;overflow:hidden!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;display:flex!important;align-items:center!important;width:100%!important;min-width:0!important;max-width:none!important;height:var(--awa-header-main-row-h)!important;min-height:0!important;max-height:var(--awa-header-main-row-h)!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{grid-area:actions!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;width:100%!important;min-width:0!important;max-width:300px!important;height:var(--awa-header-main-row-h)!important;min-height:0!important;max-height:var(--awa-header-main-row-h)!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar){height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-nav-bar__inner{height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;box-sizing:border-box!important;width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;padding-inline:var(--awa-header-shell-pad)!important}}
 @media(min-width:992px) and (max-width:1199px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]{--awa-header-main-row-h:64px!important;--awa-header-nav-h:46px!important;--awa-header-shell-pad:20px!important;--awa-header-col-gap:16px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){grid-template-columns:minmax(132px,160px) minmax(320px,1fr) minmax(220px,280px)!important;grid-template-areas:"brand search actions"!important;column-gap:var(--awa-header-col-gap)!important;padding-inline:var(--awa-header-shell-pad)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .header.awa-main-header{height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;padding:0 var(--awa-header-shell-pad)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container,.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar){height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-nav-bar__inner{height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;padding-inline:var(--awa-header-shell-pad)!important}}
 @media(min-width:768px) and (max-width:991px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]{--awa-header-main-row-h:56px!important;--awa-header-nav-h:44px!important;--awa-header-shell-pad:16px!important;--awa-header-col-gap:16px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template-columns:minmax(112px,148px) minmax(260px,1fr) minmax(180px,240px)!important;grid-template-areas:"brand search actions"!important;column-gap:var(--awa-header-col-gap)!important;padding-inline:var(--awa-header-shell-pad)!important;height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .header.awa-main-header{height:var(--awa-header-main-row-h)!important;min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;padding:0 var(--awa-header-shell-pad)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;max-width:none!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{grid-area:actions!important;max-width:240px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar){height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .awa-nav-bar__inner{height:var(--awa-header-nav-h)!important;min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;padding-inline:var(--awa-header-shell-pad)!important}}
-@media(max-width:767px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky{height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container){height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;margin:0!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template-areas:"toggle brand cart" "search search search"!important;grid-template-columns:44px minmax(0,1fr) 44px!important;grid-template-rows:auto auto!important;row-gap:12px!important;column-gap:12px!important;height:auto!important;min-height:0!important;max-height:none!important;padding:12px 16px!important;overflow:visible!important;box-sizing:border-box!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important;align-self:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important;align-self:center!important;min-width:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-cart-link{grid-area:cart!important;justify-self:end!important;align-self:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;width:100%!important;min-width:0!important;max-width:none!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form{display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;grid-template-areas:"field submit"!important;width:100%!important;min-width:0!important;max-width:100%!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form .field.search{grid-area:field!important;min-width:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col input#search{height:44px!important;min-height:44px!important;max-height:44px!important;line-height:44px!important;font-size:16px!important;padding-block:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form .actions{grid-area:submit!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important;margin:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form :is(.action.search,button.action.search){width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{grid-area:search!important;width:100%!important;min-width:0!important;max-width:none!important}}
-@media(min-width:1200px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container,.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){height:68px!important;min-height:68px!important;max-height:68px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){grid-template-columns:160px minmax(0,1fr) 272px!important;column-gap:28px!important;padding-inline:16px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-header-brand-cell,.awa-header-search-col,.awa-header-right-col){box-sizing:border-box!important;height:68px!important;min-height:68px!important;max-height:68px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{width:160px!important;min-width:160px!important;max-width:160px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{align-items:center!important;display:flex!important;padding-inline:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form{align-self:center!important;margin-block:auto!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{width:272px!important;min-width:272px!important;max-width:272px!important}}
-@media(min-width:1200px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]{--awa-header-nav-frame-h:50px;--awa-header-sticky-h:118px}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:0!important;height:var(--awa-header-sticky-h)!important;min-height:var(--awa-header-sticky-h)!important;max-height:var(--awa-header-sticky-h)!important;margin:0!important;padding:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky>:is(.header-control.awa-nav-bar,.header-control.header-nav.awa-nav-bar){box-sizing:border-box!important;flex:0 0 var(--awa-header-nav-frame-h)!important;height:var(--awa-header-nav-frame-h)!important;min-height:var(--awa-header-nav-frame-h)!important;max-height:var(--awa-header-nav-frame-h)!important;margin:0 auto!important;padding:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header-control.awa-nav-bar>.container,.awa-nav-bar__inner){box-sizing:border-box!important;height:48px!important;min-height:48px!important;max-height:48px!important}}
+@media(max-width:767px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky{height:auto!important;min-height:0!important;max-height:none!important;padding-block:0!important;padding-inline:16px!important;overflow:visible!important;box-sizing:border-box!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container){height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;margin:0!important;overflow:visible!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template-areas:"toggle brand cart" "search search search"!important;grid-template-columns:44px minmax(0,1fr) 44px!important;grid-template-rows:auto auto!important;row-gap:12px!important;column-gap:12px!important;height:auto!important;min-height:0!important;max-height:none!important;padding-block:12px!important;padding-inline:0!important;overflow:visible!important;box-sizing:border-box!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important;align-self:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important;align-self:center!important;min-width:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-cart-link{grid-area:cart!important;justify-self:end!important;align-self:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{grid-area:search!important;width:100%!important;min-width:0!important;max-width:none!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form{display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;grid-template-areas:"field submit"!important;width:100%!important;min-width:0!important;max-width:100%!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form .field.search{grid-area:field!important;min-width:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col input#search{height:44px!important;min-height:44px!important;max-height:44px!important;line-height:44px!important;font-size:16px!important;padding-block:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form .actions{grid-area:submit!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important;margin:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form :is(.action.search,button.action.search){width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{grid-area:search!important;width:100%!important;min-width:0!important;max-width:none!important}}
+@media(min-width:1200px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container,.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){height:68px!important;min-height:68px!important;max-height:68px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){grid-template-columns:160px minmax(0,1fr) 272px!important;column-gap:28px!important;padding-inline:24px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-header-brand-cell,.awa-header-search-col,.awa-header-right-col){box-sizing:border-box!important;height:68px!important;min-height:68px!important;max-height:68px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{width:160px!important;min-width:160px!important;max-width:160px!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col{align-items:center!important;display:flex!important;padding-inline:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-search-col form#search_mini_form{align-self:center!important;margin-block:auto!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col{width:272px!important;min-width:272px!important;max-width:272px!important}}
+/* 2026-07-17 Round3: sticky-h 118 (68+frame50) deixava deadBottom=2px na PLP porque
+   a nav resolve para --awa-header-nav-h (48), não 50. SSOT = main-row + nav-h.
+   border:0 no wrap evita clip com border-box + border-block-end da PLP. */
+@media(min-width:1200px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]{--awa-header-nav-frame-h:var(--awa-header-nav-h,48px);--awa-header-sticky-h:calc(var(--awa-header-main-row-h,68px) + var(--awa-header-nav-h,48px))}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:0!important;height:var(--awa-header-sticky-h)!important;min-height:var(--awa-header-sticky-h)!important;max-height:var(--awa-header-sticky-h)!important;margin:0!important;padding:0!important;border:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky>:is(.header-control.awa-nav-bar,.header-control.header-nav.awa-nav-bar){box-sizing:border-box!important;flex:0 0 var(--awa-header-nav-h,48px)!important;height:var(--awa-header-nav-h,48px)!important;min-height:var(--awa-header-nav-h,48px)!important;max-height:var(--awa-header-nav-h,48px)!important;margin:0 auto!important;padding:0!important}html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header-control.awa-nav-bar>.container,.awa-nav-bar__inner){box-sizing:border-box!important;height:var(--awa-header-nav-h,48px)!important;min-height:var(--awa-header-nav-h,48px)!important;max-height:var(--awa-header-nav-h,48px)!important}}
+/* AWA 2026-07-16 H4: PLP padding-block:8px on main+header_main + height:68 spilled 16px into nav (sticky).
+   2026-07-17: overflow:visible (Round1) — hidden recortava autocomplete/flyout. */
+@media(min-width:992px){html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container){padding-block:0!important;padding-top:0!important;padding-bottom:0!important;box-sizing:border-box!important}html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .header.awa-main-header{height:var(--awa-header-main-row-h,68px)!important;min-height:var(--awa-header-main-row-h,68px)!important;max-height:var(--awa-header-main-row-h,68px)!important;overflow:visible!important}html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container,.awa-main-header__inner.wp-header,.awa-header-right-col){height:var(--awa-header-main-row-h,68px)!important;min-height:var(--awa-header-main-row-h,68px)!important;max-height:var(--awa-header-main-row-h,68px)!important;margin-block:0!important}}
 CSS;
 
         return $css;
@@ -2197,7 +4404,8 @@ CSS;
             foreach (
                 [
                 'awa-home-cls-critical-opt21',
-                'awa-home-critical-cls-shell',
+                // r2g: NÃO stripar awa-home-critical-cls-shell — é a SSOT CLS da home
+                // (carrossel categorias / viewport). Remoção fazia overflow:hidden legado vencer.
                 'awa-home-critical-cls-final-lock',
                 'awa-header-vtex-clean-critical-20260622',
                 ] as $styleId
@@ -2231,7 +4439,8 @@ CSS;
                         // declarado vence), então este layer passa a vencer awa-fixes também.
                         . '@layer awa-header-first-paint-lock;'
                         . 'html,body#html-body{margin:0!important;padding:0!important}'
-                        . 'html{overflow-x:clip;scrollbar-width:thin}'
+                        // r44: scrollbar-gutter evita bodyW 1350→1340 (re-stamp LCP do hero).
+                        . 'html{overflow-x:clip;scrollbar-width:thin;scrollbar-gutter:stable}'
                         . 'body{overflow-x:clip;background-color:#ffffff}'
                         // H60-H64: no 1º paint mobile da home, o form de busca em #header
                         // inicia como bloco e a .actions cai para a linha de baixo até o
@@ -2245,13 +4454,20 @@ CSS;
                         // H65: first paint do iPhone ainda recebia estilo nativo (cinza/preto)
                         // em nav-toggle/search/cart; aplica aparência crítica estável.
                         . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .action.nav-toggle.awa-header-mobile-toggle{appearance:none!important;-webkit-appearance:none!important;background:#b73337!important;color:#fff!important;border:0!important;box-shadow:none!important;border-radius:0!important}'
-                        . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .minicart-wrapper .action.showcart.header-mini-cart{appearance:none!important;-webkit-appearance:none!important;background:#b73337!important;color:#fff!important;border:0!important;box-shadow:none!important;border-radius:0!important}'
-                        . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) form#search_mini_form :is(.action.search,button.action.search){appearance:none!important;-webkit-appearance:none!important;background:transparent!important;color:#b73337!important;border:0!important;box-shadow:none!important;border-radius:0!important}'
+                        // Minicart/lupa/account/Departamentos: ver awa-header-chrome-fouc-global-20260730 (GLOBAL).
                         // H75-H79: trava contrato final do header mobile já no first paint
                         // (evita salto render->dom-ready em sticky/promo/nav). Dentro do layer
                         // declarado acima para vencer @layer awa-fixes do awa-super-global.
                         . '@layer awa-header-first-paint-lock{'
-                        . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky{padding-inline:16px!important;box-sizing:border-box!important;min-height:84px!important;height:112px!important;max-height:112px!important}'
+                        . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky{padding-inline:16px!important;box-sizing:border-box!important;min-height:84px!important;height:96px!important;max-height:96px!important}'
+                        /* BUG-SHELL-MOBILE-STICKY-OVERSIZE-001: vencer critical-stack/align-grid 112 */
+                        . 'html body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5){'
+                        . '--awa-header-scroll-offset:96px!important;--awa-header-sticky-h:96px!important}'
+                        . 'html:has(body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)){'
+                        . '--awa-header-scroll-offset:96px!important;--awa-header-sticky-h:96px!important;'
+                        . 'scroll-padding-top:96px!important;scroll-padding-block-start:96px!important}'
+                        . 'html body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5){'
+                        . 'scroll-padding-top:96px!important;scroll-padding-block-start:96px!important}'
                         // H81: a promo bar (#awa-b2b-promo-bar) mora FORA de .header-wrapper-sticky,
                         // dentro de #header.header-container > .header-content. Sem regra própria
                         // aqui, .header-content nasce com padding:0 (left:0,width:440) e só ganha
@@ -2271,7 +4487,8 @@ CSS;
                         // (376px/left:32 no render vs 408px/left:16 no dom-ready).
                         . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky .header-main{width:100%!important;max-width:100%!important;margin:0!important;box-sizing:border-box!important}'
                         . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky :is(.header-main>.container,.header_main>.container){width:100%!important;max-width:none!important;margin:0!important;padding:0!important;box-sizing:border-box!important}'
-                        . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){width:100%!important;max-width:none!important;margin:0!important;padding-inline:12px!important;box-sizing:border-box!important}'
+                        /* PIXEL-QA B 2026-07-24: sticky já tem padding-inline:16; inner 12px somava eixo a 28. */
+                        . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){width:100%!important;max-width:none!important;margin:0!important;padding-inline:0!important;box-sizing:border-box!important}'
                         . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-wrapper-sticky :is(.header-control.header-nav.awa-nav-bar,.header-control.header-nav.header-nav-global.cms_home_1,#awa-primary-navigation){display:none!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}'
                         . '}'
                         . '}'
@@ -2280,6 +4497,803 @@ CSS;
                     1
                 ) ?? $html;
             }
+
+            // PSI/CrUX CLS: ao remover opt21/shell/final-lock/vtex-clean acima,
+            // o ul.togge-menu Departamentos pode pintar expandido (~6k px) até o CSS async,
+            // inflando .header-wrapper-sticky e empurrando .content-top-home (lab CLS ~0.88).
+            // Guard alinhado à geometria final r40c (promo 44 + sticky 118 = 162).
+            // r42: skip-link é filho direto do body; hide em CSS async → first-paint ~22px
+            // empurra .page-wrapper (CLS ~0.47). Hide síncrono no <head>.
+            $geometryGuardCss = 'html body#html-body > :is(a.awa-skip-link,a.skip-link,a.action.skip,a.action.skip.content,'
+                . 'a.action.skip.nav,a.skip-to-main-content):not(:focus):not(:focus-visible),'
+                . 'html body#html-body :is(a.awa-skip-link,a.skip-link,a.action.skip,a.action.skip.content,'
+                . 'a.action.skip.nav,a.skip-to-main-content):not(:focus):not(:focus-visible){'
+                . 'position:fixed!important;top:0!important;left:0!important;inset:0 auto auto 0!important;'
+                . 'width:1px!important;height:1px!important;min-width:1px!important;min-height:1px!important;'
+                . 'max-width:1px!important;max-height:1px!important;padding:0!important;margin:0!important;'
+                . 'overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;'
+                . 'white-space:nowrap!important;border:0!important;font-size:0!important;line-height:0!important;'
+                . 'word-break:break-all!important;contain:strict!important;z-index:0!important;'
+                . 'pointer-events:none!important}'
+                . 'html body#html-body .page-wrapper{margin-block-start:0!important;padding-block-start:0!important;'
+                . 'position:relative!important;top:0!important}'
+                . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header .awa-search-helper-copy,'
+                . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header .awa-search-helper-copy[aria-hidden="true"]{'
+                . 'display:none!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;'
+                . 'overflow:hidden!important;position:absolute!important;visibility:hidden!important;pointer-events:none!important}'
+                . '#awa-header-cls-placeholder{display:none!important;height:0!important;margin:0!important;padding:0!important}'
+                . 'body.awa-header-is-sticky #awa-header-cls-placeholder{display:block!important;'
+                . 'height:var(--awa-header-height,var(--awa-header-sticky-h,116px))!important}'
+                // r43e: !important DENTRO do primeiro @layer vence !important unlayered
+                // (align-grid/themes redefinem --awa-header-nav-h:44 → sticky calc 112).
+                // BUG-SHELL-CLS-GEOM-ALIGN-001 + BUG-SHELL-PROMO-COLLAPSE-ALL-VW-001:
+                // nav 48 / sticky 116; stack 160 SÓ com promo aberta (fechada = 116).
+                . '@layer awa-header-first-paint-lock{'
+                . '@media(min-width:992px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header{'
+                . '--awa-header-promo-h:0px!important;--awa-header-main-row-h:68px!important;--awa-header-nav-h:48px!important;'
+                . '--awa-nav-bar-h:48px!important;--awa-header-sticky-h:116px!important;--awa-header-stack-h:116px!important;'
+                . 'box-sizing:border-box!important;min-height:116px!important;'
+                . 'height:auto!important;max-height:none!important;overflow:visible!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header:has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+                . '--awa-header-promo-h:44px!important;--awa-header-stack-h:160px!important;'
+                . 'min-height:160px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header .header-wrapper-sticky{'
+                . 'box-sizing:border-box!important;display:flex!important;flex-direction:column!important;'
+                . 'height:116px!important;min-height:116px!important;max-height:116px!important;'
+                . 'overflow:visible!important;padding:0!important;margin:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(#header.header-container,#header.header-container .header-content,'
+                . '#awa-b2b-promo-bar:not([aria-hidden="true"]),.awa-b2b-promo-bar:not([aria-hidden="true"]),.top-header.awa-b2b-promo-bar:not([aria-hidden="true"])){'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(#awa-b2b-promo-bar:not([aria-hidden="true"]),.awa-b2b-promo-bar:not([aria-hidden="true"]),.header-content:has(#awa-b2b-promo-bar:not([aria-hidden="true"]))){'
+                . 'box-sizing:border-box!important;height:var(--awa-header-promo-h)!important;'
+                . 'min-height:var(--awa-header-promo-h)!important;max-height:var(--awa-header-promo-h)!important}'
+                // sticky 116px literal (10×ID acima) — não usar var(--awa-header-sticky-h) aqui:
+                // align-grid redefine o token para calc(68+44)=112 e reabria o CLS.
+                // r43: themes/home stack aplica padding-block:var(--awa-space-2,8px) no shell
+                // até o CSS async zerar → .header-main pinta em y:53 e depois sobe para y:44 (CLS ~0.038).
+                // r55c: NÃO incluir .awa-main-header__inner em margin:0 — isso prendia o rail em x=0
+                // enquanto .awa-nav-bar__inner centrava (evidência: main left=0, nav left≈111 @1512).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,'
+                . '.header-main>.container){'
+                . 'box-sizing:border-box!important;height:var(--awa-header-main-row-h)!important;'
+                . 'min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;'
+                . 'padding:0!important;padding-block:0!important;padding-top:0!important;padding-bottom:0!important;'
+                . 'margin:0!important;width:100%!important;max-width:none!important;overflow:visible!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .header-control.header-nav.awa-nav-bar>.container{'
+                . 'box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;'
+                . 'padding:0!important;height:var(--awa-header-nav-h,48px)!important;'
+                . 'min-height:var(--awa-header-nav-h,48px)!important;max-height:var(--awa-header-nav-h,48px)!important;'
+                . 'overflow:visible!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+                . 'box-sizing:border-box!important;height:var(--awa-header-main-row-h)!important;'
+                . 'min-height:var(--awa-header-main-row-h)!important;max-height:var(--awa-header-main-row-h)!important;'
+                . 'width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;'
+                . 'padding-block:0!important;padding-inline:24px!important;overflow:visible!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar,.awa-nav-bar__inner){'
+                . 'box-sizing:border-box!important;height:var(--awa-header-nav-h)!important;'
+                . 'min-height:var(--awa-header-nav-h)!important;max-height:var(--awa-header-nav-h)!important;overflow:visible!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header :is(.awa-header-categories,.awa-nav-categories,.sections.nav-sections.category-dropdown,.section-items.nav-sections.category-dropdown-items,.section-item-content.nav-sections.category-dropdown-item-content,.navigation.verticalmenu.side-verticalmenu){'
+                . 'box-sizing:border-box!important;height:44px!important;min-height:0!important;max-height:44px!important;'
+                . 'margin:0!important;padding:0!important;overflow:visible!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header ul.togge-menu.list-category-dropdown:not([data-awa-menu-state="open"]):not(.vmm-open):not(.menu-open),'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header ul.togge-menu.list-category-dropdown[data-awa-menu-state="closed"],'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header ul.togge-menu.list-category-dropdown[aria-hidden="true"]{'
+                . 'display:none!important;visibility:hidden!important;opacity:0!important;height:0!important;max-height:0!important;'
+                . 'margin:0!important;padding:0!important;overflow:hidden!important;pointer-events:none!important;'
+                . 'position:absolute!important;inset-block-start:100%!important;inset-inline-start:0!important}'
+                . 'html body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home{'
+                . 'margin-block-start:0!important}'
+                // r43c: categoria encolhe 338→295 tarde e empurra o featured (~0.034 CLS).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel{'
+                . 'min-height:220px!important;padding:0!important;padding-block:0!important;'
+                . 'box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel > .container{'
+                . 'width:100%!important;max-width:100%!important;height:auto!important;'
+                . 'min-height:0!important;box-sizing:border-box!important;'
+                . 'gap:12px!important;row-gap:12px!important;column-gap:12px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel :is(.awa-category-carousel__header,.awa-section-header){'
+                . 'min-height:44px!important;height:44px!important;max-height:44px!important;padding-block:0!important;box-sizing:border-box!important;'
+                . 'margin-bottom:0!important;margin-block-end:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar){'
+                . 'height:48px!important;min-height:48px!important;max-height:48px!important;box-sizing:border-box!important;'
+                . 'width:100%!important;max-width:100%!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar)> .container{'
+                . 'height:48px!important;min-height:48px!important;max-height:48px!important;box-sizing:border-box!important;'
+                . 'display:flex!important;align-items:center!important}'
+                // r49: quick-links → nav 48 (BUG-SHELL-CLS-GEOM-ALIGN-001) + promo text 17→31 @~900ms (pré-themes)
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(.awa-nav-quick-links,.awa-nav-quick-links__list){'
+                . 'height:48px!important;min-height:48px!important;max-height:48px!important;box-sizing:border-box!important;overflow:hidden!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-b2b-promo-bar__text,#awa-b2b-promo-bar .awa-b2b-promo-bar__text){'
+                . 'min-height:31px!important;line-height:1.45!important;display:flex!important;align-items:center!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-category-carousel{'
+                . 'position:relative!important;top:0!important;margin:0!important;'
+                . 'min-height:148px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-category-carousel__viewport{'
+                . 'margin:0!important;margin-top:0!important;'
+                . 'min-height:148px!important;box-sizing:border-box!important}'
+                // r50/r76: search/brand — pad FINAL 24px (antes 16→24 @~885ms = CLS ~0.10).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+                . 'display:grid!important;grid-template-columns:160px minmax(0,1fr) 272px!important;'
+                . 'grid-template-areas:"brand search actions"!important;column-gap:28px!important;'
+                . 'height:68px!important;min-height:68px!important;max-height:68px!important;'
+                . 'padding:0 24px!important;padding-inline:24px!important;padding-block:0!important;'
+                . 'width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;'
+                . 'box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-brand-cell{'
+                . 'width:160px!important;min-width:160px!important;max-width:160px!important;'
+                . 'height:68px!important;min-height:68px!important;max-height:68px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-search-col{'
+                . 'height:68px!important;min-height:68px!important;max-height:68px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-right-col{'
+                . 'width:272px!important;min-width:272px!important;max-width:272px!important;'
+                . 'height:68px!important;min-height:68px!important;max-height:68px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-nav-bar__inner{'
+                . 'height:48px!important;min-height:48px!important;max-height:48px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home{'
+                . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important}'
+                // r74/r75: first-paint = faixa height:0 do deferred-stack (não inset:0).
+                // inset:0 fazia o nav acompanhar altura do carrossel (277→249) e inflava CLS.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .content-top-home .awa-shelf--carousel .awa-carousel{'
+                . 'position:relative!important;box-sizing:border-box!important}'
+                . '@media(min-width:768px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .content-top-home .awa-shelf--carousel'
+                . ' :is(.awa-owl-nav.awa-carousel__nav,.awa-owl-nav.awa-carousel-chrome-ssr,'
+                . '.awa-carousel__nav.awa-carousel-chrome-ssr,'
+                . '.awa-owl-nav[data-awa-nav-anchor="viewport"]){'
+                . 'position:absolute!important;top:50%!important;left:0!important;right:0!important;'
+                . 'bottom:auto!important;inset:auto 0 auto 0!important;'
+                . 'display:flex!important;justify-content:space-between!important;align-items:center!important;'
+                // r74/r75/r77: faixa height:0 no first-paint (CLS). max-height:none permite
+                // awa-scroll-carousel.js aplicar height do viewport via inline !important,
+                // para toggle top:4px e setas top:50% ancorarem no retângulo real.
+                . 'height:0!important;min-height:0!important;max-height:none!important;'
+                . 'width:auto!important;margin:0!important;padding:0!important;'
+                . 'transform:translateY(-50%)!important;'
+                . 'pointer-events:none!important;z-index:4!important;box-sizing:border-box!important;'
+                . 'background:transparent!important;border:0!important;overflow:visible!important}'
+                // r77 visual: relative+space-between + toggle autoplay (3º filho) centrava
+                // a seta next. Absolute nas laterais (mesmo layer first-paint) alinha ao
+                // contrato viewport e deixa o toggle no canto sem roubar o slot do next.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .content-top-home .awa-shelf--carousel .awa-owl-nav'
+                . ' :is(.awa-owl-nav__btn,.awa-carousel__arrow,.awa-carousel__button){'
+                . 'position:absolute!important;top:50%!important;transform:translateY(-50%)!important;'
+                . 'inset:auto!important;margin:0!important;pointer-events:auto!important;'
+                . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
+                . 'box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .content-top-home .awa-shelf--carousel .awa-owl-nav'
+                . ' :is(.awa-owl-nav__btn--prev,.awa-carousel__arrow--prev,.awa-carousel__button--prev){'
+                . 'left:max(6px,env(safe-area-inset-left,0px))!important;right:auto!important;'
+                . 'inset-inline-start:max(6px,env(safe-area-inset-left,0px))!important;inset-inline-end:auto!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .content-top-home .awa-shelf--carousel .awa-owl-nav'
+                . ' :is(.awa-owl-nav__btn--next,.awa-carousel__arrow--next,.awa-carousel__button--next){'
+                . 'right:max(6px,env(safe-area-inset-right,0px))!important;left:auto!important;'
+                . 'inset-inline-end:max(6px,env(safe-area-inset-right,0px))!important;inset-inline-start:auto!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .content-top-home .awa-shelf--carousel .awa-owl-nav .awa-carousel__toggle{'
+                . 'top:4px!important;right:max(6px,env(safe-area-inset-right,0px))!important;'
+                . 'left:auto!important;inset-inline-end:max(6px,env(safe-area-inset-right,0px))!important;'
+                . 'inset-inline-start:auto!important;transform:none!important}'
+                . '}'
+                // r75: categoria — contain:size + height:auto = título 0px (CLS 60→18).
+                // First-paint = densidade final desktop (16/12), sem contain:size.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel .awa-section-header__left{'
+                . 'display:flex!important;flex-direction:column!important;gap:2px!important;'
+                . 'min-height:36px!important;height:auto!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel .awa-section-header__title{'
+                . 'contain:none!important;min-height:1.25em!important;height:auto!important;max-height:none!important;'
+                . 'margin:0!important;line-height:1.25!important;font-size:16px!important;'
+                . 'overflow:visible!important;white-space:nowrap!important;text-overflow:ellipsis!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel :is(.awa-section-header__subtitle,.awa-category-carousel__subtitle){'
+                . 'contain:none!important;min-height:1.3em!important;height:auto!important;max-height:none!important;'
+                . 'margin:0!important;line-height:1.3!important;font-size:12px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel .awa-category-carousel__icon,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel .awa-category-carousel__icon :is(picture,img,svg){'
+                . 'width:72px!important;height:72px!important;min-width:72px!important;min-height:72px!important;'
+                . 'max-width:72px!important;max-height:72px!important;box-sizing:border-box!important}'
+                // r69: progress track fino (4px), independente do chrome nav 32px
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-owl-progress.awa-carousel-chrome-ssr,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-shelf--carousel .awa-owl-progress{'
+                . 'height:4px!important;min-height:4px!important;max-height:4px!important;'
+                . 'margin-block-start:12px!important;overflow:hidden!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-owl-progress .awa-owl-progress__bar{height:100%!important;max-height:4px!important}'
+                // r71: niche — absolute left of panel Ver todos (r69 relative overlapped prev)
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-home-niche-shelves .awa-carousel__toggle:not([hidden]){'
+                . 'top:-52px!important;bottom:auto!important;right:125px!important;left:auto!important;'
+                . 'position:absolute!important;transform:none!important;z-index:7!important}'
+                // r62: trava explícita — root .awa-shelf/.rokan-* com chrome-ssr NUNCA herda 32px
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-shelf,.rokan-newproduct,.rokan-bestseller,.awa-grid-section--featured .awa-shelf)'
+                . '.awa-carousel-chrome-ssr{'
+                . 'height:auto!important;min-height:0!important;max-height:none!important;'
+                . 'max-block-size:none!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-search-col,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-search-col.top-search{'
+                // r52: grid track já era 744px mas width:auto mantinha 261→744 @~2.5s
+                . 'width:100%!important;min-width:0!important;max-width:none!important;'
+                . 'justify-self:stretch!important;align-self:center!important;'
+                . 'flex:1 1 auto!important;grid-area:search!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-search-col :is(.block-search,.block-content,form#search_mini_form){'
+                . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(#awa-b2b-promo-bar,.header-content){padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout){'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+                . 'width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;'
+                . 'padding-inline:24px!important;padding-right:52px!important;box-sizing:border-box!important;'
+                . 'display:flex!important;align-items:center!important;justify-content:center!important}'
+                // r51b: ayo-home5-wrapper 1355→1280 @~2.6s (CLS ~0.11)
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.ayo-home5-wrapper,.ayo-home5-wrapper--template-driven){'
+                . 'width:min(100%,1280px)!important;max-width:1280px!important;'
+                . 'margin-inline:auto!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-hero__pagination,.swiper-pagination.awa-hero__pagination){'
+                . 'min-height:52px!important;height:52px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-nav-bar__inner{'
+                . 'width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;'
+                . 'padding-inline:24px!important;box-sizing:border-box!important}'
+                // r58 CLS: items clamp(112px,10vw,152px)=135 @1350 → 144 late (CLS ~0.016).
+                // Shell 144 perdia para deferred-stack/themes (flex:0 0 auto + width fluid).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(#awa-cat-carousel .awa-category-carousel__item,#awa-cat-carousel>.awa-category-carousel__item,'
+                . '.top-home-content--category-carousel .awa-category-carousel__item){'
+                . 'flex:0 0 144px!important;flex-grow:0!important;flex-shrink:0!important;flex-basis:144px!important;'
+                . 'width:144px!important;min-width:144px!important;max-width:144px!important;'
+                . 'box-sizing:border-box!important}'
+                // r59 CLS: shelf padding 12→0 + container 1248→1232 @~2.5s (CLS ~0.006).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .content-top-home :is(.awa-carousel-section,.awa-carousel-section--featured,'
+                . '.top-home-content.awa-carousel-section){'
+                . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
+                . 'margin-block:0!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .content-top-home :is(.awa-carousel-section,.awa-carousel-section--featured)> .container{'
+                . 'width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;'
+                . 'padding-inline:24px!important;padding-block:0!important;box-sizing:border-box!important}'
+                // r59: quick-links + account prompt residual width/height churn
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-nav-quick-links{'
+                . 'min-height:46px!important;height:46px!important;max-height:46px!important;'
+                . 'min-width:410px!important;width:auto!important;max-width:none!important;'
+                . 'box-sizing:border-box!important;overflow:visible!important}'
+                // r59b/r73b: prefixo DEVE repetir após vírgula — senão __guest fica só `.class` e perde p/ themes/align-grid (gap:1px/overflow:hidden).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-account-prompt__text,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-account-prompt__guest,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__guest{'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+                . 'line-height:1.2!important;overflow:visible!important;box-sizing:border-box!important;'
+                . 'display:flex!important;flex-direction:column!important;justify-content:center!important;'
+                . 'align-items:flex-start!important;gap:2px!important;row-gap:2px!important}'
+                /* r73 polish: prompt cluster respiro (vence critical-shell 220) */
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-contact-links.awa-header-account-prompt,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-account-prompt[data-awa-auth-state="guest"]{'
+                . 'max-width:252px!important;overflow:visible!important;gap:8px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-account-prompt__line2{gap:6px!important;overflow:visible!important;min-height:28px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' .awa-header-right-col{gap:10px!important;max-width:none!important}'
+                // r60 CLS: logo 104→77→126 @~1–3s. Lock contrato shell 104×44.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(.logo,.awa-header-brand-cell .logo){'
+                . 'width:104px!important;min-width:104px!important;max-width:104px!important;'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+                . 'display:flex!important;align-items:center!important;overflow:hidden!important;'
+                . 'box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(.logo img,.awa-header-brand-cell .logo img,.awa-header-brand-cell img){'
+                . 'width:104px!important;min-width:104px!important;max-width:104px!important;'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+                . 'object-fit:contain!important;aspect-ratio:auto!important;display:block!important;'
+                . 'box-sizing:border-box!important}'
+                // r60 legado: height:32 em fluxo no owl-nav. r74: shelves de produto usam
+                // overlay viewport — NÃO reaplicar 32px nelas (conflitaria com absolute).
+                // Mantém reserva só em featured grid / carrosséis sem data-awa-nav-anchor.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-grid-section--featured .awa-owl-nav.awa-carousel__nav:not([data-awa-nav-anchor="viewport"]){'
+                . 'min-height:32px!important;height:32px!important;max-height:32px!important;box-sizing:border-box!important}'
+                . '}' // fecha @media(min-width:992px)
+                // BUG-SHELL-MOBILE-STICKY-OVERSIZE-001 + BUG-SHELL-NONHOME-MIN120-001:
+                // HPOL5/align-grid força stack=promo32+main88=120 mesmo com promo fechada
+                // → faixa ~22–38px sob a busca em PLP/cart/PDP (home já tinha override).
+                // SSOT mobile: sticky 96; promo aberta 44+96=140; tokens stack/promo alinhados.
+                . '@media(max-width:767px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+                . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"],'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header{'
+                . 'height:auto!important;min-height:96px!important;max-height:none!important;'
+                . '--awa-header-main-row-h:96px!important;--awa-header-sticky-h:96px!important;'
+                . '--awa-header-promo-h:0px!important;--awa-header-stack-h:96px!important;'
+                . 'overflow:visible!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+                . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]'
+                . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])),'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header:has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+                . '--awa-header-promo-h:44px!important;--awa-header-stack-h:140px!important;'
+                . 'min-height:140px!important}'
+                /* mensagens vazias: mt/mb 8px somavam ~16px (home: dentro de #maincontent, não filho direto). */
+                . 'html body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)'
+                . ' .page-wrapper > .page.messages:not(:has(.message)),'
+                . 'html body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)'
+                . ' .page-wrapper #maincontent .page.messages:not(:has(.message)),'
+                . 'html body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)'
+                . ' .page-wrapper .page-main > .page.messages:not(:has(.message)){'
+                . 'display:none!important;margin:0!important;padding:0!important;'
+                . 'height:0!important;min-height:0!important;overflow:hidden!important}'
+                /* sticky ativo: shell colapsa; placeholder CLS ocupa o slot (evita 120+120 no cart) */
+                . 'html body#html-body#html-body.awa-header-is-sticky:not(.checkout-index-index):not(.onepagecheckout-index-index)'
+                . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]{'
+                . 'min-height:0!important;height:auto!important;max-height:none!important;'
+                . '--awa-header-stack-h:var(--awa-header-sticky-h,96px)!important}'
+                . '}'
+                . '@media(max-width:767px){'
+                . 'html body#html-body#html-body:not(.awa-account-operational):not(.b2b-account-shell):not(.b2b-auth-shell){'
+                . '--awa-header-scroll-offset:96px!important;--awa-header-sticky-h:96px!important}'
+                . 'html:has(body#html-body:not(.awa-account-operational):not(.b2b-account-shell):not(.b2b-auth-shell)){'
+                . '--awa-header-scroll-offset:96px!important;'
+                . 'scroll-padding-top:96px!important;scroll-padding-block-start:96px!important}'
+                . '}' /* BUG-SHELL-SCROLL-OFFSET-GLOBAL-MOBILE-001 */
+                . '@media(min-width:768px) and (max-width:991px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header{'
+                . 'height:auto!important;min-height:112px!important;max-height:none!important;'
+                . '--awa-header-promo-h:0px!important;--awa-header-sticky-h:112px!important;'
+                . '--awa-header-stack-h:112px!important;'
+                . 'overflow:visible!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header:has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+                . '--awa-header-promo-h:44px!important;--awa-header-stack-h:156px!important;'
+                . 'min-height:156px!important}'
+                . '}'
+                . '@media(max-width:991px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header'
+                . ' :is(#header.header-container,#header.header-container .header-content,'
+                . '#awa-b2b-promo-bar,.awa-b2b-promo-bar,.top-header.awa-b2b-promo-bar,.header-content){'
+                . 'position:relative!important;display:flex!important;top:0!important;inset-block-start:0!important;'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;box-sizing:border-box!important;'
+                . 'overflow:hidden!important;margin:0!important;margin-block:0!important;padding-block:0!important;'
+                . 'transform:none!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-b2b-promo-bar__text,#awa-b2b-promo-bar .awa-b2b-promo-bar__text){'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;line-height:1.25!important;'
+                . 'display:flex!important;align-items:center!important;overflow:hidden!important;box-sizing:border-box!important}'
+                . '}'
+                . '@media(max-width:767px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header .header-wrapper-sticky{'
+                . 'position:relative!important;height:96px!important;min-height:96px!important;max-height:96px!important;'
+                . 'margin:0!important;padding:0!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5){'
+                . '--awa-header-scroll-offset:96px!important;--awa-header-sticky-h:96px!important}'
+                . 'html:has(body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)){'
+                . '--awa-header-scroll-offset:96px!important;--awa-header-sticky-h:96px!important;'
+                . 'scroll-padding-top:96px!important;scroll-padding-block-start:96px!important}'
+                . '}'
+                . '@media(min-width:768px) and (max-width:991px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .awa-site-header .header-wrapper-sticky{'
+                . 'position:relative!important;height:112px!important;min-height:112px!important;max-height:112px!important;'
+                . 'margin:0!important;padding:0!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5){'
+                . '--awa-header-scroll-offset:128px!important;--awa-header-sticky-h:112px!important}'
+                . 'html:has(body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)){'
+                . '--awa-header-scroll-offset:128px!important;'
+                . 'scroll-padding-top:128px!important;scroll-padding-block-start:128px!important}'
+                . '}'
+                // r75: desktop first-paint = density 220 (evita 338→220 no featured carousel CLS).
+                . '@media(min-width:992px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel{'
+                . 'min-height:220px!important;height:auto!important;max-height:none!important;'
+                . 'padding:0!important;padding-block:0!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel > .container{'
+                . 'min-height:0!important;height:auto!important;max-height:none!important;'
+                . 'box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel :is(.awa-category-carousel__header,.awa-section-header){'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+                . 'padding:0!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-category-carousel,.awa-category-carousel__viewport){'
+                . 'min-height:148px!important}'
+                . '}'
+                . '@media(max-width:991px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home{'
+                . 'margin-block-start:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel{'
+                . 'min-height:338px!important;max-height:338px!important;height:338px!important;'
+                . 'padding:0!important;padding-block:0!important;padding-top:0!important;padding-bottom:0!important;'
+                . 'box-sizing:border-box!important;overflow:hidden!important}'
+                // r51: cat header 80→60 + container 366→338 @~2.5s (CLS ~0.066)
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel :is(.awa-category-carousel__header,.awa-section-header){'
+                . 'height:60px!important;min-height:60px!important;max-height:60px!important;'
+                . 'padding:0!important;padding-block:0!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel > .container{'
+                . 'height:338px!important;min-height:338px!important;max-height:338px!important;'
+                . 'box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout){'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+                . 'box-sizing:border-box!important;align-items:center!important}'
+                // r65c: banners mobile ~2.4:1 (~163px @390w). Shell 288+contain = void ~125px.
+                // Lock 176 pré/pós-init (aspect + folga dots); img fill 100% + contain.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.top-home-content--above-fold,.top-home-content--above-fold>.banner-slider.banner-slider2){'
+                . 'height:176px!important;min-height:176px!important;max-height:176px!important;'
+                . 'padding-block:0!important;box-sizing:border-box!important;overflow:hidden!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs :is(.awa-hero-swiper,.awa-hero-swiper.swiper-initialized,'
+                . '.awa-hero-swiper.awa-hero-swiper-ready,.banner_item_bg,.swiper-slide){'
+                . 'height:176px!important;min-height:176px!important;max-height:176px!important;'
+                . 'box-sizing:border-box!important;overflow:hidden!important;position:relative!important}'
+                // r64 FIX: critical-home força .swiper-wrapper{display:block} no mobile → slides
+                // empilham fora do shell (overflow:hidden) = faixa branca. Swiper precisa de flex.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs :is(.awa-hero-swiper .swiper-wrapper,.swiper-wrapper){'
+                . 'display:flex!important;flex-direction:row!important;align-items:stretch!important;'
+                . 'height:176px!important;min-height:176px!important;max-height:176px!important;'
+                . 'width:100%!important;box-sizing:border-box!important;overflow:hidden!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs :is(.swiper-slide,.banner_item.swiper-slide,.awa-hero__slide){'
+                . 'flex:0 0 100%!important;width:100%!important;max-width:100%!important;'
+                . 'height:176px!important;min-height:176px!important;max-height:176px!important;'
+                . 'box-sizing:border-box!important;overflow:hidden!important}'
+                // r65/r65e: shell 176 ≈ aspect banner mobile. cover em 176 corta ~17px/lado
+                // (em 288 cortava ~150px). Preenche slide Guidão (asset 390x95) sem void.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs :is(.banner_item_bg,.awa-hero__slide .banner_item_bg){'
+                . 'display:block!important;background:#0b1220!important;background-color:#0b1220!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs :is(.banner_item_bg img,.banner_item_bg picture,img){'
+                . 'display:block!important;width:100%!important;height:100%!important;'
+                . 'max-height:176px!important;min-height:0!important;'
+                . 'object-fit:cover!important;object-position:left center!important;box-sizing:border-box!important}'
+                // r67b: left center preserva headline do banner (cover centrado cortava "GUIDÃO").
+                // r65e: prev@bottom-left cobria CTA B2B (círculo escuro no botão). Esconde setas;
+                // swipe + dots bastam no mobile.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs :is(.swiper-button-prev,.swiper-button-next,'
+                . '.awa-hero-swiper__nav,.awa-hero__prev,.awa-hero__next){'
+                . 'display:none!important;visibility:hidden!important;pointer-events:none!important;'
+                . 'width:0!important;height:0!important;opacity:0!important}'
+                // r65e: dots bottom-right — longe do CTA (esq) e do headline (topo-esq).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs :is(.awa-hero__pagination,.swiper-pagination.awa-hero__pagination,'
+                . '.swiper-pagination){'
+                . 'position:absolute!important;inset:auto 12px 8px auto!important;top:auto!important;bottom:8px!important;'
+                . 'left:auto!important;right:12px!important;transform:none!important;'
+                . 'height:28px!important;min-height:28px!important;'
+                . 'max-height:28px!important;width:auto!important;max-width:40%!important;margin:0!important;'
+                . 'display:flex!important;align-items:center!important;justify-content:flex-end!important;'
+                . 'gap:8px!important;z-index:4!important;box-sizing:border-box!important;'
+                . 'visibility:visible!important;opacity:1!important;pointer-events:auto!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .wrapper_slider.visible-xs .awa-hero-pause-btn{'
+                . 'position:absolute!important;top:auto!important;bottom:12px!important;left:auto!important;'
+                . 'right:16px!important;width:44px!important;height:44px!important;z-index:3!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper #awa-cat-dots{'
+                . 'min-height:44px!important;height:44px!important;box-sizing:border-box!important}'
+                // r52: carousel position static→relative @~3.3s move y 528→517 (CLS ~0.064)
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-category-carousel{'
+                . 'position:relative!important;top:0!important;left:0!important;'
+                . 'margin:0!important;margin-block:0!important;'
+                . 'min-height:202px!important;height:202px!important;max-height:202px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-category-carousel__viewport{'
+                . 'margin:0!important;margin-top:0!important;min-height:190px!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel :is(.awa-category-carousel__header,.awa-section-header){'
+                . 'margin:0!important;margin-block:0!important}'
+                // r58/r75 mobile CLS: title — sem contain:size (colapsa com height:auto).
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel .awa-section-header__title{'
+                . 'contain:none!important;min-height:36px!important;height:36px!important;max-height:36px!important;'
+                . 'line-height:36px!important;font-size:22px!important;font-weight:700!important;'
+                . 'padding:0!important;padding-block:0!important;margin:0!important;'
+                . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important;'
+                . 'overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel :is(.awa-section-header__subtitle,.awa-category-carousel__subtitle){'
+                . 'min-height:20px!important;height:20px!important;max-height:20px!important;'
+                . 'line-height:20px!important;font-size:13px!important;overflow:hidden!important;'
+                . 'white-space:nowrap!important;text-overflow:ellipsis!important;box-sizing:border-box!important;'
+                . 'margin:0!important;padding:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel .awa-category-carousel__label{'
+                . 'display:block!important;width:100%!important;max-width:100%!important;'
+                . 'min-height:15px!important;height:15px!important;max-height:15px!important;'
+                . 'line-height:15px!important;font-size:12px!important;font-weight:600!important;'
+                . 'font-family:"Source Sans 3",system-ui,sans-serif!important;'
+                . 'color:var(--awa-text,#111827)!important;text-decoration:none!important;'
+                . 'overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;'
+                . 'box-sizing:border-box!important;margin:0!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-category-carousel__item,#awa-cat-carousel .awa-category-carousel__item){'
+                . 'flex:0 0 202px!important;width:202px!important;min-width:202px!important;max-width:202px!important;'
+                . 'box-sizing:border-box!important}'
+                . '}' // fecha @media(max-width:991px)
+                . '}' // fecha @layer awa-header-first-paint-lock
+                // r63: unlock UNLAYERED (vence qualquer regra layered residual) + strip via JS
+                . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.awa-shelf,.rokan-newproduct,.rokan-bestseller).awa-carousel-chrome-ssr{'
+                . 'height:auto!important;min-height:0!important;max-height:none!important;'
+                . 'max-block-size:none!important;box-sizing:border-box!important}'
+                // r65: labels de categoria herdam azul de link do <a> (rgb(0,0,238)). Força tokens AWA.
+                . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel a.awa-category-carousel__item,'
+                . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel a.awa-category-carousel__item:link,'
+                . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel a.awa-category-carousel__item:visited{'
+                . 'color:var(--awa-text,#111827)!important;text-decoration:none!important}'
+                . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel a.awa-category-carousel__item'
+                . ' :is(.awa-category-carousel__label,.awa-category-carousel__count){'
+                . 'color:inherit!important;text-decoration:none!important}'
+                . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--category-carousel a.awa-category-carousel__item .awa-category-carousel__count{'
+                . 'color:var(--awa-text-secondary,#6b7280)!important}'
+                // r73b UNLAYERED: guest gap/overflow — regras layered perdem p/ themes+align-grid unlayered.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header[data-awa-header-mode="default"] .awa-header-account-prompt[data-awa-auth-state="guest"]'
+                . ' .awa-header-account-prompt__guest,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header[data-awa-header-mode="default"] .awa-header-account-prompt[data-awa-auth-state="guest"]'
+                . ' .awa-header-account-prompt__text{'
+                . 'gap:2px!important;row-gap:2px!important;overflow:visible!important;'
+                . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+                . 'display:flex!important;flex-direction:column!important;justify-content:center!important;'
+                . 'align-items:flex-start!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header[data-awa-header-mode="default"] .awa-header-contact-links.awa-header-account-prompt,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header[data-awa-header-mode="default"] .awa-header-account-prompt[data-awa-auth-state="guest"]{'
+                . 'max-width:252px!important;overflow:visible!important;gap:8px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header[data-awa-header-mode="default"] .awa-header-account-prompt__line2{'
+                . 'gap:6px!important;overflow:visible!important;min-height:28px!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .awa-site-header[data-awa-header-mode="default"] .awa-header-right-col{'
+                . 'gap:10px!important;max-width:none!important}'
+                // r76d/H12 CLS: banner_item 420→335 @~3s + late hero 339→313 (aspect 1920/488 height:auto).
+                // Lock shell final no first paint (vence critical-home async height:auto).
+                . '@media(min-width:768px){'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(.top-home-content--above-fold,.top-home-content--above-fold>.banner-slider.banner-slider2){'
+                . 'height:339px!important;min-height:339px!important;max-height:339px!important;'
+                . 'overflow:hidden!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--above-fold .wrapper_slider.hidden-xs,'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--above-fold .wrapper_slider.hidden-xs'
+                . ' :is(.awa-hero-swiper,.swiper-wrapper,.swiper-slide,.banner_item,.banner_item_bg){'
+                . 'height:331px!important;min-height:331px!important;max-height:331px!important;'
+                . 'aspect-ratio:unset!important;overflow:hidden!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--above-fold .wrapper_slider.hidden-xs .banner_item_bg'
+                . ' :is(a,picture,img){'
+                . 'display:block!important;width:100%!important;height:100%!important;'
+                . 'min-height:0!important;max-height:none!important;object-fit:cover!important;'
+                . 'object-position:center!important;box-sizing:border-box!important}'
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' .top-home-content--above-fold .banner_item .text-banner:not(:empty){'
+                . 'position:absolute!important;inset:auto 0 0 0!important;height:auto!important;'
+                . 'min-height:0!important;padding:clamp(12px,1.6vw,20px) clamp(16px,3vw,40px)!important;'
+                . 'box-sizing:border-box!important}'
+                . '}'
+                // r76e/H13 CLS: .page.messages vazio mt/mb 8→0 (gap 0→22→0). Lock hide desde 1º paint.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(#maincontent .page.messages,.page-main > .page.messages,.page.messages)'
+                . ':not(:has(.message)){'
+                . 'display:none!important;margin:0!important;margin-block:0!important;padding:0!important;'
+                . 'height:0!important;min-height:0!important;max-height:0!important;overflow:hidden!important;'
+                . 'border:0!important}'
+                // r76f/H14 CLS: #maincontent padding-block 0→6px @~3s (themes/async) → gap 6 + late volta a 0.
+                . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+                . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+                . ' :is(#maincontent.page-main,#maincontent.page-main.container,.page-main.container){'
+                . 'padding-block:0!important;padding-top:0!important;padding-bottom:0!important;'
+                . 'margin-block:0!important;box-sizing:border-box!important}'
+                ;
+            $html = preg_replace(
+                '/<style\s+id="awa-home-cls-geometry-guard"[^>]*>.*?<\/style>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+            $html = preg_replace(
+                '/<head[^>]*>/i',
+                '$0<style id="awa-home-cls-geometry-guard">' . $geometryGuardCss . '</style>',
+                $html,
+                1
+            ) ?? $html;
+
+            // r63/r66f: strip awa-carousel-chrome-ssr from shelf ROOT only (keep on nav/progress).
+            $chromeStripJs = '(function(){try{'
+                . 'function strip(){document.querySelectorAll(".awa-shelf.awa-carousel-chrome-ssr,.rokan-newproduct.awa-carousel-chrome-ssr,.rokan-bestseller.awa-carousel-chrome-ssr").forEach(function(el){'
+                . 'el.classList.remove("awa-carousel-chrome-ssr");el.setAttribute("data-awa-chrome-ssr-host","1");});}'
+                . 'strip();'
+                . 'var mo=new MutationObserver(function(){strip();});'
+                . 'mo.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:["class"]});'
+                . 'if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",strip);'
+                . 'window.addEventListener("load",strip);'
+                . '}catch(e){}})();';
+            $html = preg_replace(
+                '/<script\s+id="awa-debug-r62-probe">.*?<\/script>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+            $html = preg_replace(
+                '/<script\s+id="awa-chrome-ssr-strip">.*?<\/script>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+            $html = preg_replace(
+                '/<\/head>/i',
+                '<script id="awa-chrome-ssr-strip">' . $chromeStripJs . '</script></head>',
+                $html,
+                1
+            ) ?? $html;
+
 
             $html = str_replace(
                 [
@@ -2297,6 +5311,167 @@ CSS;
                 $html
             );
         }
+
+        // BUG-SHELL-NONHOME-MIN120-001 + BUG-SHELL-PROMO-COLLAPSE-ALL-VW-001:
+        // stack-h incluía promo mesmo fechada → faixa 44px (desktop/tablet) / 24px (mobile).
+        // SSOT: promo-h:0 + stack=sticky; :has(promo aberta) restaura 44+sticky.
+        // Placeholder CLS: hide default global (home guard não roda no cart).
+        $nonHomeMobileShellCss = '#awa-header-cls-placeholder{display:none!important;height:0!important;'
+            . 'margin:0!important;padding:0!important;min-height:0!important;overflow:hidden!important}'
+            . 'body.awa-header-is-sticky #awa-header-cls-placeholder{display:block!important;'
+            . 'height:var(--awa-header-height,var(--awa-header-sticky-h,96px))!important;'
+            . 'min-height:0!important;overflow:hidden!important}'
+            /* all viewports — collapse promo reservation when closed */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]{'
+            . '--awa-header-promo-h:0px!important;'
+            . '--awa-header-stack-h:var(--awa-header-sticky-h)!important;'
+            . 'height:auto!important;min-height:var(--awa-header-sticky-h)!important;max-height:none!important;'
+            . 'overflow:visible!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]'
+            . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+            . '--awa-header-promo-h:44px!important;'
+            . '--awa-header-stack-h:calc(44px + var(--awa-header-sticky-h))!important;'
+            . 'min-height:calc(44px + var(--awa-header-sticky-h))!important}'
+            . 'html body#html-body#html-body.awa-header-is-sticky:not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]{'
+            . 'min-height:0!important;height:auto!important;max-height:none!important;'
+            . '--awa-header-stack-h:var(--awa-header-sticky-h)!important}'
+            . 'html body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper > .page.messages:not(:has(.message)),'
+            . 'html body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper #maincontent .page.messages:not(:has(.message)),'
+            . 'html body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .page-main > .page.messages:not(:has(.message)){'
+            . 'display:none!important;margin:0!important;padding:0!important;'
+            . 'height:0!important;min-height:0!important;overflow:hidden!important}'
+            . '@media(max-width:767px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index){'
+            . '--awa-header-scroll-offset:96px!important;--awa-header-sticky-h:96px!important}'
+            . 'html:has(body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)){'
+            . '--awa-header-scroll-offset:96px!important;--awa-header-sticky-h:96px!important;'
+            . 'scroll-padding-top:96px!important;scroll-padding-block-start:96px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]{'
+            . '--awa-header-main-row-h:96px!important;--awa-header-sticky-h:96px!important;'
+            . '--awa-header-promo-h:0px!important;--awa-header-stack-h:96px!important;'
+            . 'min-height:96px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]'
+            . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+            . '--awa-header-promo-h:44px!important;--awa-header-stack-h:140px!important;'
+            . 'min-height:140px!important}'
+            . '}'
+            . '@media(min-width:768px) and (max-width:991px){'
+            /* BUG-SHELL-TABLET-PLP-MAIN88-001: themes força .header.awa-main-header 88px
+             * → sticky 88+nav48=136 (SSOT 64+48=112). Vencer literal 88. */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index){'
+            . '--awa-header-scroll-offset:128px!important;--awa-header-sticky-h:112px!important;'
+            . '--awa-header-main-row-h:64px!important;--awa-header-nav-h:48px!important}'
+            . 'html:has(body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)){'
+            . '--awa-header-scroll-offset:128px!important;--awa-header-sticky-h:112px!important;'
+            . 'scroll-padding-top:128px!important;scroll-padding-block-start:128px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]{'
+            . '--awa-header-main-row-h:64px!important;--awa-header-nav-h:48px!important;'
+            . '--awa-header-sticky-h:112px!important;--awa-header-stack-h:112px!important;'
+            . 'min-height:112px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]'
+            . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+            . '--awa-header-promo-h:44px!important;--awa-header-stack-h:156px!important;'
+            . 'min-height:156px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky{'
+            . 'height:112px!important;min-height:112px!important;max-height:112px!important;'
+            . 'box-sizing:border-box!important;overflow:visible!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,'
+            . '.header-main>.container,.awa-main-header__inner.wp-header,'
+            . '.awa-main-header__inner[data-awa-header-row]){'
+            . 'height:64px!important;min-height:64px!important;max-height:64px!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]'
+            . ' :is(.header-control.header-nav,.header-control.awa-nav-bar,.awa-nav-bar){'
+            . 'height:48px!important;min-height:48px!important;max-height:48px!important;'
+            . 'box-sizing:border-box!important}'
+            /* BUG-SHELL-TABLET-PLP-MAIN88-001: path idêntico ao condensed 88 (max 3×#html-body no HTML) */
+            . 'html body#html-body.catalog-category-view .page-wrapper'
+            . ' .awa-site-header:not(.awa-header-condensed) .header-wrapper-sticky .header.awa-main-header,'
+            . 'html body#html-body.catalogsearch-result-index .page-wrapper'
+            . ' .awa-site-header:not(.awa-header-condensed) .header-wrapper-sticky .header.awa-main-header,'
+            . 'html body#html-body.catalog-product-view .page-wrapper'
+            . ' .awa-site-header:not(.awa-header-condensed) .header-wrapper-sticky .header.awa-main-header,'
+            . 'html body#html-body.cms-index-index .page-wrapper'
+            . ' .awa-site-header:not(.awa-header-condensed) .header-wrapper-sticky .header.awa-main-header,'
+            . 'html body#html-body.cms-home .page-wrapper'
+            . ' .awa-site-header:not(.awa-header-condensed) .header-wrapper-sticky .header.awa-main-header,'
+            . 'html body#html-body.checkout-cart-index .page-wrapper'
+            . ' .awa-site-header:not(.awa-header-condensed) .header-wrapper-sticky .header.awa-main-header{'
+            . 'height:64px!important;min-height:64px!important;max-height:64px!important;'
+            . 'box-sizing:border-box!important}'
+            . '}'
+            . '@media(min-width:992px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index){'
+            . '--awa-header-scroll-offset:116px!important;--awa-header-sticky-h:116px!important}'
+            . 'html:has(body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)){'
+            . '--awa-header-scroll-offset:116px!important;--awa-header-sticky-h:116px!important;'
+            . 'scroll-padding-top:116px!important;scroll-padding-block-start:116px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]{'
+            . '--awa-header-sticky-h:116px!important;--awa-header-stack-h:116px!important;'
+            . 'min-height:116px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"]'
+            . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+            . '--awa-header-promo-h:44px!important;--awa-header-stack-h:160px!important;'
+            . 'min-height:160px!important}'
+            . '}';
+        $html = preg_replace(
+            '/<style\s+id="awa-nonhome-mobile-shell-min120"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<head[^>]*>/i',
+            '$0<style id="awa-nonhome-mobile-shell-min120">' . $nonHomeMobileShellCss . '</style>',
+            $html,
+            1
+        ) ?? $html;
+        // BUG-SHELL-CSS-SOURCE-SSOT-001: geometria tablet/mobile vem da fonte CSS
+        // (LESS + bugfix-terminal + contract). Remover paliativos JS/terminal/debug.
+        $html = preg_replace(
+            '/<style\s+id="awa-shell-tablet-main64-terminal"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<script\s+id="awa-shell-tablet-main64-lock"[^>]*>.*?<\/script>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<script\s+id="awa-shell-css-debug-0d05c9"[^>]*>.*?<\/script>\s*/is',
+            '',
+            $html
+        ) ?? $html;
 
         $html = str_replace(
             [
@@ -2360,9 +5535,10 @@ CSS;
                 'box-sizing:border-box!important;display:block!important;height:96px!important;min-height:96px!important;max-height:96px!important;block-size:96px!important;min-block-size:96px!important;max-block-size:96px!important;padding:0!important;margin:0!important;overflow:visible!important}',
             ],
             [
-                '{box-sizing:border-box!important;display:grid!important;grid-template:"toggle brand cart" 44px "search search search" 44px/44px minmax(0,1fr) 44px!important;gap:4px 8px!important;height:96px!important;min-height:96px!important;max-height:96px!important;padding:4px 12px 0!important;padding-block:4px 0!important;padding-inline:12px!important;align-content:start!important;align-items:center!important;overflow:visible!important}',
-                '{box-sizing:border-box!important;display:grid!important;gap:4px 8px!important;grid-template:"toggle brand cart" 44px "search search search" 44px/44px minmax(0,1fr) 44px!important;height:96px!important;min-height:96px!important;max-height:96px!important;overflow:visible!important;padding:4px 12px 0!important;padding-block:4px 0!important;padding-inline:12px!important}',
-                'header-wrapper-sticky{box-sizing:border-box!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;overflow:visible!important}',
+                '{box-sizing:border-box!important;display:grid!important;grid-template:"toggle brand cart" 44px "search search search" 44px/44px minmax(0,1fr) 44px!important;gap:4px 8px!important;height:96px!important;min-height:96px!important;max-height:96px!important;padding:4px 0 0!important;padding-block:4px 0!important;padding-inline:0!important;align-content:start!important;align-items:center!important;overflow:visible!important}',
+                '{box-sizing:border-box!important;display:grid!important;gap:4px 8px!important;grid-template:"toggle brand cart" 44px "search search search" 44px/44px minmax(0,1fr) 44px!important;height:96px!important;min-height:96px!important;max-height:96px!important;overflow:visible!important;padding:4px 0 0!important;padding-block:4px 0!important;padding-inline:0!important}',
+                /* PIXEL-QA 2026-07-25: manter gutter 16 no sticky (não zerar). */
+                'header-wrapper-sticky{box-sizing:border-box!important;height:auto!important;min-height:0!important;max-height:none!important;padding-block:0!important;padding-inline:16px!important;overflow:visible!important}',
                 'box-sizing:border-box!important;display:block!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;margin:0!important;overflow:visible!important}',
             ],
             $html
@@ -2377,7 +5553,8 @@ CSS;
             ],
             [
                 ':is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container){box-sizing:border-box!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;margin:0!important;overflow:visible!important}',
-                'header.awa-site-header .header-wrapper-sticky{box-sizing:border-box!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;margin:0!important;overflow:visible!important}',
+                /* PIXEL-QA 2026-07-25: gutter mobile 16 no sticky PLP/PDP. */
+                'header.awa-site-header .header-wrapper-sticky{box-sizing:border-box!important;height:auto!important;min-height:0!important;max-height:none!important;padding-block:0!important;padding-inline:16px!important;margin:0!important;overflow:visible!important}',
             ],
             $html
         );
@@ -2385,6 +5562,994 @@ CSS;
         $html = $this->enforcePrimaryRowResponsiveContract($html);
 
         return $html;
+    }
+
+    /**
+     * WCAG 2.5.8 / Magento touch target ≥44px.
+     * Evidência 2026-07-25: select.sorter com height:auto ignora min-height no Chrome;
+     * breadcrumbs a{display:inline} zera o hit-area. Body-end unlayered + force style.
+     */
+    private function injectTouch44Terminal(string $html): string
+    {
+        if (!str_contains($html, 'page-wrapper')) {
+            return $html;
+        }
+
+        $html = preg_replace(
+            '/<style id="awa-touch-44-terminal">.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<script id="awa-touch-44-terminal-js">.*?<\/script>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="awa-touch-44-terminal">'
+            . 'html body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index)'
+            . ' .page-wrapper .toolbar.toolbar-products'
+            . ' :is(.sorter-options,select.limiter-options,#sorter,#limiter){'
+            . 'min-height:44px!important;height:44px!important;max-height:none!important;'
+            . 'box-sizing:border-box!important;padding-block:8px!important}'
+            /* H-crumbs-compact (2026-08-02): breadcrumb nav textual — 44px inflava
+               .items ~50px (CDP search). Sempre compacto (pointer:coarse no Electron
+               MCP re-inflava; alvos touch reais ficam nos botões/toolbar). */
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(.breadcrumbs,.nav-breadcrumbs) a{'
+            . 'display:inline-flex!important;align-items:center!important;'
+            . 'min-height:0!important;min-block-size:0!important;height:auto!important;'
+            . 'padding-block:2px!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(.page_footer,.page-footer)'
+            . ' :is(button.awa-footer-section__toggle,.awa-footer-section__toggle){'
+            . 'min-height:44px!important;height:auto!important;max-height:none!important;'
+            . 'padding-block:10px!important;box-sizing:border-box!important;'
+            . 'display:flex!important;align-items:center!important}'
+            /* Cart: critical CSS forçava Remover=34px; qty btn w=36 fora de pointer:coarse. */
+            . 'html body#html-body#html-body#html-body#html-body.checkout-cart-index'
+            . ' .page-wrapper .cart.table-wrapper'
+            . ' :is(.action-delete,.action.action-delete){'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'min-height:44px!important;height:44px!important;min-width:44px!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body.checkout-cart-index'
+            . ' .page-wrapper :is(.awa-qty-btn,.awa-qty-stepper .awa-qty-btn){'
+            . 'min-width:44px!important;width:44px!important;min-height:44px!important;height:44px!important;'
+            . 'box-sizing:border-box!important;display:inline-flex!important;'
+            . 'align-items:center!important;justify-content:center!important}'
+            /* Promo close = 1º button no DOM (Pixel QA sel:"button"). */
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(#awa-b2b-promo-close,button.awa-b2b-promo-close){'
+            . 'min-width:44px!important;width:44px!important;max-width:44px!important;'
+            . 'min-height:44px!important;height:44px!important;max-height:44px!important;'
+            . 'box-sizing:border-box!important;display:inline-flex!important;'
+            . 'align-items:center!important;justify-content:center!important;padding:0!important}'
+            /* PLP: modes-label é o toggle de filtros (role=button) — era 36px no audit inject. */
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index)'
+            . ' .page-wrapper .toolbar.toolbar-products .modes .modes-label{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'min-height:44px!important;height:auto!important;min-width:44px!important;'
+            . 'box-sizing:border-box!important;padding-block:10px!important}'
+            /* Empty cart: suggestion/more — min.css quebrava .page-wrapper :is(); base era 36/22. */
+            . 'html body#html-body#html-body#html-body#html-body.checkout-cart-index'
+            . ' .page-wrapper .cart-empty.awa-cart-empty'
+            . ' :is(a.awa-cart-empty__suggestion,a.awa-cart-empty__categories-more){'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'min-height:44px!important;height:auto!important;box-sizing:border-box!important;'
+            . 'padding-block:10px!important}'
+            . '</style>';
+
+        /* Element style !important vence qualquer stylesheet author (prova CDP). */
+        $js = '<script id="awa-touch-44-terminal-js">(function(){try{'
+            . 'var q=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};'
+            . 'var set=function(els,p){els.forEach(function(el){'
+            . 'Object.keys(p).forEach(function(k){el.style.setProperty(k,p[k],"important");});'
+            . '});};'
+            . 'set(q(".toolbar.toolbar-products #sorter,'
+            . '.toolbar.toolbar-products select.sorter-options,'
+            . '.toolbar.toolbar-products select.limiter-options,'
+            . '.toolbar.toolbar-products #limiter"),'
+            . '{height:"44px","min-height":"44px","max-height":"none","box-sizing":"border-box"});'
+            /* H-crumbs-compact: sempre compacto + reapply após ux-enhancements
+               (CDP: JS antigo/race com forceTouch44 44 inflava .items ~50px). */
+            . 'var crumbP={display:"inline-flex","align-items":"center","min-height":"0",'
+            . '"min-block-size":"0",height:"auto","padding-block":"2px","box-sizing":"border-box"};'
+            . 'var crumbBusy=false;'
+            . 'var crumbApply=function(){'
+            . 'if(crumbBusy){return;}crumbBusy=true;'
+            . 'try{set(q(".breadcrumbs a,.nav-breadcrumbs a"),crumbP);'
+            . 'var ts=document.getElementById("awa-touch-style");'
+            . 'if(ts&&ts.textContent&&/:is\\(\\.breadcrumbs,\\.nav-breadcrumbs\\) a\\{/.test(ts.textContent)){'
+            . 'var next=ts.textContent.replace(/(:is\\(\\.breadcrumbs,\\.nav-breadcrumbs\\) a\\{)[^}]*(})/g,'
+            . '"$1display:inline-flex!important;align-items:center!important;min-height:0!important;'
+            . 'min-block-size:0!important;height:auto!important;padding-block:2px!important;box-sizing:border-box!important$2");'
+            . 'if(next!==ts.textContent){ts.textContent=next;}'
+            . '}'
+            . '}finally{setTimeout(function(){crumbBusy=false;},0);}};'
+            . 'crumbApply();'
+            . '[0,50,200,800,2000,4000,8000].forEach(function(ms){setTimeout(crumbApply,ms);});'
+            . 'if(window.requestAnimationFrame){requestAnimationFrame(crumbApply);}'
+            . 'try{if(window.MutationObserver){var mo=new MutationObserver(function(){crumbApply();});'
+            . 'var boot=function(){q(".breadcrumbs a,.nav-breadcrumbs a").forEach(function(el){'
+            . 'mo.observe(el,{attributes:true,attributeFilter:["style"]});});'
+            . 'var ts=document.getElementById("awa-touch-style");'
+            . 'if(ts){mo.observe(ts,{childList:true,characterData:true,subtree:true});}};'
+            . 'boot();setTimeout(boot,1000);setTimeout(boot,3000);'
+            . 'setTimeout(function(){try{mo.disconnect();}catch(e){}},12000);}}catch(e){}'
+            . 'set(q(".page_footer .awa-footer-section__toggle,'
+            . '.page-footer .awa-footer-section__toggle"),'
+            . '{"min-height":"44px",height:"auto","max-height":"none",'
+            . '"padding-block":"10px",display:"flex","align-items":"center",'
+            . '"box-sizing":"border-box"});'
+            . 'set(q(".checkout-cart-index .cart.table-wrapper .action-delete,'
+            . '.checkout-cart-index .cart.table-wrapper .action.action-delete"),'
+            . '{"min-height":"44px",height:"44px","min-width":"44px",'
+            . 'display:"inline-flex","align-items":"center","justify-content":"center",'
+            . '"box-sizing":"border-box"});'
+            . 'set(q(".checkout-cart-index .awa-qty-btn"),'
+            . '{"min-width":"44px",width:"44px","min-height":"44px",height:"44px",'
+            . 'display:"inline-flex","align-items":"center","justify-content":"center",'
+            . '"box-sizing":"border-box"});'
+            . 'set(q("#awa-b2b-promo-close,button.awa-b2b-promo-close"),'
+            . '{"min-width":"44px",width:"44px","min-height":"44px",height:"44px",'
+            . '"max-width":"44px","max-height":"44px",'
+            . 'display:"inline-flex","align-items":"center","justify-content":"center",'
+            . '"box-sizing":"border-box"});'
+            . 'set(q(".toolbar.toolbar-products .modes .modes-label"),'
+            . '{"min-height":"44px",height:"auto","min-width":"44px",'
+            . 'display:"inline-flex","align-items":"center","justify-content":"center",'
+            . '"padding-block":"10px","box-sizing":"border-box"});'
+            . 'set(q(".cart-empty.awa-cart-empty a.awa-cart-empty__suggestion,'
+            . '.cart-empty.awa-cart-empty a.awa-cart-empty__categories-more"),'
+            . '{"min-height":"44px",height:"auto",'
+            . 'display:"inline-flex","align-items":"center","justify-content":"center",'
+            . '"padding-block":"10px","box-sizing":"border-box"});'
+            . '}catch(e){}})();</script>';
+
+        $payload = $css . "\n" . $js;
+        $injected = preg_replace('/<\/body>/i', $payload . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * §hero-box-r1 — home above-fold full-bleed.
+     * Evidência 2026-07-25: content-box + padding-inline 16 → offsetWidth=vw+32,
+     * img right=vw+16 (clip); body/html overflow:hidden esconde scroll.
+     */
+    private function injectHeroBoxTerminal(string $html): string
+    {
+        if (!preg_match(
+            '/<body\b[^>]*\bclass=(["\'])[^"\']*(?:cms-index-index|cms-home|cms-homepage_ayo_home5)/i',
+            $html
+        )) {
+            return $html;
+        }
+
+        $html = preg_replace(
+            '/<style id="awa-hero-box-terminal">.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="awa-hero-box-terminal">'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .content-top-home'
+            . ' :is(#awa-main-content.top-home-content--above-fold,'
+            . '.top-home-content--above-fold.awa-hero){'
+            . 'box-sizing:border-box!important;width:100%!important;max-width:100%!important;'
+            . 'margin-inline:0!important;padding-inline:0!important;padding-block:0!important;'
+            . 'overflow:hidden!important}'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .content-top-home .top-home-content--above-fold'
+            . ' :is(.banner-slider,.banner-slider2,.wrapper_slider.visible-xs,'
+            . '.awa-hero-swiper,.swiper-slide,.banner_item_bg,picture,img){'
+            . 'box-sizing:border-box!important;max-width:100%!important;'
+            . 'width:100%!important;margin-inline:0!important}'
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * §plp-col-r1 — contém .col-main dentro de .columns no PLP.
+     * Evidência 2026-07-25 (vw 390): .columns=358px mas .col-main=376.5px
+     * (flex:0 0 auto de html body.page-products .columns>.col-main no layout-bundle),
+     * hero/grid right=392.5 → imgOverflow falso + bleed real clipado.
+     */
+    private function injectPlpColContainTerminal(string $html): string
+    {
+        if (!preg_match(
+            '/<body\b[^>]*\bclass=(["\'])[^"\']*(?:catalog-category-view|catalogsearch-result-index|page-products)/i',
+            $html
+        )) {
+            return $html;
+        }
+
+        $html = preg_replace(
+            '/<style id="awa-plp-col-contain-terminal">.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        /* Mobile-only contain (desktop usa display:contents no .col-main).
+         * Tablet: esconde coluna de filtro colapsada (era ~26px fantasma em 768). */
+        $css = '<style id="awa-plp-col-contain-terminal">'
+            . '@media(max-width:767px){'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index,.page-products)'
+            . ' .page-wrapper .page-main > .columns{'
+            . 'display:flex!important;flex-wrap:wrap!important;max-width:100%!important;'
+            . 'min-width:0!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index,.page-products)'
+            . ' .page-wrapper .page-main > .columns > .col-main{'
+            . 'flex:1 1 auto!important;flex-grow:1!important;flex-shrink:1!important;'
+            . 'flex-basis:0%!important;width:auto!important;max-width:100%!important;'
+            . 'min-width:0!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index,.page-products)'
+            . ' .page-wrapper .page-main > .columns > .col-main'
+            . ' :is(.category-view-move,.awa-category-hero,.shop-tab-title,.shop-tab-select,'
+            . '.wrapper.grid.products-grid,#layered-ajax-list-products,.product-content-right){'
+            . 'max-width:100%!important;min-width:0!important;box-sizing:border-box!important}'
+            . '}'
+            . '@media(max-width:991px){'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index,.page-products)'
+            . ':not(.awa-plp-filters-expanded)'
+            . ' .page-wrapper .page-main > .columns{'
+            . 'grid-template-columns:minmax(0,1fr)!important}'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index,.page-products)'
+            . ':not(.awa-plp-filters-expanded)'
+            . ' .page-wrapper .page-main > .columns > .col-xs-12.col-sm-3:not(.col-main){'
+            . 'display:none!important;width:0!important;min-width:0!important;'
+            . 'max-width:0!important;flex:0 0 0!important;overflow:hidden!important;'
+            . 'pointer-events:none!important}'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index,.page-products)'
+            . ':not(.awa-plp-filters-expanded)'
+            . ' .page-wrapper .page-main > .columns > .col-main{'
+            . 'width:100%!important;max-width:100%!important;min-width:0!important;'
+            . 'grid-column:1/-1!important}'
+            . '}'
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * §header-stack-r1 — empilha título/subtítulo das seções home.
+     * Evidência 2026-07-25 (vw 390): flex-wrap:wrap + altura curta colocava
+     * .awa-category-carousel__subtitle em left≈326 (fora do viewport).
+     */
+    private function injectSectionHeaderStackTerminal(string $html): string
+    {
+        if (!preg_match(
+            '/<body\b[^>]*\bclass=(["\'])[^"\']*(?:cms-index-index|cms-home|cms-homepage_ayo_home5)/i',
+            $html
+        )) {
+            return $html;
+        }
+
+        $html = preg_replace(
+            '/<style id="awa-section-header-stack-terminal">.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $css = '<style id="awa-section-header-stack-terminal">'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .content-top-home'
+            . ' :is(.awa-section-header__left,.awa-shelf__heading,.awa-category-carousel__heading){'
+            . 'display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;'
+            . 'align-items:flex-start!important;gap:4px!important;height:auto!important;'
+            . 'max-height:none!important;max-width:100%!important;min-width:0!important;'
+            . 'overflow:visible!important;width:auto!important;flex:1 1 auto!important}'
+            . 'html body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .content-top-home'
+            . ' :is(.awa-section-header__subtitle,.awa-shelf__subtitle,.awa-category-carousel__subtitle){'
+            . 'flex:0 1 auto!important;max-width:100%!important;min-width:0!important;'
+            . 'width:auto!important;white-space:normal!important;margin:0!important}'
+            // r76 CLS: align-grid/themes forçam flex-wrap:wrap → “Ver todos” salta de x~1152→86
+            // (CLS ~0.045). Desktop: agora = nowrap estável (título|link na mesma linha).
+            . '@media(min-width:768px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .content-top-home'
+            . ' :is(.awa-section-header,.awa-shelf__header,.awa-category-carousel__header,'
+            . 'header.awa-section-header){'
+            . 'display:flex!important;flex-wrap:nowrap!important;flex-direction:row!important;'
+            . 'align-items:center!important;justify-content:space-between!important;'
+            . 'gap:12px!important;width:100%!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .content-top-home'
+            . ' :is(.awa-section-header__link,.awa-shelf__view-all,.awa-category-carousel__view-all,'
+            . '.awa-category-carousel__actions){'
+            . 'flex:0 0 auto!important;margin-inline-start:auto!important;white-space:nowrap!important;'
+            . 'align-self:center!important}'
+            . '}'
+            . '</style>';
+
+        $injected = preg_replace('/<\/body>/i', $css . "\n</body>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * PIXEL-QA r5 — lock terminal de gutter (DEPOIS do audit visual e do
+     * normalizeExcessiveHtmlBodySpecificity; senão #html-body colapsa p/ 3× e o
+     * padding:12px do audit vence no carrinho).
+     */
+    private function injectPixelQaGutterLock(string $html): string
+    {
+        $storefrontHdr = 'html body#html-body#html-body#html-body'
+            . ':not(.checkout-index-index):not(.onepagecheckout-index-index)'
+            . ':not(.checkout-cart-index):not(.b2b-auth-shell)';
+        $catalogHdr = 'html body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view,'
+            . '.catalogo-index-index,.awa-catalog-page)';
+        /* CMS / 404 / contato / currículo — mesmo gutter 16/24 do eixo storefront. */
+        $cmsHdr = 'html body#html-body#html-body#html-body'
+            . ':is(.cms-page-view,.cms-noroute-index,.contact-index-index,'
+            . '.curriculo-index-index,.curriculo-index-status)';
+        $cartHdr = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index';
+        $homeRoot = 'html:has(body.cms-index-index),html:has(body.cms-home),html:has(body.cms-homepage_ayo_home5),'
+            . 'html:has(body#html-body.cms-index-index),html:has(body#html-body.cms-home),'
+            . 'html:has(body#html-body.cms-homepage_ayo_home5)';
+        /* Dois seletores separados: NÃO concatenar sufixo em lista com vírgula
+         * (senão o 1º seletor recebe o padding do descendente — body padava 24). */
+        $homeBodyA = 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)';
+        $homeBodyB = 'html body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)';
+        $homeBody = $homeBodyA . ',' . $homeBodyB;
+        $homeDesc = static function (string $suffix) use ($homeBodyA, $homeBodyB): string {
+            return $homeBodyA . $suffix . ',' . $homeBodyB . $suffix;
+        };
+        $homeShell = $homeDesc(' .page-wrapper') . ',' . $homeDesc(' .header-wrapper-sticky');
+        /* PIXEL-QA 2026-07-25: contrato gutter mobile 16 / tablet+desktop 24.
+         * align-grid terminal fica em media=print (css-gate) — tokens 24 do arquivo
+         * NÃO aplicam na tela; este lock no <head> é a fonte de verdade do eixo. */
+        $gutterLock = '<style id="awa-pixel-qa-catalog-hdr-gutter-16">'
+            /* Layer awa-pixel-qa ANTES de awa-fixes: !important da layer anterior vence o
+             * align-grid (mesma layer / ordem tardia na home media=all). */
+            . '@layer awa-pixel-qa,awa-fixes;'
+            . '@layer awa-pixel-qa{'
+            . '@media(max-width:767px){'
+            . $homeRoot . '{width:100vw!important;min-width:100vw!important;max-width:100vw!important}'
+            . $homeBody . '{width:100%!important;min-width:100%!important;max-width:100%!important;margin:0!important}'
+            . $homeShell . '{width:100%!important;max-width:100%!important;box-sizing:border-box!important}'
+            . $storefrontHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky,'
+            . $storefrontHdr . ' .page-wrapper #header .header-wrapper-sticky{'
+            . 'padding-block:0!important;padding-inline:16px!important;box-sizing:border-box!important}'
+            . $storefrontHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main,.header-main>.container,'
+            . '.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+            . $cartHdr . '{margin:0!important;width:100%!important;max-width:100%!important}'
+            . $cartHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky{'
+            . 'padding-block:0!important;padding-inline:16px!important;box-sizing:border-box!important}'
+            . $cartHdr . ' .page-wrapper header.awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main,.header-main>.container,'
+            . '.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+            /* Cart: gutter só no page-main — .column.main pad=0 (evita 16+4vw≈32). */
+            . $cartHdr . ' .page-wrapper .page-main{'
+            . 'padding-inline:16px!important;box-sizing:border-box!important}'
+            . $cartHdr . ' .page-wrapper .columns .column.main,'
+            . $cartHdr . ' .page-wrapper .column.main,'
+            . $cartHdr . ' .page-wrapper .cart-container{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . '}'
+            . '@media(min-width:768px){'
+            /* Tokens 24 (align-grid catálogo fica em print/css-gate). */
+            . $homeBody . '{'
+            . '--awa-page-pad:24px!important;--awa-page-pad-catalog:24px!important;'
+            . '--awa-shell-gutter:24px!important;--awa-container-pad:24px!important;'
+            . '--awa-container-gutter:24px!important;--awa-plp-shell-pad:24px!important;'
+            . '--awa-grid-container-pad:24px!important;--awa-header-shell-pad:24px!important;'
+            . '--awa-home-shell-gutter:24px!important}'
+            /* Home: body sem pad; eixo único no inner/main/footer. */
+            . $homeBody . '{padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+            . $homeDesc(' .page-wrapper .awa-site-header .header-wrapper-sticky') . '{'
+            . 'padding-inline:0!important}'
+            . $homeDesc(' .page-wrapper .awa-site-header .header-wrapper-sticky'
+                . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+                . '.header-main,.header-main>.container)') . '{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+            . $homeDesc(' .page-wrapper .awa-site-header .header-wrapper-sticky'
+                . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row])') . '{'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            /* Home ≥1024: vencer clamp/space-4 (5–6 IDs) no inner — pad literal 24. */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]),'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            . $homeDesc(' .page-wrapper :is(.page-main,#maincontent)') . '{'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            /* Footer: shell full-bleed; eixo 1280 só nos containers internos. */
+            . $homeDesc(' .page-wrapper footer.page-footer') . ','
+            . $homeDesc(' .page-wrapper :is(.page_footer,footer.page-footer)') . '{'
+            . 'max-width:none!important;width:100%!important;margin-inline:0!important;'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . $homeDesc(' .page-wrapper footer.page-footer :is(#footer.footer-container,'
+                . '.awa-footer-newsletter>.container,.footer-bottom>.container,'
+                . '.awa-footer-trust-bar>.container)') . '{'
+            . 'max-width:min(100%,1280px)!important;width:100%!important;margin-inline:auto!important;'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            . $homeDesc(' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,'
+                . '.footer-bottom,.footer-bottom-inner)') . '{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            /* Catálogo/PDP/busca: sticky 0 + inner/main/footer 24. */
+            . $catalogHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky{'
+            . 'padding-inline:0!important}'
+            . $catalogHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main,.header-main>.container){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . $catalogHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            . $catalogHdr . ' .page-wrapper .page-main{'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            /* SSOT-1 Onda 5: catálogo/PDP — gutter só no page-main (evita pad duplo). */
+            . $catalogHdr . ' .page-wrapper .columns .column.main,'
+            . $catalogHdr . ' .page-wrapper .column.main{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . $cmsHdr . ' .page-wrapper .page-main{'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            . $cmsHdr . ' .page-wrapper .columns .column.main,'
+            . $cmsHdr . ' .page-wrapper .column.main{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            /* SSOT-1 Onda 2: CMS tablet/desktop — gutter só no inner (24), wrappers 0.
+             * Sem isso, align-grid/themes aplicam --awa-header-shell-pad (16) em
+             * .header.awa-main-header + inner 24 → rail 40 vs main 24. */
+            . $cmsHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky{'
+            . 'padding-inline:0!important}'
+            . $cmsHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main){'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;'
+            . 'padding-right:0!important;margin-inline:0!important;box-sizing:border-box!important}'
+            /* SSOT-1 Onda 5: CMS ≥768 — centralizar .container (eixo 1280); gutter só no inner.
+             * Pin JS antigo forçava margin 0 no .container → delta header −80@1440. */
+            . $cmsHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' .header-main>.container{'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;'
+            . 'padding-right:0!important;margin-inline:auto!important;margin-left:auto!important;'
+            . 'margin-right:auto!important;max-width:min(100%,1280px)!important;width:100%!important;'
+            . 'box-sizing:border-box!important}'
+            . $cmsHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            . $catalogHdr . ' .page-wrapper footer.page-footer,'
+            . $storefrontHdr . ' .page-wrapper footer.page-footer{'
+            . 'max-width:none!important;width:100%!important;margin-inline:0!important;'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;box-sizing:border-box!important}'
+            . $catalogHdr . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,'
+                . '.footer-bottom,.footer-bottom-inner),'
+            . $storefrontHdr . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,'
+                . '.footer-bottom,.footer-bottom-inner){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            /* Cart tablet/desktop: mesmo eixo do .page-main (pad 24 + shell 1280). */
+            . $cartHdr . '{margin:0!important;width:100%!important;max-width:100%!important;'
+            . 'padding-inline:0!important}'
+            . $cartHdr . ' .page-wrapper .awa-site-header .header-wrapper-sticky{'
+            . 'padding-inline:0!important}'
+            . $cartHdr . ' .page-wrapper header.awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main,.header-main>.container,.header_main>.container){'
+            . 'padding:0!important;padding-inline:0!important;margin-inline:0!important;'
+            . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important}'
+            . $cartHdr . ' .page-wrapper header.awa-site-header .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'width:100%!important;max-width:min(100%,1280px)!important;margin-inline:auto!important;'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            . $cartHdr . ' .page-wrapper .page-main{'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            . $cartHdr . ' .page-wrapper .columns .column.main,'
+            . $cartHdr . ' .page-wrapper .column.main,'
+            . $cartHdr . ' .page-wrapper .cart-container{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . $cartHdr . ' .page-wrapper footer.page-footer{'
+            . 'max-width:none!important;width:100%!important;margin-inline:0!important;'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;box-sizing:border-box!important}'
+            . $cartHdr . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,'
+                . '.footer-bottom,.footer-bottom-inner){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . '}'
+            /* Mobile: mesmo contrato — shell 16, filhos 0. */
+            . '@media(max-width:767px){'
+            . $cmsHdr . ' .page-wrapper .page-main{'
+            . 'padding-inline:16px!important;box-sizing:border-box!important}'
+            /* SSOT-1 Onda 1: CMS filho sem gutter (evita 16+16 no mobile). */
+            . $cmsHdr . ' .page-wrapper .columns .column.main,'
+            . $cmsHdr . ' .page-wrapper .column.main{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            /* SSOT-1 Onda 5: catálogo/PDP mobile — filho sem gutter. */
+            . $catalogHdr . ' .page-wrapper .page-main{'
+            . 'padding-inline:16px!important;box-sizing:border-box!important}'
+            . $catalogHdr . ' .page-wrapper .columns .column.main,'
+            . $catalogHdr . ' .page-wrapper .column.main{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . $storefrontHdr . ' .page-wrapper footer.page-footer,'
+            . $catalogHdr . ' .page-wrapper footer.page-footer,'
+            . $cartHdr . ' .page-wrapper footer.page-footer,'
+            . $homeDesc(' .page-wrapper footer.page-footer') . '{'
+            . 'max-width:none!important;width:100%!important;margin-inline:0!important;'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;box-sizing:border-box!important}'
+            . $storefrontHdr . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,'
+                . '.footer-bottom,.footer-bottom-inner),'
+            . $catalogHdr . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,'
+                . '.footer-bottom,.footer-bottom-inner),'
+            . $cartHdr . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,'
+                . '.footer-bottom,.footer-bottom-inner),'
+            . $homeDesc(' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,'
+                . '.footer-bottom,.footer-bottom-inner)') . '{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . '}'
+            /* PIXEL-QA 2026-07-25: shells B2B/auth — gutter 16/24 (sem header storefront). */
+            . '@media(max-width:767px){'
+            . 'html body#html-body:is(.b2b-auth-shell,.b2b-register-index,.customer-account-login,'
+            . '.customer-account-create){'
+            . '--b2b-auth-shell-pad-x:16px!important;--awa-page-pad:16px!important}'
+            . 'html body#html-body:is(.b2b-auth-shell,.b2b-register-index,.customer-account-login,'
+            . '.customer-account-create) .page-wrapper :is(.page-main,#maincontent){'
+            . 'padding-inline:16px!important;box-sizing:border-box!important}'
+            . '}'
+            . '@media(min-width:768px){'
+            . 'html body#html-body:is(.b2b-auth-shell,.b2b-register-index,.customer-account-login,'
+            . '.customer-account-create){'
+            . '--b2b-auth-shell-pad-x:24px!important;--awa-page-pad:24px!important}'
+            . 'html body#html-body:is(.b2b-auth-shell,.b2b-register-index,.customer-account-login,'
+            . '.customer-account-create) .page-wrapper :is(.page-main,#maincontent){'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            . '}'
+            /* SSOT-1 Onda 4: B2B account dashboard + OPC checkout — gutter 16/24 fixo. */
+            . '@media(max-width:767px){'
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational,.checkout-index-index,.rokanthemes-onepagecheckout,'
+            . '.onepagecheckout-index-index){'
+            . '--awa-acct-shell-pad:16px!important;--awa-page-pad:16px!important}'
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational,.checkout-index-index,.rokanthemes-onepagecheckout,'
+            . '.onepagecheckout-index-index) .page-wrapper :is(.page-main,#maincontent,.page-main.container){'
+            . 'padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important;'
+            . 'box-sizing:border-box!important}'
+            /* SSOT-1 Onda 4b: B2B account header — sticky 16, wrappers/inner 0. */
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational) .page-wrapper .awa-site-header .header-wrapper-sticky{'
+            . 'padding-inline:16px!important;box-sizing:border-box!important}'
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational) .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main,.header-main>.container,'
+            . '.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;'
+            . 'padding-right:0!important;margin-inline:0!important;margin-left:0!important;'
+            . 'margin-right:0!important;width:100%!important;max-width:100%!important;'
+            . 'box-sizing:border-box!important}'
+            . '}'
+            . '@media(min-width:768px){'
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational,.checkout-index-index,.rokanthemes-onepagecheckout,'
+            . '.onepagecheckout-index-index){'
+            . '--awa-acct-shell-pad:24px!important;--awa-page-pad:24px!important}'
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational,.checkout-index-index,.rokanthemes-onepagecheckout,'
+            . '.onepagecheckout-index-index) .page-wrapper :is(.page-main,#maincontent,.page-main.container){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            /* SSOT-1 Onda 4b: B2B account header — sticky/wrappers 0, inner 24 (evita 24×N). */
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational) .page-wrapper .awa-site-header .header-wrapper-sticky{'
+            . 'padding-inline:0!important}'
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational) .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main,.header-main>.container){'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;'
+            . 'padding-right:0!important;margin-inline:0!important;margin-left:0!important;'
+            . 'margin-right:0!important;width:100%!important;max-width:100%!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body:is(.account,.b2b-account-shell,.b2b-account-dashboard,'
+            . '.awa-account-operational) .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'margin-inline:auto!important;max-width:min(100%,1280px)!important;width:100%!important;'
+            . 'box-sizing:border-box!important}'
+            . '}'
+            . '}'
+            . '</style>';
+
+        $html = preg_replace(
+            '/<style id="awa-pixel-qa-catalog-hdr-gutter-16">.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<style id="awa-pixel-qa-gutter-terminal">.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<script id="awa-pixel-qa-home-gutter-24">.*?<\/script>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        /* HEAD: first paint (catálogo align-grid em print). */
+        $injected = preg_replace('/<\/head>/i', $gutterLock . "\n</head>", $html, 1);
+        if (!is_string($injected) || $injected === $html) {
+            $injected = $html;
+        }
+        /* BODY terminal: na home o align-grid é media=all e chega depois do <head>;
+         * override final-wins no eixo desktop (sem depender de layer order).
+         * Footer axis: depois do site-shell inline (padding 16 em .footer-bottom). */
+        $homeTerminal = '<style id="awa-pixel-qa-gutter-terminal">'
+            /* Mesma layer do align-grid, depois dele no DOM → final-wins no desktop home. */
+            . '@layer awa-fixes{@media(min-width:768px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]),'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            /* SSOT-1 Onda 3: token shell-pad 24 na home ≥768 (impeccable usava fallback 16). */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5){'
+            . '--awa-header-shell-pad:24px!important;--awa-home-shell-gutter:24px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper :is(.page-main,#maincontent){'
+            . 'padding-inline:24px!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important}'
+            . '}}'
+            /* PIXEL-QA footer axis — UNLAYERED + após site-shell (unlayered !important vence layer). */
+            . '@media(max-width:767px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer{'
+            . 'max-width:none!important;width:100%!important;margin-inline:0!important;'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer :is(#footer.footer-container,.awa-footer-newsletter>.container,'
+            . '.footer-bottom>.container,.awa-footer-trust-bar>.container){'
+            . 'max-width:min(100%,1280px)!important;width:100%!important;margin-inline:auto!important;'
+            . 'padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,#footer.footer-container,'
+            . '.footer-container,.footer-bottom,.footer-bottom-inner){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'padding-inline-start:0!important;padding-inline-end:0!important;box-sizing:border-box!important}'
+            . '}'
+            . '@media(min-width:768px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer{'
+            . 'max-width:none!important;width:100%!important;margin-inline:0!important;'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer :is(#footer.footer-container,.awa-footer-newsletter>.container,'
+            . '.footer-bottom>.container,.awa-footer-trust-bar>.container){'
+            . 'max-width:min(100%,1280px)!important;width:100%!important;margin-inline:auto!important;'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,#footer.footer-container,'
+            . '.footer-container,.footer-bottom,.footer-bottom-inner){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'padding-inline-start:0!important;padding-inline-end:0!important;box-sizing:border-box!important}'
+            . '}'
+            /* CMS/404/contato — UNLAYERED: vence impeccable-refine clamp(12px,2.5vw,24px). */
+            . '@media(max-width:767px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-page-view,.cms-noroute-index,.contact-index-index,'
+            . '.curriculo-index-index,.curriculo-index-status)'
+            . ' .page-wrapper :is(.page-main,#maincontent.page-main,.page-main.container){'
+            . 'padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-page-view,.cms-noroute-index,.contact-index-index,'
+            . '.curriculo-index-index,.curriculo-index-status)'
+            . ' .page-wrapper :is(.columns .column.main,.column.main){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . '}'
+            . '@media(min-width:768px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-page-view,.cms-noroute-index,.contact-index-index,'
+            . '.curriculo-index-index,.curriculo-index-status)'
+            . ' .page-wrapper :is(.page-main,#maincontent.page-main,.page-main.container){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-page-view,.cms-noroute-index,.contact-index-index,'
+            . '.curriculo-index-index,.curriculo-index-status)'
+            . ' .page-wrapper :is(.columns .column.main,.column.main){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            /* SSOT-1 Onda 2: unlayered — zera pad do wrapper do header no CMS ≥768. */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-page-view,.cms-noroute-index,.contact-index-index,'
+            . '.curriculo-index-index,.curriculo-index-status)'
+            . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main){'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;'
+            . 'padding-right:0!important;margin-inline:0!important;box-sizing:border-box!important}'
+            /* SSOT-1 Onda 5 UNLAYERED: CMS ≥768 — .container centrado; gutter no inner. */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-page-view,.cms-noroute-index,.contact-index-index,'
+            . '.curriculo-index-index,.curriculo-index-status)'
+            . ' .page-wrapper .awa-site-header .header-wrapper-sticky .header-main>.container{'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;'
+            . 'padding-right:0!important;margin-inline:auto!important;margin-left:auto!important;'
+            . 'margin-right:auto!important;max-width:min(100%,1280px)!important;width:100%!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-page-view,.cms-noroute-index,.contact-index-index,'
+            . '.curriculo-index-index,.curriculo-index-status)'
+            . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            . '}'
+            /* SSOT-1 Onda 5 UNLAYERED: catálogo/PDP — .column.main sem pad horizontal. */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view,'
+            . '.catalogo-index-index,.awa-catalog-page)'
+            . ' .page-wrapper :is(.columns .column.main,.column.main){'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            /* Cart: .column.main / .cart-container sem pad horizontal (gutter só no page-main). */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '.checkout-cart-index .page-wrapper .columns .column.main,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '.checkout-cart-index .page-wrapper .column.main,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '.checkout-cart-index .page-wrapper .cart-container{'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            /* SSOT-1 Onda 4 UNLAYERED: B2B account + OPC — vence align-grid 16@768. */
+            . '@media(max-width:767px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.account,.b2b-account-shell,.b2b-account-dashboard,.awa-account-operational,'
+            . '.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)'
+            . ' .page-wrapper :is(.page-main,#maincontent,.page-main.container){'
+            . 'padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important;'
+            . 'box-sizing:border-box!important}}'
+            . '@media(min-width:768px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.account,.b2b-account-shell,.b2b-account-dashboard,.awa-account-operational,'
+            . '.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)'
+            . ' .page-wrapper :is(.page-main,#maincontent,.page-main.container){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'box-sizing:border-box!important}'
+            /* SSOT-1 Onda 4b UNLAYERED: B2B account header axis. */
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.account,.b2b-account-shell,.b2b-account-dashboard,.awa-account-operational)'
+            . ' .page-wrapper .awa-site-header .header-wrapper-sticky{padding-inline:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.account,.b2b-account-shell,.b2b-account-dashboard,.awa-account-operational)'
+            . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,'
+            . '.header-main,.header-main>.container){'
+            . 'padding:0!important;padding-inline:0!important;padding-left:0!important;'
+            . 'padding-right:0!important;margin-inline:0!important;margin-left:0!important;'
+            . 'margin-right:0!important;width:100%!important;max-width:100%!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.account,.b2b-account-shell,.b2b-account-dashboard,.awa-account-operational)'
+            . ' .page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;'
+            . 'margin-inline:auto!important;max-width:min(100%,1280px)!important;width:100%!important;'
+            . 'box-sizing:border-box!important}}'
+            . '</style>'
+            /* ≥768: awa-visual-priority (deferred-stack) vence stylesheet no padding do
+             * inner a partir de 992px; só style="" !important supera.
+             * Footer: pin do impeccable recoloca <style> por último — setProperty vence. */
+            . '<script id="awa-pixel-qa-home-gutter-24">'
+            . '(function(){function a(){var on=window.matchMedia("(min-width:768px)").matches;'
+            . 'var pad=on?"24px":"16px";'
+            . 'var n=document.querySelectorAll(".awa-site-header .awa-main-header__inner");'
+            . 'for(var i=0;i<n.length;i++){if(on){'
+            . 'n[i].style.setProperty("padding-inline","24px","important");'
+            . 'n[i].style.setProperty("padding-left","24px","important");'
+            . 'n[i].style.setProperty("padding-right","24px","important");}else{'
+            /* Mobile: gutter no sticky (16); inner horizontal 0 — vence audit 12px no cart. */
+            . 'n[i].style.setProperty("padding-inline","0px","important");'
+            . 'n[i].style.setProperty("padding-left","0px","important");'
+            . 'n[i].style.setProperty("padding-right","0px","important");}}'
+            . 'var foot=document.querySelector("footer.page-footer");'
+            . 'if(foot){foot.style.setProperty("max-width","none","important");'
+            . 'foot.style.setProperty("width","100%","important");'
+            . 'foot.style.setProperty("margin-left","0","important");'
+            . 'foot.style.setProperty("margin-right","0","important");'
+            . 'foot.style.setProperty("margin-inline","0","important");'
+            . 'foot.style.setProperty("padding-inline","0","important");'
+            . 'foot.style.setProperty("padding-left","0","important");'
+            . 'foot.style.setProperty("padding-right","0","important");'
+            . 'foot.style.setProperty("box-sizing","border-box","important");}'
+            . 'var kids=document.querySelectorAll("footer.page-footer .page_footer,footer.page-footer #footer,'
+            . 'footer.page-footer .footer-container,footer.page-footer .footer-bottom,'
+            . 'footer.page-footer .footer-bottom-inner");'
+            . 'for(var k=0;k<kids.length;k++){'
+            . 'kids[k].style.setProperty("padding-inline","0px","important");'
+            . 'kids[k].style.setProperty("padding-left","0px","important");'
+            . 'kids[k].style.setProperty("padding-right","0px","important");'
+            . 'if(kids[k].classList&&(kids[k].classList.contains("footer-bottom")||kids[k].id==="footer"'
+            . '||kids[k].classList.contains("page_footer")||kids[k].classList.contains("footer-container"))){'
+            . 'kids[k].style.setProperty("margin-inline","0px","important");'
+            . 'kids[k].style.setProperty("max-width","100%","important");'
+            . 'kids[k].style.setProperty("width","100%","important");}}'
+            . 'var b=document.body&&document.body.classList;'
+            . 'if(b&&(b.contains("cms-page-view")||b.contains("cms-noroute-index")'
+            . '||b.contains("contact-index-index")||b.contains("curriculo-index-index")'
+            . '||b.contains("curriculo-index-status")'
+            . '||b.contains("b2b-account-shell")||b.contains("b2b-account-dashboard")'
+            . '||b.contains("awa-account-operational")||b.contains("account"))){'
+            . 'var mains=document.querySelectorAll(".page-wrapper .page-main,#maincontent.page-main");'
+            . 'for(var m=0;m<mains.length;m++){'
+            . 'if(b.contains("cms-page-view")||b.contains("cms-noroute-index")'
+            . '||b.contains("contact-index-index")||b.contains("curriculo-index-index")'
+            . '||b.contains("curriculo-index-status")'
+            . '||b.contains("b2b-account-shell")||b.contains("b2b-account-dashboard")'
+            . '||b.contains("awa-account-operational")){'
+            . 'mains[m].style.setProperty("padding-inline",pad,"important");'
+            . 'mains[m].style.setProperty("padding-left",pad,"important");'
+            . 'mains[m].style.setProperty("padding-right",pad,"important");'
+            . 'mains[m].style.setProperty("box-sizing","border-box","important");}}'
+            /* SSOT-1 Onda 1: CMS .column.main pad-inline 0 (gutter só no page-main). */
+            . 'if(b.contains("cms-page-view")||b.contains("cms-noroute-index")'
+            . '||b.contains("contact-index-index")||b.contains("curriculo-index-index")'
+            . '||b.contains("curriculo-index-status")){'
+            . 'var cmsCols=document.querySelectorAll(".page-wrapper .columns .column.main,'
+            . '.page-wrapper .column.main");'
+            . 'for(var cc=0;cc<cmsCols.length;cc++){'
+            . 'cmsCols[cc].style.setProperty("padding-inline","0px","important");'
+            . 'cmsCols[cc].style.setProperty("padding-left","0px","important");'
+            . 'cmsCols[cc].style.setProperty("padding-right","0px","important");}}'
+            /* SSOT-1 Onda 2/4b/5: wrappers do header sem pad; gutter no inner/container.
+             * NÃO zerar margin no .header-main>.container (quebrava eixo CMS @1440). */
+            . 'if(b.contains("cms-page-view")||b.contains("cms-noroute-index")'
+            . '||b.contains("contact-index-index")||b.contains("curriculo-index-index")'
+            . '||b.contains("curriculo-index-status")'
+            . '||b.contains("b2b-account-shell")||b.contains("b2b-account-dashboard")'
+            . '||b.contains("awa-account-operational")){'
+            . 'var cmsHdrWrap=document.querySelectorAll(".page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' .header.awa-main-header,.page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' .header_main.awa-main-header-inner-wrap,.page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' .header-main");'
+            . 'for(var hw=0;hw<cmsHdrWrap.length;hw++){'
+            . 'cmsHdrWrap[hw].style.setProperty("padding-inline","0px","important");'
+            . 'cmsHdrWrap[hw].style.setProperty("padding-left","0px","important");'
+            . 'cmsHdrWrap[hw].style.setProperty("padding-right","0px","important");'
+            . 'cmsHdrWrap[hw].style.setProperty("margin-inline","0px","important");'
+            . 'cmsHdrWrap[hw].style.setProperty("margin-left","0px","important");'
+            . 'cmsHdrWrap[hw].style.setProperty("margin-right","0px","important");}'
+            . 'var stickyEl=document.querySelector(".page-wrapper .awa-site-header .header-wrapper-sticky");'
+            . 'if(stickyEl){stickyEl.style.setProperty("padding-inline",on?"0px":"16px","important");'
+            . 'stickyEl.style.setProperty("padding-left",on?"0px":"16px","important");'
+            . 'stickyEl.style.setProperty("padding-right",on?"0px":"16px","important");}'
+            /* SSOT-1 Onda 5: CMS — centrar .container ≥768; gutter 24 só no inner. */
+            . 'if(b.contains("cms-page-view")||b.contains("cms-noroute-index")'
+            . '||b.contains("contact-index-index")||b.contains("curriculo-index-index")'
+            . '||b.contains("curriculo-index-status")){'
+            . 'var cmsCont=document.querySelectorAll(".page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' .header-main>.container");'
+            . 'for(var cc2=0;cc2<cmsCont.length;cc2++){'
+            . 'cmsCont[cc2].style.setProperty("padding-inline","0px","important");'
+            . 'cmsCont[cc2].style.setProperty("padding-left","0px","important");'
+            . 'cmsCont[cc2].style.setProperty("padding-right","0px","important");'
+            . 'if(on){cmsCont[cc2].style.setProperty("margin-inline","auto","important");'
+            . 'cmsCont[cc2].style.setProperty("margin-left","auto","important");'
+            . 'cmsCont[cc2].style.setProperty("margin-right","auto","important");'
+            . 'cmsCont[cc2].style.setProperty("max-width","min(100%,1280px)","important");'
+            . 'cmsCont[cc2].style.setProperty("width","100%","important");}'
+            . 'else{cmsCont[cc2].style.setProperty("margin-inline","0px","important");}}'
+            . 'var cmsInner=document.querySelectorAll(".page-wrapper .awa-site-header .header-wrapper-sticky'
+            . ' .awa-main-header__inner");'
+            . 'for(var ci=0;ci<cmsInner.length;ci++){'
+            . 'if(on){cmsInner[ci].style.setProperty("padding-inline","24px","important");'
+            . 'cmsInner[ci].style.setProperty("padding-left","24px","important");'
+            . 'cmsInner[ci].style.setProperty("padding-right","24px","important");}'
+            . 'else{cmsInner[ci].style.setProperty("padding-inline","0px","important");'
+            . 'cmsInner[ci].style.setProperty("padding-left","0px","important");'
+            . 'cmsInner[ci].style.setProperty("padding-right","0px","important");}}}}}'
+            . 'if(b&&b.contains("checkout-cart-index")){'
+            . 'var cols=document.querySelectorAll(".page-wrapper .columns .column.main,'
+            . '.page-wrapper .column.main,.page-wrapper .cart-container");'
+            . 'for(var c=0;c<cols.length;c++){'
+            . 'cols[c].style.setProperty("padding-inline","0px","important");'
+            . 'cols[c].style.setProperty("padding-left","0px","important");'
+            . 'cols[c].style.setProperty("padding-right","0px","important");}}'
+            /* SSOT-1 Onda 5: PDP/PLP/search — .column.main pad 0 (vence impeccable clamp). */
+            . 'if(b&&(b.contains("catalog-product-view")||b.contains("catalog-category-view")'
+            . '||b.contains("catalogsearch-result-index")||b.contains("catalogo-index-index")'
+            . '||b.contains("awa-catalog-page"))){'
+            . 'var catCols=document.querySelectorAll(".page-wrapper .columns .column.main,'
+            . '.page-wrapper .column.main");'
+            . 'for(var cx=0;cx<catCols.length;cx++){'
+            . 'catCols[cx].style.setProperty("padding-inline","0px","important");'
+            . 'catCols[cx].style.setProperty("padding-left","0px","important");'
+            . 'catCols[cx].style.setProperty("padding-right","0px","important");}}'
+            . '}'
+            . 'a();'
+            . 'if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",a);'
+            . 'window.addEventListener("resize",a);'
+            . 'window.addEventListener("load",a);'
+            . 'window.setTimeout(a,900);window.setTimeout(a,2500);})();</script>';
+        $withTerminal = preg_replace('/<\/body>/i', $homeTerminal . "\n</body>", $injected, 1);
+        $htmlOut = is_string($withTerminal) ? $withTerminal : (is_string($injected) ? $injected : $html);
+
+        /* PIXEL-QA: neutraliza dense-inline do footer (phtml/boot) que força padding 2px 16px. */
+        $htmlOut = str_replace(
+            [
+                "setProperty('padding','2px 16px','important')",
+                'setProperty("padding","2px 16px","important")',
+            ],
+            [
+                "setProperty('padding','2px 0','important')",
+                'setProperty("padding","2px 0","important")',
+            ],
+            $htmlOut
+        );
+
+        /* Garante PIXEL-QA footer axis em TODOS os blocos impeccable (getElementById = 1º). */
+        $footerAxisAppend = HeaderImpeccableCascadeLockCss::pixelQaFooterAxisTerminalRules();
+        $htmlOut = preg_replace_callback(
+            '/(<style\s+id="' . preg_quote(HeaderImpeccableCascadeLockCss::STYLE_ID, '/') . '"[^>]*>)(.*?)(<\/style>)/is',
+            static function (array $m) use ($footerAxisAppend): string {
+                if (str_contains($m[2], 'PIXEL-QA footer-axis-terminal')) {
+                    return $m[0];
+                }
+
+                return $m[1] . $m[2] . $footerAxisAppend . $m[3];
+            },
+            $htmlOut
+        ) ?? $htmlOut;
+
+        return $htmlOut;
     }
 
     /**
@@ -2401,7 +6566,7 @@ CSS;
         $contractCss = '/* ' . $marker . ' */'
             . '@media(min-width:768px){html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}}'
             . '@media(max-width:767px){'
-            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template:"toggle brand cart" 44px "search search search" 44px/44px minmax(0,1fr) 44px!important;gap:4px 8px!important;height:96px!important;min-height:96px!important;max-height:96px!important;padding:4px 12px 0!important;align-content:start!important;align-items:center!important;overflow:visible!important}'
+            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"]:not(.awa-header-condensed) .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){display:grid!important;grid-template:"toggle brand cart" 44px "search search search" 44px/44px minmax(0,1fr) 44px!important;gap:4px 8px!important;height:96px!important;min-height:96px!important;max-height:96px!important;padding:4px 0 0!important;padding-inline:0!important;align-content:start!important;align-items:center!important;overflow:visible!important}'
             . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-primary-row{display:contents!important}'
             . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important;align-self:center!important;width:44px!important;height:44px!important}'
             . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important;align-self:center!important;min-width:0!important;max-width:160px!important;height:44px!important;overflow:visible!important}'
@@ -2411,10 +6576,17 @@ CSS;
              * presente, a coluna "cart" do grid mobile precisa de mais espaço que os 44px
              * fixos usados apenas para o ícone do carrinho — senão o botão "Olá, Fernando"
              * fica com width:0 (display:flex, mas invisível) neste breakpoint. */
-            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky:has(.b2b-status-panel) :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){grid-template-columns:44px minmax(0,1fr) minmax(44px,auto)!important}'
-            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel){min-width:44px!important;max-width:min(150px,40vw)!important;width:auto!important;gap:4px!important}'
-            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel) .b2b-status-panel{width:auto!important;max-width:none!important;overflow:visible!important}'
-            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-header-minicart,.minicart-wrapper,.minicart-wrapper .action.showcart,.minicart-wrapper a.showcart.header-mini-cart){align-items:center!important;display:inline-flex!important;float:none!important;justify-content:center!important;justify-self:auto!important;place-self:center!important;transform:none!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;flex-shrink:0!important}'
+            /* 2026-07-16: grid-template shorthand (44px na 3ª track) vencia grid-template-columns
+             * sozinho — painel B2B estourava p/ esquerda sobre o logo. Reaplica o shorthand completo. */
+            . 'html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky:has(.b2b-status-panel) :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){grid-template:"toggle brand cart" 44px "search search search" 44px/44px minmax(0,1fr) minmax(96px,auto)!important;grid-template-columns:44px minmax(0,1fr) minmax(96px,auto)!important}'
+            . 'html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel){min-width:96px!important;max-width:min(140px,38vw)!important;width:auto!important;gap:2px!important;overflow:hidden!important;justify-self:end!important}'
+            . 'html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky:has(.b2b-status-panel) .awa-header-brand-cell{max-width:min(120px,32vw)!important;overflow:hidden!important}'
+            . 'html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel) .b2b-status-panel{width:auto!important;max-width:min(88px,24vw)!important;min-width:0!important;overflow:hidden!important}'
+            . 'html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel) .b2b-status-trigger{color:var(--awa-text-primary,#0f172a)!important;max-width:100%!important}'
+            . 'html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-right-col:has(.b2b-status-panel) :is(.b2b-status-trigger__line1,.b2b-status-trigger__text){color:var(--awa-text-primary,#0f172a)!important;max-width:6ch!important}'
+            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-minicart:not(:has(.minicart-wrapper.active)):not(:has(.minicart-wrapper.show)):not(:has(.minicart-wrapper.is-open)),'
+            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .minicart-wrapper:not(.active):not(.show):not(.is-open),'
+            . 'html body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .minicart-wrapper:not(.active):not(.show):not(.is-open) :is(.action.showcart,a.showcart.header-mini-cart){align-items:center!important;display:inline-flex!important;float:none!important;justify-content:center!important;justify-self:auto!important;place-self:center!important;transform:none!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;flex-shrink:0!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper header.awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky :is(.awa-header-minicart,.minicart-wrapper){position:relative!important;overflow:visible!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper header.awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-minicart .minicart-wrapper :is(.action.showcart,a.showcart.header-mini-cart){float:none!important;position:absolute!important;inset:auto!important;left:auto!important;right:0!important;top:0!important;bottom:auto!important;transform:none!important;place-self:center!important;justify-self:auto!important;margin:0!important}'
             . 'html body#html-body:not(#__awa-no-match):not(#__awa-no-match):not(#__awa-no-match):not(#__awa-no-match):not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper header.awa-site-header[data-awa-header-mode="default"] .header-wrapper-sticky .awa-header-minicart .minicart-wrapper :is(.action.showcart,a.showcart.header-mini-cart){float:none!important;position:absolute!important;inset:auto!important;left:auto!important;right:0!important;top:0!important;bottom:auto!important;transform:none!important;place-self:center!important;justify-self:auto!important;margin:0!important}'
@@ -2482,8 +6654,8 @@ CSS;
     private function consolidateAlignGridToBodyTerminal(string $html, string $fullAction): string
     {
         $html = $this->normalizeAlignGridStylesheetVersion($html);
-        $deferAlignGrid = $fullAction !== self::HOME_ACTION
-            && in_array($fullAction, self::DEFER_ALIGN_GRID_ACTIONS, true);
+        // PSI 2026-07-17: home também defer (665KB align-grid + density). Inline lock cobre 1º paint.
+        $deferAlignGrid = in_array($fullAction, self::DEFER_ALIGN_GRID_ACTIONS, true);
 
         if (!str_contains($html, 'awa-align-grid-terminal-2026-06-11')) {
             return $this->injectAlignGridBodyTerminalIfMissing($html, $deferAlignGrid, $fullAction);
@@ -2493,6 +6665,50 @@ CSS;
         $html = preg_replace($pattern, '', $html) ?? $html;
 
         return $this->injectAlignGridBodyTerminalIfMissing($html, $deferAlignGrid, $fullAction);
+    }
+
+    /**
+     * BUG-SHELL-SSOT-DUP-001 — uma única instância de awa-m2-visual-ssot após align-grid.
+     *
+     * Remove cópias early (layout XML / FPC / loader) e reinjeta terminal com
+     * data-awa-m2-visual-ssot, imediatamente após o último link align-grid quando
+     * existir (Home/PLP sem loader também ficam cobertos).
+     */
+    private function consolidateM2VisualSsotTerminal(string $html, string $fullAction): string
+    {
+        $html = preg_replace('/<link\s[^>]*awa-m2-visual-ssot[^>]*\/?>\s*/i', '', $html) ?? $html;
+
+        if (
+            !preg_match(
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                $html,
+                $versionMatch
+            )
+        ) {
+            return $html;
+        }
+
+        $href = '/static/' . $versionMatch[1]
+            . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
+            . HeaderImpeccableCascadeLockCss::M2_VISUAL_SSOT_FILE
+            . HeaderImpeccableCascadeLockCss::M2_VISUAL_SSOT_QUERY;
+
+        $tag = '<link rel="stylesheet" href="' . $href . '" media="all"'
+            . ' data-awa-m2-visual-ssot="1" data-awa-bundle="m2-visual-ssot"/>';
+
+        if (preg_match_all('/<link\s[^>]*awa-align-grid-terminal[^>]*\/?>/i', $html, $matches, PREG_OFFSET_CAPTURE)) {
+            $last = $matches[0][array_key_last($matches[0])];
+            $pos = $last[1] + strlen($last[0]);
+
+            return substr($html, 0, $pos) . "\n" . $tag . substr($html, $pos);
+        }
+
+        $isHome = $fullAction === self::HOME_ACTION;
+        $injectionPattern = $isHome ? '/<\/head>/i' : '/<\/body>/i';
+        $closingTag = $isHome ? '</head>' : '</body>';
+        $injected = preg_replace($injectionPattern, $tag . "\n" . $closingTag, $html, 1);
+
+        return is_string($injected) ? $injected : $html;
     }
 
     /**
@@ -2555,7 +6771,7 @@ CSS;
 
         if (
             !preg_match(
-                '#/static/(version\d+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
                 $html,
                 $versionMatch
             )
@@ -2593,12 +6809,23 @@ CSS;
             /* Home/PLP/busca: inline lock cobre container/grid no 1º paint — folha completa async */
             $tag = '';
             if (!$hasAlignGridBodyTerminal) {
-                $tag .= '<link rel="stylesheet" href="' . $href . '" media="print" onload="this.media=\'all\'"'
-                    . ' data-awa-align-grid-body-terminal="1" data-awa-bundle="align-grid-terminal" data-awa-defer="1"/>';
+                if ($isHome) {
+                    /* Home: não usar onload swap — ~600KB; css-gate controla (interação / fallback). */
+                    $tag .= '<link rel="stylesheet" href="' . $href . '" media="print"'
+                        . ' data-awa-gate="1" data-awa-align-grid-body-terminal="1"'
+                        . ' data-awa-bundle="align-grid-terminal" data-awa-defer="1"/>';
+                } else {
+                    /* PLP/busca: awa-css-gate NÃO é injetado nestas rotas. media=print sem
+                       onload deixa align-grid (P1-C etc.) inerte para screen — residual badge. */
+                    $tag .= '<link rel="stylesheet" href="' . $href . '" media="print" onload="this.media=\'all\'"'
+                        . ' data-awa-align-grid-body-terminal="1"'
+                        . ' data-awa-bundle="align-grid-terminal" data-awa-defer="1"/>';
+                }
             }
+            /* Home: density permanece no deferred-stack; contract é SSOT geom (BUG-SHELL-GEOM-TOKEN-001). */
             if (
                 $hasHomeDensityHref
-                && $isHome
+                && !$isHome
                 && !str_contains($html, 'data-awa-home-density-grid-body-terminal="1"')
             ) {
                 $tag .= '<link rel="stylesheet" href="' . $homeDensityHref . '" media="print" onload="this.media=\'all\'"'
@@ -2613,8 +6840,14 @@ CSS;
                     . ' data-awa-catalog-density-grid-body-terminal="1" data-awa-bundle="catalog-density-grid"/>';
             }
             if (!$hasHeaderContractBodyTerminal) {
-                $tag .= '<link rel="stylesheet" href="' . $contractHref . '" media="print" onload="this.media=\'all\'"'
-                    . ' data-awa-header-contract-grid-body-terminal="1" data-awa-bundle="header-contract-grid" data-awa-defer="1"/>';
+                /* Home: media=all no head (tokens geom no 1º paint). Demais: print→all. */
+                if ($isHome) {
+                    $tag .= '<link rel="stylesheet" href="' . $contractHref . '" media="all"'
+                        . ' data-awa-header-contract-grid-body-terminal="1" data-awa-bundle="header-contract-grid"/>';
+                } else {
+                    $tag .= '<link rel="stylesheet" href="' . $contractHref . '" media="print" onload="this.media=\'all\'"'
+                        . ' data-awa-header-contract-grid-body-terminal="1" data-awa-bundle="header-contract-grid" data-awa-defer="1"/>';
+                }
             }
         } else {
             $tag = '';
@@ -2770,7 +7003,8 @@ CSS;
         $terminalV = HeaderImpeccableCascadeLockCss::HEADER_TERMINAL_VERSION;
         $html = preg_replace(
             '/awa-home-critical-stack-2026-06-11\.min\.css\?v=[^"\'&\s>]+/',
-            'awa-home-critical-stack-2026-06-11.min.css?v=20260708-b2b-panel-mobile-fix',
+            HeaderImpeccableCascadeLockCss::HOME_CRITICAL_STACK_FILE
+                . HeaderImpeccableCascadeLockCss::HOME_CRITICAL_STACK_QUERY,
             $html
         ) ?? $html;
         if (!str_contains($html, 'awa-header-refine-terminal.min.css?v=')) {
@@ -2807,7 +7041,7 @@ CSS;
         $html = $this->injectHeaderTerminalStylesheetIfMissing($html);
         if (
             !preg_match(
-                '#/static/(version\d+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
                 $html,
                 $versionMatch
             )
@@ -2836,23 +7070,156 @@ CSS;
     }
 
     /**
-     * Home: garante distill-lock + align-grid terminal no head (sync media=all).
-     * Templates/FPC podem omitir — plugin reinjeta antes de </head>.
+     * Home: troca terminais CSS/JS inline pesados por <link>/<script src> cacheáveis.
+     * Header locks permanecem media=all (anti-FOUC). Polish/bugfix abaixo da dobra
+     * usam media=print onload (GTmetrix 2026-07-23 — reduzir CSS sync no critical path).
      */
+    private function convertHomeHeavyTerminalsToExternal(string $html): string
+    {
+        if (
+            !preg_match(
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                $html,
+                $versionMatch
+            )
+        ) {
+            return $html;
+        }
+
+        $staticBase = '/static/' . $versionMatch[1] . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/';
+        /* P2.1 2026-07-28: bust deferred visual-audit (home nav gutter 24)
+           r5 2026-08-05: upgrade condensed border fix para auditLock (0,13,4). */
+        $query = '?v=20260805-b2b-ops-density-r4';
+
+        // Sync: header geometry / CLS locks mínimos (above-fold).
+        $syncCssIds = [
+            'awa-header-simplify-ui-terminal-lock',
+            'awa-align-grid-inline-lock-20260626-phase3d22b',
+        ];
+        // Deferred: polish / spacing / bugfix / visual-audit (GTmetrix 2026-07-23 — −48KB sync).
+        $deferredCssIds = [
+            'awa-header-visual-audit-fixes-20260630',
+            'awa-home-impeccable-terminal-v1',
+            'awa-home-product-design-audit-polish-20260629',
+            'awa-home-compact-spacing-terminal-20260707',
+            'awa-visual-bugfix-terminal-20260707',
+        ];
+
+        $linkTags = '';
+        $cssStagger = 'window.__awaCssQ?__awaCssQ(this):(/themes\\.min|third-party-bundle|visual-bugfix|deferred-stack/.test(this.href||\'\')?(window.__awaCssPend=window.__awaCssPend||[]).push(this):(this.media=\'all\'))';
+
+        foreach (array_merge($syncCssIds, $deferredCssIds) as $styleId) {
+            if (!str_contains($html, 'id="' . $styleId . '"')) {
+                continue;
+            }
+            $html = preg_replace(
+                '/<style id="' . preg_quote($styleId, '/') . '"[^>]*>.*?<\/style>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+            $html = preg_replace(
+                '/<link[^>]*\bid="' . preg_quote($styleId, '/') . '"[^>]*>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+            // P1A 2026-07-27: buster dedicado — card de categoria height 144->min-height 176
+            // (assets são immutable/1y; bump por arquivo, sem re-bust do grupo footer-touch).
+            $cssQuery = $styleId === 'awa-home-product-design-audit-polish-20260629'
+                ? '?v=20260727-p1a-card-min-height-r1'
+                : $query;
+            $href = $staticBase . 'css/' . $styleId . '.css' . $cssQuery;
+            if (in_array($styleId, $deferredCssIds, true)) {
+                $linkTags .= '<link rel="stylesheet" href="' . $href . '" media="print"'
+                    . ' onload="' . $cssStagger . '" id="' . $styleId . '"/>' . "\n";
+            } else {
+                $linkTags .= '<link rel="stylesheet" href="' . $href . '" media="all" id="' . $styleId . '"/>' . "\n";
+            }
+        }
+
+        if ($linkTags !== '') {
+            $replaced = preg_replace('/<\/head>/i', $linkTags . '</head>', $html, 1);
+            if (is_string($replaced)) {
+                $html = $replaced;
+            }
+        }
+
+        $jsIds = [
+            'awa-visual-bugfix-terminal-runtime-20260707',
+            'awa-minicart-anchor-terminal-20260801v22',
+        ];
+        $scriptTags = '';
+        foreach ($jsIds as $scriptId) {
+            if (!str_contains($html, 'id="' . $scriptId . '"')
+                && !($scriptId === 'awa-minicart-anchor-terminal-20260801v22'
+                    && (str_contains($html, 'id="awa-minicart-anchor-terminal-20260717i"')
+                        || str_contains($html, 'awa-minicart-anchor-terminal-20260717')))
+            ) {
+                continue;
+            }
+            $html = preg_replace(
+                '/<script[^>]*\bid="' . preg_quote($scriptId, '/') . '"[^>]*>.*?<\/script>\s*/is',
+                '',
+                $html
+            ) ?? $html;
+            // Remover id legado se estamos injetando o v22.
+            if ($scriptId === 'awa-minicart-anchor-terminal-20260801v22') {
+                $html = preg_replace(
+                    '/<script id="awa-minicart-anchor-terminal-20260717[a-z0-9]*"[^>]*>.*?<\/script>\s*/is',
+                    '',
+                    $html
+                ) ?? $html;
+                $html = preg_replace(
+                    '/<script[^>]*id="awa-minicart-anchor-terminal-20260717[a-z0-9]*"[^>]*><\/script>\s*/is',
+                    '',
+                    $html
+                ) ?? $html;
+            }
+            $scriptQuery = $scriptId === 'awa-minicart-anchor-terminal-20260801v22'
+                ? MinicartAssetVersion::query()
+                : ($scriptId === 'awa-visual-bugfix-terminal-runtime-20260707'
+                    ? '?v=20260803-store-flat-r21b'
+                    : $query);
+            $href = $staticBase . 'js/' . $scriptId . '.js' . $scriptQuery;
+            $scriptTags .= '<script defer src="' . $href . '" id="' . $scriptId . '"></script>' . "\n";
+        }
+
+        if ($scriptTags !== '') {
+            $pos = stripos($html, '</body>');
+            if ($pos === false) {
+                $html .= "\n" . $scriptTags;
+            } else {
+                $html = substr($html, 0, $pos) . $scriptTags . substr($html, $pos);
+            }
+        }
+
+        return $html;
+    }
+
     /**
-     * Converte o bloco footer terminal inline (~58KB) para um link CSS async externo.
-     * O footer é 100% below-fold — não há risco de FOUC ou CLS ao carregar async.
-     * O arquivo externo é cacheável pelo browser, reduzindo peso em page loads subsequentes.
+     * Converte o bloco footer terminal inline (~65KB) para CSS externo síncrono e
+     * preserva um contrato estrutural crítico após a folha. O footer é below-fold,
+     * mas toda a sua geometria precisa existir antes do primeiro layout para evitar CLS.
+     *
+     * Também garante o lock crítico em páginas sem o bloco inline (ex.: PLP/categoria),
+     * onde o bundle deferido deixava o logo do rodapé em 0×0 (content-visibility:auto).
      */
     private function convertFooterCssToAsync(string $html): string
     {
-        if (!str_contains($html, 'id="' . HeaderImpeccableCascadeLockCss::FOOTER_STYLE_ID . '"')) {
+        $hasInlineFooterTerminal = str_contains(
+            $html,
+            'id="' . HeaderImpeccableCascadeLockCss::FOOTER_STYLE_ID . '"'
+        );
+        $hasFooterMarkup = str_contains($html, 'footer-bottom')
+            || str_contains($html, 'page-footer')
+            || str_contains($html, 'page_footer');
+
+        if (!$hasInlineFooterTerminal && !$hasFooterMarkup) {
             return $html;
         }
 
         if (
             !preg_match(
-                '#/static/(version\d+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
                 $html,
                 $versionMatch
             )
@@ -2865,22 +7232,48 @@ CSS;
             . HeaderImpeccableCascadeLockCss::FOOTER_CSS_FILE
             . HeaderImpeccableCascadeLockCss::FOOTER_CSS_QUERY;
 
-        // Remove bloco inline
+        // Remove bloco inline (quando existir) e critical anterior para reinserir no head.
         $html = HeaderImpeccableCascadeLockCss::stripFooterTerminalFromHtml($html);
+        $html = preg_replace(
+            '/<style\s+id="'
+            . preg_quote(HeaderImpeccableCascadeLockCss::FOOTER_CRITICAL_STYLE_ID, '/')
+            . '"[^>]*>.*?<\/style>\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<link\s[^>]*data-awa-footer-sync=["\']1["\'][^>]*>\s*/i',
+            '',
+            $html
+        ) ?? $html;
 
-        // Injeta link async antes de </body>
-        $tag = '<link rel="stylesheet" href="' . $href . '" media="print"'
-            . ' onload="this.media=\'all\'" data-awa-footer-async="1"/>'
-            . '<noscript><link rel="stylesheet" href="' . $href . '"/></noscript>';
-
-        $pos = stripos($html, '</body>');
-        if ($pos === false) {
-            return $html . "
-" . $tag;
+        // Folha completa async (print→all); critical inline cobre estabilidade above-fold do footer.
+        // GTmetrix 2026-07-23: ~96KB sync removidos do critical path da home.
+        $criticalTag = '<style id="' . HeaderImpeccableCascadeLockCss::FOOTER_CRITICAL_STYLE_ID . '">'
+            . HeaderImpeccableCascadeLockCss::footerCriticalStabilityRules()
+            . '</style>';
+        $stylesheetTag = '<link rel="stylesheet" href="' . $href . '" media="print"'
+            . ' onload="window.__awaCssQ?__awaCssQ(this):(/themes\\.min|third-party-bundle|visual-bugfix|deferred-stack/.test(this.href||\'\')?(window.__awaCssPend=window.__awaCssPend||[]).push(this):(this.media=\'all\'))"'
+            . ' data-awa-footer-sync="1"/>';
+        $criticalInserted = false;
+        if (stripos($html, '</head>') !== false) {
+            $withCritical = preg_replace(
+                '/<\/head>/i',
+                $stylesheetTag . "\n" . $criticalTag . "\n</head>",
+                $html,
+                1
+            );
+            if (is_string($withCritical)) {
+                $html = $withCritical;
+                $criticalInserted = true;
+            }
         }
 
-        return substr($html, 0, $pos) . $tag . "
-" . substr($html, $pos);
+        if (!$criticalInserted) {
+            return $html . "\n" . $stylesheetTag . $criticalTag;
+        }
+
+        return $html;
     }
 
 
@@ -2888,7 +7281,7 @@ CSS;
     {
         if (
             !preg_match(
-                '#/static/(version\d+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
                 $html,
                 $versionMatch
             )
@@ -2930,7 +7323,7 @@ CSS;
 
         if (
             !preg_match(
-                '#/static/(version\d+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
                 $html,
                 $versionMatch
             )
@@ -3020,7 +7413,7 @@ CSS;
             return $html;
         }
 
-        if (!preg_match('#/static/(version\d+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#', $html, $versionMatch)) {
+        if (!preg_match('#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#', $html, $versionMatch)) {
             return $html;
         }
 
@@ -3029,9 +7422,9 @@ CSS;
             . HeaderImpeccableCascadeLockCss::REFINE_CSS_FILE
             . HeaderImpeccableCascadeLockCss::REFINE_QUERY;
 
-        $isHome = $fullAction === self::HOME_ACTION;
-        $tag = '<link rel="stylesheet" href="' . $href . '" media="' . ($isHome ? 'all' : 'print') . '"'
-            . ($isHome ? ' data-awa-first-paint-critical="commerce-refine"' : ' onload="this.media=\'all\'"')
+        // PSI 2026-07-17: home também em print→all (critical-home + anti-FOUC cobrem 1º paint).
+        $tag = '<link rel="stylesheet" href="' . $href . '" media="print"'
+            . ' onload="this.media=\'all\'"'
             . ' data-awa-impeccable-terminal="refine"/>';
 
         $injected = preg_replace('/<\/head>/i', $tag . "\n</head>", $html, 1);
@@ -3048,7 +7441,7 @@ CSS;
             return $html;
         }
 
-        if (!preg_match('#/static/(version\d+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#', $html, $versionMatch)) {
+        if (!preg_match('#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#', $html, $versionMatch)) {
             return $html;
         }
 
@@ -3073,7 +7466,7 @@ CSS;
             return $html;
         }
 
-        $bootstrap = '<script>!function(w){var q=[],r=0;w.__awaCssQ=function(e){if(q.length<96){q.push(e);if(!r){r=1;w.requestAnimationFrame(function t(){q.length?(q.shift().media="all",w.requestAnimationFrame(function(){setTimeout(t,40)})):r=0})}}}}(window);</script>';
+        $bootstrap = '<script>!function(w){var q=w.__awaCssPend||(w.__awaCssPend=[]),r=0,dbg=w.__AWA_CSSQ_DBG=w.__AWA_CSSQ_DBG||[];function L(m,d){dbg.push({m:m,d:d,t:Math.round(performance.now())})}function isHeavy(el){return /themes\\.min|third-party-bundle|visual-bugfix|deferred-stack/.test((el&&el.href)||"")}function releaseGate(why){if(w.__awaCssPaintGate==="go")return;w.__awaCssPaintGate="go";L("cssq-gate-release",{why:why});kick()}function armGate(){if(w.__awaCssGateArmed)return;w.__awaCssGateArmed=1;L("cssq-gate-armed",{});function onScroll(){var y=w.pageYOffset||0;if(y<160)return;w.removeEventListener("scroll",onScroll,true);releaseGate("scroll")}w.addEventListener("scroll",onScroll,{passive:true,capture:true});w.addEventListener("pointerdown",function(){releaseGate("pointer")},{once:true,passive:true,capture:true});w.addEventListener("keydown",function(){releaseGate("keydown")},{once:true,capture:true});w.setTimeout(function(){releaseGate("timeout")},12000)}function kick(){if(r)return;r=1;w.requestAnimationFrame(function t(){if(!q.length){r=0;L("cssq-idle",{n:dbg.length});return}var el=q[0];if(isHeavy(el)&&w.__awaCssPaintGate!=="go"){w.__awaCssPaintGate=w.__awaCssPaintGate||"wait";r=0;L("cssq-wait-paint",{href:((el.href||"").split("/").pop()||"").slice(0,60),pend:q.length});armGate();return}q.shift();var href=((el&&el.href)||"").split("/").pop()||"",t0=performance.now();el.media="all";L("css-media-all",{href:href.slice(0,80),applyMs:+(performance.now()-t0).toFixed(1),qLeft:q.length,heavy:!!isHeavy(el)});w.requestAnimationFrame(function(){setTimeout(t,/themes\\.min|third-party/.test(href)?200:80)})})}w.__awaCssQ=function(e){if(q.length<96){q.push(e);kick()}};if(q.length){L("cssq-boot-drain",{pend:q.length});w.requestAnimationFrame(function(){w.requestAnimationFrame(function(){kick()})})}else{L("cssq-boot-empty",{})}try{new PerformanceObserver(function(l){l.getEntries().forEach(function(e){if(e.duration>=100)L("longtask",{st:Math.round(e.startTime),d:Math.round(e.duration)})})}).observe({type:"longtask",buffered:true})}catch(e){}try{new PerformanceObserver(function(l){var e=l.getEntries().at(-1);if(e)L("lcp",{st:Math.round(e.startTime),size:e.size,url:((e.element&&e.element.currentSrc)||"").slice(-60)})}).observe({type:"largest-contentful-paint",buffered:true})}catch(e){}}(window);</script>';
         if (!str_contains($html, 'w.__awaCssQ=function')) {
             $replaced = preg_replace(
                 '/(<!-- AWA CSS Stagger[^>]*-->\s*)?(<link\s[^>]*rel=["\']stylesheet["\'])/i',
@@ -3271,25 +7664,111 @@ CSS;
 
     private function synchronizeHomeRefineStylesheet(string $html): string
     {
-        return preg_replace_callback(
-            '/<link\s[^>]*awa-commerce-impeccable-refine[^>]*\/?>/i',
-            static function (array $matches): string {
-                $tag = preg_replace('/\smedia=(["\'])print\1/i', ' media="all"', $matches[0]) ?? $matches[0];
-                $tag = preg_replace('/\sonload=(["\']).*?\1/i', '', $tag) ?? $tag;
+        // PSI 2026-07-17: não forçar media=all no refine da home (mantém print→all).
+        return $html;
+    }
 
-                if (!str_contains($tag, 'data-awa-first-paint-critical=')) {
-                    $tag = preg_replace(
-                        '/\s*\/?>$/',
-                        ' data-awa-first-paint-critical="commerce-refine"/>',
-                        $tag,
-                        1
-                    ) ?? $tag;
-                }
+    /**
+     * Home: troca N folhas deferred (print→all) por awa-home-deferred-stack.min.css.
+     * Mantém align-grid + refine + themes/third-party/criticals fora do stack.
+     */
+    private function consolidateHomeDeferredStylesheetStack(string $html): string
+    {
+        if (
+            !preg_match(
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                $html,
+                $versionMatch
+            )
+        ) {
+            return $html;
+        }
 
-                return $tag;
-            },
-            $html
-        ) ?? $html;
+        $hadFragment = false;
+        foreach (self::HOME_DEFERRED_STACK_FRAGMENTS as $fragment) {
+            if (str_contains($html, $fragment)) {
+                $hadFragment = true;
+                break;
+            }
+        }
+
+        if (!$hadFragment && str_contains($html, HeaderImpeccableCascadeLockCss::HOME_DEFERRED_STACK_FILE)) {
+            return $html;
+        }
+
+        if ($hadFragment) {
+            $html = $this->stripStylesheetFragments($html, self::HOME_DEFERRED_STACK_FRAGMENTS);
+        }
+
+        if (str_contains($html, HeaderImpeccableCascadeLockCss::HOME_DEFERRED_STACK_FILE)) {
+            return $html;
+        }
+
+        $href = '/static/' . $versionMatch[1]
+            . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
+            . HeaderImpeccableCascadeLockCss::HOME_DEFERRED_STACK_FILE
+            . HeaderImpeccableCascadeLockCss::HOME_DEFERRED_STACK_QUERY;
+
+        $tag = '<link rel="stylesheet" href="' . $href . '" media="print"'
+            . ' onload="this.media=\'all\'"'
+            . ' data-awa-home-deferred-stack="1"/>'
+            . '<noscript><link rel="stylesheet" href="' . $href . '"/></noscript>';
+
+        $injected = preg_replace('/<\/head>/i', $tag . "\n</head>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
+    }
+
+    /**
+     * Home: awa-home-deferred-stack absorve awa-header-contract-grid (tokens antigos).
+     * Reinjeta o SSOT geom imediatamente após o link do stack para vencer a cascade.
+     * BUG-SHELL-GEOM-TOKEN-001.
+     */
+    private function injectHeaderContractGeomSsotForHome(string $html): string
+    {
+        if (
+            str_contains($html, 'data-awa-header-contract-grid-body-terminal="1"')
+            && str_contains($html, self::HEADER_CONTRACT_GRID_QUERY)
+        ) {
+            return $html;
+        }
+
+        $html = preg_replace('/<link\s[^>]*awa-header-contract-grid-20260626[^>]*\/?>\s*/i', '', $html) ?? $html;
+
+        if (
+            !preg_match(
+                '#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#',
+                $html,
+                $versionMatch
+            )
+        ) {
+            return $html;
+        }
+
+        $contractHref = '/static/' . $versionMatch[1]
+            . '/frontend/AWA_Custom/ayo_home5_child/pt_BR/css/'
+            . self::HEADER_CONTRACT_GRID_FILE
+            . self::HEADER_CONTRACT_GRID_QUERY;
+
+        $tag = '<link rel="stylesheet" href="' . $contractHref . '" media="all"'
+            . ' data-awa-header-contract-grid-body-terminal="1"'
+            . ' data-awa-bundle="header-contract-grid"'
+            . ' data-awa-geom-ssot="1"/>';
+
+        if (preg_match('/<link\s[^>]*data-awa-home-deferred-stack="1"[^>]*\/?>/i', $html) === 1) {
+            $injected = preg_replace(
+                '/(<link\s[^>]*data-awa-home-deferred-stack="1"[^>]*\/?>)/i',
+                '$1' . "\n" . $tag,
+                $html,
+                1
+            );
+
+            return is_string($injected) ? $injected : $html;
+        }
+
+        $injected = preg_replace('/<\/head>/i', $tag . "\n</head>", $html, 1);
+
+        return is_string($injected) ? $injected : $html;
     }
 
     /**

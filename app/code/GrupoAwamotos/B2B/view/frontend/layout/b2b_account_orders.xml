@@ -7,11 +7,11 @@
     </head>
     <body>
         <attribute name="class" value="b2b-account-dashboard"/>
-        <referenceContainer name="head.additional">
+        <referenceBlock name="head.additional">
             <block class="Magento\Framework\View\Element\Template"
                    name="b2b.orders.late.css"
                    template="GrupoAwamotos_B2B::head/b2b-dashboard-css.phtml"/>
-        </referenceContainer>
+        </referenceBlock>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Account\Orders"
                    name="b2b.account.orders"

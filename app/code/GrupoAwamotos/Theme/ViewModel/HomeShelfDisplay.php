@@ -51,19 +51,16 @@ class HomeShelfDisplay implements ArgumentInterface
         return false;
     }
 
+    /**
+     * Controla se o bloco de preço do card deve renderizar (preço numérico OU gate B2B).
+     * O valor numérico continua protegido por PriceVisibility/canViewPrices nos templates.
+     *
+     * Bug 2026-08-05: retornar false para visitante na home omitia também o gate
+     * "login para ver preço", deixando só "Ver produto".
+     */
     public function shouldShowProductPrices(bool $isHomePage): bool
     {
-        if (!$isHomePage) {
-            return true;
-        }
-
-        if (!$this->customerSession->isLoggedIn()) {
-            return false;
-        }
-
-        if (!$this->priceVisibility->canViewPrices()) {
-            return false;
-        }
+        unset($isHomePage); // assinatura mantida; bloco preço/gate sempre renderiza
 
         return true;
     }

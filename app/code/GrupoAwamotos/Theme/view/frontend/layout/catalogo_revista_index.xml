@@ -36,10 +36,5 @@
                 </arguments>
             </block>
         </referenceContainer>
-        <referenceContainer name="before.body.end">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="catalogo.flipbook.scripts"
-                   template="GrupoAwamotos_Theme::catalogo/flipbook-scripts.phtml"/>
-        </referenceContainer>
     </body>
 </page>

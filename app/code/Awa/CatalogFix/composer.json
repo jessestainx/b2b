@@ -1,0 +1,22 @@
+{
+  "name": "awa/module-catalog-fix",
+  "description": "AWA CatalogFix — Search Landing UX (hint + exact=1 bypass)",
+  "type": "magento2-module",
+  "version": "1.0.0",
+  "license": "proprietary",
+  "require": {
+    "php": ">=8.1",
+    "magento/framework": "*"
+  },
+  "suggest": {
+    "mirasvit/module-search-landing": "Required at runtime when Mirasvit SearchLanding is installed (app/code or Composer). Awa_CatalogFix is coupled to Mirasvit_SearchLanding."
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Awa\\CatalogFix\\": ""
+    }
+  }
+}

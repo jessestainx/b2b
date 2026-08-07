@@ -7,6 +7,12 @@
                   instance="GrupoAwamotos\WhatsAppCommerce\Observer\LogConsentChange"/>
     </event>
 
+    <!-- Notify assigned attendant ("vendedora") on new customer registration -->
+    <event name="customer_register_success">
+        <observer name="whatsapp_commerce_customer_registered"
+                  instance="GrupoAwamotos\WhatsAppCommerce\Observer\CustomerRegisterNotification"/>
+    </event>
+
     <!-- Order notifications -->
     <event name="sales_order_place_after">
         <observer name="whatsapp_commerce_order_placed"

@@ -13,7 +13,7 @@
             </action>
         </referenceBlock>
         <referenceContainer name="content">
-            <block class="Magento\Framework\View\Element\Template" name="curriculo.status" template="Ayo_Curriculo::status.phtml" />
+            <block class="Magento\Framework\View\Element\Template" name="curriculo.status" template="Ayo_Curriculo::status.phtml" cacheable="false" />
         </referenceContainer>
     </body>
 </page>

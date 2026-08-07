@@ -79,7 +79,7 @@ $loginUrl     = $block->escapeUrl($block->getUrl('b2b/account/login'));
                                             <span class="awa-related-price-notice">
                                                 <a class="awa-related-price-notice__login-link"
                                                    href="<?= /* @noEscape */ $loginUrl ?>">
-                                                    <?= $block->escapeHtml((string) __('Faça login')) ?>
+                                                    <?= $block->escapeHtml((string) __('Entrar')) ?>
                                                 </a>
                                                 <span class="awa-related-price-notice__suffix">
                                                     <?= $block->escapeHtml((string) __('para ver preços')) ?>
@@ -98,6 +98,7 @@ $loginUrl     = $block->escapeUrl($block->getUrl('b2b/account/login'));
                                                       class="related-tocart-form"
                                                       action="<?= $block->escapeUrl((string) $postParams['action']) ?>"
                                                       method="post">
+                                                    <?= $block->getBlockHtml('formkey') ?>
                                                     <?php foreach ($postParams['data'] as $key => $value): ?>
                                                         <input type="hidden"
                                                                name="<?= $block->escapeHtmlAttr((string) $key) ?>"

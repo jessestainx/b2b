@@ -462,7 +462,7 @@ class DashboardViewModel implements ArgumentInterface
             'cnpj' => 'b2b/register',
             'address' => 'customer/address/new',
             'order' => 'catalogsearch/result/?q=',
-            'list' => 'b2b/shoppinglist/create',
+            'list' => 'b2b/shoppinglist',
             default => '',
         };
     }
@@ -575,7 +575,7 @@ class DashboardViewModel implements ArgumentInterface
             'title' => __('Organize seus produtos favoritos'),
             'description' => __('Crie listas de compras para agilizar pedidos recorrentes da sua empresa.'),
             'action_label' => __('Criar Lista de Compras'),
-            'action_path' => 'b2b/shoppinglist/create',
+            'action_path' => 'b2b/shoppinglist',
             'priority' => 4,
         ];
     }

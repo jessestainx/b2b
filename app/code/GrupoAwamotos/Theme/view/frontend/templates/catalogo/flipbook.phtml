@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /**
- * Catálogo em revista — flipbook com PDF.js + page-flip.
+ * Catálogo em revista — flipbook com PDF.js + page-flip (RequireJS / x-magento-init).
  *
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\Escaper $escaper
@@ -13,6 +13,16 @@ $pdfUrl = $viewModel->getPdfUrl();
 $workerUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/vendor/pdf.worker.min.js');
 $pdfJsUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/vendor/pdf.min.js');
 $pageFlipUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/vendor/page-flip.browser.js');
+$mageInit = [
+    '#awa-catalog-flipbook' => [
+        'GrupoAwamotos_Theme/js/catalogo-flipbook' => [
+            'pdfUrl' => $pdfUrl,
+            'workerUrl' => $workerUrl,
+            'pdfJsUrl' => $pdfJsUrl,
+            'pageFlipUrl' => $pageFlipUrl,
+        ],
+    ],
+];
 ?>
 <header class="awa-catalog-revista-header">
     <p class="awa-catalog-revista-header__eyebrow"><?= $escaper->escapeHtml(__('Catálogo Digital')) ?></p>
@@ -23,10 +33,9 @@ $pageFlipUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/vendor/page-flip.
 </header>
 <div class="awa-catalog-flipbook"
      id="awa-catalog-flipbook"
-     data-pdf-url="<?= $escaper->escapeUrl($pdfUrl) ?>"
-     data-worker-url="<?= $escaper->escapeUrl($workerUrl) ?>"
-     data-pdf-js-url="<?= $escaper->escapeUrl($pdfJsUrl) ?>"
-     data-page-flip-url="<?= $escaper->escapeUrl($pageFlipUrl) ?>">
+     tabindex="0"
+     role="region"
+     aria-label="<?= $escaper->escapeHtmlAttr(__('Catálogo em revista')) ?>">
     <div class="awa-catalog-flipbook__status" id="awa-catalog-flipbook-status" role="status" aria-live="polite">
         <div class="awa-catalog-flipbook__spinner" aria-hidden="true"></div>
         <p><?= $escaper->escapeHtml(__('Preparando catálogo em revista…')) ?></p>
@@ -59,3 +68,6 @@ $pageFlipUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/vendor/page-flip.
         </a>
     </p>
 </div>
+<script type="text/x-magento-init">
+<?= /* @noEscape */ json_encode($mageInit, JSON_UNESCAPED_SLASHES) ?>
+</script>

@@ -55,7 +55,7 @@
 .b2b-quickorder .quickorder-row input[type="text"],
 .b2b-quickorder .quickorder-row input[type="number"] {
     border: 1px solid var(--awa-border, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 14px;
     padding: 10px 12px;
 }
@@ -81,7 +81,7 @@
     border: none;
     background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, #ffffff);
     color: var(--awa-primary-hover, #8e2629);
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 18px;
     display: flex;
@@ -115,7 +115,7 @@
 
 .b2b-quickorder .results-success,
 .b2b-quickorder .results-errors {
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 12px;
     font-size: 14px;
 }
@@ -150,7 +150,7 @@
 
 .b2b-quickorder .csv-dropzone {
     border: 2px dashed var(--awa-border, #e5e7eb);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 28px 20px;
     text-align: center;
     cursor: pointer;

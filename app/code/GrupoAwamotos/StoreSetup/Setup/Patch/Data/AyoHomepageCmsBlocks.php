@@ -252,7 +252,7 @@ class AyoHomepageCmsBlocks implements DataPatchInterface
                     <div class="boxServiceImage boxServiceImage2"></div>
                     <div class="boxServiceContent">
                         <h4 class="boxServiceTitle">Pagamento seguro</h4>
-                        <div class="boxServiceDesc"><a href="{{store url='formas-pagamento'}}" title="Ver formas de pagamento">Cartões, Pix e boleto</a></div>
+                        <div class="boxServiceDesc"><a href="{{store url='formas-pagamento'}}" title="Ver formas de pagamento">Pix, boleto e à vista</a></div>
                     </div>
                 </div>
             </div>
@@ -294,13 +294,13 @@ HTML;
         return <<<'HTML'
 <div class="rowFlex">
 <div class="col-xs-12 col-sm-4 col-md-4 col_banner1">
-<div class="bs-banner "><a class="banner-hover" href="{{store url="shipping"}}"><img loading="lazy" src="{{media url=wysiwyg/home-banners/banner-envio.jpg}}" alt="Envio Imediato para todo o Brasil"></a></div>
+<div class="bs-banner "><a class="banner-hover" href="{{store url="shipping"}}"><img loading="lazy" decoding="async" src="{{media url=wysiwyg/home-banners/banner-envio.webp}}" alt="Envio Imediato para todo o Brasil" width="1024" height="1024"></a></div>
 </div>
 <div class="col-xs-12 col-sm-4 col-md-4 col_banner2">
-<div class="bs-banner "><a class="banner-hover" href="{{store url="formas-pagamento"}}"><img loading="lazy" src="{{media url=wysiwyg/home-banners/banner-pagamento.jpg}}" alt="Pagamento Seguro - Cartões, Pix e Boleto"></a></div>
+<div class="bs-banner "><a class="banner-hover" href="{{store url="formas-pagamento"}}"><img loading="lazy" decoding="async" src="{{media url=wysiwyg/home-banners/banner-pagamento.webp}}" alt="Pagamento Seguro - Pix, Boleto e à vista" width="1024" height="1024"></a></div>
 </div>
 <div class="col-xs-12 col-sm-4 col-md-4 col_banner3">
-<div class="bs-banner bs-banner-last"><a class="banner-hover" href="{{store url="ofertas.html"}}"><img loading="lazy" src="{{media url=wysiwyg/home-banners/banner-ofertas.jpg}}" alt="Ofertas e Promoções AWA Motos"></a></div>
+<div class="bs-banner bs-banner-last"><a class="banner-hover" href="{{store url="ofertas.html"}}"><img loading="lazy" decoding="async" src="{{media url=wysiwyg/home-banners/banner-ofertas.webp}}" alt="Ofertas e Promoções AWA Motos" width="1024" height="1024"></a></div>
 </div>
 </div>
 HTML;

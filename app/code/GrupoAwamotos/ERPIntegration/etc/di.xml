@@ -67,11 +67,13 @@
             <argument name="fileName" xsi:type="string">/var/log/erp_integration.log</argument>
         </arguments>
     </virtualType>
+    <!-- Use Monolog\Logger so handlers do not merge into the global Magento logger. -->
     <virtualType name="GrupoAwamotos\ERPIntegration\Logger\VirtualLogger"
-                 type="Magento\Framework\Logger\Monolog">
+                 type="Monolog\Logger">
         <arguments>
+            <argument name="name" xsi:type="string">erp_integration</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">GrupoAwamotos\ERPIntegration\Logger\VirtualHandler</item>
+                <item name="file" xsi:type="object">GrupoAwamotos\ERPIntegration\Logger\VirtualHandler</item>
             </argument>
         </arguments>
     </virtualType>

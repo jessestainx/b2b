@@ -8,10 +8,12 @@
     </head>
     <update handle="customer_account"/>
     <body>
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Quote\Form"
                    name="b2b.quote.form"
-                   template="GrupoAwamotos_B2B::quote/form.phtml">
+                   template="GrupoAwamotos_B2B::quote/form.phtml"
+                   cacheable="false">
                 <block class="Magento\Checkout\Block\Cart\Sidebar"
                        name="b2b.quote.cart.items"
                        template="GrupoAwamotos_B2B::quote/items.phtml"/>

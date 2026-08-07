@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+  Ultra-fallback: mounts on all pages; SearchHint::shouldRender() gates output
+  (only true when Mirasvit registered search_landing_page in the registry).
+  Covers future Mirasvit handle / fullActionName renames.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.search.hint"
+                   template="Awa_CatalogFix::search-hint.phtml"
+                   before="-">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Awa\CatalogFix\Block\SearchHint</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

@@ -9,10 +9,12 @@
                 <checkout_base_url/>
             </general>
             <notifications>
+                <customer_registered>1</customer_registered>
                 <order_placed>1</order_placed>
                 <order_paid>1</order_paid>
                 <order_shipped>1</order_shipped>
                 <order_refunded>0</order_refunded>
+                <notify_attendant_order_placed>1</notify_attendant_order_placed>
             </notifications>
             <app_builder_offload>
                 <enabled>0</enabled>

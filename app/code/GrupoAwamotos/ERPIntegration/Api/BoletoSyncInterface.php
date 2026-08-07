@@ -86,9 +86,11 @@ interface BoletoSyncInterface
      * @param int $erpClientCode Codigo do cliente no ERP, usado para validar propriedade do titulo
      * @return array{
      *     codigo: int, filial: int, pedido: int|null, banco: string, carteira: string,
-     *     nro_boleto: string, nro_documento: string, data_vencimento: mixed, valor_devido: float,
-     *     beneficiario_nome: string, beneficiario_cnpj: string, beneficiario_endereco: string,
-     *     sacado_nome: string, sacado_cnpj: string
+     *     cc: int|null, nro_boleto: string, nro_documento: string, data_vencimento: mixed,
+     *     valor_devido: float, beneficiario_nome: string, beneficiario_cnpj: string,
+     *     beneficiario_endereco: string, sacado_nome: string, sacado_cnpj: string,
+     *     sicoob_agencia: string, sicoob_cedente: string, sicoob_dig_cedente: string,
+     *     sicoob_modalidade: string
      * }|null
      */
     public function getBoletoPrintableRawData(int $receberCodigo, int $erpClientCode): ?array;

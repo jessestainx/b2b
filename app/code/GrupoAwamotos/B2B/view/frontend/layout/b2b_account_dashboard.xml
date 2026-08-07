@@ -4,6 +4,8 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="b2b_account_index"/>
     <body>
+        <!-- Evita H1 duplicado: título vem do dashboard.phtml ("Painel B2B") -->
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceBlock name="rexisml.recommendations" remove="true"/>
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
         <referenceBlock name="b2b.account.dashboard">

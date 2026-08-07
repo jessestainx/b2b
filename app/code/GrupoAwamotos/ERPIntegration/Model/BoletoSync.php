@@ -231,6 +231,7 @@ class BoletoSync implements BoletoSyncInterface
                         r.PEDIDO,
                         r.BANCO,
                         r.CARTEIRA,
+                        r.CC,
                         r.NROBOLETO,
                         r.NRODOCUMENTO,
                         r.DTVENCIMENTO,
@@ -243,10 +244,18 @@ class BoletoSync implements BoletoSyncInterface
                         f.ESTADO AS BENEFICIARIO_ESTADO,
                         f.CEP AS BENEFICIARIO_CEP,
                         c.RAZAO AS SACADO_NOME,
-                        c.CGC AS SACADO_CNPJ
+                        c.CGC AS SACADO_CNPJ,
+                        cc.AGENCIA AS SICOOB_AGENCIA,
+                        cart.CEDENTE AS SICOOB_CEDENTE,
+                        cart.DIGCEDENTE AS SICOOB_DIGCEDENTE,
+                        cart.MODALIDADE AS SICOOB_MODALIDADE
                     FROM FN_RECEBER r
                     LEFT JOIN GR_FILIAL f ON f.CODIGO = r.FILIAL
                     LEFT JOIN FN_FORNECEDORES c ON c.CODIGO = r.CODCLIENTE
+                    LEFT JOIN CC_CC cc ON cc.CODIGO = r.CC
+                    LEFT JOIN CC_CARTEIRA cart
+                        ON cart.CC = r.CC
+                       AND LTRIM(RTRIM(CAST(cart.CODIGO AS VARCHAR(20)))) = LTRIM(RTRIM(CAST(r.CARTEIRA AS VARCHAR(20))))
                     WHERE r.CODIGO = :receber
                       AND r.CODCLIENTE = :codcliente
                       AND r.STATUS = :status";
@@ -271,6 +280,7 @@ class BoletoSync implements BoletoSyncInterface
                 'pedido' => isset($row['PEDIDO']) && $row['PEDIDO'] !== '' ? (int) $row['PEDIDO'] : null,
                 'banco' => (string) ($row['BANCO'] ?? ''),
                 'carteira' => (string) ($row['CARTEIRA'] ?? ''),
+                'cc' => isset($row['CC']) && $row['CC'] !== '' && $row['CC'] !== null ? (int) $row['CC'] : null,
                 'nro_boleto' => (string) ($row['NROBOLETO'] ?? ''),
                 'nro_documento' => (string) ($row['NRODOCUMENTO'] ?? ''),
                 'data_vencimento' => $row['DTVENCIMENTO'] ?? null,
@@ -286,6 +296,10 @@ class BoletoSync implements BoletoSyncInterface
                 ]))),
                 'sacado_nome' => (string) ($row['SACADO_NOME'] ?? ''),
                 'sacado_cnpj' => (string) ($row['SACADO_CNPJ'] ?? ''),
+                'sicoob_agencia' => (string) ($row['SICOOB_AGENCIA'] ?? ''),
+                'sicoob_cedente' => (string) ($row['SICOOB_CEDENTE'] ?? ''),
+                'sicoob_dig_cedente' => (string) ($row['SICOOB_DIGCEDENTE'] ?? ''),
+                'sicoob_modalidade' => (string) ($row['SICOOB_MODALIDADE'] ?? ''),
             ];
         } catch (\Exception $e) {
             $this->logger->error('[ERP-Boleto] Falha ao buscar dados brutos para impressao ' . $receberCodigo . ': ' . $e->getMessage());
@@ -304,7 +318,7 @@ class BoletoSync implements BoletoSyncInterface
 
         return [
             'codigo' => (int) ($row['CODIGO'] ?? 0),
-            'pedido' => isset($row['PEDIDO']) ? (int) $row['PEDIDO'] : null,
+            'pedido' => isset($row['PEDIDO']) && $row['PEDIDO'] !== '' ? (int) $row['PEDIDO'] : null,
             'nro_documento' => (string) ($row['NRODOCUMENTO'] ?? ''),
             'nro_boleto' => (string) ($row['NROBOLETO'] ?? ''),
             'nro_duplicata' => (string) ($row['NRODUPLICATA'] ?? ''),

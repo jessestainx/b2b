@@ -597,9 +597,24 @@
     .b2b-status-trigger {
         padding: 5px 8px;
         gap: 6px;
+        max-width: min(160px, 42vw);
     }
 
-    /* On mobile, trigger shows only badge icon + group name */
+    /* Mobile: saudação curta visível; empresa oculta (evita truncar "Pan…") */
+    .b2b-status-trigger__line1 {
+        display: block !important;
+        max-width: min(12ch, 100%);
+        font-size: 12px;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .b2b-status-trigger__line2 {
+        display: none !important;
+    }
+
     .status-greeting,
     .status-company {
         display: none;

@@ -48,6 +48,12 @@ class BlockCartItemSavePlugin
             return [$cartItem];
         }
 
+        if ($customerState === CheckoutAccessValidator::STATE_PENDING_ERP) {
+            throw new CouldNotSaveException(
+                __($this->config->getPendingErpMessage() ?: 'Sua tabela de preços está sendo definida. Consulte o departamento de vendas.')
+            );
+        }
+
         throw new CouldNotSaveException(
             __('Sua conta precisa ser aprovada antes de adicionar produtos ao carrinho.')
         );

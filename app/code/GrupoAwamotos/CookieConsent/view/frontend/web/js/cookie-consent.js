@@ -29,16 +29,28 @@ define([], function () {
         return null;
     }
 
-    function hasConsented()
+    function readConsentValue()
     {
         try {
-            if (localStorage.getItem(STORAGE_KEY)) {
-                return true;
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                return stored;
             }
         } catch (e) {
             // localStorage bloqueado (modo privado restrito)
         }
-        return getCookie(COOKIE_NAME) !== null;
+        return getCookie(COOKIE_NAME);
+    }
+
+    function hasConsented()
+    {
+        return readConsentValue() !== null;
+    }
+
+    /** Marketing (Pixel/GA) só com aceite completo — LGPD. */
+    function allowsMarketing()
+    {
+        return readConsentValue() === 'all';
     }
 
     function saveConsent(value)
@@ -49,6 +61,11 @@ define([], function () {
             // silencia erros de localStorage
         }
         setCookie(COOKIE_NAME, value, COOKIE_DAYS);
+        try {
+            window.dispatchEvent(new CustomEvent('awa:cookie-consent', { detail: { value: value } }));
+        } catch (e) {
+            // CustomEvent indisponível
+        }
     }
 
     function syncBannerHeight()
@@ -138,6 +155,8 @@ define([], function () {
     }
 
     return {
+        allowsMarketing: allowsMarketing,
+        hasConsented: hasConsented,
         init: function () {
             if (hasConsented()) {
                 return;

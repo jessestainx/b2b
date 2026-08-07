@@ -43,6 +43,12 @@
                 sortOrder="10"/>
     </type>
 
+    <type name="Magento\Customer\Block\Address\Edit">
+        <plugin name="grupoawamotos_b2b_prefill_address_company"
+                type="GrupoAwamotos\B2B\Plugin\Customer\Block\Address\PrefillCompanyPlugin"
+                sortOrder="10"/>
+    </type>
+
     <type name="GrupoAwamotos\B2B\Plugin\BlockCheckoutPlugin">
         <arguments>
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>

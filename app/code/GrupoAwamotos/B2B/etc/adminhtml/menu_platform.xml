@@ -1,20 +1,25 @@
 <?xml version="1.0"?>
 <!--
-  Menu unificado B2B (Fase 2) — aditivo. Não substitui menu.xml nem menu_commercial.xml.
+  Menu unificado B2B — onda emergencial 2026-08-03 (labels + Todos os Pedidos).
   Visível quando grupoawamotos_b2b/platform/unified_menu_enabled = 1
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
+        <!-- Canario 3C: expoe Meu Painel na arvore Platform (ACL commercial_dashboard) -->
+        <update id="GrupoAwamotos_B2B::commercial_dashboard"
+                parent="GrupoAwamotos_B2B::platform"
+                sortOrder="5"/>
+
         <add id="GrupoAwamotos_B2B::platform"
-             title="B2B"
+             title="B2B AWA — Visão Unificada"
              translate="title"
              module="GrupoAwamotos_B2B"
              sortOrder="14"
              resource="GrupoAwamotos_B2B::commercial"/>
 
         <add id="GrupoAwamotos_B2B::platform_dashboard"
-             title="Dashboard"
+             title="Painel B2B"
              translate="title"
              module="GrupoAwamotos_B2B"
              parent="GrupoAwamotos_B2B::platform"
@@ -23,15 +28,24 @@
              resource="GrupoAwamotos_B2B::commercial_dashboard"/>
 
         <add id="GrupoAwamotos_B2B::platform_orders"
-             title="Pedidos B2B"
+             title="Pedidos"
              translate="title"
              module="GrupoAwamotos_B2B"
              parent="GrupoAwamotos_B2B::platform"
              sortOrder="20"
              resource="GrupoAwamotos_B2B::platform_orders"/>
 
+        <add id="GrupoAwamotos_B2B::platform_orders_all"
+             title="Todos os Pedidos"
+             translate="title"
+             module="GrupoAwamotos_B2B"
+             parent="GrupoAwamotos_B2B::platform_orders"
+             sortOrder="5"
+             action="sales/order/index"
+             resource="Magento_Sales::sales_order"/>
+
         <add id="GrupoAwamotos_B2B::platform_orders_approval"
-             title="Aprovação de Pedidos"
+             title="Pedidos aguardando aprovação"
              translate="title"
              module="GrupoAwamotos_B2B"
              parent="GrupoAwamotos_B2B::platform_orders"
@@ -136,7 +150,7 @@
              resource="GrupoAwamotos_B2B::platform_sectra"/>
 
         <add id="GrupoAwamotos_B2B::platform_sectra_erp_pending"
-             title="Clientes Aguardando ERP"
+             title="Validação ERP — base histórica em saneamento"
              translate="title"
              module="GrupoAwamotos_B2B"
              parent="GrupoAwamotos_B2B::platform_sectra"
@@ -145,7 +159,7 @@
              resource="GrupoAwamotos_B2B::customer_approval"/>
 
         <add id="GrupoAwamotos_B2B::platform_sectra_queue"
-             title="Fila Sectra — Pedidos ERP"
+             title="Pedidos aguardando Sectra"
              translate="title"
              module="GrupoAwamotos_B2B"
              parent="GrupoAwamotos_B2B::platform_sectra"
@@ -215,7 +229,7 @@
              resource="GrupoAwamotos_SalesIntelligence::dashboard"/>
 
         <add id="GrupoAwamotos_B2B::platform_audit"
-             title="Auditoria"
+             title="Logs de Notificações"
              translate="title"
              module="GrupoAwamotos_B2B"
              parent="GrupoAwamotos_B2B::platform"
@@ -233,11 +247,11 @@
              resource="GrupoAwamotos_B2B::config"/>
 
         <add id="GrupoAwamotos_B2B::platform_legacy"
-             title="Modo Clássico"
+             title="MODO CLÁSSICO — Legado"
              translate="title"
              module="GrupoAwamotos_B2B"
              parent="GrupoAwamotos_B2B::platform"
-             sortOrder="900"
+             sortOrder="990"
              resource="GrupoAwamotos_B2B::platform_legacy"/>
 
         <add id="GrupoAwamotos_B2B::platform_legacy_commercial_dashboard"
@@ -320,5 +334,13 @@
              sortOrder="90"
              action="salesintelligence/dashboard/index"
              resource="GrupoAwamotos_SalesIntelligence::dashboard"/>
+
+        <!-- Canário 2A: labels/sortOrder only — NÃO remover raízes; NÃO mudar ACL/action/id -->
+        <update id="GrupoAwamotos_B2B::commercial"
+                title="COMERCIAL — Operação Atual"
+                sortOrder="20"/>
+        <update id="GrupoAwamotos_B2B::b2b"
+                title="B2B/ERP — Operação Técnica"
+                sortOrder="30"/>
     </menu>
 </config>

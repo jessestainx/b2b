@@ -17,7 +17,7 @@
                        as="auth_logo"
                        template="GrupoAwamotos_B2B::html/auth-logo.phtml"/>
                 <block class="Magento\Framework\View\Element\FormKey" name="b2b.register.form.key" as="b2b_form_key"/>
-                <block class="Magento\Framework\View\Element\Messages"
+                <block class="GrupoAwamotos\B2B\Block\Account\SessionMessages"
                        name="b2b_register_messages"
                        as="b2b_register_messages"
                        template="GrupoAwamotos_B2B::account/login-messages.phtml"/>

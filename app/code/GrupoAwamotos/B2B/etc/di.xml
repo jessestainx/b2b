@@ -35,6 +35,14 @@
         </arguments>
     </type>
 
+    <type name="GrupoAwamotos\B2B\Model\CheckoutAccessValidator">
+        <arguments>
+            <argument name="config" xsi:type="object">GrupoAwamotos\B2B\Helper\Config</argument>
+            <argument name="erpCodeResolver" xsi:type="object">GrupoAwamotos\B2B\Model\ErpCodeResolver</argument>
+            <argument name="purchaseHistory" xsi:type="object">GrupoAwamotos\ERPIntegration\Model\PurchaseHistory</argument>
+        </arguments>
+    </type>
+
     <preference for="GrupoAwamotos\B2B\Api\AttendantRepositoryInterface"
                 type="GrupoAwamotos\B2B\Model\AttendantRepository"/>
 

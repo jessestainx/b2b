@@ -255,11 +255,20 @@ html body#html-body .page-wrapper .awa-site-header [data-role='awa-vertical-menu
     color: var(--awa-text-primary, #333333) !important;
 }
 @media (min-width: 992px) {
-    html body#html-body .awa-vmf-portal :is(.navigation__inner-item--level1.subcategory-second-level > a, .subchildmenu li a) {
+    /* Portal é superfície clara; não usar --awa-text-primary quando ele vem invertido (#f1f5f9). */
+    html body#html-body .awa-vmf-portal {
+        color: var(--awa-text, var(--awa-dark, #333333)) !important;
+        --awa-text-primary: var(--awa-text, var(--awa-dark, #333333));
+        --awa-hc-text-2: var(--awa-text, var(--awa-dark, #333333));
+    }
+    html body#html-body .awa-vmf-portal :is(.navigation__inner-item--level1.subcategory-second-level > a, .subchildmenu li a, a.title-cat-mega-menu) {
         min-height: 44px !important;
         font-size: max(13px, 0.8125rem) !important;
         font-weight: 500 !important;
-        color: var(--awa-text-primary, #333) !important;
+        color: var(--awa-text, var(--awa-dark, #333333)) !important;
+    }
+    html body#html-body .awa-vmf-portal :is(.navigation__inner-item--level1.subcategory-second-level > a, .subchildmenu li a, a.title-cat-mega-menu):hover {
+        color: var(--awa-primary, #b73337) !important;
     }
 }
 @media (max-width: 991px) {

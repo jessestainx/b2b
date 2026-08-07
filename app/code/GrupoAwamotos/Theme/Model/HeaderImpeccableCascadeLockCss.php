@@ -4,22 +4,29 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\Theme\Model;
 
+use GrupoAwamotos\Theme\Model\Generated\CascadeAssetVersionConsts;
+
 /**
  * CSS terminal único — vence super-global (promo vermelho), visual-audit (72–88px / grid 4 col mobile)
  * e folhas injetadas pelo CSS gate após </body> (pin script mantém este bloco por último).
  */
 final class HeaderImpeccableCascadeLockCss
 {
-    public const STYLE_ID = 'awa-header-impeccable-cascade-lock-v18';
+    public const STYLE_ID = 'awa-header-impeccable-cascade-lock-v21';
     public const CATALOG_PARITY_STYLE_ID = 'awa-header-catalog-parity-v1';
 
     /** Lock leve (~4KB) — footer em PLP/PDP/checkout onde o cascade-lock do header é omitido. */
     public const FOOTER_STYLE_ID = 'awa-footer-terminal-lock-v1';
 
+    /** Regras estruturais críticas que impedem CLS enquanto o CSS completo do footer carrega. */
+    public const FOOTER_CRITICAL_STYLE_ID = 'awa-footer-critical-stability-v1';
+
     /** Arquivo CSS externo gerado de footerTerminalRules() — carregado async no body. */
     public const FOOTER_CSS_FILE = 'awa-footer-terminal-lock-v1.min.css';
 
-    public const FOOTER_CSS_QUERY = '?v=20260702-mobile-newsletter-width';
+    public const FOOTER_CSS_QUERY = CascadeAssetVersionConsts::FOOTER;
+
+    public const CROSSPAGE_SHELL_STYLE_ID = 'awa-crosspage-shell-lock-r68';
 
     public const HOME_IMPECCABLE_TERMINAL_STYLE_ID = 'awa-home-impeccable-terminal-v1';
 
@@ -34,12 +41,22 @@ final class HeaderImpeccableCascadeLockCss
 
     public const DISTILL_MOBILE_GRID_SCRIPT_ID = 'awa-header-distill-mobile-grid-20260616c';
 
-    public const HEADER_TERMINAL_VERSION = '24-b2b-header-normalize';
+    public const HEADER_TERMINAL_VERSION = '25-visual-bugs-r1';
 
     /** Subset leve (~6KB) — home/PLP/carrinho onde o cascade-lock completo é omitido. */
     public const HEADER_ESSENTIAL_STYLE_ID = 'awa-header-essential-terminal-v1';
 
-    public const GATE_SCRIPT_QUERY = '20260711-header-geometry-v4';
+    /**
+     * Audit30 Média+Baixa (~7KB) — home/carrinho omitem o cascade-lock completo;
+     * este bloco garante dark header, skip/busca/cookie/toggle sem os ~112KB.
+     */
+    public const AUDIT30_SURFACE_STYLE_ID = 'awa-audit30-surface-lock-v1';
+
+    /**
+     * 2026-07-20: alinha o shell externo do footer-bottom ao container de 1280px.
+     * O padding interno preserva a largura útil de 1248px sem recuo duplo.
+     */
+    public const GATE_SCRIPT_QUERY = '20260805-hygiene-r71';
 
     /**
      * Cache-busting para awa-visual-fixes-2026-06-29-final.min.css, aplicado
@@ -60,7 +77,12 @@ final class HeaderImpeccableCascadeLockCss
      * — sem trocar a query, visitantes com o CSS antigo em cache do navegador
      * NUNCA revalidariam e continuariam vendo o bug por até 1 ano.
      */
-    public const VISUAL_FIXES_CSS_QUERY = '20260706-footer-toggle-selector-fix';
+    // 2026-07-27: bump P1A — badge de estoque #15803d->#166534 (WCAG AA 4.5:1).
+    // 2026-07-31 H27b: bust obrigatório — .br stale ainda servia CTA min-height:56px.
+    // 2026-08-02 H-pager-rwd: bust — pager padronizado mobile/tablet/desktop.
+    // 2026-08-02 H-badge-clip: bust — hot-onsale max-width 50px → texto legível.
+    // 2026-08-02 H-badge-clip2: bust + cascade-lock inline (vence CSS imutável em cache).
+    public const VISUAL_FIXES_CSS_QUERY = '20260804-cart-empty-r10';
 
     /**
      * Cache-busting para awa-master-fix.js após tornar o init não bloqueante
@@ -108,23 +130,38 @@ final class HeaderImpeccableCascadeLockCss
 
     public const REFINE_CSS_FILE = 'awa-commerce-impeccable-refine.min.css';
 
-    public const REFINE_QUERY = '?v=20260704-carousel-nav-transform-fix';
+    public const REFINE_QUERY = CascadeAssetVersionConsts::REFINE;
 
     /** PDP terminal — ui-simplify + distill-lock (round 6, 2026-06-10). */
     public const PDP_DISTILL_LOCK_QUERY = '?v=20260610-pdp';
 
-    public const PDP_UI_SIMPLIFY_QUERY = '?v=20260618-vqa-pdp-title-v2';
+    public const PDP_UI_SIMPLIFY_QUERY = '?v=20260730-p1-ssot-title';
 
     /** Grid/alinhamento terminal — última camada SSOT (2026-06-11). */
     public const ALIGN_GRID_CSS_FILE = 'awa-align-grid-terminal-2026-06-11.min.css';
 
-    public const ALIGN_GRID_QUERY = '?v=20260708-plp-b2b-gate-align-r7';
+    /** Grid terminal sem hotfixes visuais; conteúdo novo exige URL nova por ser immutable. */
+    public const ALIGN_GRID_QUERY = CascadeAssetVersionConsts::ALIGN_GRID;
+
+    /** Autoridade visual carregada imediatamente após o align-grid. */
+    public const M2_VISUAL_SSOT_FILE = 'awa-m2-visual-ssot.min.css';
+
+    public const M2_VISUAL_SSOT_QUERY = CascadeAssetVersionConsts::M2_VISUAL_SSOT;
+
+    public const HOME_CRITICAL_STACK_FILE = 'awa-home-critical-stack-2026-06-11.min.css';
+
+    public const HOME_CRITICAL_STACK_QUERY = CascadeAssetVersionConsts::HOME_CRITICAL_STACK;
+
+    public const HOME_DEFERRED_STACK_FILE = 'awa-home-deferred-stack.min.css';
+
+    public const HOME_DEFERRED_STACK_QUERY = CascadeAssetVersionConsts::HOME_DEFERRED_STACK;
 
     public const BODY_END_QUERY = '?v=20260622-carousel-pro-controls-v4';
 
     public const SUPER_GLOBAL_CSS_FILE = 'awa-super-global-20260611m.min.css';
 
-    public const SUPER_GLOBAL_QUERY = '';
+    /** Cache-bust após reconciliar fonte→pub (Fase 2: bottom FAB 84px + tokens). */
+    public const SUPER_GLOBAL_QUERY = CascadeAssetVersionConsts::SUPER_GLOBAL;
 
     public const HOME_DISTILL_LOCK_QUERY = '?v=20260610-pdp';
 
@@ -172,6 +209,9 @@ final class HeaderImpeccableCascadeLockCss
         'awa-header-impeccable-cascade-lock-v15',
         'awa-header-impeccable-cascade-lock-v16',
         'awa-header-impeccable-cascade-lock-v17',
+        'awa-header-impeccable-cascade-lock-v18',
+        'awa-header-impeccable-cascade-lock-v19',
+        'awa-header-impeccable-cascade-lock-v20',
     ];
 
     private const GUARD_SCRIPT_ID = 'awa-header-cascade-lock-guard';
@@ -201,6 +241,63 @@ final class HeaderImpeccableCascadeLockCss
     }
 
     /**
+     * SSOT do chrome interativo do header.
+     *
+     * É usado tanto no critical do head quanto no cascade-lock terminal. Os
+     * fallbacks concretos são intencionais: no primeiro paint os tokens ainda
+     * podem não ter sido resolvidos.
+     */
+    public static function headerChromeCanonicalRules(): string
+    {
+        $root = 'html body#html-body#html-body#html-body#html-body#html-body:not(.checkout-index-index)'
+            . ':not(.onepagecheckout-index-index):not(.rokanthemes-onepagecheckout)'
+            . ' .page-wrapper .awa-site-header';
+        $cart = $root . ' .awa-header-minicart .minicart-wrapper'
+            . ' :is(.action.showcart,a.showcart.header-mini-cart,.awa-minicart-trigger)';
+        $search = $root . ' :is(.block-search,.awa-professional-search,form#search_mini_form)'
+            . ' :is(button.action.search,.action.search)';
+        $primary = 'var(--awa-primary,var(--awa-red,#b73337))';
+        $inverse = 'var(--awa-text-inverse,var(--awa-white,#fff))';
+
+        return $cart . '{'
+            . 'appearance:none!important;-webkit-appearance:none!important;'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'color:' . $primary . '!important;border:0!important;border-color:transparent!important;'
+            . 'box-shadow:none!important;border-radius:0!important;opacity:1!important}'
+            . $cart . ':is(:hover,:focus,:focus-visible,:active){'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'color:' . $primary . '!important;box-shadow:none!important}'
+            . $cart . ' :is(.awa-minicart-icon,svg){'
+            . 'stroke:' . $primary . '!important;color:' . $primary . '!important;fill:none!important}'
+            . $cart . ' .awa-minicart-icon circle{fill:' . $primary . '!important;stroke:none!important}'
+            . $cart . '::before,' . $cart . '::after{color:' . $primary . '!important}'
+            . $search . '{'
+            . 'appearance:none!important;-webkit-appearance:none!important;'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'color:' . $primary . '!important;border:0!important;box-shadow:none!important;border-radius:0!important}'
+            . $search . ':is(:hover,:focus,:focus-visible,:active){'
+            . 'background:transparent!important;background-color:transparent!important;color:' . $primary . '!important}'
+            . $search . '::before,' . $search . '::after{color:' . $primary . '!important}'
+            . '@media(min-width:992px){'
+            . $root . ' .awa-header-account-prompt .awa-header-account-prompt__customer,'
+            . $root . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__customer{'
+            . 'display:none!important;visibility:hidden!important;opacity:0!important;height:0!important;'
+            . 'max-height:0!important;min-height:0!important;overflow:hidden!important;'
+            . 'pointer-events:none!important;position:absolute!important;width:0!important}'
+            . $root . ' .awa-header-account-prompt[data-awa-auth-state="customer"] .awa-header-account-prompt__guest{'
+            . 'display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;'
+            . 'pointer-events:none!important}'
+            . $root . ' button.title-category-dropdown.our_categories,'
+            . $root . ' .our_categories.title-category-dropdown{'
+            . 'appearance:none!important;-webkit-appearance:none!important;'
+            . 'background:' . $primary . '!important;background-color:' . $primary . '!important;'
+            . 'border:0!important;border-color:transparent!important;box-shadow:none!important;'
+            . 'color:' . $inverse . '!important;outline:0!important;position:relative!important;top:auto!important;'
+            . 'inset:auto!important;transform:none!important}'
+            . '}';
+    }
+
+    /**
      * Terminal header contrast/layout lock.
      *
      * Uses high specificity and !important because Magento critical inline CSS and
@@ -209,26 +306,25 @@ final class HeaderImpeccableCascadeLockCss
     public static function headerBolderActionContrastLockRules(): string
     {
         $shell = 'html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header';
+        /* Lupa ghost (ícone primary) — SSOT = awa-header-impeccable-critical-global + FOUC r4.
+         * CTA vermelho sólido aqui lutava com critical/FOUC e gerava flash. Minicart: ghost. */
         $actions = $shell . ' :is('
             . '.block-search button.action.search,'
             . '.block-search .action.search,'
             . 'form#search_mini_form button.action.search,'
-            . 'form#search_mini_form button.action.search[disabled],'
-            . '.minicart-wrapper .action.showcart,'
-            . '.awa-header-minicart .action.showcart,'
-            . '.awa-header-minicart a.showcart.header-mini-cart'
+            . 'form#search_mini_form button.action.search[disabled]'
             . ')';
         $promo = $shell . ' :is(#awa-b2b-promo-bar,.awa-b2b-promo-bar)';
         $searchForm = $shell . ' form#search_mini_form';
         $searchShell = $shell . ' .awa-header-search-col > .block-search';
 
         return $actions . '{'
-            . 'background:var(--awa-primary,var(--awa-red))!important;'
-            . 'border-color:var(--awa-primary,var(--awa-red))!important;'
-            . 'color:var(--awa-text-inverse,var(--awa-white))!important;'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border-color:transparent!important;'
+            . 'color:var(--awa-primary,var(--awa-red))!important;'
             . 'opacity:1!important}'
             . $actions . ':is(:disabled,[disabled]){'
-            . 'color:var(--awa-text-inverse,var(--awa-white))!important;'
+            . 'color:var(--awa-primary,var(--awa-red))!important;'
             . 'opacity:1!important}'
             . $actions . '::before{'
             . 'color:currentColor!important;opacity:1!important}'
@@ -249,25 +345,27 @@ final class HeaderImpeccableCascadeLockCss
             . 'align-items:center!important;background:var(--awa-primary,var(--awa-red))!important;'
             . 'background-color:var(--awa-primary,var(--awa-red))!important;box-sizing:border-box!important;'
             . 'color:var(--awa-text-inverse,var(--awa-white))!important;display:flex!important;'
-            . 'flex:1 1 100%!important;height:36px!important;justify-content:center!important;line-height:36px!important;'
-            . 'inline-size:auto!important;margin:0!important;max-height:36px!important;max-inline-size:100%!important;'
-            . 'max-width:100%!important;min-height:36px!important;min-inline-size:0!important;'
+            . 'flex:1 1 100%!important;height:44px!important;justify-content:center!important;line-height:44px!important;'
+            . 'inline-size:auto!important;margin:0!important;max-height:44px!important;max-inline-size:100%!important;'
+            . 'max-width:100%!important;min-height:44px!important;min-inline-size:0!important;'
             . 'overflow:hidden!important;padding:0 44px 0 12px!important;position:relative!important;width:auto!important}'
             . $promo . ' :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout){'
             . 'align-items:center!important;background:transparent!important;box-sizing:border-box!important;'
-            . 'display:flex!important;height:36px!important;justify-content:center!important;'
-            . 'line-height:36px!important;max-height:36px!important;min-height:36px!important;'
+            . 'display:flex!important;height:44px!important;justify-content:center!important;'
+            . 'line-height:44px!important;max-height:44px!important;min-height:44px!important;'
             . 'overflow:hidden!important;padding:0!important;width:100%!important}'
             . $promo . ' :is(*,a,strong,span,p,.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta *){'
             . 'color:var(--awa-text-inverse,var(--awa-white))!important;opacity:1!important}'
             . $promo . ' :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,.awa-b2b-promo-bar__tail,.awa-b2b-promo-bar__separator,.awa-b2b-promo-bar__cta){'
-            . 'display:block!important;line-height:36px!important;margin:0!important;max-width:100%!important;'
+            . 'display:block!important;line-height:44px!important;margin:0!important;max-width:100%!important;'
             . 'min-width:0!important;overflow:hidden!important;padding:0 4px!important;text-overflow:ellipsis!important;'
             . 'white-space:nowrap!important}'
+            /* §promo-close-44: WCAG 2.5.8 — Pixel QA mede o 1º button do DOM (= promo-close). */
             . $shell . ' :is(.awa-b2b-promo-close,#awa-b2b-promo-close){'
-            . 'align-items:center!important;display:flex!important;height:36px!important;inset-block-start:0!important;'
-            . 'inset-inline-end:0!important;justify-content:center!important;margin:0!important;min-height:36px!important;'
-            . 'padding:0!important;position:absolute!important;width:44px!important}'
+            . 'align-items:center!important;display:inline-flex!important;height:44px!important;inset-block-start:0!important;'
+            . 'inset-inline-end:0!important;justify-content:center!important;margin:0!important;min-height:44px!important;'
+            . 'min-width:44px!important;max-height:44px!important;max-width:44px!important;'
+            . 'padding:0!important;position:absolute!important;width:44px!important;box-sizing:border-box!important}'
             . $searchShell . '{'
             . 'background:transparent!important;border:0!important;border-radius:0!important;'
             . 'box-shadow:none!important;box-sizing:border-box!important;outline:none!important;overflow:visible!important}'
@@ -288,9 +386,9 @@ final class HeaderImpeccableCascadeLockCss
             . 'display:flex!important;height:40px!important;max-height:40px!important;min-height:40px!important;'
             . 'width:44px!important}'
             . $searchForm . ' button.action.search{'
-            . 'align-items:center!important;background:var(--awa-primary,var(--awa-red))!important;border:0!important;'
+            . 'align-items:center!important;background:transparent!important;background-color:transparent!important;border:0!important;'
             . 'border-radius:0 var(--awa-radius-sm) var(--awa-radius-sm) 0!important;'
-            . 'color:var(--awa-text-inverse,var(--awa-white))!important;display:flex!important;height:40px!important;'
+            . 'color:var(--awa-primary,var(--awa-red))!important;display:flex!important;height:40px!important;'
             . 'justify-content:center!important;max-height:40px!important;min-height:40px!important;opacity:1!important;width:44px!important}'
             . 'html body#html-body:has(nav.fixed-bottom.hidden-sm.hidden-md.hidden-lg) .page-wrapper{'
             . 'padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}'
@@ -356,7 +454,16 @@ final class HeaderImpeccableCascadeLockCss
 
     public static function promoBarRules(): string
     {
-        return 'html body#html-body .page-wrapper :is('
+        /* Spec 5×#html-body — vence awa-plp-terminal-lock-inline (padding:8px no bag PLP). */
+        $root = 'html body#html-body#html-body#html-body#html-body#html-body';
+        $wrap = $root . ' .page-wrapper';
+
+        return $wrap . ' #header :is('
+            . '#awa-b2b-promo-bar,'
+            . '.top-header.awa-b2b-promo-bar,'
+            . '.awa-b2b-promo-bar[data-awa-header-utility]'
+            . '),'
+            . $wrap . ' :is('
             . '#awa-b2b-promo-bar,'
             . '#header.header-container[data-awa-header-shell="true"] .top-header.awa-b2b-promo-bar,'
             . '#header.header-container[data-awa-header-shell="true"] .awa-b2b-promo-bar[data-awa-header-utility],'
@@ -369,40 +476,58 @@ final class HeaderImpeccableCascadeLockCss
             . 'background-color:var(--awa-primary,oklch(48% .14 20))!important;'
             . 'background-image:none!important;'
             . 'border:0!important;box-shadow:none!important;'
+            /* r41 CLS: shell promo = 44px (alinha critical + r40c; evita shift 32→44) */
             . 'box-sizing:border-box!important;min-height:44px!important;max-height:44px!important;'
             . 'height:44px!important;'
-            . 'padding-block:8px!important;padding-inline:clamp(12px,2vw,16px)!important;'
-            . 'overflow:visible!important;position:relative!important;'
+            . 'padding:0 clamp(12px,2vw,16px)!important;'
+            . 'padding-block:0!important;padding-inline:clamp(12px,2vw,16px)!important;'
+            . 'overflow:hidden!important;position:relative!important;'
             . 'display:flex!important;align-items:center!important;'
             . 'flex:1 1 100%!important;min-width:0!important;width:100%!important;max-width:100%!important;'
             . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important}'
-            . 'html body#html-body .page-wrapper :is('
+            . $wrap . ' .awa-site-header :is('
+            . '#header.header-container[data-awa-header-shell="true"],'
+            . '#header.header-container[data-awa-header-shell="true"] > .header-content'
+            . '){height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'padding:0!important;padding-block:0!important;margin:0!important;'
+            . 'border:0!important;border-bottom:0!important;border-block-end:0!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'box-shadow:none!important;overflow:hidden!important;box-sizing:border-box!important}'
+            . $wrap . ' .awa-site-header > #header.header-container[data-awa-header-shell="true"]{'
+            . 'background:var(--awa-primary,oklch(48% .14 20))!important;'
+            . 'background-color:var(--awa-primary,oklch(48% .14 20))!important;'
+            . 'border:0!important;border-bottom:0!important;height:44px!important;'
+            . 'min-height:44px!important;max-height:44px!important}'
+            . $wrap . ' :is('
             . '.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout'
             . '){width:100%!important;max-width:var(--awa-container-catalog,var(--awa-container-max,1440px))!important;'
-            . 'margin-inline:auto!important;justify-content:center!important}'
-            . 'html body#html-body .page-wrapper :is(#awa-b2b-promo-bar,.awa-b2b-promo-bar) .awa-b2b-promo-close,'
-            . 'html body#html-body .page-wrapper button.awa-b2b-promo-close{'
+            . 'margin-inline:auto!important;justify-content:center!important;'
+            . 'align-items:center!important;display:flex!important;'
+            . 'border:0!important;box-shadow:none!important;background:transparent!important;'
+            . 'border-radius:0!important;overflow:hidden!important;'
+            . 'padding:0!important;padding-block:0!important;padding-inline:0!important;box-sizing:border-box!important;'
+            . 'min-height:44px!important;max-height:44px!important;height:44px!important}'
+            . $wrap . ' :is(#awa-b2b-promo-bar,.awa-b2b-promo-bar) .awa-b2b-promo-close,'
+            . $wrap . ' button.awa-b2b-promo-close{'
             . 'position:absolute!important;inset-block-start:50%!important;inset-inline-end:clamp(8px,1.5vw,12px)!important;'
             . 'transform:translateY(-50%)!important;'
             . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
             . 'inline-size:44px!important;block-size:44px!important;min-width:44px!important;min-height:44px!important;'
-            . 'padding:0!important;margin:0!important;border-radius:999px!important;'
+            . 'max-width:44px!important;max-height:44px!important;width:44px!important;height:44px!important;'
+            . 'box-sizing:border-box!important;padding:0!important;margin:0!important;border-radius:999px!important;'
             . 'border:1px solid color-mix(in srgb,var(--awa-text-inverse,oklch(99% .002 20)) 24%,transparent)!important;'
             . 'background:color-mix(in srgb,var(--awa-text-inverse,oklch(99% .002 20)) 10%,transparent)!important;'
             . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important;opacity:.92!important}'
-            . 'html body#html-body .page-wrapper :is('
-            . '.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout'
-            . '){border:0!important;box-shadow:none!important;background:transparent!important;'
-            . 'border-radius:0!important;overflow:visible!important;'
-            . 'padding-block:8px!important;padding-inline:0!important;box-sizing:border-box!important}'
-            . 'html body#html-body .page-wrapper :is('
+            . $wrap . ' :is('
             . '.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__tail'
             . '){border:0!important;box-shadow:none!important;background:transparent!important;'
-            . 'border-radius:0!important;overflow:visible!important;padding:0!important}'
-            . 'html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta,'
-            . 'html body#html-body .page-wrapper #header .awa-b2b-promo-bar__cta{'
+            . 'border-radius:0!important;overflow:visible!important;padding:0!important;'
+            . 'height:auto!important;min-height:0!important;max-height:none!important;'
+            . 'line-height:1.25!important;font-size:13px!important}'
+            . $wrap . ' .awa-site-header .awa-b2b-promo-bar__cta,'
+            . $wrap . ' #header .awa-b2b-promo-bar__cta{'
             . 'display:inline!important;padding:0!important;border:0!important;border-radius:0!important;'
-            . 'background:transparent!important;'
+            . 'background:transparent!important;height:auto!important;min-height:0!important;max-height:none!important;'
             . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important}';
     }
 
@@ -425,7 +550,7 @@ final class HeaderImpeccableCascadeLockCss
             . '.header-control.header-nav.awa-nav-bar,.header-control.awa-nav-bar,.awa-nav-bar'
             . ') :is(.our_categories.title-category-dropdown,button[data-role=awa-vertical-menu-trigger]){'
             . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important;'
-            . 'font-weight:700!important}'
+            . 'font-weight:600!important}'
             . 'html body#html-body .page-wrapper .awa-site-header :is('
             . 'form#search_mini_form,.action.search,.action.showcart,.showcart.header-mini-cart,'
             . '.awa-minicart-trigger,.awa-nav-quick-links__link,'
@@ -528,6 +653,9 @@ final class HeaderImpeccableCascadeLockCss
             . 'height:100%!important;min-height:100%!important}'
             . 'html body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view){'
             . 'height:100%!important;min-height:100%!important}'
+            . '}'
+            /* H24A: bottom nav só em mobile real (≤767). Em tablet o header já cobre navegação. */
+            . '@media(max-width:767px){'
             . 'html body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
             . ':is(nav.fixed-bottom.hidden-sm.hidden-md.hidden-lg,nav.fixed-bottom.mobile-bottom-nav,nav.fixed-bottom.awa-mobile-bottom-nav){'
             . 'position:fixed!important;inset:auto 0 0 0!important;top:auto!important;right:0!important;bottom:0!important;left:0!important;'
@@ -540,6 +668,10 @@ final class HeaderImpeccableCascadeLockCss
             . ':is(nav.fixed-bottom.hidden-sm.hidden-md.hidden-lg,nav.fixed-bottom.mobile-bottom-nav,nav.fixed-bottom.awa-mobile-bottom-nav) .mobile-bottom-link{'
             . 'align-items:stretch!important;display:flex!important;gap:0!important;height:100%!important;'
             . 'justify-content:space-between!important;margin:0!important;padding:4px 10px calc(4px + env(safe-area-inset-bottom,0px))!important}'
+            . '}'
+            . '@media(min-width:768px){'
+            . 'html body#html-body#html-body :is(nav.fixed-bottom.hidden-sm.hidden-md.hidden-lg,nav.fixed-bottom.mobile-bottom-nav,nav.fixed-bottom.awa-mobile-bottom-nav,.awa-mobile-bottom-nav){'
+            . 'display:none!important;visibility:hidden!important;pointer-events:none!important}'
             . '}'
             . 'html body#html-body nav.fixed-bottom .mobile-bottom-link>li>a,'
             . 'html body#html-body nav.fixed-bottom .mobile-bottom-link>li>button{'
@@ -627,8 +759,8 @@ final class HeaderImpeccableCascadeLockCss
             . 'html body#html-body .page-wrapper .page_footer p.awa-footer-atendimento__label--social{'
             . 'color:oklch(45% .02 20)!important}'
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store{'
-            . 'background:oklch(99% .002 20)!important;border:1px solid oklch(92% .01 20)!important;'
-            . 'padding:12px!important;border-radius:8px!important}'
+            . 'background:transparent!important;border:0!important;'
+            . 'padding:8px 0!important;border-radius:0!important}'
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store '
             . 'p.awa-footer-atendimento__store-name,'
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store '
@@ -638,7 +770,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento__store-name,'
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento__store-address{'
             . 'color:oklch(22% .01 20)!important}'
-            . '@media (min-width:768px){html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5) .page-wrapper .header-wrapper-sticky{padding-block:4px!important}}'
+            . '@media (min-width:768px){html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5) .page-wrapper .header-wrapper-sticky{padding-block:0!important;padding:0!important}}'
             . 'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5) .page-wrapper .header_main.awa-main-header-inner-wrap{padding-inline:8px!important}'
             . 'html body#html-body .page-wrapper .awa-b2b-min-order-progress--minicart{padding-top:8px!important}'
             . 'html body#html-body .page-wrapper .header-control.header-nav.awa-nav-bar{'
@@ -666,7 +798,7 @@ final class HeaderImpeccableCascadeLockCss
 
     public static function homeImpeccablePolishRules(): string
     {
-        return 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) :is('
+        return 'html body#html-body :is('
             . '.awa-sr-only,.sr-only,.visually-hidden,label.visually-hidden,.awa-carousel-live.visually-hidden'
             . '):not(.awa-skip-link){'
             . 'position:fixed!important;top:0!important;left:0!important;width:1px!important;height:1px!important;'
@@ -674,12 +806,22 @@ final class HeaderImpeccableCascadeLockCss
             . 'margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;'
             . 'clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;'
             . 'font-size:0!important;line-height:0!important;word-break:break-all!important;contain:strict!important}'
-            . 'html body#html-body .awa-skip-link:not(:focus):not(:focus-visible){'
+            . 'html body#html-body :is(.awa-skip-link,a.action.skip):not(:focus):not(:focus-visible){'
             . 'position:fixed!important;top:0!important;left:0!important;width:1px!important;height:1px!important;'
             . 'min-width:1px!important;min-height:1px!important;max-width:1px!important;max-height:1px!important;'
             . 'margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;'
             . 'clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;'
-            . 'font-size:0!important;line-height:0!important;word-break:break-all!important;contain:strict!important}'
+            . 'font-size:0!important;line-height:0!important;word-break:break-all!important}'
+            . 'html body#html-body#html-body :is(.awa-skip-link,a.action.skip,a.action.skip.content,'
+            . 'a.action.skip.nav,a.skip-to-main-content):is(:focus,:focus-visible){'
+            . 'position:fixed!important;top:8px!important;left:8px!important;inset:auto!important;'
+            . 'width:auto!important;height:auto!important;min-width:44px!important;min-height:44px!important;'
+            . 'max-width:none!important;max-height:none!important;margin:0!important;padding:10px 14px!important;'
+            . 'overflow:visible!important;clip:auto!important;clip-path:none!important;white-space:normal!important;'
+            . 'font-size:14px!important;line-height:1.3!important;word-break:normal!important;'
+            . 'display:inline-flex!important;align-items:center!important;z-index:100000!important;'
+            . 'background:#b73337!important;color:#fff!important;border-radius:8px!important;font-weight:600!important;'
+            . 'text-decoration:none!important;pointer-events:auto!important;opacity:1!important;visibility:visible!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5),'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper{'
             . 'font-family:var(--awa-font-family,"Source Sans 3",system-ui,sans-serif)!important}'
@@ -703,9 +845,12 @@ final class HeaderImpeccableCascadeLockCss
             . '.content-top-home .ayo-home5-wrapper--template-driven>.awa-carousel-section:not(.top-home-content--above-fold){'
             . 'padding-inline:clamp(16px,3vw,48px)!important;box-sizing:border-box!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
-            . ':is(.awa-footer-business-contact__copy,.awa-newsletter-desc,.awa-footer-copyright__legal,'
-            . '.awa-footer-copyright__disclaimer,#b2b-login-desc,.awa-hero-b2b-cta__lead){'
+            . ':is(.awa-footer-business-contact__copy,.awa-newsletter-desc,#b2b-login-desc,.awa-hero-b2b-cta__lead){'
             . 'max-width:min(72ch,100%)!important;overflow-wrap:anywhere!important}'
+            . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
+            . '.footer-bottom :is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer){'
+            . 'max-width:min(72ch,100%)!important;width:100%!important;margin-inline:auto!important;'
+            . 'overflow-wrap:anywhere!important;text-align:center!important;line-height:1.4!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
             . '.page_footer :is(.footer-bottom,.footer-bottom-inner){padding-block:12px!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .content-top-home '
@@ -749,7 +894,7 @@ final class HeaderImpeccableCascadeLockCss
             . '.awa-footer-atendimento__store-address,p.awa-footer-atendimento__store-name,'
             . 'p.awa-footer-atendimento__store-address){color:oklch(22% .01 20)!important}'
             . 'html body#html-body .page-wrapper .awa-footer-atendimento__store{'
-            . 'background:oklch(99% .002 20)!important}'
+            . 'background:transparent!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper :is('
             . '.awa-carousel-section,.top-home-content.awa-home-section,.ayo-home5-wrapper,.awa-shelf--carousel,'
             . '.item-product.awa-carousel-card-slot,.content-item-product.awa-product-card,'
@@ -1005,11 +1150,49 @@ final class HeaderImpeccableCascadeLockCss
             . 'height:0!important;min-height:0!important;max-height:0!important;'
             . 'overflow:hidden!important;opacity:0!important;position:absolute!important;'
             . 'clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important}'
-            // awa-super-global aplica gradiente/pill no trigger — reset terminal em todas as superfícies
+            // awa-super-global aplica gradiente/pill no trigger — reset visual SEM zerar hit-target 44px
             . 'html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger{'
             . 'background:transparent!important;background-image:none!important;'
             . 'border:0!important;border-radius:0!important;box-shadow:none!important;'
-            . 'padding:0!important;padding-inline:0!important;min-block-size:0!important;min-height:0!important}';
+            . 'padding:0!important;padding-inline:0!important;'
+            . 'min-block-size:44px!important;min-height:44px!important;height:44px!important;max-height:44px!important;'
+            . 'align-items:center!important;color:var(--awa-text-primary)!important}'
+            // 2026-07-16: mobile logado — grid cart=44px + status panel (~140px) invadia o logo.
+            // right-col volta a ser flex na área cart; brand permanece centrada sem overlap.
+            . '@media (max-width:767px){'
+            // Reaplica grid-template completo — columns sozinho perde p/ shorthand 44px.
+            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header:has(.b2b-status-panel) '
+            . ':is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'grid-template:"toggle brand cart" 44px "search search search" 44px/'
+            . '44px minmax(0,1fr) minmax(96px,auto)!important;'
+            . 'grid-template-columns:44px minmax(0,1fr) minmax(96px,auto)!important}'
+            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header:has(.b2b-status-panel) '
+            . '.awa-header-right-col.awa-header-right--logged{'
+            . 'display:flex!important;grid-area:cart!important;align-items:center!important;'
+            . 'justify-content:flex-end!important;justify-self:end!important;gap:2px!important;'
+            . 'width:auto!important;max-width:min(140px,38vw)!important;min-width:0!important;'
+            . 'overflow:hidden!important;height:44px!important;margin:0!important;padding:0!important}'
+            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header:has(.b2b-status-panel) '
+            . ':is(.awa-header-brand,.awa-header-brand-cell){max-width:min(120px,32vw)!important;'
+            . 'overflow:hidden!important;min-width:0!important}'
+            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header:has(.b2b-status-panel) '
+            . '.awa-header-right-col .b2b-status-panel{'
+            . 'max-width:min(88px,24vw)!important;min-width:0!important;overflow:hidden!important}'
+            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header:has(.b2b-status-panel) '
+            . '.b2b-status-trigger{max-width:100%!important;gap:4px!important;'
+            . 'color:var(--awa-text-primary,#0f172a)!important;background:transparent!important}'
+            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header:has(.b2b-status-panel) '
+            . ':is(.b2b-status-trigger__text,.b2b-status-trigger__line1){'
+            . 'max-width:6ch!important;min-width:0!important;overflow:hidden!important;'
+            . 'text-overflow:ellipsis!important;white-space:nowrap!important;'
+            . 'color:var(--awa-text-primary)!important}'
+            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header:has(.b2b-status-panel) '
+            . ':is(.b2b-status-trigger__line2,.b2b-status-trigger__chevron){display:none!important}'
+            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header:has(.b2b-status-panel) '
+            . ':is(.awa-header-minicart,.mini-cart-wrapper,.minicart-wrapper){'
+            . 'grid-area:auto!important;width:44px!important;min-width:44px!important;'
+            . 'flex:0 0 44px!important}'
+            . '}';
     }
 
     /**
@@ -1073,7 +1256,243 @@ final class HeaderImpeccableCascadeLockCss
             . self::headerMinicartGhostTerminalRules()
             . self::headerLoggedPromptCleanRules()
             . self::headerAccountPromptCompactRules()
-            . self::headerStickyPositionFixRules();
+            . self::headerStickyPositionFixRules()
+            . self::altaVisualAudit30Rules();
+    }
+
+    /**
+     * AUDIT30 (2026-07-16): fixes Alta com CSS inline (vence cache immutable de styles-l/themes).
+     * Evidência CDP: .price-container.weee display:none; grid-template 3ª track 44px; promo logado.
+     */
+    public static function altaVisualAudit30Rules(): string
+    {
+        return 'html body#html-body#html-body .page-wrapper .item-product .price-container.weee,'
+            . 'html body#html-body#html-body .page-wrapper .item-product .price-container.price-final_price,'
+            . 'html body#html-body#html-body .page-wrapper .item-deal-product .price-container.weee{'
+            . 'display:inline!important;visibility:visible!important}'
+            . 'html body#html-body#html-body .page-wrapper .item-product .weee:not(.price-container),'
+            . 'html body#html-body#html-body .page-wrapper .item-deal-product .weee:not(.price-container){'
+            . 'display:none!important}'
+            . 'html body#html-body.customer-logged-in #awa-b2b-promo-bar,'
+            . 'html body#html-body.customer-logged-in .awa-b2b-promo-bar,'
+            . 'html body#html-body:has(.b2b-status-panel) #awa-b2b-promo-bar,'
+            . 'html body#html-body:has(.b2b-status-panel) .awa-b2b-promo-bar{'
+            . 'display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;'
+            . 'overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}'
+            . 'html body#html-body.awa-dark-mode.checkout-cart-index .page-wrapper '
+            . ':is(h1.page-title,.page-title-wrapper .page-title,.page-title){'
+            . 'color:var(--awa-text-primary,#f1f5f9)!important}'
+            . '@media (max-width:767px){'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper '
+            . '.awa-site-header:has(.b2b-status-panel) '
+            . ':is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'grid-template:"toggle brand cart" 44px "search search search" 44px/'
+            . '44px minmax(0,1fr) minmax(96px,auto)!important;'
+            . 'grid-template-columns:44px minmax(0,1fr) minmax(96px,auto)!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper '
+            . '.awa-site-header:has(.b2b-status-panel) .awa-header-right-col{'
+            . 'max-width:min(140px,38vw)!important;width:auto!important;min-width:0!important;'
+            . 'overflow:hidden!important;justify-self:end!important;gap:2px!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper '
+            . '.awa-site-header:has(.b2b-status-panel) :is(.awa-header-brand,.awa-header-brand-cell){'
+            . 'max-width:min(120px,32vw)!important;overflow:hidden!important;min-width:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper '
+            . '.awa-site-header .b2b-status-panel .b2b-status-trigger,'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper '
+            . '.awa-site-header .b2b-status-panel :is(.b2b-status-trigger__line1,.b2b-status-trigger__text){'
+            . 'color:var(--awa-text-primary,#0f172a)!important;background:transparent!important;'
+            . 'background-image:none!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper '
+            . 'nav.fixed-bottom .mobile-bottom-link>li>button.toggle-nav-footer{'
+            . 'color:var(--awa-text-secondary,#475569)!important;background:transparent!important}'
+            . '}'
+            /* Alta #11: ocultar "Sair da tela cheia" fora do fullscreen Fotorama */
+            . 'html body#html-body.catalog-product-view .page-wrapper '
+            . '.fotorama__fullscreen-icon:not(.fotorama--fullscreen .fotorama__fullscreen-icon),'
+            . 'html body#html-body.catalog-product-view:not(:has(.fotorama--fullscreen)) .page-wrapper '
+            . '.fotorama__fullscreen-icon{'
+            . 'display:none!important;visibility:hidden!important;pointer-events:none!important}'
+            /* Alta #12: ícone Início da bottom nav legível */
+            . 'html body#html-body nav.fixed-bottom .mobile-bottom-link>li>a.active,'
+            . 'html body#html-body nav.fixed-bottom .mobile-bottom-link>li>a[aria-current="page"],'
+            . 'html body#html-body nav.fixed-bottom .mobile-bottom-link>li>a:first-child{'
+            . 'color:var(--awa-text-primary)!important}'
+            . 'html body#html-body nav.fixed-bottom .mobile-bottom-link>li>a :is(.icon,span.icon,svg){'
+            . 'color:inherit!important;opacity:1!important;fill:currentColor!important}'
+            . 'html body#html-body.awa-dark-mode nav.fixed-bottom .mobile-bottom-link>li>a{'
+            . 'color:var(--awa-text-primary,#e2e8f0)!important}'
+            /* Alta #10: hero PLP — vencer awa-plp-distill opacity:0.32!important */
+            . 'html body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index) '
+            . '.page-wrapper .awa-category-hero--has-image .awa-category-hero__bg-image,'
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper '
+            . '.awa-category-hero .awa-category-hero__bg-image,'
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper .category-image img,'
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper .category-image .image,'
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper .awa-category-hero img{'
+            . 'opacity:1!important;filter:none!important;-webkit-filter:none!important;'
+            . 'mix-blend-mode:normal!important;visibility:visible!important}'
+            /* Alta #9: cart — espaço para painel B2B hidratado */
+            . '@media(max-width:767px){'
+            . 'html body#html-body.checkout-cart-index .page-wrapper '
+            . '.awa-site-header .awa-header-right-col:has(.b2b-status-panel){'
+            . 'min-width:96px!important;max-width:min(140px,38vw)!important;width:auto!important;'
+            . 'overflow:hidden!important}'
+            . '}'
+            . self::mediaVisualAudit30Rules()
+            . self::baixaVisualAudit30Rules();
+    }
+
+    /**
+     * Audit visual — prioridade Média (13–24): PLP lupa/filtros, truncamentos, carrossel, FAB, header dark.
+     */
+    public static function mediaVisualAudit30Rules(): string
+    {
+        return
+            /* #18: lupa Mirasvit dentro do input (não órfã abaixo) */
+            'html body#html-body:is(.catalog-category-view,.catalogsearch-result-index) '
+            . '.page-wrapper .mst_categorySearch{position:relative!important}'
+            . 'html body#html-body:is(.catalog-category-view,.catalogsearch-result-index) '
+            . '.page-wrapper .mst_categorySearch .mst_categorySearch_searchIcon{'
+            . 'position:absolute!important;right:12px!important;top:22px!important;'
+            . 'transform:translateY(-50%)!important;width:16px!important;height:16px!important;'
+            . 'margin:0!important;display:inline-flex!important;align-items:center!important;'
+            . 'justify-content:center!important;pointer-events:none!important;color:var(--awa-text-secondary,#64748b)!important;'
+            . 'z-index:2!important}'
+            /* #19: um controle de filtro — toolbar modes-label; esconder FAB/duplicate */
+            . '@media(max-width:767px){'
+            . 'html body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index) '
+            . '.page-wrapper :is(.awa-plp-filter-button,.awa-filter-toggle){'
+            . 'display:none!important;visibility:hidden!important;pointer-events:none!important;'
+            . 'height:0!important;width:0!important;overflow:hidden!important;margin:0!important;padding:0!important;'
+            . 'border:0!important}'
+            . '}'
+            /* #16: placeholder da busca do header legível */
+            . '@media(max-width:767px){'
+            . 'html body#html-body .page-wrapper .awa-site-header input#search::placeholder,'
+            . 'html body#html-body .page-wrapper .awa-site-header .awa-header-search input.input-text::placeholder{'
+            . 'font-size:13px!important;letter-spacing:0!important;opacity:1!important;'
+            . 'color:var(--awa-text-secondary,#64748b)!important;text-overflow:ellipsis!important}'
+            /* #17: nome B2B — priorizar "Olá, Nome" sem truncar demais */
+            . 'html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger{'
+            . 'min-width:0!important;max-width:100%!important}'
+            . 'html body#html-body .page-wrapper .awa-site-header .b2b-status-panel '
+            . '.b2b-status-trigger__line1{overflow:hidden!important;text-overflow:ellipsis!important;'
+            . 'white-space:nowrap!important;max-width:100%!important}'
+            . 'html body#html-body .page-wrapper .awa-site-header .b2b-status-panel '
+            . '.b2b-status-trigger__line2{display:none!important}'
+            . '}'
+            /* #20: setas do carrossel de categorias fora das cards */
+            . '@media(max-width:767px){'
+            . 'html body#html-body.cms-index-index .page-wrapper '
+            . '.awa-category-carousel .awa-owl-nav,'
+            . 'html body#html-body.cms-index-index .page-wrapper '
+            . '.awa-carousel-shell:has(.awa-category-carousel) .awa-owl-nav{'
+            . 'position:static!important;display:flex!important;justify-content:center!important;'
+            . 'gap:8px!important;margin-top:8px!important;pointer-events:auto!important}'
+            . 'html body#html-body.cms-index-index .page-wrapper '
+            . '.awa-category-carousel .awa-owl-nav__btn,'
+            . 'html body#html-body.cms-index-index .page-wrapper '
+            . '.awa-carousel-shell:has(.awa-category-carousel) .awa-owl-nav__btn{'
+            . 'position:static!important;inset:auto!important;transform:none!important;'
+            . 'margin:0!important}'
+            . '}'
+            /* #21: FAB voltar ao topo — não cobrir conteúdo crítico */
+            . '@media(max-width:767px){'
+            . 'html body#html-body .page-wrapper .back-to-top,'
+            . 'html body#html-body .page-wrapper #back-to-top,'
+            . 'html body#html-body button[aria-label="Voltar ao topo"]{'
+            . 'bottom:calc(var(--awa-mobile-bottom-nav-h,64px) + 16px + env(safe-area-inset-bottom,0px))!important;'
+            . 'right:12px!important;z-index:40!important}'
+            . '}'
+            /* #23: breadcrumb PLP — altura vem dos <a>/<li> 44px, não só do container */
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper .breadcrumbs,'
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper .nav-breadcrumbs,'
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper .breadcrumbs .items{'
+            . 'min-height:0!important;height:auto!important;max-height:none!important;'
+            . 'padding:2px 0!important;margin:0 0 6px!important;line-height:1.25!important;'
+            . 'background:transparent!important;border:0!important;box-shadow:none!important}'
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper .breadcrumbs .items{'
+            . 'display:flex!important;flex-wrap:wrap!important;gap:2px 6px!important;align-items:center!important}'
+            . 'html body#html-body#html-body.catalog-category-view .page-wrapper .breadcrumbs '
+            . ':is(.item,a,strong,span){'
+            . 'min-height:0!important;height:auto!important;max-height:none!important;'
+            . 'padding:0!important;margin:0!important;font-size:12px!important;line-height:1.25!important;'
+            . 'display:inline!important}'
+            /* #24: tokens dark + header com cores literais (vence visual-fixes sticky branco) */
+            . 'html body#html-body#html-body.awa-dark-mode{'
+            . '--awa-bg-page:#0f172a!important;--awa-bg-surface:#1e293b!important;'
+            . '--awa-bg-elevated:#334155!important;--awa-text-primary:#f1f5f9!important;'
+            . '--awa-text-secondary:#cbd5e1!important;--awa-text-muted:#94a3b8!important;'
+            . '--awa-border:#334155!important;--awa-border-subtle:#475569!important;'
+            . 'background-color:#0f172a!important;color:#f1f5f9!important}'
+            . 'html body#html-body#html-body.awa-dark-mode .page-wrapper .awa-site-header,'
+            . 'html body#html-body#html-body.awa-dark-mode .page-wrapper .header-wrapper-sticky,'
+            . 'html body#html-body#html-body.awa-dark-mode .page-wrapper .header-wrapper-sticky.is-sticky,'
+            . 'html body#html-body#html-body.awa-dark-mode .page-wrapper .awa-main-header,'
+            . 'html body#html-body#html-body.awa-dark-mode .page-wrapper .header_main,'
+            . 'html body#html-body#html-body.awa-dark-mode .page-wrapper #header,'
+            . 'html body#html-body#html-body.awa-dark-mode .page-wrapper .header-content{'
+            . 'background:#1e293b!important;background-color:#1e293b!important;'
+            . 'color:#f1f5f9!important;border-color:#334155!important;'
+            . 'backdrop-filter:none!important;-webkit-backdrop-filter:none!important}'
+            . 'html body#html-body#html-body.awa-dark-mode .page-wrapper .awa-site-header '
+            . ':is(.b2b-status-trigger,.b2b-status-trigger__line1,.b2b-status-trigger__text){'
+            . 'color:#f1f5f9!important}';
+    }
+
+    /**
+     * Audit visual — prioridade Baixa (25–30).
+     */
+    public static function baixaVisualAudit30Rules(): string
+    {
+        return
+            /* #25: botão buscar desabilitado — estado intencional, não “morto” */
+            'html body#html-body .page-wrapper .awa-site-header '
+            . 'form#search_mini_form button.action.search:disabled,'
+            . 'html body#html-body .page-wrapper .awa-site-header '
+            . 'form#search_mini_form button.action.search[aria-disabled="true"]{'
+            . 'opacity:1!important;filter:none!important;cursor:not-allowed!important;'
+            . 'background:transparent!important;color:var(--awa-primary,#b73337)!important}'
+            . 'html body#html-body .page-wrapper .awa-site-header '
+            . 'form#search_mini_form button.action.search:disabled svg,'
+            . 'html body#html-body .page-wrapper .awa-site-header '
+            . 'form#search_mini_form button.action.search[aria-disabled="true"] svg{'
+            . 'opacity:.85!important;stroke:var(--awa-primary,#b73337)!important}'
+            /* #26: skip links (awa-skip-link + action.skip) — filhos do body */
+            . 'html body#html-body :is(a.awa-skip-link,a.skip-link,a.action.skip,a.action.skip.content,'
+            . 'a.action.skip.nav,a.skip-to-main-content):is(:focus,:focus-visible){'
+            . 'position:fixed!important;left:8px!important;top:8px!important;z-index:100000!important;'
+            . 'width:auto!important;min-width:44px!important;height:auto!important;min-height:44px!important;'
+            . 'max-width:none!important;max-height:none!important;'
+            . 'clip:auto!important;clip-path:none!important;overflow:visible!important;contain:none!important;'
+            . 'padding:10px 14px!important;display:inline-flex!important;align-items:center!important;'
+            . 'background:#b73337!important;color:#fff!important;border-radius:8px!important;'
+            . 'font-weight:600!important;text-decoration:none!important;white-space:normal!important;'
+            . 'font-size:14px!important;line-height:1.3!important;opacity:1!important;visibility:visible!important}'
+            /* #27: lupa centralizada no botão vermelho/header */
+            . 'html body#html-body .page-wrapper .awa-site-header '
+            . 'form#search_mini_form button.action.search{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'line-height:0!important}'
+            . 'html body#html-body .page-wrapper .awa-site-header '
+            . 'form#search_mini_form button.action.search svg{'
+            . 'display:block!important;margin:0 auto!important;width:20px!important;height:20px!important;'
+            . 'position:static!important;inset:auto!important;transform:none!important}'
+            /* #28: cookie acima da bottom nav mobile */
+            . '@media(max-width:767px){'
+            . 'html body#html-body #awa-cookie-banner.awa-cookie-banner--visible{'
+            . 'bottom:calc(var(--awa-mobile-bottom-nav-h,64px) + env(safe-area-inset-bottom,0px))!important}'
+            . 'html body#html-body.awa-pwa-install-open .awa-pwa-install-prompt__card{'
+            . 'margin-bottom:calc(var(--awa-mobile-bottom-nav-h,64px) + 12px)!important}'
+            . '}'
+            /* #29: toggle dark flutuante — esconder no carrinho/checkout */
+            . 'html body#html-body:is(.checkout-cart-index,.checkout-index-index,.onepagecheckout-index-index) '
+            . '.awa-dark-mode-toggle{'
+            . 'display:none!important;visibility:hidden!important;pointer-events:none!important;'
+            . 'width:0!important;height:0!important;overflow:hidden!important}'
+            /* #30: badge CNPJ sem emoji (fallback se template em cache) */
+            . 'html body#html-body .page-wrapper .awa-footer-cnpj-badge__icon{'
+            . 'display:none!important}';
     }
 
     /**
@@ -1102,39 +1521,33 @@ final class HeaderImpeccableCascadeLockCss
      */
     public static function headerMinicartGhostTerminalRules(): string
     {
+        /* 5×#html-body — alinhado ao contrast lock / FOUC (vence themes.min CTA vermelho). */
+        $root = 'html body#html-body#html-body#html-body#html-body#html-body'
+            . ':not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)';
+        $cart = $root . ' .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper '
+            . ':is(.action.showcart,.showcart.header-mini-cart,.awa-minicart-trigger)';
+
         return '@media (min-width:992px){'
-            . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard) '
-            . '.page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper '
-            . ':is(.action.showcart,.showcart.header-mini-cart,.awa-minicart-trigger){'
+            . $cart . '{'
             . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
             . 'width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;'
             . 'padding:0!important;border:0!important;border-radius:0!important;'
-            . 'background:transparent!important;color:var(--awa-primary,oklch(48% .14 20))!important;'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'color:var(--awa-primary,oklch(48% .14 20))!important;'
             . 'box-shadow:none!important}'
-            . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard) '
-            . '.page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper '
-            . ':is(.action.showcart,.showcart.header-mini-cart,.awa-minicart-trigger):is(:hover,:focus-visible){'
-            . 'background:transparent!important;box-shadow:none!important;opacity:.88!important}'
-            . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard) '
-            . '.page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper '
-            . ':is(.action.showcart,.showcart.header-mini-cart,.awa-minicart-trigger) :is(svg,.awa-minicart-icon){'
+            . $cart . ':is(:hover,:focus-visible){'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'box-shadow:none!important;opacity:.88!important}'
+            . $cart . ' :is(svg,.awa-minicart-icon){'
             . 'display:inline-block!important;visibility:visible!important;opacity:1!important}'
-            . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard) '
-            . '.page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper '
-            . ':is(.action.showcart,.showcart.header-mini-cart,.awa-minicart-trigger) :is(svg,.awa-minicart-icon),'
-            . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard) '
-            . '.page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper '
-            . ':is(.action.showcart,.showcart.header-mini-cart,.awa-minicart-trigger) :is(svg,.awa-minicart-icon) path{'
-            . 'width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;'
+            . $cart . ' :is(svg,.awa-minicart-icon),'
+            . $cart . ' :is(svg,.awa-minicart-icon) path{'
+            . 'width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;'
             . 'stroke:var(--awa-primary,oklch(48% .14 20))!important;'
             . 'color:var(--awa-primary,oklch(48% .14 20))!important;fill:none!important}'
-            . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard) '
-            . '.page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper '
-            . ':is(.action.showcart,.showcart.header-mini-cart,.awa-minicart-trigger) :is(svg,.awa-minicart-icon) circle{'
+            . $cart . ' :is(svg,.awa-minicart-icon) circle{'
             . 'fill:var(--awa-primary,oklch(48% .14 20))!important;stroke:none!important}'
-            . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard) '
-            . '.page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper '
-            . ':is(.action.showcart,.showcart.header-mini-cart,.awa-minicart-trigger) .counter.qty:not(.empty){'
+            . $cart . ' .counter.qty:not(.empty){'
             . 'position:absolute!important;top:auto!important;bottom:2px!important;right:0!important;'
             . 'width:auto!important;min-width:14px!important;max-width:34px!important;height:14px!important;'
             . 'padding:0 4px!important;font-size:10px!important;font-weight:700!important;line-height:1!important;'
@@ -1183,9 +1596,10 @@ final class HeaderImpeccableCascadeLockCss
             . 'object-fit:contain!important;object-position:center!important}'
             . 'html body#html-body.b2b-account-dashboard .page-wrapper .awa-site-header '
             . ':is(.awa-header-search-col,.top-search){'
-            . 'grid-area:search!important;display:block!important;width:100%!important;'
-            . 'min-width:0!important;max-width:620px!important;margin:0!important;'
-            . 'padding:0!important;align-self:center!important;overflow:visible!important}'
+            . 'grid-area:search!important;display:flex!important;align-items:center!important;'
+            . 'width:100%!important;min-width:0!important;max-width:620px!important;margin:0!important;'
+            . 'padding:0!important;align-self:center!important;overflow:visible!important;'
+            . 'height:68px!important;min-height:68px!important;max-height:68px!important}'
             . 'html body#html-body.b2b-account-dashboard .page-wrapper .awa-site-header '
             . ':is(.awa-header-search-col,.top-search) :is(.block-search,.block-content){'
             . 'display:block!important;width:100%!important;min-width:0!important;'
@@ -1306,7 +1720,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'height:44px!important;min-height:44px!important;padding:0 16px!important;'
             . 'background:color-mix(in srgb,var(--awa-primary,oklch(48% .14 20)) 86%,oklch(20% .02 20))!important;'
             . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important;border:0!important;'
-            . 'border-radius:8px!important;font-weight:700!important;line-height:1!important}'
+            . 'border-radius:8px!important;font-weight:600!important;line-height:1!important}'
             . 'html body#html-body.b2b-account-dashboard .page-wrapper .awa-site-header '
             . ':is(.awa-nav-quick-links,.custommenu.main-nav,.navigation.custommenu){'
             . 'display:flex!important;align-items:center!important;justify-content:flex-end!important;'
@@ -1336,6 +1750,7 @@ final class HeaderImpeccableCascadeLockCss
     {
         return '@media (min-width:992px){'
             . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
+            . '.page-wrapper .header-control.awa-nav-bar .awa-header-primary-nav.menu_primary[data-awa-topnav-empty="1"],'
             . '.page-wrapper .header-control.awa-nav-bar .awa-header-primary-nav.menu_primary:has(nav.top-menu:empty){'
             . 'display:none!important;visibility:hidden!important;flex:0 0 0!important;'
             . 'width:0!important;min-width:0!important;max-width:0!important;height:0!important;'
@@ -1343,20 +1758,35 @@ final class HeaderImpeccableCascadeLockCss
             . 'overflow:hidden!important;pointer-events:none!important;border:0!important}'
             . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
             . '.page-wrapper .header-control.awa-nav-bar .awa-nav-bar__inner{'
-            . 'display:flex!important;align-items:stretch!important;justify-content:flex-start!important;'
-            . 'gap:0!important;width:100%!important;max-width:100%!important;'
+            . 'display:flex!important;align-items:center!important;justify-content:flex-start!important;'
+            . 'gap:clamp(16px,1.5vw,24px)!important;width:100%!important;max-width:100%!important;'
             . 'min-height:var(--awa-nav-bar-h,48px)!important;height:var(--awa-nav-bar-h,48px)!important;'
             . 'max-height:var(--awa-nav-bar-h,48px)!important;margin:0!important;padding:0!important;'
             . 'box-sizing:border-box!important;overflow:visible!important}'
+            /* Quick links ao lado do menu vertical (Departamentos) — não à extrema direita. */
             . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
             . '.page-wrapper .header-control.awa-nav-bar .awa-nav-quick-links{'
-            . 'display:flex!important;align-items:center!important;justify-content:flex-end!important;'
-            . 'flex:1 1 auto!important;min-width:0!important;margin-left:auto!important;'
-            . 'height:var(--awa-nav-bar-h,48px)!important;background:transparent!important}'
+            . 'display:flex!important;align-items:center!important;justify-content:flex-start!important;'
+            . 'flex:0 0 auto!important;min-width:0!important;max-width:none!important;width:auto!important;'
+            . 'margin:0!important;margin-left:0!important;margin-inline:0!important;'
+            . 'justify-self:start!important;grid-column:auto!important;position:static!important;'
+            . 'overflow:visible!important;height:var(--awa-nav-bar-h,48px)!important;background:transparent!important}'
             . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
             . '.page-wrapper .header-control.awa-nav-bar .awa-nav-quick-links__list{'
-            . 'display:flex!important;align-items:center!important;gap:clamp(16px,2.5vw,40px)!important;'
-            . 'margin:0!important;padding:0!important;list-style:none!important}'
+            . 'display:flex!important;align-items:center!important;justify-content:flex-start!important;'
+            . 'gap:clamp(16px,1.6vw,28px)!important;min-width:0!important;max-width:none!important;'
+            . 'overflow:visible!important;margin:0!important;padding:0!important;list-style:none!important}'
+            . 'html body#html-body.catalog-product-view:not(.checkout-index-index):not(.onepagecheckout-index-index) '
+            . '.page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner{'
+            . 'justify-content:flex-start!important;gap:clamp(16px,1.5vw,24px)!important}'
+            . 'html body#html-body.catalog-product-view:not(.checkout-index-index):not(.onepagecheckout-index-index) '
+            . '.page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links{'
+            . 'flex:0 0 auto!important;max-width:none!important;overflow:visible!important;'
+            . 'margin:0!important;justify-content:flex-start!important;justify-self:start!important;grid-column:auto!important}'
+            . 'html body#html-body.catalog-product-view:not(.checkout-index-index):not(.onepagecheckout-index-index) '
+            . '.page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links__list{'
+            . 'justify-content:flex-start!important;gap:clamp(16px,1.6vw,28px)!important;'
+            . 'overflow:visible!important;max-width:none!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5):not(.checkout-index-index) '
             . '.page-wrapper .awa-site-header :is(.header-control.header-nav.awa-nav-bar,.header-control.awa-nav-bar){'
             . 'width:100vw!important;max-width:100vw!important;'
@@ -1466,6 +1896,28 @@ final class HeaderImpeccableCascadeLockCss
             . '.page-wrapper .awa-site-header .awa-header-search-col .block-search{'
             . 'height:var(--awa-header-control-h)!important;min-height:var(--awa-header-control-h)!important;'
             . 'max-height:var(--awa-header-control-h)!important;overflow:visible!important}'
+            /* Beat _extend.less height:32px no stack de busca (desalinha vs logo/B2B na row 68). */
+            . 'html body#html-body#html-body#html-body#html-body#html-body:not(.checkout-index-index)'
+            . ':not(.onepagecheckout-index-index):not(.b2b-account-dashboard) .page-wrapper .awa-site-header '
+            . '.awa-header-search-col{'
+            . 'display:flex!important;align-items:center!important;align-self:center!important;'
+            . 'height:var(--awa-header-main-row-h,68px)!important;'
+            . 'min-height:var(--awa-header-main-row-h,68px)!important;'
+            . 'max-height:var(--awa-header-main-row-h,68px)!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body:not(.checkout-index-index)'
+            . ':not(.onepagecheckout-index-index):not(.b2b-account-dashboard) .page-wrapper .awa-site-header '
+            . '.awa-header-search-col :is(.block-search,.block-content,.awa-search-action-wrapper,'
+            . 'form#search_mini_form,form.minisearch){'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'width:100%!important;margin:0!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body:not(.checkout-index-index)'
+            . ':not(.onepagecheckout-index-index):not(.b2b-account-dashboard) .page-wrapper .awa-site-header '
+            . '.awa-header-search-col form#search_mini_form :is(.field.search,.field.search .control,.actions),'
+            . 'html body#html-body#html-body#html-body#html-body#html-body:not(.checkout-index-index)'
+            . ':not(.onepagecheckout-index-index):not(.b2b-account-dashboard) .page-wrapper .awa-site-header '
+            . '.awa-header-search-col form#search_mini_form :is(input#search,button.action.search){'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'line-height:1.25!important;box-sizing:border-box!important}'
             . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
             . '.page-wrapper .awa-site-header .awa-header-search-col :is(.block-search .label,.block-search .block-title,.nested){'
             . 'display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;'
@@ -1531,19 +1983,32 @@ final class HeaderImpeccableCascadeLockCss
             . ':root{--awa-header-scroll-offset:128px!important;--awa-header-site-shell-h:128px!important;'
             . '--awa-header-sticky-h:96px!important}'
             . '}'
+            // 2026-07-17 Round4: offsets 136/104 estavam stale — sticky real = 68+48=116
+            // (evidência CDP: scrollPaddingTop 136 vs wrapH 116). SSOT via tokens.
             . '@media (min-width:992px){'
+            . ':root{--awa-header-main-row-h:68px;--awa-header-nav-h:48px;'
+            . '--awa-header-scroll-offset:calc(var(--awa-header-main-row-h) + var(--awa-header-nav-h))!important;'
+            . '--awa-header-site-shell-h:calc(var(--awa-header-main-row-h) + var(--awa-header-nav-h))!important;'
+            . '--awa-header-sticky-h:calc(var(--awa-header-main-row-h) + var(--awa-header-nav-h))!important}'
             . 'html body#html-body .page-wrapper .awa-site-header .header-wrapper-sticky,'
             . 'html body#html-body .page-wrapper .awa-site-header .header-wrapper-sticky.is-sticky,'
             . 'html body#html-body .page-wrapper #header .header-wrapper-sticky,'
             . 'html body#html-body .page-wrapper #header .header-wrapper-sticky.is-sticky{'
-            . 'height:auto!important;min-height:64px!important;max-height:64px!important;'
             . 'overflow:visible!important;contain:none!important;padding-block:0!important;'
-            . 'box-sizing:border-box!important}'
-            . 'html body#html-body:has(.awa-site-header){scroll-padding-block-start:136px!important}'
-            . 'html body#html-body .awa-site-header #awa-main-content{scroll-margin-block-start:136px!important}'
-            . 'html{scroll-padding-top:136px!important}'
-            . ':root{--awa-header-scroll-offset:136px!important;--awa-header-site-shell-h:136px!important;'
-            . '--awa-header-sticky-h:104px!important}'
+            . 'box-sizing:border-box!important;'
+            // Round5: vencer leftovers 124px (vtex-clean/polish/home preload)
+            . 'height:var(--awa-header-sticky-h)!important;'
+            . 'min-height:var(--awa-header-sticky-h)!important;'
+            . 'max-height:var(--awa-header-sticky-h)!important}'
+            // Round5: align-grid usa #html-body×2/3 + min-height:var(--awa-header-stack-h)
+            // (124px). Precisa de especificidade ≥ para colapsar o shell no sticky.
+            . 'html body#html-body#html-body#html-body.awa-header-is-sticky .page-wrapper .awa-site-header,'
+            . 'html body#html-body#html-body#html-body.awa-header-is-sticky .page-wrapper .awa-site-header[data-awa-header-mode="default"]{'
+            . '--awa-header-stack-h:var(--awa-header-sticky-h)!important;'
+            . 'min-height:0!important;height:auto!important;max-height:none!important}'
+            . 'html body#html-body:has(.awa-site-header){scroll-padding-block-start:var(--awa-header-scroll-offset)!important}'
+            . 'html body#html-body .awa-site-header #awa-main-content{scroll-margin-block-start:var(--awa-header-scroll-offset)!important}'
+            . 'html{scroll-padding-top:var(--awa-header-scroll-offset)!important}'
             . '}';
     }
 
@@ -1661,8 +2126,7 @@ final class HeaderImpeccableCascadeLockCss
 
     public static function visualCrawlSystemicRules(): string
     {
-        return 'html body#html-body .page-wrapper #awa-b2b-promo-bar :is(button.awa-b2b-promo-close,.awa-b2b-promo-bar__cta),'
-            . 'html body#html-body .page-wrapper .grid-mode-show-type-products a,'
+        return 'html body#html-body .page-wrapper .grid-mode-show-type-products a,'
             . 'html body#html-body .page-wrapper :is(.awa-b2b-gate-card__action,.b2b-login-to-see-price .price-label a,.b2b-login-to-see-price a),'
             . 'html body#html-body .page-wrapper div.b2b-login-to-see-price.price-box span.price-label>a,'
             . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(.awa-footer-section__toggle,.velaFooterLinks a,.awa-footer-atendimento__actions a,.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link,.awa-seal),'
@@ -1670,7 +2134,6 @@ final class HeaderImpeccableCascadeLockCss
             . 'align-items:center!important;box-sizing:border-box!important;display:inline-flex!important;'
             . 'justify-content:center!important;line-height:1.2!important;min-height:44px!important;'
             . 'min-width:44px!important;text-align:center!important;text-decoration:none!important}'
-            . 'html body#html-body .page-wrapper #awa-b2b-promo-bar button.awa-b2b-promo-close,'
             . 'html body#html-body .page-wrapper .grid-mode-show-type-products a,'
             . 'html body#html-body .page-wrapper .block-search .action.search{height:44px!important;width:44px!important}'
             . 'html body#html-body .page-wrapper :is(.awa-b2b-gate-card__action,.b2b-login-to-see-price .price-label a,.b2b-login-to-see-price a){padding:8px 14px!important}'
@@ -1690,7 +2153,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'html body#html-body .page-wrapper .awa-owl-nav__btn svg{stroke:currentColor!important}'
             . 'html body#html-body .page-wrapper .awa-category-hero__eyebrow{background-color:rgba(0,0,0,.72)!important;border-radius:999px!important;color:rgb(255,255,255)!important;display:inline-block!important;padding:4px 10px!important;text-shadow:none!important}'
             . 'html body#html-body .page-wrapper :is(.b2b-login-forgot__text,.b2b-login-divider span){background-color:rgb(255,255,255)!important;color:rgb(51,51,51)!important;text-shadow:none!important}'
-            . 'html body#html-body .page-wrapper .awa-sr-only{background-color:rgb(0,0,0)!important;color:rgb(255,255,255)!important}';
+            . 'html body#html-body .page-wrapper .awa-sr-only{background-color:transparent!important;color:transparent!important}';
     }
 
     /**
@@ -1712,8 +2175,8 @@ final class HeaderImpeccableCascadeLockCss
             . 'html body#html-body .page-wrapper .page_footer p.awa-footer-atendimento__label--social{'
             . 'color:oklch(45% .02 20)!important}'
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store{'
-            . 'background:oklch(99% .002 20)!important;border:1px solid oklch(92% .01 20)!important;'
-            . 'padding:12px!important;border-radius:8px!important}'
+            . 'background:transparent!important;border:0!important;'
+            . 'padding:8px 0!important;border-radius:0!important}'
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store '
             . 'p.awa-footer-atendimento__store-name,'
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento .awa-footer-atendimento__store '
@@ -1763,7 +2226,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'content-visibility:visible!important;contain:none!important;contain-intrinsic-size:unset!important;'
             . 'height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}'
             . $scope . ' a{height:auto!important;min-width:0!important;overflow-wrap:anywhere!important}'
-            . $scope . ' .footer-bottom{box-sizing:border-box!important;padding:16px!important}'
+            . $scope . ' .footer-bottom{box-sizing:border-box!important;padding-block:16px!important;padding-inline:0!important}'
             . $scope . ' .footer-bottom-inner{'
             . 'box-sizing:border-box!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;'
             . 'gap:8px!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important}'
@@ -1771,9 +2234,9 @@ final class HeaderImpeccableCascadeLockCss
             . 'display:block!important;height:auto!important;margin-inline:auto!important;max-width:100%!important;'
             . 'min-height:0!important;padding:0!important;width:min(100%,1280px)!important}'
             . $scope . ' :is(.velaFooterLinks a,.awa-footer-atendimento__actions a){'
-            . 'height:auto!important;min-height:44px!important;min-width:0!important;padding-block:6px!important}'
+            . 'height:auto!important;min-height:0!important;min-width:0!important;padding-block:4px!important}'
             . $scope . ' :is(.velaFooterTitle,.awa-footer-section__toggle){'
-            . 'height:auto!important;min-height:44px!important;margin-bottom:4px!important;padding-bottom:4px!important}'
+            . 'height:auto!important;min-height:0!important;margin-bottom:4px!important;padding-bottom:4px!important}'
             . $scope . ' :is(.awa-footer-atendimento,.awa-footer-atendimento .velaContent){'
             . 'gap:4px!important;height:auto!important;min-height:0!important;max-height:none!important}'
             . $scope . ' :is(.awa-footer-atendimento__phone,.awa-footer-atendimento__email,'
@@ -1781,7 +2244,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'height:auto!important;min-height:0!important;margin:0 0 4px!important;'
             . 'padding:0!important;line-height:1.25!important}'
             . $scope . ' :is(.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a){'
-            . 'height:auto!important;min-height:44px!important;margin:0!important;padding:6px 0!important}'
+            . 'height:auto!important;min-height:0!important;margin:0!important;padding:4px 0!important}'
             . $scope . ' .awa-footer-atendimento__store{'
             . 'height:auto!important;min-height:0!important;margin-bottom:8px!important;padding:8px!important;gap:2px!important}'
             . $scope . ' .awa-footer-categories-expand{'
@@ -1917,12 +2380,13 @@ final class HeaderImpeccableCascadeLockCss
             . $root . ' .awa-footer-trust-item{min-height:48px!important;padding-block:4px!important}'
             . $hard . ' .row.rowFlexMargin{gap:12px!important;padding-block:4px!important}'
             . $hard . ' .vela-content.velaFooterMenu{padding:6px 8px!important}'
-            . $hard . ' .velaFooterTitle{height:auto!important;min-height:44px!important;margin-bottom:4px!important;padding-bottom:4px!important}'
-            . $hard . ' .awa-footer-section__toggle{align-items:center!important;display:flex!important;min-height:44px!important;height:auto!important;margin-bottom:4px!important;padding:0!important}'
+            . $hard . ' .velaFooterTitle{height:auto!important;min-height:0!important;margin-bottom:4px!important;padding-bottom:4px!important}'
+            . $hard . ' .awa-footer-section__toggle{align-items:center!important;display:flex!important;min-height:0!important;height:auto!important;margin-bottom:4px!important;padding:0!important}'
             . $hard . ' .awa-footer-atendimento .velaContent{gap:4px!important}'
             . $hard . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a){'
-            . 'display:inline-flex!important;align-items:center!important;height:auto!important;min-height:44px!important;padding:6px 0!important}'
-            . $hard . ' .velaFooterLinks a{align-items:center!important;display:flex!important;min-height:44px!important;padding-block:6px!important}'
+            . 'display:inline-flex!important;align-items:center!important;height:auto!important;min-height:0!important;padding:4px 0!important}'
+            . $hard . ' .velaFooterLinks a{align-items:center!important;display:flex!important;min-height:0!important;padding-block:1px!important}'
+            . $hard . ' .velaFooterLinks li{margin:0!important;padding:0!important}'
             . $hard . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone,.awa-footer-atendimento__email){'
             . 'height:auto!important;min-height:0!important;margin-bottom:4px!important}'
             . $hard . ' .awa-footer-atendimento__store{padding:8px!important;margin-bottom:6px!important;gap:2px!important}'
@@ -1930,7 +2394,7 @@ final class HeaderImpeccableCascadeLockCss
             . $hard . ' .awa-footer-atendimento__actions{gap:4px!important}'
             . $hard . ' .awa-footer-pro__social{gap:8px!important;height:auto!important;min-height:44px!important}'
             . $hard . ' .awa-footer-pro__social-link{align-items:center!important;display:inline-flex!important;height:44px!important;justify-content:center!important;min-height:44px!important;min-width:44px!important;width:44px!important;padding:6px!important}'
-            . $shell . ' .footer-bottom{padding:16px!important;margin-top:8px!important}'
+            . $shell . ' .footer-bottom{padding-block:16px!important;padding-inline:0!important;margin-top:8px!important}'
             . $shell . ' .footer-bottom .footer-bottom-inner{gap:8px!important}'
             . '}';
     }
@@ -1942,10 +2406,21 @@ final class HeaderImpeccableCascadeLockCss
     {
         return 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(.awa-footer-section__toggle,.velaFooterLinks a,.awa-footer-atendimento__actions a,.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link,.awa-seal){'
             . 'align-items:center!important;box-sizing:border-box!important;display:inline-flex!important;'
-            . 'justify-content:flex-start!important;line-height:1.45!important;min-height:44px!important;'
-            . 'min-width:44px!important;text-align:start!important;text-decoration:none!important}'
+            . 'justify-content:flex-start!important;line-height:1.45!important;'
+            . 'min-width:0!important;text-align:start!important;text-decoration:none!important}'
+            . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(.awa-footer-section__toggle,.velaFooterLinks a,.awa-footer-atendimento__actions a,.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link){'
+            . 'padding-block:4px!important}'
+            . '@media (max-width:767px){'
+            . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(.awa-footer-section__toggle,.velaFooterLinks a,.awa-footer-atendimento__actions a,.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link,.awa-seal){'
+            . 'min-height:44px!important;min-width:44px!important}'
             . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(.awa-footer-section__toggle,.velaFooterLinks a,.awa-footer-atendimento__actions a,.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link){'
             . 'padding-block:7px!important}'
+            . '}'
+            . '@media (min-width:768px){'
+            . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(.velaFooterLinks a,.awa-footer-atendimento__actions a,.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link){'
+            . 'min-height:44px!important;min-width:0!important;padding-block:10px!important}'
+            . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) .velaFooterLinks li{margin:0!important;padding:0!important}'
+            . '}'
             . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) .awa-footer-trust-item{'
             . 'background-color:transparent!important;color:var(--awa-text-muted,oklch(45% .02 20))!important}'
             . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) .awa-footer-atendimento__store-badge{'
@@ -1955,6 +2430,80 @@ final class HeaderImpeccableCascadeLockCss
     /**
      * Regras terminais do footer para páginas sem cascade-lock do header (PLP/PDP/checkout).
      */
+    /**
+     * Shell global do .page-wrapper + sticky header — mesma geometria/cor em home e catálogo.
+     * Evidência: home (refine) usava overflow-x:clip; PLP (refine removido) usava visible.
+     * Sticky home resolvia #f7f7f7 vs PLP #fff ao navegar.
+     */
+    public static function crossPageShellLockRules(): string
+    {
+        $root = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body';
+        $pw = $root . ' .page-wrapper';
+        $sticky = $pw . ' :is(.header-wrapper-sticky,.header-wrapper-sticky.is-sticky,'
+            . '.awa-site-header .header-wrapper-sticky,.awa-site-header .header-wrapper-sticky.is-sticky)';
+        // Surface canônica branca (sem chroma rosa). Antes: oklch(0.992 0.006 27) tingia cards.
+        $surface = '#fff';
+
+        return '/*awa-crosspage-shell-lock-r68*/'
+            . $root . '{--awa-bg:' . $surface . ';--awa-bg-surface:' . $surface . '}'
+            . $pw . '{'
+            . 'overflow-x:clip!important;overflow-y:visible!important;'
+            . 'background:' . $surface . '!important;background-color:' . $surface . '!important;'
+            . 'max-width:100%!important}'
+            . $sticky . '{'
+            . 'background:' . $surface . '!important;background-color:' . $surface . '!important;'
+            . 'backdrop-filter:none!important;-webkit-backdrop-filter:none!important}'
+            // Importante em awa-fixes: o contrato legado dessa camada vence regras unlayered.
+            . '@layer awa-fixes{@media(min-width:768px){'
+            . $sticky . '{box-sizing:border-box!important;height:116px!important;'
+            . 'min-height:116px!important;max-height:116px!important}}'
+            . '@media(max-width:767px){'
+            . $sticky . '{box-sizing:border-box!important;height:96px!important;'
+            . 'min-height:96px!important;max-height:96px!important}}}';
+    }
+
+    /**
+     * Superfície única do footer em todas as rotas (home/PLP/PDP/busca).
+     * Evita soft-bg só na home + trust vermelho só fora da home + round10 transparente.
+     */
+    public static function footerCrossPageSurfaceRules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper :is(footer.page-footer,.page_footer,.page-footer)';
+
+        return '/*awa-footer-crosspage-surface-r63*/'
+            . $scope . '{'
+            . 'background:#fff!important;'
+            . 'background-color:#fff!important;'
+            . 'color:var(--awa-text,oklch(0.32 0.012 27))!important;'
+            . 'border-top:0!important}'
+            . $scope . ' :is(#footer,.footer-container,.footer.content,.vela-content,.velaFooterMenu){'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'background-image:none!important;color:var(--awa-text,oklch(0.32 0.012 27))!important}'
+            . $scope . ' :is(.footer-bottom,.awa-footer-devby){'
+            . 'background:#fff!important;'
+            . 'background-color:#fff!important;'
+            . 'border:0!important;border-radius:0!important;'
+            . 'color:var(--awa-text,oklch(0.32 0.012 27))!important}'
+            . $scope . ' section.awa-footer-categories-expand{'
+            . 'background:#fff!important;'
+            . 'background-color:#fff!important;'
+            . 'border:0!important;border-top:0!important;border-bottom:0!important;'
+            . 'box-shadow:none!important;color:var(--awa-text,oklch(0.32 0.012 27))!important}'
+            . $scope . ' section.awa-footer-trust-bar,'
+            . $scope . ' .awa-footer-trust-bar{'
+            . 'display:block!important;background:var(--awa-primary,#b73337)!important;'
+            . 'background-color:var(--awa-primary,#b73337)!important;color:#fff!important;'
+            . 'border:0!important;box-shadow:none!important}'
+            . $scope . ' .awa-footer-trust-bar .awa-footer-trust-copy strong{'
+            . 'color:#fff!important}'
+            . $scope . ' .awa-footer-trust-bar .awa-footer-trust-copy span{'
+            . 'color:color-mix(in srgb,#fff 88%,transparent)!important}'
+            . $scope . ' .awa-footer-trust-bar .awa-footer-trust-icon,'
+            . $scope . ' .awa-footer-trust-bar .awa-footer-trust-icon svg{'
+            . 'color:#fff!important;fill:currentColor!important}';
+    }
+
     public static function footerTerminalRules(): string
     {
         return self::footerStructuralContainmentRules()
@@ -1968,7 +2517,1806 @@ final class HeaderImpeccableCascadeLockCss
             . self::footerSealImgPolishRules()
             . self::footerAlignShellRules()
             . self::footerNoJsCompactRules()
-            . self::footerVtexNeutralTerminalRules();
+            . self::footerVtexNeutralTerminalRules()
+            . self::footerCrossPageSurfaceRules()
+            . self::footerCategoriesGridFillRules()
+            . self::footerCategoriesDesktopLayoutRules()
+            . self::footerDenseDesktopR67Rules()
+            . self::footerDesktopTouch44R1Rules()
+            . self::footerCategoriesWhiteR16Rules()
+            . self::footerNewsletterWhiteR17Rules()
+            . self::footerCopyrightFlatR20Rules()
+            . self::footerAtendimentoStoreFlatR21Rules()
+            . self::footerImpeccablePolishR66Rules();
+    }
+
+    /**
+     * r66 — Impeccable home audit (2026-08-04).
+     * Typeset: LH>=1.35 em address/copyright; line length legal/disclaimer <=72ch.
+     * Newsletter field: inset mínimo. Dropdown: sem hairline+wide shadow.
+     * Trust contrast NÃO alterado (5.93:1 no bar vermelho; falso positivo Impeccable).
+     */
+    public static function footerImpeccablePolishR66Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(.page_footer,.page-footer)';
+        $footerRoot = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper footer.page-footer > .page_footer';
+        $hdr = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper .awa-site-header';
+
+        return '/*§footer-impeccable-r66*/'
+            . $scope . ' .awa-footer-atendimento__store-address,'
+            . $scope . ' p.awa-footer-atendimento__store-address,'
+            . $footerRoot . ' .awa-footer-atendimento__store-address{'
+            . 'line-height:1.4!important;white-space:normal!important}'
+            . $scope . ' .footer-bottom :is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer,'
+            . 'p.awa-footer-copyright__legal,p.awa-footer-copyright__disclaimer),'
+            . $footerRoot . ' .awa-footer-bottom__copyright '
+            . ':is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer,p.awa-footer-copyright__legal,p.awa-footer-copyright__disclaimer),'
+            . $footerRoot . ' .footer-bottom :is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer){'
+            . 'display:block!important;-webkit-box-orient:initial!important;-webkit-line-clamp:unset!important;'
+            . 'line-height:1.4!important;max-width:min(72ch,100%)!important;'
+            . 'max-height:none!important;overflow:visible!important;'
+            . 'width:100%!important;margin-inline:auto!important;overflow-wrap:anywhere!important}'
+            . '@media (min-width:992px){'
+            . $footerRoot . ' .awa-footer-bottom__copyright '
+            . ':is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer,p.awa-footer-copyright__legal,p.awa-footer-copyright__disclaimer),'
+            . $footerRoot . ' .footer-bottom :is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer){'
+            . 'display:block!important;-webkit-line-clamp:unset!important;'
+            . 'line-height:1.4!important;max-height:none!important;overflow:visible!important;'
+            . 'max-width:min(72ch,100%)!important}}'
+            . $scope . ' #newsletter-validate-detail .field.newsletter{'
+            . 'padding-block:8px!important;padding-inline:0!important;box-sizing:border-box!important}'
+            . $scope . ' .awa-footer-trust-copy strong{line-height:1.35!important}'
+            . $scope . ' .awa-footer-trust-copy span{line-height:1.35!important}'
+            . $hdr . ' .awa-account-dropdown__menu,'
+            . $hdr . ' .awa-site-header[data-awa-header-mode="default"] .awa-account-dropdown__menu{'
+            . 'border:0!important;border-width:0!important;border-style:none!important;'
+            . 'box-shadow:0 4px 12px color-mix(in srgb,CanvasText 12%,transparent)!important}'
+            . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header '
+            . ':is(#awa-b2b-promo-bar,.awa-b2b-promo-bar) '
+            . ':is(.awa-b2b-promo-bar__lead,.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__lead-short,'
+            . '.awa-b2b-promo-bar__text){line-height:1.4!important}';
+    }
+
+    /**
+     * Audit 4.2 — desktop footer links must keep ≥44px touch targets.
+     * Runtime: footerTouchAndTrust + footerDenseDesktopR67 set min-height:0 !important
+     * (≥768/992) and override FIX-9 / footerTouchAndTrust mobile-only 44px.
+     * This block loads last in footerTerminalRules with higher #html-body specificity.
+     */
+    public static function footerDesktopTouch44R1Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(.page_footer,.page-footer)';
+
+        return '/*§footer-touch-4.2-r1*/'
+            . '@media (min-width:768px){'
+            . $scope . ' :is('
+            . 'ul.velaFooterLinks a,'
+            . '.awa-footer-atendimento__actions a,'
+            . '.awa-footer-atendimento__phone a,'
+            . '.awa-footer-atendimento__email a,'
+            . '.awa-footer-pro__social a,'
+            . '.awa-footer-pro__social-link,'
+            . 'ul.awa-footer-categories-list a,'
+            . 'ul.awa-footer-categories-list>li>a,'
+            . '.awa-footer-devby__link'
+            . '){'
+            . 'display:inline-flex!important;align-items:center!important;'
+            . 'box-sizing:border-box!important;min-height:44px!important;height:auto!important;'
+            . 'padding-block:10px!important;padding-top:10px!important;padding-bottom:10px!important;'
+            . 'line-height:1.25!important}'
+            . $scope . ' :is(.awa-footer-pro__social a,.awa-footer-pro__social-link){'
+            . 'min-width:44px!important;justify-content:center!important}'
+            . '}';
+    }
+
+    /**
+     * Desktop ≥992 — densifica categories/newsletter/bottom/atendimento.
+     * Evidência r66: page~908; cats a minH 44 (critical+gridFill); newsletter icon 56.
+     */
+
+    /**
+     * Categories surface white — @layer awa-visual-priority (layered !important
+     * from deferred-stack soft/border beats unlayered locks). Served via inline
+     * footer terminal rules to bypass immutable static CSS cache.
+     */
+    public static function footerCategoriesWhiteR16Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer)';
+
+        return '/*§footer-cat-white-r16-inline*/'
+            . '@layer awa-visual-priority{'
+            . $scope . ' section.awa-footer-categories-expand,'
+            . $scope . ' section.awa-footer-categories-expand>.container,'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__inner,'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__panel,'
+            . $scope . ' section.awa-footer-categories-expand ul.awa-footer-categories-list{'
+            . 'background:#fff!important;background-color:#fff!important;background-image:none!important;'
+            . 'border:0!important;border-top:0!important;border-right:0!important;'
+            . 'border-bottom:0!important;border-left:0!important;'
+            . 'border-radius:0!important;box-shadow:none!important;outline:0!important}'
+            . $scope . ' section.awa-footer-categories-expand ul.awa-footer-categories-list{'
+            . 'display:flex!important;flex-wrap:wrap!important;align-items:center!important;'
+            . 'justify-content:flex-start!important;gap:6px 8px!important;'
+            . 'grid-template-columns:none!important;width:auto!important;max-width:100%!important;'
+            . 'margin:0!important;padding:0!important;list-style:none!important}'
+            . $scope . ' section.awa-footer-categories-expand ul.awa-footer-categories-list>li{'
+            . 'width:auto!important;max-width:none!important;flex:0 0 auto!important;'
+            . 'margin:0!important;padding:0!important}'
+            . $scope . ' section.awa-footer-categories-expand ul.awa-footer-categories-list a,'
+            . $scope . ' section.awa-footer-categories-expand ul.awa-footer-categories-list>li>a{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:auto!important;min-width:0!important;max-width:none!important;flex:0 0 auto!important;'
+            . 'box-sizing:border-box!important;min-height:28px!important;height:auto!important;'
+            . 'padding:4px 10px!important;margin:0!important;'
+            . 'background:#fff!important;background-color:#fff!important;'
+            . 'border:1px solid var(--awa-border,#e5e5e5)!important;border-radius:6px!important;'
+            . 'box-shadow:none!important;outline:0!important;line-height:1.25!important;font-size:12px!important}'
+            . '@media (max-width:767px){'
+            . $scope . ' section.awa-footer-categories-expand,'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__inner{'
+            . 'background:#fff!important;background-color:#fff!important;border:0!important;border-top:0!important}'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__toggle{'
+            . 'background:#fff!important;background-color:#fff!important;'
+            . 'border:1px solid var(--awa-border,#e5e5e5)!important;border-radius:6px!important}'
+            . '}'
+            . '}';
+    }
+
+
+    /**
+     * Newsletter band — flatten soft card (bg-soft + 1px + radius) that broke
+     * visual continuity with white footer columns. Must use @layer awa-visual-priority.
+     */
+    public static function footerNewsletterWhiteR17Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer)';
+
+        return '/*§footer-news-white-r17-inline*/'
+            . '@layer awa-visual-priority{'
+            . $scope . ' .awa-footer-newsletter,'
+            . $scope . ' .awa-footer-newsletter>.container{'
+            . 'background:#fff!important;background-color:#fff!important;background-image:none!important;'
+            . 'border:0!important;border-top:0!important;border-bottom:0!important;'
+            . 'border-block:0!important;border-radius:0!important;box-shadow:none!important}'
+            . '}';
+    }
+
+    /**
+     * Mobile shelf CTA: hide --desktop-only + kill ::after "deslize" truncation
+     * (impeccable ver-todos-fit-r7 forced visible + max-width:7rem).
+     */
+    /**
+     * Mobile product carousels: hide overlay prev/next/pause chrome.
+     * align-grid terminal forces display:inline-grid on .awa-owl-nav__btn
+     * (5–6 #html-body) and beats impeccable unlayered display:none.
+     * Must live in @layer awa-visual-priority.
+     */
+    public static function shelfCarouselMobileChromeHideR19Rules(): string
+    {
+        $h = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home';
+
+        return '/*§carousel-chrome-mobile-hide-r19-inline*/'
+            . '@layer awa-visual-priority{'
+            . '@media (max-width:767px){'
+            . $h . ' .awa-shelf--carousel > .awa-owl-nav,'
+            . $h . ' .awa-shelf--carousel .awa-owl-nav.awa-carousel__nav,'
+            . $h . ' .awa-carousel-section .awa-shelf--carousel > .awa-owl-nav,'
+            . $h . ' .awa-carousel-section :is(.awa-owl-nav.awa-carousel__nav,.awa-owl-nav){'
+            . 'display:none!important;visibility:hidden!important;opacity:0!important;'
+            . 'pointer-events:none!important;width:0!important;height:0!important;'
+            . 'min-width:0!important;min-height:0!important;max-width:0!important;max-height:0!important;'
+            . 'overflow:hidden!important;position:absolute!important}'
+            . $h . ' .awa-shelf--carousel :is(button.awa-owl-nav__btn,.awa-owl-nav__btn,'
+            . 'button.awa-carousel__arrow,.awa-carousel__arrow,.awa-carousel__toggle,'
+            . '.owl-prev,.owl-next),'
+            . $h . ' .awa-carousel-section :is(button.awa-owl-nav__btn,.awa-owl-nav__btn,'
+            . 'button.awa-carousel__arrow,.awa-carousel__arrow,.awa-carousel__toggle,'
+            . '.owl-prev,.owl-next){'
+            . 'display:none!important;visibility:hidden!important;opacity:0!important;'
+            . 'pointer-events:none!important;width:0!important;height:0!important;'
+            . 'min-width:0!important;min-height:0!important;max-width:0!important;max-height:0!important;'
+            . 'overflow:hidden!important}'
+            . '}'
+            . '}';
+    }
+
+    public static function shelfViewAllMobileHideR18Rules(): string
+    {
+        $h = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .content-top-home';
+
+        return '/*§ver-todos-mobile-hide-r18-inline*/'
+            . '@layer awa-visual-priority{'
+            . '@media (max-width:767px){'
+            . $h . ' .awa-shelf-view-all--desktop-only,'
+            . $h . ' a.awa-shelf-view-all--desktop-only,'
+            . $h . ' :is(.awa-section-header__link,.awa-shelf__view-all,.awa-shelf-view-all).awa-shelf-view-all--desktop-only{'
+            . 'display:none!important;visibility:hidden!important;pointer-events:none!important;'
+            . 'opacity:0!important;width:0!important;height:0!important;min-width:0!important;min-height:0!important;'
+            . 'max-width:0!important;max-height:0!important;margin:0!important;padding:0!important;'
+            . 'overflow:hidden!important;border:0!important;font-size:0!important;line-height:0!important;'
+            . 'position:absolute!important;inset:auto!important;clip:rect(0,0,0,0)!important}'
+            . $h . ' .awa-shelf-view-all--desktop-only::after,'
+            . $h . ' :is(.awa-section-header__link,.awa-shelf__view-all).awa-shelf-view-all--desktop-only::after{'
+            . 'content:none!important;display:none!important}'
+            . $h . ' :is(.awa-section-header__left,.awa-shelf__header-left){max-width:100%!important}'
+            . '}'
+            . '}';
+    }
+
+    /**
+     * Copyright band — flatten soft card (var(--awa-bg) soft + 1px + radius)
+     * from footerVtexNeutralTerminalRules. Layered to beat deferred soft surfaces.
+     */
+    /**
+     * Category carousel desktop gutter r22c — 48px pad in @layer awa-visual-priority
+     * so prev/next sit in gutters (match product shelf geometry).
+     */
+    public static function categoryCarouselDesktopGutterR22Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper';
+        $header = $scope . ' .top-home-content--category-carousel .awa-category-carousel__header';
+        $left = $scope . ' .top-home-content--category-carousel .awa-section-header__left';
+        $actions = $scope . ' .top-home-content--category-carousel .awa-category-carousel__actions';
+        $nav = $scope . ' .top-home-content--category-carousel .awa-category-carousel__nav';
+        $btn = $scope . ' .top-home-content--category-carousel .awa-category-carousel__nav'
+            . ' :is(.awa-category-carousel__prev,.awa-category-carousel__next)';
+        $cta = $scope . ' .top-home-content--category-carousel .awa-category-carousel__cta-link';
+        $wrap = $scope . ' .top-home-content--category-carousel .awa-category-carousel';
+        $vp = $scope . ' .top-home-content--category-carousel .awa-category-carousel__viewport';
+
+        $dot = $scope . ' .top-home-content--category-carousel .awa-category-carousel__dot';
+        $dots = $scope . ' .top-home-content--category-carousel #awa-cat-dots,'
+            . $scope . ' .top-home-content--category-carousel .awa-category-carousel__dots';
+
+        // r22j: title left + (nav+Ver todos) right cluster; never wrap nav under subtitle.
+        // r24: mobile dots — keep 44px hit area, paint only ::before (8/22px); kill btn fill + scaleX.
+        return '/*§cat-dots-r24b-gutter-inline*/'
+            . '@media (min-width:768px){'
+            . '@layer awa-visual-priority{'
+            . $header . '{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;'
+            . 'justify-content:space-between!important;gap:16px!important;width:100%!important}'
+            . $left . '{flex:1 1 auto!important;width:auto!important;max-width:none!important;min-width:0!important;'
+            . 'float:none!important;display:flex!important;flex-direction:column!important}'
+            . $actions . '{display:inline-flex!important;align-items:center!important;gap:12px!important;'
+            . 'flex:0 0 auto!important;margin-inline-start:auto!important;order:unset!important}'
+            . $nav . '{display:inline-flex!important;align-items:center!important;gap:8px!important;'
+            . 'flex:0 0 auto!important;margin:0!important;order:unset!important}'
+            . $btn . '{position:static!important;left:auto!important;right:auto!important;top:auto!important;'
+            . 'transform:none!important;inset:auto!important;margin:0!important;'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;'
+            . 'border-radius:10px!important;z-index:1!important;flex:0 0 36px!important}'
+            . $cta . '{order:unset!important;margin:0!important;align-self:center!important;white-space:nowrap!important}'
+            . $wrap . '{position:relative!important;padding-inline:0!important;--awa-home-carousel-gutter:0px;'
+            . 'width:100%!important;margin-top:16px!important}'
+            . $vp . '{padding-inline:0!important;margin-inline:0!important;overflow:hidden!important;'
+            . 'overflow-x:hidden!important;width:100%!important;position:relative!important}'
+            . '}'
+            . '}'
+            . '@media (max-width:767px){'
+            . '@layer awa-visual-priority{'
+            . $nav . '{display:none!important}'
+            . $actions . '{display:inline-flex!important;margin-inline-start:auto!important}'
+            . $dots . '{display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'gap:6px!important;min-height:18px!important;height:auto!important;margin-block:8px 0!important;'
+            . 'padding:0!important;width:100%!important}'
+            . $dot . '{appearance:none!important;background:transparent!important;background-color:transparent!important;'
+            . 'background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
+            . 'max-width:44px!important;max-height:44px!important;padding:0!important;margin:0!important;'
+            . 'flex:0 0 44px!important;transform:none!important;overflow:visible!important}'
+            . $dot . ':is(.active,[aria-current="page"]){'
+            . 'background:transparent!important;background-color:transparent!important;width:44px!important;'
+            . 'max-width:44px!important;transform:none!important;scale:none!important}'
+            . $dot . '::before{content:""!important;display:block!important;width:8px!important;height:8px!important;'
+            . 'border-radius:9999px!important;'
+            . 'background:color-mix(in srgb,var(--awa-text-muted,CanvasText) 42%,transparent)!important;'
+            . 'box-shadow:none!important;transform:none!important}'
+            . $dot . ':is(.active,[aria-current="page"])::before{'
+            . 'width:22px!important;height:8px!important;'
+            . 'background:var(--awa-primary,var(--awa-red,#b73337))!important}'
+            . '}'
+            . '}'
+            . '@media (min-width:768px){'
+            . '@layer awa-visual-priority{'
+            . $scope . ' .top-home-content--category-carousel.is-awa-cat-nav-idle .awa-category-carousel__nav{display:none!important}'
+            . $scope . ' .top-home-content--category-carousel.is-awa-cat-nav-idle #awa-cat-dots{display:none!important}'
+            . $scope . ' .top-home-content--category-carousel .awa-category-carousel__label{'
+            . 'min-height:2.6em!important;display:-webkit-box!important;-webkit-line-clamp:2!important;'
+            . '-webkit-box-orient:vertical!important;overflow:hidden!important;text-align:center!important;line-height:1.3!important}'
+            . $scope . ' .top-home-content--category-carousel .awa-category-carousel__count{margin-top:auto!important}'
+            . $scope . ' .top-home-content--category-carousel .awa-category-carousel__item{'
+            . 'display:flex!important;flex-direction:column!important;justify-content:flex-start!important}'
+            . '}'
+            . '}'
+            . '@media (min-width:1280px){'
+            . '@layer awa-visual-priority{'
+            /* r23a: 8×~152px cards fit; hide header nav/dots without waiting for JS idle */
+            . $scope . ' .top-home-content--category-carousel .awa-category-carousel__nav{display:none!important}'
+            . $scope . ' .top-home-content--category-carousel #awa-cat-dots{display:none!important}'
+            . '}'
+            . '}';
+    }
+
+    /**
+     * r24b: mobile category dots — dedicated injectable rules.
+     * Keep 44px hit area; paint only ::before (8/22px). Kill btn fill + scaleX(2.75).
+     * Unlayered + layered: link id awa-home-impeccable-terminal-v1 blocks PHP style re-inject.
+     */
+    public static function categoryCarouselDotsCompactR24Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
+            . ' .top-home-content--category-carousel';
+        $dot = $scope . ' .awa-category-carousel__dot';
+        $dots = $scope . ' #awa-cat-dots,' . $scope . ' .awa-category-carousel__dots';
+
+        $core = $dots . '{display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'gap:6px!important;min-height:18px!important;height:auto!important;margin-block:8px 0!important;'
+            . 'padding:0!important;width:100%!important}'
+            . $dot . '{appearance:none!important;background:transparent!important;background-color:transparent!important;'
+            . 'background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
+            . 'max-width:44px!important;max-height:44px!important;padding:0!important;margin:0!important;'
+            . 'flex:0 0 44px!important;transform:none!important;overflow:visible!important}'
+            . $dot . ':is(.active,[aria-current="page"]){'
+            . 'background:transparent!important;background-color:transparent!important;width:44px!important;'
+            . 'max-width:44px!important;transform:none!important}'
+            . $dot . '::before{content:""!important;display:block!important;width:8px!important;height:8px!important;'
+            . 'border-radius:9999px!important;'
+            . 'background:color-mix(in srgb,var(--awa-text-muted,CanvasText) 42%,transparent)!important;'
+            . 'box-shadow:none!important;transform:none!important}'
+            . $dot . ':is(.active,[aria-current="page"])::before{'
+            . 'width:22px!important;height:8px!important;'
+            . 'background:var(--awa-primary,var(--awa-red,#b73337))!important}';
+
+        return '/*§cat-dots-r24b-inline*/'
+            . '@media (max-width:767px){'
+            . '@layer awa-visual-priority{' . $core . '}'
+            . $core
+            . '}';
+    }
+
+
+
+
+
+
+
+
+
+    public static function footerAtendimentoStoreFlatR21Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer)';
+        $flat = $scope . ' .awa-footer-atendimento__store,'
+            . $scope . ' .awa-footer-atendimento .awa-footer-atendimento__store{'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-top:0!important;border-right:0!important;border-bottom:0!important;border-left:0!important;'
+            . 'border-radius:0!important;box-shadow:none!important;outline:0!important}';
+
+        // Layered (beats most author CSS) + unlayered twin (beats late unlayered
+        // align-grid/visual-bugfix --awa-bg soft card when document order loses).
+        return '/*§footer-store-flat-r21-inline*/'
+            . '@layer awa-visual-priority{' . $flat . '}'
+            . '/*§footer-store-flat-r21b-unlayered*/' . $flat;
+    }
+
+    public static function footerCopyrightFlatR20Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer)';
+
+        return '/*§footer-copyright-flat-r20-inline*/'
+            . '@layer awa-visual-priority{'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright,'
+            . $scope . ' .awa-footer-bottom__copyright{'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-top:0!important;border-right:0!important;border-bottom:0!important;border-left:0!important;'
+            . 'border-radius:0!important;box-shadow:none!important;outline:0!important}'
+            . '}';
+    }
+
+    /**
+     * r26: flatten CNPJ badge soft-card (tint + border from visual-fixes ROUND 15).
+     * Layered + unlayered twin — same pattern as store-flat r21b.
+     */
+    public static function footerCnpjBadgeFlatR26Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer)';
+
+        $flat = $scope . ' .footer-bottom .awa-footer-cnpj-badge,'
+            . $scope . ' .awa-footer-bottom__copyright .awa-footer-cnpj-badge,'
+            . $scope . ' .awa-footer-cnpj-badge{'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-top:0!important;border-right:0!important;border-bottom:0!important;border-left:0!important;'
+            . 'border-radius:0!important;box-shadow:none!important;outline:0!important;'
+            . 'color:var(--awa-text-secondary,var(--awa-text-muted,var(--awa-text,#333)))!important}'
+            . $scope . ' .awa-footer-cnpj-badge__text{'
+            . 'background:transparent!important;border:0!important;'
+            . 'color:inherit!important}'
+            . $scope . ' .awa-footer-cnpj-badge__icon{'
+            . 'background:transparent!important;border:0!important;'
+            . 'color:var(--awa-primary,#b73337)!important}';
+
+        return '/*§footer-cnpj-flat-r26-inline*/'
+            . '@layer awa-visual-priority{' . $flat . '}'
+            . '/*§footer-cnpj-flat-r26-unlayered*/' . $flat;
+    }
+
+    /**
+     * r27: mobile B2B promo bar is light (css-gate/align) but cascade-lock still
+     * paints __lead-short / __cta-short white (era of solid red bar) → invisible.
+     * Align mobile with desktop: light bar + dark text; CTA brand underline.
+     */
+    public static function b2bPromoContrastR27Rules(): string
+    {
+        $bar = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper .awa-site-header :is(#awa-b2b-promo-bar,.awa-b2b-promo-bar)';
+
+        $rules = '@media (max-width:767px){'
+            . $bar . '{'
+            . 'background:#fff!important;background-color:#fff!important;background-image:none!important;'
+            . 'color:var(--awa-text-primary,#111827)!important}'
+            . $bar . ' :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,'
+            . '.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__lead-short,'
+            . '.awa-b2b-promo-bar__tail,.awa-b2b-promo-bar__separator,'
+            . '.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta-long,.awa-b2b-promo-bar__cta-short,'
+            . '.awa-b2b-promo-bar__cta strong,span,p,a,strong){'
+            . 'color:var(--awa-text-primary,#111827)!important;opacity:1!important;'
+            . 'line-height:1.4!important}'
+            . $bar . ' :is(.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta-short,.awa-b2b-promo-bar__cta-long,'
+            . 'a.awa-b2b-promo-bar__cta){'
+            . 'color:var(--awa-primary,#b73337)!important;font-weight:700!important;'
+            . 'text-decoration:underline!important;text-underline-offset:2px!important}'
+            . $bar . ' :is(.awa-b2b-promo-close,#awa-b2b-promo-close){'
+            . 'color:var(--awa-text-secondary,#475569)!important}'
+            . '}';
+
+        return '/*§b2b-promo-contrast-r27-inline*/'
+            . '@layer awa-visual-priority{' . $rules . '}'
+            . '/*§b2b-promo-contrast-r27-unlayered*/' . $rules;
+    }
+
+    /**
+     * r40c: desktop B2B promo shell — 44px soft white FULL-BLEED.
+     * r40b fixed height/contrast but visual-audit-fixes locked
+     * .header-content/.top-header to min(100%,1280px)+margin:auto → 160px cream
+     * gutters on each side at 1610px. Force bar + shell to 100% width.
+     * Mobile ≤767 unchanged (r27).
+     */
+    public static function b2bPromoShellR40Rules(): string
+    {
+        $root = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body';
+        $site = $root . ' .page-wrapper .awa-site-header';
+        $header = $site . ' #header.header-container';
+        $bar = $site . ' :is(#awa-b2b-promo-bar,.awa-b2b-promo-bar,.top-header.awa-b2b-promo-bar)';
+        $inner = $bar . ' .awa-b2b-promo-bar__inner';
+        $text = $bar . ' :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,'
+            . '.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__tail,'
+            . '.awa-b2b-promo-bar__separator,span,p)';
+        $ctaLink = $bar . ' :is(a.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta)';
+        $ctaText = $bar . ' :is(.awa-b2b-promo-bar__cta strong,.awa-b2b-promo-bar__cta-long,'
+            . '.awa-b2b-promo-bar__cta-short)';
+        $close = $bar . ' :is(.awa-b2b-promo-close,#awa-b2b-promo-close)';
+
+        /* BUG-SHELL-PROMO-TOKEN-CLOSED-001: tokens 44/160 só com promo aberta.
+         * Antes: forçava --awa-header-promo-h:44 e stack 160 mesmo com aria-hidden=true. */
+        $rules = '@media (min-width:768px){'
+            . $site . '{'
+            . '--awa-header-promo-h:0px!important;'
+            . '--awa-header-stack-h:var(--awa-header-sticky-h,112px)!important}'
+            . $site . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+            . '--awa-header-promo-h:44px!important;'
+            . '--awa-header-stack-h:calc(44px + var(--awa-header-sticky-h,116px))!important}'
+            . $site . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])) ' . '#header.header-container{'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'width:100%!important;max-width:none!important;margin:0!important;'
+            . 'overflow:hidden!important;background:#fff!important;background-color:#fff!important}'
+            . $site . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])) '
+            . '#header.header-container .header-content{'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'width:100%!important;max-width:none!important;margin:0!important;'
+            . 'padding:0!important;align-items:center!important;overflow:hidden!important;'
+            . 'background:#fff!important;background-color:#fff!important}'
+            . $bar . '{'
+            . 'position:relative!important;'
+            . 'display:block!important;'
+            . 'height:var(--awa-header-promo-h,0px)!important;'
+            . 'min-height:var(--awa-header-promo-h,0px)!important;'
+            . 'max-height:var(--awa-header-promo-h,0px)!important;'
+            . 'width:100%!important;max-width:none!important;min-width:100%!important;'
+            . 'margin:0!important;margin-inline:0!important;margin-left:0!important;margin-right:0!important;'
+            . 'left:auto!important;right:auto!important;inset-inline:auto!important;'
+            . 'padding:0 52px 0 16px!important;box-sizing:border-box!important;'
+            . 'background:#fff!important;background-color:#fff!important;background-image:none!important;'
+            . 'color:var(--awa-text-primary,#111827)!important;'
+            . 'border:0!important;'
+            . 'border-bottom:1px solid var(--awa-border-subtle,var(--awa-border,#e5e7eb))!important;'
+            . 'line-height:1.25!important;overflow:hidden!important}'
+            . $site . ':has(#awa-b2b-promo-bar[aria-hidden="true"]) ' . '#header.header-container,'
+            . $site . ':has(#awa-b2b-promo-bar[aria-hidden="true"]) '
+            . '#header.header-container .header-content{'
+            . 'height:0!important;min-height:0!important;max-height:0!important;'
+            . 'overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}'
+            . $inner . '{'
+            . 'height:var(--awa-header-promo-h,0px)!important;'
+            . 'min-height:var(--awa-header-promo-h,0px)!important;'
+            . 'max-height:var(--awa-header-promo-h,0px)!important;'
+            . 'width:100%!important;max-width:min(100%,1280px)!important;'
+            . 'margin:0 auto!important;'
+            . 'display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'padding:0!important;box-sizing:border-box!important;'
+            . 'background:transparent!important;color:inherit!important}'
+            . $text . '{'
+            . 'color:var(--awa-text-primary,#111827)!important;opacity:1!important;'
+            . 'line-height:1.25!important;font-size:13px!important}'
+            /* UX 2026-08-04: CTA chip (não underline) — conversão B2B; vence refine/r40c antigo */
+            . $ctaLink . '{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'color:var(--awa-primary,#b73337)!important;font-weight:700!important;font-size:12px!important;'
+            . 'text-decoration:none!important;text-decoration-line:none!important;text-underline-offset:0!important;'
+            . 'height:auto!important;min-height:28px!important;max-height:none!important;'
+            . 'padding:4px 12px!important;padding-block:4px!important;padding-inline:12px!important;'
+            . 'border:1px solid var(--awa-primary,#b73337)!important;border-radius:999px!important;'
+            . 'background:color-mix(in srgb,var(--awa-primary,#b73337) 12%,#fff)!important;'
+            . 'background-color:color-mix(in srgb,var(--awa-primary,#b73337) 12%,#fff)!important;'
+            . 'box-sizing:border-box!important;white-space:nowrap!important;line-height:1.2!important}'
+            . $ctaLink . ':hover,' . $ctaLink . ':focus-visible{'
+            . 'background:var(--awa-primary,#b73337)!important;'
+            . 'background-color:var(--awa-primary,#b73337)!important;'
+            . 'color:var(--awa-on-primary,#fff)!important;'
+            . 'text-decoration:none!important;text-decoration-line:none!important}'
+            . $ctaText . '{'
+            . 'color:inherit!important;text-decoration:none!important;text-decoration-line:none!important;'
+            . 'background:transparent!important;border:0!important;padding:0!important;'
+            . 'font-weight:700!important}'
+            . $close . '{'
+            . 'position:absolute!important;top:0!important;inset-block-start:0!important;'
+            . 'right:var(--awa-container-pad,16px)!important;'
+            . 'inset-inline-end:var(--awa-container-pad,16px)!important;'
+            . 'width:44px!important;min-width:44px!important;max-width:44px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'box-sizing:border-box!important;display:inline-flex!important;'
+            . 'align-items:center!important;justify-content:center!important;'
+            . 'border:0!important;border-radius:0!important;background:transparent!important;'
+            . 'color:var(--awa-text-secondary,#475569)!important;font-size:16px!important;'
+            . 'font-weight:600!important;line-height:1!important;transform:none!important;'
+            . 'padding:0!important}'
+            . '}';
+
+        return '/*§b2b-promo-shell-r40c-inline*/'
+            . '@layer awa-visual-priority{' . $rules . '}'
+            . '/*§b2b-promo-shell-r40c-unlayered*/' . $rules;
+    }
+
+    /**
+     * r28: flatten footer trust/pay soft-cards (density-grid surface+border+radius).
+     * Images remain; chrome (bg/border/radius/shadow) removed — same pattern as CNPJ r26.
+     */
+    public static function footerSealsPayFlatR28Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer)';
+
+        $flat = $scope . ' :is(.awa-seal,.awa-footer-sec-seals li,.awa-footer-devby__logo,'
+            . '.awa-pay-logo,.awa-footer-pay-logos li){'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-top:0!important;border-right:0!important;border-bottom:0!important;border-left:0!important;'
+            . 'border-radius:0!important;box-shadow:none!important;outline:0!important}'
+            . $scope . ' .awa-seal{padding:0!important}'
+            . $scope . ' .awa-seal__img,'
+            . $scope . ' .awa-footer-sec-seals img,'
+            . $scope . ' .awa-footer-pay-logos img,'
+            . $scope . ' .awa-footer-devby__logo{'
+            . 'background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;'
+            . 'opacity:1!important;visibility:visible!important}';
+
+        return '/*§footer-seals-pay-flat-r28-inline*/'
+            . '@layer awa-visual-priority{' . $flat . '}'
+            . '/*§footer-seals-pay-flat-r28-unlayered*/' . $flat;
+    }
+
+    /**
+     * r29: newsletter form polish —
+     * 1) kill 3px left accent (visual-fixes ROUND 24) → uniform 1px border
+     * 2) mobile stack field so CTA text does not wrap in 118px grid cell
+     * 3) flatten soft-tint on .awa-newsletter-icon
+     */
+    public static function footerNewsletterFormR29Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer)';
+
+        $rules = $scope . ' .awa-newsletter-icon{'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-radius:0!important;box-shadow:none!important}'
+            . $scope . ' #newsletter-validate-detail input[type=email],'
+            . $scope . ' #newsletter-validate-detail input#newsletter,'
+            . $scope . ' .newsletter-footer input[type=email],'
+            . $scope . ' .awa-footer-newsletter input[type=email]{'
+            . 'border:1px solid var(--awa-border,#e5e5e5)!important;'
+            . 'border-top:1px solid var(--awa-border,#e5e5e5)!important;'
+            . 'border-right:1px solid var(--awa-border,#e5e5e5)!important;'
+            . 'border-bottom:1px solid var(--awa-border,#e5e5e5)!important;'
+            . 'border-left:1px solid var(--awa-border,#e5e5e5)!important;'
+            . 'box-shadow:none!important}'
+            . $scope . ' #newsletter-validate-detail button.action.subscribe{'
+            . 'white-space:nowrap!important;line-height:1.2!important}'
+            . '@media (max-width:767px){'
+            . $scope . ' #newsletter-validate-detail .field.newsletter{'
+            . 'display:flex!important;flex-direction:column!important;align-items:stretch!important;'
+            . 'grid-template-columns:none!important;grid-template-rows:none!important;'
+            . 'gap:8px!important;width:100%!important;height:auto!important;min-height:0!important;'
+            . 'border:0!important}'
+            . $scope . ' #newsletter-validate-detail :is(.control,.actions){'
+            . 'width:100%!important;max-width:none!important;flex:0 0 auto!important;'
+            . 'display:block!important}'
+            . $scope . ' #newsletter-validate-detail input[type=email],'
+            . $scope . ' #newsletter-validate-detail input#newsletter,'
+            . $scope . ' #newsletter-validate-detail button.action.subscribe{'
+            . 'width:100%!important;max-width:none!important;'
+            . 'min-height:44px!important;height:44px!important}'
+            . $scope . ' #newsletter-validate-detail button.action.subscribe{'
+            . 'white-space:nowrap!important;font-size:13px!important;'
+            . 'padding-inline:16px!important}'
+            . '}';
+
+        return '/*§footer-newsletter-r29-inline*/'
+            . '@layer awa-visual-priority{' . $rules . '}'
+            . '/*§footer-newsletter-r29-unlayered*/' . $rules;
+    }
+
+    /**
+     * r30: stack back-to-top above WhatsApp on mobile — both were at ~80–84px right
+     * and overlapped (~1600px²). WA stays closest to bottom nav; back-to-top sits +62px up.
+     */
+    public static function mobileFabStackR30Rules(): string
+    {
+        $wa = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' :is(a.awa-whatsapp-float,.awa-whatsapp-float)';
+        $top = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' :is(#awa-back-to-top,.awa-back-to-top).is-visible:not([hidden])';
+        $cookieRoot = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body.awa-cookie-banner-active';
+        $nav = 'var(--awa-mobile-bottom-nav-h,72px)';
+        $safe = 'env(safe-area-inset-bottom,0px)';
+        $cookie = 'var(--awa-cookie-banner-height,0px)';
+
+        $rules = '@media (max-width:991px){'
+            . $wa . '{'
+            . 'position:fixed!important;right:16px!important;left:auto!important;'
+            . 'bottom:calc(' . $nav . ' + 12px + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(' . $nav . ' + 12px + ' . $safe . ')!important;'
+            . 'z-index:10002!important}'
+            . $top . '{'
+            . 'position:fixed!important;right:16px!important;left:auto!important;'
+            . 'bottom:calc(' . $nav . ' + 12px + 50px + 12px + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(' . $nav . ' + 12px + 50px + 12px + ' . $safe . ')!important;'
+            . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
+            . 'max-width:44px!important;max-height:44px!important;padding:0!important;'
+            . 'box-sizing:border-box!important;z-index:10001!important}'
+            . $cookieRoot . ' :is(a.awa-whatsapp-float,.awa-whatsapp-float){'
+            . 'bottom:calc(' . $nav . ' + 12px + ' . $cookie . ' + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(' . $nav . ' + 12px + ' . $cookie . ' + ' . $safe . ')!important}'
+            . $cookieRoot . ' :is(#awa-back-to-top,.awa-back-to-top).is-visible:not([hidden]){'
+            . 'bottom:calc(' . $nav . ' + 12px + 50px + 12px + ' . $cookie . ' + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(' . $nav . ' + 12px + 50px + 12px + ' . $cookie . ' + ' . $safe . ')!important}'
+            . '}';
+
+        return '/*§mobile-fab-stack-r30-inline*/'
+            . '@layer awa-visual-priority{' . $rules . '}'
+            . '/*§mobile-fab-stack-r30-unlayered*/' . $rules;
+    }
+
+    /**
+     * r31: flatten trust-bar icon soft chips (rgba white/red 0.08 + pill).
+     * Keep glyph white on primary bar; remove chip chrome only.
+     */
+    public static function footerTrustIconFlatR31Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer)'
+            . ' .awa-footer-trust-bar';
+
+        $flat = $scope . ' .awa-footer-trust-icon{'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-radius:0!important;box-shadow:none!important;outline:0!important;'
+            . 'color:#fff!important}'
+            . $scope . ' .awa-footer-trust-icon :is(svg,img,i){'
+            . 'background:transparent!important;border:0!important;border-radius:0!important;'
+            . 'color:#fff!important}'
+            . $scope . ' .awa-footer-trust-icon svg{'
+            . 'stroke:currentColor!important}';
+
+        return '/*§footer-trust-icon-flat-r31-inline*/'
+            . '@layer awa-visual-priority{' . $flat . '}'
+            . '/*§footer-trust-icon-flat-r31-unlayered*/' . $flat;
+    }
+
+
+    /**
+     * r33: desktop FAB stack — r30 only covered max-width:991px.
+     * WA + back-to-top both at bottom:24px/right:16px overlapped (~2376px²).
+     * Keep WA at corner; raise back-to-top by WA height + 12px gap.
+     */
+    public static function desktopFabStackR33Rules(): string
+    {
+        $wa = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' :is(a.awa-whatsapp-float,.awa-whatsapp-float)';
+        $top = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' :is(#awa-back-to-top,.awa-back-to-top).is-visible:not([hidden])';
+        $cookieRoot = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body.awa-cookie-banner-active';
+        $safe = 'env(safe-area-inset-bottom,0px)';
+        $cookie = 'var(--awa-cookie-banner-height,0px)';
+
+        $rules = '@media (min-width:992px){'
+            . $wa . '{'
+            . 'position:fixed!important;right:16px!important;left:auto!important;'
+            . 'bottom:calc(24px + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(24px + ' . $safe . ')!important;'
+            . 'z-index:10002!important}'
+            . $top . '{'
+            . 'position:fixed!important;right:16px!important;left:auto!important;'
+            . 'bottom:calc(24px + 56px + 12px + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(24px + 56px + 12px + ' . $safe . ')!important;'
+            . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
+            . 'max-width:44px!important;max-height:44px!important;padding:0!important;'
+            . 'box-sizing:border-box!important;z-index:10001!important}'
+            . $cookieRoot . ' :is(a.awa-whatsapp-float,.awa-whatsapp-float){'
+            . 'bottom:calc(24px + ' . $cookie . ' + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(24px + ' . $cookie . ' + ' . $safe . ')!important}'
+            . $cookieRoot . ' :is(#awa-back-to-top,.awa-back-to-top).is-visible:not([hidden]){'
+            . 'bottom:calc(24px + 56px + 12px + ' . $cookie . ' + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(24px + 56px + 12px + ' . $cookie . ' + ' . $safe . ')!important}'
+            . '}';
+
+        return '/*§desktop-fab-stack-r33-inline*/'
+            . '@layer awa-visual-priority{' . $rules . '}'
+            . '/*§desktop-fab-stack-r33-unlayered*/' . $rules;
+    }
+
+    /**
+     * r34: mobile header hamburger — flatten soft chip (bg+border+radius)
+     * to match flat cart icon. Keep 44px hit area and primary glyph color.
+     * Expanded state keeps solid primary for open feedback.
+     */
+    public static function mobileToggleFlatR34Rules(): string
+    {
+        $toggle = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper .awa-site-header'
+            . ' :is(.awa-header-mobile-toggle,.action.nav-toggle,[data-action="toggle-nav"])';
+
+        $flat = '@media (max-width:991px){'
+            . $toggle . '{'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-width:0!important;border-color:transparent!important;'
+            . 'border-radius:0!important;box-shadow:none!important;outline:0!important;'
+            . 'color:var(--awa-primary,var(--awa-red,#b73337))!important;'
+            . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
+            . 'padding:0!important}'
+            . $toggle . ' :is(svg,i,span,::before,::after){'
+            . 'background:transparent!important;border:0!important;box-shadow:none!important;'
+            . 'color:inherit!important}'
+            . $toggle . '[aria-expanded="true"]{'
+            . 'background:var(--awa-primary,var(--awa-red,#b73337))!important;'
+            . 'background-color:var(--awa-primary,var(--awa-red,#b73337))!important;'
+            . 'color:#fff!important;border-radius:var(--awa-radius,8px)!important}'
+            . $toggle . '[aria-expanded="true"] :is(svg,i,span,::before,::after){'
+            . 'color:#fff!important}'
+            . '}';
+
+        return '/*§ham-flat-r34-inline*/'
+            . '@layer awa-visual-priority{' . $flat . '}'
+            . '/*§ham-flat-r34-unlayered*/' . $flat;
+    }
+
+    /**
+     * r35a: mobile bottom nav — equal 4 columns.
+     * space-between + intrinsic widths (Deptos ~85px vs Início 44px) made gaps uneven (118/77/106).
+     */
+    public static function mobileBottomNavEqualR35Rules(): string
+    {
+        $nav = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' nav.fixed-bottom';
+        $ul = $nav . ' ul.mobile-bottom-link';
+        $li = $ul . ' > li';
+        $hit = $li . ' > :is(a,button)';
+
+        $core = $nav . '{width:100%!important}'
+            . $nav . ' .link-on-bottom{width:100%!important;display:block!important}'
+            . $ul . '{'
+            . 'display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;'
+            . 'width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;'
+            . 'gap:0!important;justify-content:normal!important;align-items:stretch!important;'
+            . 'list-style:none!important}'
+            . $li . '{'
+            . 'display:flex!important;justify-content:center!important;align-items:stretch!important;'
+            . 'width:auto!important;min-width:0!important;max-width:none!important;'
+            . 'flex:unset!important;margin:0!important;padding:0!important}'
+            . $hit . '{'
+            . 'display:inline-flex!important;flex-direction:column!important;'
+            . 'align-items:center!important;justify-content:center!important;'
+            . 'width:100%!important;min-width:0!important;max-width:100%!important;'
+            . 'box-sizing:border-box!important;text-align:center!important;'
+            . 'padding-inline:2px!important}';
+
+        $media = '@media (max-width:767px){' . $core . '}';
+
+        return '/*§bottom-nav-equal-r35-inline*/'
+            . '@layer awa-visual-priority{' . $media . '}'
+            . '/*§bottom-nav-equal-r35-unlayered*/' . $media;
+    }
+
+    /**
+     * r35b: shelf progress track — replace pill 9999px with control radius 8px (match desktop).
+     */
+    public static function owlProgressRadiusR35Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper';
+        $track = $scope . ' .awa-owl-progress';
+        $bar = $scope . ' .awa-owl-progress__bar';
+
+        $core = $track . ',' . $bar . '{'
+            . 'border-radius:var(--awa-radius,8px)!important;'
+            . '-webkit-border-radius:var(--awa-radius,8px)!important}';
+
+        return '/*§owl-progress-radius-r35-inline*/'
+            . '@layer awa-visual-priority{' . $core . '}'
+            . '/*§owl-progress-radius-r35-unlayered*/' . $core;
+    }
+
+    /**
+     * r36: shelf carousel nav buttons — replace pill/circle (999px/50%) with 8px radius.
+     * Keep surface/border for contrast on product imagery; only kill stadium/circle chrome.
+     */
+    public static function carouselNavRadiusR36Rules(): string
+    {
+        $btn = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper'
+            . ' :is(.awa-owl-nav__btn,.awa-carousel__arrow,.awa-carousel__toggle,.awa-carousel__button)';
+
+        $core = $btn . '{'
+            . 'border-radius:var(--awa-radius,8px)!important;'
+            . '-webkit-border-radius:var(--awa-radius,8px)!important}'
+            . $btn . ':is(:hover,:focus,:focus-visible,:active){'
+            . 'border-radius:var(--awa-radius,8px)!important;'
+            . '-webkit-border-radius:var(--awa-radius,8px)!important}';
+
+        return '/*§carousel-nav-radius-r36-inline*/'
+            . '@layer awa-visual-priority{' . $core . '}'
+            . '/*§carousel-nav-radius-r36-unlayered*/' . $core;
+    }
+
+    /**
+     * r38: autoplay toggle was parked at top-right gutter (same x as next),
+     * visually glued to the last full card / NOVO badge. Park it in the
+     * right gutter BELOW the card image band (bottom) + force 8px radius
+     * (launches-toggle-fix still ships 999px pill). Desktop only — mobile
+     * chrome is already hidden (r19).
+     */
+    public static function carouselToggleGutterR38Rules(): string
+    {
+        $home = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)'
+            . ' .page-wrapper .content-top-home';
+        $car = $home . ' .awa-shelf--carousel .awa-carousel.has-carousel-autoplay-toggle';
+        $toggle = $car . ' > .awa-owl-nav.awa-carousel__nav .awa-carousel__toggle:not([hidden])';
+
+        /* r38c/r71: park pause on the header row, LEFT of "Ver todos"
+         * (link ~100px + gap => right:125px). r71: top -56→-63 aligns Y with
+         * the flex-centered view-all (header 58 / link 44 / gap 12).
+         * Niche panel-head sits closer (desc+viewAll 44px) => top:-52. */
+        $core = '@media (min-width:768px){'
+            . $car . '{'
+            . 'padding-top:0!important}'
+            . $toggle . '{'
+            . 'top:-63px!important;'
+            . 'bottom:auto!important;'
+            . 'right:125px!important;'
+            . 'left:auto!important;'
+            . 'transform:none!important;'
+            . 'border-radius:var(--awa-radius,8px)!important;'
+            . '-webkit-border-radius:var(--awa-radius,8px)!important;'
+            . 'z-index:7!important}'
+            /* r71: niche — absolute left of panel Ver todos (not relative; that
+             * overlapped prev arrow after r69). */
+            . $home . ' .awa-home-niche-shelves .awa-carousel__toggle:not([hidden]){'
+            . 'top:-52px!important;right:125px!important;left:auto!important;bottom:auto!important;'
+            . 'position:absolute!important;transform:none!important;z-index:7!important}'
+            . '}';
+
+        return '/*§carousel-toggle-gutter-r71-inline*/'
+            . '@layer awa-visual-priority{' . $core . '}'
+            . '/*§carousel-toggle-gutter-r71-unlayered*/' . $core;
+    }
+
+    /**
+     * r37: mobile bottom nav inactive hierarchy.
+     * themes.min.css forced ALL links to rgb(183,51,55); only active should be primary.
+     * Inactive = slate secondary (visible on white); active / Deptos expanded = brand.
+     */
+    public static function mobileBottomNavInactiveR37Rules(): string
+    {
+        $nav = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body'
+            . ' nav.fixed-bottom';
+        $hit = $nav . ' ul.mobile-bottom-link > li > :is(a,button)';
+        $icon = $hit . ' :is(.icon,i,svg)';
+        $active = $nav . ' ul.mobile-bottom-link > li.active > a,'
+            . $nav . ' ul.mobile-bottom-link > li > a[aria-current="page"]';
+        $activeIcon = $nav . ' ul.mobile-bottom-link > li.active > a :is(.icon,i,svg),'
+            . $nav . ' ul.mobile-bottom-link > li > a[aria-current="page"] :is(.icon,i,svg)';
+        $dept = $nav . ' ul.mobile-bottom-link > li > button.toggle-nav-footer';
+        $deptOpen = $dept . '[aria-expanded="true"]';
+        $deptClosed = $dept . ':not([aria-expanded="true"])';
+        $deptOpenIcon = $deptOpen . ' :is(.icon,i,svg)';
+        $deptClosedIcon = $deptClosed . ' :is(.icon,i,svg)';
+        /* Literal slate — --awa-text-secondary resolves to #475569 and splits Conta vs Deptos. */
+        $muted = '#64748b';
+        $brand = 'var(--awa-primary,var(--awa-red,#b73337))';
+
+        $core = $hit . '{color:' . $muted . '!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'box-shadow:none!important;border-color:transparent!important}'
+            . $icon . '{color:inherit!important}'
+            . $active . '{color:' . $brand . '!important}'
+            . $activeIcon . '{color:' . $brand . '!important}'
+            . $deptClosed . '{color:' . $muted . '!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'box-shadow:none!important;outline:none!important}'
+            . $deptClosedIcon . '{color:' . $muted . '!important}'
+            . $deptOpen . '{color:' . $brand . '!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'box-shadow:none!important}'
+            . $deptOpenIcon . '{color:' . $brand . '!important}';
+
+        $media = '@media (max-width:767px){' . $core . '}';
+
+        return '/*§bottom-nav-inactive-r37c-inline*/'
+            . '@layer awa-visual-priority{' . $media . '}'
+            . '/*§bottom-nav-inactive-r37c-unlayered*/' . $media;
+    }
+
+    public static function footerDenseDesktopR67Rules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper :is(.page_footer,.page-footer)';
+
+        return '@media (min-width:992px){'
+            . $scope . ' ul.awa-footer-categories-list>li>a,'
+            . $scope . ' ul.awa-footer-categories-list a{'
+            . 'min-height:28px!important;height:auto!important;padding:4px 8px!important;'
+            . 'line-height:1.25!important;font-size:12px!important}'
+            . $scope . ' ul.awa-footer-categories-list{gap:4px 8px!important;row-gap:4px!important}'
+            . $scope . ' .awa-footer-newsletter{'
+            . 'padding:6px 12px!important;padding-block:6px!important;margin-bottom:6px!important}'
+            . $scope . ' .awa-footer-newsletter .awa-newsletter-wrapper{gap:12px!important}'
+            . $scope . ' .awa-newsletter-info{'
+            . 'display:grid!important;grid-template-columns:32px minmax(0,1fr)!important;'
+            . 'gap:10px!important;align-items:center!important;min-height:0!important}'
+            . $scope . ' .awa-newsletter-icon{'
+            . 'width:32px!important;height:32px!important;min-width:32px!important;'
+            . 'min-height:32px!important;max-width:32px!important;max-height:32px!important;margin:0!important}'
+            . $scope . ' :is(.awa-newsletter-title,.velaNewsletterTitle){'
+            . 'font-size:15px!important;line-height:1.2!important;margin:0 0 2px!important}'
+            . $scope . ' .awa-newsletter-desc{margin:0!important;font-size:12px!important;line-height:1.3!important}'
+            . $scope . ' #newsletter-validate-detail :is(.field.newsletter,.control,.actions,'
+            . 'input[type=email],button.action.subscribe){'
+            . 'height:44px!important;min-height:44px!important}'
+            . $scope . ' .awa-footer-bottom__logo-img{height:36px!important;max-height:36px!important}'
+            . $scope . ' .awa-footer-sec-seals :is(li,img,.awa-seal){min-height:0!important;max-height:36px!important}'
+            . $scope . ' .awa-footer-sec-seals img{height:36px!important;max-height:36px!important;width:auto!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row{padding:4px 0!important;gap:8px 12px!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{padding:4px 6px!important}'
+            . $scope . ' .awa-footer-atendimento__store{padding:4px 6px!important;margin:0!important}'
+            . $scope . ' .awa-footer-atendimento__store-badge{margin:0 0 2px!important;padding:2px 6px!important}'
+            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone,'
+            . '.awa-footer-atendimento__email){margin-bottom:2px!important}'
+            . $scope . ' .footer-container .vela-content.velaFooterMenu{padding:6px 8px!important}'
+            . $scope . ' .footer-container .row.rowFlexMargin{padding-block:2px!important;gap:10px 14px!important}'
+            /* r68: trust/atendimento/copyright — page~793 ainda alto (atend 286, trust items 44, disc 33) */
+            . $scope . ' .awa-footer-trust-bar{padding-block:4px!important;margin-bottom:4px!important}'
+            . $scope . ' .awa-footer-trust-grid{gap:6px 10px!important;padding-block:2px!important}'
+            . $scope . ' .awa-footer-trust-item{padding:2px 0!important;gap:8px!important;min-height:0!important}'
+            . $scope . ' .awa-footer-trust-icon{'
+            . 'flex:0 0 24px!important;width:24px!important;height:24px!important;'
+            . 'min-width:24px!important;min-height:24px!important;max-height:24px!important}'
+            . $scope . ' .awa-footer-trust-copy{gap:0!important;min-height:0!important}'
+            . $scope . ' .awa-footer-trust-copy strong{font-size:12px!important;line-height:1.2!important}'
+            . $scope . ' .awa-footer-trust-copy span{'
+            . 'font-size:11px!important;line-height:1.2!important;min-height:0!important;'
+            . 'max-height:none!important}'
+            . $scope . ' .awa-footer-trust-copy span:empty{display:none!important}'
+            . $scope . ' .awa-footer-atendimento{gap:2px!important}'
+            . $scope . ' .awa-footer-atendimento .velaFooterTitle,'
+            . $scope . ' .awa-footer-atendimento .awa-footer-section__toggle{'
+            . 'margin:0 0 2px!important;margin-bottom:2px!important}'
+            . $scope . ' .awa-footer-atendimento__store{'
+            . 'padding:2px 6px!important;gap:1px!important}'
+            . $scope . ' .awa-footer-atendimento__store-address{'
+            . 'font-size:11px!important;line-height:1.25!important;margin:0!important}'
+            . $scope . ' .awa-footer-atendimento__store-badge{'
+            . 'margin:0!important;padding:1px 5px!important;font-size:11px!important;line-height:1.2!important}'
+            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone,'
+            . '.awa-footer-atendimento__email){margin:0!important}'
+            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone a,'
+            . '.awa-footer-atendimento__email a){padding-block:2px!important;font-size:12.5px!important}'
+            . $scope . ' .awa-footer-newsletter{'
+            . 'padding:4px 12px!important;padding-block:4px!important;margin-bottom:4px!important}'
+            . $scope . ' .footer-bottom{padding:6px 16px!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{padding:2px 4px!important}'
+            . $scope . ' .footer-bottom .awa-footer-copyright__disclaimer{'
+            . 'font-size:10px!important;line-height:1.25!important;margin:0!important}'
+            . $scope . ' .footer-bottom .awa-footer-copyright__legal{'
+            . 'font-size:10.5px!important;line-height:1.25!important;gap:4px 8px!important}'
+            . $scope . ' .awa-footer-devby{padding-block:2px!important;min-height:0!important}'
+            . $scope . ' .awa-footer-devby__inner{min-height:0!important;gap:8px!important}'
+            . $scope . ' section.awa-footer-categories-expand{'
+            . 'margin-top:2px!important;padding:4px 0 2px!important}'
+            /* r69: labels/CNPJ/seals/disclaimer — page~699 (atend labels 40, cnpj 32, disc 11px) */
+            . $scope . ' #footer.footer-container{padding:4px 16px!important}'
+            . $scope . ' #footer.footer-container .row.rowFlexMargin,'
+            . $scope . ' .footer-container .row.rowFlexMargin{'
+            . 'gap:8px 12px!important;padding-block:0!important}'
+            . $scope . ' .awa-footer-atendimento .velaFooterTitle,'
+            . $scope . ' .awa-footer-atendimento .awa-footer-section__toggle,'
+            . $scope . ' .footer-container .velaFooterTitle{'
+            . 'margin:0 0 2px!important;margin-bottom:2px!important;padding-bottom:0!important}'
+            . $scope . ' .awa-footer-atendimento :is(p.awa-footer-atendimento__label,'
+            . 'p.awa-footer-atendimento__label--social){'
+            . 'position:absolute!important;width:1px!important;height:1px!important;'
+            . 'padding:0!important;margin:-1px!important;overflow:hidden!important;'
+            . 'clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}'
+            . $scope . ' .awa-footer-atendimento{position:relative!important;gap:2px!important}'
+            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone a,'
+            . '.awa-footer-atendimento__email a){'
+            . 'padding-block:1px!important;line-height:1.25!important;font-size:12.5px!important}'
+            . $scope . ' .awa-footer-pro__social{margin-top:0!important;min-height:0!important}'
+            . $scope . ' .footer-bottom :is(.awa-footer-pay-sec__label,.awa-footer-muted-label,'
+            . '.awa-footer-sec__label){display:none!important}'
+            . $scope . ' .footer-bottom :is(.awa-footer-pay-sec,.awa-footer-sec){'
+            . 'gap:4px!important}'
+            . $scope . ' .awa-footer-sec-seals :is(li,img,.awa-seal){'
+            . 'min-height:0!important;max-height:28px!important;height:auto!important}'
+            . $scope . ' .awa-footer-sec-seals img{height:28px!important;max-height:28px!important}'
+            . $scope . ' .awa-footer-bottom__logo-img{height:32px!important;max-height:32px!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row{padding:2px 0!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{padding:2px 0!important}'
+            . $scope . ' .footer-bottom :is(p.awa-footer-copyright__disclaimer,'
+            . '.awa-footer-copyright__disclaimer){'
+            . 'font-size:10px!important;line-height:1.25!important;margin:0!important}'
+            . $scope . ' .footer-bottom :is(p.awa-footer-copyright__legal,'
+            . '.awa-footer-copyright__legal){'
+            . 'font-size:10px!important;line-height:1.25!important;gap:4px 6px!important;'
+            . 'align-items:center!important;min-height:0!important}'
+            . $scope . ' .footer-bottom .awa-footer-cnpj-badge{'
+            . 'font-size:10px!important;line-height:1.2!important;padding:1px 6px!important;'
+            . 'min-height:0!important;height:auto!important;margin:0!important}'
+            . $scope . ' .velaFooterLinks a{padding-block:2px!important;min-height:0!important;'
+            . 'line-height:1.3!important}'
+            . $scope . ' .awa-footer-newsletter{margin-bottom:2px!important}'
+            . $scope . ' .awa-footer-trust-bar{margin-bottom:2px!important}'
+            /* r70: links/disclaimer/store — page~606 (suporte 197=links 26px, disc 11px) */
+            . $scope . '{'
+            . 'margin-top:8px!important}'
+            . $scope . ' :is(.velaFooterLinks a,.awa-footer-atendimento__actions a,'
+            . '.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a){'
+            . 'padding-block:1px!important;padding-top:1px!important;padding-bottom:1px!important;'
+            . 'min-height:0!important;line-height:1.25!important}'
+            . $scope . ' .footer-bottom{padding:4px 16px!important}'
+            . $scope . ' .footer-bottom .footer-bottom-inner{gap:4px!important}'
+            . $scope . ' .awa-footer-bottom__copyright '
+            . ':is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer),'
+            . $scope . ' .footer-bottom :is(p.awa-footer-copyright__legal,p.awa-footer-copyright__disclaimer){'
+            . 'font-size:10px!important;line-height:1.4!important}'
+            . $scope . ' .footer-bottom p.awa-footer-copyright__disclaimer,'
+            . $scope . ' .awa-footer-bottom__copyright .awa-footer-copyright__disclaimer{'
+            . 'display:block!important;overflow:visible!important;'
+            . 'font-size:10px!important;line-height:1.4!important;max-height:none!important}'
+            . $scope . ' .awa-footer-atendimento__store-badge{display:none!important}'
+            . $scope . ' .awa-footer-atendimento__store-address{'
+            . 'white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;'
+            . 'font-size:11px!important;line-height:1.2!important;max-width:100%!important}'
+            . $scope . ' .awa-footer-atendimento__store{padding:2px 4px!important;gap:0!important}'
+            . $scope . ' section.awa-footer-categories-expand{'
+            . 'margin-top:0!important;padding:2px 0!important}'
+            . $scope . ' ul.awa-footer-categories-list{gap:2px 6px!important}'
+            . $scope . ' .awa-footer-devby{padding-block:0!important;max-height:36px!important}'
+            . $scope . ' .awa-footer-devby__inner{min-height:32px!important;height:32px!important}'
+            . $scope . ' .awa-footer-newsletter{padding-block:2px!important}'
+            . $scope . ' .awa-footer-trust-bar{padding-block:2px!important;margin-bottom:2px!important}'
+            /* r72: container 24/24 (~48px) + colunas 171 + news info 58 — evidência Playwright */
+            . $scope . ' #footer.footer-container>.container,'
+            . $scope . ' .footer-container>.container{'
+            . 'padding:4px 16px!important;padding-top:4px!important;padding-bottom:4px!important;'
+            . 'padding-block:4px!important}'
+            . $scope . ' .awa-newsletter-info{'
+            . 'grid-template-columns:24px minmax(0,1fr)!important;gap:8px!important;min-height:0!important;'
+            . 'max-height:none!important;overflow:visible!important}'
+            . $scope . ' .awa-newsletter-icon{'
+            . 'width:24px!important;height:24px!important;min-width:24px!important;'
+            . 'min-height:24px!important;max-height:24px!important}'
+            . $scope . ' :is(.awa-newsletter-title,.velaNewsletterTitle){'
+            . 'font-size:13px!important;line-height:1.15!important;margin:0!important}'
+            . $scope . ' .awa-newsletter-desc{'
+            . 'font-size:11px!important;line-height:1.35!important;margin:0!important;'
+            . 'max-height:none!important;overflow:visible!important;white-space:normal!important;'
+            . 'text-overflow:clip!important}'
+            . $scope . ' #newsletter-validate-detail :is(.field.newsletter,.control,.actions,'
+            . 'input[type=email],button.action.subscribe){'
+            . 'height:44px!important;min-height:44px!important}'
+            . $scope . ' .awa-footer-newsletter{padding:2px 12px!important;margin-bottom:0!important}'
+            . $scope . ' .awa-footer-trust-bar{padding-block:0!important;margin-bottom:0!important}'
+            . $scope . ' .awa-footer-trust-grid{padding-block:0!important;gap:4px 8px!important}'
+            . $scope . ' .footer-container .vela-content.velaFooterMenu{padding:0 4px!important}'
+            . $scope . ' .velaFooterLinks a{padding-block:0!important;line-height:1.2!important;font-size:12.5px!important}'
+            . $scope . ' .awa-footer-atendimento__actions{gap:2px!important;margin:0!important}'
+            . $scope . ' .awa-footer-pro__social{margin:2px 0 0!important;gap:4px!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{padding:0!important;margin:0!important}'
+            . $scope . ' .awa-footer-devby__title{margin:0!important;font-size:11px!important}'
+            . $scope . ' .awa-footer-devby{max-height:28px!important}'
+            . $scope . ' .awa-footer-devby__inner{min-height:24px!important;height:24px!important}}';
+    }
+
+    /**
+     * Contrato visual mínimo do footer aplicado de forma síncrona.
+     *
+     * O align-grid e o footer terminal completos são carregados abaixo da dobra. Estas regras
+     * usam a geometria final desde o primeiro layout e vencem o content-visibility tardio,
+     * evitando logos 0x0, grids flex provisórios e categorias ilegíveis.
+     */
+    public static function footerCriticalStabilityRules(): string
+    {
+        $footerRoot = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper footer.page-footer';
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper '
+            . 'footer.page-footer > .page_footer';
+
+        return self::footerCrossPageSurfaceRules()
+            . $footerRoot . '{'
+            . 'padding:0!important;padding-block:0!important;'
+            . 'min-height:0!important;height:auto!important;max-height:none!important}'
+            . $scope . '{'
+            . 'margin-top:16px!important;margin-bottom:0!important;'
+            . 'padding:0!important;padding-block:0!important;'
+            . 'min-height:0!important;height:auto!important;max-height:none!important}'
+            . $scope . ' :is(.footer-bottom,.awa-footer-devby,section.awa-footer-categories-expand){'
+            . 'content-visibility:visible!important;contain:none!important;'
+            . 'contain-intrinsic-size:unset!important;box-sizing:border-box!important}'
+            . $scope . ' :is(.awa-footer-bottom__logo-img,.awa-footer-devby__logo,'
+            . '.awa-footer-pay-logos img,.awa-footer-sec-seals img){'
+            . 'content-visibility:visible!important;contain:none!important}'
+            . $scope . ' .awa-footer-pay-logos{'
+            . 'min-height:34px!important;height:34px!important}'
+            . $scope . ' .awa-footer-pay-logos img{'
+            . 'display:block!important;width:46px!important;height:28px!important;'
+            . 'max-width:46px!important;max-height:28px!important;object-fit:contain!important}'
+            . $scope . ' .footer-bottom{'
+            . 'display:block!important;width:100%!important;'
+            /* PIXEL-QA: sem calc(100%-32px)/margin auto — eixo no page-footer. */
+            . 'max-width:100%!important;margin-inline:0!important;'
+            . 'padding-block:16px!important;padding-inline:0!important;'
+            . 'box-sizing:border-box!important;'
+            . 'overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important}'
+            . $scope . ' #footer.footer-container{'
+            . 'display:block!important;margin-top:0!important;margin-bottom:0!important}'
+            . $scope . ' .footer-bottom>.container,'
+            . $scope . ' .footer-bottom .footer-bottom-inner{'
+            . 'display:block!important;width:100%!important;max-width:none!important;'
+            . 'margin:0!important;padding:0!important;box-sizing:border-box!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row{'
+            . 'display:grid!important;grid-template-columns:minmax(0,1fr)!important;'
+            . 'align-items:center!important;justify-items:center!important;'
+            . 'gap:20px!important;width:100%!important;max-width:none!important;'
+            . 'margin:0!important;justify-self:stretch!important;'
+            . 'padding:20px 0 16px!important;box-sizing:border-box!important}'
+            . '@media (min-width:992px){'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row{'
+            . 'grid-template-columns:minmax(96px,auto) minmax(0,1fr) minmax(0,1fr)!important;'
+            . 'align-items:start!important;justify-items:center!important;column-gap:24px!important;'
+            . 'max-width:none!important;width:100%!important;margin:0!important;'
+            . 'justify-self:stretch!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row>[class*="col-"]:first-child{'
+            . 'align-self:center!important}}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row::before,'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row::after{'
+            . 'display:none!important;content:none!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row>[class*="col-"]{'
+            . 'float:none!important;flex:initial!important;width:auto!important;'
+            . 'max-width:none!important;min-width:0!important;padding:0!important;'
+            . 'justify-self:center!important;text-align:center!important}'
+            . $scope . ' .footer-bottom :is(.awa-footer-pay-sec,.awa-footer-sec){'
+            . 'display:flex!important;flex-direction:column!important;align-items:center!important;'
+            . 'text-align:center!important;width:100%!important}'
+            . $scope . ' .footer-bottom :is(.awa-footer-pay-logos,.awa-footer-sec-seals){'
+            . 'display:flex!important;justify-content:center!important;align-items:center!important;'
+            . 'flex-wrap:wrap!important}'
+            . $scope . ' .awa-footer-bottom__logo-img{'
+            . 'display:block!important;width:auto!important;height:44px!important;'
+            . 'max-width:142px!important;max-height:44px!important;'
+            . 'filter:none!important;opacity:1!important}'
+            . $scope . ' .awa-footer-sec-seals img{'
+            . 'filter:brightness(0) saturate(100%)!important;opacity:1!important}'
+            . $scope . ' .awa-footer-pay-logos img{'
+            . 'opacity:1!important;filter:none!important}'
+            . $scope . ' .awa-footer-bottom__copyright{'
+            . 'display:block!important;width:100%!important;max-width:none!important;'
+            . 'margin:0!important;padding:2px 0!important;box-sizing:border-box!important;'
+            . 'text-align:center!important}'
+            . $scope . ' .awa-footer-bottom__copyright '
+            . ':is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer){'
+            . 'box-sizing:border-box!important;display:block!important;width:100%!important;'
+            . 'max-width:none!important;margin-inline:0!important;text-align:center!important;'
+            . 'font-size:10px!important;line-height:1.25!important}'
+            . $scope . ' .awa-footer-bottom__copyright .awa-footer-copyright__legal{'
+            . 'display:flex!important;align-items:center!important;'
+            . 'justify-content:center!important;gap:6px 10px!important;text-align:center!important}'
+            . '@media (min-width:992px){' . $scope . ' .awa-footer-bottom__copyright .awa-footer-copyright__legal{'
+            . 'flex-direction:row!important;flex-wrap:wrap!important}}'
+            . '@media (max-width:991px){' . $scope . ' .awa-footer-bottom__copyright .awa-footer-copyright__legal{'
+            . 'flex-direction:column!important}}'
+            . $scope . ' .awa-footer-bottom__copyright .awa-footer-cnpj-badge{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:fit-content!important;max-width:100%!important;margin-inline:auto!important;'
+            . 'margin-block:0!important}'
+            . $scope . ' .awa-footer-devby{'
+            . 'display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'min-height:56px!important;height:auto!important;max-height:none!important}'
+            . $scope . ' .awa-footer-devby__inner{'
+            . 'display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'gap:8px!important;width:100%!important;margin-inline:auto!important}'
+            . $scope . ' .awa-footer-devby__logo{'
+            . 'display:block!important;width:57px!important;height:30px!important;'
+            . 'min-width:57px!important;max-width:57px!important;max-height:30px!important;'
+            . 'object-fit:contain!important;filter:brightness(0) saturate(100%)!important;'
+            . 'opacity:1!important;visibility:visible!important}'
+            . $scope . ' .awa-footer-atendimento__store,'
+            . $scope . ' .awa-footer-atendimento__store-address,'
+            . $scope . ' .awa-footer-atendimento__store-name{'
+            . 'color:var(--awa-text,#333)!important;opacity:1!important}'
+            . $scope . ' section.awa-footer-categories-expand{'
+            . 'background:var(--awa-bg,#fff)!important;'
+            . 'background-color:var(--awa-bg,#fff)!important;'
+            . 'border:0!important;border-top:0!important;border-bottom:0!important;'
+            . 'color:var(--awa-text,#333)!important}'
+            . $scope . ' section.awa-footer-categories-expand '
+            . '.awa-footer-categories-expand__heading{'
+            . 'clip:auto!important;clip-path:none!important;position:static!important;'
+            . 'display:block!important;width:auto!important;height:auto!important;'
+            . 'inline-size:auto!important;block-size:auto!important;'
+            . 'min-width:0!important;min-height:0!important;margin:0!important;padding:0!important;'
+            . 'overflow:visible!important;white-space:normal!important;'
+            . 'color:var(--awa-text,#333)!important}'
+            . $scope . ' section.awa-footer-categories-expand '
+            . 'ul.awa-footer-categories-list a{'
+            . 'color:var(--awa-text-muted,#555)!important;min-height:0!important}'
+            . '@media (max-width:767px){'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__inner{'
+            . 'display:grid!important;grid-template-columns:minmax(0,1fr)!important;'
+            . 'gap:8px!important;align-items:stretch!important}'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__toggle{'
+            . 'display:flex!important;align-items:center!important;justify-content:space-between!important;'
+            . 'width:100%!important;min-height:44px!important;color:var(--awa-text,#333)!important}'
+            . $scope . ' section.awa-footer-categories-expand '
+            . 'ul.awa-footer-categories-list a{min-height:44px!important}'
+            . $scope . ' section.awa-footer-categories-expand '
+            . '.awa-footer-categories-expand__panel[hidden]{display:none!important}'
+            . $scope . ' .awa-footer-newsletter .awa-newsletter-wrapper{'
+            . 'display:grid!important;grid-template-columns:minmax(0,1fr)!important;'
+            . 'gap:12px!important;align-items:start!important}'
+            . $scope . ' .awa-footer-newsletter '
+            . ':is(.awa-newsletter-info,.awa-newsletter-form-container){'
+            . 'width:100%!important;max-width:none!important;min-width:0!important}'
+            . $scope . ' .awa-footer-bottom__copyright .awa-footer-copyright__legal{'
+            . 'min-height:0!important}'
+            . $scope . ' #footer.footer-container{'
+            . 'min-height:0!important;height:auto!important}'
+            . $scope . ' :is(.velaFooterLinks a,.awa-footer-atendimento a,'
+            . '.awa-footer-pro__social-link){min-height:44px!important}}'
+            . '@media (min-width:768px) and (max-width:991px){'
+            . $scope . ' .awa-footer-newsletter .awa-newsletter-wrapper{'
+            . 'display:grid!important;grid-template-columns:minmax(0,1fr)!important;'
+            . 'gap:16px!important;align-items:start!important}'
+            . $scope . ' .awa-footer-newsletter '
+            . ':is(.awa-newsletter-info,.awa-newsletter-form-container){'
+            . 'width:100%!important;max-width:none!important;min-width:0!important}'
+            . $scope . ' .awa-footer-newsletter '
+            . ':is(.awa-newsletter-title,.velaNewsletterTitle){'
+            . 'width:auto!important;max-width:none!important}'
+            . $scope . ' :is(.velaFooterLinks a,.awa-footer-atendimento a,'
+            . '.awa-footer-pro__social-link){min-height:44px!important}}'
+            . '@media (min-width:768px){'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__inner{'
+            . 'display:grid!important;grid-template-columns:minmax(96px,max-content) minmax(0,1fr)!important;'
+            . 'align-items:center!important;gap:10px 20px!important}'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__toggle{'
+            . 'display:none!important}'
+            . $scope . ' section.awa-footer-categories-expand '
+            . '.awa-footer-categories-expand__panel[hidden]{'
+            . 'display:block!important;visibility:visible!important;max-height:none!important}}'
+            . '@media (min-width:992px){'
+            . $scope . ' .awa-footer-newsletter .awa-newsletter-wrapper{'
+            . 'display:grid!important;'
+            . 'grid-template-columns:minmax(0,1fr) minmax(320px,480px)!important;'
+            . 'gap:24px!important;align-items:center!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row{'
+            . 'grid-template-columns:minmax(96px,auto) minmax(0,1fr) minmax(0,1fr)!important;'
+            . 'align-items:start!important;justify-items:center!important;'
+            . 'gap:10px 16px!important;padding:8px 0!important;'
+            . 'max-width:none!important;width:100%!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row>[class*="col-"]:first-child{'
+            . 'align-self:center!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{'
+            . 'padding:8px!important;margin:0!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright '
+            . ':is(p,.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer){'
+            . 'font-size:11px!important;line-height:1.35!important;margin:0!important}'
+            . $scope . ' #footer.footer-container,'
+            . $scope . ' .footer-container,'
+            . $scope . ' .awa-footer-newsletter,'
+            . $scope . ' .awa-footer-atendimento{'
+            . 'min-height:0!important;height:auto!important}'
+            . $scope . ' .awa-footer-newsletter{padding-block:10px!important;margin-bottom:8px!important}'
+            . $scope . ' .awa-footer-pro__social{min-height:0!important;gap:6px!important;margin-top:4px!important}'
+            . $scope . ' .awa-footer-pro__social-link{'
+            . 'width:28px!important;height:28px!important;min-width:28px!important;'
+            . 'min-height:28px!important;max-width:28px!important;max-height:28px!important;'
+            . 'padding:3px!important}'
+            /* r65: trust em row (não column) — items ~105px→~48px; store/copyright/cats mais densos */
+            . $scope . ' .awa-footer-trust-bar{'
+            . 'padding-block:8px!important;margin-bottom:8px!important}'
+            . $scope . ' .awa-footer-trust-grid{'
+            . 'gap:8px 12px!important;padding-block:4px!important}'
+            . $scope . ' .awa-footer-trust-item{'
+            . 'display:flex!important;flex-direction:row!important;align-items:center!important;'
+            . 'gap:10px!important;min-height:0!important;padding:4px 0!important}'
+            . $scope . ' .awa-footer-trust-icon{'
+            . 'flex:0 0 28px!important;width:28px!important;height:28px!important;'
+            . 'min-width:28px!important;min-height:28px!important}'
+            . $scope . ' .awa-footer-trust-copy{'
+            . 'display:flex!important;flex-direction:column!important;gap:0!important;min-width:0!important}'
+            . $scope . ' .awa-footer-trust-copy strong{font-size:13px!important;line-height:1.25!important}'
+            . $scope . ' .awa-footer-trust-copy span{font-size:11px!important;line-height:1.3!important}'
+            . $scope . ' .awa-footer-atendimento__store{'
+            . 'padding:6px 8px!important;margin:2px 0!important;gap:2px!important}'
+            . $scope . ' .awa-footer-atendimento__store-link{'
+            . 'min-height:0!important;line-height:1.3!important;padding:0!important}'
+            . $scope . ' .awa-footer-atendimento__store-address{'
+            . 'font-size:12px!important;line-height:1.3!important}'
+            . $scope . ' #footer.footer-container{padding:8px 16px!important}'
+            . $scope . ' #footer.footer-container .row.rowFlexMargin{'
+            . 'gap:12px 16px!important;padding-block:4px!important}'
+            . $scope . ' section.awa-footer-categories-expand{'
+            . 'margin-top:4px!important;padding:6px 0 4px!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{'
+            . 'padding:6px 8px!important;border-radius:6px!important}'
+            . $scope . ' .footer-bottom .awa-footer-copyright__legal{'
+            . 'flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;'
+            . 'justify-content:center!important;gap:6px 10px!important}'
+            . $scope . ' .footer-bottom .awa-footer-copyright__disclaimer{'
+            . 'font-size:10.5px!important;line-height:1.3!important;margin-top:2px!important}'
+            . $scope . ' .awa-footer-devby{padding-block:4px!important;min-height:0!important;max-height:none!important}'
+            . $scope . ' .footer-bottom{padding:8px 16px!important;min-height:0!important}'
+            /* r67: categories/newsletter/bottom densos no desktop — vence critical 44/56 e audit polish */
+            . $scope . ' ul.awa-footer-categories-list>li>a,'
+            . $scope . ' ul.awa-footer-categories-list a{'
+            . 'min-height:28px!important;height:auto!important;padding:4px 8px!important;'
+            . 'line-height:1.25!important;font-size:12px!important}'
+            . $scope . ' ul.awa-footer-categories-list{'
+            . 'gap:4px 8px!important;row-gap:4px!important}'
+            . $scope . ' .awa-footer-newsletter{'
+            . 'padding:6px 12px!important;padding-block:6px!important;margin-bottom:6px!important}'
+            . $scope . ' .awa-footer-newsletter .awa-newsletter-wrapper{'
+            . 'gap:12px!important;align-items:center!important}'
+            . $scope . ' .awa-newsletter-info{'
+            . 'display:grid!important;grid-template-columns:32px minmax(0,1fr)!important;'
+            . 'gap:10px!important;align-items:center!important;min-height:0!important}'
+            . $scope . ' .awa-newsletter-icon{'
+            . 'width:32px!important;height:32px!important;min-width:32px!important;'
+            . 'min-height:32px!important;max-width:32px!important;max-height:32px!important;'
+            . 'margin:0!important}'
+            . $scope . ' :is(.awa-newsletter-title,.velaNewsletterTitle){'
+            . 'font-size:15px!important;line-height:1.2!important;margin:0 0 2px!important}'
+            . $scope . ' .awa-newsletter-desc{'
+            . 'margin:0!important;font-size:12px!important;line-height:1.3!important}'
+            . $scope . ' #newsletter-validate-detail :is(.field.newsletter,.control,.actions,'
+            . 'input[type=email],button.action.subscribe){'
+            . 'height:44px!important;min-height:44px!important}'
+            . $scope . ' .awa-footer-bottom__logo-img{'
+            . 'height:36px!important;max-height:36px!important}'
+            . $scope . ' .awa-footer-sec-seals :is(li,img,.awa-seal){'
+            . 'min-height:0!important;max-height:36px!important}'
+            . $scope . ' .awa-footer-sec-seals img{'
+            . 'height:36px!important;max-height:36px!important;width:auto!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row{'
+            . 'padding:4px 0!important;gap:8px 12px!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{'
+            . 'padding:4px 6px!important}'
+            . $scope . ' .awa-footer-atendimento__store{'
+            . 'padding:4px 6px!important;margin:0!important}'
+            . $scope . ' .awa-footer-atendimento__store-badge{'
+            . 'margin:0 0 2px!important;padding:2px 6px!important}'
+            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone,'
+            . '.awa-footer-atendimento__email){margin-bottom:2px!important}'
+            . $scope . ' .footer-container .vela-content.velaFooterMenu{padding:6px 8px!important}'
+            . $scope . ' .footer-container .row.rowFlexMargin{padding-block:2px!important;gap:10px 14px!important}'
+            /* r68: trust/atendimento/copyright densos (critical inline — vence bundles) */
+            . $scope . ' .awa-footer-trust-bar{padding-block:4px!important;margin-bottom:4px!important}'
+            . $scope . ' .awa-footer-trust-grid{gap:6px 10px!important;padding-block:2px!important}'
+            . $scope . ' .awa-footer-trust-item{padding:2px 0!important;gap:8px!important;min-height:0!important}'
+            . $scope . ' .awa-footer-trust-icon{'
+            . 'flex:0 0 24px!important;width:24px!important;height:24px!important;'
+            . 'min-width:24px!important;min-height:24px!important;max-height:24px!important}'
+            . $scope . ' .awa-footer-trust-copy{gap:0!important;min-height:0!important}'
+            . $scope . ' .awa-footer-trust-copy strong{font-size:12px!important;line-height:1.2!important}'
+            . $scope . ' .awa-footer-trust-copy span{'
+            . 'font-size:11px!important;line-height:1.2!important;min-height:0!important}'
+            . $scope . ' .awa-footer-trust-copy span:empty{display:none!important}'
+            . $scope . ' .awa-footer-atendimento{gap:2px!important}'
+            . $scope . ' .awa-footer-atendimento .velaFooterTitle,'
+            . $scope . ' .awa-footer-atendimento .awa-footer-section__toggle{'
+            . 'margin:0 0 2px!important;margin-bottom:2px!important}'
+            . $scope . ' .awa-footer-atendimento__store{padding:2px 6px!important;gap:1px!important}'
+            . $scope . ' .awa-footer-atendimento__store-address{'
+            . 'font-size:11px!important;line-height:1.25!important;margin:0!important}'
+            . $scope . ' .awa-footer-atendimento__store-badge{'
+            . 'margin:0!important;padding:1px 5px!important;font-size:11px!important;line-height:1.2!important}'
+            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone,'
+            . '.awa-footer-atendimento__email){margin:0!important}'
+            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone a,'
+            . '.awa-footer-atendimento__email a){padding-block:2px!important}'
+            . $scope . ' .awa-footer-newsletter{'
+            . 'padding:4px 12px!important;padding-block:4px!important;margin-bottom:4px!important}'
+            . $scope . ' .footer-bottom{padding:6px 16px!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{padding:2px 4px!important}'
+            . $scope . ' .footer-bottom .awa-footer-copyright__disclaimer{'
+            . 'font-size:10px!important;line-height:1.25!important;margin:0!important}'
+            . $scope . ' .footer-bottom .awa-footer-copyright__legal{'
+            . 'font-size:10.5px!important;line-height:1.25!important;gap:4px 8px!important}'
+            . $scope . ' .awa-footer-devby{padding-block:2px!important;min-height:0!important}'
+            . $scope . ' .awa-footer-devby__inner{min-height:0!important;gap:8px!important}'
+            . $scope . ' section.awa-footer-categories-expand{'
+            . 'margin-top:2px!important;padding:4px 0 2px!important}'
+            /* r69 critical: labels/CNPJ/seals/disclaimer */
+            . $scope . ' #footer.footer-container{padding:4px 16px!important}'
+            . $scope . ' #footer.footer-container .row.rowFlexMargin{'
+            . 'gap:8px 12px!important;padding-block:0!important}'
+            . $scope . ' .awa-footer-atendimento .velaFooterTitle,'
+            . $scope . ' .footer-container .velaFooterTitle{'
+            . 'margin:0 0 2px!important;margin-bottom:2px!important;padding-bottom:0!important}'
+            . $scope . ' .awa-footer-atendimento{position:relative!important}'
+            . $scope . ' .awa-footer-atendimento :is(p.awa-footer-atendimento__label,'
+            . 'p.awa-footer-atendimento__label--social){'
+            . 'position:absolute!important;width:1px!important;height:1px!important;'
+            . 'padding:0!important;margin:-1px!important;overflow:hidden!important;'
+            . 'clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}'
+            . $scope . ' .awa-footer-pro__social{margin-top:0!important}'
+            . $scope . ' .footer-bottom :is(.awa-footer-pay-sec__label,.awa-footer-muted-label,'
+            . '.awa-footer-sec__label){display:none!important}'
+            . $scope . ' .awa-footer-sec-seals :is(li,img,.awa-seal){'
+            . 'min-height:0!important;max-height:28px!important}'
+            . $scope . ' .awa-footer-sec-seals img{height:28px!important;max-height:28px!important}'
+            . $scope . ' .awa-footer-bottom__logo-img{height:32px!important;max-height:32px!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__row{padding:2px 0!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{padding:2px 0!important}'
+            . $scope . ' .footer-bottom :is(p.awa-footer-copyright__disclaimer,'
+            . '.awa-footer-copyright__disclaimer){'
+            . 'font-size:10px!important;line-height:1.25!important;margin:0!important}'
+            . $scope . ' .footer-bottom :is(p.awa-footer-copyright__legal,'
+            . '.awa-footer-copyright__legal){'
+            . 'font-size:10px!important;line-height:1.25!important;gap:4px 6px!important;'
+            . 'min-height:0!important}'
+            . $scope . ' .footer-bottom .awa-footer-cnpj-badge{'
+            . 'font-size:10px!important;line-height:1.2!important;padding:1px 6px!important;'
+            . 'min-height:0!important;height:auto!important}'
+            . $scope . ' .velaFooterLinks a{padding-block:2px!important;min-height:0!important}'
+            . $scope . ' .awa-footer-newsletter{margin-bottom:2px!important}'
+            . $scope . ' .awa-footer-trust-bar{margin-bottom:2px!important}'
+            /* r70 critical */
+            . $scope . '{margin-top:8px!important}'
+            . $scope . ' :is(.velaFooterLinks a,.awa-footer-atendimento__actions a,'
+            . '.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a){'
+            . 'padding-block:1px!important;padding-top:1px!important;padding-bottom:1px!important;'
+            . 'min-height:0!important;line-height:1.25!important}'
+            . $scope . ' .footer-bottom{padding:4px 16px!important}'
+            . $scope . ' .footer-bottom .footer-bottom-inner{gap:4px!important}'
+            . $scope . ' .awa-footer-bottom__copyright '
+            . ':is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer){'
+            . 'font-size:10px!important;line-height:1.4!important}'
+            . $scope . ' .awa-footer-bottom__copyright .awa-footer-copyright__disclaimer{'
+            . 'display:block!important;overflow:visible!important;'
+            . 'font-size:10px!important;line-height:1.4!important;max-height:none!important}'
+            . $scope . ' .awa-footer-atendimento__store-badge{display:none!important}'
+            . $scope . ' .awa-footer-atendimento__store-address{'
+            . 'white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;'
+            . 'font-size:11px!important;line-height:1.2!important;max-width:100%!important}'
+            . $scope . ' .awa-footer-atendimento__store{padding:2px 4px!important;gap:0!important}'
+            . $scope . ' section.awa-footer-categories-expand{'
+            . 'margin-top:0!important;padding:2px 0!important}'
+            . $scope . ' ul.awa-footer-categories-list{gap:2px 6px!important}'
+            . $scope . ' .awa-footer-devby{padding-block:0!important;max-height:36px!important}'
+            . $scope . ' .awa-footer-devby__inner{min-height:32px!important;height:32px!important}'
+            . $scope . ' .awa-footer-newsletter{padding-block:2px!important}'
+            . $scope . ' .awa-footer-trust-bar{padding-block:2px!important;margin-bottom:2px!important}}'
+            /* Mobile: FAB não cobre copyright; overflow do footer-bottom liberado */
+            . '@media (max-width:767px){'
+            . 'html body#html-body .page-wrapper '
+            . ':is(#awa-back-to-top,.awa-back-to-top).is-visible:not([hidden]){'
+            . 'bottom:calc(var(--awa-mobile-bottom-nav-h,72px) + 16px + env(safe-area-inset-bottom,0px))!important;'
+            . 'right:12px!important;width:44px!important;height:44px!important;'
+            . 'max-width:44px!important;max-height:44px!important;'
+            . 'min-width:44px!important;min-height:44px!important;'
+            . 'padding:0!important;box-sizing:border-box!important;z-index:998!important}'
+            . $scope . ' .footer-bottom .awa-footer-bottom__copyright{'
+            . 'padding-inline-end:56px!important;box-sizing:border-box!important;'
+            . 'background:transparent!important;border:0!important;border-radius:0!important}'
+            . $scope . ' .footer-bottom,'
+            . $scope . ' .footer-bottom .footer-bottom-inner{'
+            . 'overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important}}'
+            /* Audit 4.2: sync critical — tablet pode não carregar css-gate/deferred. */
+            . self::footerDesktopTouch44R1Rules()
+            . self::footerCategoriesWhiteR16Rules()
+            . self::footerNewsletterWhiteR17Rules()
+            . self::footerCopyrightFlatR20Rules()
+            . self::footerAtendimentoStoreFlatR21Rules()
+            . self::footerImpeccablePolishR66Rules();
+    }
+
+    /**
+     * Grid de categorias no footer: link preenche a célula (evita gap li~208px vs a~80px).
+     */
+    public static function footerCategoriesGridFillRules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper :is(.page_footer,.page-footer)';
+
+        return '@media (max-width:767px){'
+            . $scope . ' ul.awa-footer-categories-list>li{'
+            . 'display:block!important;min-width:0!important}'
+            . $scope . ' ul.awa-footer-categories-list>li>a{'
+            . 'box-sizing:border-box!important;display:flex!important;'
+            . 'justify-content:center!important;align-items:center!important;'
+            . 'width:100%!important;max-width:100%!important;min-width:0!important;'
+            . 'min-height:44px!important}}'
+            . '@media (min-width:768px){'
+            . $scope . ' ul.awa-footer-categories-list>li>a{'
+            . 'box-sizing:border-box!important;display:flex!important;'
+            . 'justify-content:center!important;align-items:center!important;'
+            . 'width:100%!important;max-width:100%!important;min-width:0!important;'
+            . 'min-height:28px!important;height:auto!important;padding:4px 8px!important}}';
+    }
+
+    /**
+     * Desktop: esconde toggle mobile e usa grid 2 colunas (título | pills).
+     * Evidência: visual-fixes 3-col + align-grid inline-flex deixavam "Ver todas" visível em 1564px.
+     */
+    public static function footerCategoriesDesktopLayoutRules(): string
+    {
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper :is(.page_footer,.page-footer)';
+
+        return '@media (min-width:768px){'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__inner{'
+            . 'display:grid!important;'
+            . 'grid-template-columns:minmax(96px,max-content) minmax(0,1fr)!important;'
+            . 'align-items:center!important;column-gap:clamp(14px,2vw,28px)!important;row-gap:10px!important}'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__toggle{'
+            . 'display:none!important;visibility:hidden!important;pointer-events:none!important}'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__heading{'
+            . 'grid-column:1!important;grid-row:1!important}'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__panel{'
+            . 'grid-column:2!important;grid-row:1!important;display:block!important;'
+            . 'max-height:none!important;height:auto!important;visibility:visible!important}'
+            . $scope . ' section.awa-footer-categories-expand .awa-footer-categories-expand__panel[hidden]{'
+            . 'display:block!important}'
+            . $scope . ' ul.awa-footer-categories-list{'
+            . 'display:flex!important;flex-wrap:wrap!important;grid-template-columns:none!important;'
+            . 'gap:6px 8px!important;width:auto!important;height:auto!important}}';
+    }
+
+    public static function footerCategoriesDesktopLayoutScriptTag(): string
+    {
+        $js = <<<'JS'
+(function (w, d) {
+    'use strict';
+    var INLINE_PROPS = [
+        'display', 'grid-template-columns', 'align-items', 'height', 'min-height',
+        'grid-column', 'grid-row', 'max-height', 'visibility', 'pointer-events',
+        'box-sizing', 'justify-content', 'width', 'max-width', 'gap', 'min-width'
+    ];
+
+    function isFooterMobile() {
+        return w.matchMedia && w.matchMedia('(max-width: 767px)').matches;
+    }
+
+    function clearFooterDesktopInlineState() {
+        d.querySelectorAll(
+            '.awa-footer-categories-expand__inner, [data-awa-categories-toggle], '
+            + '.awa-footer-categories-expand__toggle, .awa-footer-categories-expand__heading, '
+            + '.awa-footer-categories-expand__panel, #awa-footer-categories-panel, '
+            + 'ul.awa-footer-categories-list, ul.awa-footer-categories-list > li, '
+            + 'ul.awa-footer-categories-list > li > a'
+        ).forEach(function (el) {
+            INLINE_PROPS.forEach(function (prop) {
+                el.style.removeProperty(prop);
+            });
+        });
+    }
+
+    function syncFooterCategoriesShell() {
+        var mobile = isFooterMobile();
+        d.querySelectorAll('[data-awa-categories-toggle], .awa-footer-categories-expand__toggle').forEach(function (btn) {
+            var panelId = btn.getAttribute('aria-controls');
+            var panel = panelId ? d.getElementById(panelId) : null;
+            if (!panel) {
+                return;
+            }
+            if (mobile) {
+                if (btn.getAttribute('aria-expanded') !== 'true') {
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.classList.remove('is-expanded');
+                    panel.hidden = true;
+                    panel.setAttribute('aria-hidden', 'true');
+                    panel.setAttribute('inert', '');
+                }
+                return;
+            }
+            btn.setAttribute('aria-expanded', 'true');
+            btn.classList.add('is-expanded');
+            panel.hidden = false;
+            panel.removeAttribute('hidden');
+            panel.removeAttribute('inert');
+            panel.setAttribute('aria-hidden', 'false');
+        });
+    }
+
+    function applyFooterCategoriesDesktopState() {
+        d.querySelectorAll('.awa-footer-categories-expand__inner').forEach(function (inner) {
+            inner.style.setProperty('display', 'grid', 'important');
+            inner.style.setProperty('grid-template-columns', 'minmax(96px,max-content) minmax(0,1fr)', 'important');
+            inner.style.setProperty('align-items', 'center', 'important');
+            inner.style.setProperty('height', 'auto', 'important');
+            inner.style.setProperty('min-height', '0', 'important');
+        });
+
+        d.querySelectorAll('[data-awa-categories-toggle], .awa-footer-categories-expand__toggle').forEach(function (btn) {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.style.setProperty('visibility', 'hidden', 'important');
+            btn.style.setProperty('pointer-events', 'none', 'important');
+            btn.setAttribute('aria-expanded', 'true');
+            btn.classList.add('is-expanded');
+        });
+
+        d.querySelectorAll('.awa-footer-categories-expand__heading').forEach(function (heading) {
+            heading.style.setProperty('grid-column', '1', 'important');
+            heading.style.setProperty('grid-row', '1', 'important');
+        });
+
+        d.querySelectorAll('.awa-footer-categories-expand__panel, #awa-footer-categories-panel').forEach(function (panel) {
+            panel.style.setProperty('grid-column', '2', 'important');
+            panel.style.setProperty('grid-row', '1', 'important');
+            panel.style.setProperty('display', 'block', 'important');
+            panel.style.setProperty('max-height', 'none', 'important');
+            panel.style.setProperty('height', 'auto', 'important');
+            panel.style.setProperty('visibility', 'visible', 'important');
+            panel.hidden = false;
+            panel.removeAttribute('hidden');
+            panel.removeAttribute('inert');
+            panel.setAttribute('aria-hidden', 'false');
+        });
+
+        d.querySelectorAll('ul.awa-footer-categories-list').forEach(function (list) {
+            list.style.setProperty('display', 'flex', 'important');
+            list.style.setProperty('flex-wrap', 'wrap', 'important');
+            list.style.setProperty('grid-template-columns', 'none', 'important');
+            list.style.setProperty('gap', '6px 8px', 'important');
+            list.style.setProperty('width', 'auto', 'important');
+            list.style.setProperty('height', 'auto', 'important');
+        });
+
+        d.querySelectorAll('ul.awa-footer-categories-list > li').forEach(function (item) {
+            item.style.setProperty('display', 'block', 'important');
+            item.style.setProperty('width', 'auto', 'important');
+            item.style.setProperty('min-width', '0', 'important');
+            item.style.setProperty('flex', '0 0 auto', 'important');
+        });
+
+        d.querySelectorAll('ul.awa-footer-categories-list > li > a').forEach(function (link) {
+            link.style.setProperty('box-sizing', 'border-box', 'important');
+            link.style.setProperty('display', 'inline-flex', 'important');
+            link.style.setProperty('justify-content', 'center', 'important');
+            link.style.setProperty('align-items', 'center', 'important');
+            link.style.setProperty('width', 'auto', 'important');
+            link.style.setProperty('max-width', 'none', 'important');
+            link.style.setProperty('flex', '0 0 auto', 'important');
+            link.style.setProperty('background', '#fff', 'important');
+            link.style.setProperty('border', '1px solid #e5e5e5', 'important');
+            link.style.setProperty('border-radius', '6px', 'important');
+            /* r13: compact pills — no 4-col stretch cards */
+            link.style.setProperty('min-height', '28px', 'important');
+            link.style.setProperty('height', 'auto', 'important');
+            link.style.setProperty('padding', '4px 10px', 'important');
+        });
+    }
+
+    function schedule() {
+        if (isFooterMobile()) {
+            clearFooterDesktopInlineState();
+            syncFooterCategoriesShell();
+            return;
+        }
+        applyFooterCategoriesDesktopState();
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', schedule, { once: true });
+    } else {
+        schedule();
+    }
+
+    w.addEventListener('resize', schedule, { passive: true });
+    w.addEventListener('load', schedule, { once: true });
+})(window, document);
+JS;
+
+        return '<script id="awa-footer-categories-desktop-layout-v2">' . $js . '</script>';
+    }
+
+    public static function injectFooterCategoriesDesktopLayoutScript(string $html): string
+    {
+        if (!str_contains($html, 'awa-footer-categories-expand')) {
+            return $html;
+        }
+
+        $html = preg_replace(
+            '/<script\\s+id="awa-footer-categories-desktop-layout(?:-v2)?"[^>]*>.*?<\\/script>\\s*/is',
+            '',
+            $html
+        ) ?? $html;
+
+        $tag = self::footerCategoriesDesktopLayoutScriptTag();
+        $pos = stripos($html, '</body>');
+        if ($pos === false) {
+            return $html . $tag;
+        }
+
+        return substr($html, 0, $pos) . $tag . substr($html, $pos);
     }
 
     /**
@@ -1991,14 +4339,20 @@ final class HeaderImpeccableCascadeLockCss
             . 'box-shadow:none!important;text-shadow:none!important}'
             . $hard . '{'
             . 'box-sizing:border-box!important;margin-inline:auto!important;max-width:100%!important;'
-            . 'padding:16px!important;width:min(100%,1280px)!important}'
+            . 'padding-block:16px!important;padding-inline:0!important;width:100%!important}'
             . $hard . ' :is(a,p,li,span,strong,.velaFooterTitle,h4,.awa-footer-section__toggle){'
             . 'color:var(--awa-text,CanvasText)!important;text-shadow:none!important}'
             . $hard . ' :is(.velaFooterLinks a,.awa-footer-atendimento__actions a,'
             . '.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link){'
             . 'align-items:center!important;color:var(--awa-text-secondary,var(--awa-text-muted,CanvasText))!important;'
-            . 'display:inline-flex!important;font-size:13px!important;line-height:1.35!important;min-height:36px!important;'
-            . 'padding-block:6px!important;text-decoration:none!important}'
+            . 'display:inline-flex!important;font-size:13px!important;line-height:1.35!important;min-height:0!important;'
+            . 'padding-block:4px!important;text-decoration:none!important}'
+            . '@media (min-width:768px){'
+            . $hard . ' .velaFooterLinks li{margin:0!important;padding:0!important}'
+            . $hard . ' :is(.velaFooterLinks a,.awa-footer-atendimento__actions a,'
+            . '.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link){'
+            . 'min-height:0!important;padding-block:4px!important}'
+            . '}'
             . $hard . ' :is(.velaFooterLinks a,.awa-footer-atendimento__actions a,'
             . '.awa-footer-atendimento__phone a,.awa-footer-atendimento__email a,.awa-footer-devby__link):hover{'
             . 'color:var(--awa-primary,var(--awa-red,currentColor))!important}'
@@ -2009,18 +4363,23 @@ final class HeaderImpeccableCascadeLockCss
             . $hard . ' :is(.vela-content.velaFooterMenu,.awa-footer-atendimento){'
             . 'border:0!important;box-shadow:none!important;min-width:0!important;padding:8px!important}'
             . $hard . ' .awa-footer-atendimento__store{'
-            . 'background:var(--awa-bg-soft,color-mix(in srgb,CanvasText 3%,Canvas))!important;'
-            . 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas))!important;'
-            . 'border-radius:8px!important;color:var(--awa-text,CanvasText)!important;padding:10px!important}'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-radius:0!important;box-shadow:none!important;'
+            . 'color:var(--awa-text,CanvasText)!important;padding:8px 0!important}'
             . $scope . ' .awa-footer-newsletter{'
-            . 'background:var(--awa-bg-soft,color-mix(in srgb,CanvasText 3%,Canvas))!important;'
-            . 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas))!important;'
-            . 'border-radius:8px!important;margin:0 0 12px!important;padding:14px 16px!important}'
-            . $scope . ' :is(.footer-bottom,section.awa-footer-categories-expand,.awa-footer-devby){'
-            . 'background:var(--awa-bg-soft,color-mix(in srgb,CanvasText 3%,Canvas))!important;'
-            . 'background-color:var(--awa-bg-soft,color-mix(in srgb,CanvasText 3%,Canvas))!important;'
-            . 'border-top:1px solid var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas))!important;'
+            . 'background:#fff!important;background-color:#fff!important;'
+            . 'border:0!important;border-radius:0!important;'
+            . 'margin:0 0 12px!important;padding:14px 16px!important}'
+            . $scope . ' :is(.footer-bottom,.awa-footer-devby){'
+            . 'background:#fff!important;'
+            . 'background-color:#fff!important;'
+            . 'border:0!important;border-top:0!important;'
             . 'color:var(--awa-text,CanvasText)!important;text-shadow:none!important}'
+            . $scope . ' section.awa-footer-categories-expand{'
+            . 'background:var(--awa-bg,#fff)!important;'
+            . 'background-color:var(--awa-bg,#fff)!important;'
+            . 'border:0!important;border-top:0!important;border-bottom:0!important;'
+            . 'box-shadow:none!important;color:var(--awa-text,CanvasText)!important;text-shadow:none!important}'
             . $scope . ' .footer-bottom{'
             . 'box-sizing:border-box!important;margin:0!important;margin-left:0!important;margin-right:0!important;'
             . 'max-width:100%!important;padding:0!important;padding-left:0!important;padding-right:0!important;'
@@ -2032,21 +4391,51 @@ final class HeaderImpeccableCascadeLockCss
             . 'padding:12px 16px!important;width:100%!important}'
             . $scope . ' .footer-bottom .footer-bottom-inner>.row.awa-footer-bottom__row{'
             . 'box-sizing:border-box!important;display:grid!important;'
-            . 'grid-template-columns:minmax(88px,118px) minmax(220px,1fr) minmax(180px,240px)!important;'
-            . 'align-items:center!important;gap:10px 18px!important;justify-self:center!important;'
-            . 'margin:0 auto!important;max-width:760px!important;min-width:0!important;width:100%!important}'
+            . 'grid-template-columns:minmax(96px,auto) minmax(0,1fr) minmax(0,1fr)!important;'
+            . 'align-items:start!important;justify-items:center!important;gap:10px 24px!important;'
+            . 'justify-self:stretch!important;margin:0!important;max-width:none!important;'
+            . 'min-width:0!important;width:100%!important}'
+            . $scope . ' .footer-bottom .footer-bottom-inner>.row.awa-footer-bottom__row>[class*="col-"]:first-child{'
+            . 'align-self:center!important}'
             . $scope . ' .footer-bottom .footer-bottom-inner>.row.awa-footer-bottom__row>[class*="col-"]{'
             . 'box-sizing:border-box!important;float:none!important;margin:0!important;max-width:none!important;'
-            . 'min-width:0!important;padding-inline:0!important;width:auto!important}'
+            . 'min-width:0!important;padding-inline:0!important;width:auto!important;'
+            . 'justify-self:center!important;text-align:center!important}'
             . $scope . ' .footer-bottom :is(.awa-footer-pay-sec,.awa-footer-sec){'
-            . 'height:auto!important;margin:0!important;min-height:0!important}'
+            . 'height:auto!important;margin:0!important;min-height:0!important;'
+            . 'display:flex!important;flex-direction:column!important;align-items:center!important;'
+            . 'text-align:center!important;width:100%!important}'
             . $scope . ' .footer-bottom :is(.awa-footer-pay-logos,.awa-footer-sec-seals){'
-            . 'gap:6px 8px!important;margin:0!important;padding:0!important}'
+            . 'gap:6px 8px!important;margin:0!important;padding:0!important;'
+            . 'display:flex!important;justify-content:center!important;align-items:center!important;'
+            . 'flex-wrap:wrap!important}'
             . $scope . ' .footer-bottom .awa-footer-bottom__copyright{'
-            . 'background:var(--awa-bg,Canvas)!important;border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas))!important;'
-            . 'border-radius:8px!important;color:var(--awa-text-secondary,var(--awa-text-muted,CanvasText))!important;'
-            . 'box-sizing:border-box!important;justify-self:center!important;margin:0!important;'
-            . 'max-width:1040px!important;padding:10px 12px!important;width:100%!important}'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-top:0!important;border-radius:0!important;box-shadow:none!important;'
+            . 'color:var(--awa-text-secondary,var(--awa-text-muted,CanvasText))!important;'
+            . 'box-sizing:border-box!important;justify-self:stretch!important;margin:0!important;'
+            . 'max-width:none!important;padding:8px 0!important;text-align:center!important;width:100%!important}'
+            . $scope . ' .footer-bottom .awa-footer-cnpj-badge{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:fit-content!important;max-width:100%!important;margin-inline:auto!important;'
+            . 'margin-block:0!important;vertical-align:baseline!important}'
+            . $scope . ' .footer-bottom .awa-footer-copyright__legal{'
+            . 'display:flex!important;align-items:center!important;'
+            . 'justify-content:center!important;gap:6px 10px!important;text-align:center!important}'
+            . '@media (min-width:992px){'
+            . $scope . ' .footer-bottom .awa-footer-copyright__legal{'
+            . 'flex-direction:row!important;flex-wrap:wrap!important}'
+            . $scope . ' .footer-bottom .awa-footer-sec-seals .awa-seal{'
+            . 'min-height:36px!important;min-width:36px!important;padding:4px 8px!important}}'
+            . '@media (max-width:991px){'
+            . $scope . ' .footer-bottom .awa-footer-copyright__legal{flex-direction:column!important}'
+            . '}'
+            . $scope . ' .footer-bottom :is(.awa-footer-copyright__legal,.awa-footer-copyright__disclaimer){'
+            . 'box-sizing:border-box!important;width:100%!important;'
+            . 'max-width:none!important;margin-inline:0!important;text-align:center!important;'
+            . 'line-height:1.35!important}'
+            . $scope . ' .footer-bottom .awa-footer-copyright__disclaimer{'
+            . 'display:block!important;font-size:10.5px!important;margin-top:2px!important}'
             . '@media (max-width:991px){'
             . $hard . ' .row.rowFlexMargin{grid-template-columns:minmax(0,1fr)!important}'
             . $scope . ' .footer-bottom .footer-bottom-inner{grid-template-columns:minmax(0,1fr)!important;text-align:left!important}'
@@ -2142,9 +4531,9 @@ final class HeaderImpeccableCascadeLockCss
             . $scope . ' .footer-bottom .footer-bottom-inner{' . $innerReset . '}'
             . $scope . ' .awa-footer-trust-bar > .container{' . $trustBar . '}'
             . $scope . ' #footer .row.rowFlexMargin{gap:16px!important}'
-            . '@media (min-width:768px){' . $scope . ' .velaFooterLinks li{margin:0!important}'
+            . '@media (min-width:768px){' . $scope . ' .velaFooterLinks li{margin:0!important;padding:0!important}'
             . $scope . ' .velaFooterLinks a{align-items:center!important;display:inline-flex!important;'
-            . 'min-height:44px!important;padding-block:6px!important}'
+            . 'min-height:0!important;padding-block:4px!important}'
             . $scope . ' .awa-footer-atendimento .velaContent{gap:6px!important;display:flex!important;'
             . 'flex-direction:column!important}'
             . $scope . ' section.awa-footer-categories-expand{margin-top:12px!important;padding-top:12px!important}'
@@ -2192,7 +4581,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) .footer-container .container>.row.rowFlexMargin{'
             . 'grid-template-columns:repeat(3,minmax(0,1fr))!important}'
             . 'html body#html-body .page-wrapper :is(.page_footer,.page-footer) .awa-footer-newsletter{'
-            . 'padding-block:24px 16px!important}}';
+            . 'padding-block:6px!important;margin-bottom:6px!important}}';
     }
 
     /**
@@ -2240,19 +4629,21 @@ final class HeaderImpeccableCascadeLockCss
             . 'max-height:44px!important;width:auto!important;opacity:.94!important}'
             . $scope . ' .awa-footer-bottom__copyright{'
             . 'margin-top:8px!important;padding-top:8px!important;'
-            . 'border-top:1px solid var(--awa-border,oklch(90% .008 20))!important}'
+            . 'border-top:0!important}'
             . '@media (min-width:992px){' . $scope . ' .footer-bottom .footer-bottom-inner{'
-            . 'gap:12px!important}'
+            . 'gap:12px!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important}'
             . $scope . ' .footer-bottom .footer-bottom-inner>.row.awa-footer-bottom__row{'
-            . 'flex:1 1 560px!important;min-width:0!important}'
+            . 'min-width:0!important;max-width:none!important;width:100%!important}'
             . $scope . ' .footer-bottom .footer-bottom-inner>.awa-footer-bottom__copyright{'
-            . 'flex:1 1 420px!important;min-width:320px!important;max-width:560px!important;'
-            . 'margin-top:0!important;padding-top:8px!important}}'
+            . 'min-width:0!important;max-width:none!important;width:100%!important;'
+            . 'margin-top:0!important;padding-top:8px!important;justify-self:stretch!important;'
+            . 'text-align:center!important}}'
             . $scope . ' .awa-footer-bottom__copyright p{'
             . 'font-size:12px!important;line-height:1.45!important}'
             . $scope . ' section.awa-footer-categories-expand{'
-            . 'border-top:1px solid var(--awa-border,oklch(90% .008 20))!important;'
-            . 'background:var(--awa-primary,oklch(48% .14 20))!important}'
+            . 'border:0!important;border-top:0!important;'
+            . 'background:var(--awa-bg,#fff)!important;'
+            . 'background-color:var(--awa-bg,#fff)!important}'
             . '@media (min-width:768px){' . $scope . ' .awa-footer-categories-expand__toggle{'
             . 'display:none!important}'
             . $scope . ' .awa-footer-categories-expand__panel,'
@@ -2304,17 +4695,20 @@ final class HeaderImpeccableCascadeLockCss
             . $scope . ' .awa-newsletter-form-container{width:100%!important;max-width:none!important}'
             . $scope . ' #newsletter-validate-detail{flex-direction:column!important;width:100%!important}}'
             . $scope . ' .footer-bottom .awa-footer-bottom__copyright{'
-            . 'text-align:start!important}'
+            . 'text-align:center!important}'
             . $scope . ' .footer-bottom :is(p.awa-footer-copyright__legal,p.awa-footer-copyright__disclaimer){'
-            . 'font-size:12px!important;line-height:1.5!important;'
-            . 'color:var(--awa-text-muted,oklch(45% .02 20))!important;'
-            . 'max-width:72ch!important;margin-inline:0!important}'
+            . 'box-sizing:border-box!important;display:block!important;width:100%!important;'
+            . 'max-width:none!important;margin-inline:0!important;text-align:center!important;'
+            . 'font-size:10px!important;line-height:1.25!important;'
+            . 'color:var(--awa-text-muted,oklch(45% .02 20))!important}'
             . $scope . ' .footer-bottom p.awa-footer-copyright__disclaimer{'
-            . 'font-size:11px!important;opacity:.92!important}'
+            . 'font-size:10px!important;opacity:.92!important}'
+            . '@media (min-width:992px){' . $scope . ' .footer-bottom p.awa-footer-copyright__disclaimer{'
+            . 'display:block!important;overflow:visible!important;line-height:1.4!important;max-height:none!important}}'
             . '@media (max-width:767px){' . $scope . ' .footer-bottom .awa-footer-bottom__copyright{'
             . 'text-align:center!important}'
             . $scope . ' .footer-bottom :is(p.awa-footer-copyright__legal,p.awa-footer-copyright__disclaimer){'
-            . 'margin-inline:auto!important}}'
+            . 'width:100%!important;max-width:none!important;margin-inline:0!important;text-align:center!important}}'
             . $scope . ' .awa-footer-devby{'
             . 'border-top:1px solid var(--awa-border,oklch(90% .008 20))!important;'
             . 'padding-block:12px!important;opacity:1!important;text-align:center!important}'
@@ -2352,12 +4746,12 @@ final class HeaderImpeccableCascadeLockCss
         $scope = 'html body#html-body .page-wrapper :is(.page_footer,.page-footer)';
 
         return $scope . ' .awa-footer-atendimento{'
-            . 'display:flex!important;flex-direction:column!important;gap:8px!important}'
+            . 'display:flex!important;flex-direction:column!important;gap:6px!important}'
             . $scope . ' :is(.awa-footer-atendimento__label,.awa-footer-atendimento__label--social){'
             . 'text-transform:none!important;letter-spacing:0!important;'
             . 'font-size:13px!important;font-weight:600!important;'
             . 'color:var(--awa-text-muted,oklch(45% .02 20))!important;'
-            . 'margin:0 0 4px!important}'
+            . 'margin:0 0 2px!important}'
             . $scope . ' .awa-footer-atendimento__phone :is(a,span){'
             . 'font-size:15px!important;font-weight:600!important;'
             . 'color:var(--awa-secondary,oklch(35% .03 20))!important}'
@@ -2368,16 +4762,25 @@ final class HeaderImpeccableCascadeLockCss
             . $scope . ' .awa-footer-atendimento__email a:focus-visible{'
             . 'color:var(--awa-primary,oklch(48% .14 20))!important}'
             . $scope . ' .awa-footer-atendimento__store{'
-            . 'display:flex!important;flex-direction:column!important;gap:4px!important;'
-            . 'padding:12px!important;border-radius:8px!important;'
-            . 'background:rgba(183,51,55,.05)!important;background-image:none!important;'
+            . 'display:flex!important;flex-direction:column!important;gap:2px!important;'
+            . 'padding:8px 0!important;margin:4px 0!important;border-radius:0!important;'
+            . 'background:transparent!important;background-image:none!important;border:0!important;'
             . 'border:1px solid var(--awa-border,oklch(90% .008 20))!important}'
             . $scope . ' :is(.awa-footer-atendimento__store-name,.awa-footer-atendimento__store-address){'
-            . 'margin:0!important;line-height:1.45!important;'
+            . 'margin:0!important;line-height:1.35!important;'
             . 'color:var(--awa-text-muted,oklch(45% .02 20))!important}'
+            . $scope . ' ul.awa-footer-atendimento__actions{'
+            . 'display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:4px!important;'
+            . 'margin:4px 0 0!important;padding:0!important;list-style:none!important}'
             . $scope . ' ul.awa-footer-atendimento__actions a{'
-            . 'display:inline-flex!important;align-items:center!important;gap:8px!important}'
-            . $scope . ' .awa-footer-atendimento__icon{flex-shrink:0!important}'
+            . 'display:inline-flex!important;align-items:center!important;gap:6px!important;'
+            . 'min-height:0!important;padding-block:4px!important}'
+            . $scope . ' .awa-footer-atendimento__icon{'
+            . 'flex:0 0 20px!important;width:20px!important;min-width:20px!important;max-width:20px!important;'
+            . 'height:20px!important;min-height:20px!important;max-height:20px!important;flex-shrink:0!important}'
+            . $scope . ' .awa-footer-atendimento__icon :is(svg,img){'
+            . 'width:16px!important;height:16px!important;min-width:16px!important;min-height:16px!important;'
+            . 'max-width:16px!important;max-height:16px!important}'
             // Visual audit Jul/2026 — ícones sociais visíveis (vence super-global transparent)
             . $scope . ' .awa-footer-pro__social-link{'
             . 'background:#374151!important;'
@@ -2389,19 +4792,34 @@ final class HeaderImpeccableCascadeLockCss
             . $scope . ' .awa-footer-pro__social-link:focus-visible{'
             . 'background:var(--awa-primary,#b73337)!important;'
             . 'border-color:var(--awa-primary,#b73337)!important;color:#fff!important}'
+            . '@media (min-width:768px){'
+            . $scope . ' .velaFooterTitle,'
+            . $scope . ' #footer.footer-container .velaFooterTitle{'
+            . 'margin:0 0 6px!important;margin-bottom:6px!important;padding-bottom:4px!important}'
+            . $scope . ' ul.awa-footer-atendimento__actions{'
+            . 'grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px 8px!important}'
+            . $scope . ' ul.awa-footer-atendimento__actions > li{min-width:0!important}'
+            . $scope . ' ul.awa-footer-atendimento__actions a{width:100%!important}'
+            . $scope . ' .awa-footer-atendimento__store{padding:8px!important;gap:2px!important;margin:4px 0!important}'
+            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone a,'
+            . '.awa-footer-atendimento__email a,.awa-footer-atendimento__actions a){min-height:0!important}'
+            . '}'
             . '@media (min-width:992px){' . $scope . ' .footer-container .vela-content.velaFooterMenu{'
-            . 'padding:16px!important}'
+            . 'padding:12px!important}'
             . $scope . ' .footer-container .row.rowFlexMargin{'
             . 'padding-block:8px!important}'
             . $scope . ' .awa-footer-atendimento .velaContent.active{'
-            . 'gap:8px!important}'
-            . $scope . ' .awa-footer-atendimento :is(.awa-footer-atendimento__phone a,'
-            . '.awa-footer-atendimento__email a,.awa-footer-atendimento__actions a,.awa-footer-pro__social-link){'
-            . 'min-height:40px!important}'
-            . $scope . ' .awa-footer-atendimento__store{'
-            . 'padding:8px!important;gap:4px!important}'
+            . 'gap:6px!important}'
             . $scope . ' .awa-footer-atendimento__store-badge{'
-            . 'margin:4px 0 8px!important}}';
+            . 'margin:2px 0 4px!important}}'
+            . '@media (max-width:767px){'
+            . $scope . ' .awa-footer-atendimento__icon{'
+            . 'flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important}'
+            . $scope . ' .awa-footer-atendimento__icon :is(svg,img){'
+            . 'width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important}'
+            . $scope . ' ul.awa-footer-atendimento__actions a{min-height:44px!important}'
+            . '}';
     }
 
     /**
@@ -2483,6 +4901,7 @@ final class HeaderImpeccableCascadeLockCss
             . self::b2bDashboardSurfaceRules()
             . self::headerEssentialTerminalRules()
             . self::tabletHeaderCompactRules()
+            . self::headerVisualBugsFixRules()
             . '@media (min-width:992px){'
             . 'html body#html-body#html-body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header{'
             . '--awa-header-main-row-h:68px!important;--awa-header-row-h:var(--awa-header-main-row-h)!important;'
@@ -2561,6 +4980,8 @@ final class HeaderImpeccableCascadeLockCss
             . self::footerAlignShellRules()
             . self::homePostAuditTerminalRules()
             . self::headerBolderActionContrastLockRules()
+            /* Ghost DEPOIS do contrast lock — minicart não é CTA vermelho no storefront. */
+            . self::headerMinicartGhostTerminalRules()
             . self::plpB2bGuestGateTerminalRules()
             . self::plpMobileToolbarTerminalRules();
     }
@@ -2593,37 +5014,39 @@ final class HeaderImpeccableCascadeLockCss
 
     /**
      * PLP guest B2B gate — última camada (body-end lock).
-     * Vence styles-l/themes (display:block) e visual-fixes (border:dashed),
-     * confirmado Playwright debug cc2a40 (computed ainda block/dashed com CSS terminal sozinho).
+     * 2026-07-26 r6 (bug 2.2 UI audit): gate secundário ao título do produto.
+     * Antes: min-height:64 + title fw:700 + fundo rosa (competia com o nome).
+     * Evidência Playwright: altura do gate ~66px vs título 14px/600.
      */
     public static function plpB2bGuestGateTerminalRules(): string
     {
         $root = 'html body#html-body#html-body#html-body#html-body#html-body'
             . ':is(.catalog-category-view,.catalogsearch-result-index)';
-        $gate = $root . ' .page-wrapper :is(.products-grid,.wrapper.grid.products-grid)'
-            . ' li.item-product .info-price :is(.b2b-login-to-see-price.price-box,.b2b-login-to-see-price)';
+        $info = $root . ' .page-wrapper :is(.products-grid,.wrapper.grid.products-grid)'
+            . ' li.item-product .info-price';
+        $gate = $info . ' :is(.b2b-login-to-see-price.price-box,.b2b-login-to-see-price)';
 
-        return '/* §PLP-B2B-GATE — guest card CTA (2026-07-08 r5) */'
+        return '/* §PLP-B2B-GATE — guest card quiet (2026-07-26 r6) */'
+            . $info . '{min-height:0!important}'
             . $gate . '{'
             . 'display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;'
-            . 'justify-content:center!important;align-items:center!important;gap:4px!important;'
+            . 'justify-content:flex-start!important;align-items:flex-start!important;gap:2px!important;'
             . 'box-sizing:border-box!important;width:100%!important;max-width:100%!important;'
-            . 'min-height:64px!important;height:auto!important;margin:0!important;padding:10px 12px!important;'
-            . 'text-align:center!important;text-transform:none!important;letter-spacing:normal!important;'
+            . 'min-height:0!important;height:auto!important;margin:4px 0 0!important;padding:0!important;'
+            . 'text-align:start!important;text-transform:none!important;letter-spacing:normal!important;'
             . 'font-size:12px!important;line-height:1.3!important;'
-            . 'background:color-mix(in srgb,var(--awa-primary,#b73337) 6%,#fff)!important;'
-            . 'border:1px solid color-mix(in srgb,var(--awa-primary,#b73337) 22%,transparent)!important;'
-            . 'border-style:solid!important;border-radius:8px!important;box-shadow:none!important}'
+            . 'background:transparent!important;border:0!important;border-radius:0!important;'
+            . 'box-shadow:none!important}'
             . $gate . ' .b2b-login-to-see-price__title{'
-            . 'margin:0!important;width:100%!important;font-size:12px!important;font-weight:700!important;'
-            . 'line-height:1.3!important;text-align:center!important;text-transform:none!important;'
-            . 'letter-spacing:normal!important;color:var(--awa-text-primary,#333)!important}'
+            . 'margin:0!important;width:100%!important;font-size:11px!important;font-weight:500!important;'
+            . 'line-height:1.3!important;text-align:start!important;text-transform:none!important;'
+            . 'letter-spacing:normal!important;color:var(--awa-text-muted,#64748b)!important}'
             . $gate . ' .b2b-login-to-see-price__message{'
-            . 'margin:0!important;width:100%!important;font-size:11px!important;font-weight:400!important;'
-            . 'line-height:1.35!important;text-align:center!important;text-transform:none!important;'
-            . 'letter-spacing:normal!important;color:var(--awa-text-muted,#666)!important;'
+            . 'margin:0!important;width:100%!important;font-size:12px!important;font-weight:600!important;'
+            . 'line-height:1.35!important;text-align:start!important;text-transform:none!important;'
+            . 'letter-spacing:normal!important;color:var(--awa-primary,#b73337)!important;'
             . 'display:-webkit-box!important;-webkit-box-orient:vertical!important;'
-            . '-webkit-line-clamp:2!important;line-clamp:2!important;overflow:hidden!important}';
+            . '-webkit-line-clamp:1!important;line-clamp:1!important;overflow:hidden!important}';
     }
 
     /**
@@ -2642,13 +5065,14 @@ final class HeaderImpeccableCascadeLockCss
             . '@media (min-width:992px){'
             . $header . '{background:var(--awa-bg-surface,var(--awa-bg,Canvas))!important;border-bottom:0!important}'
             . $header . ' #header.header-container{height:44px!important;min-height:44px!important;max-height:44px!important;'
-            . 'overflow:visible!important;background:transparent!important}'
+            . 'overflow:hidden!important;background:transparent!important}'
             . $header . ' #header.header-container .header-content{height:44px!important;min-height:44px!important;max-height:44px!important;'
-            . 'padding:0!important;align-items:center!important;overflow:visible!important}'
+            . 'padding:0!important;align-items:center!important;overflow:hidden!important;background:transparent!important}'
             . $header . ' #awa-b2b-promo-bar{position:relative!important;height:44px!important;min-height:44px!important;'
             . 'max-height:44px!important;padding:0 52px 0 16px!important;border:0!important;'
-            . 'background:#ffffff!important;background-color:#ffffff!important;'
-            . 'color:var(--awa-text-primary,#111827)!important;line-height:1.4!important;'
+            . 'background:var(--awa-primary,oklch(48% .14 20))!important;'
+            . 'background-color:var(--awa-primary,oklch(48% .14 20))!important;'
+            . 'color:var(--awa-text-inverse,#fff)!important;line-height:1.25!important;'
             . 'box-sizing:border-box!important}'
             . $header . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__inner{position:static!important;width:100%!important;'
             . 'max-width:1280px!important;margin:0 auto!important;padding:0!important;height:44px!important;min-height:44px!important;'
@@ -2656,13 +5080,15 @@ final class HeaderImpeccableCascadeLockCss
             . $header . ' #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,'
             . '.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__tail,.awa-b2b-promo-bar__separator,'
             . '.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta strong){'
-            . 'color:var(--awa-text-primary,#111827)!important;line-height:1.4!important}'
+            . 'color:var(--awa-text-inverse,#fff)!important;line-height:1.25!important;font-size:13px!important}'
             . $header . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__cta{'
             . 'font-weight:700!important;color:inherit!important;text-decoration:underline!important;text-underline-offset:2px!important}'
             . $header . ' #awa-b2b-promo-bar .awa-b2b-promo-close{'
-            . 'position:absolute!important;top:0!important;right:0!important;inset-block-start:0!important;inset-inline-end:0!important;'
+            . 'position:absolute!important;top:0!important;right:var(--awa-container-pad,16px)!important;inset-block-start:0!important;'
+            . 'inset-inline-end:var(--awa-container-pad,16px)!important;'
             . 'width:44px!important;min-width:44px!important;max-width:44px!important;'
             . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;'
             . 'border:0!important;border-radius:0!important;background:transparent!important;'
             . 'color:inherit!important;font-size:16px!important;'
             . 'font-weight:600!important;line-height:1!important;transform:none!important}'
@@ -2716,14 +5142,23 @@ final class HeaderImpeccableCascadeLockCss
             . 'font-weight:600!important;color:var(--awa-text-muted,var(--awa-text-secondary,CanvasText))!important}'
             . $header . ' .awa-header-account-prompt__line2{font-size:13px!important;line-height:1.1!important;font-weight:600!important}'
             . $header . ' .awa-header-account-prompt__link--login{font-size:13px!important;font-weight:700!important;'
-            . 'display:inline-flex!important;align-items:center!important;min-height:44px!important;height:44px!important;'
-            . 'padding:0 4px!important;color:var(--awa-text,CanvasText)!important}'
+            . 'display:inline-flex!important;align-items:center!important;min-height:0!important;height:auto!important;'
+            . 'padding:0 2px!important;color:var(--awa-text,CanvasText)!important;background:transparent!important}'
             . $header . ' .awa-header-account-prompt__separator{font-size:10px!important;font-weight:500!important;'
             . 'padding-inline:1px!important;color:var(--awa-text-muted,var(--awa-text-secondary,CanvasText))!important}'
-            . $header . ' .awa-header-account-prompt__link--register{font-size:13px!important;font-weight:700!important;'
-            . 'display:inline-flex!important;align-items:center!important;min-height:44px!important;height:44px!important;'
-            . 'padding:0 4px!important;background:transparent!important;color:var(--awa-primary,var(--awa-red,currentColor))!important}'
-            . $header . ' :is(.minicart-wrapper,.awa-header-minicart,.action.showcart){height:44px!important;min-height:44px!important;'
+            /* r72: CTA cadastre-se = pill conversão (não texto transparente). */
+            . $header . ' .awa-header-account-prompt__link--register{font-size:12px!important;font-weight:700!important;'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'min-height:28px!important;height:auto!important;max-height:none!important;'
+            . 'padding:4px 12px!important;border-radius:999px!important;'
+            . 'background:var(--awa-primary,#b73337)!important;background-color:var(--awa-primary,#b73337)!important;'
+            . 'color:var(--awa-on-primary,#fff)!important;border:1px solid var(--awa-primary,#b73337)!important;'
+            . 'text-decoration:none!important;box-sizing:border-box!important}'
+            . $header . ' .awa-header-account-prompt__line2{overflow:visible!important;min-height:28px!important;'
+            . 'align-items:center!important;gap:4px!important}'
+            . $header . ' .minicart-wrapper:not(.active):not(.show):not(.is-open),'
+            . $header . ' .awa-header-minicart:not(:has(.minicart-wrapper.active)):not(:has(.minicart-wrapper.show)):not(:has(.minicart-wrapper.is-open)),'
+            . $header . ' .minicart-wrapper:not(.active):not(.show):not(.is-open) .action.showcart{height:44px!important;min-height:44px!important;'
             . 'max-height:44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;align-self:center!important;'
             . 'display:inline-flex!important;align-items:center!important;justify-content:center!important}'
             . $header . ' :is(.awa-header-minicart .action.showcart,.awa-minicart-trigger){border-radius:8px!important;box-shadow:none!important}'
@@ -2735,17 +5170,18 @@ final class HeaderImpeccableCascadeLockCss
             . $header . ' .header-control.awa-nav-bar .awa-nav-bar__inner{height:46px!important;min-height:46px!important;'
             . 'max-height:46px!important;max-width:1280px!important;margin-inline:auto!important;padding:0 16px!important;'
             . 'box-sizing:border-box!important}'
-            . $header . ' .header-control.awa-nav-bar .awa-nav-bar__inner{display:grid!important;'
-            . 'grid-template-columns:206px minmax(0,1fr) auto!important;align-items:center!important;gap:24px!important}'
-            . $header . ' .awa-header-categories.menu_left_home1{grid-column:1!important;width:206px!important;height:40px!important;'
+            . $header . ' .header-control.awa-nav-bar .awa-nav-bar__inner{display:flex!important;'
+            . 'align-items:center!important;justify-content:flex-start!important;gap:clamp(16px,1.5vw,24px)!important}'
+            . $header . ' .awa-header-categories.menu_left_home1{flex:0 0 auto!important;width:206px!important;height:40px!important;'
             . 'min-height:40px!important;max-height:40px!important;padding:0!important;align-self:center!important}'
             . $header . ' .header-control.awa-nav-bar button.our_categories.title-category-dropdown[data-role="awa-vertical-menu-trigger"],'
             . $header . ' .header-control.awa-nav-bar .our_categories.title-category-dropdown{height:40px!important;min-height:40px!important;'
             . 'max-height:40px!important;border-radius:8px!important;box-shadow:none!important}'
-            . $header . ' .awa-nav-quick-links{grid-column:3!important;margin:0!important;justify-self:end!important;height:40px!important;'
+            . $header . ' .awa-nav-quick-links{flex:0 0 auto!important;margin:0!important;margin-inline-start:0!important;'
+            . 'justify-self:start!important;justify-content:flex-start!important;height:40px!important;'
             . 'min-height:40px!important;max-height:40px!important;align-items:center!important}'
             . $header . ' .awa-nav-quick-links__list{height:40px!important;min-height:40px!important;max-height:40px!important;'
-            . 'align-items:center!important;gap:24px!important}'
+            . 'align-items:center!important;justify-content:flex-start!important;gap:24px!important}'
             . $header . ' .awa-nav-quick-links__link{height:40px!important;min-height:40px!important;'
             . 'padding:0 6px!important;border-radius:8px!important;font-size:13px!important;'
             . 'font-weight:600!important;color:var(--awa-text,CanvasText)!important}'
@@ -2772,13 +5208,20 @@ final class HeaderImpeccableCascadeLockCss
             . $wrap . ' :is(.page_footer,.page-footer) #footer.footer-container :is(.container,.row.rowFlexMargin){'
             . 'max-width:var(--awa-home-terminal-shell,min(100%,1280px))!important;'
             . 'margin-inline:auto!important;box-sizing:border-box!important}'
+            /* H25B: grid responsivo 1/2/3 — evita 3 colunas esmagadas em tablet (~914px) */
             . $wrap . ' :is(.page_footer,.page-footer) #footer.footer-container .row.rowFlexMargin{'
-            . 'display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(280px,.86fr)!important;'
+            . 'display:grid!important;grid-template-columns:minmax(0,1fr)!important;'
             . 'gap:clamp(14px,2vw,20px)!important;align-items:start!important}'
+            . '@media(min-width:768px) and (max-width:991px){'
+            . $wrap . ' :is(.page_footer,.page-footer) #footer.footer-container .row.rowFlexMargin{'
+            . 'grid-template-columns:repeat(2,minmax(0,1fr))!important}}'
+            . '@media(min-width:992px){'
+            . $wrap . ' :is(.page_footer,.page-footer) #footer.footer-container .row.rowFlexMargin{'
+            . 'grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(280px,.86fr)!important}}'
             . $wrap . ' :is(.page_footer,.page-footer) #footer.footer-container :is(.velaFooterMenu,.awa-footer-atendimento,.velaBlock){'
             . 'background:transparent!important;border:0!important;box-shadow:none!important;min-width:0!important;padding:8px!important}'
             . $wrap . ' :is(.page_footer,.page-footer) .footer-bottom{'
-            . 'background:var(--awa-bg-soft,oklch(97% .004 20))!important}'
+            . 'background:#fff!important;background-color:#fff!important;border:0!important}'
             . $wrap . ' :is(.page_footer,.page-footer) .footer-bottom .footer-bottom-inner{'
             . 'padding-block:clamp(14px,2vw,18px)!important}'
             . $wrap . ' :is(.page_footer,.page-footer) .awa-footer-bottom__copyright{'
@@ -2799,7 +5242,9 @@ final class HeaderImpeccableCascadeLockCss
             . $root . ' #awa-cookie-banner.awa-cookie-banner--visible .awa-cookie-banner__link{'
             . 'color:var(--awa-primary,oklch(48% .14 20))!important}'
             . '@media(max-width:767px){'
-            . $header . ' :is(.awa-header-minicart,.minicart-wrapper,.minicart-wrapper .action.showcart){'
+            . $header . ' .awa-header-minicart:not(:has(.minicart-wrapper.active)):not(:has(.minicart-wrapper.show)):not(:has(.minicart-wrapper.is-open)),'
+            . $header . ' .minicart-wrapper:not(.active):not(.show):not(.is-open),'
+            . $header . ' .minicart-wrapper:not(.active):not(.show):not(.is-open) .action.showcart{'
             . 'width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;'
             . 'min-height:44px!important;max-height:44px!important;display:inline-flex!important;align-items:center!important;'
             . 'justify-content:center!important;box-sizing:border-box!important}'
@@ -2830,17 +5275,25 @@ final class HeaderImpeccableCascadeLockCss
     }
 
     /**
-     * Desktop/tablet — prompt de conta + link Cadastrar sem pill (vence styles-l/themes stale).
+     * Desktop/tablet — prompt de conta + CTA Cadastrar em pill (conversão B2B).
+     * UX 2026-08-04: não equalizar register a texto plano (evidência CDP session 19da9f).
      */
     public static function headerVisFixTerminalRules(): string
     {
         return '@media (min-width:992px){'
             . 'html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-account-prompt{'
             . 'max-width:none!important;overflow:visible!important;flex-shrink:1!important}'
-            . 'html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-account-prompt__link--register{'
-            . 'display:inline-flex!important;align-items:center!important;background:transparent!important;background-color:transparent!important;'
-            . 'color:var(--awa-primary,#b73337)!important;border:none!important;border-radius:0!important;'
-            . 'padding:0 4px!important;min-height:44px!important;height:44px!important;min-width:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper .awa-site-header .awa-header-account-prompt__link--register{'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'background:var(--awa-primary,#b73337)!important;background-color:var(--awa-primary,#b73337)!important;'
+            . 'color:var(--awa-on-primary,#fff)!important;border:1px solid var(--awa-primary,#b73337)!important;'
+            . 'border-radius:999px!important;padding:4px 12px!important;min-height:28px!important;height:auto!important;'
+            . 'max-height:none!important;min-width:0!important;font-size:12px!important;font-weight:700!important;'
+            . 'line-height:1.2!important;text-decoration:none!important;box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper .awa-site-header .awa-header-account-prompt__line2{'
+            . 'overflow:visible!important;min-height:28px!important;align-items:center!important}'
             . 'html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-minicart{flex-shrink:0!important}'
             . '}'
             . '@media (min-width:768px) and (max-width:991px){'
@@ -2988,10 +5441,11 @@ final class HeaderImpeccableCascadeLockCss
             . 'grid-template-areas:"toggle brand cart" "search search search"!important;'
             . 'gap:4px 8px!important;height:96px!important;min-height:96px!important;max-height:96px!important;'
             . 'padding:4px 16px 0!important;box-sizing:border-box!important}'
-            . $shell . ' .header-wrapper-sticky{'
+            . $shell . ':not(.awa-header-condensed) .header-wrapper-sticky{'
             . 'min-height:96px!important;height:96px!important;max-height:96px!important;'
             . 'padding-top:max(0px,env(safe-area-inset-top,0px))!important;box-sizing:border-box!important}'
-            . $row . '{'
+            . $shell . ':not(.awa-header-condensed) .header-wrapper-sticky '
+            . ':is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
             . 'grid-template-columns:44px minmax(0,1fr) 44px!important;'
             . 'grid-template-rows:44px 44px!important;'
             . 'grid-template-areas:"toggle brand cart" "search search search"!important;'
@@ -3155,7 +5609,7 @@ final class HeaderImpeccableCascadeLockCss
         $promoInner = $promo . ' :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout,.header-content)';
 
         return $shell . '{'
-            . '--awa-header-promo-h:32px;--awa-header-nav-h:48px;'
+            . '--awa-header-promo-h:44px;--awa-header-nav-h:48px;'
             . '--awa-header-shell-pad:16px;--awa-header-col-gap:clamp(16px,2vw,24px)}'
             . '@media(max-width:767px){' . $shell . '{'
             . '--awa-header-main-row-h:96px;--awa-header-shell-pad:16px;--awa-header-col-gap:8px;'
@@ -3347,10 +5801,74 @@ final class HeaderImpeccableCascadeLockCss
             . self::plpImpeccableTerminalLockRules()
             . self::catalogMobileHeaderClampRules(self::checkoutImpeccableLockRoot())
             . self::headerBolderActionContrastLockRules()
+            /* Ghost DEPOIS do contrast lock — minicart não é CTA vermelho no storefront. */
+            . self::headerMinicartGhostTerminalRules()
             . self::headerAccountVtexCleanTerminalRules()
-            . self::headerSimplifyUiTerminalRules();
+            . self::headerSimplifyUiTerminalRules()
+            . self::headerVisualBugsFixRules();
 
         return $css;
+    }
+
+    /**
+     * 2026-07-16 — bugs visuais remanescentes (PDP/PLP/mobile):
+     * Departamentos 14/600, B2B trigger 44px, search control overflow,
+     * lupa duplicada, truncamento da conta no mobile.
+     */
+    public static function headerVisualBugsFixRules(): string
+    {
+        // 5× #html-body — vence align-grid terminal (mesma especificidade, ordem final).
+        $h = 'html body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper .awa-site-header[data-awa-header-mode="default"]';
+        $search = $h . ' .awa-header-search-col';
+        $dept = $h . ' :is(.our_categories.title-category-dropdown,.title-category-dropdown.our_categories,'
+            . 'button[data-role="awa-vertical-menu-trigger"])';
+        $b2b = $h . ' .b2b-status-panel .b2b-status-trigger';
+
+        return $dept . '{'
+            . 'font-size:14px!important;font-weight:600!important;'
+            . 'letter-spacing:0!important}'
+            . $dept . ' .awa-vmenu-trigger-text{'
+            . 'font-size:14px!important;font-weight:600!important}'
+            // B2B trigger: altura 44px alinhada à busca/carrinho (desktop).
+            . '@media(min-width:992px){'
+            . $b2b . '{'
+            . 'display:inline-flex!important;align-items:center!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'box-sizing:border-box!important;padding-block:0!important}'
+            . $b2b . ' .b2b-status-trigger__text{'
+            . 'gap:0!important;justify-content:center!important;min-width:0!important}'
+            . $b2b . ' .b2b-status-trigger__line1{'
+            . 'font-size:11px!important;line-height:1.1!important;font-weight:400!important}'
+            . $b2b . ' .b2b-status-trigger__line2{'
+            . 'font-size:12px!important;line-height:1.15!important;font-weight:600!important}'
+            . '}'
+            // Search control: clip no X (não força Y=auto como overflow-x:hidden+y:visible).
+            . $search . ' :is(.block-search .control,.field.search .control,form#search_mini_form .control){'
+            . 'overflow-x:clip!important;overflow-y:visible!important}'
+            // Lupa duplicada: esconder label Magento + background do input em todas as viewports.
+            . $search . ' :is(.block-search .label,.block-search .block-title,label.search,label[for="search"],.nested){'
+            . 'display:none!important;visibility:hidden!important;width:0!important;height:0!important;'
+            . 'max-height:0!important;overflow:hidden!important;pointer-events:none!important;'
+            . 'position:absolute!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important}'
+            . $search . ' form#search_mini_form :is(input#search,input[type="text"],.input-text){'
+            . 'background-image:none!important;padding-inline-start:12px!important}'
+            . $search . ' form#search_mini_form :is(.field.search,.control)::before,'
+            . $search . ' form#search_mini_form :is(.field.search,.control)::after{'
+            . 'content:none!important;display:none!important}'
+            // Mobile: mostrar primeiro nome (line1), ocultar empresa truncada (line2).
+            . '@media(max-width:767px){'
+            . $b2b . '{'
+            . 'max-width:min(160px,42vw)!important;min-width:0!important;overflow:hidden!important}'
+            . $b2b . ' .b2b-status-trigger__line1{'
+            . 'display:block!important;max-width:min(12ch,100%)!important;'
+            . 'font-size:12px!important;font-weight:600!important;line-height:1.2!important;'
+            . 'overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}'
+            . $b2b . ' .b2b-status-trigger__line2{'
+            . 'display:none!important}'
+            . $h . ' .header-wrapper-sticky .awa-header-right-col > .b2b-status-panel{'
+            . 'max-width:min(160px,42vw)!important}'
+            . '}';
     }
 
     /**
@@ -3365,6 +5883,7 @@ final class HeaderImpeccableCascadeLockCss
     {
         return '<style id="' . self::HEADER_SIMPLIFY_UI_STYLE_ID . '">'
             . self::headerSimplifyUiTerminalRules()
+            . self::headerVisualBugsFixRules()
             . '</style>';
     }
 
@@ -3429,8 +5948,8 @@ final class HeaderImpeccableCascadeLockCss
             . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__line1,'
             . $homeShell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__line1{'
             . 'display:block!important;height:auto!important;max-height:none!important;overflow:visible!important;'
-            . 'white-space:nowrap!important;font-size:11px!important;line-height:1.3!important;'
-            . 'font-weight:400!important;color:var(--awa-text-secondary,#666666)!important;'
+            . 'white-space:nowrap!important;font-size:12px!important;line-height:1.3!important;'
+            . 'font-weight:600!important;color:var(--awa-text,#334155)!important;'
             . 'text-transform:none!important}'
             . $shell . ' .awa-header-account-prompt :is(.awa-header-account-prompt__line2,.awa-header-account-prompt__actions),'
             . $homeShell . ' .awa-header-account-prompt :is(.awa-header-account-prompt__line2,.awa-header-account-prompt__actions){'
@@ -3441,6 +5960,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'color:var(--awa-text,#1a1a1a)!important;font-weight:700!important;text-decoration:none!important}'
             . $shell . ' .awa-header-account-prompt__separator,' . $homeShell . ' .awa-header-account-prompt__separator{'
             . 'color:var(--awa-text-muted,CanvasText)!important;font-weight:400!important;padding-inline:2px!important}'
+            . $shell . ' .awa-header-primary-nav.menu_primary[data-awa-topnav-empty="1"],'
             . $shell . ' .awa-header-primary-nav.menu_primary:has(nav.top-menu:empty){display:none!important;'
             . 'visibility:hidden!important;width:0!important;height:0!important;overflow:hidden!important;'
             . 'pointer-events:none!important;flex:0 0 0!important}'
@@ -3475,22 +5995,70 @@ final class HeaderImpeccableCascadeLockCss
             . 'min-height:44px!important;min-width:44px!important;padding:0!important;width:44px!important}'
             . $text . '{box-sizing:border-box!important;display:flex!important;flex:1 1 auto!important;flex-direction:column!important;'
             . 'height:44px!important;justify-content:center!important;line-height:1.1!important;max-height:44px!important;'
-            . 'max-width:160px!important;min-height:44px!important;min-width:0!important;overflow:hidden!important;width:auto!important}'
-            . $shell . ' .awa-header-account-prompt__line1{display:none!important;font-size:10px!important;font-weight:700!important;'
-            . 'height:0!important;line-height:0!important;margin:0!important;overflow:hidden!important;white-space:nowrap!important}'
-            . $shell . ' .awa-header-account-prompt :is(.awa-header-account-prompt__line2,.awa-header-account-prompt__actions){'
-            . 'align-items:center!important;box-sizing:border-box!important;display:flex!important;flex-wrap:nowrap!important;'
-            . 'gap:2px 6px!important;height:44px!important;line-height:44px!important;max-height:44px!important;'
-            . 'max-width:160px!important;min-height:44px!important;min-width:0!important;overflow:hidden!important;width:auto!important}'
-            . $shell . ' .awa-header-account-prompt :is(a,.awa-header-account-prompt__link){align-items:center!important;'
-            . 'box-sizing:border-box!important;display:inline-flex!important;height:44px!important;line-height:44px!important;'
-            . 'min-height:44px!important;padding:0 2px!important;white-space:nowrap!important}'
-            . $shell . ' .awa-header-account-prompt__separator{height:44px!important;line-height:44px!important;margin:0!important;padding-inline:1px!important}'
+            . 'max-width:180px!important;min-height:44px!important;min-width:0!important;overflow:visible!important;width:auto!important;'
+            . 'gap:1px!important}'
+            // FOUC 2026-07-30: nunca forçar .customer flex no estado guest (vence [hidden]).
+            . $shell . ' .awa-header-account-prompt .awa-header-account-prompt__customer,'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__customer{'
+            . 'display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;min-height:0!important;'
+            . 'opacity:0!important;overflow:hidden!important;pointer-events:none!important;position:absolute!important;width:0!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="customer"] .awa-header-account-prompt__customer{'
+            . 'display:flex!important;visibility:visible!important;height:44px!important;max-height:44px!important;min-height:44px!important;'
+            . 'opacity:1!important;overflow:visible!important;pointer-events:auto!important;position:static!important;width:auto!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="customer"] .awa-header-account-prompt__guest{'
+            . 'display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;pointer-events:none!important}'
+            // 2026-07-30: guest line2/links/separator em altura natural (não 30px).
+            // O 30px + justify center desalinhava o stack "Para ver preços / Entrar ou".
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__line1{'
+            . 'display:block!important;font-size:12px!important;font-weight:600!important;height:auto!important;'
+            . 'line-height:1.2!important;margin:0!important;max-height:16px!important;overflow:hidden!important;'
+            . 'color:var(--awa-text,#334155)!important;text-transform:none!important;white-space:nowrap!important;'
+            . 'text-align:start!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="customer"] .awa-header-account-prompt__line1{'
+            . 'display:none!important;height:0!important;overflow:hidden!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] '
+            . ':is(.awa-header-account-prompt__line2,.awa-header-account-prompt__actions){'
+            . 'align-items:center!important;box-sizing:border-box!important;display:inline-flex!important;flex-wrap:nowrap!important;'
+            . 'justify-content:flex-start!important;gap:2px!important;height:auto!important;line-height:1.2!important;'
+            . 'max-height:none!important;min-height:0!important;min-width:0!important;overflow:visible!important;'
+            . 'width:auto!important;padding:0!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] '
+            . ':is(a,.awa-header-account-prompt__link,.awa-header-account-prompt__link--login):not(.awa-header-account-prompt__link--register){'
+            . 'align-items:center!important;box-sizing:border-box!important;display:inline-flex!important;'
+            . 'height:auto!important;line-height:1.2!important;min-height:0!important;max-height:none!important;'
+            . 'min-width:0!important;width:auto!important;max-width:none!important;padding:0 2px!important;'
+            . 'white-space:nowrap!important;font-size:12px!important;font-weight:700!important;'
+            . 'justify-content:flex-start!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] '
+            . '.awa-header-account-prompt__link--register{align-items:center!important;justify-content:center!important;'
+            . 'box-sizing:border-box!important;display:inline-flex!important;height:auto!important;line-height:1.2!important;'
+            . 'min-height:28px!important;max-height:none!important;min-width:0!important;width:auto!important;'
+            . 'padding:4px 12px!important;white-space:nowrap!important;font-size:12px!important;font-weight:700!important;'
+            . 'border-radius:999px!important;background:var(--awa-primary,#b73337)!important;'
+            . 'background-color:var(--awa-primary,#b73337)!important;color:var(--awa-on-primary,#fff)!important;'
+            . 'border:1px solid var(--awa-primary,#b73337)!important;text-decoration:none!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__separator{'
+            . 'height:auto!important;line-height:1.2!important;margin:0 2px!important;padding-inline:0!important;'
+            . 'display:inline-flex!important;align-items:center!important;min-width:0!important;width:auto!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__guest{'
+            . 'align-items:flex-start!important;justify-content:center!important;text-align:start!important}'
+            . '@media(min-width:992px){'
+            . $shell . ' .awa-header-account-prompt__mobile-link{display:none!important;visibility:hidden!important;'
+            . 'width:0!important;height:0!important;min-width:0!important;min-height:0!important;overflow:hidden!important;'
+            . 'pointer-events:none!important;margin:0!important;padding:0!important}}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="customer"] '
+            . ':is(.awa-header-account-prompt__line2,.awa-header-account-prompt__actions){'
+            . 'align-items:center!important;display:flex!important;height:44px!important;max-height:44px!important;'
+            . 'min-height:44px!important;line-height:44px!important}'
+            . $shell . ' .awa-header-account-prompt[data-awa-auth-state="customer"] '
+            . ':is(a,.awa-header-account-prompt__link){align-items:center!important;display:inline-flex!important;'
+            . 'height:44px!important;min-height:44px!important;line-height:44px!important;padding:0 2px!important}'
             . $shell . ' .awa-account-dropdown{overflow:visible!important;position:relative!important;z-index:100270!important}'
             . $shell . ' .awa-account-dropdown__trigger{position:relative!important;z-index:100280!important}'
+            // r66 impeccable: hairline+wide shadow = AI tell. Sombra só, blur curto.
             . $shell . ' .awa-account-dropdown__menu{background:var(--awa-bg,Canvas)!important;'
-            . 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 12%,Canvas))!important;'
-            . 'border-radius:8px!important;box-shadow:0 8px 20px color-mix(in srgb,CanvasText 14%,transparent)!important;'
+            . 'border:0!important;border-radius:8px!important;'
+            . 'box-shadow:0 4px 12px color-mix(in srgb,CanvasText 12%,transparent)!important;'
             . 'box-sizing:border-box!important;display:none!important;inset-block-start:calc(100% - 1px)!important;'
             . 'inset-inline-end:0!important;margin:0!important;margin-block-start:0!important;'
             . 'min-width:12rem!important;max-width:min(18rem,calc(100vw - 24px))!important;'
@@ -3739,12 +6307,14 @@ final class HeaderImpeccableCascadeLockCss
         $stickyInner = $shell . ' .header-wrapper-sticky.is-sticky '
             . ':is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row],.awa-main-header__inner)';
 
-        return $zeroChain . '{'
+        return $home . '{--awa-home-shell-max:1280px}'
+            . $zeroChain . '{'
             . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
             . 'margin-inline:0!important;box-sizing:border-box!important}'
             . $shell . ' :is(.header-main>.container,.header_main>.container){'
             . 'box-sizing:border-box!important;margin-inline:auto!important;'
-            . 'max-width:min(100%,1280px)!important;padding-inline:0!important;width:100%!important}'
+            . 'max-width:min(100%,var(--awa-home-shell-max,1280px))!important;'
+            . 'padding-inline:0!important;width:100%!important}'
             . $stickyHome . '{'
             . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
             . 'box-sizing:border-box!important}'
@@ -3752,10 +6322,12 @@ final class HeaderImpeccableCascadeLockCss
             . $navBar . '{padding:0!important;padding-inline:0!important;box-sizing:border-box!important}'
             . $navContainer . '{'
             . 'padding:0!important;padding-inline:0!important;'
-            . 'max-width:1280px!important;width:100%!important;margin-inline:auto!important;'
+            . 'max-width:var(--awa-home-shell-max,1280px)!important;'
+            . 'width:100%!important;margin-inline:auto!important;'
             . 'box-sizing:border-box!important}'
             . $navInner . '{'
-            . 'padding-inline:16px!important;max-width:1280px!important;width:100%!important;'
+            . 'padding-inline:var(--awa-home-shell-gutter,16px)!important;max-width:var(--awa-home-shell-max,1280px)!important;'
+            . 'width:100%!important;'
             . 'margin-inline:auto!important;box-sizing:border-box!important}'
             . '@media(max-width:767px){'
             . $row . '{padding-inline:16px!important;box-sizing:border-box!important}'
@@ -3764,13 +6336,19 @@ final class HeaderImpeccableCascadeLockCss
             . '}'
             . '@media(min-width:992px){'
             . $row . '{max-width:100%!important;width:100%!important;margin-inline:auto!important;'
+            . 'grid-template-rows:var(--awa-header-main-row-h,68px)!important;'
             . 'padding:0 16px!important;padding-inline:16px!important;box-sizing:border-box!important}}'
             . '@media(min-width:768px) and (max-width:991px){'
             . $row . '{padding-inline:16px!important;max-width:100%!important;margin-inline:auto!important}}'
             . $shell . ' .header-wrapper-sticky.is-sticky{'
             . 'box-sizing:border-box!important;'
             . 'padding-block-start:4px!important;'
-            . 'padding-inline:max(16px,calc((100% - min(100%,1280px))/2))!important}';
+            . 'padding-inline:max(16px,calc((100% - min(100%,var(--awa-home-shell-max,1280px)))/2))!important}'
+            . $home . ' .page-wrapper :is(.page_footer,.page-footer) #footer.footer-container{'
+            . 'box-sizing:border-box!important;margin-inline:auto!important;'
+            . 'max-width:var(--awa-home-shell-max,1280px)!important;width:100%!important}'
+            . '@media(min-width:1600px){'
+            . $home . '{--awa-home-shell-max:1440px!important}}';
     }
 
     public static function homeImpeccablePolishTerminalRules(): string
@@ -3794,7 +6372,7 @@ final class HeaderImpeccableCascadeLockCss
             . '.ayo-home5-wrapper--template-driven>:is(.top-home-content,.awa-home-section,.awa-carousel-section,#awa-home-niche-shelves)){'
             . 'padding-inline:16px!important;box-sizing:border-box!important}'
             . $wrap . ' .awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner{'
-            . 'padding-block:8px!important;padding-inline:16px!important}'
+            . 'padding-block:8px!important;padding-inline:var(--awa-home-shell-gutter,16px)!important}'
             . $wrap . ' .content-top-home>.top-home-content--above-fold>.banner-slider.banner-slider2{'
             . 'overflow:visible!important}'
             . $wrap . ' :is(.page_footer,.page-footer) .awa-footer-newsletter{padding-inline:0!important}';
@@ -3814,10 +6392,11 @@ final class HeaderImpeccableCascadeLockCss
             . 'max-width:none!important;padding-inline:0!important;width:100%!important}'
             . $wrap . ' .content-top-home>.ayo-home5-wrapper.ayo-home5-wrapper--template-driven{'
             . 'box-sizing:border-box!important;margin-inline:auto!important;'
-            . 'max-width:min(100%,1280px)!important;width:100%!important}'
+            . 'max-width:min(100%,var(--awa-home-shell-max,1280px))!important;width:100%!important}'
             . $wrap . ' .awa-site-header :is(.header-main>.container,.header_main>.container){'
             . 'box-sizing:border-box!important;margin-inline:auto!important;'
-            . 'max-width:min(100%,1280px)!important;padding-inline:0!important;width:100%!important}'
+            . 'max-width:min(100%,var(--awa-home-shell-max,1280px))!important;'
+            . 'padding-inline:0!important;width:100%!important}'
             . $wrap . ' .awa-site-header '
             . ':is(.awa-main-header__inner,.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
             . 'margin-inline:auto!important;max-width:100%!important;width:100%!important}';
@@ -3890,10 +6469,13 @@ final class HeaderImpeccableCascadeLockCss
         $searchContent = $wrap . ' .awa-site-header '
             . ':is(.block.block-search>.block-content,.awa-header-search-col .block-content)';
 
+        /* PIXEL-QA 2026-07-25: gutter mobile 16 no sticky (toggle/minicart alinhados ao page-main).
+           padding:0 zerava o eixo horizontal; inner permanece 0 via first-paint-lock. */
         return '@media(max-width:767px){'
             . $sticky . '{'
             . 'box-sizing:border-box!important;height:96px!important;max-height:96px!important;'
-            . 'min-height:96px!important;padding:0!important;margin:0!important;overflow:hidden!important}'
+            . 'min-height:96px!important;padding-block:0!important;padding-inline:16px!important;'
+            . 'margin:0!important;overflow:hidden!important}'
             . $chain . '{'
             . 'box-sizing:border-box!important;height:96px!important;max-height:96px!important;'
             . 'min-height:96px!important;margin:0!important;padding:0!important;overflow:hidden!important}'
@@ -3907,7 +6489,9 @@ final class HeaderImpeccableCascadeLockCss
     }
 
     /**
-     * Padding shell header — path com .header-wrapper-sticky vence layout-align padding-block:0.
+     * Padding shell header (PLP/PDP/busca) — zero vertical no sticky/main.
+     * FIX 2026-07-15: padding:8px / padding-block:12px abria gap sob a promo e
+     * estourava a row 68px (busca desalinhada + sticky max-height curto).
      */
     private static function plpImpeccableHeaderPaddingRules(string $wrap): string
     {
@@ -3917,37 +6501,58 @@ final class HeaderImpeccableCascadeLockCss
         $headerMain = $sticky . ' .header_main.awa-main-header-inner-wrap';
         $inner = $sticky . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row])';
         $searchContent = $shell . ' :is(.block.block-search>.block-content,.awa-header-search-col .block-content)';
+        $rowH = 'var(--awa-header-main-row-h,68px)';
 
-        return $header . '{'
-            . 'padding:8px!important;padding-block:8px!important;padding-inline:8px!important;'
+        /* PIXEL-QA 2026-07-25: sticky carrega gutter mobile 16; desktop ≥768 usa shell-pad no header. */
+        return $sticky . '{'
+            . 'padding-block:0!important;padding-inline:16px!important;'
+            . 'box-sizing:border-box!important;overflow:visible!important}'
+            . '@media(min-width:768px){' . $sticky . '{padding-inline:0!important}}'
+            . $header . '{'
+            . 'padding-block:0!important;padding-inline:0!important;'
             . 'box-sizing:border-box!important;overflow:visible!important;'
-            . 'height:auto!important;max-height:none!important;min-height:0!important}'
+            . 'height:' . $rowH . '!important;min-height:' . $rowH . '!important;max-height:' . $rowH . '!important}'
+            . '@media(min-width:768px){' . $header . '{'
+            . 'padding-inline:var(--awa-header-shell-pad,24px)!important}}'
             . $headerMain . '{'
-            . 'padding:0 8px!important;padding-block:0!important;padding-inline:8px!important;'
+            . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
             . 'box-sizing:border-box!important;overflow:visible!important;'
-            . 'height:auto!important;max-height:none!important;min-height:0!important}'
+            . 'height:' . $rowH . '!important;min-height:' . $rowH . '!important;max-height:' . $rowH . '!important}'
             . '@media(min-width:768px){'
             . $headerMain . '>:is(.header-main,.header_main){'
-            . 'margin:8px 0!important;box-sizing:border-box!important;'
-            . 'height:auto!important;max-height:none!important;'
-            . 'min-height:var(--awa-header-main-row-h,56px)!important}}'
+            . 'margin:0!important;box-sizing:border-box!important;'
+            . 'height:' . $rowH . '!important;min-height:' . $rowH . '!important;max-height:' . $rowH . '!important}}'
             . $inner . '{'
-            . 'height:auto!important;max-height:none!important;'
-            . 'min-height:var(--awa-header-main-row-h,56px)!important;'
-            . 'padding-block:12px!important;box-sizing:border-box!important}'
+            . 'height:' . $rowH . '!important;min-height:' . $rowH . '!important;max-height:' . $rowH . '!important;'
+            . 'padding-block:0!important;box-sizing:border-box!important}'
             . $searchContent . '{'
-            . 'padding:8px!important;padding-block:8px!important;box-sizing:border-box!important;'
-            . 'overflow:visible!important;height:auto!important;min-height:60px!important}'
+            . 'padding:0!important;padding-block:0!important;box-sizing:border-box!important;'
+            . 'overflow:visible!important;height:44px!important;min-height:44px!important;max-height:44px!important}'
             . $shell . ' .awa-header-search-col :is(.block-search,form#search_mini_form){'
             . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'box-sizing:border-box!important}'
+            /* H8F: wrapper da busca sem borda (só o form); nav sem border-top */
+            . $shell . ' .awa-header-search-col :is(.block.block-search,.block-search.awa-professional-search){'
+            . 'border:0!important;box-shadow:none!important;background:transparent!important;'
+            . 'padding:0!important;margin:0!important;display:flex!important;align-items:center!important}'
+            . $shell . ' .awa-header-search-col .block-content{'
+            . 'display:flex!important;align-items:center!important;margin:0!important;border:0!important;'
+            . 'padding:0!important;height:44px!important;min-height:44px!important;max-height:44px!important}'
+            . $shell . ' :is(.header-control.awa-nav-bar,.header-control.header-nav.awa-nav-bar){'
+            . 'border-top:0!important;border-block-start:0!important}'
+            /* H8G: .container da nav tinha border 1px → navInner a top=69 */
+            . $shell . ' :is(.header-control.awa-nav-bar,.header-control.header-nav.awa-nav-bar) > .container{'
+            . 'border:0!important;border-top:0!important;border-bottom:0!important;'
+            . 'border-block-start:0!important;border-block-end:0!important;box-shadow:none!important}'
+            . $shell . ' .awa-nav-bar__inner{margin-top:0!important;padding-top:0!important;border-top:0!important}'
             . '@media(min-width:992px){'
-            . $header . '{display:block!important;align-items:stretch!important;'
-            . 'height:auto!important;min-height:0!important;max-height:none!important;'
-            . 'overflow:visible!important;padding-block:8px!important;margin-block:0!important}'
-            . $headerMain . '{height:auto!important;max-height:none!important;overflow:visible!important;padding:0!important}'
-            . $inner . '{height:auto!important;max-height:none!important;'
-            . 'min-height:var(--awa-header-main-row-h,56px)!important;padding-block:12px!important}'
+            . $header . '{display:flex!important;align-items:center!important;'
+            . 'height:' . $rowH . '!important;min-height:' . $rowH . '!important;max-height:' . $rowH . '!important;'
+            . 'overflow:visible!important;padding-block:0!important;margin-block:0!important}'
+            . $headerMain . '{height:' . $rowH . '!important;max-height:' . $rowH . '!important;'
+            . 'overflow:visible!important;padding:0!important}'
+            . $inner . '{height:' . $rowH . '!important;max-height:' . $rowH . '!important;'
+            . 'min-height:' . $rowH . '!important;padding-block:0!important}'
             . '}';
     }
 
@@ -3994,12 +6599,18 @@ final class HeaderImpeccableCascadeLockCss
             . 'padding:8px!important;box-sizing:border-box!important}'
             . $shell . ' :is(.header-control.header-nav.awa-nav-bar,.header-control.awa-nav-bar)>.container{'
             . 'padding:8px!important;box-sizing:border-box!important}'
+            /* Promo NÃO entra no bag padding:8px — shell DS = 32px / pad-block 0 (2026-07-15). */
+            /* FIX 2026-07-19 H6: .page-main>.columns NÃO entra no bag — somava 8px ao
+               page-main (16px) → doubleGutterPx=24. Chrome 8px fica em filter/toolbar/etc. */
             . $wrap . ' :is('
-            . '#awa-b2b-promo-bar,.awa-b2b-promo-bar,.awa-b2b-promo-bar__inner,'
             . '.toolbar-sorter.sorter,.field.limiter>.control,'
-            . '#layered-ajax-filter-block,.block.filter,.category-view-move,'
-            . '.page-main>.columns,.columns.layout,.columns.layout.layout-2-col){'
+            . '#layered-ajax-filter-block,.block.filter,.category-view-move){'
             . 'padding:8px!important;box-sizing:border-box!important}'
+            . $wrap . ' :is(.page-main>.columns,.columns.layout,.columns.layout.layout-2-col){'
+            . 'padding:0!important;box-sizing:border-box!important}'
+            . $wrap . ' :is(#awa-b2b-promo-bar,.awa-b2b-promo-bar,.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout){'
+            . 'padding:0!important;padding-block:0!important;box-sizing:border-box!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important}'
             . $wrap . ' .category-view-move{overflow:visible!important;height:auto!important;'
             . 'max-height:none!important;margin-block-end:12px!important}'
             . $wrap . ' .awa-category-hero--has-image .awa-category-hero__content{'
@@ -4011,6 +6622,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'color:#333!important;text-shadow:none!important}'
             . $wrap . ' .awa-category-hero--has-image .awa-category-hero__count{color:#666!important}'
             . self::plpImpeccableSrOnlyHideRules($wrap)
+            . self::plpSkuDensityRules($wrap)
             . $wrap . ' :is('
             . '#search_mini_form,#search_mini_form .field.search,'
             . '.mst-searchautocomplete__autocomplete,#awa-b2b-promo-bar,'
@@ -4020,18 +6632,197 @@ final class HeaderImpeccableCascadeLockCss
             . '.toolbar.toolbar-products:not(.toolbar-products--bottom-slim){'
             . 'min-height:52px!important;max-height:56px!important;padding:8px!important;'
             . 'box-sizing:border-box!important;align-items:center!important}}'
-            . '/* AWA layout audit: B2B promo CTA touch target */'
+            /* CTA promo: cabe no shell 32px — não forçar touch 44px (estoura a barra). */
             . $wrap . ' .awa-site-header :is(.awa-b2b-promo-bar,#awa-b2b-promo-bar) :is(a.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta){'
-            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
-            . 'width:auto!important;min-width:44px!important;height:44px!important;min-height:44px!important;'
-            . 'max-height:44px!important;padding:0 12px!important;margin-block:0!important;'
-            . 'box-sizing:border-box!important;line-height:1.15!important;white-space:nowrap!important}'
+            . 'display:inline!important;align-items:unset!important;justify-content:unset!important;'
+            . 'width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;'
+            . 'max-height:none!important;padding:0!important;margin-block:0!important;'
+            . 'box-sizing:border-box!important;line-height:1.25!important;white-space:nowrap!important}'
             . self::plpImpeccableToolbarTypeRules($wrap)
-            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items .item a,'
-            . $wrap . ' .toolbar.toolbar-products--bottom-slim :is(.pages .item a,.pages .item.current strong){'
-            . 'min-width:44px!important;min-height:44px!important;display:inline-flex!important;'
-            . 'align-items:center!important;justify-content:center!important;box-sizing:border-box!important}'
+            /* H-pager-rwd (2026-08-02): CDP tablet/desktop — border-block 1px
+               (themes + defer :last-of-type), amount abaixo dos botões, chrome
+               inconsistente vs mobile. Padroniza todos os breakpoints. */
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim{'
+            . 'border:0!important;border-block:0!important;border-block-start:0!important;'
+            . 'border-block-end:0!important;border-inline:0!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'box-shadow:none!important;border-radius:0!important;'
+            . 'display:flex!important;flex-direction:column!important;align-items:center!important;'
+            . 'justify-content:center!important;gap:8px!important;'
+            . 'width:100%!important;max-width:100%!important;box-sizing:border-box!important;'
+            . 'min-height:0!important;height:auto!important;'
+            . 'margin-block:12px 0!important;padding:0!important;padding-block:0!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim > .center{'
+            . 'display:flex!important;flex-direction:column!important;align-items:center!important;'
+            . 'justify-content:center!important;gap:8px!important;width:100%!important;'
+            . 'max-width:100%!important;box-sizing:border-box!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .toolbar-amount{'
+            . 'order:-1!important;margin:0!important;padding:0!important;border:0!important;'
+            . 'background:transparent!important;text-align:center!important;width:100%!important;'
+            . 'font-size:13px!important;line-height:1.35!important;'
+            . 'color:var(--awa-text-muted,var(--awa-text-secondary,#64748b))!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages{'
+            . 'margin:0!important;padding:0!important;width:100%!important;max-width:100%!important;'
+            . 'box-sizing:border-box!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items{'
+            . 'display:flex!important;flex-wrap:nowrap!important;justify-content:center!important;'
+            . 'align-items:center!important;gap:8px!important;width:100%!important;'
+            . 'max-width:100%!important;margin:0!important;padding:0!important;'
+            . 'border:0!important;border-radius:0!important;background:transparent!important;'
+            . 'box-shadow:none!important;box-sizing:border-box!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items > li.item{'
+            . 'margin:0!important;padding:0!important;border:0!important;background:transparent!important;'
+            . 'box-shadow:none!important;flex:0 0 auto!important;width:auto!important;min-width:0!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items > li.item'
+            . ' :is(a,strong,a.page,strong.page,a.action){margin:0!important;margin-inline:0!important;'
+            . 'box-sizing:border-box!important;border-radius:8px!important;'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'text-decoration:none!important}'
+            /* Tablet/desktop: alvo 40px (conforto + WCAG); mobile: 36px (cabe em 375). */
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items'
+            . ' > li.item:not(.pages-item-next):not(.pages-item-previous) :is(a,strong){'
+            . 'width:40px!important;min-width:40px!important;max-width:40px!important;'
+            . 'height:40px!important;min-height:40px!important;padding:0!important;'
+            . 'line-height:38px!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items'
+            . ' > li.pages-item-next a.action.next,'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items'
+            . ' > li.pages-item-previous a.action.previous{'
+            . 'width:auto!important;min-width:0!important;max-width:none!important;'
+            . 'height:40px!important;min-height:40px!important;padding:0 14px!important;'
+            . 'white-space:nowrap!important;line-height:38px!important}'
+            . '@media (max-width:767px){'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim{'
+            . 'margin-block:8px 0!important;gap:8px!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim > .center{gap:8px!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items{gap:4px!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items'
+            . ' > li.item:not(.pages-item-next):not(.pages-item-previous) :is(a,strong){'
+            . 'width:36px!important;min-width:36px!important;max-width:36px!important;'
+            . 'height:36px!important;min-height:36px!important;line-height:34px!important}'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items'
+            . ' > li.pages-item-next a.action.next,'
+            . $wrap . ' .toolbar.toolbar-products--bottom-slim .pages .items.pages-items'
+            . ' > li.pages-item-previous a.action.previous{'
+            . 'height:36px!important;min-height:36px!important;padding:0 10px!important;'
+            . 'line-height:34px!important}}'
+            /* H-badge-clip2 (2026-08-02): themes .hot-onsale{max-width:50px} truncava
+               "LANÇAMENTO DISTRIBUIDORA". Inline terminal vence CSS estático cached/immutable. */
+            . 'html body#html-body .page-wrapper .item-product .hot-onsale{'
+            . 'max-width:calc(100% - 16px)!important;width:auto!important;z-index:5!important;'
+            . 'overflow:visible!important}'
+            . 'html body#html-body .page-wrapper .item-product .hot-onsale '
+            . ':is(.onsale,.onsale.new-lable,.new-lable){'
+            . 'max-width:100%!important;width:auto!important;white-space:normal!important;'
+            . 'overflow:visible!important;text-overflow:unset!important;line-height:1.25!important}'
+            /* H-pdp-thumbs-row2: nowrap + hide dots mobile + scroll-x */
+            . 'html body#html-body.catalog-product-view .page-wrapper .product.media'
+            . ' .fotorama__nav--dots .fotorama__nav__shaft{'
+            . 'display:flex!important;flex-wrap:nowrap!important;justify-content:flex-start!important;'
+            . 'max-inline-size:100%!important;max-width:100%!important;'
+            . 'overflow-x:auto!important;overflow-y:hidden!important}'
+            . '@media (max-width:767px){'
+            . 'html body#html-body.catalog-product-view .page-wrapper .product.media'
+            . ' .fotorama__nav--dots .fotorama__nav__frame--dot{'
+            . 'display:none!important;width:0!important;height:0!important;margin:0!important;'
+            . 'padding:0!important;overflow:hidden!important}}'
+            . 'html body#html-body.catalog-product-view .page-wrapper .product.media'
+            . ' .fotorama__nav--dots{max-height:88px!important;overflow:hidden!important}'
+            /* H-pdp-gallery-lcp: LCP visivel durante loading — 5x #html-body
+               vence awa-align-grid-terminal :has(.fotorama-item){width:0;display:none}. */
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .product.media .gallery-placeholder._block-content-loading,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-main .product.media .gallery-placeholder._block-content-loading{'
+            . 'min-height:clamp(300px,82vw,460px)!important;height:auto!important;'
+            . 'overflow:hidden!important;display:block!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .product.media .gallery-placeholder._block-content-loading>'
+            . ':is(img.gallery-placeholder__image,.gallery-placeholder__image),'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-main .product.media .gallery-placeholder._block-content-loading>'
+            . ':is(img.gallery-placeholder__image,.gallery-placeholder__image){'
+            . 'display:block!important;width:100%!important;height:auto!important;'
+            . 'max-width:100%!important;max-height:none!important;min-height:0!important;'
+            . 'opacity:1!important;visibility:visible!important;overflow:visible!important;'
+            . 'object-fit:contain!important}'
+            /* H-pdp-gallery-race: LCP fica ate existir .fotorama__img (nao so .fotorama-item). */
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .gallery-placeholder:not(:has(.fotorama__img))>'
+            . ':is(img.gallery-placeholder__image,.gallery-placeholder__image),'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-main .gallery-placeholder:not(:has(.fotorama__img))>'
+            . ':is(img.gallery-placeholder__image,.gallery-placeholder__image){'
+            . 'display:block!important;width:100%!important;height:auto!important;'
+            . 'max-width:100%!important;opacity:1!important;visibility:visible!important;'
+            . 'object-fit:contain!important}'
+            /* H-pdp-tabs-shell6: moldura tripla detailed+items+content — outer zero */
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .product.info.detailed,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .product.data.items{'
+            . 'border:0!important;box-shadow:none!important;background:transparent!important;'
+            . 'padding:0!important;border-radius:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .product.data.items>.item.content{'
+            . 'border:1px solid var(--awa-border)!important;box-sizing:border-box!important}'
+            /* H-plp-pager-moldura-shell6: toolbar/ul outer chrome */
+            . 'html body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper'
+            . ' .toolbar.toolbar-products,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper'
+            . ' .toolbar.toolbar-products--bottom-slim{'
+            . 'border:0!important;border-block:0!important;box-shadow:none!important;'
+            . 'background:transparent!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper'
+            . ' .pages .items.pages-items,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body'
+            . ':is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper'
+            . ' ul.pages-items{'
+            . 'border:0!important;box-shadow:none!important;background:transparent!important;'
+            . 'border-radius:0!important;padding:0!important}'
+            /* H-pdp-shell7: attr nest + spacing + thumb inner */
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .product.data.items>.item.content'
+            . ' .additional-attributes-wrapper.table-wrapper{'
+            . 'border:0!important;box-shadow:none!important;background:transparent!important;'
+            . 'padding:0!important;margin:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .awa-pdp-faq{border:0!important;box-shadow:none!important;'
+            . 'background:transparent!important;padding-inline:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .main-detail{padding-inline:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .product-info-main{padding:12px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .awa-pdp-related{padding-top:12px!important;padding-block-start:12px!important;'
+            . 'border:0!important;box-shadow:none!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .rx-pdp-crosssell{border:0!important;box-shadow:none!important;'
+            . 'padding-block-start:12px!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view'
+            . ' .page-wrapper .product.media .fotorama__nav__frame--thumb .fotorama__thumb{'
+            . 'border:0!important;box-shadow:none!important;outline:none!important}'
             . self::plpImpeccablePass2Rules();
+    }
+
+    /**
+     * H9A — SKU badge compacto (padding só no wrapper; filhos com 8px empilhavam ~52px).
+     */
+    private static function plpSkuDensityRules(string $wrap): string
+    {
+        return $wrap . ' .wrapper.grid.products-grid .item-product .awa-b2b-sku{'
+            . 'display:inline-flex!important;align-items:center!important;gap:4px!important;'
+            . 'padding:2px 8px!important;font-size:11px!important;line-height:1.2!important;'
+            . 'box-sizing:border-box!important;min-height:0!important;height:auto!important;'
+            . 'max-height:none!important}'
+            . $wrap . ' .wrapper.grid.products-grid .item-product '
+            . ':is(.awa-b2b-sku__label,.awa-b2b-sku__value){'
+            . 'padding:0!important;margin:0!important;font-size:inherit!important;'
+            . 'line-height:inherit!important;min-height:0!important;height:auto!important;'
+            . 'display:inline!important;gap:0!important;box-sizing:border-box!important}';
     }
 
     /**
@@ -4055,16 +6846,24 @@ final class HeaderImpeccableCascadeLockCss
             . $wrap . ' :is(.product.attribute,.product-info-stock-sku .product.attribute){'
             . 'padding-block:8px!important;box-sizing:border-box!important}'
             . $wrap . ' .product-info-price .price-label{padding:4px 8px!important;box-sizing:border-box!important}'
-            . $wrap . ' :is(.columns,.column.main){padding:8px!important;box-sizing:border-box!important}'
+            /* FIX 2026-07-19 H-C/H6: padding:8px em columns+column.main somava ao page-main */
+            . $wrap . ' :is(.columns,.column.main){padding:0!important;box-sizing:border-box!important}'
             . $wrap . ' :is(.product-view,.column.main){overflow:visible!important}'
             . $wrap . ' .product.media{'
             . 'box-sizing:border-box!important;isolation:isolate!important;max-width:100%!important;'
             . 'min-width:0!important;overflow:hidden!important;position:relative!important;z-index:1!important}'
             . $wrap . ' .product-info-main{'
             . 'isolation:isolate!important;position:relative!important;z-index:2!important;min-width:0!important}'
+            . $wrap . ' .product-info-main .page-title-wrapper{'
+            . 'border-block-end:1px solid var(--awa-border)!important;'
+            . 'margin:0!important;padding-block:8px 12px!important;gap:0!important}'
+            /* SSOT PDP title 2026-07-30: títulos longos B2B ~18–22px (não 28px). */
             . $wrap . ' .product-info-main .page-title-wrapper :is(h1.page-title,.page-title,.page-title .base){'
-            . 'font-size:clamp(22px,1.25rem + .6vw,30px)!important;font-weight:700!important;'
-            . 'line-height:1.2!important;margin-block:0 12px!important}'
+            . 'font-family:var(--awa-font-heading,"Rubik",system-ui,sans-serif)!important;'
+            . 'font-size:clamp(1.125rem,1.05rem + .45vw,1.375rem)!important;font-weight:700!important;'
+            . 'line-height:1.3!important;letter-spacing:-.01em!important;color:var(--awa-text)!important;'
+            . 'text-wrap:balance!important;margin:0!important;margin-block:0!important;padding:0!important;'
+            . 'hyphens:none!important;-webkit-hyphens:none!important;border-block-end:0!important}'
             . $wrap . ' .main-detail>.row>.col-md-6:first-child{'
             . 'min-width:0!important;overflow:hidden!important}'
             . $wrap . ' .gallery-placeholder{'
@@ -4199,16 +6998,15 @@ final class HeaderImpeccableCascadeLockCss
             . $shell . ' .awa-header-account-prompt__icon{'
             . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
             . 'flex:0 0 44px!important}'
-            . '/* AWA: vence o sr-only legado do carrinho vazio; evita child posicionado clipado. */'
-            . $wrap . ':has(.awa-cart-empty,.cart-empty) .page-title-wrapper{'
-            . 'position:static!important;width:100%!important;height:auto!important;padding:0!important;'
-            . 'margin:0 0 var(--awa-space-3,12px)!important;overflow:visible!important;'
-            . 'clip:auto!important;clip-path:none!important;white-space:normal!important;border:0!important}'
-            . $wrap . ':has(.awa-cart-empty,.cart-empty) .page-title-wrapper :is(h1,.page-title,.page-title .base){'
-            . 'position:static!important;display:block!important;width:auto!important;height:auto!important;'
-            . 'padding:0!important;margin:0!important;overflow:visible!important;clip:auto!important;'
-            . 'clip-path:none!important;white-space:normal!important;border:0!important;'
-            . 'font-size:var(--awa-font-3xl,28px)!important;line-height:1.2!important}'
+            . '/* AWA 2026-08-04: H1 de página oculto no empty simples (título no hero). */'
+            . $wrap . ':has(.awa-cart-empty--simple) .page-title-wrapper{'
+            . 'position:absolute!important;width:1px!important;height:1px!important;padding:0!important;'
+            . 'margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;'
+            . 'clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}'
+            . $wrap . ':has(.awa-cart-empty--simple) .page-title-wrapper :is(h1,.page-title,.page-title .base){'
+            . 'position:static!important;display:inline!important;width:auto!important;height:auto!important;'
+            . 'padding:0!important;margin:0!important;overflow:hidden!important;'
+            . 'font-size:inherit!important;line-height:inherit!important}'
             . self::checkoutSearchImpeccableDistillRules()
             . self::checkoutCartMobileMinicartTerminalRules()
             . self::checkoutOpenModalTerminalRules()
@@ -4387,13 +7185,26 @@ final class HeaderImpeccableCascadeLockCss
             . $wrap . ' .awa-category-hero--has-image .awa-category-hero__content .awa-category-hero__count{'
             . 'color:#666!important}'
             . $wrap . ' :is(.page-main>.columns,.columns.layout,.columns.layout.layout-2-col){'
-            . 'padding:8px!important;box-sizing:border-box!important}'
-            . $wrap . ' .category-view-move{padding:8px!important;box-sizing:border-box!important;overflow:visible!important}'
+            . 'padding:0!important;box-sizing:border-box!important}'
+            . $wrap . ' .category-view-move{padding:0!important;box-sizing:border-box!important;overflow:visible!important;'
+            . 'margin:0 0 var(--awa-plp-stack-gap,12px)!important}'
+            . $wrap . '{--awa-plp-stack-gap:var(--awa-stack-tight,var(--awa-space-3,12px))}'
+            . $wrap . ' .page-main > .columns.layout.layout-2-col.row,'
+            . $wrap . ' .page-main > .columns.layout-2-col.row{'
+            . 'column-gap:var(--awa-plp-gap-md,12px)!important;row-gap:0!important;'
+            . 'gap:0 var(--awa-plp-gap-md,12px)!important}'
+            . $wrap . ' .nav-breadcrumbs{margin:0!important;margin-block:0!important;padding:0!important}'
+            . $wrap . ' .nav-breadcrumbs .breadcrumbs{margin:0!important;margin-block:0!important;padding-block:0!important}'
+            . $wrap . ' #maincontent.page-main{padding-top:var(--awa-plp-stack-gap,12px)!important}'
+            . $wrap . ' .mst_categorySearch{margin:0 0 var(--awa-plp-stack-gap,12px)!important}'
+            . $wrap . ' .awa-plp-b2b-gate-banner{margin:0 0 var(--awa-plp-stack-gap,12px)!important;'
+            . 'padding:var(--awa-space-3,12px)!important}'
+            . $wrap . ' .awa-category-hero{min-height:112px!important;max-height:140px!important;'
+            . 'padding-block:var(--awa-space-3,12px)!important;margin:0!important;'
+            . 'margin-block:0!important;margin-block-end:0!important}'
             . $wrap . ' :is(#layered-ajax-filter-block,.block.filter){padding:8px!important;box-sizing:border-box!important}'
             . $wrap . ' .awa-header-categories.menu_left_home1{padding:8px!important;box-sizing:border-box!important}'
-            . $wrap . ' .wrapper.grid.products-grid .item-product '
-            . ':is(.awa-b2b-sku,.awa-b2b-sku__label,.awa-b2b-sku__value){'
-            . 'padding:8px!important;font-size:12px!important;line-height:1.35!important;box-sizing:border-box!important}'
+            . self::plpSkuDensityRules($wrap)
             . $wrap . ' .awa-site-header '
             . ':is(.header-control.header-nav.awa-nav-bar,.header-control.awa-nav-bar,.header-control.header-nav){'
             . 'padding:8px!important;box-sizing:border-box!important}'
@@ -4635,28 +7446,29 @@ final class HeaderImpeccableCascadeLockCss
             . $row . '{max-width:1280px!important;margin-inline:auto!important;padding-inline:16px!important}'
             . '}'
             . '@media (max-width:767px){'
-            . $shell . ' .header-wrapper-sticky :is(.header-main,.header_main){'
+            . $shell . ':not(.awa-header-condensed) .header-wrapper-sticky :is(.header-main,.header_main){'
             . 'padding:0!important;padding-block:0!important;margin:0!important;'
             . 'height:96px!important;min-height:96px!important;max-height:96px!important;'
             . 'overflow:hidden!important;box-sizing:border-box!important}'
-            . $row . '{'
+            . $shell . ':not(.awa-header-condensed) .header-wrapper-sticky '
+            . ':is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
             . 'align-items:center!important;align-content:center!important;contain:none!important;overflow:visible!important;'
             . 'grid-template-columns:44px minmax(0,1fr) 44px!important;grid-template-rows:44px 44px!important;'
             . 'grid-template-areas:"toggle brand cart" "search search search"!important;gap:4px 8px!important;'
             . 'padding:4px 16px 0!important;box-sizing:border-box!important}'
-            . $shell . ' :is(.awa-header-mobile-toggle,.action.nav-toggle,[data-action="toggle-nav"]){'
+            . $shell . ':not(.awa-header-condensed) :is(.awa-header-mobile-toggle,.action.nav-toggle,[data-action="toggle-nav"]){'
             . 'position:relative!important;top:auto!important;right:auto!important;left:auto!important;inset:auto!important;'
             . 'align-self:center!important;justify-self:center!important;margin:0!important;transform:none!important}'
-            . $shell . ' :is(.awa-header-brand-cell,.col-md-2.awa-header-brand,.awa-header-minicart){'
+            . $shell . ':not(.awa-header-condensed) :is(.awa-header-brand-cell,.col-md-2.awa-header-brand,.awa-header-minicart){'
             . 'align-self:center!important;justify-self:center!important;position:relative!important;top:auto!important}'
-            . $shell . ' .awa-header-minicart .minicart-wrapper{position:static!important;top:auto!important;right:auto!important}'
-            . $shell . ' .awa-header-search-col{align-self:stretch!important;contain:none!important;'
+            . $shell . ':not(.awa-header-condensed) .awa-header-minicart .minicart-wrapper{position:static!important;top:auto!important;right:auto!important}'
+            . $shell . ':not(.awa-header-condensed) .awa-header-search-col{align-self:stretch!important;contain:none!important;'
             . 'display:block!important;grid-template-columns:none!important;width:100%!important;'
             . 'min-width:0!important;max-width:100%!important;box-sizing:border-box!important}'
-            . $shell . ' .awa-header-search-col :is(.block-search,.block-content){'
+            . $shell . ':not(.awa-header-condensed) .awa-header-search-col :is(.block-search,.block-content){'
             . 'display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;'
             . 'padding:0!important;margin:0!important;height:44px!important;max-height:44px!important;box-sizing:border-box!important}'
-            . $shell . ' .awa-header-search-col form#search_mini_form{'
+            . $shell . ':not(.awa-header-condensed) .awa-header-search-col form#search_mini_form{'
             . 'display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;'
             . 'grid-template-areas:"field submit"!important;width:100%!important;max-width:100%!important;'
             . 'box-sizing:border-box!important;margin:0!important;height:44px!important;max-height:44px!important}'
@@ -4732,7 +7544,123 @@ final class HeaderImpeccableCascadeLockCss
 
     public static function styleTag(): string
     {
-        return '<style id="' . self::STYLE_ID . '">' . self::rules() . '</style>';
+        return '<style id="' . self::STYLE_ID . '">'
+            . self::rules()
+            . self::skipLinkFocusTerminalRules()
+            . self::footerCategoriesGridFillRules()
+            . self::footerCategoriesDesktopLayoutRules()
+            . self::pixelQaFooterAxisTerminalRules()
+            . self::mobileCondensedOneRowTerminalRules()
+            . '</style>';
+    }
+
+    /**
+     * BUG-SHELL-MOBILE-CONDENSED-1ROW — último no cascade-lock (depois de rules()).
+     * Força 1 linha + primary-row:contents no sticky mobile.
+     */
+    public static function mobileCondensedOneRowTerminalRules(): string
+    {
+        $h = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper header.awa-site-header.awa-header-condensed';
+
+        return '/* BUG-SHELL-MOBILE-CONDENSED-1ROW terminal cascade-lock */'
+            . '@media(max-width:767px){'
+            . $h . ' .header-wrapper-sticky{'
+            . 'height:56px!important;min-height:56px!important;max-height:56px!important;overflow:hidden!important;'
+            . 'position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;z-index:5001!important}'
+            . $h . ' .header-wrapper-sticky :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main){'
+            . 'height:56px!important;min-height:56px!important;max-height:56px!important;padding:0!important;margin:0!important;overflow:hidden!important}'
+            . $h . ' .header-wrapper-sticky :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
+            . 'display:grid!important;grid-template-areas:"toggle brand search cart"!important;'
+            . 'grid-template-columns:44px minmax(0,1fr) 44px 44px!important;grid-template-rows:44px!important;'
+            . 'gap:0 8px!important;height:56px!important;min-height:56px!important;max-height:56px!important;'
+            . 'padding:6px 12px!important;box-sizing:border-box!important;align-items:center!important;overflow:visible!important}'
+            /* primary-row vira contents — senão grid-area:primary cria linha fantasma sob o shell 56px. */
+            . $h . ' .header-wrapper-sticky .awa-header-primary-row{'
+            . 'display:contents!important;grid-area:unset!important;grid-template:none!important;'
+            . 'height:auto!important;min-height:0!important;max-height:none!important;width:auto!important}'
+            . $h . ' .header-wrapper-sticky :is(.awa-header-search-col,.top-search){'
+            . 'grid-area:search!important;display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;'
+            . 'min-height:44px!important;max-height:44px!important;overflow:visible!important}'
+            . $h . ' .header-wrapper-sticky .awa-header-search-col form#search_mini_form{'
+            . 'display:flex!important;width:44px!important;min-width:44px!important;max-width:44px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important;'
+            . 'border:0!important;background:transparent!important;overflow:visible!important;grid-template-columns:none!important}'
+            . $h . ' .header-wrapper-sticky .awa-header-search-col :is(.field.search,.field.search .control,.block-search .label,input#search){'
+            . 'position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;'
+            . 'overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}'
+            . $h . ' .header-wrapper-sticky .awa-header-search-col .actions{display:flex!important;margin:0!important;padding:0!important}'
+            . $h . ' .header-wrapper-sticky .awa-header-search-col :is(button.action.search,.action.search){'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important}'
+            . $h . ' .header-wrapper-sticky .awa-header-mobile-toggle{grid-area:toggle!important;justify-self:start!important}'
+            . $h . ' .header-wrapper-sticky .awa-header-brand-cell{grid-area:brand!important;justify-self:center!important;align-self:center!important}'
+            . $h . ' .header-wrapper-sticky :is(.awa-header-minicart,.awa-header-right-col){grid-area:cart!important;justify-self:end!important}'
+            . '}';
+    }
+
+    /**
+     * PIXEL-QA: último override no cascade-lock — eixo só em footer.page-footer.
+     * Neutraliza padding: Npx 16px / max-width calc(100%-32px) definidos acima em rules().
+     */
+    public static function pixelQaFooterAxisTerminalRules(): string
+    {
+        return '/* PIXEL-QA footer-axis-terminal fullbleed-20260731 */'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer,'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(.page_footer,footer.page-footer){'
+            . 'max-width:none!important;width:100%!important;margin-inline:0!important;'
+            . 'padding-inline:0!important;padding-left:0!important;padding-right:0!important;'
+            . 'box-sizing:border-box!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(footer.page-footer,.page_footer,.page-footer) :is(section.awa-footer-trust-bar,.awa-footer-trust-bar){'
+            . 'width:100%!important;max-width:none!important;margin-inline:0!important}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer :is(#footer.footer-container,.awa-footer-newsletter>.container,'
+            . '.footer-bottom>.container,.awa-footer-trust-bar>.container){'
+            . 'box-sizing:border-box!important;width:100%!important;max-width:min(100%,1280px)!important;'
+            . 'margin-inline:auto!important}'
+            . '@media(max-width:767px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer :is(#footer.footer-container,.awa-footer-newsletter>.container,'
+            . '.footer-bottom>.container,.awa-footer-trust-bar>.container){'
+            . 'padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important}}'
+            . '@media(min-width:768px){'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer :is(#footer.footer-container,.awa-footer-newsletter>.container,'
+            . '.footer-bottom>.container,.awa-footer-trust-bar>.container){'
+            . 'padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important}}'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper footer.page-footer :is(.page_footer,#footer,.footer-container,.footer-bottom,.footer-bottom-inner),'
+            . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper :is(.page_footer,.page-footer) .footer-bottom{'
+            . 'max-width:100%!important;width:100%!important;margin-inline:0!important;'
+            . 'padding-left:0!important;padding-right:0!important;padding-inline:0!important;'
+            . 'box-sizing:border-box!important}';
+    }
+
+    /**
+     * Audit #26 — skip links precisam vencer o hide terminal no fim do cascade.
+     * Evidência CDP: binary-search part 297 (.awa-skip-link hide); focus show no meio
+     * de rules() perdia para regras posteriores.
+     */
+    public static function skipLinkFocusTerminalRules(): string
+    {
+        return 'html body#html-body#html-body#html-body :is('
+            . '.awa-skip-link,a.action.skip,a.action.skip.content,a.action.skip.nav,'
+            . 'a.skip-to-main-content'
+            . '):is(:focus,:focus-visible){'
+            . 'position:fixed!important;top:8px!important;left:8px!important;right:auto!important;bottom:auto!important;'
+            . 'width:auto!important;height:auto!important;min-width:44px!important;min-height:44px!important;'
+            . 'max-width:none!important;max-height:none!important;margin:0!important;padding:10px 14px!important;'
+            . 'overflow:visible!important;clip:auto!important;clip-path:none!important;contain:none!important;'
+            . 'white-space:normal!important;font-size:14px!important;line-height:1.3!important;'
+            . 'display:inline-flex!important;align-items:center!important;z-index:2147483646!important;'
+            . 'background:#b73337!important;color:#fff!important;border-radius:8px!important;'
+            . 'font-weight:600!important;text-decoration:none!important;pointer-events:auto!important;'
+            . 'opacity:1!important;visibility:visible!important}';
     }
 
     public static function guardScriptTag(): string
@@ -4746,7 +7674,10 @@ final class HeaderImpeccableCascadeLockCss
             . '"use strict";'
             . 'var id=' . json_encode($styleId, JSON_UNESCAPED_SLASHES) . ';'
             . 'var snap="";'
-            . 'function capture(){var el=document.getElementById(id);if(el&&el.textContent){snap=el.textContent;}}'
+            . 'function capture(){var nodes=document.querySelectorAll("style[id=\\""+id+"\\"]");var best="";'
+            . 'for(var i=0;i<nodes.length;i++){if(nodes[i].textContent&&nodes[i].textContent.length>best.length){'
+            . 'best=nodes[i].textContent;}}if(best){snap=best;}else{var el=document.getElementById(id);'
+            . 'if(el&&el.textContent){snap=el.textContent;}}}'
             . 'function apply(){if(!snap){return;}var el=document.getElementById(id);'
             . 'var root=document.body||document.documentElement;if(!el){el=document.createElement("style");'
             . 'el.id=id;root.appendChild(el);}if(el.textContent!==snap){el.textContent=snap;}'
@@ -4811,9 +7742,11 @@ final class HeaderImpeccableCascadeLockCss
             . ':is(.awa-shelf--carousel,.product-item) a.b2b-login-link{'
             . 'min-height:44px!important;min-width:44px!important;display:inline-flex!important;'
             . 'align-items:center!important;justify-content:center!important}}'
+            /* Promo CTA: inline no shell 32px — sem min-height 44 / pad±8 (estoura a barra). */
             . 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-b2b-promo-bar__cta{'
-            . 'display:inline-flex!important;align-items:center!important;position:relative!important;'
-            . 'min-height:44px!important;padding-block:8px!important;margin-block:-8px!important;'
+            . 'display:inline!important;align-items:unset!important;position:relative!important;'
+            . 'min-height:0!important;height:auto!important;max-height:none!important;'
+            . 'padding-block:0!important;margin-block:0!important;'
             . 'box-sizing:border-box!important}';
     }
 
@@ -4843,9 +7776,27 @@ final class HeaderImpeccableCascadeLockCss
             . '</style>';
     }
 
+    public static function audit30SurfaceStyleTag(): string
+    {
+        return '<style id="' . self::AUDIT30_SURFACE_STYLE_ID . '">'
+            . self::mediaVisualAudit30Rules()
+            . self::baixaVisualAudit30Rules()
+            . self::skipLinkFocusTerminalRules()
+            . self::footerCategoriesGridFillRules()
+            . self::footerCategoriesDesktopLayoutRules()
+            . '</style>';
+    }
+
     public static function stripHeaderEssentialFromHtml(string $html): string
     {
         $pattern = '/<style\\s+id="' . preg_quote(self::HEADER_ESSENTIAL_STYLE_ID, '/') . '"[^>]*>.*?<\\/style>\\s*/is';
+
+        return preg_replace($pattern, '', $html) ?? $html;
+    }
+
+    public static function stripAudit30SurfaceFromHtml(string $html): string
+    {
+        $pattern = '/<style\\s+id="' . preg_quote(self::AUDIT30_SURFACE_STYLE_ID, '/') . '"[^>]*>.*?<\\/style>\\s*/is';
 
         return preg_replace($pattern, '', $html) ?? $html;
     }
@@ -5011,6 +7962,7 @@ final class HeaderImpeccableCascadeLockCss
         $html = self::stripFooterTerminalFromHtml($html);
         $html = self::stripHomeLightFromHtml($html);
         $html = self::stripHomeImpeccableTerminalFromHtml($html);
+        $html = self::stripAudit30SurfaceFromHtml($html);
         $html = preg_replace(
             '/<script\\s+id="' . preg_quote(self::HOME_GUARD_SCRIPT_ID, '/') . '"[^>]*>.*?<\\/script>\\s*/is',
             '',
@@ -5023,9 +7975,6 @@ final class HeaderImpeccableCascadeLockCss
                 ? self::homeVisFixOnlyScriptTag()
                 : self::homeGuardScriptTag();
         }
-        if ($tag === '') {
-            return $html;
-        }
 
         if (!str_contains($html, 'id="awa-impeccable-critical-home"')) {
             $tag = self::footerOnlyStyleTag() . "\n" . $tag;
@@ -5034,6 +7983,9 @@ final class HeaderImpeccableCascadeLockCss
         if (!str_contains($html, self::HOME_IMPECCABLE_TERMINAL_STYLE_ID)) {
             $tag = self::homeImpeccableTerminalStyleTag() . "\n" . $tag;
         }
+
+        // Audit30 Média/Baixa — home omite cascade-lock; este bloco cobre dark header etc.
+        $tag = self::audit30SurfaceStyleTag() . "\n" . $tag;
 
         $pos = stripos($html, '</body>');
         if ($pos === false) {
@@ -5080,6 +8032,17 @@ final class HeaderImpeccableCascadeLockCss
     {
         return '<style id="' . self::HOME_IMPECCABLE_TERMINAL_STYLE_ID . '">'
             . self::homeImpeccableTerminalRules()
+            . self::footerCategoriesGridFillRules()
+            . self::footerCategoriesDesktopLayoutRules()
+            . self::footerDesktopTouch44R1Rules()
+            . self::footerCategoriesWhiteR16Rules()
+            . self::footerNewsletterWhiteR17Rules()
+            . self::footerCopyrightFlatR20Rules()
+            . self::footerAtendimentoStoreFlatR21Rules()
+            . self::categoryCarouselDesktopGutterR22Rules()
+            . self::shelfViewAllMobileHideR18Rules()
+            . self::shelfCarouselMobileChromeHideR19Rules()
+            . self::footerImpeccablePolishR66Rules()
             . '</style>';
     }
 
@@ -5091,13 +8054,47 @@ final class HeaderImpeccableCascadeLockCss
         return $h . ' .content-top-home :is(.awa-shelf--carousel,.awa-carousel-section)'
             . ' :is(.content-item-product.awa-product-card,.product-thumb,span.first-thumb,.item-product.awa-carousel-card-slot,'
             . '.product-image-container,.product-image-wrapper,.owl-stage-outer){overflow:visible!important}'
-            . $h . ' :is(.awa-category-carousel__viewport,.awa-category-carousel__item,a.awa-category-carousel__item,'
-            . '.awa-owl-progress.awa-carousel-chrome-ssr){overflow:visible!important}'
+            /* QA 2026-07-22 / H22b: category carousel — setas overlaid, track 100% (sem gutter 52×2). */
+            . $h . ' :is(.awa-owl-progress.awa-carousel-chrome-ssr){overflow:visible!important}'
             . $h . ' .top-home-content--category-carousel .awa-category-carousel__viewport{'
-            . 'margin-inline:0!important;padding:0!important;box-sizing:border-box!important}'
+            . 'margin-inline:0!important;padding:0!important;box-sizing:border-box!important;'
+            . 'overflow:hidden!important;overflow-x:hidden!important;position:relative!important}'
             . $h . ' .top-home-content--category-carousel .awa-category-carousel__track,'
             . $h . ' .top-home-content--category-carousel #awa-cat-carousel.awa-category-carousel__track{'
-            . 'margin-inline:0!important;padding:0!important;scroll-padding-inline:0!important;gap:8px!important}'
+            . 'padding:0!important;scroll-padding-inline:0!important;gap:8px!important;'
+            . 'overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important}'
+            . '@media (min-width:768px){'
+            /* r22g: product DOM — padded wrap, clipped viewport, nav left/right 4px */
+            . $h . ' .top-home-content--category-carousel .awa-category-carousel{'
+            . 'position:relative!important;padding-inline:48px!important;--awa-home-carousel-gutter:48px}'
+            . $h . ' .top-home-content--category-carousel .awa-category-carousel__viewport{'
+            . 'padding-inline:0!important;margin-inline:0!important;overflow:hidden!important;'
+            . 'overflow-x:hidden!important;width:100%!important}'
+            . $h . ' .top-home-content--category-carousel .awa-category-carousel__prev{'
+            . 'left:0!important;right:auto!important;z-index:5!important}'
+            . $h . ' .top-home-content--category-carousel .awa-category-carousel__next{'
+            . 'right:0!important;left:auto!important;z-index:5!important}'
+            . $h . ' .top-home-content--category-carousel .awa-category-carousel__track,'
+            . $h . ' .top-home-content--category-carousel #awa-cat-carousel.awa-category-carousel__track{'
+            . 'margin-inline:0!important;width:100%!important;max-width:100%!important}'
+            . '}'
+            . '@media (max-width:767px){'
+            . $h . ' .top-home-content--category-carousel .awa-category-carousel__track,'
+            . $h . ' .top-home-content--category-carousel #awa-cat-carousel.awa-category-carousel__track{'
+            . 'margin-inline:0!important;width:100%!important;max-width:100%!important}'
+            . '}'
+            . $h . ' .top-home-content--category-carousel :is(.awa-category-carousel__item,a.awa-category-carousel__item){'
+            . 'overflow:hidden!important;max-width:144px!important}'
+            /* Sticky: promo e irmao do sticky — esconde via body.awa-header-is-sticky */
+            . 'html body#html-body#html-body#html-body.awa-header-is-sticky:not(.onepagecheckout-index-index):not(.checkout-index-index)'
+            . ' .page-wrapper .awa-site-header :is(#header.header-container,#header.header-container>.header-content,'
+            . '#awa-b2b-promo-bar,.awa-b2b-promo-bar,.top-header.awa-b2b-promo-bar),'
+            . 'html body#html-body#html-body#html-body:has(.header-wrapper-sticky.is-sticky):not(.onepagecheckout-index-index):not(.checkout-index-index)'
+            . ' .page-wrapper .awa-site-header :is(#header.header-container,#header.header-container>.header-content,'
+            . '#awa-b2b-promo-bar,.awa-b2b-promo-bar,.top-header.awa-b2b-promo-bar){'
+            . 'display:none!important;height:0!important;max-height:0!important;min-height:0!important;'
+            . 'overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;'
+            . 'visibility:hidden!important;pointer-events:none!important}'
             . $h . ' :is(.swiper.awa-hero-swiper,.swiper-wrapper,.banner_item,.banner_item_bg,'
             . '.banner-slider.banner-slider2,.wrapper_slider){overflow:visible!important}'
             . $h . ' .ayo-home5-wrapper.ayo-home5-wrapper--template-driven{overflow:visible!important}'
@@ -5132,8 +8129,8 @@ final class HeaderImpeccableCascadeLockCss
             . 'position:relative!important;z-index:100280!important}'
             . $h . ' .awa-site-header[data-awa-header-mode="default"] .awa-account-dropdown__menu{'
             . 'background:var(--awa-bg,Canvas)!important;'
-            . 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 12%,Canvas))!important;'
-            . 'border-radius:8px!important;box-shadow:0 8px 20px color-mix(in srgb,CanvasText 14%,transparent)!important;'
+            . 'border:0!important;border-radius:8px!important;'
+            . 'box-shadow:0 4px 12px color-mix(in srgb,CanvasText 12%,transparent)!important;'
             . 'box-sizing:border-box!important;display:none!important;inset-block-start:calc(100% - 1px)!important;'
             . 'inset-inline-end:0!important;margin:0!important;margin-block-start:0!important;'
             . 'min-width:12rem!important;max-width:min(18rem,calc(100vw - 24px))!important;'
@@ -5149,7 +8146,8 @@ final class HeaderImpeccableCascadeLockCss
             . 'z-index:100120!important}'
             . '}'
             . $h . ' .header-control.awa-nav-bar .awa-nav-bar__inner{'
-            . 'align-items:center!important;padding-block:0!important;padding-inline:16px!important;'
+            . 'align-items:center!important;padding-block:0!important;'
+            . 'padding-inline:var(--awa-home-shell-gutter,24px)!important;'
             . 'min-height:48px!important;height:48px!important;max-height:48px!important}'
             . $h . ' .header-control.awa-nav-bar > .container{'
             . 'align-items:center!important;padding:0!important;padding-inline:0!important;'
@@ -5188,14 +8186,15 @@ final class HeaderImpeccableCascadeLockCss
             . $h . ' .content-top-home>.ayo-home5-wrapper.ayo-home5-wrapper--template-driven{'
             . 'padding-inline:0!important;box-sizing:border-box!important}'
             . $h . ' .content-top-home>.top-home-content--above-fold{'
-            . 'padding-inline:max(16px,env(safe-area-inset-left),env(safe-area-inset-right))!important;box-sizing:border-box!important}'
+            // r44c: padding no above-fold gerava inset 1280@x=30 e LCP re-stamp ~2.9s.
+            . 'padding-inline:0!important;box-sizing:border-box!important}'
             . $h . ' .content-top-home :is(.awa-hero-b2b-cta,.awa-home-pricing-notice,'
             . '.ayo-home5-wrapper--template-driven>:is(.top-home-content,.awa-home-section,.awa-carousel-section,#awa-home-niche-shelves)){'
             . 'padding-inline:max(16px,env(safe-area-inset-left),env(safe-area-inset-right))!important;box-sizing:border-box!important}'
             . $h . ' .content-top-home .ayo-home5-wrapper--template-driven>.top-home-content.awa-home-section{'
             . 'padding-inline:0!important}'
             . $h . ' .content-top-home>.top-home-content--above-fold>.banner-slider.banner-slider2{'
-            . 'width:100%!important;max-width:100%!important;margin-inline:0!important;margin-left:0!important;'
+            . 'width:100vw!important;max-width:100vw!important;margin-left:calc(50% - 50vw)!important;margin-right:0!important;'
             . 'padding:0!important;box-sizing:border-box!important;overflow:hidden!important}'
             . $h . ' .top-home-content--above-fold .banner_item .text-banner:not(:empty){'
             . 'background:linear-gradient(to top,rgb(15 23 42 / 72%) 0%,rgb(15 23 42 / 28%) 55%,transparent 100%)!important;'
@@ -5213,13 +8212,22 @@ final class HeaderImpeccableCascadeLockCss
             . $h . ' .awa-shelf--carousel :is(.awa-carousel__viewport,.owl-wrapper-outer){'
             . 'margin-inline:0!important;padding-inline:0!important;width:100%!important}'
             . $h . ' .content-top-home .awa-hero-b2b-cta{padding-block:12px!important;padding-inline:0!important}'
+            . $h . ' .content-top-home .ayo-home5-wrapper--template-driven{'
+            . 'gap:var(--awa-home-section-gap,12px)!important;row-gap:var(--awa-home-section-gap,12px)!important}'
             . $h . ' .content-top-home .ayo-home5-wrapper--template-driven > .top-home-content.awa-home-section{'
-            . 'padding-block:8px!important;padding-inline:0!important;margin-block:0!important}'
+            . 'padding-block:0!important;padding-inline:0!important;margin-block:0!important}'
             . $h . ' .content-top-home :is(.awa-section-header,.awa-shelf__header,.awa-category-carousel__header.awa-section-header){'
-            . 'margin-block-end:8px!important;padding-block-end:8px!important;gap:8px!important}'
+            . 'margin-block-end:var(--awa-home-section-gap,12px)!important;padding-block-end:0!important;'
+            . 'gap:var(--awa-home-section-gap,12px)!important}'
+            . $h . ' #maincontent.page-main{min-height:0!important;height:auto!important;margin:0!important;padding:0!important}'
+            . $h . ' :is(.page-footer,.page_footer){margin-block-start:var(--awa-home-section-gap,12px)!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5){'
             . '--awa-home-shell-gutter:16px;--awa-home-pad-compact:8px;--awa-home-pad-standard:12px;'
-            . '--awa-home-pad-featured:16px;--awa-home-pad-category:12px;--awa-home-section-gap:12px}'
+            . '--awa-home-pad-featured:16px;--awa-home-pad-category:12px;'
+            . '--awa-home-section-gap:var(--awa-stack-tight,var(--awa-space-3,12px))}'
+            /* P2.1 2026-07-28: contrato tablet/desktop gutter 24 (≥768); mobile permanece 16 */
+            . '@media (min-width:768px){html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5){'
+            . '--awa-home-shell-gutter:24px}}'
             . 'html body#html-body#html-body#html-body#html-body#html-body .page-wrapper'
             . ' :is(.page_footer,.page-footer) .footer-container .vela-content'
             . ' :is(p.awa-footer-atendimento__label,p.awa-footer-atendimento__label--social){'
@@ -5245,7 +8253,10 @@ final class HeaderImpeccableCascadeLockCss
 
     /**
      * Override final dos achados Impeccable de padding.
-     * Mantém o eixo visual do header, mas vence os resets do homeHeaderRailTerminalRules().
+     * r43b/CLS: NÃO reintroduzir padding-block:8px no shell — isso pintava
+     * .header-main em y:53 e o CSS async (rail/terminal) zerava depois (CLS ~0.038).
+     * Geometria alinhada ao awa-home-cls-geometry-guard (promo 44 + main 68 + nav 48).
+     * BUG-SHELL-CLS-GEOM-ALIGN-001: sticky 116 / stack 160 ≡ SSOT geom.
      */
     public static function homeImpeccablePaddingTerminalRules(): string
     {
@@ -5254,31 +8265,37 @@ final class HeaderImpeccableCascadeLockCss
         $wrap = $home . ' .page-wrapper';
         $header = $wrap . ' .awa-site-header';
         $safePad = 'max(var(--awa-space-4,16px),env(safe-area-inset-left),env(safe-area-inset-right))';
+        $mainH = 'var(--awa-header-main-row-h,var(--awa-header-main-h,68px))';
 
-        return $wrap . ' :is(#b2b-status-dropdown,.b2b-status-dropdown){'
+        return $home . '{'
+            . '--awa-header-nav-h:48px!important;--awa-nav-bar-h:48px!important;'
+            . '--awa-header-sticky-h:116px!important;--awa-header-stack-h:160px!important}'
+            . $wrap . ' :is(#b2b-status-dropdown,.b2b-status-dropdown){'
             . 'border-width:0!important;box-shadow:0 2px 8px rgb(15 23 42 / 10%)!important}'
             . $wrap . ' :is(.awa-site-header .header-wrapper-sticky,#header .header-wrapper-sticky){'
-            . 'padding:var(--awa-space-2,8px) ' . $safePad . '!important;'
-            . 'min-height:calc(var(--awa-header-main-h,68px) + var(--awa-space-4,16px))!important;'
-            . 'height:auto!important;max-height:none!important;box-sizing:border-box!important;overflow:visible!important}'
-            . $header . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap){'
-            . 'padding-block:var(--awa-space-2,8px)!important;padding-inline:0!important;'
-            . 'min-height:calc(var(--awa-header-main-h,68px) + var(--awa-space-4,16px))!important;'
-            . 'height:auto!important;max-height:none!important;box-sizing:border-box!important;overflow:visible!important}'
+            . 'padding-block:0!important;padding-inline:0!important;'
+            . 'min-height:var(--awa-header-sticky-h,116px)!important;'
+            . 'height:var(--awa-header-sticky-h,116px)!important;'
+            . 'max-height:var(--awa-header-sticky-h,116px)!important;'
+            . 'box-sizing:border-box!important;overflow:visible!important}'
+            . $header . ' :is(.header.awa-main-header,.header_main.awa-main-header-inner-wrap,.header-main){'
+            . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
+            . 'min-height:' . $mainH . '!important;height:' . $mainH . '!important;'
+            . 'max-height:' . $mainH . '!important;box-sizing:border-box!important;overflow:visible!important}'
             . $header . ' .header-wrapper-sticky > .header.awa-main-header{'
-            . 'padding:var(--awa-space-2,8px) var(--awa-space-4,16px)!important;'
-            . 'min-height:calc(var(--awa-header-main-h,68px) + var(--awa-space-4,16px))!important;'
-            . 'height:auto!important;max-height:none!important;box-sizing:border-box!important;overflow:visible!important}'
+            . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
+            . 'min-height:' . $mainH . '!important;height:' . $mainH . '!important;'
+            . 'max-height:' . $mainH . '!important;box-sizing:border-box!important;overflow:visible!important}'
             . $header . ' :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
-            . 'padding-block:var(--awa-space-2,8px)!important;padding-inline:var(--awa-space-4,16px)!important;'
-            . 'min-height:calc(var(--awa-header-main-h,68px) + var(--awa-space-4,16px))!important;'
-            . 'height:auto!important;max-height:none!important;box-sizing:border-box!important;overflow:visible!important}'
+            . 'padding-block:0!important;padding-inline:var(--awa-space-4,16px)!important;'
+            . 'min-height:' . $mainH . '!important;height:' . $mainH . '!important;'
+            . 'max-height:' . $mainH . '!important;box-sizing:border-box!important;overflow:visible!important}'
             . $header . ' .header-wrapper-sticky .header.awa-main-header '
             . ':is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
-            . 'padding-block:var(--awa-space-2,8px)!important;'
+            . 'padding-block:0!important;'
             . 'padding-inline:var(--awa-space-4,16px)!important;'
-            . 'min-height:calc(var(--awa-header-main-h,68px) + var(--awa-space-4,16px))!important;'
-            . 'height:auto!important;max-height:none!important;box-sizing:border-box!important;overflow:visible!important}'
+            . 'min-height:' . $mainH . '!important;height:' . $mainH . '!important;'
+            . 'max-height:' . $mainH . '!important;box-sizing:border-box!important;overflow:visible!important}'
             . $header . ' :is(.awa-header-search-col,.top-search) :is(.block-search,.block-content){'
             . 'padding:0!important;'
             . 'min-height:var(--awa-touch-min,44px)!important;'
@@ -5289,12 +8306,20 @@ final class HeaderImpeccableCascadeLockCss
             . $header . ' :is(.header-control.header-nav,.header-control.header-nav.awa-nav-bar,'
             . '.header-control.awa-nav-bar,.awa-nav-bar){'
             . 'padding:0 ' . $safePad . '!important;'
-            . 'min-height:var(--awa-nav-bar-h,48px)!important;'
-            . 'height:var(--awa-nav-bar-h,48px)!important;max-height:var(--awa-nav-bar-h,48px)!important;box-sizing:border-box!important;overflow:visible!important}'
+            . 'min-height:50px!important;'
+            . 'height:50px!important;max-height:50px!important;box-sizing:border-box!important;overflow:visible!important}'
             . $header . ' :is(.header-control.header-nav,.header-control.header-nav.awa-nav-bar,'
             . '.header-control.awa-nav-bar,.awa-nav-bar) > .container{'
-            . 'padding-inline:0!important;min-height:var(--awa-nav-bar-h,48px)!important;'
-            . 'height:var(--awa-nav-bar-h,48px)!important;max-height:var(--awa-nav-bar-h,48px)!important;box-sizing:border-box!important;overflow:visible!important}'
+            . 'padding-inline:0!important;min-height:50px!important;'
+            . 'height:50px!important;max-height:50px!important;box-sizing:border-box!important;overflow:visible!important}'
+            /* P2.1: tablet/desktop home — gutter no inner (24), zero no bar (evita double) */
+            . '@media (min-width:768px){'
+            . $header . ' :is(.header-control.header-nav,.header-control.header-nav.awa-nav-bar,'
+            . '.header-control.awa-nav-bar,.awa-nav-bar){padding-inline:0!important}'
+            . $header . ' :is(.awa-nav-bar__inner,.header-control.awa-nav-bar .awa-nav-bar__inner){'
+            . 'padding-inline:var(--awa-home-shell-gutter,24px)!important;'
+            . 'padding-left:var(--awa-home-shell-gutter,24px)!important;'
+            . 'padding-right:var(--awa-home-shell-gutter,24px)!important}}'
             . $wrap . ' :is(.page_footer,.page-footer) .awa-footer-newsletter{'
             . 'padding-inline:' . $safePad . '!important;box-sizing:border-box!important}';
     }
@@ -5324,8 +8349,9 @@ final class HeaderImpeccableCascadeLockCss
 
         $html = self::stripFooterTerminalFromHtml($html);
         $html = self::stripHeaderEssentialFromHtml($html);
-        $tag = self::footerOnlyStyleTag();
-        /* headerEssentialTerminalRules migrado para awa-header-distill-terminal (2026-06-16). */
+        $html = self::stripAudit30SurfaceFromHtml($html);
+        /* headerEssentialTerminalRules migrado para distill; Audit30 surface cobre dark/toggle/cookie. */
+        $tag = self::footerOnlyStyleTag() . "\n" . self::audit30SurfaceStyleTag();
         $pos = stripos($html, '</body>');
         if ($pos === false) {
             return $html . "\n" . $tag;
@@ -5401,7 +8427,7 @@ final class HeaderImpeccableCascadeLockCss
             . '--awa-header-nav-h:48px!important;--awa-nav-bar-h:var(--awa-header-nav-h)!important}'
             . $header . ' #header.header-container{height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'padding-block:0!important;margin:0!important}'
-            . $header . ' #header.header-container .header-content{height:32px!important;min-height:32px!important;max-height:32px!important;'
+            . $header . ' #header.header-container .header-content{height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'padding-block:0!important;margin:0 auto!important}'
             . $header . ' .header-wrapper-sticky{display:flex!important;flex-direction:column!important;'
             . 'height:auto!important;min-height:118px!important;max-height:none!important;'
@@ -5548,6 +8574,7 @@ final class HeaderImpeccableCascadeLockCss
             && str_contains($html, '--awa-header-polish-ease:cubic-bezier(.22,1,.36,1)')
             && str_contains($html, '.counter.qty .counter-number')
             && str_contains($html, 'font-weight:650!important')
+            && str_contains($html, 'awa-header-primary-nav.menu_primary[data-awa-topnav-empty="1"]')
             && str_contains($html, 'awa-header-primary-nav.menu_primary:has(nav.top-menu:empty)')
             && str_contains($html, 'margin-inline:calc(50% - 50vw)')
             && str_contains($html, 'awa-header-account-prompt__line1')

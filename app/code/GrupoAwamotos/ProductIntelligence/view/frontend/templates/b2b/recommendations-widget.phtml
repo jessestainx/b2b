@@ -118,6 +118,7 @@ foreach ($recommendations as $item) {
                         <form data-role="tocart-form"
                               action="<?= $block->escapeUrl($postParams['action']) ?>"
                               method="post">
+                            <?= $block->getBlockHtml('formkey') ?>
                             <?php foreach ($postParams['data'] as $key => $value): ?>
                                 <input type="hidden"
                                        name="<?= $block->escapeHtmlAttr($key) ?>"
@@ -187,6 +188,7 @@ foreach ($recommendations as $item) {
                         <form data-role="tocart-form"
                               action="<?= $block->escapeUrl($postParams['action']) ?>"
                               method="post">
+                            <?= $block->getBlockHtml('formkey') ?>
                             <?php foreach ($postParams['data'] as $key => $value): ?>
                                 <input type="hidden"
                                        name="<?= $block->escapeHtmlAttr($key) ?>"

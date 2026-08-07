@@ -8,6 +8,7 @@
     </head>
     <update handle="customer_account"/>
     <body>
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Quote\History"
                    name="b2b.quote.history"

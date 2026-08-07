@@ -166,6 +166,7 @@ class BoletoSyncTest extends TestCase
             'PEDIDO' => 194122,
             'BANCO' => '001',
             'CARTEIRA' => '017',
+            'CC' => 2,
             'NROBOLETO' => '3599',
             'NRODOCUMENTO' => 'OUT:000010547/E',
             'DTVENCIMENTO' => '2026-08-06',
@@ -179,6 +180,10 @@ class BoletoSyncTest extends TestCase
             'BENEFICIARIO_CEP' => '14808-110',
             'SACADO_NOME' => 'FERNANDO JOSE PAVAO & CIA LTDA',
             'SACADO_CNPJ' => '66.618.406/0001-40',
+            'SICOOB_AGENCIA' => '',
+            'SICOOB_CEDENTE' => '',
+            'SICOOB_DIGCEDENTE' => '',
+            'SICOOB_MODALIDADE' => '',
         ]);
 
         $result = $this->boletoSync->getBoletoPrintableRawData(247091, 7219);
@@ -186,6 +191,7 @@ class BoletoSyncTest extends TestCase
         $this->assertSame(2, $result['filial']);
         $this->assertSame('001', $result['banco']);
         $this->assertSame('017', $result['carteira']);
+        $this->assertSame(2, $result['cc']);
         $this->assertSame(
             'RUA PROFESSORA ERGILIA MICELLI, JD REGINA, ARARAQUARA, SP, 14808-110',
             $result['beneficiario_endereco']

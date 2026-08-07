@@ -35,7 +35,7 @@ class MenuRestrictionPlugin
 
         // Vendedoras cockpit-only: menu AWA Comercial (itens com ACL comercial).
         // Menu unificado B2B usa pais platform_* que vendedoras não possuem — sidebar fica vazia.
-        $keepRootId = self::COMMERCIAL_ROOT_ID;
+        $keepRootId = self::PLATFORM_ROOT_ID;
 
         foreach ($menu as $item) {
             if ($item->getId() !== $keepRootId) {

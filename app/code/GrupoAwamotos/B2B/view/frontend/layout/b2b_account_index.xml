@@ -6,6 +6,8 @@
     <head>
         <title>Minha Conta B2B</title>
         <!-- dashboard.css + dashboard-distill.css consolidados em 2026-06-15 (save 1 render-blocking request) -->
+        <!-- ERP suggestions embedded no dashboard — fundos primary/navy + tipografia do bloco -->
+        <css src="GrupoAwamotos_ERPIntegration::css/suggestions-page.css"/>
         <css src="GrupoAwamotos_B2B::css/account/dashboard-combined.css"/>
         <css src="css/b2b/dashboard-grid.css"/>
         <css src="GrupoAwamotos_B2B::css/account/awa-b2b-dashboard-layout-reset.css" order="9999"/>
@@ -14,11 +16,11 @@
         <attribute name="class" value="b2b-account-dashboard"/>
         <referenceBlock name="rexisml.recommendations" remove="true"/>
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
-        <referenceContainer name="head.additional">
+        <referenceBlock name="head.additional">
             <block class="Magento\Framework\View\Element\Template"
                    name="b2b.dashboard.late.css"
                    template="GrupoAwamotos_B2B::head/b2b-dashboard-css.phtml"/>
-        </referenceContainer>
+        </referenceBlock>
         <referenceContainer name="content">
             <block class="GrupoAwamotos\B2B\Block\Account\Dashboard"
                    name="b2b.account.dashboard"

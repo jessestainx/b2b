@@ -366,7 +366,7 @@ HTML;
   <p>Estamos aqui para ajudar você antes, durante e depois da compra.</p>
   <ul>
     <li><strong>Telefone:</strong> (11) 4002-8922</li>
-    <li><strong>E-mail:</strong> <a href="mailto:suporte@awamotos.com.br">suporte@awamotos.com.br</a></li>
+    <li><strong>E-mail:</strong> <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a></li>
     <li><strong>Horário:</strong> {{config path="general/store_information/hours"}}</li>
   </ul>
   <p>Se preferir, use a página de <a href="{{store url='contact'}}">Contato</a>.</p>
@@ -473,9 +473,7 @@ HTML;
     <div class="atacado-card">
       <h3>📦 Pedido mínimo</h3>
       <ul>
-        <li>Primeiro pedido: R$ 500,00</li>
-        <li>Pedidos seguintes: R$ 300,00</li>
-        <li>Frete grátis acima de R$ 1.500,00</li>
+        <li>Primeiro pedido: R$ 1.500,00</li>
         <li>Sem quantidade mínima por item</li>
       </ul>
     </div>
@@ -500,10 +498,10 @@ HTML;
 
   <h2>Formas de Pagamento</h2>
   <ul>
-    <li><strong>Boleto:</strong> 28 dias para clientes com cadastro aprovado</li>
-    <li><strong>Cartão de Crédito:</strong> Parcelamento em até 6x sem juros</li>
-    <li><strong>Pix:</strong> 3% de desconto adicional à vista</li>
-    <li><strong>Crédito Rotativo:</strong> Disponível para clientes VIP após análise</li>
+    <li><strong>Pix</strong></li>
+    <li><strong>Boleto bancário</strong></li>
+    <li><strong>Pagamento à vista</strong></li>
+    <li><strong>Prazo:</strong> mediante análise financeira — consulte um de nossos atendentes</li>
   </ul>
 
   <div class="atacado-cta">
@@ -516,8 +514,8 @@ HTML;
   <p>Nossa equipe B2B está à disposição para atender você:</p>
   <ul>
     <li><strong>WhatsApp Comercial:</strong> (11) 99999-8888</li>
-    <li><strong>E-mail:</strong> <a href="mailto:atacado@awamotos.com.br">atacado@awamotos.com.br</a></li>
-    <li><strong>Horário:</strong> Segunda a sexta, das 8h às 18h</li>
+    <li><strong>E-mail:</strong> <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a></li>
+    <li><strong>Horário:</strong> De 2ª a 5ª feira, das 8h às 18h; sexta-feira, das 8h às 17h.</li>
   </ul>
 </div>
 HTML;
@@ -583,7 +581,7 @@ HTML;
   <h2>📧 Como exercer seus direitos?</h2>
   <p>Para exercer qualquer um dos direitos acima, entre em contato conosco:</p>
   <ul>
-    <li><strong>E-mail do DPO:</strong> <a href="mailto:privacidade@awamotos.com.br">privacidade@awamotos.com.br</a></li>
+    <li><strong>E-mail do DPO:</strong> <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a></li>
     <li><strong>Formulário:</strong> <a href="{{store url='contact'}}">Página de Contato</a> (selecione "LGPD/Privacidade")</li>
     <li><strong>Prazo de resposta:</strong> Até 15 dias úteis</li>
   </ul>
@@ -667,7 +665,7 @@ HTML;
   <p>Fica eleito o foro da comarca de {{config path="general/store_information/city"}} para dirimir quaisquer controvérsias.</p>
 
   <h2>11. Contato</h2>
-  <p>Dúvidas sobre estes termos? Entre em contato pelo <a href="{{store url='contact'}}">formulário de contato</a> ou e-mail <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>.</p>
+  <p>Dúvidas sobre estes termos? Entre em contato pelo <a href="{{store url='contact'}}">formulário de contato</a> ou e-mail <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a>.</p>
 </div>
 HTML;
     }
@@ -894,11 +892,10 @@ HTML;
 
   <h2>💳 Formas de Pagamento B2B</h2>
   <ul>
-    <li><strong>Pix:</strong> +3% de desconto adicional</li>
-    <li><strong>Boleto à vista:</strong> Valor da tabela</li>
-    <li><strong>Boleto 28 dias:</strong> Para grupos Atacado e VIP</li>
-    <li><strong>Cartão de Crédito:</strong> Até 6x sem juros</li>
-    <li><strong>Crédito Rotativo:</strong> Exclusivo grupo VIP</li>
+    <li><strong>Pix</strong></li>
+    <li><strong>Boleto bancário</strong></li>
+    <li><strong>Pagamento à vista</strong></li>
+    <li><strong>Prazo:</strong> mediante análise financeira — consulte um de nossos atendentes</li>
   </ul>
 
   <div class="desconto-cta">
@@ -1293,9 +1290,9 @@ HTML;
     {
             return <<<HTML
 <div class="benefits-bar">
-    <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/truck.svg'}}" alt="Envio"> Envio para todo o Brasil</div>
-    <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/clock.svg'}}" alt="Prazos"> Prazos e valores no carrinho</div>
-    <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/shield.svg'}}" alt="Suporte"> Ajuda para compatibilidade</div>
+    <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/truck.svg'}}" alt="Envio" width="24" height="24" decoding="async"> Envio para todo o Brasil</div>
+    <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/clock.svg'}}" alt="Prazos" width="24" height="24" decoding="async"> Prazos e valores no carrinho</div>
+    <div class="benefits-bar__item"><img class="benefits-bar__icon" src="{{view url='images/icons/shield.svg'}}" alt="Suporte" width="24" height="24" decoding="async"> Ajuda para compatibilidade</div>
 </div>
 HTML;
     }
@@ -1510,7 +1507,7 @@ HTML;
 <div class="head-contact">
     <span>Atendimento: <a href="https://wa.me/5516997367588" target="_blank" rel="noopener">(16) 99736-7588</a></span>
     <span class="separator">•</span>
-    <span><a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a></span>
+    <span><a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a></span>
 </div>
 HTML;
     }
@@ -1526,7 +1523,7 @@ HTML;
     <span class="separator">•</span>
     <span class="topbar-info topbar-info--hours">
         <i class="fa fa-clock-o" aria-hidden="true"></i>
-        <span class="info-text">Seg-Sex: 9h às 17h</span>
+        <span class="info-text">2ª–5ª: 8h–18h; sex: 8h–17h</span>
     </span>
     <span class="separator">•</span>
     <span class="topbar-info topbar-info--phone">
@@ -1564,7 +1561,7 @@ HTML;
     <div class="email">
         <i class="fa fa-envelope-o" aria-hidden="true"></i>
         <span class="label">E-mail</span>
-        <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
+        <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a>
     </div>
 </div>
 HTML;
@@ -1636,7 +1633,7 @@ HTML;
             <div class="velaContent velaContentSupport">
                 <div class="support-mail">
                     <label>Dúvidas?</label>
-                    <strong><a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a></strong>
+                    <strong><a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a></strong>
                 </div>
             </div>
         </div>
@@ -1711,7 +1708,7 @@ HTML;
                     </div>
                     <div class="contacinfo-address contactinfo-item">
                         <label>E-mail</label>
-                        <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
+                        <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a>
                     </div>
                     <div class="contacinfo-address contactinfo-item">
                         <label>Endereço</label>
@@ -1821,7 +1818,7 @@ HTML;
                     </div>
                     <div class="b2b-contact-item">
                         <span class="b2b-contact-label">E-mail:</span>
-                        <a href="mailto:atacado@awamotos.com.br" class="b2b-contact-value">atacado@awamotos.com.br</a>
+                        <a href="mailto:awamotos@awamotos.com.br" class="b2b-contact-value">awamotos@awamotos.com.br</a>
                     </div>
                     <div class="b2b-contact-hours">
                         <strong>Atendimento B2B:</strong> Seg-Sex 8h às 18h | Sáb 8h às 12h
@@ -1889,7 +1886,7 @@ HTML;
 <div class="footer-payment-methods">
     <div class="payment-methods-wrapper">
         <h5 class="footer-title">Pagamento Seguro</h5>
-        <img src="{{view url='images/payment_methods.png'}}" alt="Bandeiras de cartão de crédito, boleto e pix" class="payment-methods-img" loading="lazy">
+        <img src="{{view url='images/payment_methods.png'}}" alt="Pix, boleto bancário e pagamento à vista" class="payment-methods-img" loading="lazy">
     </div>
     <div class="security-seals-wrapper">
         <h5 class="footer-title">Compra Segura</h5>
@@ -2073,13 +2070,13 @@ HTML;
         return <<<HTML
 <div class="rowFlex">
 <div class="col-xs-12 col-sm-4 col-md-4 col_banner1">
-<div class="bs-banner "><a class="banner-hover" href="{{store url="shipping"}}"><img loading="lazy" src="{{media url=wysiwyg/home-banners/banner-envio.jpg}}" alt="Envio Imediato para todo o Brasil"></a></div>
+<div class="bs-banner "><a class="banner-hover" href="{{store url="shipping"}}"><img loading="lazy" decoding="async" src="{{media url=wysiwyg/home-banners/banner-envio.webp}}" alt="Envio Imediato para todo o Brasil" width="1024" height="1024"></a></div>
 </div>
 <div class="col-xs-12 col-sm-4 col-md-4 col_banner2">
-<div class="bs-banner "><a class="banner-hover" href="{{store url="formas-pagamento"}}"><img loading="lazy" src="{{media url=wysiwyg/home-banners/banner-pagamento.jpg}}" alt="Pagamento Seguro - Cartões, Pix e Boleto"></a></div>
+<div class="bs-banner "><a class="banner-hover" href="{{store url="formas-pagamento"}}"><img loading="lazy" decoding="async" src="{{media url=wysiwyg/home-banners/banner-pagamento.webp}}" alt="Pagamento Seguro - Pix, Boleto e à vista" width="1024" height="1024"></a></div>
 </div>
 <div class="col-xs-12 col-sm-4 col-md-4 col_banner3">
-<div class="bs-banner bs-banner-last"><a class="banner-hover" href="{{store url="ofertas.html"}}"><img loading="lazy" src="{{media url=wysiwyg/home-banners/banner-ofertas.jpg}}" alt="Ofertas e Promoções AWA Motos"></a></div>
+<div class="bs-banner bs-banner-last"><a class="banner-hover" href="{{store url="ofertas.html"}}"><img loading="lazy" decoding="async" src="{{media url=wysiwyg/home-banners/banner-ofertas.webp}}" alt="Ofertas e Promoções AWA Motos" width="1024" height="1024"></a></div>
 </div>
 </div>
 HTML;
@@ -2116,7 +2113,7 @@ HTML;
                     <div class="boxServiceImage boxServiceImage2"></div>
                     <div class="boxServiceContent">
                         <h4 class="boxServiceTitle">Pagamento seguro</h4>
-                        <div class="boxServiceDesc"><a href="{{store url='formas-pagamento'}}" title="Ver formas de pagamento">Cartões, Pix e boleto</a></div>
+                        <div class="boxServiceDesc"><a href="{{store url='formas-pagamento'}}" title="Ver formas de pagamento">Pix, boleto e à vista</a></div>
                     </div>
                 </div>
             </div>

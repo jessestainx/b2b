@@ -61,6 +61,7 @@ class View extends \Magento\CatalogSearch\Controller\Result\Index
 
         $this->registry->register('search_landing_page', $page);
 
+
         $resultPage = $this->resultPageFactory->create();
 
         $resultPage->initLayout();

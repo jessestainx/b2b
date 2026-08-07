@@ -8,10 +8,24 @@ declare(strict_types=1);
 
 /** @var \Magento\Framework\View\Element\Template $block */
 $cssUrl = $block->getViewFileUrl('GrupoAwamotos_B2B::css/account/awa-b2b-pages-late.css');
-$assetVersion = '20260707-v63-header-normalize';
+$assetVersion = '20260717-v85-modal-zstack';
 ?>
 <style id="awa-b2b-pages-critical">
 /* §148 critical — superfícies operacionais antes do late.css async */
+
+/* 2026-07-16 critical: shell mobile account (anti FOUC overflow 590px) */
+@media (max-width: 768px) {
+    html body#html-body#html-body:is(.account, [class*="b2b-"]) .page-wrapper .page-main > .columns > :is(
+        .sidebar, .sidebar-main, [class*="col-sm-3"],
+        .column.main, .col-main, [class*="col-sm-9"], [class*="col-"]
+    ) {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        box-sizing: border-box !important;
+    }
+}
 
 /* Auth KO shell — nunca inline no portal logado (modal-only em catálogo/checkout) */
 html body#html-body:is(.account, .b2b-account-dashboard, .b2b-account-shell) #authenticationPopup,

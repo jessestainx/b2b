@@ -147,6 +147,11 @@ class BlockPlaceOrderPlugin
 
         if ($isB2bGroup) {
             $customerState = $this->checkoutAccessValidator->resolveCustomerState($customerId);
+            if ($customerState === CheckoutAccessValidator::STATE_PENDING_ERP) {
+                throw new CouldNotSaveException(
+                    __($this->config->getPendingErpMessage() ?: 'Sua tabela de preços está sendo definida. Consulte o departamento de vendas.')
+                );
+            }
             if ($customerState !== CheckoutAccessValidator::STATE_APPROVED) {
                 throw new CouldNotSaveException(
                     __('Sua conta precisa ser aprovada antes de realizar compras. Por favor, aguarde a aprovação.')

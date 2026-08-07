@@ -28,16 +28,22 @@ final class PreprocessedTemplateHealer
 
     public function extractMissingPathFromMessage(string $message): ?string
     {
-        if (!preg_match('/include\(([^)]+)\): Failed to open stream: No such file or directory/', $message, $matches)) {
-            return null;
+        if (preg_match(
+            '/include\(([^)]+)\): Failed to open stream: No such file or directory/',
+            $message,
+            $matches
+        )) {
+            $candidate = trim((string) $matches[1]);
+            return $candidate === '' ? null : str_replace('\\', '', $candidate);
         }
 
-        $candidate = trim((string) $matches[1]);
-        if ($candidate === '') {
-            return null;
+        // Production: Template::fetchView loga e engole — path vem nesta mensagem.
+        if (preg_match("/Invalid template file: '([^']+)'/", $message, $matches)) {
+            $candidate = trim((string) $matches[1]);
+            return $candidate === '' ? null : str_replace('\\', '', $candidate);
         }
 
-        return str_replace('\\', '', $candidate);
+        return null;
     }
 
     public function resolveSourcePath(string $missingPreprocessedPath): ?string

@@ -15,7 +15,13 @@ use Rokanthemes\Blog\Model\ResourceModel\Post\CollectionFactory as PostCollectio
 
 class PublicEmailNormalizer
 {
-    private const EMAIL_PATTERN = '/\b(contato|atacado|privacidade|suporte|entregas)@(?:awamotos\.com|awamotos\.com\.br|grupoawamotos\.com\.br|gruposrv1113343\.hstgr\.cloud\.br)\b/i';
+    private const CANONICAL_EMAIL = 'awamotos@awamotos.com.br';
+
+    /**
+     * E-mails públicos/institucionais da AWA → caixa única.
+     * Não cobre caixas geradas (whatsapp_*, vendedor*) nem Gmail/SMTP.
+     */
+    private const EMAIL_PATTERN = '/\b(?:contato|atacado|privacidade|suporte|entregas|sac|falecom|teste|oportunidades|admin|rh|vendas|noreply|monitoring|awamotos)@(?:awamotos\.com\.br|awamotos\.com|grupoawamotos\.com\.br)\b/i';
 
     public function __construct(
         private readonly BlockCollectionFactory $blockCollectionFactory,
@@ -204,9 +210,14 @@ class PublicEmailNormalizer
         $normalizedContent = (string) preg_replace_callback(
             self::EMAIL_PATTERN,
             static function (array $matches) use (&$replacedCount): string {
+                $email = strtolower($matches[0]);
+                if ($email === self::CANONICAL_EMAIL) {
+                    return self::CANONICAL_EMAIL;
+                }
+
                 $replacedCount++;
 
-                return strtolower($matches[1]) . '@awamotos.com.br';
+                return self::CANONICAL_EMAIL;
             },
             $content
         );

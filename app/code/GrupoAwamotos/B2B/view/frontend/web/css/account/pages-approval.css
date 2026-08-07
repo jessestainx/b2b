@@ -52,7 +52,7 @@
 .b2b-approval-page .btn-approve,
 .b2b-approval-page .btn-reject {
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     min-height: 44px;
     padding: 10px 16px;
     color: var(--awa-bg-surface, #ffffff);

@@ -134,7 +134,7 @@ app/code/GrupoAwamotos/MaintenanceMode/
 | YouTube | https://youtube.com/@awamotos7661 |
 | WhatsApp | 5516997367588 |
 | Telefone | (16) 3301-1890 |
-| E-mail | sac@awamotos.com.br |
+| E-mail | awamotos@awamotos.com.br |
 
 ---
 
@@ -181,8 +181,8 @@ php bin/magento setup:di:compile
 - 📍 CEP 14808-390 - Araraquara/SP
 - 📞 (16) 3301-1890
 - 💬 (16) 99736-7588
-- ✉️ sac@awamotos.com.br
-- 📋 CNPJ: 06.093.812/0001-05
+- ✉️ awamotos@awamotos.com.br
+- 📋 CNPJ: 51.274.901/0001-02
 
 ---
 

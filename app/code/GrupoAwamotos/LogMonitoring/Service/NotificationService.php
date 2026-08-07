@@ -142,7 +142,7 @@ class NotificationService
                 ])
                 ->setTemplateVars($templateVars)
                 ->setFromByScope([
-                    'email' => 'monitoring@awamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'name' => 'AWA Motos Monitoring'
                 ])
                 ->addTo($recipients)

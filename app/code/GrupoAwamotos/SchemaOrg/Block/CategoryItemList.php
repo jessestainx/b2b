@@ -15,7 +15,7 @@ use Magento\Framework\View\Element\Template\Context;
 /**
  * Gera schema.org ItemList com os primeiros produtos da categoria atual
  */
-final class CategoryItemList extends Template
+class CategoryItemList extends Template
 {
     private const MAX_ITEMS = 10;
 

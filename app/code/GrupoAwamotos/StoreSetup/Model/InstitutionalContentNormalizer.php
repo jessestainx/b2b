@@ -87,10 +87,7 @@ class InstitutionalContentNormalizer
             '/\(\s*11\s*\)\s*99999-9999/' => '(16) 99736-7588',
             '/\(\s*11\s*\)\s*4002-8922/' => '(16) 99736-7588',
             '/\+55\s*16\s*99999-9999/' => '+55 16 99736-7588',
-            '/contato@awamotos\.com(?:\.br)*/i' => 'contato@awamotos.com.br',
-            '/privacidade@awamotos\.com(?:\.br)*/i' => 'privacidade@awamotos.com.br',
-            '/atacado@grupoawamotos\.com\.br/i' => 'atacado@awamotos.com.br',
-            '/suporte@grupoawamotos\.com\.br/i' => 'suporte@awamotos.com.br',
+            '/\b(?:contato|atacado|privacidade|suporte|entregas|sac|falecom|teste|oportunidades|admin|rh|vendas|noreply|monitoring)@(?:awamotos\.com\.br|awamotos\.com|grupoawamotos\.com\.br)\b/i' => 'awamotos@awamotos.com.br',
         ];
 
         foreach ($replacements as $pattern => $replacement) {

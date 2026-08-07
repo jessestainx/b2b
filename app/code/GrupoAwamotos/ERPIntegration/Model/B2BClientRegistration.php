@@ -185,29 +185,96 @@ class B2BClientRegistration
     }
 
     /**
+     * Full "Cadastro de Cliente" row (ORIGEM_CLIENTE / 7D4C6FBD).
+     *
+     * Distinct from {@see isClientRegistered()}: prospect-only (753ADB36) is NOT Cadastro.
+     * Bridge confirmed + Importar Pedidos require this origin (or alias Cadastro).
+     */
+    public function hasCadastroCliente(int $erpClientCode): bool
+    {
+        if ($erpClientCode <= 0) {
+            return false;
+        }
+
+        return $this->hasValidatorEntry(self::ORIGEM_CLIENTE, $erpClientCode);
+    }
+
+    /**
      * Whether Magento may release held B2B orders to oc_order for Sectra Importar Pedidos.
      *
      * Runtime evidence from Sectra desktop: native ERP customers still fail
      * "Cliente não foi encontrado" when the B2B validator origin is missing.
      * Keep this gate aligned with the desktop import contract.
+     *
+     * Autonomy: when ERP write_connection is enabled, Magento may INSERT Cadastro via
+     * {@see registerClient()} (same contract as Sectra "Exportar Clientes") — no desktop click.
      */
     public function isClientReadyForSectraOrderImport(int $erpClientCode): bool
     {
         if ($erpClientCode <= 0) {
             return false;
         }
-        // STRICT gate: only release B2B orders when Sectra has created a full
-        // 'Cadastro de Cliente' entry (7D4C6FBD). Prospect (753ADB36) entries
-        // are created by 'Importar Clientes Prospect' but Sectra still requires
-        // 7D4C6FBD from 'Exportar Clientes' before it can import the order.
-        if ($this->hasValidatorEntry(self::ORIGEM_CLIENTE, $erpClientCode)) {
+        // STRICT gate: only release B2B orders when a full Cadastro de Cliente
+        // entry (7D4C6FBD) exists. Prospect (753ADB36) alone is not enough.
+        if ($this->hasCadastroCliente($erpClientCode)) {
             return true;
         }
         // Accept alias: when prospect CHAVE was remapped (e.g. 18771 → 19195)
         $prospectChave = $this->resolveProspectIntegrationChave($erpClientCode);
         return $prospectChave !== null
             && $prospectChave !== $erpClientCode
-            && $this->hasValidatorEntry(self::ORIGEM_CLIENTE, $prospectChave);
+            && $this->hasCadastroCliente($prospectChave);
+    }
+
+    /**
+     * Active ERP price-list codes (FATORPRECO) keyed by FN_FORNECEDORES.CODIGO.
+     *
+     * Used by the OpenCart bridge so oc_customer.customer_group_id matches Sectra.
+     *
+     * @param list<int> $erpClientCodes
+     * @return array<int, int> erpCode => fatorPreco
+     */
+    public function getActiveFatorPrecoByClientCodes(array $erpClientCodes): array
+    {
+        $codes = [];
+        foreach ($erpClientCodes as $code) {
+            $code = (int) $code;
+            if ($code > 0) {
+                $codes[$code] = true;
+            }
+        }
+        if ($codes === []) {
+            return [];
+        }
+
+        $map = [];
+        try {
+            foreach (array_chunk(array_keys($codes), 200) as $chunk) {
+                $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+                $rows = $this->readConnection->query(
+                    "SELECT f.CODIGO,
+                            CASE WHEN fp.CKATIVO = 'S' THEN f.FATORPRECO ELSE NULL END AS FATORPRECO
+                       FROM FN_FORNECEDORES f
+                       LEFT JOIN VE_FATORPRECO fp ON fp.CODIGO = f.FATORPRECO
+                      WHERE f.CKCLIENTE = 'S'
+                        AND f.CODIGO IN ({$placeholders})",
+                    $chunk
+                );
+                foreach ($rows as $row) {
+                    $erpCode = (int) ($row['CODIGO'] ?? 0);
+                    $fator = (int) round((float) ($row['FATORPRECO'] ?? 0));
+                    if ($erpCode > 0 && $fator > 0) {
+                        $map[$erpCode] = $fator;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->logger->warning(
+                '[B2BClientRegistration] getActiveFatorPrecoByClientCodes failed: ' . $e->getMessage()
+            );
+        }
+
+        return $map;
     }
 
     /**
@@ -471,9 +538,40 @@ class B2BClientRegistration
     }
 
     /**
-     * Register a client in Sectra B2B integration (GR_INTEGRACAOVALIDADOR)
+     * FN_FORNECEDORES has this CODIGO as a real customer (CKCLIENTE=S).
+     */
+    private function erpSupplierExistsAsCliente(int $erpClientCode): bool
+    {
+        $lookupCode = $this->resolveErpSupplierLookupCode($erpClientCode);
+        if ($lookupCode <= 0) {
+            return false;
+        }
+
+        try {
+            $found = $this->readConnection->fetchColumn(
+                "SELECT TOP 1 CODIGO FROM FN_FORNECEDORES WHERE CODIGO = ? AND CKCLIENTE = 'S'",
+                [$lookupCode]
+            );
+
+            return $found !== false && $found !== null && (int) $found > 0;
+        } catch (\Exception $e) {
+            $this->logger->warning(
+                '[B2B Registration] FN_FORNECEDORES lookup failed for ' . $erpClientCode . ': ' . $e->getMessage()
+            );
+            return false;
+        }
+    }
+
+    /**
+     * Register a client Cadastro (ORIGEM_CLIENTE) in GR_INTEGRACAOVALIDADOR.
      *
-     * @return bool True if registered successfully, false otherwise
+     * Autonomous alternative to Sectra desktop "Exportar Clientes" when write_connection
+     * is enabled. Prospect-only rows must NOT short-circuit this method — Importar Pedidos
+     * and oc_customer_b2b_confirmed require Cadastro (7D4C6FBD).
+     *
+     * Safety: refuses codes absent from FN_FORNECEDORES (CKCLIENTE=S).
+     *
+     * @return bool True if Cadastro exists or was inserted successfully
      */
     public function registerClient(int $erpClientCode): bool
     {
@@ -481,10 +579,17 @@ class B2BClientRegistration
             return false;
         }
 
-        // Already registered? (Sectra is responsible for registration via 'Exportar Clientes')
-        if ($this->isClientRegistered($erpClientCode)) {
-            $this->logger->info("[B2B Registration] Client $erpClientCode already registered");
+        // Only Cadastro counts as done — prospect-only must still insert 7D4C6FBD.
+        if ($this->hasCadastroCliente($erpClientCode)) {
+            $this->logger->info("[B2B Registration] Client $erpClientCode already has Cadastro de Cliente");
             return true;
+        }
+
+        if (!$this->erpSupplierExistsAsCliente($erpClientCode)) {
+            $this->logger->warning(
+                "[B2B Registration] Refusing Cadastro for $erpClientCode — not CKCLIENTE in FN_FORNECEDORES"
+            );
+            return false;
         }
 
         $pdo = $this->getWriteConnection();
@@ -550,6 +655,197 @@ class B2BClientRegistration
             $this->logger->error('[B2B Registration] Failed to register client ' . $erpClientCode . ': ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Create FN_FORNECEDORES prospect stub (CKPROSPECT=S) — Magento-side equivalent of
+     * Sectra "Importar Clientes Prospect". Requires write_connection INSERT on FN_FORNECEDORES.
+     *
+     * Does not invent a full fiscal master: uses the same minimal defaults Sectra writes
+     * for new prospects (FATORPRECO=1, endereço placeholder when absent).
+     *
+     * @param array{
+     *     razao?: string,
+     *     fantasia?: string,
+     *     ie?: string,
+     *     endereco?: string,
+     *     numero?: string,
+     *     bairro?: string,
+     *     cidade?: string,
+     *     cep?: string,
+     *     uf?: string
+     * } $profile
+     * @return int|null New FN_FORNECEDORES.CODIGO or null on failure
+     */
+    public function createErpProspectStub(string $cnpjDigits, array $profile = []): ?int
+    {
+        $cnpjDigits = preg_replace('/\D+/', '', $cnpjDigits) ?? '';
+        if (strlen($cnpjDigits) !== 14) {
+            $this->logger->warning('[B2B Registration] createErpProspectStub refused — CNPJ must have 14 digits');
+            return null;
+        }
+
+        $existing = $this->findErpCodigoByCnpjDigits($cnpjDigits);
+        if ($existing !== null) {
+            return $existing;
+        }
+
+        $pdo = $this->getWriteConnection();
+        if (!$pdo) {
+            $this->logger->warning('[B2B Registration] createErpProspectStub — write connection unavailable');
+            return null;
+        }
+
+        $razao = $this->truncateErpString((string) ($profile['razao'] ?? ('CNPJ ' . $cnpjDigits)), 60);
+        $fantasia = $this->truncateErpString((string) ($profile['fantasia'] ?? $razao), 60);
+        $ie = $this->truncateErpString((string) ($profile['ie'] ?? 'ISENTO'), 20);
+        if ($ie === '') {
+            $ie = 'ISENTO';
+        }
+        $endereco = $this->truncateErpString((string) ($profile['endereco'] ?? '.'), 60) ?: '.';
+        $numero = $this->truncateErpString((string) ($profile['numero'] ?? '.'), 10) ?: '.';
+        $bairro = $this->truncateErpString((string) ($profile['bairro'] ?? '.'), 40) ?: '.';
+        $cidade = $this->truncateErpString((string) ($profile['cidade'] ?? 'ARARAQUARA'), 40) ?: 'ARARAQUARA';
+        $cep = $this->formatCep((string) ($profile['cep'] ?? ''));
+        $uf = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', (string) ($profile['uf'] ?? 'SP')) ?: 'SP', 0, 2));
+        $cgcMasked = $this->formatCnpjMask($cnpjDigits);
+
+        try {
+            $pdo->beginTransaction();
+            $maxStmt = $pdo->query('SELECT MAX(CODIGO) FROM FN_FORNECEDORES WITH (UPDLOCK, HOLDLOCK)');
+            $nextCode = ((int) $maxStmt->fetchColumn()) + 1;
+            if ($nextCode <= 0) {
+                $pdo->rollBack();
+                return null;
+            }
+
+            $sql = "INSERT INTO FN_FORNECEDORES (
+                CODIGO,DTCADASTRO,CKFORNECEDOR,CKTRANSPORTADOR,CKCLIENTE,CKINDUSTRIA,
+                ATFORNECEDOR,ATTRANSPORTADOR,ATCLIENTE,STFORNECEDOR,STTRANSPORTADOR,STCLIENTE,
+                CKPESSOA,RAZAO,FANTASIA,CGC,INSCEST,ENDERECO,NUMERO,BAIRRO,CIDADE,CEP,UF,
+                FATORPRECO,CKETIQUETACLI,CKETIQUETAFOR,CKETIQUETATRA,CKLISTACLI,CKLISTAFOR,CKLISTATRA,
+                DIASMENTFORN,CKSUFRAMA,CKIMPRODUTIVO,CKPRODUTOR,
+                CKAVALIACAO1,CKAVALIACAO2,CKAVALIACAO3,CKAVALIACAO4,CKAVALIACAO5,CKAVALIACAO6,CKAVALIACAO7,CKAVALIACAO8,
+                CKASSISTENCIA,FILIAL,CATEGORIAFOR,CATEGORIATRA,CATEGORIACLI,EXIGETERCEIRO,PAIS,VLRLIMCREDITO,
+                CKRETERISS,PERCISS,CKCONSUMIDOR,CKSEGURO,REGIMETRIBUTARIO,SCCLIENTE,SCFORNECEDOR,SCTRANSPORTADOR,
+                CKTPESTOQUE,DESONERACAO,PERCCONTRIBINSS,CKCONTRIBINSS,REGIMEAPURACAO,PONTUACAO,CKCONTRIBUINTE,
+                CKPROSPECT,ATPROSPECT,CKRESTRITOCLI,CKFLUXO,CKRESTRITOFOR,TPFATOR,PERCFATOR,
+                CKCODIGOBARRAXML,CKCODIGOBARRADANFE,PERCPISSERVICO,PERCPISPRODUTO,PERCCOFINSSERVICO,PERCCOFINSPRODUTO,
+                QTDEITENSXML,PERCCOMISSAO,TPFATORCOMPRA,PERCFATORCOMPRA,CKFATOR,CKQUALIDADECLI,CKQUALIDADEFOR,CKQUALIDADETRA,
+                INSERTNAMECLI,INSERTDATECLI,USUARIOCLI,DTALTERACAOCLI,MUNICIPIO,ENTTPPESSOA
+            ) VALUES (
+                :codigo, CAST(GETDATE() AS DATE),'N','N','S','N',
+                'N','N','S','L','L','L',
+                'J',:razao,:fantasia,:cgc,:ie,:endereco,:numero,:bairro,:cidade,:cep,:uf,
+                1,'S','S','S','S','S','S',
+                0,'N','N','N',
+                'N','N','N','N','N','N','N','N',
+                'N',1,0,0,0,'N',1058,0,
+                'N',0,'N','N',0,'L','L','L',
+                'N',0,0,'N',0,0,'N',
+                'S','S','N','S','N','V',1,
+                'N','N',0,0,0,0,
+                0,-1,'N',0,'N','L','L','L',
+                'MAGENTO_AWA',CAST(GETDATE() AS DATE),'MAGENTO_AWA',GETDATE(),3503208,'J'
+            )";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':codigo' => $nextCode,
+                ':razao' => $razao,
+                ':fantasia' => $fantasia,
+                ':cgc' => $cgcMasked,
+                ':ie' => $ie,
+                ':endereco' => $endereco,
+                ':numero' => $numero,
+                ':bairro' => $bairro,
+                ':cidade' => $cidade,
+                ':cep' => $cep,
+                ':uf' => $uf,
+            ]);
+            $pdo->commit();
+
+            $this->logger->info(sprintf(
+                '[B2B Registration] Created ERP prospect stub CODIGO=%d CNPJ=%s',
+                $nextCode,
+                $cnpjDigits
+            ));
+
+            return $nextCode;
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            $this->logger->error('[B2B Registration] createErpProspectStub failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * @return int|null FN_FORNECEDORES.CODIGO when CNPJ already exists as CKCLIENTE
+     */
+    public function findErpCodigoByCnpjDigits(string $cnpjDigits): ?int
+    {
+        $cnpjDigits = preg_replace('/\D+/', '', $cnpjDigits) ?? '';
+        if ($cnpjDigits === '') {
+            return null;
+        }
+
+        try {
+            $row = $this->readConnection->fetchOne(
+                "SELECT TOP 1 CODIGO
+                   FROM FN_FORNECEDORES
+                  WHERE CKCLIENTE = 'S'
+                    AND REPLACE(REPLACE(REPLACE(ISNULL(CGC,''),'.',''),'/',''),'-','') = ?
+                  ORDER BY CASE WHEN CKPROSPECT = 'N' THEN 0 ELSE 1 END, CODIGO",
+                [$cnpjDigits]
+            );
+            if (!is_array($row)) {
+                return null;
+            }
+            $code = (int) ($row['CODIGO'] ?? 0);
+            return $code > 0 ? $code : null;
+        } catch (\Exception $e) {
+            $this->logger->warning('[B2B Registration] findErpCodigoByCnpjDigits failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    private function formatCnpjMask(string $digits): string
+    {
+        $digits = preg_replace('/\D+/', '', $digits) ?? '';
+        if (strlen($digits) !== 14) {
+            return $digits;
+        }
+
+        return substr($digits, 0, 2) . '.'
+            . substr($digits, 2, 3) . '.'
+            . substr($digits, 5, 3) . '/'
+            . substr($digits, 8, 4) . '-'
+            . substr($digits, 12, 2);
+    }
+
+    private function formatCep(string $cep): string
+    {
+        $digits = preg_replace('/\D+/', '', $cep) ?? '';
+        if (strlen($digits) === 8) {
+            return substr($digits, 0, 5) . '-' . substr($digits, 5, 3);
+        }
+
+        return '00000-000';
+    }
+
+    private function truncateErpString(string $value, int $max): string
+    {
+        $value = trim(preg_replace('/\s+/', ' ', $value) ?? '');
+        if ($value === '') {
+            return '';
+        }
+        if (function_exists('mb_substr')) {
+            return mb_substr($value, 0, $max);
+        }
+
+        return substr($value, 0, $max);
     }
 
     /**
@@ -623,7 +919,8 @@ class B2BClientRegistration
 
         foreach ($erpClientCodes as $code) {
             $code = (int) $code;
-            if ($code <= 0 || $this->isClientRegistered($code)) {
+            // Missing Cadastro (not merely prospect) → still needs registration SQL / auto-insert.
+            if ($code <= 0 || $this->hasCadastroCliente($code)) {
                 continue;
             }
 

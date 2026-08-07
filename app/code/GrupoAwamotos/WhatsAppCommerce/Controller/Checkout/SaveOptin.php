@@ -10,6 +10,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,13 +23,18 @@ class SaveOptin implements HttpPostActionInterface
         private readonly JsonFactory $resultJsonFactory,
         private readonly CustomerSession $customerSession,
         private readonly CustomerRepositoryInterface $customerRepository,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly FormKeyValidator $formKeyValidator
     ) {
     }
 
     public function execute(): Json
     {
         $result = $this->resultJsonFactory->create();
+
+        if (!$this->formKeyValidator->validate($this->request)) {
+            return $result->setData(['success' => false, 'message' => 'Invalid form key']);
+        }
 
         if (!$this->customerSession->isLoggedIn()) {
             return $result->setData(['success' => false, 'message' => 'Not logged in']);

@@ -85,6 +85,7 @@ class OptimizeHtmlResponseObserver implements ObserverInterface
 
         if ($isCart) {
             $html = $this->ensureExpressEmptyCartNotice($html);
+            $html = $this->injectCartFooterStickyGuard($html);
         }
 
         $html = $this->normalizeRefineStylesheetQuery($html);
@@ -222,7 +223,7 @@ class OptimizeHtmlResponseObserver implements ObserverInterface
             return $html;
         }
 
-        if (!preg_match('#/static/(version\d+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#', $html, $versionMatch)) {
+        if (!preg_match('#/static/(version[A-Za-z0-9]+)/frontend/AWA_Custom/ayo_home5_child/pt_BR/#', $html, $versionMatch)) {
             return $html;
         }
 
@@ -300,6 +301,86 @@ class OptimizeHtmlResponseObserver implements ObserverInterface
             },
             $html
         ) ?? $html;
+    }
+
+    /**
+     * Sticky do #cart-summary para ao encontrar o footer (não depende de OPcache em PHTML).
+     */
+    private function injectCartFooterStickyGuard(string $html): string
+    {
+        if (str_contains($html, 'id="awa-cart-footer-sticky-guard"')) {
+            return $html;
+        }
+
+        $snippet = <<<'HTML'
+<style id="awa-cart-footer-sticky-guard">
+@media (min-width:992px){
+html body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index.awa-cart-footer-inview .page-wrapper
+.cart-container :is(.cart-summary,#cart-summary,.cart-summary._sticky,#cart-summary._sticky){
+position:static!important;top:auto!important;left:auto!important;bottom:auto!important;
+max-height:none!important;height:auto!important;overflow:visible!important;overflow-y:visible!important;
+z-index:auto!important;transform:none!important}
+}
+html body#html-body.checkout-cart-index .page-wrapper footer.page-footer{
+max-width:none!important;width:100%!important;margin-inline:0!important;
+padding-inline:0!important;padding-left:0!important;padding-right:0!important;box-sizing:border-box!important}
+html body#html-body.checkout-cart-index .page-wrapper footer.page-footer
+:is(section.awa-footer-trust-bar,.awa-footer-trust-bar){
+width:100%!important;max-width:none!important;margin-inline:0!important}
+</style>
+<script>
+require(['js/awa-cart-runtime'], function (boot) {
+    if (typeof boot === 'function') { boot(); }
+});
+/* Cache-bust AMD: re-apply stop com max-height none (ficha sticky vs footer). */
+(function (w, d) {
+    'use strict';
+    if (w.__awaCartStickyFix31c) { return; }
+    w.__awaCartStickyFix31c = 1;
+    function apply(active) {
+        d.querySelectorAll('#cart-summary, .cart-container .cart-summary').forEach(function (el) {
+            if (active) {
+                el.style.setProperty('position', 'static', 'important');
+                el.style.setProperty('max-height', 'none', 'important');
+                el.style.setProperty('height', 'auto', 'important');
+                el.style.setProperty('overflow', 'visible', 'important');
+                el.style.setProperty('z-index', 'auto', 'important');
+            } else {
+                el.style.removeProperty('position');
+                el.style.removeProperty('max-height');
+                el.style.removeProperty('height');
+                el.style.removeProperty('z-index');
+                el.style.setProperty('overflow-x', 'hidden', 'important');
+                el.style.setProperty('overflow-y', 'auto', 'important');
+            }
+        });
+    }
+    function check() {
+        var footer = d.querySelector('footer.page-footer, .page_footer');
+        var summary = d.querySelector('#cart-summary');
+        if (!footer || !summary || !d.body) { return; }
+        var fr = footer.getBoundingClientRect();
+        var sr = summary.getBoundingClientRect();
+        var near = fr.top < (w.innerHeight - 24) || fr.top < (sr.bottom + 12);
+        d.body.classList.toggle('awa-cart-footer-inview', near);
+        apply(near);
+    }
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', check, { once: true });
+    } else {
+        check();
+    }
+    w.addEventListener('scroll', function () { w.requestAnimationFrame(check); }, { passive: true });
+    w.addEventListener('resize', check, { passive: true });
+}(window, document));
+</script>
+HTML;
+
+        if (stripos($html, '</body>') !== false) {
+            return preg_replace('/<\/body>/i', $snippet . '</body>', $html, 1) ?? ($html . $snippet);
+        }
+
+        return $html . $snippet;
     }
 
     private function ensureExpressEmptyCartNotice(string $html): string

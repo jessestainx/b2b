@@ -2762,10 +2762,10 @@ html body#html-body.b2b-account-dashboard .page-wrapper .erp-price-badge {
     align-self: flex-start !important;
     padding: 2px 6px !important;
     border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 22%, #ffffff) !important;
-    border-radius: 4px !important;
+    border-radius: var(--awa-radius-sm, 8px) !important;
     background: color-mix(in srgb, var(--awa-primary, #b73337) 7%, #ffffff) !important;
     color: var(--awa-primary, #b73337) !important;
-    font-size: 11px !important;
+    font-size: max(12px, 0.75rem) !important;
     font-weight: 600 !important;
     line-height: 1.2 !important;
     text-transform: none !important;
@@ -2874,7 +2874,7 @@ html body#html-body.b2b-account-dashboard .page-wrapper .status-badge {
     justify-content: center !important;
     min-height: 24px !important;
     padding: 3px 8px !important;
-    border-radius: 4px !important;
+    border-radius: var(--awa-radius-sm, 8px) !important;
     font-size: 12px !important;
     font-weight: 600 !important;
     line-height: 1.2 !important;
@@ -3355,6 +3355,7 @@ html body#html-body:is(.b2b-account-dashboard, .b2b-account-index) .page-wrapper
 
 html body#html-body:is(.b2b-account-dashboard, .b2b-account-index) .page-wrapper .b2b-intelligence-section :is(.label, .freq-detail) {
     color: var(--awa-text-secondary, var(--awa-text-muted)) !important;
+    font-size: max(12px, 0.75rem) !important;
     line-height: 1.45 !important;
 }
 

@@ -279,12 +279,59 @@ class OperationalHealthService
     }
 
     /**
+     * Resolve OpenSearch endpoint from Magento config (core_config_data), then env.php.
+     *
+     * @return array{0: string, 1: string} [hostname, port]
+     */
+    private function resolveOpenSearchEndpoint(): array
+    {
+        $hostname = null;
+        $port = null;
+
+        try {
+            $connection = $this->resourceConnection->getConnection();
+            $table = $this->resourceConnection->getTableName('core_config_data');
+            $rows = $connection->fetchPairs(
+                $connection->select()
+                    ->from($table, ['path', 'value'])
+                    ->where('scope = ?', 'default')
+                    ->where('path IN (?)', [
+                        'catalog/search/opensearch_server_hostname',
+                        'catalog/search/opensearch_server_port',
+                    ])
+            );
+            if (is_array($rows)) {
+                $hostname = isset($rows['catalog/search/opensearch_server_hostname'])
+                    ? trim((string) $rows['catalog/search/opensearch_server_hostname'])
+                    : null;
+                $port = isset($rows['catalog/search/opensearch_server_port'])
+                    ? trim((string) $rows['catalog/search/opensearch_server_port'])
+                    : null;
+            }
+        } catch (\Throwable $e) {
+            // Fall through to deploymentConfig / defaults.
+        }
+
+        if ($hostname === null || $hostname === '') {
+            $hostname = (string) ($this->deploymentConfig->get(
+                'system/default/catalog/search/opensearch_server_hostname'
+            ) ?: 'localhost');
+        }
+        if ($port === null || $port === '') {
+            $port = (string) ($this->deploymentConfig->get(
+                'system/default/catalog/search/opensearch_server_port'
+            ) ?: '9200');
+        }
+
+        return [$hostname, $port];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function checkOpenSearch(): array
     {
-        $hostname = (string)($this->deploymentConfig->get('system/default/catalog/search/opensearch_server_hostname') ?: 'localhost');
-        $port = (string)($this->deploymentConfig->get('system/default/catalog/search/opensearch_server_port') ?: '9200');
+        [$hostname, $port] = $this->resolveOpenSearchEndpoint();
         $host = $hostname . ':' . $port;
         $url = 'http://' . $host . '/_cluster/health';
 

@@ -19,6 +19,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Message\ManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -38,12 +39,18 @@ class Create implements HttpPostActionInterface
         private readonly ManagerInterface $messageManager,
         private readonly RequestInterface $request,
         private readonly GuestLoginRedirect $guestLoginRedirect,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly FormKeyValidator $formKeyValidator
     ) {
     }
 
     public function execute(): ResultInterface
     {
+        if (!$this->formKeyValidator->validate($this->request)) {
+            $this->messageManager->addErrorMessage(__('Formulário inválido. Atualize a página e tente novamente.'));
+            return $this->redirectFactory->create()->setPath('checkout/cart');
+        }
+
         if (!$this->customerSession->isLoggedIn()) {
             return $this->guestLoginRedirect->create('checkout/cart');
         }

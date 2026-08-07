@@ -10,12 +10,13 @@
         </arguments>
     </virtualType>
 
+    <!-- Use Monolog\Logger so handlers do not merge into the global Magento logger. -->
     <virtualType name="GrupoAwamotos\WhatsAppCommerce\Logger\Logger"
-                 type="Magento\Framework\Logger\Monolog">
+                 type="Monolog\Logger">
         <arguments>
             <argument name="name" xsi:type="string">whatsapp_commerce</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">GrupoAwamotos\WhatsAppCommerce\Logger\Handler</item>
+                <item name="file" xsi:type="object">GrupoAwamotos\WhatsAppCommerce\Logger\Handler</item>
             </argument>
         </arguments>
     </virtualType>

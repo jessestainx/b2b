@@ -7,195 +7,143 @@ declare(strict_types=1);
  * @var \Magento\Framework\View\Element\Template $block
  */
 $layoutHandles = $block->getLayout() ? $block->getLayout()->getUpdate()->getHandles() : [];
-$isCheckoutFocus = in_array('checkout_cart_index', $layoutHandles, true)
-    || in_array('checkout_index_index', $layoutHandles, true)
+$isCheckoutFocus = in_array('checkout_index_index', $layoutHandles, true)
     || in_array('onepagecheckout_index_index', $layoutHandles, true);
 if ($isCheckoutFocus) {
     return;
 }
 $isHomePage = in_array('cms_index_index', $layoutHandles, true);
-$controllerUrl = $block->getViewFileUrl('js/awa-menu-controller.js');
-$floatingCoreUrl = $block->getViewFileUrl('js/vendor/floating-ui.core.umd.js');
-$floatingDomUrl = $block->getViewFileUrl('js/vendor/floating-ui.dom.umd.js');
+$controllerUrl = $block->getViewFileUrl('js/awa-menu-controller.dept-strip-r16.js');
+$floatingCoreUrl = $block->getViewFileUrl('js/vendor/floating-ui.core.umd.min.js');
+$floatingDomUrl = $block->getViewFileUrl('js/vendor/floating-ui.dom.umd.min.js');
 $menuConfig = [
     'desktopBreakpoint' => 992,
     'hoverDelay' => 100,
     'limitShow' => 0,
 ];
 $menuCssUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::css/awa-menu-v2-dept-open-fix.css');
+$runtimeUrl = $block->getViewFileUrl('GrupoAwamotos_Theme::js/awa-menu-bootstrap-runtime.dept-strip-r16.js');
+$controllerPinUrl = preg_replace('/\.js$/i', '', $controllerUrl);
+$runtimeConfig = [
+    'controllerUrl' => $controllerUrl,
+    'floatingCoreUrl' => $floatingCoreUrl,
+    'floatingDomUrl' => $floatingDomUrl,
+    'menuConfig' => $menuConfig,
+    'isHome' => $isHomePage,
+];
 ?>
 <script>
-window.__AWA_MENU_V2 = true;
+window.__AWA_MENU_V2 = true; /* awa-dept-typography-strip-r16 */
+(function (d, w) {
+    'use strict';
+    function stripDeptTriggerTypography() {
+        d.querySelectorAll('[data-role="awa-vertical-menu-trigger"], .awa-vmenu-trigger-text').forEach(function (el) {
+            ['font-size', 'font-weight', 'line-height'].forEach(function (prop) {
+                el.style.removeProperty(prop);
+            });
+            if (!el.getAttribute('style')) {
+                el.removeAttribute('style');
+            }
+        });
+    }
+    function bootStripGuard() {
+        stripDeptTriggerTypography();
+        if (!w.__awaDeptTypographyStripObserver) {
+            // r44f: MutationObserver em documentElement no DCL compete com LCP na home.
+            // Adia observe até load; strip pontual já rodou acima.
+            var startObserver = function () {
+                if (w.__awaDeptTypographyStripObserver) {
+                    return;
+                }
+                w.__awaDeptTypographyStripObserver = new MutationObserver(function () {
+                    stripDeptTriggerTypography();
+                });
+                w.__awaDeptTypographyStripObserver.observe(d.documentElement, {
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
+            };
+            if (d.readyState === 'complete') {
+                startObserver();
+            } else {
+                w.addEventListener('load', startObserver, { once: true });
+            }
+        }
+    }
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', bootStripGuard, { once: true });
+    } else {
+        bootStripGuard();
+    }
+    w.__awaStripDeptTriggerTypography = stripDeptTriggerTypography;
+
+    /* CDN pode ignorar ?v= no path do runtime — fixa require path antes do defer boot. */
+    var menuControllerPin = <?= /* @noEscape */ json_encode(
+        $controllerPinUrl,
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    ) ?>;
+    function pinMenuControllerPath() {
+        if (typeof w.require !== 'function' || typeof w.require.config !== 'function') {
+            return false;
+        }
+        if (typeof w.require.undef === 'function') {
+            w.require.undef('awa-menu-controller');
+        }
+        w.require.config({
+            paths: {
+                'awa-menu-controller': menuControllerPin
+            }
+        });
+        return true;
+    }
+    if (!pinMenuControllerPath()) {
+        var pinAttempts = 0;
+        var pinTimer = w.setInterval(function () {
+            pinAttempts += 1;
+            if (pinMenuControllerPath() || pinAttempts > 80) {
+                w.clearInterval(pinTimer);
+            }
+        }, 25);
+    }
+})(document, window);
 </script>
+<script type="application/json" id="awa-menu-bootstrap-config"><?= /* @noEscape */ json_encode(
+    $runtimeConfig,
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+) ?></script>
+<script defer src="<?= $block->escapeUrl($runtimeUrl) ?>" id="awa-menu-bootstrap-runtime"></script>
+<?php if (!$isHomePage): ?>
 <script defer src="<?= $block->escapeUrl($floatingCoreUrl) ?>"></script>
 <script defer src="<?= $block->escapeUrl($floatingDomUrl) ?>"></script>
-<?php if (!$isHomePage): ?>
 <link rel="preload" href="<?= $block->escapeUrl($menuCssUrl) ?>" as="style"/>
 <link rel="stylesheet" href="<?= $block->escapeUrl($menuCssUrl) ?>" id="awa-menu-v2-dept-open-fix"/>
 <?php endif; ?>
+<style id="awa-menu-v2-desktop-fallback-static">
+@media (min-width: 992px) {
+    .navigation.verticalmenu.side-verticalmenu:hover > [data-role="awa-vertical-menu-panel"],
+    [data-role="awa-vertical-menu"]:hover > [data-role="awa-vertical-menu-panel"],
+    [data-role="awa-vertical-menu-trigger"]:hover ~ [data-role="awa-vertical-menu-panel"],
+    [data-role="awa-vertical-menu-trigger"]:active ~ [data-role="awa-vertical-menu-panel"],
+    [data-role="awa-vertical-menu-trigger"]:focus ~ [data-role="awa-vertical-menu-panel"],
+    [data-role="awa-vertical-menu-trigger"]:focus-visible ~ [data-role="awa-vertical-menu-panel"],
+    [data-role="awa-vertical-menu-panel"]:hover,
+    [data-role="awa-vertical-menu-panel"]:focus-within {
+        display: flex !important;
+        flex-direction: column !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        height: auto !important;
+        min-height: 120px !important;
+        max-height: min(70vh, 560px) !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+}
+</style>
 <style id="awa-menu-v2-mobile-critical">
 <?= $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
     ->setTemplate('GrupoAwamotos_Theme::menu/awa-menu-v2-mobile-critical-fragment.phtml')
     ->toHtml() ?>
 </style>
-<script>
-(function (w, d) {
-    'use strict';
-    if (!w.__AWA_MENU_V2) {
-        return;
-    }
-
-    /* Mobile hamburger preflight (1º toque antes do controller carregar) */
-    if (w.matchMedia && w.matchMedia('(max-width: 767px)').matches) {
-        function closeNavPreflight() {
-            d.body.classList.remove('nav-open', 'awa-nav-preflight', 'awa-menu-drawer-open', 'nav-before-open');
-            var toggle = d.querySelector('[data-awa-nav-toggle="true"]');
-            if (toggle) {
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-            var shell = d.querySelector('[data-awa-nav-shell="true"]')
-                || d.getElementById('awa-category-navigation')
-                || d.getElementById('awa-primary-navigation');
-            if (shell) {
-                shell.classList.remove('is-awa-mobile-open');
-                ['display', 'visibility', 'opacity', 'pointer-events', 'position', 'width', 'height', 'z-index'].forEach(function (prop) {
-                    shell.style.removeProperty(prop);
-                });
-            }
-            var overlay = d.querySelector('.awa-mobile-drawer-overlay');
-            if (overlay) {
-                overlay.classList.remove('is-active');
-            }
-        }
-
-        function onNavPreflight(ev) {
-            var toggle = ev.target && ev.target.closest
-                ? ev.target.closest('[data-awa-nav-toggle="true"], [data-action="toggle-nav"], .toggle-nav-footer')
-                : null;
-            if (!toggle || d.body.classList.contains('awa-menu-v2-ready')) {
-                return;
-            }
-            if (!d.body.classList.contains('nav-open') && !d.body.classList.contains('awa-menu-drawer-open')) {
-                d.body.classList.add('nav-open', 'awa-nav-preflight', 'awa-menu-drawer-open');
-                toggle.setAttribute('aria-expanded', 'true');
-                var shell = d.querySelector('[data-awa-nav-shell="true"]')
-                    || d.getElementById('awa-category-navigation')
-                    || d.getElementById('awa-primary-navigation');
-                if (shell) {
-                    shell.classList.add('is-awa-mobile-open');
-                }
-                var overlay = d.querySelector('.awa-mobile-drawer-overlay');
-                if (overlay) {
-                    overlay.classList.add('is-active');
-                }
-            }
-        }
-
-        d.addEventListener('keydown', function (ev) {
-            if (ev.key !== 'Escape' || d.body.classList.contains('awa-menu-v2-ready')) {
-                return;
-            }
-            if (d.body.classList.contains('nav-open') || d.body.classList.contains('awa-menu-drawer-open')) {
-                closeNavPreflight();
-            }
-        }, true);
-
-        d.addEventListener('pointerdown', onNavPreflight, { capture: true, passive: true });
-    }
-
-    var controllerUrl = <?= /* @noEscape */ json_encode($controllerUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
-    var menuConfig = <?= /* @noEscape */ json_encode($menuConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
-    var isHome = <?= $isHomePage ? 'true' : 'false' ?>;
-    var booted = false;
-
-    function applyController() {
-        if (!w.FloatingUIDOM) {
-            w.setTimeout(applyController, 50);
-            return;
-        }
-        if (booted || typeof w.require !== 'function') {
-            if (!booted && typeof w.require !== 'function') {
-                w.setTimeout(applyController, 150);
-            }
-            return;
-        }
-        booted = true;
-        w.require(['awa-menu-controller', 'mage/apply/main'], function (MenuController) {
-            d.querySelectorAll('[data-role="awa-vertical-menu"]').forEach(function (nav) {
-                if (nav.dataset.awaMenuControllerReady === '1') {
-                    return;
-                }
-                MenuController(menuConfig, nav);
-            });
-        });
-    }
-
-    function scheduleBoot() {
-        if (isHome) {
-            var menuEl = d.querySelector('[data-role="awa-vertical-menu"]');
-            if (menuEl) {
-                menuEl.addEventListener('mouseenter', applyController, { once: true, passive: true });
-                menuEl.addEventListener('pointerdown', applyController, { once: true, passive: true });
-            }
-            if (w.requestIdleCallback) {
-                w.requestIdleCallback(applyController, { timeout: 2500 });
-            } else {
-                w.setTimeout(applyController, 1500);
-            }
-            return;
-        }
-        applyController();
-    }
-
-    /* Departamentos preflight — 1º clique abre painel antes do controller */
-    var deptTrigger = d.querySelector('[data-role="awa-vertical-menu-trigger"]');
-    var deptPanel = d.querySelector('[data-role="awa-vertical-menu-panel"]');
-    if (deptTrigger && deptPanel) {
-        deptTrigger.addEventListener('click', function onDeptPreflight(ev) {
-            if (d.body.classList.contains('awa-menu-v2-ready')) {
-                return;
-            }
-            applyController();
-            var isOpen = deptTrigger.getAttribute('aria-expanded') === 'true'
-                || deptPanel.getAttribute('data-awa-menu-state') === 'open';
-            if (!isOpen) {
-                d.body.classList.add('awa-menu-dept-open');
-                deptTrigger.setAttribute('aria-expanded', 'true');
-                deptTrigger.classList.add('active');
-                deptPanel.setAttribute('data-awa-menu-state', 'open');
-                deptPanel.setAttribute('aria-hidden', 'false');
-                deptPanel.classList.add('vmm-open', 'menu-open');
-                deptPanel.style.setProperty('display', 'flex', 'important');
-                deptPanel.style.setProperty('flex-direction', 'column', 'important');
-                deptPanel.style.setProperty('visibility', 'visible', 'important');
-                deptPanel.style.setProperty('opacity', '1', 'important');
-                if (w.matchMedia && w.matchMedia('(min-width: 992px)').matches) {
-                    deptPanel.style.setProperty('height', 'auto', 'important');
-                    deptPanel.style.setProperty('min-height', '120px', 'important');
-                    deptPanel.style.setProperty('max-height', 'min(70vh, 560px)', 'important');
-                    deptPanel.style.setProperty('overflow-x', 'hidden', 'important');
-                    deptPanel.style.setProperty('overflow-y', 'auto', 'important');
-                    var nav = deptPanel.closest('[data-role="awa-vertical-menu"]');
-                    var shell = nav && nav.closest('.menu_left_home1, .awa-header-categories, .sections.nav-sections');
-                    if (nav) {
-                        nav.style.setProperty('height', 'auto', 'important');
-                        nav.style.setProperty('max-height', 'none', 'important');
-                        nav.style.setProperty('overflow', 'visible', 'important');
-                    }
-                    if (shell) {
-                        shell.style.setProperty('height', 'auto', 'important');
-                        shell.style.setProperty('max-height', 'none', 'important');
-                        shell.style.setProperty('overflow', 'visible', 'important');
-                    }
-                }
-            }
-        }, { capture: true });
-    }
-
-    if (d.readyState === 'loading') {
-        d.addEventListener('DOMContentLoaded', scheduleBoot, { once: true });
-    } else {
-        scheduleBoot();
-    }
-})(window, document);
-</script>

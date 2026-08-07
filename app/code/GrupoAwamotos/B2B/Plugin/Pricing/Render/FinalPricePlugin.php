@@ -83,12 +83,15 @@ class FinalPricePlugin
 
         return sprintf(
             '<div class="b2b-login-to-see-price">'
-            . '<a href="%s" class="b2b-login-link">Faça login</a> ou '
-            . '<a href="%s" class="b2b-register-link">cadastre-se</a> '
-            . 'para ver os preços.'
+            . '<a href="%s" class="b2b-login-link">%s</a> ou '
+            . '<a href="%s" class="b2b-register-link">%s</a> '
+            . '%s'
             . '</div>',
-            htmlspecialchars($loginUrl),
-            htmlspecialchars($registerUrl)
+            htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) __('Entrar'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($registerUrl, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) __('cadastre-se'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) __('para ver os preços.'), ENT_QUOTES, 'UTF-8')
         );
     }
 }

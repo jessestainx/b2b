@@ -40,12 +40,13 @@
         </arguments>
     </virtualType>
 
+    <!-- Use Monolog\Logger (not Framework\Logger\Monolog) so handlers do not merge into the global Magento logger. -->
     <virtualType name="GrupoAwamotos\AbandonedCart\Logger\Logger"
-                 type="Magento\Framework\Logger\Monolog">
+                 type="Monolog\Logger">
         <arguments>
             <argument name="name" xsi:type="string">abandoned_cart</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">GrupoAwamotos\AbandonedCart\Logger\Handler</item>
+                <item name="file" xsi:type="object">GrupoAwamotos\AbandonedCart\Logger\Handler</item>
             </argument>
         </arguments>
     </virtualType>

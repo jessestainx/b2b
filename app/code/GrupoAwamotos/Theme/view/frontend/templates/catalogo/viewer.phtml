@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /**
- * Catálogo digital AWA 2026 — visualizador PDF embutido.
+ * Catálogo digital AWA 2026 — prévia estática (capa) + CTAs.
  *
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\Escaper $escaper
@@ -12,7 +12,9 @@ $viewModel = $block->getData('view_model');
 $pdfUrl = $viewModel->getPdfUrl();
 $coverUrl = $viewModel->getCoverImageUrl();
 $mobileCoverUrl = $viewModel->getMobileCoverImageUrl();
+$pagePreviewUrl = $viewModel->getPdfPagePreviewUrl();
 $b2bRegisterUrl = $viewModel->getB2bRegisterUrl();
+$revistaUrl = $block->getUrl('catalogo/revista');
 ?>
 <section class="awa-catalogo-page" aria-labelledby="awa-catalogo-title">
     <header class="awa-catalogo-page__hero">
@@ -46,7 +48,7 @@ $b2bRegisterUrl = $viewModel->getB2bRegisterUrl();
                     <span><?= $escaper->escapeHtml(__('Baixar PDF')) ?></span>
                     <span class="awa-catalogo-page__cta-hint" aria-hidden="true"><?= $escaper->escapeHtml(__('nova aba')) ?></span>
                 </a>
-                <a href="<?= $escaper->escapeUrl($block->getUrl('catalogo/revista')) ?>"
+                <a href="<?= $escaper->escapeUrl($revistaUrl) ?>"
                    class="action secondary awa-catalogo-page__cta awa-catalogo-page__revista"
                    aria-label="<?= $escaper->escapeHtmlAttr(__('Abrir catálogo em formato revista')) ?>">
                     <svg class="awa-catalogo-page__cta-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -65,18 +67,31 @@ $b2bRegisterUrl = $viewModel->getB2bRegisterUrl();
         </div>
     </header>
 
-    <div class="awa-catalogo-page__viewer">
-        <iframe src="<?= $escaper->escapeUrl($pdfUrl) ?>#view=FitH"
-                class="awa-catalogo-page__frame"
-                title="<?= $escaper->escapeHtmlAttr(__('Visualizador do Catálogo AWA 2026')) ?>"
-                loading="lazy"></iframe>
-        <p class="awa-catalogo-page__fallback">
-            <?= $escaper->escapeHtml(__('Se o visualizador não carregar,')) ?>
-            <a href="<?= $escaper->escapeUrl($pdfUrl) ?>"
-               target="_blank"
-               rel="noopener noreferrer">
-                <?= $escaper->escapeHtml(__('abra o catálogo em PDF')) ?>
-            </a>.
-        </p>
+    <div class="awa-catalogo-page__viewer"
+         id="awa-catalogo-pdf-preview"
+         data-preview-mode="static-jpeg">
+        <div class="awa-catalogo-page__preview-stage" id="awa-catalogo-preview-stage">
+            <img id="awa-catalogo-preview-img"
+                 class="awa-catalogo-page__preview-canvas"
+                 src="<?= $escaper->escapeUrl($pagePreviewUrl) ?>"
+                 alt="<?= $escaper->escapeHtmlAttr(__('Prévia da capa do Catálogo AWA 2026')) ?>"
+                 width="910"
+                 height="1287"
+                 loading="eager"
+                 decoding="async"
+                 fetchpriority="high">
+            <div class="awa-catalogo-page__preview-actions">
+                <a href="<?= $escaper->escapeUrl($revistaUrl) ?>"
+                   class="action primary awa-catalogo-page__cta">
+                    <?= $escaper->escapeHtml(__('Folhear revista completa')) ?>
+                </a>
+                <a href="<?= $escaper->escapeUrl($pdfUrl) ?>"
+                   class="action secondary awa-catalogo-page__cta"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    <?= $escaper->escapeHtml(__('Abrir PDF')) ?>
+                </a>
+            </div>
+        </div>
     </div>
 </section>

@@ -40,7 +40,7 @@
 .b2b-page-shell .badge--admin,
 .b2b-page-shell .badge--approver {
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     text-transform: none;
@@ -58,7 +58,7 @@
     color: var(--awa-b2b-primary);
     font-weight: 600;
     background: color-mix(in srgb, var(--awa-b2b-primary) 8%, #ffffff);
-    border-radius: 4px;
+    border-radius: 8px;
     border-left: 0;
     border-inline-start: 0;
 }
@@ -73,7 +73,7 @@
     text-decoration: none;
     border-left: 0;
     border-inline-start: 0;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 14px;
     color: var(--awa-text, #444444);
 }
@@ -103,7 +103,7 @@
 #html-body:is(.account, [class*='b2b-']) .account-nav-wrapper {
     background: var(--awa-bg-surface, #ffffff);
     border: 1px solid var(--awa-b2b-border);
-    border-radius: 4px;
+    border-radius: 8px;
     overflow: visible;
     padding: 0;
     width: 100%;

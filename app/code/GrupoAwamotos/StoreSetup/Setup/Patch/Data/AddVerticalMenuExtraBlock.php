@@ -78,7 +78,7 @@ class AddVerticalMenuExtraBlock implements DataPatchInterface
 <nav class="awa-vertical-extra-menu" aria-label="Links rápidos">
     <ul class="awa-vem-list">
         <li class="awa-vem-item">
-            <a class="awa-vem-link" href="{{store url="sobre-nos"}}">
+            <a class="awa-vem-link" href="{{store url="about-us"}}">
                 Sobre a AWA Motos
             </a>
         </li>
@@ -88,7 +88,7 @@ class AddVerticalMenuExtraBlock implements DataPatchInterface
             </a>
         </li>
         <li class="awa-vem-item">
-            <a class="awa-vem-link" href="{{store url="track"}}">
+            <a class="awa-vem-link" href="{{store url="sales/guest/form"}}">
                 Rastrear Pedido
             </a>
         </li>

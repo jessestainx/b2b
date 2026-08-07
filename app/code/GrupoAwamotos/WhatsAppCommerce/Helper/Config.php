@@ -15,10 +15,12 @@ class Config extends AbstractHelper
     private const XML_PATH_CHECKOUT_URL = 'whatsapp_commerce/general/checkout_base_url';
 
     // Notifications
+    private const XML_PATH_NOTIFY_CUSTOMER_REGISTERED = 'whatsapp_commerce/notifications/customer_registered';
     private const XML_PATH_NOTIFY_PLACED = 'whatsapp_commerce/notifications/order_placed';
     private const XML_PATH_NOTIFY_PAID = 'whatsapp_commerce/notifications/order_paid';
     private const XML_PATH_NOTIFY_SHIPPED = 'whatsapp_commerce/notifications/order_shipped';
     private const XML_PATH_NOTIFY_REFUNDED = 'whatsapp_commerce/notifications/order_refunded';
+    private const XML_PATH_NOTIFY_ATTENDANT_ORDER_PLACED = 'whatsapp_commerce/notifications/notify_attendant_order_placed';
 
     // App Builder Offload
     private const XML_PATH_APPBUILDER_ENABLED = 'whatsapp_commerce/app_builder_offload/enabled';
@@ -69,6 +71,11 @@ class Config extends AbstractHelper
 
     // ==================== Notifications ====================
 
+    public function isNotifyCustomerRegisteredEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_CUSTOMER_REGISTERED, ScopeInterface::SCOPE_STORE);
+    }
+
     public function isNotifyOrderPlacedEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_PLACED, ScopeInterface::SCOPE_STORE);
@@ -87,6 +94,11 @@ class Config extends AbstractHelper
     public function isNotifyOrderRefundedEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_REFUNDED, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function isNotifyAttendantOnOrderPlacedEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_NOTIFY_ATTENDANT_ORDER_PLACED, ScopeInterface::SCOPE_STORE);
     }
 
     // ==================== App Builder Offload ====================

@@ -20,10 +20,13 @@
                   instance="GrupoAwamotos\B2B\Observer\AttendantAssignOnApprovalObserver"/>
     </event>
 
-    <!-- Classificação CNAE no save do cliente (fires in admin + frontend) -->
+    <!-- Classificação CNAE + score de aprovação no save do cliente (admin + frontend).
+         Ordem importa: CNAE grava b2b_cnae_* antes do scoring avaliar o perfil. -->
     <event name="customer_save_after_data_object">
         <observer name="grupoawamotos_b2b_cnae_classification"
                   instance="GrupoAwamotos\B2B\Observer\CnaeClassificationObserver"/>
+        <observer name="grupoawamotos_b2b_approval_scoring"
+                  instance="GrupoAwamotos\B2B\Observer\ApprovalScoringObserver"/>
     </event>
 
     <!-- Notificação de mudança de status do pedido (admin area triggers) -->
@@ -48,6 +51,17 @@
     <event name="grupoawamotos_b2b_quote_response_after">
         <observer name="grupoawamotos_b2b_quote_response_notification"
                   instance="GrupoAwamotos\B2B\Observer\QuoteNotification"/>
+    </event>
+
+    <!-- Persistir preço Sectra no quote item (custom_price) — cobre frontend e webapi_rest -->
+    <event name="sales_quote_product_add_after">
+        <observer name="grupoawamotos_b2b_apply_erp_authorized_price_on_add"
+                  instance="GrupoAwamotos\B2B\Observer\Quote\ApplyErpAuthorizedPriceOnAddObserver"/>
+    </event>
+
+    <event name="sales_quote_collect_totals_before">
+        <observer name="grupoawamotos_b2b_ensure_erp_authorized_price_on_collect"
+                  instance="GrupoAwamotos\B2B\Observer\Quote\EnsureErpAuthorizedPriceOnCollectObserver"/>
     </event>
 
     <!-- Copia PO number da cotação para o pedido -->

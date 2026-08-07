@@ -25,10 +25,12 @@
         </arguments>
     </virtualType>
 
-    <virtualType name="GrupoAwamotos\SmartSuggestions\Logger\Logger" type="Magento\Framework\Logger\Monolog">
+    <!-- Use Monolog\Logger so handlers do not merge into the global Magento logger. -->
+    <virtualType name="GrupoAwamotos\SmartSuggestions\Logger\Logger" type="Monolog\Logger">
         <arguments>
+            <argument name="name" xsi:type="string">smart_suggestions</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="debug" xsi:type="object">GrupoAwamotos\SmartSuggestions\Logger\Handler</item>
+                <item name="file" xsi:type="object">GrupoAwamotos\SmartSuggestions\Logger\Handler</item>
             </argument>
         </arguments>
     </virtualType>

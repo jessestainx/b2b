@@ -125,8 +125,13 @@ class BlockCartAddPlugin
                 return $this->redirectFactory->create()->setPath('b2b/account/login', $this->loginRefererParams->toLoginRedirectParams());
             }
 
-            // Cliente logado mas bloqueado
-            $message = (string) __('Sua conta está pendente de aprovação. Você receberá um e-mail assim que for aprovada.');
+            // Cliente logado mas bloqueado. Aprovado sem vínculo ERP não está
+            // "pendente de aprovação": a tabela de preços ainda está em definição.
+            if ($this->priceVisibility->isApprovedPendingErp()) {
+                $message = trim(strip_tags($this->priceVisibility->getPriceReplacementMessage()));
+            } else {
+                $message = (string) __('Sua conta está pendente de aprovação. Você receberá um e-mail assim que for aprovada.');
+            }
             $url = $this->urlBuilder->getUrl('b2b/account/dashboard');
 
             if ($isAjax) {

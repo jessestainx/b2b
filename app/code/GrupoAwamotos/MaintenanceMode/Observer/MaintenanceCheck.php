@@ -559,6 +559,7 @@ document.getElementById('maintenance-newsletter').addEventListener('submit', fun
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'email=' + encodeURIComponent(email)
+            + '&form_key=' + encodeURIComponent((document.cookie.match(/(?:^|; )form_key=([^;]*)/) || [])[1] || '')
     })
     .then(r => r.json())
     .then(data => {

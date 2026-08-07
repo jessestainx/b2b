@@ -1,5 +1,19 @@
 <?xml version="1.0"?>
+<!--
+  AWA B2B — PLP: ERP gate + LoginToCart (substitui add-to-cart nos cards para guest/pending).
+-->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="b2b_checkout_erp_gate"/>
+    <head>
+        <css src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
+    </head>
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="GrupoAwamotos\B2B\Block\LoginToCart"
+                   name="b2b.login.to.cart.category"
+                   template="GrupoAwamotos_B2B::product/login-to-cart.phtml"
+                   after="-"/>
+        </referenceContainer>
+    </body>
 </page>

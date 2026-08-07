@@ -102,10 +102,16 @@ class BlockCheckoutPlugin
                 return $redirect->setPath('b2b/account/login', $this->loginRefererParams->toLoginRedirectParams());
             }
 
-            // Cliente logado mas não aprovado
-            $this->messageManager->addWarningMessage(
-                __('Sua conta está pendente de aprovação. Você não pode finalizar compras até que sua conta seja aprovada.')
-            );
+            // Cliente logado mas bloqueado: diferenciar aprovado sem ERP de pendente
+            if ($this->priceVisibility->isApprovedPendingErp()) {
+                $this->messageManager->addWarningMessage(
+                    trim(strip_tags($this->priceVisibility->getPriceReplacementMessage()))
+                );
+            } else {
+                $this->messageManager->addWarningMessage(
+                    __('Sua conta está pendente de aprovação. Você não pode finalizar compras até que sua conta seja aprovada.')
+                );
+            }
 
             return $redirect->setPath('b2b/account/dashboard');
         }

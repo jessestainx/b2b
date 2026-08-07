@@ -7,6 +7,12 @@
                 sortOrder="10"/>
     </type>
 
+    <type name="Magento\Framework\View\Element\Template">
+        <plugin name="grupoawamotos_preprocessed_fallback_template_fetch"
+                type="GrupoAwamotos\PreprocessedFallback\Plugin\View\Element\TemplateFallbackPlugin"
+                sortOrder="5"/>
+    </type>
+
     <type name="Magento\Framework\View\Result\Page">
         <plugin name="grupoawamotos_preprocessed_fallback_page_result"
                 type="GrupoAwamotos\PreprocessedFallback\Plugin\View\Result\PageFallbackPlugin"

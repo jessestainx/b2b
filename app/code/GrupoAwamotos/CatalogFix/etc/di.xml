@@ -84,11 +84,16 @@
 
 
     <!-- Production: raise debug handler minimum level to WARNING to stop cron INFO/DEBUG
-         from filling var/log/debug.log (Monolog\Logger::WARNING = 300). -->
+         from filling var/log/debug.log (Monolog\Logger::WARNING = 300).
+         MUST redeclare system+syslog: Magento DI array merge with module virtualTypes
+         that extend Framework\Logger\Monolog can otherwise drop those handlers and leave
+         exception.log / system.log permanently empty. -->
     <type name="Magento\Framework\Logger\Monolog">
         <arguments>
             <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Magento\Framework\Logger\Handler\System</item>
                 <item name="debug" xsi:type="object">GrupoAwamotos\CatalogFix\Logger\Handler\ProductionDebug</item>
+                <item name="syslog" xsi:type="object">Magento\Framework\Logger\Handler\Syslog</item>
             </argument>
         </arguments>
     </type>

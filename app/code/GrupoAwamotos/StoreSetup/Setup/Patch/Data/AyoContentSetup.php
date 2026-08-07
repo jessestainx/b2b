@@ -279,7 +279,7 @@ HTML;
                             </div>
                             <div class="contact-item d-flex">
                                 <i class="fa fa-envelope" aria-hidden="true"></i>
-                                <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
+                                <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a>
                             </div>
                         </div>
                     </div>
@@ -422,7 +422,7 @@ HTML;
             <div class="d-flex">
                 <div class="wrap">
                     <label>E-mail:</label>
-                    <a href="mailto:contato@awamotos.com.br">contato@awamotos.com.br</a>
+                    <a href="mailto:awamotos@awamotos.com.br">awamotos@awamotos.com.br</a>
                 </div>
             </div>
         </div>
