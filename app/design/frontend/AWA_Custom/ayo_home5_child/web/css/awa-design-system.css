@@ -266,33 +266,49 @@
 }
 
 /* ==========================================================================
-   10. FIX v2 — Hero: banner cortando texto nas laterais (Onda 2C)
-   Diagnóstico (via Playwright, 08/08): o slider de desktop (.hidden-xs) está
-   travado em 331px por regra INLINE com ~10 IDs repetidos + !important, que
-   inclusive zera o aspect-ratio (aspect-ratio:unset!important).
-   Contra-medida: reforço :is(…, #awa-boost×12) — especificidade de 12 IDs
-   sem repetir IDs reais. Hack isolado e documentado APENAS nesta seção.
-   O lock de 176px do mobile (.visible-xs) não é tocado (media query).
+   10. FIX v3 — Hero: a IMAGEM define a caixa (Onda 2C)
+   Histórico: v1 perdeu na especificidade; v2 venceu o lock de 331px mas
+   zerou a imagem (img height:100% dentro de <picture> inline = 0).
+   v3: achata a cadeia (<a>/<picture> viram block estáticos) e a imagem
+   renderiza em width:100% + height:auto — proporção natural 1200x294,
+   sem crop, sem aspect-ratio, sem alturas percentuais.
+   overflow:visible SÓ em slide/banner_item/banner_item_bg (nunca no
+   swiper container/wrapper, para os slides vizinhos não vazarem).
+   Mobile (.visible-xs) intocado. Booster :is(#awa-boost×12) mantido.
    ========================================================================== */
 @media (min-width: 768px) {
   html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs
-  :is(.awa-hero-swiper, .swiper-wrapper, .swiper-slide, .banner_item, .banner_item_bg,
+  :is(.swiper-slide, .banner_item, .banner_item_bg,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs
+  :is(.awa-hero-swiper, .swiper-wrapper,
       #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
   }
-  html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs
-  :is(.banner_item_bg,
+  html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs .banner_item_bg
+  :is(a, picture,
       #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
-    aspect-ratio: 1200 / 294 !important;
+    position: static !important;
+    display: block !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
   }
   html body .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs .banner_item_bg
   :is(img, picture img,
       #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    display: block !important;
+    position: static !important;
     width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
+    height: auto !important;
+    object-fit: contain !important;
     object-position: center !important;
   }
 }
