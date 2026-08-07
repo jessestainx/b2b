@@ -29,192 +29,36 @@
     var STANDARDIZE_TERMINAL_FRAGMENT = 'awa-home-standardize-terminal-wins';
     var ALIGN_GRID_TERMINAL_FRAGMENT = 'awa-align-grid-terminal-2026-06-11';
     var AWA_CSS_GATE_DEBUG_VERSION = '20260711-header-geometry-v4';
-    var AWA_DEBUG_SESSION = 'ca59a1';
-    var AWA_DEBUG_INGEST_PATH = '/b2b/account/login/';
-    var gateInteractionDebugSent = false;
     var QUEUE_HEADER_FIRST_FRAGMENTS = [
         'awa-third-party-bundle',
         /* awa-carousel-bundle + awa-shelf-carousel: async imediato na home — vitrine é conteúdo primário */
         /* header-stack + header-refine-terminal: migrados para styles-l (_extend.less 43.01/43.02) */
         /* impeccable-refine: home body-end sync; non-home head async */
     ];
-    /* Home: bundles pesados retirados do idle gate — body-end via plugin (2026-06-13) */
-    var QUEUE_HOME_LOAD_LAST_FRAGMENTS = [];
-
-    function sendCssGateDebug(hypothesisId, location, message, data) {
-        var payload;
-        var dataText;
-        var qs;
-        var url;
-        try {
-            payload = {
-                sessionId: AWA_DEBUG_SESSION,
-                runId: 'pre-fix',
-                hypothesisId: hypothesisId,
-                location: location,
-                message: message,
-                data: data || {},
-                timestamp: Date.now()
-            };
-            dataText = '';
-            try {
-                dataText = encodeURIComponent(JSON.stringify(payload.data).slice(0, 240));
-            } catch (e) {}
-            qs = '?awa_dbg=1'
-                + '&sid=' + encodeURIComponent(AWA_DEBUG_SESSION)
-                + '&run=' + encodeURIComponent(payload.runId)
-                + '&hyp=' + encodeURIComponent(payload.hypothesisId)
-                + '&loc=' + encodeURIComponent(payload.location)
-                + '&msg=' + encodeURIComponent(payload.message)
-                + '&ts=' + encodeURIComponent(String(payload.timestamp))
-                + '&transport=' + encodeURIComponent('css-gate')
-                + '&data=' + dataText;
-            url = AWA_DEBUG_INGEST_PATH + qs;
-            (new Image()).src = url;
-            if (navigator && typeof navigator.sendBeacon === 'function') {
-                try {
-                    navigator.sendBeacon(url, JSON.stringify(payload));
-                } catch (e2) {}
-            }
-        } catch (e3) {}
-    }
-
-    // #region agent log
-    sendCssGateDebug(
-        'H31',
-        'awa-css-gate.js:init',
-        'CSS gate script initialized',
-        {
-            href: window.location.href,
-            readyState: document.readyState,
-            stickyCount: document.querySelectorAll('.header-wrapper-sticky').length,
-            menuRootCount: document.querySelectorAll('[data-role="awa-vertical-menu"]').length,
-            gateVersion: AWA_CSS_GATE_DEBUG_VERSION
-        }
-    );
-    // #endregion
-
-    var headerGeometryStates = {};
-    var headerResizeProbeSent = false;
-
-    function getHeaderGeometry(selector) {
-        var element = document.querySelector(selector);
-        var rect;
-        var style;
-
-        if (!element) {
-            return null;
-        }
-
-        rect = element.getBoundingClientRect();
-        style = window.getComputedStyle(element);
-
-        return {
-            x: Math.round(rect.x),
-            y: Math.round(rect.y),
-            w: Math.round(rect.width),
-            h: Math.round(rect.height),
-            ml: style.marginLeft,
-            mr: style.marginRight,
-            mw: style.maxWidth,
-            tr: style.transform
-        };
-    }
-
-    function emitHeaderGeometry(reason) {
-        var search = document.getElementById('search');
-        var expanded = search ? search.getAttribute('aria-expanded') : '';
-        var stateKey = reason + ':' + expanded + ':' + window.innerWidth + ':' + window.scrollX;
-        var viewportData;
-        var mainData;
-        var navData;
-
-        if (headerGeometryStates[stateKey]) {
-            return;
-        }
-        headerGeometryStates[stateKey] = true;
-
-        viewportData = {
-            reason: reason,
-            vw: window.innerWidth,
-            vv: window.visualViewport ? Math.round(window.visualViewport.width) : null,
-            sx: Math.round(window.scrollX),
-            sw: document.documentElement.scrollWidth,
-            expanded: expanded
-        };
-        mainData = {
-            main: getHeaderGeometry('.awa-main-header .header-main > .container'),
-            inner: getHeaderGeometry('.awa-main-header__inner.wp-header'),
-            searchCol: getHeaderGeometry('.awa-header-search-col'),
-            search: getHeaderGeometry('#search')
-        };
-        navData = {
-            nav: getHeaderGeometry('.awa-nav-bar'),
-            container: getHeaderGeometry('.awa-nav-bar > .container'),
-            inner: getHeaderGeometry('.awa-nav-bar__inner')
-        };
-
-        // #region agent log
-        fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-Debug-Session-Id': 'ca59a1'},
-            body: JSON.stringify({
-                sessionId: 'ca59a1',
-                runId: 'header-geometry-pre-fix',
-                hypothesisId: 'H91-H94',
-                location: 'awa-css-gate.js:emitHeaderGeometry',
-                message: 'Header container origins and search state',
-                data: {viewport: viewportData, main: mainData, nav: navData},
-                timestamp: Date.now()
-            })
-        }).catch(function () {});
-        sendCssGateDebug('H91', 'awa-css-gate.js:header-geometry:viewport', 'Viewport geometry state', viewportData);
-        sendCssGateDebug('H92', 'awa-css-gate.js:header-geometry:main', 'Main header and search geometry', mainData);
-        sendCssGateDebug('H93', 'awa-css-gate.js:header-geometry:nav', 'Navigation container geometry', navData);
-        // #endregion
-    }
-
-    function installHeaderGeometryProbe() {
-        var search = document.getElementById('search');
-
-        emitHeaderGeometry('gate-init');
-
-        if (search) {
-            (new MutationObserver(function (mutations) {
-                if (mutations.some(function (mutation) {
-                    return mutation.attributeName === 'aria-expanded';
-                })) {
-                    window.requestAnimationFrame(function () {
-                        emitHeaderGeometry('search-expanded-change');
-                    });
-                }
-            })).observe(search, {attributes: true, attributeFilter: ['aria-expanded']});
-        }
-
-        window.addEventListener('resize', function () {
-            if (headerResizeProbeSent) {
-                return;
-            }
-            headerResizeProbeSent = true;
-            window.requestAnimationFrame(function () {
-                emitHeaderGeometry('first-resize');
-            });
-        }, {passive: true});
-    }
-
-    installHeaderGeometryProbe();
+    /* Home: pesados por último (parse sequencial; LCP já coberto por critical/inline). */
+    var QUEUE_HOME_LOAD_LAST_FRAGMENTS = [
+        'awa-commerce-impeccable-refine',
+        'awa-align-grid-terminal-2026-06-11'
+    ];
 
     function injectHomeFooterOverflowGuard() {
         var style;
 
         style = document.getElementById('awa-post-audit-footer-overflow-fix');
-        if (style) {
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'awa-post-audit-footer-overflow-fix';
+            style.textContent = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper :is(.page_footer,.page-footer) .footer-bottom{width:min(100%,1280px)!important;max-width:calc(100% - 32px)!important;margin-inline:auto!important;box-sizing:border-box!important}';
+            (document.head || document.documentElement).appendChild(style);
+        }
+
+        if (document.getElementById('awa-footer-categories-desktop-lock') || !window.matchMedia('(min-width: 768px)').matches) {
             return;
         }
 
         style = document.createElement('style');
-        style.id = 'awa-post-audit-footer-overflow-fix';
-        style.textContent = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper :is(.page_footer,.page-footer) .footer-bottom{width:auto!important;max-width:100%!important;box-sizing:border-box!important}';
+        style.id = 'awa-footer-categories-desktop-lock';
+        style.textContent = '@media (min-width:768px){html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) section.awa-footer-categories-expand .awa-footer-categories-expand__inner{display:grid!important;grid-template-columns:minmax(96px,max-content) minmax(0,1fr)!important;align-items:center!important;column-gap:clamp(14px,2vw,28px)!important;row-gap:10px!important;height:auto!important;min-height:0!important}html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) section.awa-footer-categories-expand .awa-footer-categories-expand__toggle{display:none!important;visibility:hidden!important;pointer-events:none!important}html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) section.awa-footer-categories-expand .awa-footer-categories-expand__heading{grid-column:1!important;grid-row:1!important}html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) section.awa-footer-categories-expand .awa-footer-categories-expand__panel{grid-column:2!important;grid-row:1!important;display:block!important;max-height:none!important;height:auto!important;visibility:visible!important}html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) ul.awa-footer-categories-list{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px 16px!important;width:100%!important;height:auto!important}}';
         (document.head || document.documentElement).appendChild(style);
     }
 
@@ -265,24 +109,6 @@
     }
 
     function onGateInteraction(event) {
-        if (!gateInteractionDebugSent) {
-            gateInteractionDebugSent = true;
-            // #region agent log
-            sendCssGateDebug(
-                'H33',
-                'awa-css-gate.js:onGateInteraction',
-                'First gate interaction event observed',
-                {
-                    href: window.location.href,
-                    eventType: event && event.type ? event.type : '',
-                    targetTag: event && event.target && event.target.tagName ? event.target.tagName : '',
-                    targetClass: event && event.target && event.target.className ? String(event.target.className).slice(0, 120) : '',
-                    meaningfulIntent: isMeaningfulIntent(event),
-                    gateVersion: AWA_CSS_GATE_DEBUG_VERSION
-                }
-            );
-            // #endregion
-        }
         if (isHomePage() && !isMeaningfulIntent(event)) {
             return;
         }
@@ -943,7 +769,29 @@
             + ':is(.header-wrapper-sticky,.header.awa-main-header){height:auto!important;min-height:0!important;'
             + 'max-height:none!important;padding-block:0!important;overflow:visible!important}'
             + 'html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header[data-awa-header-mode="default"]{'
-            + '--awa-header-main-row-h:auto!important}}}';
+            + '--awa-header-main-row-h:auto!important}}}'
+            /* AUDIT30-2026-07-16: unlayered (vence @layer) — painel B2B precisa da 3ª track >44px.
+             * CDP: grid-template shorthand 44px na 3ª track + right-col overflow → overlap logo×trigger.
+             * Reaplica shorthand + longhands FORA do @layer para ganhar da cascata layered. */
+            + '@media(max-width:767px){'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            + '.page-wrapper header.awa-site-header[data-awa-header-mode="default"] '
+            + '.header-wrapper-sticky:has(.b2b-status-panel) '
+            + ':is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){'
+            + 'grid-template:"toggle brand cart" auto "search search search" auto / 44px minmax(0,1fr) minmax(96px,auto)!important;'
+            + 'grid-template-columns:44px minmax(0,1fr) minmax(96px,auto)!important;'
+            + 'grid-template-rows:auto auto!important}'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            + '.page-wrapper header.awa-site-header[data-awa-header-mode="default"] '
+            + '.header-wrapper-sticky:has(.b2b-status-panel) '
+            + '.awa-header-primary-row[data-awa-header-primary-row="true"]{'
+            + 'grid-template-columns:44px minmax(0,1fr) minmax(96px,auto)!important}'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            + '.page-wrapper header.awa-site-header[data-awa-header-mode="default"] '
+            + '.awa-header-right-col:has(.b2b-status-panel){'
+            + 'min-width:96px!important;max-width:min(140px,38vw)!important;width:auto!important;'
+            + 'overflow:hidden!important;justify-self:end!important}'
+            + '}';
 
         style = document.getElementById('awa-header-mobile-grid-terminal');
         if (!style) {
@@ -1030,7 +878,9 @@
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .awa-header-account-prompt__link--login{font-size:13px!important;font-weight:700!important;padding:2px 4px!important;color:var(--awa-text,CanvasText)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .awa-header-account-prompt__separator{font-size:10px!important;font-weight:500!important;padding-inline:1px!important;color:var(--awa-text-muted,var(--awa-text-secondary,CanvasText))!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .awa-header-account-prompt__link--register{font-size:13px!important;font-weight:700!important;padding:0!important;background:transparent!important;color:var(--awa-primary,var(--awa-red,currentColor))!important}'
-            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header :is(.minicart-wrapper,.awa-header-minicart,.action.showcart){height:44px!important;min-height:44px!important;max-height:44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;align-self:center!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .minicart-wrapper:not(.active):not(.show):not(.is-open),'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .awa-header-minicart:not(:has(.minicart-wrapper.active)):not(:has(.minicart-wrapper.show)):not(:has(.minicart-wrapper.is-open)),'
+            + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .minicart-wrapper:not(.active):not(.show):not(.is-open) .action.showcart{height:44px!important;min-height:44px!important;max-height:44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;align-self:center!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header :is(.awa-header-minicart .action.showcart,.awa-minicart-trigger){border-radius:8px!important;box-shadow:none!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-control.header-nav.awa-nav-bar{height:48px!important;min-height:48px!important;max-height:48px!important;padding:0!important;margin:0!important;background:var(--awa-bg-surface,var(--awa-bg,Canvas))!important;border-block:1px solid var(--awa-border-subtle,var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas)))!important;border-inline:0!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-control.awa-nav-bar>.container{height:46px!important;min-height:46px!important;max-height:46px!important;max-width:1280px!important;margin-inline:auto!important;padding:0!important;box-sizing:border-box!important}html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner{height:46px!important;min-height:46px!important;max-height:46px!important;max-width:1280px!important;margin-inline:auto!important;padding:0 var(--awa-home-shell-gutter,16px)!important;box-sizing:border-box!important}'
@@ -1047,10 +897,10 @@
             + 'max-height:min(58vh,430px)!important;aspect-ratio:auto!important;object-fit:contain!important;'
             + 'object-position:center center!important;background:var(--awa-bg,Canvas)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer){'
-            + 'background:var(--awa-bg-soft,var(--awa-bg,Canvas))!important;color:var(--awa-text,CanvasText)!important;min-height:0!important;height:auto!important;padding-block:0!important;overflow-x:clip!important}'
+            + 'background:var(--awa-bg,Canvas)!important;color:var(--awa-text,CanvasText)!important;min-height:0!important;height:auto!important;padding-block:0!important;overflow-x:clip!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
-            + ':is(#footer,.footer-container,.footer.content,.footer-top,.footer-middle,.footer-content,.row,.rowFlexMargin,.velaBlock,.velaContent,.awa-footer-newsletter){'
-            + 'background:transparent!important;background-color:transparent!important;color:var(--awa-text,CanvasText)!important;min-height:0!important}'
+            + ':is(.footer.content,.footer-top,.footer-middle,.footer-content,.velaBlock,.velaContent){'
+            + 'background:transparent!important;background-color:transparent!important;color:var(--awa-text,CanvasText)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             + ':is(input,textarea,select,.control input){background:var(--awa-bg,Canvas)!important;color:var(--awa-text,CanvasText)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
@@ -1058,9 +908,9 @@
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) '
             + ':is(a,p,li,span,.footer.links a,.footer-content a){color:var(--awa-text,CanvasText)!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) .footer-bottom{'
-            + 'background:var(--awa-bg,Canvas)!important;color:var(--awa-text,CanvasText)!important;border-radius:12px!important;'
-            + 'box-sizing:border-box!important;margin-inline:auto!important;width:min(100%,1248px)!important;max-width:calc(100% - 32px)!important;padding:clamp(16px,2.4vw,28px)!important;'
-            + 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 14%,Canvas))!important;box-shadow:none!important;overflow:hidden!important}'
+            + 'background:var(--awa-bg-soft,color-mix(in srgb,CanvasText 3%,Canvas))!important;color:var(--awa-text,CanvasText)!important;border-radius:12px!important;'
+            + 'box-sizing:border-box!important;margin-inline:auto!important;width:100%!important;max-width:min(100%,1280px)!important;padding:clamp(16px,2.4vw,28px)!important;'
+            + 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 14%,Canvas))!important;box-shadow:none!important;overflow:visible!important}'
             + 'html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
             + '.page-wrapper .top-home-content--category-carousel :is(.awa-section-header,.awa-category-carousel__header){'
             + 'display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important}'
@@ -1161,30 +1011,6 @@
                     queueLength = JSON.parse(queueNode.textContent).length;
                 } catch (e) { /* noop */ }
             }
-            // #region agent log
-            fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-Debug-Session-Id': 'ca59a1'},
-                body: JSON.stringify({
-                    sessionId: 'ca59a1',
-                    runId: 'post-fix',
-                    hypothesisId: 'H90',
-                    location: 'awa-css-gate.js:applyGatedCSS:home-footer-only',
-                    message: 'Home gate skipped late structural mutations',
-                    data: {
-                        triggerType: triggerType,
-                        queueLength: queueLength
-                    },
-                    timestamp: Date.now()
-                })
-            }).catch(function () {});
-            sendCssGateDebug(
-                'H90',
-                'awa-css-gate.js:applyGatedCSS:home-footer-only',
-                'Home gate skipped late structural mutations',
-                {triggerType: triggerType, queueLength: queueLength}
-            );
-            // #endregion
             injectQueuedStylesheets().then(function () {
                 try {
                     document.dispatchEvent(new CustomEvent('awa:css-gate-applied', {bubbles: true}));
@@ -1262,11 +1088,13 @@
                 return;
             }
 
-            if ('requestIdleCallback' in window) {
-                window.requestIdleCallback(run, { timeout: HOME_LCP_GATE_FALLBACK_MS });
-            } else {
-                window.setTimeout(run, HOME_LCP_GATE_FALLBACK_MS);
+            // Se o defer do gate chegou depois de window.load, LCP já passou —
+            // aplicar rápido (400ms). Caso contrário, idle com teto 2800ms.
+            var homeDelay = document.readyState === 'complete' ? 400 : HOME_LCP_GATE_FALLBACK_MS;
+            if ('requestIdleCallback' in window && homeDelay >= HOME_LCP_GATE_FALLBACK_MS) {
+                window.requestIdleCallback(run, { timeout: homeDelay });
             }
+            window.setTimeout(run, homeDelay);
             return;
         }
 
@@ -1278,9 +1106,25 @@
         window.setTimeout(run, DESKTOP_FALLBACK_DELAY_MS);
     }
 
-    window.addEventListener('load', function () {
+    // defer/async pode executar antes OU depois de window.load.
+    // Cobrir os dois lados + watchdog para nunca ficar preso em pending.
+    if (document.readyState === 'complete') {
         scheduleFallbackGate();
-    }, { once: true });
+    } else {
+        window.addEventListener('load', function () {
+            scheduleFallbackGate();
+        }, { once: true });
+        if (document.readyState === 'complete') {
+            scheduleFallbackGate();
+        }
+    }
+
+    // Watchdog home: se o fallback idle/load falhar, aplica em 1.2s.
+    window.setTimeout(function () {
+        if (!applied && isHomePage()) {
+            applyGatedCSS('fallback-watchdog');
+        }
+    }, 1200);
 
     if (window.__awaCssGateApplyImmediately) {
         window.setTimeout(function () {
@@ -1302,6 +1146,8 @@
     }
 
     function initSearchClear() {
+        // AWA 2026-07-22: busca só com lupa — sem botão limpar (X).
+        return;
         var searchInput = document.querySelector(
             '#search, .header-search input[type="text"], .block-search input.input-text'
         );
@@ -1577,43 +1423,74 @@
 }());
 
 /*
- * Fix terminal — ícone do carrinho (showcart) invisível (2026-07-02, corrigido 2026-07-07).
+ * Fix terminal — ícone do carrinho (showcart) invisível (2026-07-15).
  *
- * Diagnóstico original (2026-07-02) estava incorreto: assumia que o botão
- * showcart tinha fundo vermelho sólido (background: var(--awa-primary)) e
- * que o ícone precisava ser branco para contrastar com ele. Confirmado por
- * runtime (getComputedStyle + getBoundingClientRect via CDP em 2026-07-07)
- * que o `.showcart`/`.awa-header-cart-fallback` real tem
- * `background-color: transparent` — NÃO existe fundo vermelho. O ícone SVG
- * usa `stroke="currentColor"` e herda corretamente `color: var(--awa-primary)`
- * (vermelho) da cascata CSS, o que já o torna visível sobre o fundo branco
- * da página. O reforço inline anterior forçava `color/stroke: #fff`, criando
- * branco sobre branco — o ícone ficava 100% invisível para o usuário final
- * (regressão introduzida pelo próprio "fix").
+ * Runtime CDP (home): `.action.showcart.header-mini-cart` tem background
+ * vermelho sólido (oklch primary). Forçar stroke/color = --awa-primary
+ * deixa o SVG vermelho-sobre-vermelho (caixa vermelha sem ícone).
  *
- * Correção: reforçar a cor CORRETA (var(--awa-primary), vermelho AWA) via
- * inline important, em vez de branco — mantém o mesmo mecanismo de reforço
- * (inline important vence qualquer regra de stylesheet) mas com o valor
- * certo, garantindo visibilidade mesmo se algum agente externo ao CSSOM
- * documentado quebrar a herança de `color` nesta camada.
+ * Regra: fundo sólido → ícone branco (--awa-text-inverse);
+ * fundo transparente → ícone primary.
  */
 (function () {
     'use strict';
 
-    var ICON_SELECTOR = '.awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart .awa-minicart-icon, ' +
-        '.awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart .awa-minicart-icon *, ' +
-        '.awa-site-header .awa-header-cart-fallback__icon, ' +
-        '.awa-site-header .awa-header-cart-fallback__icon *';
+    var TRIGGER_SELECTOR = '.awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart, ' +
+        '.awa-site-header .awa-header-cart-fallback';
+    var ICON_SELECTOR = '.awa-minicart-icon, .awa-minicart-icon *, .awa-header-cart-fallback__icon, .awa-header-cart-fallback__icon *';
+
+    function isTransparentBg(bg) {
+        if (!bg || bg === 'transparent') {
+            return true;
+        }
+        var m = /^rgba?\(([\d\s.,]+)\)$/i.exec(bg);
+        if (!m) {
+            return false;
+        }
+        var parts = m[1].split(',').map(function (part) {
+            return parseFloat(part.trim());
+        });
+        return parts.length >= 4 && parts[3] === 0;
+    }
 
     function forceCartIconContrast() {
-        var els = document.querySelectorAll(ICON_SELECTOR);
-        for (var i = 0; i < els.length; i++) {
-            els[i].style.setProperty('color', 'var(--awa-primary, #b73337)', 'important');
-            els[i].style.setProperty('stroke', 'var(--awa-primary, #b73337)', 'important');
-            if (els[i].tagName === 'circle') {
-                els[i].style.setProperty('fill', 'var(--awa-primary, #b73337)', 'important');
+        var triggers = document.querySelectorAll(TRIGGER_SELECTOR);
+        var i;
+        var trigger;
+        var solid;
+        var color;
+        var icons;
+        var j;
+        var icon;
+
+        for (i = 0; i < triggers.length; i++) {
+            trigger = triggers[i];
+            /* Minicart sem fundo/borda: ícone primary alinhado aos demais ícones do header. */
+            trigger.style.removeProperty('background');
+            trigger.style.setProperty('background-color', 'transparent', 'important');
+            trigger.style.setProperty('border', '0', 'important');
+            trigger.style.setProperty('box-shadow', 'none', 'important');
+            trigger.style.setProperty('color', 'var(--awa-primary, #b73337)', 'important');
+            trigger.style.setProperty('border-radius', '0', 'important');
+            solid = false;
+            color = 'var(--awa-primary, #b73337)';
+            icons = trigger.querySelectorAll(ICON_SELECTOR);
+
+            for (j = 0; j < icons.length; j++) {
+                icon = icons[j];
+                icon.style.setProperty('color', color, 'important');
+                icon.style.setProperty('stroke', color, 'important');
+                if (icon.tagName === 'SVG' || (icon.classList && icon.classList.contains('awa-minicart-icon'))) {
+                    icon.style.setProperty('width', '24px', 'important');
+                    icon.style.setProperty('height', '24px', 'important');
+                }
+                if (icon.tagName === 'circle') {
+                    icon.style.setProperty('fill', color, 'important');
+                }
             }
+
         }
+
     }
 
     if (document.readyState !== 'loading') {
@@ -1691,8 +1568,19 @@
     }());
 
     function forceHomeTabAndFooterToggleContrast() {
-        document.querySelectorAll('.awa-home-niche-shelves__tab.is-active').forEach(function (tab) {
-            tab.style.setProperty('color', '#ffffff', 'important');
+        /* BUGFIX (2026-07-13): a versão anterior só ADICIONAVA a cor inline na
+         * aba ativa e nunca a removia da aba que deixa de ser ativa. Como
+         * inline `!important` vence qualquer regra de folha de estilo
+         * (inclusive a `<style>` injetada acima), a aba que perde ".is-active"
+         * ficava com `color:#fff` preso sobre o fundo claro do estado inativo
+         * — texto branco sobre branco, invisível. Ao trocar de aba (clique ou
+         * seta do teclado), é preciso reforçar a ativa E limpar as demais. */
+        document.querySelectorAll('.awa-home-niche-shelves__tab').forEach(function (tab) {
+            if (tab.classList.contains('is-active')) {
+                tab.style.setProperty('color', '#ffffff', 'important');
+            } else {
+                tab.style.removeProperty('color');
+            }
         });
 
         document.querySelectorAll('nav.fixed-bottom button.toggle-nav-footer').forEach(function (btn) {
@@ -1718,6 +1606,19 @@
     document.addEventListener('click', function (evt) {
         if (evt.target && evt.target.closest &&
             evt.target.closest('.awa-home-niche-shelves__tab, .toggle-nav-footer')) {
+            window.setTimeout(forceHomeTabAndFooterToggleContrast, 30);
+        }
+    }, { capture: true, passive: true });
+
+    /* BUGFIX (2026-07-13): a troca de aba das prateleiras também acontece via
+     * teclado (ArrowLeft/ArrowRight, ver niche-shelves-tabs.phtml), sem
+     * disparar "click". Sem este listener a limpeza da cor inline acima só
+     * rodava em navegação por mouse, deixando o mesmo bug de texto invisível
+     * para quem troca de aba pelo teclado. */
+    document.addEventListener('keydown', function (evt) {
+        if ((evt.key === 'ArrowLeft' || evt.key === 'ArrowRight') &&
+            evt.target && evt.target.closest &&
+            evt.target.closest('.awa-home-niche-shelves__tab')) {
             window.setTimeout(forceHomeTabAndFooterToggleContrast, 30);
         }
     }, { capture: true, passive: true });
@@ -1747,17 +1648,62 @@
         }
     }
 
+    /**
+     * H10A: setProperty('background', …) expande longhands vazios
+     * (background-image: !important) no style attr. Usar só color + image:none.
+     */
+    function clearEmptyBackgroundLonghands(el) {
+        if (!el || !el.style) {
+            return;
+        }
+        // Nunca incluir 'background': removeProperty('background') zera todos os longhands no Chrome.
+        var props = [
+            'background-image',
+            'background-position',
+            'background-position-x',
+            'background-position-y',
+            'background-size',
+            'background-repeat',
+            'background-attachment',
+            'background-origin',
+            'background-clip'
+        ];
+        props.forEach(function (prop) {
+            var val = (el.style.getPropertyValue(prop) || '').trim();
+            if (val === '') {
+                el.style.removeProperty(prop);
+            }
+        });
+    }
+
+    function applyFooterShellSurface(el, colorValue) {
+        if (!el) {
+            return;
+        }
+        el.style.removeProperty('background');
+        clearEmptyBackgroundLonghands(el);
+        setImportant(el, 'background-color', colorValue);
+        setImportant(el, 'background-image', 'none');
+    }
+
     function applyFooterShellFix() {
         if (!isTargetPage()) {
             return;
         }
 
+        var isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+        /* Desktop/tablet: content-driven height (locks 566/339/111 congelavam densidade).
+         * Mobile: mantém floors leves só onde accordion/CLS ainda colapsa. */
+        var containerMinHeight = isMobile ? '0' : '0';
+        var newsletterMinHeight = isMobile ? '0' : '0';
+        var atendimentoMinHeight = isMobile ? '0' : '0';
+
         document.querySelectorAll('.page_footer, .page-footer').forEach(function (footer) {
-            setImportant(footer, 'background', 'var(--awa-bg-soft,var(--awa-bg,Canvas))');
-            setImportant(footer, 'background-color', 'var(--awa-bg-soft,var(--awa-bg,Canvas))');
+            applyFooterShellSurface(footer, 'var(--awa-bg,Canvas)'); // token único cross-page (r62)
             setImportant(footer, 'color', 'var(--awa-text,CanvasText)');
             setImportant(footer, 'height', 'auto');
             setImportant(footer, 'min-height', '0');
+            setImportant(footer, 'max-height', 'none');
             setImportant(footer, 'padding-block', '0');
             setImportant(footer, 'overflow-x', 'clip');
             setImportant(footer, 'max-width', '100%');
@@ -1767,21 +1713,117 @@
             '.page_footer #footer, .page-footer #footer, ' +
             '.page_footer .footer-container, .page-footer .footer-container'
         ).forEach(function (el) {
-            setImportant(el, 'background', 'transparent');
-            setImportant(el, 'background-color', 'transparent');
+            applyFooterShellSurface(el, 'transparent');
             setImportant(el, 'color', 'var(--awa-text,CanvasText)');
+            setImportant(el, 'min-height', containerMinHeight);
+            setImportant(el, 'height', 'auto');
+        });
+
+        document.querySelectorAll('.page_footer .awa-footer-newsletter, .page-footer .awa-footer-newsletter').forEach(function (el) {
+            setImportant(el, 'min-height', newsletterMinHeight);
+            setImportant(el, 'height', 'auto');
+        });
+
+        document.querySelectorAll('.page_footer .awa-footer-atendimento, .page-footer .awa-footer-atendimento').forEach(function (el) {
+            setImportant(el, 'min-height', atendimentoMinHeight);
+            setImportant(el, 'height', 'auto');
+        });
+
+        /* r70: CSS terminal perde padding/margin — inline !important vence (evidência Playwright). */
+        var isDesktopDense = window.matchMedia && window.matchMedia('(min-width: 992px)').matches;
+        var denseEls = document.querySelectorAll('.page_footer, .page_footer .velaFooterLinks a, .page_footer .awa-footer-atendimento__actions a, .page_footer .awa-footer-atendimento__phone a, .page_footer .awa-footer-atendimento__email a, .page_footer .awa-footer-copyright__disclaimer, .page_footer .awa-footer-atendimento__store-badge, .page_footer .awa-footer-atendimento__store-address');
+        var denseProps = ['margin-top','padding-top','padding-bottom','padding-block','min-height','line-height','font-size','max-height','overflow','display','white-space','text-overflow'];
+        if (!isDesktopDense) {
+            denseEls.forEach(function (el) { denseProps.forEach(function (prop) { el.style.removeProperty(prop); }); });
+        } else if (isDesktopDense) {
+            document.querySelectorAll('.page_footer.page_footer, .page_footer').forEach(function (footer) {
+                setImportant(footer, 'margin-top', '8px');
+            });
+            document.querySelectorAll(
+                '.page_footer .velaFooterLinks a, .page_footer .awa-footer-atendimento__actions a, ' +
+                '.page_footer .awa-footer-atendimento__phone a, .page_footer .awa-footer-atendimento__email a'
+            ).forEach(function (link) {
+                setImportant(link, 'padding-top', '1px');
+                setImportant(link, 'padding-bottom', '1px');
+                setImportant(link, 'padding-block', '1px');
+                setImportant(link, 'min-height', '0');
+                setImportant(link, 'line-height', '1.25');
+            });
+            document.querySelectorAll('.page_footer .awa-footer-copyright__disclaimer').forEach(function (el) {
+                setImportant(el, 'font-size', '10px');
+                setImportant(el, 'line-height', '1.2');
+                setImportant(el, 'max-height', '2.4em');
+                setImportant(el, 'overflow', 'hidden');
+            });
+            document.querySelectorAll('.page_footer .awa-footer-atendimento__store-badge').forEach(function (el) {
+                setImportant(el, 'display', 'none');
+            });
+            document.querySelectorAll('.page_footer .awa-footer-atendimento__store-address').forEach(function (el) {
+                setImportant(el, 'white-space', 'nowrap');
+                setImportant(el, 'overflow', 'hidden');
+                setImportant(el, 'text-overflow', 'ellipsis');
+            });
+            document.querySelectorAll('.page_footer .footer-container > .container').forEach(function (el) {
+                setImportant(el, 'padding', '4px 16px');
+                setImportant(el, 'padding-top', '4px');
+                setImportant(el, 'padding-bottom', '4px');
+                setImportant(el, 'padding-block', '4px');
+            });
+        }
+
+        // #region agent log
+        try {
+            var _fc = document.querySelector('.page_footer .footer-container, .page-footer .footer-container');
+            var _fb = document.querySelector('.page_footer .footer-bottom, .page-footer .footer-bottom');
+            var _pf = document.querySelector('.page_footer, .page-footer');
+            var _link = document.querySelector('.page_footer .velaFooterLinks a');
+            var _disc = document.querySelector('.page_footer .awa-footer-copyright__disclaimer');
+            fetch('http://localhost:7372/ingest/d9f3505e-68fb-4364-ba40-1ca0d41266d0', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-Debug-Session-Id': '7d58c7'},
+                body: JSON.stringify({
+                    sessionId: '7d58c7',
+                    runId: 'footer-dense-r72',
+                    hypothesisId: 'H36',
+                    location: 'awa-css-gate.js:applyFooterShellFix',
+                    message: 'footer dense r72 shell',
+                    data: {
+                        isMobile: isMobile,
+                        isDesktopDense: isDesktopDense,
+                        containerH: _fc ? Math.round(_fc.getBoundingClientRect().height) : null,
+                        mainContainerPad: (function () {
+                            var c = document.querySelector('.page_footer .footer-container > .container');
+                            if (!c) return null;
+                            var cs = getComputedStyle(c);
+                            return cs.paddingTop + '/' + cs.paddingBottom;
+                        })(),
+                        bottomH: _fb ? Math.round(_fb.getBoundingClientRect().height) : null,
+                        pageFooterH: _pf ? Math.round(_pf.getBoundingClientRect().height) : null,
+                        pageMt: _pf ? getComputedStyle(_pf).marginTop : null,
+                        linkPad: _link ? getComputedStyle(_link).paddingTop : null,
+                        linkH: _link ? Math.round(_link.getBoundingClientRect().height) : null,
+                        discFs: _disc ? getComputedStyle(_disc).fontSize : null
+                    },
+                    timestamp: Date.now()
+                })
+            }).catch(function () {});
+        } catch (_e) {}
+        // #endregion
+
+        document.querySelectorAll('.page_footer .awa-footer-devby, .page-footer .awa-footer-devby').forEach(function (el) {
             setImportant(el, 'min-height', '0');
+            setImportant(el, 'height', 'auto');
         });
 
         document.querySelectorAll('.page_footer .footer-bottom, .page-footer .footer-bottom').forEach(function (el) {
             setImportant(el, 'box-sizing', 'border-box');
-            setImportant(el, 'background', 'var(--awa-bg,Canvas)');
-            setImportant(el, 'background-color', 'var(--awa-bg,Canvas)');
+            applyFooterShellSurface(el, 'var(--awa-bg,Canvas)');
             setImportant(el, 'color', 'var(--awa-text,CanvasText)');
             setImportant(el, 'margin-inline', 'auto');
             setImportant(el, 'max-width', 'calc(100% - 32px)');
-            setImportant(el, 'width', 'min(100%,1248px)');
-            setImportant(el, 'overflow', 'hidden');
+            setImportant(el, 'width', 'min(100%,1280px)');
+            /* visible: hidden cortava copyright/disclaimer no mobile (H91) */
+            setImportant(el, 'overflow', 'visible');
             setImportant(el, 'box-shadow', 'none');
         });
     }

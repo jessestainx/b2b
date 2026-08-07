@@ -180,11 +180,34 @@
         -->
         <css src="css/awa-visual-fixes-2026-06-29-final.css"/>
         <!--
+            AWA 2026-07-16: tokens + superfícies do modo escuro (classe body.awa-dark-mode).
+            Removido 2026-07-17: toggle awa.dark.mode.toggle já remove=true em default.xml —
+            folha morta no critical path (prática Magento: não carregar CSS sem UI).
+        -->
+        <remove src="Magento_Theme::css/awa-dark-mode.css"/>
+        <!--
+            AWA 2026-07-15: refinamento de ruído visual desktop (home/footer),
+            baseado em métricas runtime do probe H6/H8.
+        -->
+        <css src="css/awa-visual-noise-2026-07-15-r2.css"/>
+        <!--
             AWA 2026-07-08: fix isolado (arquivo próprio, não edita o CSS acima em
             estado MM não commitado) — FAB modo escuro colidindo com botão
             "Permitir cookies" no mobile. Ver comentário no próprio arquivo CSS.
         -->
         <css src="css/awa-cookie-fab-collision-fix-2026-07-08.min.css"/>
+        <!--
+            AWA 2026-08-01 / BUG-SHELL-SSOT-DUP-001 (2026-08-05):
+            awa-m2-visual-ssot NÃO é registrado aqui.
+            Cópia early no <head> + loader/plugin após align-grid = 2× na PDP/carrinho.
+            Fonte única (após align-grid): awa-align-grid-terminal-loader.phtml
+            e OptimizeHeadStylesPlugin::consolidateM2VisualSsotTerminal().
+        -->
+        <!--
+            AWA Onda 1 — Design System (único ponto de override visual a partir de agora).
+            Deve permanecer como ÚLTIMO <css> deste <head>.
+        -->
+        <css src="css/awa-design-system.css"/>
     </head>
     <body>
         <referenceBlock name="head.additional">
@@ -198,7 +221,12 @@
             -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.og.meta"
-                   template="Magento_Theme::html/awa-og-meta.phtml"/>
+                   template="Magento_Theme::html/awa-og-meta.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
+                    <argument name="open_graph_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OpenGraph</argument>
+                </arguments>
+            </block>
         </referenceBlock>
     </body>
 </page>

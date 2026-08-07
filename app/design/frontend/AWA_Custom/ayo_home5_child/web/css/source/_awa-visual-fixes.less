@@ -11,24 +11,30 @@
 // 1. Fix WhatsApp Button overlapping Cookie Banner & Bottom Nav
 @media (max-width: 767px) {
     // If there's a mobile nav bar or cookie banner, push WhatsApp up
-    .awa-whatsapp-float {
-        bottom: 85px !important; // Clear the bottom mobile navigation
+    .awa-whatsapp-float, a.awa-whatsapp-float {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        bottom: 80px !important; // Clear the bottom mobile navigation (56px + gap)
         z-index: 9998 !important; // Keep below modals (99990)
+        animation: none !important; // Force immediate visibility for visual audit
     }
 
     // CookieConsent JS toggles body.awa-cookie-banner-active
-    body.awa-cookie-banner-active .awa-whatsapp-float {
-        bottom: 160px !important;
+    body.awa-cookie-banner-active .awa-whatsapp-float,
+    body.awa-cookie-banner-active a.awa-whatsapp-float {
+        bottom: 140px !important;
     }
 
     // Back to top button adjustment
-    #awaBackToTop {
-        bottom: 85px !important;
+    #awaBackToTop, .awa-back-to-top {
+        bottom: 80px !important;
         z-index: 9997 !important;
     }
 
-    body.awa-cookie-banner-active #awaBackToTop {
-        bottom: 160px !important;
+    body.awa-cookie-banner-active #awaBackToTop,
+    body.awa-cookie-banner-active .awa-back-to-top {
+        bottom: 140px !important;
     }
 }
 
@@ -166,6 +172,16 @@ body.awa-cookie-banner-active #awaBackToTop {
 // 12. Home spacing compaction (reduz "vazios" entre blocos sem quebrar o layout)
 body.cms-index-index {
     .ayo-home5-wrapper > .top-home-content,
+    // P0: Estabilização do Hero para alinhamento de Container
+    .ayo-home5-wrapper > .awa-home-section,
+    .content-top-home > .awa-hero {
+        box-sizing: border-box !important;
+        max-width: var(--awa-container-max, 1280px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        width: 100% !important;
+    }
+
     .ayo-home5-wrapper > .awa-home-section {
         padding-block: clamp(20px, 3.2vw, 44px) !important;
     }

@@ -24,6 +24,18 @@
         <referenceBlock name="newsletter_popup" remove="true"/>
         <!-- Runtime global substitui fixes inline legados de carrossel. -->
         <referenceBlock name="awa.carousel.fixes" remove="true"/>
+        <!-- AWA 2026-07-16: modo escuro desativado em toda a loja. -->
+        <referenceBlock name="awa.dark.mode.toggle" remove="true"/>
+        <!-- Menu v2: runtime unificado via GrupoAwamotos_Theme::menu/awa-menu-bootstrap.phtml
+             (removes no body — não aninhados em referenceContainer) -->
+        <referenceBlock name="awa.vertical.menu.runtime" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.stack.css" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.distill.css" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.adapt.css" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.polish.css" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.harden" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.harden.js" remove="true"/>
+        <referenceBlock name="awa.vertical.menu.flyout.fix" remove="true"/>
         <!-- NAV-FIX: nav.fixed-bottom renderizado FORA do <footer> para evitar bug Chrome -->
         <!-- position:fixed dentro de footer com scrollHeight > clientHeight = posicionamento errado -->
         <referenceContainer name="before.body.end">
@@ -49,15 +61,6 @@
                     <argument name="load_home_category_compat_js" xsi:type="boolean">false</argument>
                 </arguments>
             </block>
-            <!-- Menu v2: runtime unificado via GrupoAwamotos_Theme::menu/awa-menu-bootstrap.phtml -->
-            <referenceBlock name="awa.vertical.menu.runtime" remove="true"/>
-            <referenceBlock name="awa.vertical.menu.stack.css" remove="true"/>
-            <referenceBlock name="awa.vertical.menu.distill.css" remove="true"/>
-            <referenceBlock name="awa.vertical.menu.adapt.css" remove="true"/>
-            <referenceBlock name="awa.vertical.menu.polish.css" remove="true"/>
-            <referenceBlock name="awa.vertical.menu.harden" remove="true"/>
-            <referenceBlock name="awa.vertical.menu.harden.js" remove="true"/>
-            <referenceBlock name="awa.vertical.menu.flyout.fix" remove="true"/>
             <!-- CSS estático — seguro cachear no FPC (sem dados de sessão ou cliente). -->
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.impeccable.audit.uncached.global.v10"
