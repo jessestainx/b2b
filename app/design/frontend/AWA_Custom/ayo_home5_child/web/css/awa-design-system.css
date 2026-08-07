@@ -319,4 +319,25 @@
   }
 }
 
+/* ==========================================================================
+   11. FIX — Respiro do subtítulo de seção (Onda 2F)
+   Gap real era ~2px (flex gap do __left em awa-home-b2b-ops-density @layer awa-fixes).
+   !important unlayered perde para !important DENTRO de @layer awa-fixes — por isso
+   esta seção entra na mesma layer, com #html-body×12 (>×11 do b2b-ops) e gap:0
+   para o respiro vir só do margin-top:6px.
+   ========================================================================== */
+@layer awa-fixes {
+  @media (min-width: 992px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper .content-top-home .awa-section-header__left {
+      gap: 0 !important;
+    }
+
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper .content-top-home .awa-section-header .awa-section-header__subtitle {
+      margin-top: 6px !important;
+    }
+  }
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */

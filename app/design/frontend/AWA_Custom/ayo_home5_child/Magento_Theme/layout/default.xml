@@ -106,6 +106,12 @@
             O handle default é sempre ativo e resolve o merge.
         -->
         <referenceBlock name="head.additional">
+            <!-- Onda 2F: sr-only no 1º paint (antes de CSS async media=print). -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.critical.a11y"
+                   template="Magento_Theme::html/awa-critical-a11y.phtml"
+                   before="-"/>
+
             <!--
                 AWA CLS Fix v5.0 — inline CSS no head para evitar layout shift no nav.
                 Replica as regras de layout de awa-header-premium.css (carregado async)
@@ -115,7 +121,7 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.cls.nav.fix"
                    template="Magento_Theme::html/awa-cls-nav-fix.phtml"
-                   before="-"/>
+                   after="awa.critical.a11y"/>
 
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.header.impeccable.critical.global"
