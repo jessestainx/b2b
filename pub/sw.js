@@ -6,10 +6,10 @@
  * - Network-first para paginas HTML
  * - Offline fallback
  *
- * Versao: 1.1.0
+ * Versao: 1.1.2
  */
 
-const CACHE_VERSION = 'awa-v8';
+const CACHE_VERSION = 'awa-v14-r66';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
