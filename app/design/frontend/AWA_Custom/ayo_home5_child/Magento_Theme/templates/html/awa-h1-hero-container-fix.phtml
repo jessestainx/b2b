@@ -1,13 +1,12 @@
 <?php
 // FASE 2: H1 Container Alignment Fix
 // Resolve o transbordo de 32px (padding em content-box) e alinha o Hero com as outras seções do container
+// Fragmento incluído dentro do <style> crítico de awa-head-preload.phtml.
 ?>
-<style id="awa-h1-hero-container-fix">
-    body#html-body.cms-index-index .page-wrapper #awa-main-content.top-home-content.awa-hero {
-        box-sizing: border-box !important;
-        max-width: var(--awa-container-max, 1280px) !important;
-        width: 100% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-    }
-</style>
+body#html-body.cms-index-index .page-wrapper #awa-main-content.top-home-content.awa-hero {
+    box-sizing: border-box !important;
+    max-width: var(--awa-container-max, 1280px) !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}

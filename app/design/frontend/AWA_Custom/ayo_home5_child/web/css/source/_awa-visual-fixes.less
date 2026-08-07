@@ -9,21 +9,24 @@
 // =============================================
 
 // 1. Fix WhatsApp Button overlapping Cookie Banner & Bottom Nav
-@media (max-width: 767px) {
+@media (max-width: 991px) {
     // If there's a mobile nav bar or cookie banner, push WhatsApp up
-    .awa-whatsapp-float, a.awa-whatsapp-float {
+    html body#html-body .page-wrapper .awa-whatsapp-float,
+    html body#html-body .page-wrapper a.awa-whatsapp-float {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
-        bottom: 80px !important; // Clear the bottom mobile navigation (56px + gap)
-        z-index: 9998 !important; // Keep below modals (99990)
+        bottom: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        z-index: 10002 !important; // Must be higher than fixed-bottom (1001)
         animation: none !important; // Force immediate visibility for visual audit
     }
 
     // CookieConsent JS toggles body.awa-cookie-banner-active
     body.awa-cookie-banner-active .awa-whatsapp-float,
     body.awa-cookie-banner-active a.awa-whatsapp-float {
-        bottom: 140px !important;
+        bottom: calc(72px + 12px + var(--awa-cookie-banner-height, 0px) + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + var(--awa-cookie-banner-height, 0px) + env(safe-area-inset-bottom, 0px)) !important;
     }
 
     // Back to top button adjustment
@@ -246,4 +249,110 @@ body.cms-index-index .top-home-content--trust-and-offers .top-home-content__trus
 // 17. Footer label color cleanup (replace inline styles)
 .awa-footer-muted-label {
     color: var(--awa-vfix-c1) !important;
+}
+
+// 18. Polish Newsletter Section Alignment
+.newsletter-section .block.newsletter {
+    .form.subscribe {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+
+        .field.newsletter {
+            flex: 1;
+            margin: 0;
+            .control {
+                input {
+                    height: 44px !important;
+                    border-radius: 8px !important;
+                    padding-inline: 16px !important;
+                }
+            }
+        }
+
+        .actions {
+            margin: 0;
+            .action.subscribe {
+                height: 44px !important;
+                padding: 0 24px !important;
+                border-radius: 8px !important;
+                font-weight: 700 !important;
+                text-transform: uppercase !important;
+            }
+        }
+    }
+}
+
+// 20. B2B Price Gate Polish (Convert text to prominent button-like call-to-action)
+.b2b-login-to-see-price {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    min-height: 80px !important; // Match price-box height to prevent layout shift
+    background: var(--awa-bg-soft) !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    margin: 8px 0 !important;
+    border: 1px dashed var(--awa-border) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: var(--awa-color-primary-50) !important;
+        border-color: var(--awa-primary) !important;
+        border-style: solid !important;
+    }
+
+    .b2b-login-to-see-price__title {
+        color: var(--awa-primary) !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+        margin-bottom: 4px !important;
+        display: block !important;
+        text-transform: uppercase !important;
+    }
+
+    .b2b-login-to-see-price__message {
+        font-size: 11px !important;
+        color: var(--awa-text-secondary) !important;
+        line-height: 1.2 !important;
+        display: block !important;
+    }
+    
+    // Support for simple text links inside price boxes
+    a {
+        text-decoration: none !important;
+        color: inherit !important;
+        display: block !important;
+        width: 100% !important;
+    }
+}
+
+// 21. Polish Newsletter Section Alignment
+.newsletter-section .block.newsletter {
+    .form.subscribe {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+
+        .field.newsletter {
+            flex: 1;
+            margin: 0;
+            .control {
+                input {
+                    height: 44px !important;
+                    border-radius: 8px !important;
+                    padding-inline: 16px !important;
+                    border: 1.5px solid var(--awa-border) !important;
+                    transition: border-color 0.2s;
+                    
+                    &:focus {
+                        border-color: var(--awa-primary) !important;
+                    }
+                }
+            }
+        }
+    }
 }
