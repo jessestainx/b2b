@@ -167,21 +167,23 @@ body.awa-header-is-sticky .page-wrapper .awa-site-header .awa-header-brand-cell 
     color: @awa-neutral-400 !important;
   }
 
+  /* Search ghost SSOT — alinhado a FOUC r4 / cascade (CTA sólido = Departamentos) */
   body .page-wrapper .awa-site-header .awa-header-search-col button.action.search,
   body .page-wrapper .awa-site-header .awa-header-search-col button.awa-search-btn,
   body .page-wrapper .awa-site-header .awa-header-search-col .actions .action.search {
-    background: var(--awa-primary, @awa-color-primary) !important;
-    color: @awa-color-white !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
     border: 0 !important;
     border-radius: 0 9px 9px 0 !important;
     min-width: 48px !important;
-    transition: background-color 200ms ease !important;
+    transition: opacity 200ms ease !important;
   }
 
   body .page-wrapper .awa-site-header .awa-header-search-col button.action.search:hover,
   body .page-wrapper .awa-site-header .awa-header-search-col button.awa-search-btn:hover,
   body .page-wrapper .awa-site-header .awa-header-search-col .actions .action.search:hover {
-    background: var(--awa-primary-hover, @awa-color-primary-dark) !important;
+    background: transparent !important;
+    opacity: 0.88 !important;
   }
 }
 

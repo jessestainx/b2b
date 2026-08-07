@@ -56,7 +56,8 @@ html body#html-body .page-wrapper .awa-site-header .awa-header-right-col:has(.b2
     gap: 16px;
     box-sizing: border-box;
     max-width: min(360px, 36vw);
-    min-height: 0;
+    min-height: 44px;
+    height: 44px;
     padding: 0;
     border: 0;
     border-radius: 0;
@@ -476,11 +477,19 @@ html body#html-body .page-wrapper .awa-site-header .awa-header-right-col:has(.b2
     }
 
     .b2b-status-trigger {
-        max-width: min(200px, 42vw);
-        gap: 10px;
+        max-width: min(160px, 42vw);
+        gap: 8px;
     }
 
+    /* Mobile: mostrar saudação curta; ocultar empresa (evita "Pan…") */
     .b2b-status-trigger__line1 {
+        display: block;
+        max-width: min(12ch, 100%);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .b2b-status-trigger__line2 {
         display: none;
     }
 
@@ -504,13 +513,13 @@ html body#html-body .page-wrapper .awa-site-header .awa-header-right-col:has(.b2
 
 @media screen and (max-width: 480px) {
     .b2b-status-trigger {
-        max-width: min(180px, 48vw);
-        gap: 8px;
+        max-width: min(150px, 46vw);
+        gap: 6px;
     }
 
-    .b2b-status-trigger__line2 {
+    .b2b-status-trigger__line1 {
+        max-width: min(11ch, 100%);
         font-size: 12px;
-        max-width: 120px;
     }
 
     .b2b-status-trigger__chevron {
@@ -641,8 +650,11 @@ html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status
     box-shadow: none !important;
     padding: 0 !important;
     padding-inline: 0 !important;
-    min-block-size: 0 !important;
-    min-height: 0 !important;
+    min-block-size: 44px !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px !important;
+    align-items: center !important;
 }
 
 @media (min-width: 1024px) {
@@ -654,6 +666,9 @@ html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status
         box-sizing: border-box !important;
         white-space: nowrap !important;
         gap: var(--awa-space-3, 12px) !important;
+        min-height: 44px !important;
+        height: 44px !important;
+        max-height: 44px !important;
     }
 }
 
@@ -665,21 +680,72 @@ html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status
  * Reduz o ícone e garante largura minima real para o rotulo da conta.
  */
 @media screen and (max-width: 767px) {
+    /* 2026-07-16: shorthand grid-template fixava 3ª track em 44px; painel invadia logo. */
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-main-header__inner:has(.b2b-status-panel),
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-main-header__inner.wp-header:has(.b2b-status-panel) {
+        grid-template:
+            "toggle brand cart" 44px
+            "search search search" 44px
+            / 44px minmax(0, 1fr) minmax(96px, auto) !important;
+        grid-template-columns: 44px minmax(0, 1fr) minmax(96px, auto) !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-right-col.awa-header-right--logged:has(.b2b-status-panel) {
+        width: auto !important;
+        max-width: min(140px, 38vw) !important;
+        min-width: 0 !important;
+        justify-content: flex-end !important;
+        justify-self: end !important;
+        gap: 2px !important;
+        overflow: hidden !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header :is(.awa-header-brand, .awa-header-brand-cell) {
+        min-width: 0 !important;
+        max-width: min(120px, 32vw) !important;
+        overflow: hidden !important;
+        justify-content: center !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .b2b-status-panel {
+        min-width: 0 !important;
+        max-width: min(88px, 24vw) !important;
+        overflow: hidden !important;
+    }
+
+    html body#html-body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger {
+        color: var(--awa-text-primary, #0f172a) !important;
+        background: transparent !important;
+    }
+
     html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger__icon .awa-b2b-panel-icon--user {
         width: 20px !important;
         height: 20px !important;
     }
 
     html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger {
-        gap: 6px !important;
+        gap: 4px !important;
+        max-width: 100% !important;
+        padding: 4px 6px !important;
+        background: transparent !important;
+        border-color: transparent !important;
     }
 
     html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger__text {
         flex: 1 1 auto !important;
-        min-width: 44px !important;
+        min-width: 0 !important;
+        max-width: 7ch !important;
+    }
+
+    html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger__line1 {
+        max-width: 7ch !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
 
     html body#html-body .page-wrapper .awa-site-header .b2b-status-panel .b2b-status-trigger__line2 {
+        display: none !important;
         max-width: 100% !important;
     }
 

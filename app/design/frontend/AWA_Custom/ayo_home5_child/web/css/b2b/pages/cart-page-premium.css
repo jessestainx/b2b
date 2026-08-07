@@ -156,11 +156,7 @@ body.checkout-cart-index .cart.table-wrapper .control.awa-qty-stepper input.qty:
     border-color: transparent !important;
     box-shadow: inset 0 0 0 2px var(--awa-brand-primary) !important;
     outline: none !important;
-}body.checkout-cart-index .cart.table-wrapper .action-delete, body.checkout-cart-index .cart.table-wrapper .action-edit, body.checkout-cart-index .cart.table-wrapper .action-towishlist, body.checkout-cart-index .cart.table-wrapper .action-tocompare{
-    color: var(--awa-cc-text-2) !important;
-}body.checkout-cart-index .cart.table-wrapper .action-delete:hover, body.checkout-cart-index .cart.table-wrapper .action-delete:focus-visible, body.checkout-cart-index .cart.table-wrapper .action-edit:hover, body.checkout-cart-index .cart.table-wrapper .action-edit:focus-visible{
-    color: var(--awa-brand-primary) !important;
-}body.checkout-cart-index .cart.table-wrapper .action-delete:focus-visible, body.checkout-cart-index .cart.table-wrapper .action-edit:focus-visible{
+}body.checkout-cart-index .cart.table-wrapper .action-delete, body.checkout-cart-index .cart.table-wrapper .action-tocompare{    color: var(--awa-cc-text-2) !important;}body.checkout-cart-index .cart.table-wrapper .action-edit, body.checkout-cart-index .cart.table-wrapper .action-towishlist{    color: #fff !important;}body.checkout-cart-index .cart.table-wrapper .action-delete:hover, body.checkout-cart-index .cart.table-wrapper .action-delete:focus-visible{color: var(--awa-brand-primary) !important;}body.checkout-cart-index .cart.table-wrapper .action-edit:hover, body.checkout-cart-index .cart.table-wrapper .action-edit:focus-visible, body.checkout-cart-index .cart.table-wrapper .action-towishlist:hover, body.checkout-cart-index .cart.table-wrapper .action-towishlist:focus-visible{color:#fff!important;filter:brightness(0.92);}body.checkout-cart-index .cart.table-wrapper .action-delete:focus-visible, body.checkout-cart-index .cart.table-wrapper .action-edit:focus-visible{
     outline: none !important;
     border-radius: var(--awa-radius-sm, 6px) !important;
     box-shadow: var(--awa-cc-focus-ring) !important;
@@ -355,7 +351,7 @@ body.checkout-cart-index .awa-cart-empty__icon-wrap{
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-height: 36px;
+    min-height: 44px;
     padding: 0 14px;
     border: 1px solid var(--awa-cc-border);
     border-radius: var(--awa-radius-pill);
@@ -435,6 +431,9 @@ body.checkout-cart-index .awa-cart-empty__categories{
     align-items: center;
     justify-content: center;
     margin-top: 14px;
+    min-height: 44px;
+    padding-block: 10px;
+    box-sizing: border-box;
     font-size: 14px;
     font-weight: var(--awa-weight-semibold);
     color: var(--awa-brand-primary);
@@ -1309,4 +1308,101 @@ html body#html-body#html-body.checkout-cart-index .modal-popup :is(.block.block-
     html body#html-body#html-body.checkout-cart-index .modal-popup :is(.block.block-customer-login, .block-authentication) :is(.primary, .primary .action, .action.login, .action.primary, button.action) {
         width: 100% !important;
     }
+}
+
+/* CART-SUMMARY-TABLET-STACK-20260730
+   Evidência @788px: .cart-summary ~170px (float Magento entre 768–991),
+   .amount estoura a borda (R$ fora do card). Desktop ≥992 mantém 36% sticky.
+*/
+@media (max-width: 991px) {
+    html body#html-body.checkout-cart-index .page-wrapper .cart-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: clamp(16px, 2.5vw, 24px) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        grid-template-columns: none !important;
+    }
+
+    html body#html-body.checkout-cart-index .page-wrapper .cart-container .form-cart,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-container #form-validate,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-container .cart-summary,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-container #cart-summary {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        float: none !important;
+        flex: 0 0 auto !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body.checkout-cart-index .page-wrapper .cart-container .cart-summary,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-container #cart-summary {
+        position: static !important;
+        top: auto !important;
+        overflow: visible !important;
+    }
+
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary .cart-totals,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary .table.totals,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary table.totals,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary .totals {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary .totals .mark,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary .table.totals .mark {
+        width: auto !important;
+        max-width: 68% !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        padding-inline-end: 12px !important;
+    }
+
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary .totals .amount,
+    html body#html-body.checkout-cart-index .page-wrapper .cart-summary .table.totals .amount {
+        width: 32% !important;
+        text-align: right !important;
+        white-space: nowrap !important;
+        vertical-align: top !important;
+    }
+}
+
+/* Ícone minicart no header do carrinho — stroke branco some no fundo claro */
+html body#html-body.checkout-cart-index .page-wrapper .awa-site-header .minicart-wrapper .action.showcart.header-mini-cart
+  :is(svg, .awa-minicart-icon, path),
+html body#html-body.checkout-cart-index .page-wrapper .awa-site-header .minicart-wrapper a.showcart.header-mini-cart
+  :is(svg, .awa-minicart-icon, path) {
+    color: var(--awa-primary, #b73337) !important;
+    stroke: var(--awa-primary, #b73337) !important;
+    fill: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+html body#html-body.checkout-cart-index .page-wrapper .awa-site-header .minicart-wrapper .action.showcart.header-mini-cart
+  .awa-minicart-icon circle,
+html body#html-body.checkout-cart-index .page-wrapper .awa-site-header .minicart-wrapper a.showcart.header-mini-cart
+  .awa-minicart-icon circle {
+    fill: var(--awa-primary, #b73337) !important;
+    stroke: none !important;
+}
+
+
+/* CART-SHIPPING-TITLE-A11Y-BOX-20260731
+   _a11y.less: [role=tab] { min-block-size:44px; min-inline-size:44px }.
+   Título Magento do estimate/cupom usa role=tab + padding-block 8px com
+   box-sizing:content-box → altura renderizada ~61px (evidência DevTools).
+   border-box: touch target 44px inclui padding; min-inline-size 0 (linha full-width).
+*/
+html body#html-body.checkout-cart-index .page-wrapper .cart-summary
+  :is(#block-shipping, .block.shipping, #block-discount, .discount.coupon) > .title {
+    box-sizing: border-box !important;
+    min-block-size: 44px !important;
+    min-height: 44px !important;
+    min-inline-size: 0 !important;
+    min-width: 0 !important;
 }

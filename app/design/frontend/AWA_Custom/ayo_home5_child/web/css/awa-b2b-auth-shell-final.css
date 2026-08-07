@@ -3,12 +3,40 @@
    Final-wins sobre login.css / register.css legado.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Light lock — auth shell never inherits OS dark-mode surface tokens */
+body#html-body.b2b-auth-shell {
+    --awa-bg: #ffffff;
+    --awa-bg-page: #ffffff;
+    --awa-bg-surface: #ffffff;
+    --awa-bg-elevated: #f9fafb;
+    --awa-text-primary: #111827;
+    --awa-text-secondary: #4b5563;
+    --awa-text-muted: #6b7280;
+    --awa-border: #e5e7eb;
+    --awa-border-strong: #d1d5db;
+    --awa-border-subtle: #eeeeee;
+    background: #ffffff !important;
+    color: #111827 !important;
+}
+
+body#html-body.b2b-auth-shell :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d1d5db !important;
+}
+
+body#html-body.b2b-auth-shell :is(input, textarea)::placeholder {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+}
+
 /* Cards flat — sem sombra/lift */
 body#html-body.b2b-auth-shell :is(.b2b-login-card, #b2b-register-shell.b2b-login-card, .success-card.b2b-login-card) {
     border: 1px solid var(--awa-border, #e5e7eb) !important;
     border-radius: var(--b2b-auth-radius-card, 8px) !important;
     box-shadow: none !important;
-    background: var(--awa-bg, var(--awa-bg)) !important;
+    background: #ffffff !important;
+    color: #111827 !important;
 }
 
 body#html-body.b2b-auth-shell:not(.b2b-register-index) .b2b-login-card {
@@ -65,12 +93,22 @@ body#html-body.b2b-auth-shell.b2b-register-index .field-row--ie {
     align-items: end !important;
 }
 
-body#html-body.b2b-auth-shell.b2b-register-index .field-row--ie .field {
-    grid-column: auto !important;
+body#html-body.b2b-auth-shell.b2b-register-index .field-row--ie > .field-ie-isento {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
 }
 
-body#html-body.b2b-auth-shell.b2b-register-index .field-row .field:not(.field-narrow):not(.field-wide):not(.field-uf) {
+/* span 6 só em rows de 12 col — NÃO em .field-row--ie (quebrava IE + Isento) */
+body#html-body.b2b-auth-shell.b2b-register-index .field-row:not(.field-row--ie) .field:not(.field-narrow):not(.field-wide):not(.field-uf) {
     grid-column: span 6 !important;
+}
+
+/* Especificidade >= regra span 6 antiga (.field-row .field:not×3) — vence cache immutable */
+body#html-body.b2b-auth-shell.b2b-register-index .field-row.field-row--ie > .field:not(.field-narrow):not(.field-wide):not(.field-uf),
+body#html-body.b2b-auth-shell.b2b-register-index .field-row.field-row--ie > .field {
+    grid-column: auto !important;
+    width: auto !important;
+    max-width: 100% !important;
 }
 
 body#html-body.b2b-auth-shell.b2b-register-index .field-row .field.field-wide {
@@ -84,13 +122,17 @@ body#html-body.b2b-auth-shell.b2b-register-index .field-row--locality .field:not
 }
 
 @media (max-width: 575px) {
-    body#html-body.b2b-auth-shell.b2b-register-index .field-row .field,
+    body#html-body.b2b-auth-shell.b2b-register-index .field-row:not(.field-row--ie) .field,
     body#html-body.b2b-auth-shell.b2b-register-index .field-row--locality .field {
         grid-column: span 12 !important;
     }
 
-    body#html-body.b2b-auth-shell.b2b-register-index .field-row--ie {
-        grid-template-columns: minmax(0, 1fr) !important;
+    body#html-body.b2b-auth-shell.b2b-register-index .field-row.field-row--ie {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+    }
+
+    body#html-body.b2b-auth-shell.b2b-register-index .field-row.field-row--ie > .field {
+        grid-column: auto !important;
     }
 }
 
@@ -101,8 +143,9 @@ body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-page-shell.b2b-lo
 }
 
 body#html-body.b2b-auth-shell.b2b-register-index .page-main {
-    max-width: min(100%, calc(var(--b2b-auth-register-max, 920px) + 32px)) !important;
-    padding-inline: clamp(12px, 3vw, 16px) !important;
+    max-width: min(100%, calc(var(--b2b-auth-register-max, 920px) + 48px)) !important;
+    /* PIXEL-QA: gutter 16 / 24 */
+    padding-inline: clamp(16px, 3vw, 24px) !important;
     padding-block: clamp(12px, 2vh, 16px) !important;
 }
 
@@ -471,14 +514,120 @@ body#html-body.b2b-auth-shell.b2b-register-index [name="uf"] {
     box-sizing: border-box !important;
 }
 
-/* 8. Terms section: sem gap fantasma — o JS controla visibilidade */
+/* 8. Terms / submit: honor [hidden] even when register.css uses display:!important */
 body#html-body.b2b-auth-shell.b2b-register-index .form-section--terms {
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
 
-body#html-body.b2b-auth-shell.b2b-register-index .form-section--terms[hidden] {
+body#html-body.b2b-auth-shell.b2b-register-index .form-section--terms[hidden],
+body#html-body.b2b-auth-shell.b2b-register-index .terms-section[hidden],
+body#html-body.b2b-auth-shell.b2b-register-index .actions-toolbar[hidden],
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-login-actions[hidden] {
     display: none !important;
+}
+
+/* Wizard: etapas inativas somem por completo (sem headers accordion) */
+body#html-body.b2b-auth-shell.b2b-register-index .form-section[data-step].is-collapsed {
+    display: none !important;
+}
+
+/* Secondary CTAs só na etapa final */
+body#html-body.b2b-auth-shell.b2b-register-index
+    .b2b-register-form:not(.is-register-final-step)
+    ~ .b2b-login-divider,
+body#html-body.b2b-auth-shell.b2b-register-index
+    .b2b-register-form:not(.is-register-final-step)
+    ~ .b2b-register-secondary-ctas {
+    display: none !important;
+}
+
+/* Trust — linha compacta (sem lista disc) */
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-trust {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px 14px !important;
+    list-style: none !important;
+    margin: 0 0 8px !important;
+    padding: 0 !important;
+}
+
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-trust li {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    color: #4b5563 !important;
+    list-style: none !important;
+}
+
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-trust li::before {
+    content: "" !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: var(--awa-red, #b73337) !important;
+    flex-shrink: 0 !important;
+}
+
+/* Step-nav abaixo dos campos — borda superior */
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-step-nav {
+    margin: 12px 0 0 !important;
+    padding: 12px 0 0 !important;
+    border-bottom: 0 !important;
+    border-top: 1px solid var(--awa-border-subtle, #eee) !important;
+    align-items: center !important;
+}
+
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-step-indicator {
+    text-align: center !important;
+    margin: 0 !important;
+    color: #4b5563 !important;
+}
+
+/* Mobile: labels do stepper legíveis (vence font-size:0 de bundles async) */
+@media (max-width: 575px) {
+    body#html-body.b2b-auth-shell.b2b-register-index
+        #b2b-register-shell
+        .b2b-register-progress
+        .progress-step {
+        font-size: 12px !important;
+        gap: 6px !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    body#html-body.b2b-auth-shell.b2b-register-index
+        #b2b-register-shell
+        .b2b-register-progress
+        .progress-step__label {
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+    }
+
+    body#html-body.b2b-auth-shell.b2b-register-index
+        #b2b-register-shell
+        .b2b-register-progress
+        .progress-step:not(.is-active)
+        .progress-step__label {
+        /* inactive: número só — label na ativa via grid :has */
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
 }
 
 /* 9. Terms checkbox — inline com label */
@@ -499,34 +648,127 @@ body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-terms input[type=
     accent-color: var(--awa-red, #c0392b);
 }
 
+/* Markup atual: checkbox + label>span (sem .b2b-terms-box).
+   register.css ainda força grid 22px | 1fr no label → texto empilha (~300px). */
 body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-terms .label {
+    display: block !important;
+    grid-template-columns: none !important;
+    width: auto !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
     margin: 0 !important;
+    padding: 0 !important;
     font-size: 13px !important;
     line-height: 1.5 !important;
+    overflow-wrap: anywhere !important;
 }
 
-/* 10. Header — link "Voltar à loja" */
-body#html-body.b2b-auth-shell .b2b-login-logo--compact {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+/* 10. Header — logo + Voltar na mesma linha (compacto) */
+body#html-body.b2b-auth-shell .b2b-login-logo.b2b-login-logo--compact {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px 16px !important;
+    width: min(100%, var(--b2b-auth-register-max, 920px)) !important;
+    margin-inline: auto !important;
+}
+
+body#html-body.b2b-auth-shell.b2b-register-index .page-wrapper .b2b-login-logo.b2b-login-logo--compact img,
+body#html-body.b2b-auth-shell .page-wrapper .b2b-login-logo.b2b-login-logo--compact img {
+    max-width: 120px !important;
+    max-height: 48px !important;
+    height: auto !important;
+    width: auto !important;
+    margin-inline: 0 !important;
 }
 
 body#html-body.b2b-auth-shell .b2b-auth-back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: var(--awa-text-muted, var(--awa-text-secondary));
-    text-decoration: none;
-    white-space: nowrap;
-    padding: 6px 0;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+    color: #4b5563 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    padding: 8px 0 !important;
+    min-height: 44px !important;
     transition: color 150ms ease;
 }
 
 body#html-body.b2b-auth-shell .b2b-auth-back-link:hover,
 body#html-body.b2b-auth-shell .b2b-auth-back-link:focus-visible {
-    color: var(--awa-red, #c0392b);
-    text-decoration: underline;
+    color: var(--awa-red, #c0392b) !important;
+    text-decoration: underline !important;
+}
+
+/* 11. Card accent — full-bleed no topo */
+html body#html-body.b2b-auth-shell .page-wrapper #b2b-register-shell.b2b-login-card::before,
+html body#html-body.b2b-auth-shell .page-wrapper .b2b-login-card::before {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    border-radius: var(--b2b-auth-radius-card, 8px) var(--b2b-auth-radius-card, 8px) 0 0 !important;
+}
+
+/* 12. Heading da etapa — alinhado à esquerda, sem badge numérico redundante */
+html body#html-body.b2b-auth-shell.b2b-register-index .page-wrapper .b2b-register-page .form-section .form-section__heading {
+    margin: 0 0 8px !important;
+    text-align: left !important;
+}
+
+html body#html-body.b2b-auth-shell.b2b-register-index .page-wrapper .b2b-register-page .form-section .form-section__toggle {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    font-size: 1rem !important;
+    gap: 0 !important;
+    cursor: default !important;
+    pointer-events: none !important;
+}
+
+html body#html-body.b2b-auth-shell.b2b-register-index .page-wrapper .b2b-register-page .form-section .form-section__toggle::before {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: none !important;
+}
+
+html body#html-body.b2b-auth-shell.b2b-register-index .page-wrapper .b2b-register-page .form-section .form-section__toggle-icon {
+    display: none !important;
+}
+
+html body#html-body.b2b-auth-shell.b2b-register-index .page-wrapper .b2b-register-page .form-section__body {
+    margin-top: 0 !important;
+}
+
+/* 13. Cookie no auth — card canto inferior direito */
+body#html-body.b2b-auth-shell #awa-cookie-banner,
+body#html-body.b2b-auth-shell #awa-cookie-banner.awa-cookie-banner--visible {
+    left: auto !important;
+    right: 12px !important;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    width: min(calc(100% - 24px), 360px) !important;
+    max-width: min(calc(100% - 24px), 360px) !important;
+    inset-inline: auto 12px !important;
+}
+
+body#html-body.b2b-auth-shell #awa-cookie-banner .awa-cookie-banner__inner {
+    padding: 12px !important;
+    gap: 8px !important;
+}
+
+body#html-body.b2b-auth-shell #awa-cookie-banner .awa-cookie-banner__link {
+    min-height: 0 !important;
+    padding: 0 !important;
+}
+
+body#html-body.b2b-auth-shell.b2b-register-index .b2b-register-page-shell.b2b-login-page {
+    gap: 8px !important;
 }

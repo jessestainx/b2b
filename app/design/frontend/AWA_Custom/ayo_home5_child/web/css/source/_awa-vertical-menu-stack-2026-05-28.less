@@ -9,7 +9,8 @@
 body .page-wrapper .navigation.verticalmenu
     [data-role="awa-vmenu-search-row"] {
     display: none; /* visível só no desktop — JS toggle */
-    padding: 8px 10px 6px !important;
+    /* H13: padding vertical enxuto — input 44px; evita li ~69px */
+    padding: 4px 8px !important;
     border-bottom: 1px solid var(--awa-vmenu-border,
         color-mix(in srgb, oklch(42% 0.01 25) 8%, transparent)) !important;
     margin-bottom: 0 !important;
@@ -44,6 +45,11 @@ body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-icon svg {
 
 body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-input {
     width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    margin: 0 !important;
+    margin-top: 0 !important;
     padding: 7px 10px 7px 32px !important;
     background: color-mix(in srgb, oklch(42% 0.01 25) 5%,
         var(--awa-vmenu-surface, oklch(99.4% 0.004 25))) !important;

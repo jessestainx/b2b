@@ -18,13 +18,18 @@ if (!$enableMenu) {
     return;
 }
 
+$fullActionName = (string) $block->getRequest()->getFullActionName();
+$isHome = $fullActionName === 'cms_index_index';
+$isAccount = str_starts_with($fullActionName, 'customer_account')
+    || str_starts_with($fullActionName, 'b2b_account');
+$isCart = $fullActionName === 'checkout_cart_index';
+
 ?>
 <nav class="fixed-bottom hidden-sm hidden-md hidden-lg" role="navigation" aria-label="<?= $escaper->escapeHtmlAttr(__('Navegação Móvel')) ?>" data-awa-mobile-nav="v4-deptos">
     <div class="link-on-bottom">
         <ul class="mobile-bottom-link flex-layout space-between list-unstyled">
-            <?php $currentUrl = $block->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]); ?>
-            <li class="<?= (strpos($currentUrl, $block->getUrl('')) !== false && $currentUrl == $block->getUrl('')) ? 'active' : '' ?>">
-                <a href="<?= $escaper->escapeUrl($block->getUrl('')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Início')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Início')) ?>">
+            <li class="<?= $isHome ? 'active' : '' ?>">
+                <a href="<?= $escaper->escapeUrl($block->getUrl('')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Início')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Início')) ?>"<?= $isHome ? ' aria-current="page"' : '' ?>>
                     <span class="icon icon-home" aria-hidden="true"></span>
                     <?= $escaper->escapeHtml(__('Home')) ?>
                 </a>
@@ -37,14 +42,14 @@ if (!$enableMenu) {
                     <?= $escaper->escapeHtml(__('Deptos.')) ?>
                 </button>
             </li>
-            <li class="<?= (strpos($currentUrl, 'customer/account') !== false) ? 'active' : '' ?>">
-                <a href="<?= $escaper->escapeUrl($block->getUrl('customer/account/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>">
+            <li class="<?= $isAccount ? 'active' : '' ?>">
+                <a href="<?= $escaper->escapeUrl($block->getUrl('customer/account/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Minha Conta')) ?>"<?= $isAccount ? ' aria-current="page"' : '' ?>>
                     <span class="icon icon-users" aria-hidden="true"></span>
                     <?= $escaper->escapeHtml(__('Conta')) ?>
                 </a>
             </li>
-            <li class="<?= (strpos($currentUrl, 'checkout/cart') !== false) ? 'active' : '' ?>">
-                <a href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>">
+            <li class="<?= $isCart ? 'active' : '' ?>">
+                <a href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Carrinho de Compras')) ?>"<?= $isCart ? ' aria-current="page"' : '' ?>>
                     <span class="icon icon-shopping-cart" aria-hidden="true"></span>
                     <?= $escaper->escapeHtml(__('Carrinho')) ?>
                 </a>

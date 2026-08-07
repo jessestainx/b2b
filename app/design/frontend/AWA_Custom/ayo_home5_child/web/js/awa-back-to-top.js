@@ -16,12 +16,15 @@ define([], function () {
         function showButton() {
             element.hidden = false;
             element.removeAttribute('hidden');
+            element.setAttribute('aria-hidden', 'false');
             element.classList.add('is-visible');
             shown = true;
         }
 
         function hideButton() {
             element.hidden = true;
+            element.setAttribute('hidden', '');
+            element.setAttribute('aria-hidden', 'true');
             element.classList.remove('is-visible');
             shown = false;
         }

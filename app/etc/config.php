@@ -361,6 +361,7 @@ return [
         'Magento_WishlistGraphQl' => 1,
         'AWA_VisualFixes' => 1,
         'Apptrian_ImageOptimizer' => 0,
+        'Mirasvit_Misspell' => 1,
         'Awa_DashboardFix' => 1,
         'Awa_RealTimeDashboard' => 1,
         'Ayo_Curriculo' => 1,
@@ -402,13 +403,13 @@ return [
         'Meta_Promotions' => 0,
         'Meta_Sales' => 0,
         'Mirasvit_Core' => 1,
-        'Mirasvit_Misspell' => 1,
-        'GrupoAwamotos_CatalogFix' => 1,
         'Mirasvit_Search' => 1,
+        'GrupoAwamotos_CatalogFix' => 1,
+        'Mirasvit_SearchLanding' => 1,
         'Mirasvit_SearchAutocomplete' => 1,
         'Mirasvit_SearchElastic' => 1,
         'Mirasvit_SearchGraphQl' => 0,
-        'Mirasvit_SearchLanding' => 1,
+        'Awa_CatalogFix' => 1,
         'Mirasvit_SearchMysql' => 0,
         'Mirasvit_SearchReport' => 1,
         'Mirasvit_SearchSphinx' => 0,
@@ -1964,9 +1965,9 @@ Aguarde nosso contato em até 24 horas.',
             'ayo_curriculo' => [
                 'general' => [
                     'enabled' => '1',
-                    'recipient_email' => 'rh@awamotos.com.br',
+                    'recipient_email' => 'awamotos@awamotos.com.br',
                     'sender_email_identity' => 'general',
-                    'copy_to' => 'rh@awamotos.com.br',
+                    'copy_to' => 'awamotos@awamotos.com.br',
                     'max_file_size_mb' => '5',
                     'send_confirmation' => '1',
                     'send_status_notification' => '1'
@@ -2021,7 +2022,7 @@ Aguarde nosso contato em até 24 horas.',
                     'show_info' => '0',
                     'phone' => '(16) 3301-1890',
                     'whatsapp' => '(16) 99736-7588',
-                    'email' => 'sac@awamotos.com.br'
+                    'email' => 'awamotos@awamotos.com.br'
                 ]
             ],
             'grupoawamotos_b2b' => [
@@ -2043,7 +2044,7 @@ Aguarde nosso contato em até 24 horas.',
                     'pending_message' => 'Obrigado pelo seu cadastro! Sua conta está sendo analisada e você receberá um e-mail assim que for aprovada.',
                     'send_approval_email' => '1',
                     'notify_admin_new_customer' => '1',
-                    'admin_email' => 'contato@awamotos.com.br',
+                    'admin_email' => 'awamotos@awamotos.com.br',
                     'auto_approve_if_found_in_erp' => '1'
                 ],
                 'minimum_qty' => [
@@ -2336,7 +2337,7 @@ Aguarde nosso contato em até 24 horas.',
                     'whatsapp_number' => '5516997367588',
                     'whatsapp_message' => 'Olá! Gostaria de informações sobre peças para moto.',
                     'phone' => '(16) 3301-1890',
-                    'email' => 'falecom@awamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'whatsapp_hide_checkout' => '1',
                     'whatsapp_hide_account' => '1',
                     'quote_fab_enabled' => '0'
@@ -2672,15 +2673,15 @@ Aguarde nosso contato em até 24 horas.',
             ],
             'trans_email' => [
                 'ident_general' => [
-                    'email' => 'contato@awamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'name' => 'AWA Motos'
                 ],
                 'ident_sales' => [
-                    'email' => 'vendas@awamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'name' => 'AWA Motos Vendas'
                 ],
                 'ident_support' => [
-                    'email' => 'suporte@awamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'name' => 'AWA Motos Suporte'
                 ],
                 'ident_custom1' => [
@@ -2688,11 +2689,11 @@ Aguarde nosso contato em até 24 horas.',
                     'name' => 'AWA Motos Financeiro'
                 ],
                 'ident_custom2' => [
-                    'email' => 'sac@awamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'name' => 'AWA Motos SAC'
                 ],
                 'ident_storepickup' => [
-                    'email' => 'contato@awamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'name' => 'AWA Motos Retirada'
                 ]
             ],
@@ -2713,7 +2714,7 @@ Aguarde nosso contato em até 24 horas.',
                 ],
                 'notifications' => [
                     'email_enabled' => null,
-                    'email_recipients' => 'sac@awamotos.com.br',
+                    'email_recipients' => 'awamotos@awamotos.com.br',
                     'slack_enabled' => null,
                     'slack_webhook' => null,
                     'webhook_enabled' => null,
@@ -3124,7 +3125,7 @@ Aguarde nosso contato em até 24 horas.',
                     'analysis_period' => '24',
                     'cache_ttl' => '86400',
                     'alert_at_risk' => '1',
-                    'alert_email' => 'sac@awamotos.com.br'
+                    'alert_email' => 'awamotos@awamotos.com.br'
                 ],
                 'coupon' => [
                     'enabled' => '1',
@@ -3540,7 +3541,7 @@ Aguarde nosso contato em até 24 horas.',
                     'template' => '5'
                 ],
                 'order_ready_for_pickup' => [
-                    'copy_to' => 'contato@awamotos.com.br',
+                    'copy_to' => 'awamotos@awamotos.com.br',
                     'enabled' => '1',
                     'identity' => 'storepickup',
                     'template' => 'sales_email_order_ready_for_pickup_template',
@@ -6009,7 +6010,7 @@ Aguarde nosso contato em até 24 horas.',
                 ],
                 'alerts' => [
                     'enabled' => '1',
-                    'recipient_email' => 'sac@awamotos.com.br',
+                    'recipient_email' => 'awamotos@awamotos.com.br',
                     'weekly_report' => '1',
                     'stockout_enabled' => '1',
                     'stockout_threshold' => '15',
@@ -6122,7 +6123,7 @@ Aguarde nosso contato em até 24 horas.',
                     'enabled' => null
                 ],
                 'contact_information' => [
-                    'email' => 'sac@awamotos.com.br',
+                    'email' => 'awamotos@awamotos.com.br',
                     'phone' => null,
                     'contact_page' => null
                 ],
@@ -6289,7 +6290,7 @@ Aguarde nosso contato em até 24 horas.',
                     'disable' => '0',
                     'transport' => 'smtp',
                     'set_return_path' => '1',
-                    'return_path_email' => 'sac@awamotos.com.br',
+                    'return_path_email' => 'awamotos@awamotos.com.br',
                     'username' => 'b2b.awamotos@gmail.com',
                     'password' => '0:3:UQ5YnQ11uTETarApFA+V47/20raoViShDYG1rtbN8AbvP4aIHgpLJ2011ki04xk=',
                     'auth' => 'login',
@@ -6301,7 +6302,7 @@ Aguarde nosso contato em até 24 horas.',
                     'set_return_path' => '1',
                     'debug' => [
                         'email' => 'grupoawamotos@gmail.com',
-                        'from_email' => 'contato@awamotos.com.br',
+                        'from_email' => 'awamotos@awamotos.com.br',
                         'button' => null
                     ],
                     'zend_email_template' => 'magepal_smtp_zend_email_test',
@@ -6793,7 +6794,7 @@ Sitemap: https://srv1113343.hstgr.cloud/sitemap.xml'
             ],
             'marketplace' => [
                 'general_settings' => [
-                    'adminemail' => 'admin@awamotos.com.br',
+                    'adminemail' => 'awamotos@awamotos.com.br',
                     'admin_name' => 'Administrador Awa Motos',
                     'percent' => '10',
                     'seller_approval' => '1',
@@ -7074,10 +7075,10 @@ Sitemap: https://srv1113343.hstgr.cloud/sitemap.xml'
                 'alerts' => [
                     'churn_enabled' => '1',
                     'crosssell_enabled' => '1',
-                    'churn_email_recipients' => 'sac@awamotos.com.br',
+                    'churn_email_recipients' => 'awamotos@awamotos.com.br',
                     'churn_min_score' => null,
                     'churn_min_value' => null,
-                    'crosssell_email_recipients' => 'sac@awamotos.com.br',
+                    'crosssell_email_recipients' => 'awamotos@awamotos.com.br',
                     'crosssell_min_score' => null,
                     'crosssell_min_value' => null
                 ],

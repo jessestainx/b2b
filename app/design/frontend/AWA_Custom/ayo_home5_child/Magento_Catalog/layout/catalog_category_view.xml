@@ -13,7 +13,10 @@
     <head>
         <remove src="css/awa-plp-final-polish.css"/>
         <remove src="css/awa-visual-qa-category.css"/>
-        <!-- awa-plp-shell-final.css removido: referência órfã (404 em produção). -->
+        <!-- AWA vfix scope: PLP/category only -->
+        <css src="css/awa-vfix-plp-search.css"/>
+        <!-- Reabilitado: arquivo existe em pub/static; trava altura #mst_categorySearch em 44px. -->
+        <css src="css/awa-plp-shell-final.css"/>
     </head>
     <body>
         <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
@@ -43,13 +46,10 @@
                 <argument name="load_home_category_compat_js" xsi:type="boolean">true</argument>
             </arguments>
         </referenceBlock>
-    
-        <!-- AWA - PLP extras: filter button mobile + suggestions -->
+
+        <!-- AWA - PLP extras: FAB filtros removido (audit #19); suggestions mantidas -->
+        <referenceBlock name="awa.plp.filter.button" remove="true"/>
         <referenceContainer name="main.content">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.plp.filter.button"
-                   template="Magento_Catalog::product/awa-plp-filter-button.phtml"
-                   before="category.products.list"/>
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.plp.suggestions"
                    template="Magento_Catalog::product/awa-plp-suggestions.phtml"

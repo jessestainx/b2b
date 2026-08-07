@@ -23,6 +23,7 @@
 
         el.style.setProperty('display', 'none', 'important');
         el.setAttribute('aria-hidden', 'true');
+        el.setAttribute('inert', '');
     }
 
     function isLoggedIn(data) {
@@ -96,8 +97,17 @@
             trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
             if (menu) {
                 menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+                /* A11Y 2026-08-05: inert impede Tab em itens com aria-hidden. */
+                if (open) {
+                    menu.removeAttribute('inert');
+                } else {
+                    menu.setAttribute('inert', '');
+                }
             }
         }
+
+        /* Estado inicial fechado: garantir inert mesmo antes do 1º toggle. */
+        setOpen(false);
 
         function getFocusable() {
             if (!menu) {
@@ -205,16 +215,28 @@
 
             if (loggedIn) {
                 if (guest) {
+                    guest.hidden = true;
+                    guest.setAttribute('aria-hidden', 'true');
+                    guest.setAttribute('inert', '');
                     guest.style.setProperty('display', 'none', 'important');
                 }
                 if (cust) {
+                    cust.hidden = false;
+                    cust.setAttribute('aria-hidden', 'false');
+                    cust.removeAttribute('inert');
                     cust.style.removeProperty('display');
                 }
             } else {
                 if (guest) {
+                    guest.hidden = false;
+                    guest.setAttribute('aria-hidden', 'false');
+                    guest.removeAttribute('inert');
                     guest.style.removeProperty('display');
                 }
                 if (cust) {
+                    cust.hidden = true;
+                    cust.setAttribute('aria-hidden', 'true');
+                    cust.setAttribute('inert', '');
                     cust.style.setProperty('display', 'none', 'important');
                 }
             }
@@ -359,6 +381,7 @@
         }
     }
 
+
     schedule();
 
 
@@ -375,4 +398,5 @@
             hidePromptForB2b(el);
         }
     }());
+
 }(window, document));

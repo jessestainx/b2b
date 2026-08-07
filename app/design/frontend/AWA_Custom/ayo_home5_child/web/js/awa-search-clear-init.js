@@ -6,13 +6,8 @@
     'use strict';
 
     function shouldSkipSearchClear() {
-        var body = document.body;
-
-        return !!(
-            body &&
-            (body.classList.contains('checkout-cart-index') ||
-                body.classList.contains('checkout-index-index'))
-        );
+        // AWA 2026-07-22: campo de busca exibe somente a lupa (sem botão X).
+        return true;
     }
 
     function setSearchClearVisible(clearBtn, visible) {

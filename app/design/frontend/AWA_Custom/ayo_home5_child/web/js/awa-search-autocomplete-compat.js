@@ -33,8 +33,52 @@ define([
 		return $('<div/>').html(value || '').text();
 	}
 
+	/**
+	 * Hide wholesale prices for guests/pending.
+	 * Do not rely only on body.b2b-restricted-mode — login-to-cart skips home
+	 * (no .product-item-actions early), so that class is often missing while
+	 * Instant autocomplete still returns price JSON.
+	 */
 	function isB2bRestrictedMode() {
-		return !!(document.body && document.body.classList.contains('b2b-restricted-mode'));
+		var body = document.body;
+		var authEl;
+		var state;
+		var customer;
+
+		if (body && (
+			body.classList.contains('b2b-restricted-mode')
+			|| body.classList.contains('b2b-guest-mode')
+			|| body.classList.contains('b2b-pending-mode')
+		)) {
+			return true;
+		}
+
+		authEl = document.querySelector('[data-awa-auth-state]');
+		if (authEl) {
+			state = authEl.getAttribute('data-awa-auth-state') || '';
+			if (state === 'guest' || state === 'pending') {
+				return true;
+			}
+			if (state === 'approved' || state === 'logged-in' || state === 'customer') {
+				return false;
+			}
+		}
+
+		if (document.querySelector('.b2b-login-to-see-price, [data-awa-b2b-price-gate="1"]')) {
+			return true;
+		}
+
+		try {
+			customer = JSON.parse(window.localStorage.getItem('mage-cache-storage') || '{}').customer || {};
+			if (customer.firstname || customer.fullname || customer.email || customer.id || customer.entity_id) {
+				return false;
+			}
+		} catch (e) {
+			/* fail-closed below */
+		}
+
+		// B2B storefront: fail-closed — hide prices when auth is unknown.
+		return true;
 	}
 
 	function findScoped($form, selector) {
@@ -62,12 +106,28 @@ define([
 	}
 
 	function visible(el) {
+		var inlineDisplay;
+		var inlineVisibility;
 		if (!el) {
 			return false;
 		}
-
-		return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+		if (el.hasAttribute && el.hasAttribute('hidden')) {
+			return false;
+		}
+		if (el.getAttribute && el.getAttribute('aria-hidden') === 'true') {
+			return false;
+		}
+		if (el.classList && (el.classList.contains('_active') || el.classList.contains('is-open') || el.classList.contains('menu-open'))) {
+			return true;
+		}
+		inlineDisplay = el.style ? el.style.display : '';
+		inlineVisibility = el.style ? el.style.visibility : '';
+		if (inlineDisplay === 'none' || inlineVisibility === 'hidden') {
+			return false;
+		}
+		return true;
 	}
+
 
 	function panelHasContent($panel) {
 		if (!$panel || !$panel.length) {
@@ -107,6 +167,148 @@ define([
 		}
 	}
 
+	/**
+	 * Scrim full-page ao focar a busca — isola o campo (a11y + UX Magento).
+	 * Classe: body.awa-search-focus-active (independente do painel Mirasvit).
+	 */
+	function ensureSearchFocusBackdrop() {
+		var el = document.getElementById('awa-search-focus-backdrop');
+		// Substitui button legado (min-height 44px colapsava o scrim)
+		if (el && el.tagName !== 'DIV') {
+			el.parentNode && el.parentNode.removeChild(el);
+			el = null;
+		}
+		if (el) {
+			return el;
+		}
+		// div (não button): evita min-height:44px global de botões do header
+		el = document.createElement('div');
+		el.id = 'awa-search-focus-backdrop';
+		el.className = 'awa-search-focus-backdrop';
+		el.setAttribute('role', 'button');
+		el.setAttribute('aria-label', 'Fechar busca');
+		el.setAttribute('tabindex', '-1');
+		el.setAttribute('hidden', 'hidden');
+		(document.body || document.documentElement).appendChild(el);
+		el.addEventListener('click', function () {
+			var input = document.getElementById('search');
+			setSearchFocusActive(false);
+			if (input) {
+				input.blur();
+			}
+			if (document.body) {
+				document.body.classList.remove('searchautocomplete__active');
+			}
+		});
+		return el;
+	}
+
+
+	/* H-search-popular-width (2026-08-02): painel absolute em .control (~235px)
+	   enquanto .awa-header-search-col tem ~343px. Fixa geometria via CSS vars. */
+	function syncSearchPanelGeometry() {
+		var col = document.querySelector('.awa-site-header .awa-header-search-col, .header .top-search');
+		var input = document.getElementById('search');
+		var root = document.documentElement;
+		if (!col || !input || !root) {
+			return;
+		}
+		var cr = col.getBoundingClientRect();
+		var ir = input.getBoundingClientRect();
+		var left = Math.max(0, Math.round(cr.left));
+		var width = Math.max(200, Math.round(cr.width));
+		var top = Math.round(ir.bottom + 8);
+		root.style.setProperty('--awa-search-panel-left', left + 'px');
+		root.style.setProperty('--awa-search-panel-width', width + 'px');
+		root.style.setProperty('--awa-search-panel-top', top + 'px');
+	}
+
+	function clearSearchPanelGeometry() {
+		var root = document.documentElement;
+		if (!root) {
+			return;
+		}
+		root.style.removeProperty('--awa-search-panel-left');
+		root.style.removeProperty('--awa-search-panel-width');
+		root.style.removeProperty('--awa-search-panel-top');
+	}
+
+	function setSearchFocusActive(active) {
+		var body = document.body;
+		var backdrop;
+		if (!body) {
+			return;
+		}
+		backdrop = ensureSearchFocusBackdrop();
+		body.classList.toggle('awa-search-focus-active', !!active);
+		backdrop.setAttribute('aria-hidden', active ? 'false' : 'true');
+		backdrop.classList.toggle('is-active', !!active);
+		if (active) {
+			backdrop.removeAttribute('hidden');
+			syncSearchPanelGeometry();
+		} else {
+			backdrop.setAttribute('hidden', 'hidden');
+			clearSearchPanelGeometry();
+		}
+	}
+
+	function bindSearchFocusOverlay($form, options) {
+		if ($form.data('awaSearchFocusOverlayBound')) {
+			return;
+		}
+		$form.data('awaSearchFocusOverlayBound', 1);
+		ensureSearchFocusBackdrop();
+
+		if (!window.__awaSearchPanelGeomBound) {
+			window.__awaSearchPanelGeomBound = 1;
+			window.addEventListener('resize', function () {
+				if (document.body && document.body.classList.contains('awa-search-focus-active')) {
+					syncSearchPanelGeometry();
+				}
+			}, {passive: true});
+			window.addEventListener('scroll', function () {
+				if (document.body && document.body.classList.contains('awa-search-focus-active')) {
+					syncSearchPanelGeometry();
+				}
+			}, {passive: true});
+		}
+
+		$form.on('focusin.awaSearchFocusOverlay', function () {
+			setSearchFocusActive(true);
+		});
+
+		$form.on('focusout.awaSearchFocusOverlay', function () {
+			window.setTimeout(function () {
+				var active = document.activeElement;
+				if (active && $form.get(0) && $form.get(0).contains(active)) {
+					return;
+				}
+				if (active && active.id === 'awa-search-focus-backdrop') {
+					return;
+				}
+				if (document.body && document.body.classList.contains('searchautocomplete__active')) {
+					return;
+				}
+				setSearchFocusActive(false);
+			}, 0);
+		});
+
+		$(document).on('keydown.awaSearchFocusOverlay', function (event) {
+			if (!event || event.key !== 'Escape') {
+				return;
+			}
+			if (!document.body || !document.body.classList.contains('awa-search-focus-active')) {
+				return;
+			}
+			setSearchFocusActive(false);
+			document.body.classList.remove('searchautocomplete__active');
+			var input = findScoped($form, options.inputSelector).get(0);
+			if (input) {
+				input.blur();
+			}
+		});
+	}
+
 	function setInputAriaExpanded($input, value) {
 		if (!$input || !$input.length) {
 			return;
@@ -133,6 +335,7 @@ define([
 
 		if (document.body) {
 			document.body.classList.add('searchautocomplete__active');
+			setSearchFocusActive(true);
 		}
 
 		return true;
@@ -149,6 +352,9 @@ define([
 
 		if (document.body) {
 			document.body.classList.remove('searchautocomplete__active');
+			if (!$form.is(':focus-within')) {
+				setSearchFocusActive(false);
+			}
 		}
 	}
 
@@ -275,6 +481,24 @@ define([
 		}
 
 		return findScoped($form, options.panelSelector);
+	}
+
+	/**
+	 * AWA: com Mirasvit ativo, NÃO chamar /search/ajax/suggest (Magento).
+	 * Evita XHR duplicado, 500s e contenção no header.
+	 */
+	function isMirasvitOwned($form, options) {
+		var $input = findScoped($form, options.inputSelector || '#search');
+
+		if ($input.length && $input.data('awaMirasvitAutocompleteInit')) {
+			return true;
+		}
+
+		if (document.querySelector('.mst-searchautocomplete__autocomplete')) {
+			return true;
+		}
+
+		return false;
 	}
 
 	function hasNativeResults($form, options) {
@@ -515,7 +739,9 @@ define([
 			return attrEndpoint;
 		}
 
-		return '/search/ajax/suggest';
+		// [AWA][SRCH-007] Core Magento /search/ajax/suggest returns [] on this store.
+		// Mirasvit Instant (/searchautocomplete/ajax/suggest/) is the real source.
+		return '/searchautocomplete/ajax/suggest/';
 	}
 
 	function buildCacheKey(query, categoryValue) {
@@ -528,7 +754,8 @@ define([
 		let categoryValue = $category.length ? $.trim($category.val() || '') : '';
 		let cacheKey = buildCacheKey(query, categoryValue);
 		let params = {
-			q: query
+			q: query,
+			store_id: options.storeId || (window.checkout && window.checkout.storeId) || 1
 		};
 
 		if (!endpoint || hasNativeResults($form, options)) {
@@ -588,6 +815,13 @@ define([
 			window.clearTimeout(state.timer);
 		}
 
+		// [AWA][SRCH-007] Mirasvit "owned" alone is not enough — if its KO panel
+		// never paints items, keep the AWA fallback (now pointed at Instant).
+		if (isMirasvitPanelOpen($form, options)) {
+			clearFallback($form, options);
+			return;
+		}
+
 		if (!query || query.length < options.minQueryLength) {
 			clearFallback($form, options);
 			return;
@@ -613,6 +847,7 @@ define([
 		let bodyObserver;
 		let panelNode;
 		let scheduled = false;
+		let lastFlushAt = 0;
 		let scopeNode;
 		let fallbackState = {
 			timer: null,
@@ -628,16 +863,24 @@ define([
 
 		function flushSync() {
 			scheduled = false;
+			lastFlushAt = Date.now();
 			attachPanelObserver();
 			syncState($form, options);
 		}
 
 		function scheduleSync() {
+			var elapsed;
 			if (scheduled) {
 				return;
 			}
 
+			elapsed = Date.now() - lastFlushAt;
 			scheduled = true;
+
+			if (elapsed < 90) {
+				window.setTimeout(flushSync, 90 - elapsed);
+				return;
+			}
 
 			if (typeof window.requestAnimationFrame === 'function') {
 				window.requestAnimationFrame(flushSync);
@@ -671,7 +914,7 @@ define([
 				subtree: true,
 				childList: true,
 				attributes: true,
-				attributeFilter: ['class', 'style']
+				attributeFilter: ['class', 'aria-hidden']
 			});
 
 			return true;
@@ -740,6 +983,7 @@ define([
 
 		$form.data('awaSearchCompatInit', 1);
 		$form.attr('data-awa-search-compat-init', '1');
+		bindSearchFocusOverlay($form, options);
 	}
 
 	function bootAll(config) {

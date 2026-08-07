@@ -15,6 +15,8 @@
         -->
         <remove src="css/awa-round3-pdp-conversion.css"/>
         <remove src="css/awa-pdp-final-polish.css"/>
+        <!-- AWA vfix scope: PDP only -->
+        <css src="css/awa-vfix-pdp.css"/>
         <!-- awa-pdp-shell-final.css: arquivo movido para _deprecated/ em Jun-2026; referência removida (404 ativo). Estilos cobertos por awa-pdp-premium.css + critical inline. -->
     </head>
     <body>
@@ -90,24 +92,18 @@
                 <argument name="breadcrumb_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
             </arguments>
         </referenceBlock>
-
-        <referenceContainer name="page.main">
-            <block class="Magento\Theme\Block\Html\Breadcrumbs"
-                   name="breadcrumbs.pdp"
-                   template="Magento_Catalog::product/breadcrumbs.phtml"
-                   as="breadcrumbs_pdp"
-                   before="-">
-                <arguments>
-                    <argument name="breadcrumb_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductStructuredData</argument>
-                </arguments>
-            </block>
-        </referenceContainer>
+        <!-- breadcrumbs.pdp removido: referenceContainer page.main não existe no Magento —
+             o bloco ficava órfão. Breadcrumb PDP usa o block breadcrumbs acima (nav.breadcrumbs). -->
 
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.pdp.conversion.async.css"
                    template="Magento_Theme::html/awa-pdp-conversion-async.phtml"
                    before="-"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.pdp.gallery.sync"
+                   template="Magento_Catalog::product/view/awa-pdp-gallery-sync.phtml"
+                   after="awa.pdp.conversion.async.css"/>
         </referenceContainer>
 
         <!--

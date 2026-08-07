@@ -12,9 +12,13 @@
              seletores são 100% PLP/carrossel/galeria de produto, inexistentes neste shell. -->
         <remove src="css/awa-visual-fixes-2026-06-29-final.css"/>
         <css src="css/awa-b2b-auth-shell-final.css" order="10000"/>
+        <css src="css/awa-cnpj-autofill.css" order="10001"/>
+        <css src="css/awa-ux-b2b-auth-polish-20260804.css" order="10010"/>
+        <!-- AWA vfix scope: B2B auth shell only -->
+        <css src="css/awa-vfix-b2b-auth.css"/>
     </head>
     <body>
-        <referenceContainer name="head.additional">
+        <referenceBlock name="head.additional">
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.b2b.auth.critical.css"
                    template="GrupoAwamotos_B2B::html/awa-b2b-auth-critical-css.phtml"
@@ -23,8 +27,10 @@
                    name="awa.b2b.auth.seo"
                    template="GrupoAwamotos_B2B::html/awa-b2b-auth-seo.phtml"
                    after="awa.b2b.auth.critical.css"/>
-        </referenceContainer>
+        </referenceBlock>
 
+        <!-- Auth usa b2b-login-messages no card; page.messages global (columns.top) só gera gap vazio. -->
+        <referenceContainer name="page.messages" remove="true"/>
         <referenceBlock name="add_custom_theme_head" remove="true"/>
         <referenceBlock name="authentication-popup" remove="true"/>
         <referenceBlock name="toki_header" remove="true"/>

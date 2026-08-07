@@ -147,7 +147,9 @@
             }, { rootMargin: '600px 0px', threshold: 0 });
         }
 
-        carouselVisibilityState.set(viewport, false);
+        /* A11Y: nao inicializar como false — scheduleUpdate() no boot precisa
+         * aplicar aria-hidden antes do 1o callback do IntersectionObserver.
+         * O IO continua setando false para off-screen apos a 1a medicao. */
         if (carouselVisibilityCallbacks) {
             carouselVisibilityCallbacks.set(viewport, onBecomeRelevant);
         }
@@ -1360,6 +1362,10 @@
         var alreadyBound = viewport.dataset.awaScrollBound === '1';
         viewport.dataset.awaScrollBound = '1';
 
+        /* BUG-2463a2: scroll-padding-inline > 0 desloca o snap (ex.: 229→217)
+         * e clipa o ultimo card em trilhos de N colunas com gap. */
+        viewport.style.setProperty('scroll-padding-inline', '0', 'important');
+
         var prev = chrome.prev;
         var next = chrome.next;
         var progressBar = chrome.progress ? chrome.progress.querySelector('.awa-owl-progress__bar') : null;
@@ -2048,26 +2054,8 @@
                     source: 'click'
                 });
             }
-            if (event.target.closest('[data-awa-niche-tab], .awa-home-niche-shelves__tab')) {
-                scheduleCarouselRefresh(true);
-            }
         }, true);
 
-        document.addEventListener('keydown', function (event) {
-            if (!isHomePage() || !event.target || !event.target.closest) {
-                return;
-            }
-            if (!event.target.closest('[data-awa-niche-tab], .awa-home-niche-shelves__tab')) {
-                return;
-            }
-            if (['ArrowRight', 'ArrowLeft', 'Home', 'End', 'Enter', ' '].indexOf(event.key) !== -1) {
-                scheduleCarouselRefresh(true);
-            }
-        }, true);
-
-        document.addEventListener('awa:niche-shelves:activated', function () {
-            scheduleCarouselRefresh(true);
-        });
     }
 
     function boot() {

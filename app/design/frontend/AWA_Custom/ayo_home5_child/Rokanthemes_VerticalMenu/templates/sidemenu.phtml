@@ -20,6 +20,8 @@ if (!empty($_config['general']['enable'])):
     $menuHtml = trim((string) $_menu);
     $hasCategoryItems = $menuHtml !== '' && stripos($menuHtml, 'ui-menu-item') !== false;
     $extraHtml = trim($block->getCmsBlockHtmlByIdentifier('vertical-menu-extra'));
+    // Page Builder injeta <style>#html-body [data-pb-style=…]…</style> no CMS e isso vaza na árvore a11y.
+    $extraHtml = trim((string) preg_replace('#<style\\b[^>]*>.*?</style>#is', '', $extraHtml));
     $_bgImages = trim($block->getCmsBlockHtmlByIdentifier('vertical_background_images'));
 ?>
 
@@ -51,6 +53,7 @@ if (!empty($_config['general']['enable'])):
         data-role="awa-vertical-menu-panel"
         data-limit-show="<?= (int) $limitShow ?>"
         aria-hidden="true"
+        inert
         data-awa-menu-state="closed">
         <li class="awa-vmenu-search-li" role="none" data-role="awa-vmenu-search-row">
             <div class="awa-vmenu-search-wrap" role="search" aria-label="<?= $block->escapeHtmlAttr(__('Buscar categoria')) ?>">

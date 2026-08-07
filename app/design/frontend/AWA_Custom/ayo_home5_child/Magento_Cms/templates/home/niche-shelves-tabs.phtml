@@ -18,10 +18,12 @@ if ($shelves === []) {
     return;
 }
 
-$useTabs = count($shelves) > 1;
+// Exibe apenas a primeira prateleira — interface de abas removida.
+$shelf     = $shelves[0];
 $sectionId = 'awa-home-niche-shelves';
+$viewAllUrl   = (string) ($shelf['view_all_url']   ?? '');
+$viewAllLabel = (string) ($shelf['view_all_label'] ?? '');
 ?>
-
 <section class="top-home-content awa-home-section awa-home-niche-shelves awa-home-section--below-fold ayo-home5-section"
          aria-label="<?= $block->escapeHtmlAttr(__('Linhas em destaque')) ?>"
          id="<?= $block->escapeHtmlAttr($sectionId) ?>">
@@ -35,114 +37,15 @@ $sectionId = 'awa-home-niche-shelves';
                     <?= $block->escapeHtml(__('Reposição rápida nas categorias mais pedidas')) ?>
                 </p>
             </div>
+            <?php if ($viewAllUrl !== '' && $viewAllLabel !== ''): ?>
+                <a href="<?= $block->escapeUrl($viewAllUrl) ?>"
+                   class="awa-section-header__link awa-shelf__view-all"
+                   aria-label="<?= $block->escapeHtmlAttr($viewAllLabel) ?>">
+                    <?= $block->escapeHtml(__('Ver todos')) ?>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            <?php endif; ?>
         </header>
-
-        <?php if ($useTabs): ?>
-            <div class="awa-home-niche-shelves__tabs" role="tablist" aria-label="<?= $block->escapeHtmlAttr(__('Selecionar linha de produtos')) ?>">
-                <?php foreach ($shelves as $index => $shelf): ?>
-                    <?php
-                    $tabId = $sectionId . '-tab-' . (int) $index;
-                    $panelId = $sectionId . '-panel-' . (int) $index;
-                    $isActive = $index === 0;
-                    ?>
-                    <button type="button"
-                            class="awa-home-niche-shelves__tab<?= $isActive ? ' is-active' : '' ?>"
-                            role="tab"
-                            id="<?= $block->escapeHtmlAttr($tabId) ?>"
-                            aria-selected="<?= $isActive ? 'true' : 'false' ?>"
-                            aria-controls="<?= $block->escapeHtmlAttr($panelId) ?>"
-                            aria-label="<?= $block->escapeHtmlAttr(__('Mostrar ' . (string) ($shelf['label'] ?? ''))) ?>"
-                            aria-current="<?= $isActive ? 'true' : 'false' ?>"
-                            tabindex="<?= $isActive ? '0' : '-1' ?>"
-                            data-awa-niche-tab="<?= (int) $index ?>">
-                        <?= $block->escapeHtml((string) ($shelf['label'] ?? '')) ?>
-                    </button>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <div class="awa-home-niche-shelves__panels">
-            <?php foreach ($shelves as $index => $shelf): ?>
-                <?php
-                $tabId = $sectionId . '-tab-' . (int) $index;
-                $panelId = $sectionId . '-panel-' . (int) $index;
-                $isActive = $index === 0;
-                $viewAllUrl = (string) ($shelf['view_all_url'] ?? '');
-                $viewAllLabel = (string) ($shelf['view_all_label'] ?? '');
-                ?>
-                <div class="awa-home-niche-shelves__panel<?= $isActive ? ' is-active' : '' ?>"
-                     role="tabpanel"
-                     id="<?= $block->escapeHtmlAttr($panelId) ?>"
-                     aria-labelledby="<?= $useTabs ? $block->escapeHtmlAttr($tabId) : '' ?>"
-                     <?= (!$isActive && $useTabs) ? 'hidden' : '' ?>
-                     data-awa-niche-panel="<?= (int) $index ?>">
-                    <?php if ($viewAllUrl !== '' && $viewAllLabel !== ''): ?>
-                        <div class="awa-home-niche-shelves__panel-head">
-                            <p class="awa-home-niche-shelves__panel-desc">
-                                <?= $block->escapeHtml((string) ($shelf['subtitle'] ?? '')) ?>
-                            </p>
-                            <a href="<?= $block->escapeUrl($viewAllUrl) ?>"
-                               class="awa-section-header__link awa-shelf__view-all awa-home-niche-shelves__view-all"
-                               aria-label="<?= $block->escapeHtmlAttr($viewAllLabel) ?>">
-                                <?= $block->escapeHtml(__('Ver todos')) ?>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
-                            </a>
-                        </div>
-                    <?php endif; ?>
-                    <?= /* @noEscape */ (string) ($shelf['html'] ?? '') ?>
-                </div>
-            <?php endforeach; ?>
-        </div>
+        <?= /* @noEscape */ (string) ($shelf['html'] ?? '') ?>
     </div>
 </section>
-<?php if ($useTabs): ?>
-<script>
-(function (d) {
-    'use strict';
-    var root = d.getElementById(<?= json_encode($sectionId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>);
-    if (!root) {
-        return;
-    }
-    var tabs = root.querySelectorAll('[data-awa-niche-tab]');
-    var panels = root.querySelectorAll('[data-awa-niche-panel]');
-    if (!tabs.length || !panels.length) {
-        return;
-    }
-    function activate(index) {
-        tabs.forEach(function (tab, i) {
-            var active = i === index;
-            tab.classList.toggle('is-active', active);
-            tab.setAttribute('aria-selected', active ? 'true' : 'false');
-            tab.tabIndex = active ? 0 : -1;
-        });
-        panels.forEach(function (panel, i) {
-            var active = i === index;
-            panel.classList.toggle('is-active', active);
-            if (active) {
-                panel.removeAttribute('hidden');
-            } else {
-                panel.setAttribute('hidden', '');
-            }
-        });
-    }
-    tabs.forEach(function (tab, index) {
-        tab.addEventListener('click', function () {
-            activate(index);
-        });
-        tab.addEventListener('keydown', function (event) {
-            var next = index;
-            if (event.key === 'ArrowRight') {
-                next = (index + 1) % tabs.length;
-            } else if (event.key === 'ArrowLeft') {
-                next = (index - 1 + tabs.length) % tabs.length;
-            } else {
-                return;
-            }
-            event.preventDefault();
-            activate(next);
-            tabs[next].focus();
-        });
-    });
-})(document);
-</script>
-<?php endif; ?>

@@ -43,12 +43,12 @@
         }
         w.dataLayer.push({
             event: 'awa_js_error',
-            message: 'add-to-cart button stuck disabled — safety fallback enabled it',
+            message: 'add-to-cart button still disabled; Magento validation remains authoritative',
             filename: 'awa-pdp-addtocart-safety.phtml',
             page_path: w.location.pathname
         });
         if (w.console && w.console.warn) {
-            w.console.warn('[AWA] #product-addtocart-button seguia desabilitado após ' + GRACE_MS + 'ms; habilitado pelo fallback de segurança.');
+            w.console.warn('[AWA] #product-addtocart-button ainda desabilitado após ' + GRACE_MS + 'ms; Magento_Catalog/js/validate-product continua sendo a única autoridade para habilitá-lo.');
         }
     }
 
@@ -57,10 +57,9 @@
         if (!button || !button.disabled) {
             return;
         }
-        // Ainda desabilitado apos a janela de graca: o caminho normal
-        // (Magento_Catalog/js/validate-product) nao rodou. Libera o botao
-        // para nao bloquear a compra, e registra o evento para monitoramento.
-        button.disabled = false;
+        // Ainda desabilitado apos a janela de graca: apenas reporta para
+        // monitoramento. Magento_Catalog/js/validate-product continua sendo
+        // a UNICA autoridade que pode habilitar este botao (fail-closed).
         reportStuckButton(button);
     }
 

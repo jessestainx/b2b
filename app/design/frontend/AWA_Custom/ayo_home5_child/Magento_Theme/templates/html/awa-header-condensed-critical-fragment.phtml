@@ -10,9 +10,15 @@
 $g = 'html body#html-body:not(.awa-account-operational):not(.b2b-account-shell)';
 $c = '.awa-site-header.awa-header-condensed';
 ?>
-/* §CONDENSED — anti-FOUC (distill 2026-06-08; SSOT async: _awa-header-condensed-unify-2026-06.less) */
+/* §CONDENSED — anti-FOUC (distill 2026-06-08; SSOT async: _awa-header-condensed-unify-2026-06.less)
+   Tokens com !important + especificidade alta: vencem --awa-header-*-h:68px!important do critical desktop. */
+html body#html-body#html-body#html-body#html-body:not(.awa-account-operational):not(.b2b-account-shell) .page-wrapper <?= $c ?>,
+html body#html-body#html-body#html-body#html-body:not(.awa-account-operational):not(.b2b-account-shell) <?= $c ?>,
 <?= $g ?> .page-wrapper <?= $c ?>,
-<?= $g ?> <?= $c ?>{--awa-header-row-h:56px;--awa-header-row-h-mobile:52px;--awa-header-logo-h:34px;--awa-hdr-height-sticky:56px;--awa-header-condensed-search-h:36px;--awa-header-condensed-gap:var(--awa-gap-sm,8px);--awa-header-condensed-pad-inline:12px}
+<?= $g ?> <?= $c ?>{--awa-header-row-h:56px!important;--awa-header-main-row-h:56px!important;--awa-header-row-h-mobile:52px!important;--awa-header-logo-h:34px!important;--awa-hdr-height-sticky:56px!important;--awa-header-condensed-search-h:36px;--awa-header-condensed-gap:var(--awa-gap-sm,8px);--awa-header-condensed-pad-inline:12px;--awa-header-site-shell-h:calc(56px + var(--awa-header-nav-h,48px))!important;--awa-header-sticky-h:calc(56px + var(--awa-header-nav-h,48px))!important}
+html body#html-body#html-body#html-body#html-body:not(.awa-account-operational):not(.b2b-account-shell) .page-wrapper <?= $c ?> #header.header-container[data-awa-header-shell="true"],
+<?= $g ?> .page-wrapper <?= $c ?> #header.header-container[data-awa-header-shell="true"],
+<?= $g ?> <?= $c ?> #header.header-container[data-awa-header-shell="true"]{--awa-header-main-row-h:56px!important;--awa-header-row-h:56px!important;--awa-header-site-shell-h:calc(var(--awa-header-main-row-h,56px) + var(--awa-header-nav-h,48px))!important;--awa-header-sticky-h:calc(var(--awa-header-main-row-h,56px) + var(--awa-header-nav-h,48px))!important}
 @media (max-width:767px){
 <?= $g ?> .page-wrapper <?= $c ?> .header-wrapper-sticky,
 <?= $g ?> .header-wrapper-sticky.awa-header-condensed{min-height:var(--awa-header-row-h-mobile,52px)!important;max-height:var(--awa-header-row-h-mobile,52px)!important;height:auto!important}
@@ -36,7 +42,9 @@ $c = '.awa-site-header.awa-header-condensed';
 <?= $g ?> .page-wrapper <?= $c ?> .header-wrapper-sticky .awa-header-brand-cell .logo img{max-height:var(--awa-header-logo-h,34px)!important}
 }
 @media (min-width:992px){
-<?= $g ?> .page-wrapper <?= $c ?> :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row],.header.awa-main-header,.header-wrapper-sticky,.header-wrapper-sticky.is-sticky){min-height:var(--awa-header-row-h,56px)!important;height:var(--awa-header-row-h,56px)!important;max-height:var(--awa-header-row-h,56px)!important}
+/* Wrap contém nav: altura auto (stack ~104). Só main/row em 56px. */
+<?= $g ?> .page-wrapper <?= $c ?> :is(.header-wrapper-sticky,.header-wrapper-sticky.is-sticky){height:auto!important;min-height:0!important;max-height:none!important;padding-block-start:0!important;overflow:visible!important}
+<?= $g ?> .page-wrapper <?= $c ?> :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row],.header.awa-main-header){min-height:var(--awa-header-row-h,56px)!important;height:var(--awa-header-row-h,56px)!important;max-height:var(--awa-header-row-h,56px)!important}
 <?= $g ?> .page-wrapper <?= $c ?> .header-wrapper-sticky .awa-header-brand-cell .logo img{max-height:var(--awa-header-logo-h,34px)!important;width:auto!important;object-fit:contain!important}
 <?= $g ?> .page-wrapper <?= $c ?> .awa-header-search-col form#search_mini_form{height:var(--awa-header-condensed-search-h,36px)!important;min-height:var(--awa-header-condensed-search-h,36px)!important;max-height:var(--awa-header-condensed-search-h,36px)!important;grid-template-columns:minmax(0,1fr) 36px!important;border-radius:8px!important}
 <?= $g ?> .page-wrapper <?= $c ?> .awa-header-search-col form#search_mini_form input#search{height:var(--awa-header-condensed-search-h,36px)!important;min-height:var(--awa-header-condensed-search-h,36px)!important;font-size:13px!important;padding-inline:12px!important}

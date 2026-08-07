@@ -664,12 +664,12 @@ body .page-wrapper .awa-site-header .awa-header-right-col a.awa-header-cart-link
   display: none !important;
 }
 
-// ── FIX 4: Mostrar showcart como botão vermelho consistente ──
+// ── FIX 4: Minicart ghost SSOT (fundo transparente + ícone primary; badge mantém contraste) ──
 body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .showcart.header-mini-cart {
-  background: @awa-red;
-  color: @awa-color-white;
-  border-radius: 8px;
-  padding: 8px 16px;
+  background: transparent;
+  color: var(--awa-primary, #b73337);
+  border-radius: 0;
+  padding: 0;
   display: inline-flex !important;
   align-items: center;
   gap: 8px;
@@ -677,16 +677,18 @@ body .page-wrapper .awa-site-header .awa-header-right-col .minicart-wrapper .sho
   font-weight: 600;
   text-decoration: none;
   border: none;
+  box-shadow: none;
 
   &:hover {
-    background: @awa-red-dark;
-    color: @awa-color-white;
+    background: transparent;
+    color: var(--awa-primary, #b73337);
+    opacity: 0.88;
   }
 
   // Badge quantidade
   .counter.qty {
-    background: @awa-color-white;
-    color: @awa-red;
+    background: var(--awa-primary, #b73337);
+    color: @awa-color-white;
     border-radius: 99px;
     padding: 1px 7px;
     font-size: 10px;

@@ -243,9 +243,10 @@ $normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue):
                 <?php if ($filterItem->getCount() > 0): ?>
                     <a <?= in_array($filterItem->getValue(), $requestArray) ? 'class="active"' : '' ?>
                        href="<?= $block->escapeUrl($url) ?>">
-                        <?php if ($inputName !== 'cat'): ?>
-                            <input type="checkbox" <?= in_array($filterItem->getValue(), $requestArray) ? 'checked="checked"' : '' ?> />
-                        <?php endif; ?>
+                        <?php /* P1A-A11Y (2026-07-27): checkbox decorativo removido — input sem nome
+                             acessível aninhado em <a> (Lighthouse audit "label" + nested-interactive).
+                             Era invisível (0x0, appearance:none); o estado ativo continua na classe
+                             "active" do <a>. */ ?>
                         <?php if ($inputName === 'rating') {
                             if ($filterItem->getLabel() == '1') {
                                 $width = 20;
@@ -267,8 +268,18 @@ $normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue):
                         <?php } else {
                             if ($inputName === 'product_brand') { ?>
                                 <span class="brand-name"><?= $block->escapeHtml($filterItem->getLabel()) ?></span>
-                            <?php } else {
-                                echo $block->escapeHtml($filterItem->getLabel());
+                            <?php } elseif (
+                                $inputName === 'price'
+                                || ($attributeModel && $attributeModel->getFrontendInput() === 'price')
+                            ) {
+                                // Label chega entity-encoded (&lt;span class="price"&gt;...); decodificar 1x.
+                                $priceLabel = htmlspecialchars_decode(
+                                    (string) $filterItem->getLabel(),
+                                    ENT_QUOTES | ENT_HTML5
+                                );
+                                echo /* @noEscape */ $priceLabel;
+                            } else {
+                                echo $block->escapeHtml((string) $filterItem->getLabel());
                             }
                         } ?>
                         <?php if ($this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
@@ -278,9 +289,18 @@ $normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue):
                     </a>
                 <?php else: ?>
                     <?php if ($attributeModel && $attributeModel->getFrontendInput() === 'multiselect'): ?>
-                        <input type="checkbox" disabled="disabled" />
                     <?php endif; ?>
-                    <?= $block->escapeHtml($filterItem->getLabel()) ?>
+                    <?php if (
+                        $inputName === 'price'
+                        || ($attributeModel && $attributeModel->getFrontendInput() === 'price')
+                    ): ?>
+                        <?= /* @noEscape */ htmlspecialchars_decode(
+                            (string) $filterItem->getLabel(),
+                            ENT_QUOTES | ENT_HTML5
+                        ) ?>
+                    <?php else: ?>
+                        <?= $block->escapeHtml((string) $filterItem->getLabel()) ?>
+                    <?php endif; ?>
                     <?php if ($this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
                         <span class="count"><?= (int) $filterItem->getCount() ?><span class="filter-count-label">
                             <?= $filterItem->getCount() == 1 ? $block->escapeHtml(__('item')) : $block->escapeHtml(__('items')) ?></span></span>

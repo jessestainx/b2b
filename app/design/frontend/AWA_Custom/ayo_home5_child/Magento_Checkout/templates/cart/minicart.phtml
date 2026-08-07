@@ -35,7 +35,7 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
        aria-controls="minicart-content-wrapper"
        <?= $isHomeUiDefer ? 'data-awa-minicart-defer="trigger"' : 'data-bind="scope: \'minicart_content\'"' ?>>
         <span class="awa-sr-only"><?= $block->escapeHtml(__('Carrinho de compras')) ?> </span>
-        <svg class="awa-minicart-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="awa-minicart-icon" width="20" height="20" viewBox="-0.25 0.5 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="20" r="1"></circle>
             <circle cx="18" cy="20" r="1"></circle>
             <path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path>
@@ -55,7 +55,7 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
         </span>
     </a>
     <?php if ($block->getIsNeedToDisplaySideBar()): ?>
-        <div class="block block-minicart empty"
+        <div class="block block-minicart"
                  data-role="dropdownDialog"
                  <?php if (!$isHomeUiDefer): ?>
                  data-mage-init='{"dropdownDialog":{
@@ -68,11 +68,11 @@ $blockLoaderUrl = $sanitizeUrl($block->getViewFileUrl('images/loader-1.gif'));
                     "parentClass":"is-open",
                     "buttons":[]}}'
                  <?php endif; ?>>
-            <h2 id="minicart-title" class="awa-sr-only"><?= $block->escapeHtml(__('Meu Carrinho')) ?></h2>
+            <?php /* Título visível vem do KO (.block-title). aria-label evita "Meu Carrinho" duplicado no DOM. */ ?>
             <div id="minicart-content-wrapper"
                  role="dialog"
                  aria-modal="true"
-                 aria-labelledby="minicart-title"
+                 aria-label="<?= $block->escapeHtmlAttr(__('Meu Carrinho')) ?>"
                  <?= $isHomeUiDefer ? 'data-awa-minicart-defer="content" aria-hidden="true"' : 'data-bind="scope: \'minicart_content\'"' ?>>
                 <?php if (!$isHomeUiDefer): ?>
                 <!-- ko template: getTemplate() --><!-- /ko -->

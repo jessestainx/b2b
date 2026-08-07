@@ -56,7 +56,7 @@
 								<div class="item-blog">
 									<div class="blog-image">
 										<a href="<?php echo $block->escapeUrl($_post->getPostUrl()) ?>">
-											<img alt="<?php echo $block->escapeHtmlAttr($_post->getTitle()); ?>" src="<?php echo $block->escapeUrl($this->getMediaFolder().$_post->getThumbnailimage()) ?>" loading="lazy" />
+											<img alt="<?php echo $block->escapeHtmlAttr($_post->getTitle()); ?>" src="<?php echo $block->escapeUrl($this->getMediaFolder().$_post->getThumbnailimage()) ?>" loading="lazy" decoding="async" width="400" height="240" />
 										</a>
 									</div>
 									<div class="blog-content">

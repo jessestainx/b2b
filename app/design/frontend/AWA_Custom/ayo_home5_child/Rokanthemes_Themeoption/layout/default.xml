@@ -11,11 +11,12 @@
              for proper ordering and consistency across all page types.
              This prevents potential layout resolution order issues.
         -->
-        <referenceContainer name="head.additional">
+        <!-- head.additional é BLOCK (não container) — referenceContainer era incorreto -->
+        <referenceBlock name="head.additional">
             <!-- awa.post.themeoption.css: DESATIVADO — 5 CSS migrados para awa-bundle-site.css (2026-03-16).
                  Bloco consolidado em Magento_Theme/layout/default_head_blocks.xml. -->
             <!-- awa.deferred.interaction.css: Consolidado em Magento_Theme/layout/default_head_blocks.xml (2026-03-23). -->
-        </referenceContainer>
+        </referenceBlock>
 
         <referenceContainer name="page.wrapper">
             <block class="Rokanthemes\Themeoption\Block\Themeoption" name="toki_header" template="html/header.phtml" before="-">
@@ -98,21 +99,43 @@
         <referenceContainer name="navigation.sections" remove="true"/>
 
         <!-- compatibility sink for 3rd-party blocks that still target magento default
-             header/footer containers removed by ayo. kept display=false to avoid visual output. -->
+             header/footer containers removed by ayo. kept display=false to avoid visual output.
+             AWA FIX 2026-07-19: NUNCA reusar nomes do core (header/footer/page.messages/…).
+             O tema pai ayo_home5 declara page.messages/footer dentro deste sink (display=false),
+             o que destrói o container Magento de mensagens. Sink do filho usa prefixo awa.compat.* -->
         <referenceContainer name="page.wrapper">
             <container name="awa.layout.compat" as="awa_layout_compat">
-                <container name="header"/>
-                <container name="notifications"/>
-                <container name="global.notices"/>
-                <container name="page.menu"/>
-                <container name="page.breadcrumbs"/>
-                <container name="page.formkey"/>
-                <container name="main.top"/>
-                <container name="page.main.actions"/>
-                <container name="footer"/>
+                <container name="awa.compat.header"/>
+                <container name="awa.compat.notifications"/>
+                <container name="awa.compat.global.notices"/>
+                <container name="awa.compat.page.menu"/>
+                <container name="awa.compat.page.breadcrumbs"/>
+                <container name="awa.compat.page.formkey"/>
+                <container name="awa.compat.main.top"/>
+                <container name="awa.compat.page.main.actions"/>
+                <container name="awa.compat.footer"/>
             </container>
         </referenceContainer>
         <referenceContainer name="awa.layout.compat" display="false"/>
+
+        <!-- Restaura page.messages engolido pelo sink do tema pai (ayo_home5).
+             move tira do compat; referenceContainer garante htmlTag/class + blocos core. -->
+        <move element="page.messages" destination="columns.top" after="page.main.title"/>
+        <referenceContainer name="columns.top">
+            <container name="page.messages" htmlTag="div" htmlClass="page messages" after="page.main.title">
+                <block class="Magento\Framework\View\Element\Template"
+                       name="ajax.message.placeholder"
+                       template="Magento_Theme::html/messages.phtml"/>
+                <block class="Magento\Framework\View\Element\Messages"
+                       name="messages"
+                       as="messages"
+                       template="Magento_Theme::messages.phtml"/>
+            </container>
+        </referenceContainer>
+
+        <!-- Sink oculto para módulos que ainda referenciam o container "footer" do core.
+             toki_footer em footer-container é o rodapé visual; este footer fica display=false. -->
+        <referenceContainer name="footer" display="false"/>
 
         <referenceContainer name="footer-container">
             <block class="Rokanthemes\Themeoption\Block\Themeoption" name="toki_footer" template="html/footer.phtml">

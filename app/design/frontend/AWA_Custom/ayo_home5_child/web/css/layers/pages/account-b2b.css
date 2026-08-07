@@ -203,10 +203,10 @@
 #html-body:is(.account, [class*="b2b-"]) .b2b-section-header h1,
 #html-body:is(.account, [class*="b2b-"]) .b2b-page-shell .b2b-section-header h1 {
     margin: 0;
-    font-size: clamp(22px, 2vw, 28px);
+    font-size: var(--awa-b2b-page-title-size, clamp(1.125rem, 1rem + 0.35vw, 1.375rem));
     font-weight: 700;
     letter-spacing: -0.01em;
-    line-height: 1.25;
+    line-height: 1.3;
     text-transform: none;
     color: var(--awa-text-primary, var(--awa-text));
 }
@@ -1271,7 +1271,7 @@
 
 /* ── §124 typography + mobile rhythm (2026-06-09) ─────────────────────────── */
 #html-body.b2b-account-dashboard {
-    --awa-b2b-page-title-size: clamp(22px, 2vw, 28px);
+    --awa-b2b-page-title-size: clamp(1.125rem, 1rem + 0.35vw, 1.375rem);
     --awa-b2b-section-title-size: var(--awa-acct-title-size);
 }
 
@@ -1799,9 +1799,9 @@ html body#html-body:is(.account, .b2b-account-dashboard) .page-wrapper .page-top
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-welcome h1 {
-    margin: 0 0 6px !important;
-    font-size: clamp(1.25rem, 1.1rem + 0.4vw, 1.5rem) !important;
-    line-height: 1.25 !important;
+    margin: 0 0 4px !important;
+    font-size: var(--awa-b2b-page-title-size) !important;
+    line-height: 1.3 !important;
 }
 
 #html-body.b2b-account-dashboard .page-wrapper .b2b-member-since {

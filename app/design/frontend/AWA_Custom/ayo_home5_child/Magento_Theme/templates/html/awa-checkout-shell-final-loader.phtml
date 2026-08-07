@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 /** @var \Magento\Framework\View\Element\Template $block */
 $shellUrl = $block->getViewFileUrl('css/awa-checkout-shell-final.css');
-$assetVersion = '20260619-checkout-b2b-address-v17';
+$assetVersion = '20260725-ssot1-onda4-step24';
 $shellUrlVersioned = $shellUrl . '?v=' . $assetVersion;
 $asyncInit = json_encode(
     ['js/awa-async-stylesheet' => ['urls' => [$shellUrlVersioned]]],

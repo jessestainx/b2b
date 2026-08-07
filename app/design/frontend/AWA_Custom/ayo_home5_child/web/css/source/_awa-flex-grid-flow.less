@@ -624,6 +624,12 @@ body.catalog-product-view .page-wrapper .fotorama__arr--next {
     justify-content: center !important;
     min-height: var(--awa-touch-target, 44px) !important;
     min-width: var(--awa-touch-target, 44px) !important;
+    // mage/gallery/gallery.min.css (core) define top:0;bottom:0;position:absolute sem
+    // !important. Como height é fixado nas regras acima, top:0 vence e bottom:0 é
+    // ignorado (over-constrained) — a seta fica colada no topo em vez de centralizada.
+    top: 50% !important;
+    bottom: auto !important;
+    transform: translateY(-50%) !important;
 }
 
 body.checkout-cart-index .page-wrapper .awa-cart-empty__suggestion {
@@ -2204,7 +2210,7 @@ body.catalog-product-view .fotorama--fullscreen {
 html body.catalog-product-view .product-info-main .page-title-wrapper {
     display: flex !important;
     flex-direction: column !important;
-    gap: var(--gap-tight, var(--size-2xs, var(--awa-space-2))) !important;
+    gap: 0 !important;
     margin-block-end: 0 !important;
 }
 
@@ -2230,12 +2236,19 @@ body.catalog-product-view .product-info-main .b2b-login-to-see-price {
 // PDP fase 7 — galeria, estoque, quote, grid fallback, ações relacionados
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Galeria — container grid + altura mínima fluida (CLS)
-body.catalog-product-view .product.media .gallery-placeholder {
+// Galeria — CLS no placeholder; após Fotorama montar, altura segue stage + nav
+body.catalog-product-view .product.media .gallery-placeholder:not(:has(.fotorama-item)) {
     border-radius: var(--awa-radius-lg, 16px) !important;
     display: grid !important;
     min-block-size: clamp(16rem, 42vw, 32rem) !important;
     place-items: center !important;
+}
+
+body.catalog-product-view .product.media .gallery-placeholder:has(.fotorama__img) {
+    border-radius: var(--awa-radius-lg, 16px) !important;
+    display: block !important;
+    min-block-size: 0 !important;
+    place-items: unset !important;
 }
 
 body.catalog-product-view .fotorama__wrap,
@@ -3253,11 +3266,22 @@ body.catalog-product-view .product.media .fotorama__nav--dots {
     padding-block: var(--size-xs, var(--awa-space-3)) !important;
 }
 
+/* H-pdp-thumbs-row (2026-08-02): wrap gerava grade 2 colunas (~364px) no mobile
+   e empurrava buy-box abaixo da dobra. Thumbs em faixa horizontal rolável. */
 body.catalog-product-view .product.media .fotorama__nav--dots .fotorama__nav__shaft {
     display: flex !important;
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
     gap: var(--size-2xs, var(--awa-space-2)) !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
+    max-inline-size: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Dots ficam redundantes quando thumbs estão forçados visíveis no modo dots. */
+body.catalog-product-view .product.media .fotorama__nav--dots:has(.fotorama__nav__frame--thumb) .fotorama__nav__frame--dot {
+    display: none !important;
 }
 
 body.catalog-product-view .product.media .fotorama__nav--dots .fotorama__nav__frame {
@@ -5321,12 +5345,18 @@ body.catalog-product-view .fotorama__fullscreen-icon {
 
 // Fotorama fullscreen — controles tocáveis + fundo neutro
 body.catalog-product-view .fotorama--fullscreen {
-    background: color-mix(in srgb, @awa-neutral-900 88%, transparent) !important;
-    z-index: var(--awa-z-pdp-modal, 70) !important;
+    background: color-mix(in srgb, @awa-neutral-900 94%, transparent) !important;
+    z-index: 100200 !important;
 }
 
 body.catalog-product-view .fotorama--fullscreen .fotorama__stage__frame .fotorama__img {
     object-fit: contain !important;
+}
+
+body.catalog-product-view .fotorama--fullscreen
+    :is(.fotorama__wrap, .fotorama__stage, .fotorama__stage__shaft, .fotorama__stage__frame) {
+    background: transparent !important;
+    background-color: transparent !important;
 }
 
 body.catalog-product-view .fotorama--fullscreen .fotorama__arr {
@@ -5335,11 +5365,22 @@ body.catalog-product-view .fotorama--fullscreen .fotorama__arr {
     border-radius: var(--radius-full, 9999px) !important;
     box-shadow: 0 4px 16px color-mix(in srgb, @awa-neutral-900 18%, transparent) !important;
     cursor: pointer !important;
-    display: inline-flex !important;
     justify-content: center !important;
     min-block-size: var(--awa-touch-target, 44px) !important;
     min-inline-size: var(--awa-touch-target, 44px) !important;
     opacity: 1 !important;
+    position: fixed !important;
+}
+
+body.catalog-product-view .fotorama--fullscreen .fotorama__arr[data-awa-fs-arr="on"] {
+    display: inline-flex !important;
+}
+
+body.catalog-product-view .fotorama--fullscreen .fotorama__arr[data-awa-fs-arr="off"],
+body.catalog-product-view .fotorama--fullscreen .fotorama__arr:not([data-awa-fs-arr="on"]) {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 body.catalog-product-view .fotorama--fullscreen .fotorama__fullscreen-icon {
@@ -5350,6 +5391,7 @@ body.catalog-product-view .fotorama--fullscreen .fotorama__fullscreen-icon {
     min-block-size: var(--awa-touch-target, 44px) !important;
     min-inline-size: var(--awa-touch-target, 44px) !important;
     opacity: 1 !important;
+    position: fixed !important;
 }
 
 body.catalog-product-view .fotorama--fullscreen .fotorama__arr:focus-visible,
@@ -5422,14 +5464,25 @@ body.catalog-product-view .box-tocart .input-text.qty {
 html body.catalog-product-view .product-info-main .page-title-wrapper {
     border-block-end: 1px solid var(--border-default, var(--awa-border, @awa-color-gray-200)) !important;
     margin-block-end: 0 !important;
+    padding-block-start: var(--size-2xs, var(--awa-space-2)) !important;
     padding-block-end: var(--size-xs, var(--awa-space-3)) !important;
+}
+
+html body.catalog-product-view .product-info-main .page-title-wrapper .page-title {
+    border-block-end: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    hyphens: none !important;
+    -webkit-hyphens: none !important;
 }
 
 html body.catalog-product-view .product-info-main .page-title-wrapper .page-title .base {
     color: var(--pdp-modern-text, @awa-neutral-800) !important;
     display: block !important;
-    hyphens: auto !important;
-    text-wrap: balance !important;
+    hyphens: none !important;
+    -webkit-hyphens: none !important;
+    margin: 0 !important;
+    text-wrap: pretty !important;
 }
 
 html body.catalog-product-view .product-info-main .box-inner1 .awa-pdp-review-summary,
@@ -7239,9 +7292,11 @@ body.catalog-product-view .product-info-main .b2b-login-to-see-price a:focus-vis
     outline-offset: 2px !important;
 }
 
-// Fotorama fullscreen abaixo do modal B2B (70)
+// Fotorama fullscreen — precisa vencer o <header> (z-index:100120), pois o JS do
+// fotorama remove o item do DOM de .product.media e o reanexa direto em <body> ao
+// entrar em fullscreen, escapando do stacking context isolado da galeria.
 body.catalog-product-view .fotorama--fullscreen {
-    z-index: 68 !important;
+    z-index: 100200 !important;
 }
 
 body.catalog-product-view .modals-wrapper .modal-popup {

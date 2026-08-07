@@ -1,5 +1,196 @@
 /* Fase 3D.2.1B header contract grid */
 /* Runtime contract scope only: default header mode; no auth/b2b shell. */
+
+/*
+ * BUG-SHELL-GEOM-TOKEN-001 / BUG-SHELL-RESIDUAL-GEOM-002 —
+ * SSOT de geometria do header (≥992 / modo default).
+ * Tokens desktop NÃO vazam no mobile (sticky mobile = 96).
+ * Promo bar (44px) fora do sticky; scroll-offset = sticky (116).
+ * html scroll-padding: cobre carrinho/checkout (sem site-shell lock).
+ */
+
+/* BUG-SHELL-SCROLL-OFFSET-GLOBAL-MOBILE-001 — vence align-grid 112 no mobile (cart/PLP/404) */
+/* BUG-SHELL-NONHOME-MIN120-001 — HPOL5 stack 32+88=120 com promo fechada; shell=96 / :has(promo)=140 */
+@media (max-width: 767px) {
+  html body#html-body:not(.b2b-auth-shell):not(.awa-account-operational):not(.b2b-account-shell) {
+    --awa-header-scroll-offset: 96px !important;
+    --awa-header-sticky-h: 96px !important;
+  }
+  html {
+    scroll-padding-top: 96px !important;
+    scroll-padding-block-start: 96px !important;
+  }
+
+  html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default'] {
+    --awa-header-main-row-h: 96px !important;
+    --awa-header-sticky-h: 96px !important;
+    --awa-header-promo-h: 0px !important;
+    --awa-header-stack-h: 96px !important;
+    height: auto !important;
+    min-height: 96px !important;
+    max-height: none !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default']:has(#awa-b2b-promo-bar:not([aria-hidden='true'])) {
+    --awa-header-promo-h: 44px !important;
+    --awa-header-stack-h: 140px !important;
+    min-height: 140px !important;
+  }
+
+  html body#html-body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    > .page.messages:not(:has(.message)) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html body#html-body#html-body.awa-header-is-sticky:not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default'] {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    --awa-header-stack-h: var(--awa-header-sticky-h, 96px) !important;
+  }
+}
+
+/* Placeholder CLS: hide unless body.awa-header-is-sticky (cart/PLP não herdam home guard) */
+#awa-header-cls-placeholder {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+body.awa-header-is-sticky #awa-header-cls-placeholder {
+  display: block !important;
+  height: var(--awa-header-height, var(--awa-header-sticky-h, 96px)) !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* BUG-SHELL-PROMO-COLLAPSE-ALL-VW-001 — promo fechada não reserva 44px no stack/min-height */
+html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+  .page-wrapper
+  .awa-site-header[data-awa-header-mode='default'] {
+  --awa-header-promo-h: 0px !important;
+  --awa-header-stack-h: var(--awa-header-sticky-h) !important;
+  height: auto !important;
+  min-height: var(--awa-header-sticky-h) !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+}
+
+html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+  .page-wrapper
+  .awa-site-header[data-awa-header-mode='default']:has(#awa-b2b-promo-bar:not([aria-hidden='true'])) {
+  --awa-header-promo-h: 44px !important;
+  --awa-header-stack-h: calc(44px + var(--awa-header-sticky-h)) !important;
+  min-height: calc(44px + var(--awa-header-sticky-h)) !important;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  html body#html-body:not(.b2b-auth-shell):not(.awa-account-operational):not(.b2b-account-shell) {
+    --awa-header-sticky-h: 112px !important;
+    --awa-header-scroll-offset: 128px !important;
+    --awa-header-main-row-h: 64px !important;
+    --awa-header-nav-h: 48px !important;
+  }
+  html {
+    scroll-padding-top: 128px !important;
+    scroll-padding-block-start: 128px !important;
+  }
+  html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default'] {
+    --awa-header-main-row-h: 64px !important;
+    --awa-header-nav-h: 48px !important;
+    --awa-header-sticky-h: 112px !important;
+    --awa-header-stack-h: 112px !important;
+    min-height: 112px !important;
+  }
+  html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default']:has(#awa-b2b-promo-bar:not([aria-hidden='true'])) {
+    --awa-header-stack-h: 156px !important;
+    min-height: 156px !important;
+  }
+  /* BUG-SHELL-TABLET-PLP-MAIN88-001 — vencer themes 88px */
+  html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default']
+    .header-wrapper-sticky {
+    height: 112px !important;
+    min-height: 112px !important;
+    max-height: 112px !important;
+    box-sizing: border-box !important;
+  }
+  html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default']
+    .header-wrapper-sticky
+    :is(
+      .header.awa-main-header,
+      .header_main.awa-main-header-inner-wrap,
+      .header-main,
+      .header-main > .container,
+      .awa-main-header__inner.wp-header,
+      .awa-main-header__inner[data-awa-header-row]
+    ) {
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    box-sizing: border-box !important;
+  }
+  html body#html-body#html-body#html-body:not(.b2b-auth-shell):not(.checkout-index-index):not(.onepagecheckout-index-index)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default']
+    :is(.header-control.header-nav, .header-control.awa-nav-bar, .awa-nav-bar) {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (min-width: 992px) {
+  html body#html-body:not(.b2b-auth-shell):not(.awa-account-operational):not(.b2b-account-shell) {
+    --awa-header-main-height: 68px;
+    --awa-header-nav-height: 48px;
+    --awa-header-main-row-h: 68px;
+    --awa-header-nav-h: 48px;
+    --awa-header-row-h: 68px;
+    --awa-header-sticky-h: 116px;
+    --awa-header-site-shell-h: 116px;
+    --awa-header-scroll-offset: 116px;
+  }
+
+  html {
+    scroll-padding-top: var(--awa-header-scroll-offset, 116px);
+  }
+
+  body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] {
+    --awa-header-main-height: 68px;
+    --awa-header-nav-height: 48px;
+    --awa-header-main-row-h: var(--awa-header-main-height);
+    --awa-header-nav-h: var(--awa-header-nav-height);
+    --awa-header-row-h: var(--awa-header-main-height);
+    --awa-header-sticky-h: calc(var(--awa-header-main-height) + var(--awa-header-nav-height));
+    --awa-header-site-shell-h: var(--awa-header-sticky-h);
+    --awa-header-scroll-offset: var(--awa-header-sticky-h);
+  }
+}
+
 body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] {
   --awa-header-container-max: 1280px;
   --awa-header-container-padding: 24px;
@@ -7,8 +198,6 @@ body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] {
   --awa-header-actions-width: 276px;
   --awa-header-search-min: 320px;
   --awa-header-search-max: 760px;
-  --awa-header-main-height: 68px;
-  --awa-header-nav-height: 46px;
   --awa-header-gap: 18px;
 }
 
@@ -69,6 +258,16 @@ body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] .head
 }
 
 @media (min-width: 992px) {
+  /* Trava nav em 48px — elimina drift medido ~50px vs token. */
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .header-control.awa-nav-bar[data-awa-header-nav="true"] {
+    height: var(--awa-header-nav-h, 48px) !important;
+    min-height: var(--awa-header-nav-h, 48px) !important;
+    max-height: var(--awa-header-nav-h, 48px) !important;
+    box-sizing: border-box !important;
+  }
+
   body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] .awa-header-brand-cell[data-awa-header-brand="true"] .logo {
     max-width: var(--awa-header-logo-width, 184px) !important;
   }
@@ -443,5 +642,46 @@ body:not(.b2b-auth-shell) .awa-site-header[data-awa-header-mode="default"] .head
     border-radius: 0 !important;
     align-self: stretch !important;
     box-sizing: border-box !important;
+  }
+}
+
+/* Visitante no desktop: exibe exclusivamente o link de cadastro.
+   !important neutraliza regras legadas com a mesma prioridade. */
+@media (min-width: 992px) {
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-account-prompt[data-awa-auth-state="guest"] {
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-account-prompt[data-awa-auth-state="guest"]
+    .awa-header-account-prompt__icon {
+    display: none !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-account-prompt[data-awa-auth-state="guest"]
+    .awa-header-account-prompt__link--register {
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  html body#html-body:not(.b2b-auth-shell) .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-account-prompt[data-awa-auth-state="guest"]
+    .awa-header-account-prompt__link--register:is(:hover, :focus-visible) {
+    background: transparent !important;
+    text-decoration: underline !important;
   }
 }

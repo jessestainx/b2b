@@ -27,9 +27,13 @@ define([
         }
     }
 
-    // Carrinho: CSS já aplica position:sticky no .cart-summary; o widget jQuery
-    // recalcula top/width em loop com MutationObservers → "Página sem resposta".
-    if (!$('body').hasClass('checkout-cart-index')) {
+    // Carrinho: NUNCA mage/sticky — só CSS position:sticky (+ guard de footer).
+    // (path + body class: cobre race de body class / bundle Luma)
+    var isCartPath = /^\/(?:index\.php\/?)?checkout\/cart(?:\/|$)/.test(
+        (window.location && window.location.pathname) ? window.location.pathname : ''
+    );
+
+    if (!isCartPath && !$('body').hasClass('checkout-cart-index')) {
         $('.cart-summary').mage('sticky', {
             container: '#maincontent'
         });
@@ -281,6 +285,127 @@ define([
             authLogo.setAttribute('alt', 'AWA Motos');
         }
     });
+
+    /*
+     * P1-B (2026-07-27) — WCAG 4.1.2 / axe aria-required-children + aria-allowed-attr.
+     * Dois widgets mage/tabs|collapsible ficam permanentemente "disabled" neste tema
+     * (o CSS mantém todo o conteúdo visível), mas continuam injetando semântica de
+     * tabs órfã e re-escrevendo os atributos a cada clique:
+     *  - PDP .product.data.items: painéis sempre empilhados/visíveis em TODOS os
+     *    breakpoints (mapeado em 1280 e 390), porém o widget alterna aria-hidden
+     *    em conteúdo visível e mantém role=tablist/tab/tabpanel sem comportamento
+     *    de tabs. Saneamento: remover roles/estados órfãos; os títulos voltam a ser
+     *    âncoras de salto legítimas (#description/#additional).
+     *  - PLP #narrow-by-list: acordeão FUNCIONAL (aria-expanded correto), mas com
+     *    role=tablist no container, role=tabpanel nos painéis e aria-selected
+     *    (inválido em role=button) re-aplicado pelo widget a cada toggle.
+     *    Saneamento: manter button/aria-expanded, relacionar controle↔conteúdo via
+     *    aria-controls/id e remover só o vocabulário de tabs.
+     * O widget re-escreve atributos nos handlers síncronos de clique/teclado; um
+     * listener delegado + requestAnimationFrame garante a palavra final sem
+     * MutationObserver contínuo. Re-executa após AJAX da navegação por camadas
+     * (contentUpdated) porque o sidebar é re-renderizado com os roles de novo.
+     */
+    (function () {
+        if (isHomePage) {
+            return;
+        }
+
+        function sanitizePdpTabs() {
+            let wrap = document.querySelector('.product.data.items');
+            if (!wrap) return;
+            if (wrap.getAttribute('role') === 'tablist') {
+                wrap.removeAttribute('role');
+            }
+            wrap.querySelectorAll(':scope > .title').forEach(function (t) {
+                ['role', 'aria-selected', 'aria-expanded', 'aria-controls', 'tabindex'].forEach(function (attr) {
+                    if (t.hasAttribute(attr)) t.removeAttribute(attr);
+                });
+                let a = t.querySelector('a[href]');
+                if (a && a.getAttribute('tabindex') === '-1') {
+                    a.removeAttribute('tabindex');
+                }
+            });
+            wrap.querySelectorAll(':scope > .content').forEach(function (p) {
+                if (p.getAttribute('role') === 'tabpanel') p.removeAttribute('role');
+                // conteúdo visível não pode ficar aria-hidden (o sync de inert
+                // acima remove o inert junto quando o atributo sai)
+                if (p.hasAttribute('aria-hidden')) p.removeAttribute('aria-hidden');
+            });
+        }
+
+        function sanitizePlpFilters() {
+            let list = document.getElementById('narrow-by-list');
+            if (!list) return;
+            if (list.getAttribute('role') === 'tablist') {
+                list.removeAttribute('role');
+            }
+            let seq = 0;
+            list.querySelectorAll('.filter-options-item').forEach(function (item) {
+                let title = item.querySelector('.filter-options-title');
+                let content = item.querySelector('.filter-options-content');
+                if (title) {
+                    if (title.hasAttribute('aria-selected')) title.removeAttribute('aria-selected');
+                    if (content) {
+                        if (!content.id) {
+                            seq += 1;
+                            content.id = 'awa-filter-content-' + seq;
+                        }
+                        if (title.getAttribute('aria-controls') !== content.id) {
+                            title.setAttribute('aria-controls', content.id);
+                        }
+                    }
+                }
+                if (content && content.getAttribute('role') === 'tabpanel') {
+                    content.removeAttribute('role');
+                }
+            });
+        }
+
+        function runSanitize() {
+            sanitizePdpTabs();
+            sanitizePlpFilters();
+        }
+
+        /*
+         * O mage/collapsible re-aplica aria-selected/aria-hidden no callback de
+         * conclusão da animação (~300ms), portanto DEPOIS de um requestAnimationFrame.
+         * Um rAF isolado perderia a corrida; a cadeia curta e limitada abaixo garante
+         * a palavra final sem MutationObserver contínuo (mesmo padrão do sync de inert).
+         */
+        let _sanitizePending = false;
+        function scheduleSanitize() {
+            if (_sanitizePending) return;
+            _sanitizePending = true;
+            requestAnimationFrame(runSanitize);
+            setTimeout(runSanitize, 150);
+            setTimeout(function () {
+                _sanitizePending = false;
+                runSanitize();
+            }, 500);
+        }
+
+        // Estado inicial: widgets inicializam async via RequireJS; repetir em
+        // janelas curtas cobre a corrida sem observer (padrão do sync de inert acima).
+        scheduleSanitize();
+        setTimeout(scheduleSanitize, 800);
+        setTimeout(scheduleSanitize, 2500);
+        window.addEventListener('load', scheduleSanitize, { once: true });
+
+        // Palavra final após cada interação nos dois componentes. Captura roda antes
+        // do handler do widget; a cadeia de scheduleSanitize cobre o pós-animação.
+        ['click', 'keydown', 'keyup'].forEach(function (evt) {
+            document.addEventListener(evt, function (e) {
+                let t = e.target;
+                if (t && t.closest && t.closest('.product.data.items, #narrow-by-list')) {
+                    scheduleSanitize();
+                }
+            }, true);
+        });
+
+        // Sidebar re-renderizado pelo LayeredAjax dispara contentUpdated.
+        $(document).on('contentUpdated', scheduleSanitize);
+    }());
 
     if (window.MutationObserver && shouldRunAwaPublicHotfix) {
         let observerTarget = document.querySelector('.page-wrapper') || document.body;

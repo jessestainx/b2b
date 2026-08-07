@@ -40,16 +40,21 @@
         inner.style.removeProperty('min-height');
         inner.style.removeProperty('overflow');
     }
+function onReady() {
+        resetNavBarInner();
+}
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', resetNavBarInner, { once: false });
+        document.addEventListener('DOMContentLoaded', onReady, { once: false });
     } else {
-        resetNavBarInner();
+        onReady();
     }
 
     let resizeTimer;
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(resetNavBarInner, 100);
+        resizeTimer = setTimeout(function () {
+            resetNavBarInner();
+}, 100);
     });
 }());

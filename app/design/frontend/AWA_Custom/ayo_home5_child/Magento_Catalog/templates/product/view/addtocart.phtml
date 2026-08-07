@@ -3,6 +3,9 @@
  * AWA Motos - PDP Add to Cart override
  *
  * Sprint a11y (2026-06-28): adicionado aria-label no botao + placeholder no qty.
+ * P1A (2026-07-27): aria-label do botao REMOVIDO — WCAG 2.5.3 (Label in Name):
+ *   o nome acessível deve conter o texto visível "Adicionar ao Carrinho"; o span
+ *   do botão já é o nome. Info do produto fica no contexto da página (h1).
  *
  * @var $block \Magento\Catalog\Block\Product\View
  */
@@ -34,7 +37,6 @@
         <div class="actions">
             <button type="submit"
                     title="<?= $block->escapeHtmlAttr($buttonTitle) ?>"
-                    aria-label="<?= $block->escapeHtmlAttr(__('Adicionar ' . $_product->getName() . ' ao carrinho')) ?>"
                     class="action primary tocart"
                     id="product-addtocart-button" disabled>
                 <span><?= $block->escapeHtml($buttonTitle) ?></span>

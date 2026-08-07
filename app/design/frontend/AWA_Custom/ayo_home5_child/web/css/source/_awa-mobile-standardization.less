@@ -209,7 +209,8 @@
         display: block !important;
 
         .link-on-bottom {
-            padding: 8px 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
             
             ul.mobile-bottom-link {
                 display: flex !important;
@@ -218,29 +219,33 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 list-style: none !important;
+                height: 100% !important;
 
                 li {
                     flex: 1 !important;
                     text-align: center !important;
+                    height: 100% !important;
 
                     a, button {
                         display: flex !important;
                         flex-direction: column !important;
                         align-items: center !important;
+                        justify-content: center !important;
                         background: none !important;
                         border: none !important;
-                        padding: 4px 0 !important;
+                        padding: 0 !important;
                         color: var(--awa-mob-c3) !important;
                         font-size: 11px !important;
                         font-weight: 500 !important;
-                        gap: 4px !important;
+                        gap: 2px !important;
                         width: 100% !important;
+                        height: 100% !important;
                         text-decoration: none !important;
                         line-height: 1 !important;
 
                         .icon {
-                            font-size: 22px !important;
-                            margin-bottom: 2px !important;
+                            font-size: 20px !important;
+                            margin-bottom: 0 !important;
                         }
 
                         &:active, &.active {
@@ -258,8 +263,9 @@
     }
 
     // Global padding for bottom nav
-    #maincontent, .page-footer, .main-container {
-        padding-bottom: 84px !important;
+    // Optimized: only apply to footer-bottom to avoid cumulative "ghost" height
+    #maincontent, .main-container {
+        padding-bottom: 24px !important;
     }
 }
 
@@ -672,7 +678,7 @@
         }
         
         .footer-bottom {
-            padding: 24px 16px 100px !important; // bottom padding for nav
+            padding: 24px 16px 72px !important; // match fixed-bottom height
             text-align: center !important;
         }
     }

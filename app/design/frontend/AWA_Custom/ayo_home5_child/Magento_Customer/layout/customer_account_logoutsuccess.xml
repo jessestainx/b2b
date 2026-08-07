@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * AWA Motos — customer_account_logoutsuccess
+ *
+ * Magento 2 best practice (tema filho):
+ * - Declarar <head><title> no layout (o core só seta page.main.title / H1).
+ * - Frase em inglês como source; tradução em i18n/pt_BR.csv.
+ * - Não alterar vendor/magento/module-customer.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <title>You are signed out</title>
+    </head>
+    <body>
+        <referenceBlock name="page.main.title">
+            <arguments>
+                <argument name="page_title" xsi:type="string" translate="true">You are signed out</argument>
+            </arguments>
+            <action method="setPageTitle">
+                <argument name="title" xsi:type="string" translate="true">You are signed out</argument>
+            </action>
+        </referenceBlock>
+    </body>
+</page>

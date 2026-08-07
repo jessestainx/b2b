@@ -17,7 +17,7 @@
 					<div class="author-testimo">
 						<div class="author-test-link">
 							<?php  $link = $helperImage->resize($_testimonial->getAvatar(),$img_width,$img_height, true);?>
-							<a href="#"><img src="<?php echo $link;?>" alt="" loading="lazy" /></a>
+							<a href="#"><img src="<?php echo $link;?>" alt="" loading="lazy" width="<?php echo (int)$img_width; ?>" height="<?php echo (int)$img_height; ?>" decoding="async" /></a>
 						</div>
 					</div>
 					<div class="info-testimonial">

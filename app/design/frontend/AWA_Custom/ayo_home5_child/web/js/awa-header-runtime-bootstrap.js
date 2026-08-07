@@ -25,8 +25,13 @@ define([
         try {
             if (localStorage.getItem('awa_b2b_promo_dismissed') === '1'
                 || sessionStorage.getItem('awa_b2b_promo_dismissed_session') === '1') {
-                bar.style.display = 'none';
+                bar.style.setProperty('display', 'none', 'important');
                 bar.setAttribute('aria-hidden', 'true');
+                var dismissedShell = bar.closest('#header.header-container');
+                if (dismissedShell) {
+                    dismissedShell.style.setProperty('display', 'none', 'important');
+                    dismissedShell.setAttribute('aria-hidden', 'true');
+                }
                 return;
             }
         } catch (storageReadError) {
@@ -37,8 +42,13 @@ define([
         var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         function hideBar() {
-            bar.style.display = 'none';
+            bar.style.setProperty('display', 'none', 'important');
             bar.setAttribute('aria-hidden', 'true');
+            var shell = bar.closest('#header.header-container');
+            if (shell) {
+                shell.style.setProperty('display', 'none', 'important');
+                shell.setAttribute('aria-hidden', 'true');
+            }
             try {
                 sessionStorage.setItem('awa_b2b_promo_dismissed_session', '1');
                 localStorage.setItem('awa_b2b_promo_dismissed', '1');

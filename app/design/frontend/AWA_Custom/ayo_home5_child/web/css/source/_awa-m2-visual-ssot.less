@@ -1,0 +1,209 @@
+//
+// AWA Motos — SSOT visual (fonte LESS / Magento 2)
+// Espelha web/css/awa-m2-visual-ssot.css para quando styles-m / SCD estiver ativo.
+// Produção atual carrega o .css via default_head_blocks.xml (styles-m removido).
+//
+
+// 1) Magento_Review rating overlay
+.page-wrapper :is(.product-item, .item-product, .awa-product-card, .product-item-info) {
+    .rating-summary .rating-result {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        width: 85px;
+        max-width: 85px;
+        height: 18px;
+        line-height: 18px;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 14px;
+        letter-spacing: 2px;
+
+        &::before {
+            content: '\2605\2605\2605\2605\2605';
+            color: var(--awa-border);
+            display: block;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            letter-spacing: 2px;
+        }
+
+        > span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            z-index: 1;
+
+            &::before {
+                content: '\2605\2605\2605\2605\2605';
+                color: var(--awa-warning);
+                display: block;
+                letter-spacing: 2px;
+            }
+
+            > span {
+                border: 0;
+                clip: rect(0, 0, 0, 0);
+                height: 1px;
+                margin: -1px;
+                overflow: hidden;
+                padding: 0;
+                position: absolute;
+                width: 1px;
+            }
+        }
+    }
+}
+
+// 2) Home shelf header same-row
+body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+    .page-wrapper .content-top-home {
+        :is(.awa-section-header, .awa-shelf__header) {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .awa-section-header__left {
+            flex: 1 1 auto;
+            min-width: 0;
+            max-width: calc(100% - 8rem);
+            width: auto;
+        }
+
+        :is(
+            .awa-section-header__link,
+            .awa-shelf__view-all,
+            .awa-shelf-view-all,
+            .awa-category-carousel__cta-link
+        ) {
+            flex: 0 0 auto;
+            align-self: center;
+            white-space: nowrap;
+            margin-inline-start: 0;
+        }
+
+        // 3) Carousel viewport — no CTA clip when ready
+        .awa-carousel-section .awa-carousel__viewport:not(.awa-carousel-ready) {
+            max-block-size: clamp(26rem, 48vw, 40rem);
+            max-height: clamp(26rem, 48vw, 40rem);
+            overflow: hidden;
+        }
+
+        .awa-carousel-section .awa-carousel__viewport.awa-carousel-ready {
+            max-block-size: none;
+            max-height: none;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .awa-shelf--carousel :is(.item-product, .awa-carousel-card-slot, .content-item-product, .awa-product-card) {
+            block-size: auto;
+            height: auto;
+            max-block-size: none;
+            max-height: none;
+        }
+
+        // 4) Card column + CTA pin
+        :is(.awa-shelf--carousel, .awa-grid-section, .awa-carousel-section) {
+            :is(.content-item-product, .awa-product-card, .product-item-info) {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                min-height: 0;
+            }
+
+            :is(.content-item-product, .awa-product-card) :is(.product-info, .product-item-details) {
+                display: flex;
+                flex-direction: column;
+                flex: 1 1 auto;
+                min-height: 0;
+                gap: 0.5rem;
+            }
+
+            :is(a.product-item-link, .product-item-name a, .product-name a) {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: normal;
+                min-height: calc(1.35em * 2);
+                height: auto;
+                max-height: calc(1.35em * 2);
+                line-height: 1.35;
+            }
+
+            :is(.rating-summary, .product-reviews-summary) {
+                min-height: 18px;
+                margin-block: 0;
+                flex: 0 0 auto;
+            }
+
+            .awa-card-view-product {
+                margin-top: auto;
+                flex: 0 0 auto;
+                align-self: stretch;
+            }
+
+            .onsale.new-lable {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 1.375rem;
+                padding: 0.125rem 0.375rem;
+                line-height: 1;
+                box-sizing: border-box;
+
+                :is(.sale-text, .sale-text label, label) {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0;
+                    padding: 0;
+                    line-height: 1;
+                    position: static;
+                    transform: none;
+                }
+            }
+
+            .hot-onsale {
+                background: transparent;
+                box-shadow: none;
+                border: 0;
+            }
+        }
+
+        // 6) Category carousel scroll
+        .top-home-content--category-carousel {
+            .awa-category-carousel__viewport {
+                overflow-x: auto;
+                overflow-y: hidden;
+                scroll-snap-type: x proximity;
+                scroll-padding-inline: 8px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .awa-category-carousel__item {
+                scroll-snap-align: start;
+                flex-shrink: 0;
+            }
+
+            .awa-category-carousel__count {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                line-height: 1.25;
+            }
+        }
+    }
+}

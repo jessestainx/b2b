@@ -17,23 +17,32 @@ if (!$analyticsData) {
 $layoutHandles = $block->getLayout()->getUpdate()->getHandles();
 $isHomePage = in_array('cms_index_index', $layoutHandles, true);
 ?>
-<?php if ($isHomePage): ?>
 <script type="application/json" id="awa-ga4-defer-json"><?= /* @noEscape */ $analyticsData ?></script>
 <script>
 (function (w, d) {
     'use strict';
     var applied = false;
-    var events = ['pointerdown', 'keydown', 'touchstart'];
+
+    function allowsMarketing() {
+        try {
+            if (w.localStorage && w.localStorage.getItem('awa_cookie_consent') === 'all') {
+                return true;
+            }
+            if (w.localStorage && w.localStorage.getItem('awa_cookie_consent') === 'essential') {
+                return false;
+            }
+        } catch (e) {}
+        return /(?:^|;\s*)awa_cookies_accepted=all(?:;|$)/.test(d.cookie || '');
+    }
 
     function boot() {
         var el, cfg, script;
-        if (applied) { return; }
+        if (applied || !allowsMarketing()) { return; }
         if (typeof w.require !== 'function') {
             w.setTimeout(boot, 200);
             return;
         }
         applied = true;
-        events.forEach(function (ev) { w.removeEventListener(ev, boot, true); });
         el = d.getElementById('awa-ga4-defer-json');
         if (!el || !el.textContent) { return; }
         try { cfg = JSON.parse(el.textContent); } catch (e) { return; }
@@ -44,19 +53,31 @@ $isHomePage = in_array('cms_index_index', $layoutHandles, true);
         w.require(['mage/apply/main']);
     }
 
-    events.forEach(function (ev) {
-        w.addEventListener(ev, boot, { capture: true, passive: ev !== 'keydown', once: true });
-    });
+    function schedule() {
+        if (!allowsMarketing()) { return; }
+        <?php if ($isHomePage): ?>
+        if ('requestIdleCallback' in w) {
+            w.requestIdleCallback(boot, { timeout: 3500 });
+        } else {
+            w.setTimeout(boot, 1500);
+        }
+        <?php else: ?>
+        if ('requestIdleCallback' in w) {
+            w.requestIdleCallback(boot, { timeout: 2000 });
+        } else {
+            w.setTimeout(boot, 800);
+        }
+        <?php endif; ?>
+    }
+
+    if (allowsMarketing()) {
+        schedule();
+    } else {
+        w.addEventListener('awa:cookie-consent', function (ev) {
+            if (ev && ev.detail && ev.detail.value === 'all') {
+                schedule();
+            }
+        });
+    }
 })(window, document);
 </script>
-<?php else: ?>
-<!-- BEGIN GOOGLE ANALYTICS 4 CODE -->
-<script type="text/x-magento-init">
-{
-    "*": {
-        "Magento_GoogleGtag/js/google-analytics": <?= /* @noEscape */ $analyticsData ?>
-    }
-}
-</script>
-<!-- END GOOGLE ANALYTICS 4 CODE -->
-<?php endif; ?>

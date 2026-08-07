@@ -1172,12 +1172,28 @@ html body#html-body.checkout-cart-index .page-wrapper .header-control.awa-nav-ba
 html body#html-body.checkout-cart-index .page-wrapper .header-control.awa-nav-bar .awa-nav-bar__inner {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    /* Autopilot 2026-07-15: space-between para Departamentos à esquerda + quick links à direita */
+    justify-content: space-between !important;
     gap: 20px !important;
     min-height: 44px !important;
 }
 
+/* Autopilot 2026-07-15: restaurar botão Departamentos no carrinho (antes display:none) */
 html body#html-body.checkout-cart-index .page-wrapper .header-control.awa-nav-bar .awa-header-categories,
+html body#html-body.checkout-cart-index .page-wrapper .header-control.awa-nav-bar .awa-header-categories.menu_left_home1 {
+    display: flex !important;
+    align-items: stretch !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+}
+
 html body#html-body.checkout-cart-index .page-wrapper .header-control.awa-nav-bar .awa-header-locale {
     display: none !important;
 }
@@ -1349,14 +1365,29 @@ html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper .heade
 html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper .header-control.awa-nav-bar .awa-nav-bar__inner {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    /* Autopilot 2026-07-15: space-between para Departamentos à esquerda + quick links à direita */
+    justify-content: space-between !important;
     gap: 20px !important;
     min-height: 44px !important;
     padding: 0 !important;
     background: transparent !important;
 }
 
+/* Autopilot 2026-07-15: override duplicado — manter Departamentos visível no carrinho */
 html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper .header-control.awa-nav-bar .awa-header-categories,
+html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper .header-control.awa-nav-bar .awa-header-categories.menu_left_home1 {
+    display: flex !important;
+    align-items: stretch !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+}
+
 html body#html-body.checkout-cart-index.checkout-cart-index .page-wrapper .header-control.awa-nav-bar .awa-header-locale {
     display: none !important;
 }

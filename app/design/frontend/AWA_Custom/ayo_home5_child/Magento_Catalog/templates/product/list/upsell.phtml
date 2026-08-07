@@ -132,7 +132,7 @@ $b2bPriceGateDescription = $b2bPriceGate->getPriceGateDescription();
                                         </a>
                                     </h3>
                                     <div class="product-rating">
-                                        <?php echo $block->getReviewsSummaryHtml($_item, $templateType, true); ?>
+                                        <?php $_awaB2b = \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Framework\Module\Manager::class)->isEnabled('GrupoAwamotos_B2B'); if (!$_awaB2b) { echo $block->getReviewsSummaryHtml($_item, $templateType, true); } ?>
                                     </div>
                                     <div class="info-price">
                                         <?php if ($b2bCanViewPrice): ?>

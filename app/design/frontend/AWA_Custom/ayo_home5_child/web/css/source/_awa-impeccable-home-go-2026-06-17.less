@@ -24,14 +24,14 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wr
 
 // ── Niche shelves tabs (Bauletos + Retrovisores consolidados) ──
 body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
-    .awa-home-niche-shelves__tabs {
+    :where(.awa-dead-niche-tabs) {
         display: flex;
         flex-wrap: wrap;
         gap: @awa-s-1;
         margin-block-end: @awa-s-2;
     }
 
-    .awa-home-niche-shelves__tab {
+    :where(.awa-dead-niche-tab) {
         background: var(--awa-bg, @awa-color-white);
         border: 1px solid var(--awa-border, @awa-color-border);
         border-radius: var(--awa-radius-pill, 9999px);
@@ -61,7 +61,7 @@ body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wr
         display: none;
     }
 
-    .awa-home-niche-shelves__panel-head {
+    :where(.awa-dead-niche-panel-head) {
         align-items: flex-start;
         display: flex;
         flex-wrap: wrap;
@@ -166,7 +166,7 @@ body#html-body .page-wrapper :is(.page_footer, .page-footer) .footer-container .
 }
 
 @media (prefers-reduced-motion: reduce) {
-    body#html-body .page-wrapper .awa-home-niche-shelves__tab {
+    body#html-body .page-wrapper :where(.awa-dead-niche-tab) {
         transition: none;
     }
 }

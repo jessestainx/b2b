@@ -27,8 +27,12 @@ $sectionItemsClass = trim($groupCss . '-items awa-header-primary-nav');
         <div id="<?= $block->escapeHtmlAttr($sectionItemsId) ?>"
              class="section-items <?= $block->escapeHtmlAttr($sectionItemsClass) ?>"
              data-awa-nav-shell="true"
-             aria-label="<?= $block->escapeHtmlAttr(__('Navegacao principal')) ?>"
-             data-mage-init='{"tabs":{"openedState":"active"}}'>
+             aria-label="<?= $block->escapeHtmlAttr(__('Navegacao principal')) ?>">
+            <?php /* P1A-A11Y (2026-07-27): binding mage/tabs removido. O widget ficava
+                 permanentemente em mage-tabs-disabled (tab único display:none em todos os
+                 viewports) e injetava role=tablist/tab/tabpanel órfãos — Lighthouse
+                 aria-required-children. O menu mobile é o drawer custom (awa-mobile-drawer);
+                 nenhum comportamento dependia do widget. */ ?>
             <?php foreach ($detailedInfoGroup as $name): ?>
                 <?php
                     $html = $layout->renderElement($name);

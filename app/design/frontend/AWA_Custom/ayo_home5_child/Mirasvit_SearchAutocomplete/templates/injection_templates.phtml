@@ -1,6 +1,6 @@
 <!-- AWA_DEBUG_TEMPLATE_SOURCE: child_theme_mirasvit_injection_templates -->
 <script id="searchAutocompletePlaceholder" type="text/x-custom-template">
-    <div class="mst-searchautocomplete__autocomplete">
+    <div class="mst-searchautocomplete__autocomplete" data-bind="stopBinding: true">
         <div class="mst-searchautocomplete__spinner">
             <div class="spinner-item spinner-item-1"></div>
             <div class="spinner-item spinner-item-2"></div>
@@ -85,16 +85,6 @@
 
         <!-- ko if: (description && $parents[2].config.isShowDescription) -->
         <div class="description" data-bind="text: description, highlight"></div>
-        <!-- /ko -->
-
-        <!-- ko if: (rating && $parents[2].config.isShowRating) -->
-        <div>
-            <div class="rating-summary">
-                <div class="rating-result">
-                    <span data-bind="style: { width: rating + '%' }"></span>
-                </div>
-            </div>
-        </div>
         <!-- /ko -->
 
         <!-- ko if: (stockStatus && $parents[2].config.isShowStockStatus) -->

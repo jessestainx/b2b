@@ -137,32 +137,34 @@ define([], function () {
         });
     }
 
-    function run() {
+    function runIdleSafe() {
         if (started) {
             return;
         }
         started = true;
-        initCatalogAddToCart();
+        // Idle: só superdeals se existir. NÃO puxa storage-manager / invalidation /
+        // catalogAddToCart (cascade Magento_Catalog + section compare/wishlist).
         initSuperdeals();
-        initStorageManager();
-        require(['js/awa-customer-sections-gate'], function (whenCustomerSectionsReady) {
-            whenCustomerSectionsReady(initInvalidationProcessor);
-        });
+        if (document.getElementById('awa-frontend-storage-init-json')) {
+            initStorageManager();
+        }
+        if (document.getElementById('awa-customer-invalidation-init-json')) {
+            require(['js/awa-customer-sections-gate'], function (whenCustomerSectionsReady) {
+                whenCustomerSectionsReady(initInvalidationProcessor);
+            });
+        }
     }
 
     return function bootstrapHomeDeferredWidgets() {
-        if (started) {
-            return;
-        }
-
-        var intentSelectors = [
+        var cartIntentSelectors = [
             '[data-role="tocart-form"] .tocart',
             '[data-role="tocart-form"] button[type="submit"]',
+            '.action.tocart'
+        ];
+        var shelfIntentSelectors = [
             '.hot-deal-tab-slider-customcss',
             '.rokan-bestseller',
-            '.rokan-newproduct',
-            '.quickview-link',
-            '[data-role="quickview-button"]'
+            '.rokan-newproduct'
         ];
 
         function onQuickviewIntent(evt) {
@@ -175,33 +177,38 @@ define([], function () {
             }
         }
 
-        ['pointerdown', 'touchstart', 'keydown'].forEach(function (evtName) {
-            window.addEventListener(evtName, onQuickviewIntent, { passive: true });
-        });
-
-        function onIntent(evt) {
+        function onCartIntent(evt) {
             var target = evt && evt.target;
             if (!target || !target.closest) {
                 return;
             }
-            var hit = intentSelectors.some(function (sel) {
-                return target.closest(sel);
-            });
-            if (hit) {
-                run();
+            if (cartIntentSelectors.some(function (sel) { return target.closest(sel); })) {
+                initCatalogAddToCart();
+            }
+        }
+
+        function onShelfIntent(evt) {
+            var target = evt && evt.target;
+            if (!target || !target.closest) {
+                return;
+            }
+            if (shelfIntentSelectors.some(function (sel) { return target.closest(sel); })) {
+                runIdleSafe();
             }
         }
 
         ['pointerdown', 'touchstart', 'keydown'].forEach(function (evtName) {
-            window.addEventListener(evtName, onIntent, { passive: true });
+            window.addEventListener(evtName, onQuickviewIntent, { passive: true });
+            window.addEventListener(evtName, onCartIntent, { passive: true });
+            window.addEventListener(evtName, onShelfIntent, { passive: true });
         });
 
         var fallbackDelay = window.matchMedia('(max-width: 767px)').matches ? 6500 : 4000;
 
         if (typeof window.requestIdleCallback === 'function' && fallbackDelay <= 4000) {
-            window.requestIdleCallback(run, { timeout: fallbackDelay });
+            window.requestIdleCallback(runIdleSafe, { timeout: fallbackDelay });
         } else {
-            window.setTimeout(run, fallbackDelay);
+            window.setTimeout(runIdleSafe, fallbackDelay);
         }
     };
 });

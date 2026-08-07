@@ -14,15 +14,18 @@
     --awa-cc-focus-ring: 0 0 0 3px rgb(183 51 55 / 16%);
 }
 
-/* Header promo color - 2026-07-01: alterado para branco */
+/* §H16B: promo home CLARA (BUG-PROMO-001). 2026-08-01: refine vermelho
+   anulava gate/terminal claros (CDP winnerSheet=awa-commerce-impeccable-refine). */
 html
   body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-site-header[data-awa-header-mode='default']
   :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) {
-  background: var(--awa-bg-surface, var(--awa-bg)) !important;
-  background-color: var(--awa-bg-surface, var(--awa-bg)) !important;
-  color: var(--awa-text-primary, #111827) !important;
+  background: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
+  background-color: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
+  background-image: none !important;
+  color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
+  border-bottom: 1px solid var(--awa-border-subtle, var(--awa-border, color-mix(in srgb, CanvasText 10%, Canvas))) !important;
 }
 
 html
@@ -30,8 +33,25 @@ html
   .page-wrapper
   .awa-site-header[data-awa-header-mode='default']
   :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
-  :is(*, a, strong, span, p) {
-  color: var(--awa-text-inverse, var(--awa-white)) !important;
+  :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__lead-long, .awa-b2b-promo-bar__tail, .awa-b2b-promo-bar__separator, p, span) {
+  color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
+}
+
+html
+  body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-site-header[data-awa-header-mode='default']
+  :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+  :is(.awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta *, .awa-b2b-promo-bar__cta strong) {
+  color: var(--awa-primary) !important;
+}
+
+html
+  body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .awa-site-header[data-awa-header-mode='default']
+  .awa-b2b-promo-close {
+  color: var(--awa-text-secondary, var(--awa-text, CanvasText)) !important;
 }
 
 @media (min-width: 992px) {
@@ -41,7 +61,7 @@ html
     .awa-site-header[data-awa-header-mode='default']
     :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
     :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__lead-long, .awa-b2b-promo-bar__tail, .awa-b2b-promo-bar__separator, p, span) {
-    color: var(--awa-text) !important;
+    color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
   }
 
   html
@@ -58,31 +78,8 @@ html
     .page-wrapper
     .awa-site-header[data-awa-header-mode='default']
     .awa-b2b-promo-close {
-    color: var(--awa-text) !important;
+    color: var(--awa-text-secondary, var(--awa-text, CanvasText)) !important;
   }
-}
-
-/* Header bolder final contrast/action lock (2026-06-19 v9.4).
-   !important is required because homepage critical/refine CSS loads after
-   align-grid and previously left the promo CTA/search action with low contrast. */
-html
-  body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
-  .page-wrapper
-  .awa-site-header[data-awa-header-mode='default']
-  :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) {
-  background: var(--awa-primary) !important;
-  background-color: var(--awa-primary) !important;
-  color: var(--awa-text-inverse, var(--awa-white)) !important;
-}
-
-html
-  body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
-  .page-wrapper
-  .awa-site-header[data-awa-header-mode='default']
-  :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
-  :is(*, a, strong, span, p, .awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta *) {
-  color: var(--awa-text-inverse, var(--awa-white)) !important;
-  opacity: 1 !important;
 }
 
 html
@@ -91,7 +88,15 @@ html
   .awa-site-header[data-awa-header-mode='default']
   .awa-header-search-col
   form#search_mini_form
-  :is(button.action.search, .action.search),
+  button.action.search {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  color: var(--awa-primary, #b73337) !important;
+  opacity: 1 !important;
+}
+
 html
   body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
@@ -99,9 +104,9 @@ html
   .awa-header-minicart
   .minicart-wrapper
   :is(.action.showcart, a.showcart.header-mini-cart) {
-  background: var(--awa-primary) !important;
+  background:transparent!important;background-color:transparent!important;
   border-color: var(--awa-primary) !important;
-  color: var(--awa-text-inverse, var(--awa-white)) !important;
+  color:var(--awa-primary,#b73337)) !important;
   opacity: 1 !important;
 }
 
@@ -613,6 +618,31 @@ html body.checkout-cart-index .page-wrapper .cart-summary .discount.coupon > .ti
     font-weight: var(--awa-weight-semibold, 600) !important;
 }
 
+/* H30: vencer inline promo-shell 32px (#html-body×1 + #header) no checkout */
+html
+  body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+  )
+  .page-wrapper
+  #header.header-container.awa-checkout-header-shell,
+html
+  body#html-body#html-body#html-body:is(
+    .checkout-index-index,
+    .rokanthemes-onepagecheckout,
+    .onepagecheckout-index-index
+  )
+  .page-wrapper
+  #header.header-container.awa-checkout-header-shell
+  > .header-content.awa-checkout-header-content {
+  height: auto !important;
+  min-height: 72px !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-block: 0 !important;
+}
+
 /* v3 — Checkout header: voltar ao carrinho */
 html :is(body.checkout-index-index, body.rokanthemes-onepagecheckout) .awa-checkout-header-bar {
     display: grid !important;
@@ -950,7 +980,7 @@ html body#html-body .page-wrapper :is(.column.main, .page-main) {
     }
 }
 
-/* Mata gradiente legado do header-refine-terminal no promo (quiet design) */
+/* Mata gradiente legado — promo CLARA (BUG-PROMO-001 / H16B) */
 html body#html-body .page-wrapper :is(
     #header .top-header.awa-b2b-promo-bar,
     #header .awa-b2b-promo-bar[data-awa-header-utility],
@@ -958,7 +988,7 @@ html body#html-body .page-wrapper :is(
     .awa-site-header .awa-b2b-promo-bar[data-awa-header-utility]
 ) {
     background-image: none !important;
-    background-color: var(--awa-bg-subtle, oklch(97.5% 0.006 20)) !important;
+    background-color: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
 }
 
 html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
@@ -1511,9 +1541,145 @@ html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
     background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 8%, var(--awa-bg, var(--awa-bg))) !important;
 }
 
+/*
+ * Home omite awa-defer-global-bundle (onde vivia o card de produto do Mirasvit).
+ * Sem estas regras o item fica display:list-item e a thumb renderiza em tamanho natural (~300px).
+ * Evidência debug 7d58c7: home wrapW=300/itemH=352; PLP com defer-global wrapW=64/itemH=89.
+ */
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__item.magento_catalog_product {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    min-height: 0 !important;
+    padding: 12px 16px !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__item.magento_catalog_product > a {
+    flex: 0 0 64px !important;
+    display: block !important;
+    width: 64px !important;
+    max-width: 64px !important;
+    text-decoration: none !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__item.magento_catalog_product .mst-product-image-wrapper {
+    flex: 0 0 64px !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 64px !important;
+    height: 64px !important;
+    max-width: 64px !important;
+    max-height: 64px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid var(--awa-border-subtle, #eee) !important;
+    border-radius: 8px !important;
+    background: var(--awa-bg-muted, #f8f8f8) !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__item.magento_catalog_product .mst-product-image-wrapper img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 64px !important;
+    max-height: 64px !important;
+    object-fit: contain !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__item.magento_catalog_product .meta {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__item.magento_catalog_product .store {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+}
+
 html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete .store .price {
     color: var(--awa-primary, var(--awa-primary)) !important;
     font-weight: 700 !important;
+}
+
+/*
+ * Home também omite as regras de sugestões populares do awa-defer-global-bundle.
+ * Sem elas, cada termo herda min-height:44px + padding vertical e vira uma linha
+ * de ~50px. Mantém o padrão de chips já usado nas páginas internas.
+ */
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__index.popular ul {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 8px 12px 12px !important;
+    list-style: none !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__index.popular
+.mst-searchautocomplete__item.popular {
+    display: flex !important;
+    align-items: stretch !important;
+    float: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    list-style: none !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__index.popular
+.mst-searchautocomplete__item.popular a {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 32px !important;
+    padding: 4px 12px !important;
+    border: 1px solid var(--awa-border-subtle, #eee) !important;
+    border-radius: var(--awa-radius-pill, 9999px) !important;
+    background: var(--awa-bg-muted, #f7f7f7) !important;
+    color: var(--awa-text, #333) !important;
+    font-size: 12px !important;
+    font-weight: var(--awa-weight-semibold, 600) !important;
+    line-height: 1.25 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__index.popular
+.mst-searchautocomplete__item.popular:is(:hover, ._active) a {
+    border-color: color-mix(in srgb, var(--awa-primary, #b73337) 35%, var(--awa-border, #e5e7eb)) !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, var(--awa-bg, #fff)) !important;
+    color: var(--awa-primary-hover, #8e2629) !important;
+}
+
+html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+.mst-searchautocomplete__index.popular
+.mst-searchautocomplete__item.popular a:focus-visible {
+    outline: 2px solid var(--awa-primary, #b73337) !important;
+    outline-offset: 2px !important;
+}
+
+@media (max-width: 767px) {
+    html body#html-body .page-wrapper .mst-searchautocomplete__autocomplete
+    .mst-searchautocomplete__index.popular
+    .mst-searchautocomplete__item.popular a {
+        min-height: 44px !important;
+    }
 }
 
 /* S6-04: skeleton shimmer respeita reduced-motion */
@@ -1860,7 +2026,6 @@ html body#html-body .page-wrapper :is(
 
 html body#html-body .page-wrapper :is(
     .product-label,
-    .hot-onsale,
     .awa-product-badge,
     [class*='badge--']
 ) {
@@ -1871,6 +2036,32 @@ html body#html-body .page-wrapper :is(
     text-transform: uppercase !important;
     line-height: 1.6 !important;
     padding: 2px 7px !important;
+}
+
+/* P1-C: tipografia de badge só no .onsale — não no container .hot-onsale */
+html body#html-body .page-wrapper :is(
+    .hot-onsale .onsale,
+    .hot-onsale .onsale .sale-text,
+    .product-label-sale .sale-text
+) {
+    border-radius: var(--awa-radius-xs, 4px) !important;
+    font-size: var(--awa-font-2xs, 10px) !important;
+    font-weight: var(--awa-weight-bold, 700) !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    line-height: 1.6 !important;
+    padding: 2px 7px !important;
+}
+
+html body#html-body .page-wrapper .hot-onsale {
+    text-transform: none !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    letter-spacing: normal !important;
+    line-height: inherit !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
 }
 
 /* ── Account nav — item ativo sem side-stripe ───────────────────────────────── */
@@ -2085,8 +2276,8 @@ html body#html-body .page-wrapper .field.choice label {
     line-height: 1.45 !important;
 }
 
-/* Hot sale badge — vermelho AWA em todos os contextos */
-html body#html-body .page-wrapper :is(.hot-onsale, .product-label-sale) {
+/* Hot sale badge — vermelho AWA em todos os contextos (P1-C: só no .onsale, não no wrapper) */
+html body#html-body .page-wrapper :is(.hot-onsale .onsale, .product-label-sale) {
     background: var(--awa-primary, var(--awa-primary)) !important;
     color: var(--awa-text-inverse, var(--awa-bg)) !important;
 }
@@ -2897,7 +3088,7 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
    Final cascade: flatten nested cards, decouple border+shadow, contrast, type.
    ============================================================================= */
 
-/* Promo bar: single flat surface (quiet B2B utility strip) */
+/* Promo bar: CLARA (BUG-PROMO-001 / H16B — sem brand fill vermelho) */
 html body#html-body .page-wrapper :is(
     #awa-b2b-promo-bar,
     .top-header.awa-b2b-promo-bar,
@@ -2905,15 +3096,16 @@ html body#html-body .page-wrapper :is(
 ) {
     border: 0 !important;
     box-shadow: none !important;
-    background: var(--awa-bg-subtle, oklch(97.5% 0.006 20)) !important;
-    background-color: var(--awa-bg-subtle, oklch(97.5% 0.006 20)) !important;
+    background: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
+    background-color: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
     background-image: none !important;
-    overflow: visible !important;
-    min-height: 44px !important;
-    max-height: none !important;
-    padding-block: 8px !important;
-    padding-inline: 44px 12px !important;
-    color: var(--awa-text-secondary, oklch(48% 0.02 20)) !important;
+    overflow: hidden !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    height: 32px !important;
+    padding-block: 0 !important;
+    padding-inline: clamp(12px, 2vw, 16px) !important;
+    color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
 }
 
 html body#html-body .page-wrapper :is(
@@ -2932,9 +3124,9 @@ html body#html-body .page-wrapper :is(
 
 html body#html-body .page-wrapper :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) .awa-b2b-promo-close,
 html body#html-body .page-wrapper button.awa-b2b-promo-close {
-    color: var(--awa-text-secondary, oklch(48% 0.02 20)) !important;
+    color: var(--awa-text-secondary, var(--awa-text, CanvasText)) !important;
     background: transparent !important;
-    opacity: 0.65 !important;
+    opacity: 0.92 !important;
 }
 
 /* Vertical menu shell: flatten nested cards */
@@ -3253,8 +3445,8 @@ html body#html-body .page-wrapper .navigation.verticalmenu ul.togge-menu.list-ca
 }
 
 html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .awa-category-carousel__viewport {
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
+    overflow-x: auto !important; /* r2e: hidden cortava contadores / peek do último item */
+    overflow-y: hidden !important;
     padding-block: 4px !important;
 }
 
@@ -4995,17 +5187,18 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     display: none !important;
 }
 
-/* BUG-10: main vazio na home (defer/debug hints ~194px). Único espaçador 48px antes do footer.
-   Spec (2,3,2) vence padding 12px legado em :is(#maincontent,.columns). */
+/* BUG-10 FIX 2026-08-05: content-top-home agora vive DENTRO de #maincontent.
+   A trava height/max-height:48px (espaçador quando main estava vazio) colapsava o
+   landmark e puxava o footer/newsletter por cima do hero. Altura volta a auto. */
 html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .page-wrapper .page-main#maincontent {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     margin-block: 0 !important;
-    min-height: 48px !important;
-    height: 48px !important;
-    max-height: 48px !important;
-    overflow: hidden !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
     box-sizing: border-box !important;
 }
 
@@ -5758,7 +5951,7 @@ html body#html-body .page-wrapper
    quebrar como "cor-porativas" no botão de email. A emailcopy também tem overflow-wrap
    já correto, mas word-break:break-all tem precedência sobre break-word em Chrome/Safari.
    Solução: sobrescrever word-break:normal em TODOS os action-copy; o e-mail longo
-   (falecom@awamotos.com.br) ainda pode quebrar via overflow-wrap:break-word. */
+   (awamotos@awamotos.com.br) ainda pode quebrar via overflow-wrap:break-word. */
 
 /* Regra base: todos os action-copy sem exceção */
 html body#html-body .page-wrapper
@@ -6692,13 +6885,20 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   letter-spacing: -0.01em !important;
 }
 
-/* ─── Header scroll offset SSOT (desktop-first) ────────────────────────────── */
+/* ─── Header scroll offset SSOT (BUG-SHELL-RESIDUAL-GEOM-002) ─────────────── */
 html body#html-body {
     --awa-header-scroll-offset: 116px !important;
 }
 
+/* Home desktop ≡ geom SSOT 116; mobile sticky = main 96 */
 html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
-    --awa-header-scroll-offset: 112px !important;
+    --awa-header-scroll-offset: 116px !important;
+}
+
+@media (max-width: 767px) {
+  html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
+      --awa-header-scroll-offset: 96px !important;
+  }
 }
 
 html body#html-body:is(.awa-account-operational, .b2b-account-shell, .b2b-account-dashboard, .account) {
@@ -6746,23 +6946,28 @@ html body#html-body .page-wrapper :is(
   .awa-b2b-promo-bar,
   .top-header.awa-b2b-promo-bar
 ) {
-  background: var(--awa-primary) !important;
-  background-color: var(--awa-primary) !important;
-  color: var(--awa-text-inverse) !important;
+  background: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
+  background-color: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
+  color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
 }
 
 html body#html-body .page-wrapper :is(
   .awa-b2b-promo-bar__text,
   .awa-b2b-promo-bar__lead,
-  .awa-b2b-promo-bar__tail,
+  .awa-b2b-promo-bar__tail
+) {
+  color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
+}
+
+html body#html-body .page-wrapper :is(
   .awa-b2b-promo-bar__cta,
   .awa-b2b-promo-bar__cta strong
 ) {
-  color: var(--awa-text-inverse) !important;
+  color: var(--awa-primary) !important;
 }
 
 html body#html-body .page-wrapper :is(.awa-b2b-promo-bar .awa-b2b-promo-close, button.awa-b2b-promo-close) {
-  color: var(--awa-text-inverse) !important;
+  color: var(--awa-text-secondary, var(--awa-text, CanvasText)) !important;
   opacity: 1 !important;
 }
 
@@ -8566,11 +8771,59 @@ html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,
 /* ── HOME IMPECCABLE POLISH (2026-06-18) — cramped + overflow clip ── */
 html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .page-wrapper
-    .awa-site-header
+    .awa-site-header:not(.awa-header-condensed)
     .header-wrapper-sticky.is-sticky {
     box-sizing: border-box !important;
     padding-block-start: var(--awa-home-space-1, 4px) !important;
     padding-inline: max(var(--awa-home-shell-gutter, 16px), calc((100% - min(100%, 1280px)) / 2)) !important;
+}
+
+/* Condensed sticky: wrap = main+nav (auto/~104); row/search = 56. Sem padding 4px. */
+html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-site-header.awa-header-condensed
+    .header-wrapper-sticky.is-sticky {
+    box-sizing: border-box !important;
+    padding-block-start: 0 !important;
+    padding-block-end: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+@media (min-width: 992px) {
+    html body#html-body#html-body#html-body#html-body#html-body
+        .page-wrapper
+        .awa-site-header.awa-header-condensed
+        :is(
+            .header.awa-main-header,
+            .awa-main-header__inner.wp-header,
+            .awa-main-header__inner[data-awa-header-row],
+            .awa-header-search-col
+        ) {
+        height: 56px !important;
+        min-height: 56px !important;
+        max-height: 56px !important;
+    }
+
+    html body#html-body#html-body#html-body#html-body#html-body
+        .page-wrapper
+        .awa-site-header.awa-header-condensed
+        .awa-header-search-col
+        :is(form#search_mini_form, form.minisearch, input#search, button.action.search, .actions) {
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+    }
+
+    html body#html-body#html-body#html-body#html-body#html-body
+        .page-wrapper
+        .awa-site-header.awa-header-condensed
+        .awa-header-search-col
+        input#search {
+        line-height: 44px !important;
+    }
 }
 
 html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -8906,11 +9159,12 @@ html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,
     .awa-site-header[data-awa-header-mode='default']
     .awa-header-search-col
     form#search_mini_form
-    :is(button.action.search, .action.search) {
-    background: var(--awa-primary) !important;
+    button.action.search {
+    background: transparent !important;
+    background-color: transparent !important;
     border: 0 !important;
     border-radius: 0 var(--awa-radius-sm) var(--awa-radius-sm) 0 !important;
-    color: var(--awa-text-inverse, var(--awa-white)) !important;
+    color: var(--awa-primary, #b73337) !important;
   }
 
   html
@@ -8920,10 +9174,10 @@ html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,
   .awa-header-minicart
   .minicart-wrapper
   :is(.action.showcart, a.showcart.header-mini-cart) {
-    background: var(--awa-primary) !important;
+    background:transparent!important;background-color:transparent!important;
     border-color: var(--awa-primary) !important;
     border-radius: var(--awa-radius-sm) !important;
-    color: var(--awa-text-inverse, var(--awa-white)) !important;
+    color:var(--awa-primary,#b73337)) !important;
   }
 }
 
@@ -8934,10 +9188,10 @@ html
   body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-site-header[data-awa-header-mode='default']
-  :is(.block-search .action.search, .awa-header-search-col form#search_mini_form .action.search, .minicart-wrapper .action.showcart, .awa-header-minicart .minicart-wrapper a.showcart.header-mini-cart) {
-  background: var(--awa-primary) !important;
+  :is(.minicart-wrapper .action.showcart, .awa-header-minicart .minicart-wrapper a.showcart.header-mini-cart) {
+  background:transparent!important;background-color:transparent!important;
   border-color: var(--awa-primary) !important;
-  color: var(--awa-text-inverse, var(--awa-white)) !important;
+  color:var(--awa-primary,#b73337)) !important;
   opacity: 1 !important;
 }
 
@@ -8945,20 +9199,22 @@ html
   body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-site-header[data-awa-header-mode='default']
-  :is(.block-search .action.search, .awa-header-search-col form#search_mini_form .action.search, .minicart-wrapper .action.showcart, .awa-header-minicart .minicart-wrapper a.showcart.header-mini-cart)::before {
+  :is(.minicart-wrapper .action.showcart, .awa-header-minicart .minicart-wrapper a.showcart.header-mini-cart)::before {
   color: currentColor !important;
   opacity: 1 !important;
 }
 
 @media (min-width: 992px) {
+  /* §H16B: desktop home — promo CLARA (BUG-PROMO-001) */
   html
     body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .page-wrapper
     .awa-site-header[data-awa-header-mode='default']
     :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) {
-    background: var(--awa-bg-subtle, var(--awa-bg)) !important;
-    background-color: var(--awa-bg-subtle, var(--awa-bg)) !important;
-    color: var(--awa-text) !important;
+    background: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
+    background-color: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
+    background-image: none !important;
+    color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
   }
 
   html
@@ -8967,7 +9223,7 @@ html
     .awa-site-header[data-awa-header-mode='default']
     :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
     :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__tail, .awa-b2b-promo-bar__separator, p, span) {
-    color: var(--awa-text) !important;
+    color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
   }
 
   html
@@ -8976,7 +9232,7 @@ html
     .awa-site-header[data-awa-header-mode='default']
     :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
     :is(.awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta *) {
-    color: var(--awa-primary, var(--awa-red)) !important;
+    color: var(--awa-primary) !important;
   }
 }
 
@@ -8986,8 +9242,18 @@ html
     .page-wrapper
     .awa-site-header[data-awa-header-mode='default']
     :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
-    :is(*, a, strong, span, p, .awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta *) {
-    color: var(--awa-text-inverse, var(--awa-white)) !important;
+    :is(*, a, strong, span, p) {
+    color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
+    opacity: 1 !important;
+  }
+
+  html
+    body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default']
+    :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+    :is(.awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta *) {
+    color: var(--awa-primary) !important;
     opacity: 1 !important;
   }
 }
@@ -9002,23 +9268,23 @@ html
     .awa-site-header[data-awa-header-mode='default']
     :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar) {
     align-items: center !important;
-    background: var(--awa-primary, var(--awa-red)) !important;
-    background-color: var(--awa-primary, var(--awa-red)) !important;
+    background: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
+    background-color: var(--awa-bg-surface, var(--awa-bg, Canvas)) !important;
     box-sizing: border-box !important;
-    color: var(--awa-text-inverse, var(--awa-white)) !important;
+    color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
     display: flex !important;
     flex: 1 1 100% !important;
-    height: 36px !important;
+    height: 48px !important;
     inline-size: auto !important;
     justify-content: center !important;
-    line-height: 36px !important;
+    line-height: 48px !important;
     margin: 0 !important;
-    max-height: 36px !important;
+    max-height: 48px !important;
     max-inline-size: 100% !important;
     max-width: 100% !important;
-    min-height: 36px !important;
+    min-height: 48px !important;
     min-inline-size: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     padding: 0 44px 0 12px !important;
     position: relative !important;
     width: auto !important;
@@ -9033,12 +9299,12 @@ html
     align-items: center !important;
     background: transparent !important;
     display: flex !important;
-    height: 36px !important;
+    height: 48px !important;
     justify-content: center !important;
-    line-height: 36px !important;
-    max-height: 36px !important;
-    min-height: 36px !important;
-    overflow: hidden !important;
+    line-height: 48px !important;
+    max-height: 48px !important;
+    min-height: 48px !important;
+    overflow: visible !important;
     padding: 0 !important;
     width: 100% !important;
   }
@@ -9048,10 +9314,28 @@ html
     .page-wrapper
     .awa-site-header[data-awa-header-mode='default']
     :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
-    :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__tail, .awa-b2b-promo-bar__separator, .awa-b2b-promo-bar__cta) {
-    color: var(--awa-text-inverse, var(--awa-white)) !important;
+    :is(.awa-b2b-promo-bar__text, .awa-b2b-promo-bar__lead, .awa-b2b-promo-bar__tail, .awa-b2b-promo-bar__separator) {
+    color: var(--awa-text-primary, var(--awa-text, CanvasText)) !important;
     display: block !important;
-    line-height: 36px !important;
+    line-height: 48px !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 4px !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  html
+    body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode='default']
+    :is(#awa-b2b-promo-bar, .awa-b2b-promo-bar)
+    :is(.awa-b2b-promo-bar__cta, .awa-b2b-promo-bar__cta *) {
+    color: var(--awa-primary) !important;
+    display: block !important;
+    line-height: 48px !important;
     margin: 0 !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -9068,12 +9352,12 @@ html
     :is(.awa-b2b-promo-close, #awa-b2b-promo-close) {
     align-items: center !important;
     display: flex !important;
-    height: 36px !important;
-    inset-block-start: 0 !important;
+    height: 44px !important;
+    inset-block-start: 2px !important;
     inset-inline-end: 0 !important;
     justify-content: center !important;
     margin: 0 !important;
-    min-height: 36px !important;
+    min-height: 44px !important;
     padding: 0 !important;
     position: absolute !important;
     width: 44px !important;
@@ -9139,8 +9423,9 @@ html
     .awa-header-search-col
     form#search_mini_form
     button.action.search {
-    background: var(--awa-primary, var(--awa-red)) !important;
-    color: var(--awa-text-inverse, var(--awa-white)) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
     height: 40px !important;
     max-height: 40px !important;
     min-height: 40px !important;
@@ -9239,10 +9524,11 @@ html
     form#search_mini_form
     button.action.search {
     align-items: center !important;
-    background: var(--awa-primary, var(--awa-red)) !important;
+    background: transparent !important;
+    background-color: transparent !important;
     border: 0 !important;
     border-radius: 0 var(--awa-radius-sm) var(--awa-radius-sm) 0 !important;
-    color: var(--awa-text-inverse, var(--awa-white)) !important;
+    color: var(--awa-primary, #b73337) !important;
     display: flex !important;
     height: 40px !important;
     justify-content: center !important;
@@ -9357,4 +9643,332 @@ html body#html-body .page-wrapper .page-footer .page_footer .awa-footer-devby {
     align-self: stretch !important;
     box-sizing: border-box !important;
   }
+}
+
+/* =============================================================================
+   §search-focus-overlay + lupa-only (2026-07-22)
+   - Botão submit: só ícone (sem bloco vermelho) — todos os estados
+   - Scrim ao focar #search / abrir autocomplete Mirasvit
+   - Seletores em linha única (evita minifier colapsar "form\n:is" → "form:is")
+   ============================================================================= */
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search:hover,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search:focus,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search:focus-visible,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search:active,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search:disabled,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form.active button.action.search,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form.is-open button.action.search,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form.is-ready button.action.search,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .block-search.awa-professional-search form.minisearch .actions button.action.search,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .block-search.awa-professional-search form.minisearch.is-open .actions button.action.search,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .block-search.awa-professional-search form.minisearch.active .actions button.action.search {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--awa-primary, #b73337) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search svg,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search:hover svg,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form.active button.action.search svg,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form.is-open button.action.search svg {
+  display: block !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  color: var(--awa-primary, #b73337) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search::before,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col form#search_mini_form button.action.search::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Scrim full-viewport — div.awa-search-focus-backdrop (não button: evita min-height 44px) */
+.awa-search-focus-backdrop#awa-search-focus-backdrop,
+div.awa-search-focus-backdrop#awa-search-focus-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  z-index: 100050 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: rgb(15 23 42 / 48%) !important;
+  cursor: pointer !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  transition: opacity 0.18s ease, visibility 0.18s ease !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.awa-search-focus-backdrop#awa-search-focus-backdrop.is-active,
+html body#html-body.awa-search-focus-active .awa-search-focus-backdrop#awa-search-focus-backdrop,
+html body#html-body.searchautocomplete__active .awa-search-focus-backdrop#awa-search-focus-backdrop {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awa-search-focus-backdrop#awa-search-focus-backdrop {
+    transition: none !important;
+  }
+}
+
+/* Header + busca acima do scrim (sticky header tokens ~100120) */
+html body#html-body.awa-search-focus-active .page-wrapper .awa-site-header,
+html body#html-body.searchautocomplete__active .page-wrapper .awa-site-header {
+  position: relative !important;
+  z-index: 100120 !important;
+}
+
+html body#html-body.awa-search-focus-active .page-wrapper .awa-site-header .awa-header-search-col,
+html body#html-body.searchautocomplete__active .page-wrapper .awa-site-header .awa-header-search-col {
+  position: relative !important;
+  z-index: 100121 !important;
+}
+
+html body#html-body.awa-search-focus-active .page-wrapper .awa-site-header :is(#search_autocomplete, .mst-searchautocomplete__autocomplete, .searchsuite-autocomplete),
+html body#html-body.searchautocomplete__active .page-wrapper .awa-site-header :is(#search_autocomplete, .mst-searchautocomplete__autocomplete, .searchsuite-autocomplete) {
+  z-index: 100122 !important;
+}
+
+/* Só lupa: esconde clear (X) — vence :not([hidden]){display:inline-flex} do critical */
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header #awa-search-clear.awa-search-clear-btn,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header #awa-search-clear.awa-search-clear-btn:not([hidden]),
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-search-clear-btn,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header form#search_mini_form .awa-search-clear-btn,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header form#search_mini_form .awa-search-clear-btn:not([hidden]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header form#search_mini_form input#search.awa-search-input--clearable {
+  padding-right: 12px !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header form#search_mini_form .actions,
+html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header form#search_mini_form button.action.search {
+  border-left: 0 !important;
+  box-shadow: none !important;
+}
+
+/*
+ * O fechamento da busca já é oferecido por ESC e pelo scrim. A home não
+ * carrega a regra equivalente do awa-defer-global-bundle e exibia o “×”.
+ */
+html body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__close {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Evita “linha dupla” sob o campo (borda + outline/box-shadow empilhados) */
+html body#html-body.awa-search-focus-active .page-wrapper .awa-site-header form#search_mini_form,
+html body#html-body.searchautocomplete__active .page-wrapper .awa-site-header form#search_mini_form {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* ==== AWA M2 SSOT r2 (2026-08-01) — final cascade lock (5x html-body) ==== */
+
+/* Title: 2-line clamp, NOT 44px touch-target on product name links */
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home
+  :is(.awa-shelf--carousel,.awa-grid-section,.awa-carousel-section,.rokan-bestseller,.rokan-newproduct,.products-grid)
+  :is(a.product-item-link,.product-item-name a,.product-name a,.product-item-link) {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  min-height: calc(1.35em * 2) !important;
+  height: auto !important;
+  max-height: calc(1.35em * 2) !important;
+  align-items: unset !important;
+  line-height: 1.35 !important;
+}
+
+/* Card column + CTA pin */
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home
+  :is(.awa-shelf--carousel,.awa-grid-section,.awa-carousel-section)
+  :is(.content-item-product,.awa-product-card,.product-item-info) {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home
+  :is(.awa-shelf--carousel,.awa-grid-section,.awa-carousel-section)
+  :is(.content-item-product,.awa-product-card) :is(.product-info,.product-item-details) {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  gap: 0.5rem;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home
+  :is(.awa-shelf--carousel,.awa-grid-section,.awa-carousel-section)
+  .awa-card-view-product {
+  margin-top: auto !important;
+  flex: 0 0 auto !important;
+  align-self: stretch !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home
+  :is(.awa-shelf--carousel,.awa-grid-section,.awa-carousel-section)
+  :is(.rating-summary,.product-reviews-summary) {
+  min-height: 18px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Badge Novo centered pill */
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home .onsale.new-lable {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 1.375rem !important;
+  padding: 0.125rem 0.375rem !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home .onsale.new-lable :is(.sale-text,.sale-text label,label) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  position: static !important;
+  transform: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home .hot-onsale {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+/* Category carousel: scrollable viewport (after refine) */
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .top-home-content--category-carousel .awa-category-carousel__viewport {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x proximity !important;
+  scroll-padding-inline: 8px !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .top-home-content--category-carousel .awa-category-carousel__track {
+  overflow-x: visible !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .top-home-content--category-carousel .awa-category-carousel__item {
+  scroll-snap-align: start !important;
+  flex-shrink: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .top-home-content--category-carousel .awa-category-carousel__count {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  line-height: 1.25 !important;
+}
+
+/* ==== AWA M2 SSOT r2e (2026-08-01) — origin fixes ==== */
+/* Category: force scrollable viewport above impeccable-v1 clip + refine hidden */
+html body#html-body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .top-home-content--category-carousel .awa-category-carousel__viewport {
+  overflow: auto hidden !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:not(#__awa-no-match):is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper .content-top-home
+  :is(.awa-shelf--carousel,.awa-carousel-section,.awa-grid-section)
+  :is(a.product-item-link,.product-item-name a,.product-name a) {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  min-height: calc(1.35em * 2) !important;
+  max-height: calc(1.35em * 2) !important;
+  height: auto !important;
+  line-height: 1.35 !important;
+}
+
+/* MAIN-AUTO-HEIGHT-4X-20260805 */
+html body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper main.page-main#maincontent,
+html body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper .page-main#maincontent{
+  min-height:0!important;height:auto!important;max-height:none!important;overflow:visible!important;
 }

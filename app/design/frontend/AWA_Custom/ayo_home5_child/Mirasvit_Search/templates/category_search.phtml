@@ -9,8 +9,23 @@ use Mirasvit\Core\Service\CspService;
 	if ($config['isActive'] && $block->getIsVisibleCategorySearch()) :
 ?>
 	<div class="mst_categorySearch" role="search" aria-label="<?= $block->escapeHtmlAttr(__('Buscar produtos nesta categoria')) ?>">
-		<input type="text" id="mst_categorySearch" aria-label="<?= $block->escapeHtmlAttr(__('Buscar produtos nesta categoria')) ?>" title="<?= $block->escapeHtmlAttr(__('Buscar produtos nesta categoria')) ?>" placeholder="<?= $block->getCollectionSize() === null? '' : $block->escapeHtml(__('Search across %1 products', $block->getCollectionSize()))?>"
-			value="<?= $block->escapeHtml($block->getQueryText())?>" />
+		<?php
+        $collectionSize = $block->getCollectionSize();
+        if ($collectionSize === null) {
+            $categorySearchPlaceholder = (string) __('Buscar produtos nesta categoria');
+        } else {
+            $collectionSize = (int) $collectionSize;
+            $categorySearchPlaceholder = $collectionSize === 1
+                ? (string) __('Buscar entre %1 produto', $collectionSize)
+                : (string) __('Buscar entre %1 produtos', $collectionSize);
+        }
+        ?>
+		<input type="text"
+               id="mst_categorySearch"
+               aria-label="<?= $block->escapeHtmlAttr(__('Buscar produtos nesta categoria')) ?>"
+               title="<?= $block->escapeHtmlAttr(__('Buscar produtos nesta categoria')) ?>"
+               placeholder="<?= $block->escapeHtmlAttr($categorySearchPlaceholder) ?>"
+			value="<?= $block->escapeHtml((string) $block->getQueryText()) ?>" />
 		<span class="mst_categorySearch_searchIcon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
 		<span class="mst_categorySearch_totals"><?= $block->getCollectionSize() === null? '' : $block->escapeHtml(__('found %1 products', $block->getCollectionSize()))?></span>
 		<div class="mst_categorySearchLoader">

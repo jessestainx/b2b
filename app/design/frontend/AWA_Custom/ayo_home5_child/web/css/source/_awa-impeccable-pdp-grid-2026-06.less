@@ -48,9 +48,9 @@ body.catalog-product-view .product.attribute {
     padding-block: var(--awa-space-3, 12px) !important;
 }
 
-// Coluna principal PDP — dar padding inline
+// Coluna principal PDP — gutter só no page-main (SSOT-1 Onda 5; evita pad duplo).
 body.catalog-product-view .column.main {
-    padding-inline: clamp(12px, 2vw, 20px) !important;
+    padding-inline: 0 !important;
     padding-block: 0 clamp(24px, 4vw, 48px) !important;
 }
 

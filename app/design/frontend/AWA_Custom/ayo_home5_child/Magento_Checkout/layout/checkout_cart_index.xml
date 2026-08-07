@@ -19,6 +19,8 @@
         <remove src="css/awa-header-stack-2026-05-28.min.css"/>
         <!-- Stack único: polish + layout-terminal (~70KB, 1 request bloqueante) -->
         <css src="css/awa-cart-stack.min.css"/>
+        <!-- Repõe apenas os estados ocultos do header omitidos pelo bundle global. -->
+        <css src="css/awa-cart-accessibility.min.css"/>
         <!-- awa-cart-shell-final.css removido: referência órfã (404 em produção). -->
         <!-- refine: carregado async via awa-checkout-polish-async.phtml (evita duplicata síncrona) -->
     </head>
@@ -82,7 +84,7 @@
         <!-- Bloco "Pedidos Feitos Recentemente" — removido do carrinho a pedido 2026-05-27 -->
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
 
-        <referenceBlock name="checkout.cart.empty">
+        <referenceBlock name="checkout.cart.empty" template="Magento_Checkout::cart/noItems-clean.phtml">
             <arguments>
                 <argument name="view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext</argument>
             </arguments>
@@ -138,17 +140,9 @@
         </referenceContainer>
 
         <!--
-            F1-02 (c): Trust seals universais também no carrinho VAZIO.
-            Renderizados dentro do container checkout.cart.empty.widget que existe
-            no template noItems.phtml (carrinho vazio). Fornece sinais de confiança
-            logo no primeiro acesso à página de carrinho.
+            2026-08-04 session 19da9f: selos no carrinho VAZIO excluídos a pedido (UX).
+            Mantidos em cart.summary (awa.cart.trust.seals) quando há itens.
         -->
-        <referenceContainer name="checkout.cart.empty.widget">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.cart.empty.trust.seals"
-                   template="Magento_Checkout::cart/trust-seals.phtml"
-                   after="-"/>
-        </referenceContainer>
 
         <referenceBlock name="head.additional">
             <!-- CSS crítico above-fold (tokens + header layout) embutido inline. -->
@@ -182,5 +176,45 @@
         <move element="checkout.cart.shipping" destination="cart.summary" after="checkout.cart.methods.bottom"/>
         <move element="checkout.cart.coupon" destination="cart.summary" after="checkout.cart.shipping"/>
         <move element="erp.cart.suggestions.sidebar" destination="cart.summary" after="checkout.cart.coupon"/>
+
+        <!--
+            Estimate frete no carrinho: somente CEP visível (loja BR).
+            País/UF/cidade ficam no provider (country=BR) para a estimativa não quebrar.
+            Ponto oficial Magento: jsLayout / UI Component (não CSS).
+        -->
+        <referenceBlock name="checkout.cart.shipping">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="block-summary" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="block-shipping" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="address-fieldsets" xsi:type="array">
+                                            <item name="children" xsi:type="array">
+                                                <item name="country_id" xsi:type="array">
+                                                    <item name="visible" xsi:type="boolean">false</item>
+                                                    <item name="value" xsi:type="string">BR</item>
+                                                </item>
+                                                <item name="region_id" xsi:type="array">
+                                                    <item name="visible" xsi:type="boolean">false</item>
+                                                </item>
+                                                <!-- customEntry do region_id: sem isto, o input texto UF fica vazio e visível -->
+                                                <item name="region" xsi:type="array">
+                                                    <item name="visible" xsi:type="boolean">false</item>
+                                                </item>
+                                                <item name="city" xsi:type="array">
+                                                    <item name="visible" xsi:type="boolean">false</item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
     </body>
 </page>

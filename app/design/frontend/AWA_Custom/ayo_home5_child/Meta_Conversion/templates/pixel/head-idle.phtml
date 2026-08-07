@@ -52,22 +52,50 @@ if ($category !== null && $product === null):
 <?php endif; ?>
     }
 
-    var isHome = d.body && d.body.classList.contains('cms-index-index');
-    if (isHome) {
-        ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
-            w.addEventListener(ev, bootPixel, { capture: true, passive: ev !== 'keydown', once: true });
-        });
-    } else if ('requestIdleCallback' in w) {
-        w.requestIdleCallback(bootPixel, { timeout: 2500 });
+    function allowsMarketing() {
+        try {
+            if (w.localStorage && w.localStorage.getItem('awa_cookie_consent') === 'all') {
+                return true;
+            }
+            if (w.localStorage && w.localStorage.getItem('awa_cookie_consent') === 'essential') {
+                return false;
+            }
+        } catch (e) {}
+        return /(?:^|;\s*)awa_cookies_accepted=all(?:;|$)/.test(d.cookie || '');
+    }
+
+    function schedulePixel() {
+        if (!allowsMarketing()) {
+            return;
+        }
+        var isHome = d.body && d.body.classList.contains('cms-index-index');
+        if (isHome) {
+            if ('requestIdleCallback' in w) {
+                w.requestIdleCallback(bootPixel, { timeout: 3000 });
+            } else {
+                w.setTimeout(bootPixel, 1200);
+            }
+            return;
+        }
+        if ('requestIdleCallback' in w) {
+            w.requestIdleCallback(bootPixel, { timeout: 2500 });
+        } else {
+            w.addEventListener('load', function () {
+                w.setTimeout(bootPixel, 0);
+            }, { once: true });
+        }
+    }
+
+    if (allowsMarketing()) {
+        schedulePixel();
     } else {
-        w.addEventListener('load', function () {
-            w.setTimeout(bootPixel, 0);
-        }, { once: true });
+        w.addEventListener('awa:cookie-consent', function (ev) {
+            if (ev && ev.detail && ev.detail.value === 'all') {
+                schedulePixel();
+            }
+        });
     }
 })(window, document);
 </script>
-<noscript>
-<img height="1" width="1" style="display:none" alt="" aria-hidden="true"
-     src="https://www.facebook.com/tr?id=<?= $block->escapeHtmlAttr($block->getPixelId()) ?>&ev=PageView&noscript=1"/>
-</noscript>
+<?php /* noscript Pixel omitido — LGPD: sem JS não há como verificar consentimento. */ ?>
 <?php endif; ?>

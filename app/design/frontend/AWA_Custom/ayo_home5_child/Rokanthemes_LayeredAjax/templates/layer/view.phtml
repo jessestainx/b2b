@@ -56,7 +56,7 @@ if ($block->canShowBlock()): ?>
             <?php endif; ?>
         </div>
         <div id="layered_ajax_overlay" class="layered_ajax_overlay" aria-hidden="true" hidden>
-            <div><img src="<?= $block->escapeUrl($block->getViewFileUrl('images/loader-1.gif')) ?>" alt="<?= $block->escapeHtmlAttr(__('Loading')) ?>"></div>
+            <div><img src="<?= $block->escapeUrl($block->getViewFileUrl('images/loader-1.gif')) ?>" alt="<?= $block->escapeHtmlAttr(__('Loading')) ?>" width="48" height="48" decoding="async"></div>
         </div>
     </div>
 <?php endif; ?>

@@ -155,6 +155,13 @@
             body.classList.contains('b2b-pending-mode');
     }
 
+    function hasKnownRestrictedB2bContext() {
+        return hasRestrictedB2bBodyState() ||
+            hasVisibleB2bPriceGate() ||
+            hasVisibleB2bLoginReplacement() ||
+            hasVisiblePendingBanner();
+    }
+
     function isRestrictedB2bContext(button) {
         let form = button ? (button.form || button.closest(SELECTORS.addToCartForm)) : null;
         let gateVisible = hasVisibleB2bPriceGate();
@@ -376,6 +383,10 @@
         let addToCartButton = resolveAddToCartButton();
         let productInfo = document.querySelector(SELECTORS.productInfoMain);
         if (!addToCartButton || !productInfo || !isStickyCapableAddToCartButton(addToCartButton)) {
+            if (productInfo && hasKnownRestrictedB2bContext()) {
+                clearDeferredRetry();
+                return;
+            }
             scheduleDeferredInit();
             return;
         }
@@ -492,9 +503,7 @@
             });
             deferredRetryObserver.observe(document.body, {
                 childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['class', 'style', 'disabled', 'aria-hidden']
+                subtree: true
             });
         }
     }

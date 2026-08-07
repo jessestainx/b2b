@@ -14,17 +14,39 @@ if (!$block->shouldDisplay()) {
 $data = $block->getCustomerData();
 $company = trim((string) ($data['company'] ?? ''));
 $firstName = (string) ($data['first_name'] ?? '');
+$fullName = trim((string) ($data['full_name'] ?? ''));
 $badgeColor = $block->escapeHtmlAttr($data['group_badge']['color']);
 $badgeIcon = (string) ($data['group_badge']['icon']);
 $groupName = $block->escapeHtml($data['group_name']);
 $discount = (int) $data['discount'];
 $logoutUrl = $block->getUrl('customer/account/logout');
 $line2Raw = $company !== '' ? $company : (string) ($data['group_name'] ?? '');
-$line2TriggerRaw = ($company !== '' && mb_strlen($company) > 24)
-    ? (string) ($data['group_name'] ?? '')
+$groupNameRaw = (string) ($data['group_name'] ?? '');
+
+/** Normaliza para comparar nome da pessoa vs razão social (evita linha duplicada no dropdown). */
+$normalizeIdentity = static function (string $value): string {
+    $value = mb_strtolower(trim(preg_replace('/\s+/u', ' ', $value) ?? ''));
+    return $value;
+};
+$fullNorm = $normalizeIdentity($fullName);
+$companyNorm = $normalizeIdentity($company);
+$firstNorm = $normalizeIdentity($firstName);
+$nameEqualsCompany = $companyNorm !== '' && $fullNorm !== '' && $fullNorm === $companyNorm;
+/** "Olá, Pantera" + "Pantera E-Commerce..." no trigger = leitura/visual duplicado. */
+$companyStartsWithFirst = $firstNorm !== '' && $companyNorm !== ''
+    && str_starts_with($companyNorm, $firstNorm);
+$line2TriggerRaw = ($company !== '' && (mb_strlen($company) > 24 || $companyStartsWithFirst))
+    ? $groupNameRaw
     : $line2Raw;
-$line2Label = $block->escapeHtml($line2TriggerRaw !== '' ? $line2TriggerRaw : (string) ($data['group_name'] ?? ''));
-$line2Title = $block->escapeHtmlAttr($line2Raw !== '' ? $line2Raw : (string) ($data['group_name'] ?? ''));
+$line2Label = $block->escapeHtml($line2TriggerRaw !== '' ? $line2TriggerRaw : $groupNameRaw);
+$line2Title = $block->escapeHtmlAttr($line2Raw !== '' ? $line2Raw : $groupNameRaw);
+/** Quando first+last foi cadastrado como a razão social, o título vira o primeiro nome. */
+$displayName = ($nameEqualsCompany && $firstName !== '') ? $firstName : ($fullName !== '' ? $fullName : $firstName);
+$showCompanyLine = $company !== '' && $normalizeIdentity($displayName) !== $companyNorm;
+$triggerAria = trim((string) __('Olá, %1', $firstName));
+if ($line2TriggerRaw !== '') {
+    $triggerAria .= ' — ' . $line2TriggerRaw;
+}
 
 /**
  * Ícones SVG inline (padrão AWA — sem FontAwesome no painel).
@@ -63,11 +85,12 @@ $creditPercent = $data['credit_limit'] > 0
             class="b2b-status-trigger"
             aria-expanded="false"
             aria-controls="b2b-status-dropdown"
-            aria-haspopup="true">
+            aria-haspopup="true"
+            aria-label="<?= $block->escapeHtmlAttr($triggerAria) ?>">
         <span class="b2b-status-trigger__icon" aria-hidden="true">
             <?= /* @noEscape */ $renderIcon('user') ?>
         </span>
-        <span class="b2b-status-trigger__text">
+        <span class="b2b-status-trigger__text" aria-hidden="true">
             <span class="b2b-status-trigger__line1">
                 <?= $block->escapeHtml(__('Olá, %1', $firstName)) ?>
             </span>
@@ -90,8 +113,8 @@ $creditPercent = $data['credit_limit'] > 0
                     <?= $block->escapeHtml(mb_strtoupper(mb_substr($data['first_name'], 0, 1))) ?>
                 </div>
                 <div class="user-details">
-                    <span class="user-name"><?= $block->escapeHtml($data['full_name']) ?></span>
-                    <?php if ($company !== ''): ?>
+                    <span class="user-name"><?= $block->escapeHtml($displayName) ?></span>
+                    <?php if ($showCompanyLine): ?>
                     <span class="user-company">
                         <?= /* @noEscape */ $renderIcon('building') ?>
                         <?= $block->escapeHtml($company) ?>

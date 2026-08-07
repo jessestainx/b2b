@@ -1,3 +1,103 @@
+@layer awa-cta-green;
+/* =========================================================================
+   AWA FINAL POLISH — 2026-07-23
+   ========================================================================= */
+
+/* Fix WhatsApp Button overlapping Cookie Banner & Bottom Nav on Mobile
+   2026-07-26: seletor com #html-body repetido era inválido e nunca casava. */
+@media (max-width: 991px) {
+    html body#html-body .page-wrapper .awa-whatsapp-float,
+    html body#html-body .page-wrapper a.awa-whatsapp-float,
+    html body#html-body a.awa-whatsapp-float {
+        display: -webkit-box !important;
+        display: -ms-flexbox !important;
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        bottom: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        right: 16px !important;
+        z-index: 10002 !important;
+        -webkit-animation: none !important;
+        animation: none !important;
+    }
+}
+
+/* Polish Newsletter Section */
+.newsletter-section .block.newsletter .form.subscribe {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-align: start !important;
+    -ms-flex-align: start !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+}
+.newsletter-section .block.newsletter .form.subscribe .field.newsletter {
+    -webkit-box-flex: 1 !important;
+    -ms-flex: 1 !important;
+    flex: 1 !important;
+}
+.newsletter-section .block.newsletter .form.subscribe .field.newsletter .control input {
+    height: 44px !important;
+    border-radius: 8px !important;
+    padding: 0 16px !important;
+    border: 1.5px solid #e5e5e5 !important;
+}
+.newsletter-section .block.newsletter .form.subscribe .actions .action.subscribe {
+    height: 44px !important;
+    padding: 0 24px !important;
+    border-radius: 8px !important;
+    background: #b73337 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+
+/* Compact Footer Category Grid */
+.footer-static5 .footer-categories-grid {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -ms-flex-wrap: wrap !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+.footer-static5 .footer-categories-grid .category-item {
+    background: #f7f7f7 !important;
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+}
+
+/* B2B Price Gate Polish */
+.b2b-login-to-see-price {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-box-direction: normal !important;
+    -ms-flex-direction: column !important;
+    flex-direction: column !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
+    align-items: center !important;
+    -webkit-box-pack: center !important;
+    -ms-flex-pack: center !important;
+    justify-content: center !important;
+    min-height: 80px !important;
+    background: #f7f7f7 !important;
+    border: 1px dashed #e5e5e5 !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+}
+.b2b-login-to-see-price .b2b-login-to-see-price__title {
+    color: #b73337 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+}
+
 /*!
  * awa-visual-fixes-2026-06-29-final.css
  *
@@ -321,11 +421,21 @@
    M3 — PDP GALLERY PLACEHOLDER FIX
    ========================================================================= */
 
-.product.media .fotorama,
-.product.media .gallery-placeholder,
-.fotorama__stage,
-.gallery-placeholder {
+/* CLS placeholder — só antes do Fotorama montar; stage com nav não pode ser 1:1 */
+.product.media .gallery-placeholder:not(:has(.fotorama-item)),
+.product.media .gallery-placeholder.is-placeholder {
     aspect-ratio: 1 / 1;
+    background: var(--awa-bg-muted);
+    display: block;
+    width: 100%;
+}
+
+.product.media .gallery-placeholder:has(.fotorama__img),
+.product.media .fotorama-item,
+.product.media .fotorama,
+.product.media .fotorama__wrap,
+.product.media .fotorama__stage {
+    aspect-ratio: auto;
     background: var(--awa-bg-muted);
     display: block;
     width: 100%;
@@ -908,7 +1018,7 @@ html body#html-body .page-wrapper .btn-primary {
 @media (max-width: 767px) {
     html body#html-body .page-wrapper footer.page-footer,
     html body#html-body .page-wrapper .page-footer {
-        padding-block: 24px !important;
+        padding-block: 0 !important;
     }
     html body#html-body .page-wrapper footer.page-footer .footer-container,
     html body#html-body .page-wrapper .page-footer .footer-container {
@@ -1033,11 +1143,11 @@ html body#html-body .breadcrumbs li {
     }
 }
 
-/* S14: Section padding padronizado */
+/* S14: Section padding padronizado — H17: 40px empurrava densidade da home */
 html body#html-body .awa-home-section:not(.top-home-content--above-fold),
 html body#html-body .top-home-content:not(.top-home-content--above-fold),
 html body#html-body .ayo-home5-section:not(.top-home-content--above-fold) {
-    padding-block: var(--awa-space-8, 40px) !important;
+    padding-block: var(--awa-home-section-gap, 16px) !important;
     padding-inline: var(--awa-home-pad, 16px) !important;
 }
 
@@ -1086,7 +1196,7 @@ html body#html-body .ayo-home5-section:not(.top-home-content--above-fold) {
 @media (max-width: 767px) {
     html body#html-body .page-wrapper footer.page-footer,
     html body#html-body .page-wrapper .page-footer {
-        padding-block: 16px !important;
+        padding-block: 0 !important;
     }
     html body#html-body .page-wrapper .page-footer .footer-container,
     html body#html-body .page-wrapper .page-footer .awa-footer-newsletter {
@@ -1537,7 +1647,7 @@ html body#html-body#html-body#html-body input.input-text#search {
     @media (max-width: 767px) {
         html body#html-body .page-wrapper footer.page-footer,
         html body#html-body .page-wrapper .page-footer {
-            padding-block: 16px !important;
+            padding-block: 0 !important;
         }
         html body#html-body .page-wrapper .page-footer .footer-container,
         html body#html-body .page-wrapper .page-footer .awa-footer-newsletter,
@@ -1607,13 +1717,16 @@ html body#html-body#html-body#html-body input.input-text#search {
     }
 
     @media (min-width: 992px) {
+        /* 2026-07-17: alinhar ao SSOT 68px — 64/80 no @layer venciam align-grid
+           (!important em layer > !important unlayered) e deixavam maxH=80 com height=68. */
         html body#html-body .page-wrapper .awa-main-header__inner {
-            min-height: 64px !important;
-            max-height: 80px !important;
+            min-height: var(--awa-header-main-row-h, 68px) !important;
+            max-height: var(--awa-header-main-row-h, 68px) !important;
+            height: var(--awa-header-main-row-h, 68px) !important;
         }
         html body#html-body .page-wrapper .awa-main-header {
-            min-height: 64px !important;
-            max-height: 80px !important;
+            min-height: var(--awa-header-main-row-h, 68px) !important;
+            max-height: var(--awa-header-main-row-h, 68px) !important;
         }
     }
 }
@@ -1654,7 +1767,8 @@ html body#html-body#html-body#html-body input.input-text#search {
             padding: 4px 12px !important;
             gap: 4px 8px !important;
             row-gap: 4px !important;
-            overflow: hidden !important;
+            /* 2026-07-19: visible — hidden cortava .search-autocomplete (layer !important > unlayered). */
+            overflow: visible !important;
         }
         html body#html-body .page-wrapper .awa-header-primary-row {
             min-height: 44px !important;
@@ -1664,12 +1778,12 @@ html body#html-body#html-body#html-body input.input-text#search {
     @media (min-width: 992px) {
         html body#html-body .page-wrapper #header.header-container .awa-main-header__inner.wp-header,
         html body#html-body .page-wrapper #header.header-container .awa-main-header__inner[data-awa-header-row] {
-            grid-template-rows: 56px !important;
+            grid-template-rows: var(--awa-header-main-row-h, 68px) !important;
             grid-template-areas: "brand search actions" !important;
             grid-template-columns: clamp(112px,14vw,148px) minmax(0,1fr) minmax(220px,max-content) !important;
-            min-height: 56px !important;
-            max-height: 64px !important;
-            height: 56px !important;
+            min-height: var(--awa-header-main-row-h, 68px) !important;
+            max-height: var(--awa-header-main-row-h, 68px) !important;
+            height: var(--awa-header-main-row-h, 68px) !important;
         }
     }
 }
@@ -1688,19 +1802,19 @@ html body#html-body#html-body#html-body input.input-text#search {
             height: 96px !important;
             padding: 4px 12px !important;
             row-gap: 4px !important;
-            overflow: hidden !important;
+            overflow: visible !important;
         }
     }
     @media (min-width: 992px) {
         html body#html-body#html-body#html-body#html-body .page-wrapper .awa-main-header .awa-main-header-inner-wrap .awa-main-header__inner,
         html body#html-body#html-body#html-body#html-body .page-wrapper #header.header-container .awa-main-header__inner,
         html body#html-body#html-body#html-body#html-body .page-wrapper .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner {
-            grid-template-rows: 56px !important;
+            grid-template-rows: var(--awa-header-main-row-h, 68px) !important;
             grid-template-areas: "brand search actions" !important;
             grid-template-columns: clamp(112px,14vw,148px) minmax(0,1fr) minmax(220px,max-content) !important;
-            min-height: 56px !important;
-            max-height: 64px !important;
-            height: 56px !important;
+            min-height: var(--awa-header-main-row-h, 68px) !important;
+            max-height: var(--awa-header-main-row-h, 68px) !important;
+            height: var(--awa-header-main-row-h, 68px) !important;
             padding: 0 16px !important;
         }
     }
@@ -1723,18 +1837,46 @@ html body#html-body#html-body#html-body input.input-text#search {
             max-height: 108px !important;
             padding: 4px 12px !important;
             row-gap: 4px !important;
-            overflow: hidden !important;
+            overflow: visible !important;
         }
     }
     @media (min-width: 992px) {
         html body#html-body#html-body#html-body#html-body .page-wrapper .awa-main-header .awa-main-header-inner-wrap .awa-main-header__inner,
         html body#html-body#html-body#html-body#html-body .page-wrapper #header.header-container .awa-main-header__inner,
         html body#html-body#html-body#html-body#html-body .page-wrapper .header.awa-main-header .header_main.awa-main-header-inner-wrap .awa-main-header__inner {
-            grid-template: "brand search actions" 56px / clamp(112px, 14vw, 148px) minmax(0px, 1fr) minmax(220px, max-content) !important;
-            height: 56px !important;
-            min-height: 56px !important;
-            max-height: 64px !important;
+            grid-template: "brand search actions" var(--awa-header-main-row-h, 68px) / clamp(112px, 14vw, 148px) minmax(0px, 1fr) minmax(220px, max-content) !important;
+            height: var(--awa-header-main-row-h, 68px) !important;
+            min-height: var(--awa-header-main-row-h, 68px) !important;
+            max-height: var(--awa-header-main-row-h, 68px) !important;
         }
+    }
+}
+
+/* 2026-07-19: searchsuite autocomplete — field/control/block não podem clipar no mobile */
+@layer awa-visual-priority {
+    @media (max-width: 767px) {
+        html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col :is(.block-search, .block-content, form#search_mini_form, form.minisearch, .field.search, .field.search .control) {
+            overflow: visible !important;
+        }
+    }
+
+    /* FIX 2026-07-19 H3-desktop: mesma liberação no desktop (locks unlayered overflow:hidden) */
+    @media (min-width: 768px) {
+        html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header .awa-header-search-col :is(.block-search, .block-content, form#search_mini_form, form.minisearch, .field.search, .field.search .control) {
+            overflow: visible !important;
+        }
+    }
+}
+
+/* FIX 2026-07-19 H-shadow: overlay Ayo idle não deve capturar clique */
+@layer awa-visual-priority {
+    html body#html-body :is(.shadow_bkg, .shadow_bkg_show) {
+        pointer-events: none !important;
+    }
+
+    html body#html-body:is(.background_shadow, .background_shadow_show, .nav-open, .awa-vertical-menu-open)
+        :is(.shadow_bkg, .shadow_bkg_show) {
+        pointer-events: auto !important;
     }
 }
 
@@ -1783,13 +1925,16 @@ html body#html-body#html-body#html-body input.input-text#search {
 
 @layer awa-visual-priority {
     html body#html-body .page-wrapper .awa-footer-cnpj-badge,
-    html body#html-body .page-wrapper .awa-footer-cnpj-badge__text,
-    html body#html-body .page-wrapper .awa-footer-cnpj-badge__icon,
     html body#html-body .page-wrapper .footer-bottom .awa-footer-cnpj-badge,
     html body#html-body .page-wrapper footer.page-footer .awa-footer-cnpj-badge {
         color: var(--awa-text, var(--awa-text)) !important;
         background: rgba(183, 51, 55, 0.06) !important;
         border: 1px solid rgba(183, 51, 55, 0.18) !important;
+    }
+    html body#html-body .page-wrapper .awa-footer-cnpj-badge__text,
+    html body#html-body .page-wrapper .awa-footer-cnpj-badge__icon {
+        background: transparent !important;
+        border: 0 !important;
     }
     html body#html-body .page-wrapper .awa-footer-cnpj-badge__icon {
         color: var(--awa-primary, var(--awa-primary)) !important;
@@ -1840,12 +1985,15 @@ html body#html-body#html-body#html-body input.input-text#search {
     html body#html-body.catalog-product-view .page-wrapper .product-info-main button#product-addtocart-button,
     html body#html-body.catalog-product-view .page-wrapper .product-info-main button.action.tocart,
     html body#html-body.catalog-product-view .page-wrapper .product-add-form button.tocart {
-        min-height: 56px !important;
-        padding-block: 16px !important;
-        padding-inline: 32px !important;
-        font-size: 16px !important;
+        min-height: 44px !important;
+        height: 44px !important;
+        max-height: 44px !important;
+        padding-block: 0 !important;
+        padding-inline: 24px !important;
+        font-size: 15px !important;
         font-weight: 700 !important;
         border-radius: var(--awa-radius-md, 8px) !important;
+        box-sizing: border-box !important;
     }
 
     /* PDP - Qty input altura consistente */
@@ -1868,7 +2016,7 @@ html body#html-body#html-body#html-body input.input-text#search {
     html body#html-body .page-wrapper .page-main,
     html body#html-body .page-wrapper #maincontent,
     html body#html-body .page-wrapper .columns.layout {
-        max-width: var(--awa-container, 1440px) !important;
+        max-width: min(100%, 1280px) !important;
         margin-inline: auto !important;
     }
 
@@ -1931,10 +2079,11 @@ html body#html-body#html-body#html-body input.input-text#search {
  * Bug: nav.fixed-bottom.mobile-bottom-nav estava position:static no mobile
  * Causa: minhas regras Round 2 sobrescreviam height mas perdiam position:fixed
  * Fix: forcar position:fixed com !important no @layer awa-visual-priority
+ * H24A (2026-07-17): limitar a max-width:767 — em tablet o header já cobre a nav
  */
 
 @layer awa-visual-priority {
-    @media (max-width: 991px) {
+    @media (max-width: 767px) {
         html body#html-body .page-wrapper nav.fixed-bottom.mobile-bottom-nav,
         html body#html-body .page-wrapper nav.fixed-bottom,
         html body#html-body .page-wrapper .mobile-bottom-nav {
@@ -1968,13 +2117,14 @@ html body#html-body#html-body#html-body input.input-text#search {
  */
 
 @layer awa-visual-priority {
-    /* Back to top button fixed em mobile */
+    /* Back to top button fixed em mobile — só quando visível (respeita [hidden]) */
     @media (max-width: 991px) {
-        html body#html-body .page-wrapper .awa-back-to-top,
-        html body#html-body .page-wrapper [class*="back-to-top"] {
+        html body#html-body .page-wrapper :is(#awa-back-to-top, .awa-back-to-top):not([hidden]).is-visible,
+        html body#html-body .page-wrapper [class*="back-to-top"]:not([hidden]).is-visible {
             position: fixed !important;
-            bottom: 90px !important;
-            right: 16px !important;
+            /* Acima do bottom-nav (72px) + folga — evita cobrir copyright do footer */
+            bottom: calc(var(--awa-mobile-bottom-nav-h, 72px) + 16px + env(safe-area-inset-bottom, 0px)) !important;
+            right: 12px !important;
             z-index: 998 !important;
             width: 44px !important;
             height: 44px !important;
@@ -1987,6 +2137,14 @@ html body#html-body#html-body#html-body input.input-text#search {
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
+        }
+
+        html body#html-body .page-wrapper :is(#awa-back-to-top, .awa-back-to-top)[hidden],
+        html body#html-body .page-wrapper :is(#awa-back-to-top, .awa-back-to-top)[aria-hidden="true"]:not(.is-visible) {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
     }
 
@@ -2073,12 +2231,13 @@ html body#html-body#html-body#html-body input.input-text#search {
 /*
  * ROUND 20 — Mobile bottom nav visibility (2026-06-29)
  * Bug: nav tem classes hidden-sm hidden-md hidden-lg que escondem em todos viewports
- * Fix: forcar display:block em mobile/tablet, display:none em desktop xl
+ * Fix: forcar display:block só em mobile (≤767); hide em tablet+ (≥768)
+ * H24A (2026-07-17): tablet não deve mostrar bottom nav (header completo já existe)
  */
 
 @layer awa-visual-priority {
-    /* Mobile bottom nav: visivel em mobile, escondido em desktop */
-    @media (max-width: 991px) {
+    /* Mobile bottom nav: visivel só em mobile real */
+    @media (max-width: 767px) {
         html body#html-body .page-wrapper nav.fixed-bottom.hidden-sm.hidden-md.hidden-lg,
         html body#html-body .page-wrapper nav.fixed-bottom.hidden-sm.hidden-md.hidden-lg.mobile-bottom-nav,
         html body#html-body .page-wrapper .mobile-bottom-nav.hidden-sm.hidden-md.hidden-lg {
@@ -2101,10 +2260,13 @@ html body#html-body#html-body#html-body input.input-text#search {
             opacity: 1 !important;
         }
     }
-    @media (min-width: 992px) {
+    @media (min-width: 768px) {
         html body#html-body .page-wrapper nav.fixed-bottom.hidden-sm.hidden-md.hidden-lg,
+        html body#html-body .page-wrapper nav.fixed-bottom,
         html body#html-body .page-wrapper .mobile-bottom-nav {
             display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
     }
 }
@@ -2169,13 +2331,21 @@ html body#html-body#html-body#html-body input.input-text#search {
         justify-content: center !important;
     }
 
-    /* Links do footer */
+    /* Links do footer — denso no desktop; touch 44px só no mobile */
     html body#html-body .page-wrapper .page-footer a,
     html body#html-body .page-wrapper footer a {
-        min-height: 44px !important;
-        padding-block: 8px !important;
         display: inline-flex !important;
         align-items: center !important;
+        min-height: 0 !important;
+        padding-block: 4px !important;
+    }
+
+    @media (max-width: 767px) {
+        html body#html-body .page-wrapper .page-footer a,
+        html body#html-body .page-wrapper footer a {
+            min-height: 44px !important;
+            padding-block: 8px !important;
+        }
     }
 
     /* Carousel arrows touch target 44x44 */
@@ -2218,6 +2388,48 @@ html body#html-body#html-body#html-body input.input-text#search {
     html body#html-body .page-wrapper .action,
     html body#html-body .page-wrapper a.btn {
         line-height: 1.4 !important;
+    }
+}
+
+/* DEBUG FIX H6/H8 (desktop only, outside mobile media block). */
+@media (min-width: 992px) {
+    html body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .top-home-content--category-carousel .awa-category-carousel__cta-link {
+        min-height: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        padding: 6px 12px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 6px !important;
+    }
+
+    html body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .top-home-content--above-fold .wrapper_slider.hidden-xs .awa-hero-swiper > .awa-hero-pause-btn {
+        align-items: center !important;
+        background: color-mix(in srgb, var(--awa-primary, #b73337) 78%, white 22%) !important;
+        border-radius: 999px !important;
+        box-shadow: none !important;
+        display: inline-flex !important;
+        height: 36px !important;
+        justify-content: center !important;
+        min-height: 36px !important;
+        min-width: 36px !important;
+        padding: 0 !important;
+        width: 36px !important;
+    }
+
+    html body#html-body#html-body#html-body#html-body .page-wrapper #footer #awa-footer-suporte-panel li {
+        min-height: 0 !important;
+        padding-block: 0 !important;
+    }
+
+    html body#html-body#html-body#html-body#html-body .page-wrapper #footer #awa-footer-suporte-panel a {
+        min-height: 30px !important;
+        height: auto !important;
+        padding-block: 3px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        line-height: 1.3 !important;
     }
 }
 
@@ -2304,8 +2516,8 @@ html body#html-body#html-body#html-body input.input-text#search {
             .awa-site-header
             .header-control.awa-nav-bar
             .awa-nav-quick-links {
-            grid-column: 3 !important;
-            justify-self: end !important;
+            grid-column:auto !important;
+            justify-self:start !important;
             margin: 0 !important;
             max-width: 100% !important;
             min-width: 0 !important;
@@ -2702,13 +2914,17 @@ html body#html-body#html-body#html-body input.input-text#search {
         outline-offset: 2px !important;
     }
 
-    /* Empty state melhor alinhamento */
-    html body#html-body .page-wrapper .awa-cart-empty,
+    /* Empty state — search compacto; cart precisa ≥880 para 4 selos (H1 2026-08-04) */
     html body#html-body .page-wrapper .awa-search-empty {
         max-width: 600px !important;
         margin-inline: auto !important;
         padding: 48px 24px !important;
         text-align: center !important;
+    }
+    html body#html-body .page-wrapper .cart-empty.awa-cart-empty,
+    html body#html-body .page-wrapper .awa-cart-empty {
+        max-width: min(100%, 880px) !important;
+        margin-inline: auto !important;
     }
 
     /* Hero CTA buttons com mais peso visual */
@@ -2859,25 +3075,47 @@ html body#html-body#html-body#html-body input.input-text#search {
  */
 
 @layer awa-visual-priority {
-    /* PDP - Related products section melhorada */
+    /* PDP - Related products section melhorada
+       H-shell8 (2026-08-02): CDP — clamp(…,40px)+border-top em @layer vencia
+       shell7 unlayered. Ritmo SSOT 12px; moldura só no card .main-detail>.row. */
     html body#html-body.catalog-product-view .page-wrapper .awa-pdp-related {
-        margin-top: clamp(32px, 4vw, 56px) !important;
-        padding-top: clamp(24px, 3vw, 40px) !important;
-        border-top: 1px solid var(--awa-border, var(--awa-border)) !important;
+        margin-top: 12px !important;
+        padding-top: 12px !important;
+        padding-block-start: 12px !important;
+        border-top: 0 !important;
+        border-block-start: 0 !important;
     }
     html body#html-body.catalog-product-view .page-wrapper .awa-pdp-related__title {
         font-size: clamp(18px, 2.4vw, 24px) !important;
         font-weight: 700 !important;
-        margin-bottom: 24px !important;
+        margin-bottom: 12px !important;
         line-height: 1.3 !important;
     }
 
-    /* PDP Gallery - placeholder enquanto carrega */
-    html body#html-body.catalog-product-view .page-wrapper .fotorama__stage,
-    html body#html-body.catalog-product-view .page-wrapper .gallery-placeholder {
+    /* PDP Gallery — skeleton só no loading.
+       H-shell10: CDP repro shell9 — ph 1px + row 1px = duas caixas de novo.
+       Placeholder/stage sem borda; galeria flush no card unificado. */
+    html body#html-body.catalog-product-view .page-wrapper .gallery-placeholder._block-content-loading,
+    html body#html-body.catalog-product-view .page-wrapper .gallery-placeholder:not(:has(.fotorama__img)) {
         background: linear-gradient(135deg, var(--awa-bg-subtle) 0%, var(--awa-bg-muted) 50%, var(--awa-bg-subtle) 100%) !important;
         background-size: 200% 200% !important;
         animation: awa-gallery-skeleton 2s ease infinite !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .gallery-placeholder:has(.fotorama__img),
+    html body#html-body.catalog-product-view .page-wrapper .gallery-placeholder:has(.fotorama-item) {
+        background: transparent !important;
+        animation: none !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage {
+        background: var(--awa-bg, #fff) !important;
+        animation: none !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
     }
     @keyframes awa-gallery-skeleton {
         0%, 100% { background-position: 0% 50%; }
@@ -2986,18 +3224,17 @@ html body#html-body#html-body#html-body input.input-text#search {
  */
 
 @layer awa-visual-priority {
-    /* Section spacing consistente cross-page */
+    /* Section spacing — H17: layer !important vencia compactação unlayered (6–8px) */
     html body#html-body .page-wrapper .awa-home-section:not(.top-home-content--above-fold),
     html body#html-body .page-wrapper .top-home-content:not(.top-home-content--above-fold),
     html body#html-body .page-wrapper section.awa-home-section:not(.top-home-content--above-fold) {
-        padding-block: var(--awa-space-8, 40px) !important;
+        padding-block: var(--awa-home-section-gap, 16px) !important;
     }
 
-    /* Hierarquia da Home: categorias e Mais Vendidos abrem grupos principais;
-       vitrines subsequentes mantêm densidade operacional mais compacta. */
+    /* Home: categorias / featured um pouco mais abertas que o restante, sem 48px */
     html body#html-body.cms-index-index .page-wrapper
     :is(.top-home-content--category-carousel, .awa-carousel-section--featured) {
-        padding-block: var(--awa-space-9, 48px) !important;
+        padding-block: var(--awa-home-section-gap-featured, 20px) !important;
     }
 
     html body#html-body.cms-index-index .page-wrapper .content-top-home
@@ -3206,12 +3443,18 @@ html body#html-body#html-body#html-body input.input-text#search {
         margin-top: 20px !important;
     }
 
-    /* Form input - mais espaco entre label e input */
+    /* Form input - mais espaco entre label e input.
+     * H13: exclui .awa-vmenu-search-input — label.sr-only + input no menu
+     * vertical ganhava margin-top:8px e inchava a linha de busca (~69px). */
     html body#html-body .page-wrapper .field > .label + .control,
-    html body#html-body .page-wrapper label + input,
-    html body#html-body .page-wrapper label + select,
+    html body#html-body .page-wrapper label + input:not(.awa-vmenu-search-input),
+    html body#html-body .page-wrapper label + select:not(.sorter-options),
     html body#html-body .page-wrapper label + textarea {
         margin-top: 8px !important;
+    }
+    html body#html-body .page-wrapper .navigation.verticalmenu .awa-vmenu-search-input {
+        margin-top: 0 !important;
+        margin-block-start: 0 !important;
     }
 
     /* Back to top animation */
@@ -3299,22 +3542,25 @@ html body#html-body#html-body#html-body input.input-text#search {
         margin-bottom: 32px !important;
     }
 
-    /* ==== 2. PLP FILTER TRIGGER MOBILE ==== */
+    /* ==== 2. PLP FILTER TRIGGER MOBILE ====
+       H-toolbar-chrome (2026-08-02): ::before "Filtros" era decorativo/não-clicável,
+       empilhava com "Mostrar Filtros" e poluía bordas do toolbar. Neutralizado.
+       Toggle real: .modes-label[data-awa-filter-toggle]. */
     @media (max-width: 767px) {
-        html body#html-body.catalog-category-view .page-wrapper .toolbar-products::before {
-            content: "Filtros" !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            min-height: 44px !important;
-            min-width: 120px !important;
-            padding: 0 16px !important;
-            margin-bottom: 12px !important;
-            background: var(--awa-primary, var(--awa-primary)) !important;
-            color: var(--awa-bg) !important;
-            border-radius: 4px !important;
-            font-weight: 700 !important;
-            cursor: pointer !important;
+        html body#html-body.catalog-category-view .page-wrapper .toolbar-products::before,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar-products::before,
+        html body#html-body.catalog-category-view .page-wrapper .toolbar-products::after,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar-products::after {
+            content: none !important;
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            pointer-events: none !important;
         }
     }
 
@@ -3355,14 +3601,23 @@ html body#html-body#html-body#html-body input.input-text#search {
         border-color: var(--awa-primary, var(--awa-primary)) !important;
     }
 
-    /* ==== 4. NEWSLETTER LGPD CONSENT ==== */
+    /* ==== 4. NEWSLETTER LGPD CONSENT (H10B: abaixo do campo, não no ::before do botão) ==== */
     html body#html-body .page-wrapper .newsletter-footer .actions::before,
     html body#html-body .page-wrapper .newsletter form .actions::before {
+        content: none !important;
+        display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    html body#html-body .page-wrapper .newsletter-footer .field.newsletter::after,
+    html body#html-body .page-wrapper .newsletter form .field.newsletter::after {
         content: "* Ao cadastrar, você concorda com nossa Política de Privacidade" !important;
         display: block !important;
+        grid-column: 1 / -1 !important;
         font-size: 11px !important;
+        line-height: 1.35 !important;
         color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
-        margin-bottom: 8px !important;
+        margin: 0 !important;
         font-style: italic !important;
     }
     html body#html-body .page-wrapper .newsletter-footer .required,
@@ -3389,20 +3644,35 @@ html body#html-body#html-body#html-body input.input-text#search {
         border: 1px solid #f5c6cb !important;
     }
 
-    /* ==== 5. PDP GALLERY (Fotorama) ==== */
+    /* ==== 5. PDP GALLERY (Fotorama) ====
+       H-shell8: thumb inner 2px transparent + active no .fotorama__thumb = anel duplo
+       com .fotorama__nav__frame--thumb. Um anel só no frame ativo. */
     html body#html-body.catalog-product-view .page-wrapper .fotorama__stage,
     html body#html-body.catalog-product-view .page-wrapper .fotorama__nav {
         background: var(--awa-bg) !important;
         border-radius: 4px !important;
     }
     html body#html-body.catalog-product-view .page-wrapper .fotorama__thumb {
-        border: 2px solid transparent !important;
+        border: 0 !important;
         border-radius: 4px !important;
+        box-shadow: none !important;
+        outline: none !important;
         transition: border-color 0.2s ease !important;
     }
     html body#html-body.catalog-product-view .page-wrapper .fotorama__thumb.fotorama__active,
     html body#html-body.catalog-product-view .page-wrapper .fotorama__thumb:hover {
-        border-color: var(--awa-primary, var(--awa-primary)) !important;
+        border: 0 !important;
+        border-color: transparent !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .fotorama__nav__frame--thumb {
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 2px !important;
+    }
+    html body#html-body.catalog-product-view .page-wrapper .fotorama__nav__frame--thumb.fotorama__active {
+        border: 2px solid var(--awa-primary, var(--awa-red)) !important;
+        border-radius: 4px !important;
+        padding: 0 !important;
     }
     html body#html-body.catalog-product-view .page-wrapper .fotorama__arr {
         background: rgba(255, 255, 255, 0.9) !important;
@@ -3585,13 +3855,25 @@ html body#html-body#html-body#html-body input.input-text#search {
         outline-offset: 2px !important;
     }
 
-    /* ==== 15. HEADER STICKY BACKDROP ==== */
+    /* ==== 15. HEADER STICKY BACKDROP — H27: sem will-change:transform (prende minicart) ==== */
     html body#html-body .page-wrapper .header-wrapper-sticky {
-        background: rgba(255, 255, 255, 0.95) !important;
+        background: color-mix(in srgb, var(--awa-bg-surface, #fff) 95%, transparent) !important;
+        background-color: var(--awa-bg-surface, #fff) !important;
         backdrop-filter: saturate(1.8) blur(20px) !important;
         -webkit-backdrop-filter: saturate(1.8) blur(20px) !important;
-        will-change: transform !important;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        will-change: auto !important;
+        transition: background-color 0.2s ease !important;
+    }
+    html body#html-body.awa-dark-mode .page-wrapper .header-wrapper-sticky,
+    html body#html-body.awa-dark-mode .page-wrapper .awa-site-header,
+    html body#html-body.awa-dark-mode .page-wrapper .awa-main-header,
+    html body#html-body.awa-dark-mode .page-wrapper .header_main {
+        background: #1e293b !important;
+        background-color: #1e293b !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
     }
 
     /* ==== 16. PDP TABS REVISAR (tabs duplicados) ==== */
@@ -3606,9 +3888,9 @@ html body#html-body#html-body#html-body input.input-text#search {
         font-weight: 600 !important;
     }
 
-    /* ==== 17. STICKY HEADER CLS PREVENTION ==== */
+    /* ==== 17. STICKY HEADER — H27: contain:none (não prender fixed) ==== */
     html body#html-body .page-wrapper .header-wrapper-sticky {
-        contain: layout !important;
+        contain: none !important;
     }
 
     /* ==== 18. CART ITEM PRICE STRIKETHROUGH ==== */
@@ -3727,11 +4009,12 @@ html body#html-body#html-body#html-body input.input-text#search {
     }
 
     /* ==== 26. PDP STOCK STATUS ==== */
-    /* color darkened from #28a745 to #15803d: 3.1:1 on its pale-green pill background,
-       fails WCAG AA 4.5:1 (Impeccable audit 2026-07-06). #15803d reaches ~5:1. */
+    /* P1A 2026-07-27: #15803d dava 4.487:1 sobre o composite #eef4ec do pill
+       (rgba(40,167,69,.08) sobre a página) — reprova WCAG AA 4.5:1 por 0.013
+       (Lighthouse color-contrast, PDP). #166534 (green-800) = 6.38:1, com margem. */
     html body#html-body.catalog-product-view .page-wrapper .stock.available,
     html body#html-body.catalog-product-view .page-wrapper .availability.only {
-        color: #15803d !important;
+        color: #166534 !important;
         font-weight: 600 !important;
         padding: 4px 12px !important;
         background: rgba(40, 167, 69, 0.08) !important;
@@ -3816,11 +4099,118 @@ html body#html-body#html-body#html-body input.input-text#search {
 @layer awa-visual-priority {
     /* ==== SORTER MOBILE LAYOUT ==== */
     @media (max-width: 767px) {
-        html body#html-body.catalog-category-view .page-wrapper .toolbar-products {
+        /* H-toolbar-space (2026-08-02): @layer !important vence defer unlayered.
+           CDP: padding 8px 12px desperdiçava 24px vs busca (343px); modes-label
+           flex:0 deixava ~98px ociosos. Full-bleed + filtro cresce.
+           Exclui --bottom-slim (pager) — tratado em H-pager-chrome. */
+        html body#html-body.catalog-category-view .page-wrapper .toolbar-products:not(.toolbar-products--bottom-slim),
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar-products:not(.toolbar-products--bottom-slim) {
             display: flex !important;
             flex-wrap: wrap !important;
             gap: 8px !important;
             padding: 8px 0 !important;
+            padding-inline: 0 !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        /* H-pager-chrome (2026-08-02): CDP bottom-slim h=134, border 1px, pages
+           margin 16px 0, ul 364px overflow ±11. Botões já têm borda 1px. */
+        html body#html-body.catalog-category-view .page-wrapper .toolbar.toolbar-products--bottom-slim,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar.toolbar-products--bottom-slim {
+            border: 0 !important;
+            border-width: 0 !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            padding-block: 0 !important;
+            padding-inline: 0 !important;
+            border-radius: 0 !important;
+            gap: 8px !important;
+            margin-block: 8px 0 !important;
+            min-height: 0 !important;
+            height: auto !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar.toolbar-products--bottom-slim .center,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar.toolbar-products--bottom-slim .center {
+            width: 100% !important;
+            max-width: 100% !important;
+            gap: 8px !important;
+            box-sizing: border-box !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar.toolbar-products--bottom-slim .pages,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar.toolbar-products--bottom-slim .pages {
+            margin: 0 !important;
+            margin-block: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar.toolbar-products--bottom-slim .pages .items.pages-items,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar.toolbar-products--bottom-slim .pages .items.pages-items {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 4px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar.toolbar-products--bottom-slim .pages .items.pages-items > li.item,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar.toolbar-products--bottom-slim .pages .items.pages-items > li.item {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            min-width: 0 !important;
+            width: auto !important;
+            flex: 0 0 auto !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar.toolbar-products--bottom-slim .pages .items.pages-items > li.item :is(a, strong),
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar.toolbar-products--bottom-slim .pages .items.pages-items > li.item :is(a, strong) {
+            margin: 0 !important;
+            margin-inline: 0 !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar.toolbar-products--bottom-slim .toolbar-amount,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar.toolbar-products--bottom-slim .toolbar-amount {
+            margin: 0 !important;
+            margin-block: 0 4px !important;
+            padding: 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+            text-align: center !important;
+            width: 100% !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar-products .modes,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar-products .modes {
+            display: flex !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar-products .modes .modes-label[data-awa-filter-toggle="true"],
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar-products .modes .modes-label[data-awa-filter-toggle="true"] {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            width: auto !important;
+            max-width: none !important;
+        }
+        html body#html-body.catalog-category-view .page-wrapper .toolbar-products .modes .modes-mode,
+        html body#html-body.catalogsearch-result-index .page-wrapper .toolbar-products .modes .modes-mode {
+            flex: 0 0 44px !important;
+            width: 44px !important;
+            max-width: 44px !important;
         }
         html body#html-body.catalog-category-view .page-wrapper .toolbar-sorter {
             flex: 1 1 auto !important;
@@ -4018,22 +4408,24 @@ html body#html-body#html-body#html-body input.input-text#search {
         margin: 0 12px 4px !important;
     }
 
-    /* B2B price box — solid + flex (não dashed/block; debug cc2a40) */
+    /* B2B price box — quiet (shell22): alinhado ao gate PDP limpo; sem tint rosa. */
     html body#html-body.catalog-category-view .page-wrapper .item-product .b2b-login-to-see-price {
-        background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #fff) !important;
-        border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 22%, transparent) !important;
-        border-radius: 8px !important;
-        padding: 10px 12px !important;
-        margin: 0 !important;
-        text-align: center !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        margin: 4px 0 0 !important;
+        text-align: start !important;
         display: flex !important;
         flex-direction: column !important;
-        justify-content: center !important;
-        align-items: center !important;
-        gap: 4px !important;
-        min-height: 64px !important;
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+        gap: 2px !important;
+        min-height: 0 !important;
         box-sizing: border-box !important;
         text-transform: none !important;
+        box-shadow: none !important;
     }
     html body#html-body.catalog-category-view .page-wrapper .item-product .b2b-login-link {
         color: var(--awa-primary, var(--awa-primary)) !important;
@@ -4069,21 +4461,50 @@ html body#html-body#html-body#html-body input.input-text#search {
         border-color: var(--awa-primary, var(--awa-primary)) !important;
     }
 
-    /* ==== CATEGORY IMAGE BANNER ==== */
+    /* ==== CATEGORY IMAGE BANNER ====
+       2026-08-02: gap vertical no wrapper (.category-view-move / stack 12px).
+       margin-bottom:16px aqui vivia em @layer e vencía locks unlayered. */
     html body#html-body.catalog-category-view .page-wrapper .category-view-image,
     html body#html-body.catalog-category-view .page-wrapper .awa-category-hero {
-        margin-bottom: 16px !important;
+        margin-bottom: 0 !important;
+        margin-block-end: 0 !important;
         border-radius: 8px !important;
         overflow: hidden !important;
     }
 
-    /* ==== BREADCRUMB PLP ==== */
+    /* ==== BREADCRUMB PLP (audit #23 — caixa compacta)
+       Gap crumbs→hero = só #maincontent padding-top (stack 12px). */
     html body#html-body.catalog-category-view .page-wrapper .breadcrumbs {
-        margin-bottom: 12px !important;
-        padding: 8px 0 !important;
-        font-size: 13px !important;
+        margin: 0 !important;
+        padding: 2px 0 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        font-size: 12px !important;
+        line-height: 1.25 !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
     }
+    html body#html-body.catalog-category-view .page-wrapper .breadcrumbs :is(.item, strong, span) {
+        min-height: 0 !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 1.25 !important;
+        font-size: 12px !important;
+    }
+    /* WCAG 2.5.8: link precisa ≥44px; span interno pode ficar compacto */
     html body#html-body.catalog-category-view .page-wrapper .breadcrumbs a {
+        display: inline-flex !important;
+        align-items: center !important;
+        min-height: 44px !important;
+        height: auto !important;
+        padding-block: 10px !important;
+        padding-inline: 2px !important;
+        margin: 0 !important;
+        line-height: 1.25 !important;
+        font-size: 12px !important;
+        box-sizing: border-box !important;
         color: var(--awa-text-muted, var(--awa-text-secondary)) !important;
         text-decoration: none !important;
     }
@@ -4129,39 +4550,24 @@ html body#html-body#html-body#html-body input.input-text#search {
  */
 
 @layer awa-visual-priority {
-    /* ==== PLP FILTER BUTTON (mobile) ==== */
+    /* ==== PLP FILTER BUTTON — oculto: toolbar já tem "Mostrar Filtros" (audit #19) ==== */
     @media (max-width: 767px) {
-        html body#html-body.catalog-category-view .page-wrapper .awa-plp-filter-button {
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 8px !important;
-            min-height: 48px !important;
-            min-width: 140px !important;
-            padding: 0 20px !important;
-            margin: 12px 0 !important;
-            background: var(--awa-primary, var(--awa-primary)) !important;
-            color: var(--awa-bg) !important;
-            border: none !important;
-            border-radius: 8px !important;
-            font-weight: 700 !important;
-            font-size: 15px !important;
-            cursor: pointer !important;
-            transition: background-color 0.2s ease, transform 0.2s ease !important;
-            position: relative !important;
-            z-index: 10 !important;
-        }
-        html body#html-body.catalog-category-view .page-wrapper .awa-plp-filter-button:hover {
-            background: var(--awa-primary-hover, var(--awa-primary-hover)) !important;
-            transform: translateY(-1px) !important;
-        }
-        html body#html-body.catalog-category-view .page-wrapper .awa-plp-filter-button:focus-visible {
-            outline: 2.5px solid var(--awa-primary, var(--awa-primary)) !important;
-            outline-offset: 2px !important;
+        html body#html-body.catalog-category-view .page-wrapper .awa-plp-filter-button,
+        html body#html-body.catalogsearch-result-index .page-wrapper .awa-plp-filter-button {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            height: 0 !important;
+            width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            border: 0 !important;
         }
     }
     @media (min-width: 768px) {
-        html body#html-body.catalog-category-view .page-wrapper .awa-plp-filter-button {
+        html body#html-body.catalog-category-view .page-wrapper .awa-plp-filter-button,
+        html body#html-body.catalogsearch-result-index .page-wrapper .awa-plp-filter-button {
             display: none !important;
         }
     }
@@ -4327,17 +4733,22 @@ html body#html-body#html-body#html-body input.input-text#search {
         transform: translateY(-1px) !important;
     }
 
-    /* ==== PLP SECTIONS LAYOUT (column vs row) ==== */
+    /* ==== PLP SECTIONS LAYOUT (column vs row) ====
+       row-gap:0 — col-main é display:contents; filhos viram itens do grid.
+       Ritmo vertical = --awa-plp-stack-gap via margin dos blocos (12px). */
     @media (min-width: 992px) {
         html body#html-body.catalog-category-view .page-wrapper .columns.layout-2-col.row {
             display: grid !important;
             grid-template-columns: 280px 1fr !important;
-            gap: 24px !important;
+            column-gap: var(--awa-plp-gap-md, 12px) !important;
+            row-gap: 0 !important;
+            gap: 0 var(--awa-plp-gap-md, 12px) !important;
         }
     }
     @media (max-width: 991px) {
-        html body#html-body.catalog-category-view .page-wrapper .block.filter,
-        html body#html-body.catalog-category-view .page-wrapper #layered-ajax-filter-block {
+        /* H-filter-drawer (2026-08-02): não esconder com filtros abertos (CDP layer awa-visual-priority). */
+        html body#html-body:is(.catalog-category-view,.catalogsearch-result-index):not(.awa-plp-filters-expanded) .page-wrapper .block.filter,
+        html body#html-body:is(.catalog-category-view,.catalogsearch-result-index):not(.awa-plp-filters-expanded) .page-wrapper #layered-ajax-filter-block {
             display: none !important;
         }
     }
@@ -4403,6 +4814,12 @@ html body#html-body .page-wrapper .awa-skip-link {
     clip-path: inset(50%) !important;
     white-space: nowrap !important;
 }
+html body#html-body a.action.skip:focus,
+html body#html-body a.action.skip:focus-visible,
+html body#html-body a.action.skip-nav:focus,
+html body#html-body a.action.skip-nav:focus-visible,
+html body#html-body .awa-skip-link:focus,
+html body#html-body .awa-skip-link:focus-visible,
 html body#html-body .page-wrapper a.action.skip:focus,
 html body#html-body .page-wrapper a.action.skip-nav:focus,
 html body#html-body .page-wrapper .awa-skip-link:focus {
@@ -4411,15 +4828,19 @@ html body#html-body .page-wrapper .awa-skip-link:focus {
     top: 8px !important;
     overflow: visible !important;
     width: auto !important;
+    min-width: 44px !important;
     height: auto !important;
+    min-height: 44px !important;
     clip: auto !important;
     clip-path: none !important;
     white-space: normal !important;
     z-index: 99999 !important;
-    padding: 8px 16px !important;
-    background: var(--awa-primary, var(--awa-primary)) !important;
-    color: var(--awa-bg) !important;
-    border-radius: 4px !important;
+    padding: 10px 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    background: var(--awa-primary, #b73337) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
     font-weight: 600 !important;
 }
 
@@ -5070,13 +5491,48 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
 }
 
 /* =====================================================================
-   FIX-HOME-CAROUSEL-NAV-OFFSETS-2026-07-06:
-   Evidência runtime e85cbc/pre-fix:
-   - prev, next e pause computados com o mesmo rect/inset no primeiro card.
-   - CSS legado reaplicava inset/left/right iguais após o contrato do carrossel.
-   Travamos offsets por papel do botão, mantendo nav como overlay sem ocupar fluxo.
+   FIX-HOME-CAROUSEL-NAV-OFFSETS-2026-07-06 + H18 (2026-07-17):
+   Evidência runtime H18/pre-fix (Mais Vendidos):
+   - prev/next/pause overlap cards com area=1936 (44×44) — left/right 16px
+     sobre o primeiro/último card visível.
+   - viewport pad-inline=0; setas em overlay sem gutter.
+   H18: reserva 52px no viewport (padrão H16A) + offset 4px nas setas.
    ===================================================================== */
 @layer awa-visual-priority {
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .content-top-home
+        .awa-shelf--carousel
+        .awa-carousel {
+        --awa-carousel-button-offset: 4px;
+        /* H21c: mobile sem gutter — 58px×2 colapsava viewport a ~217px e cards ~93px (CTA clip). */
+        padding-inline: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    @media (min-width: 768px) {
+        html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+            .page-wrapper
+            .content-top-home
+            .awa-shelf--carousel
+            .awa-carousel {
+            /* H22g: 24→48 — alinhado ao terminal (clearGap 0) */
+            padding-inline: 48px !important;
+        }
+    }
+
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .content-top-home
+        .awa-shelf--carousel
+        .awa-carousel
+        .awa-carousel__viewport {
+        padding-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
     html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
         .page-wrapper
         .content-top-home
@@ -5099,7 +5555,8 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
         top: 50% !important;
         right: auto !important;
         bottom: auto !important;
-        left: var(--awa-carousel-button-offset, clamp(6px, 1.2vw, 16px)) !important;
+        left: 4px !important;
+        inset-inline-start: 4px !important;
         transform: translateY(-50%) !important;
     }
 
@@ -5111,7 +5568,8 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
         > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor="viewport"]
         :is(.awa-owl-nav__btn--next, .awa-carousel__button--next) {
         top: 50% !important;
-        right: var(--awa-carousel-button-offset, clamp(6px, 1.2vw, 16px)) !important;
+        right: 4px !important;
+        inset-inline-end: 4px !important;
         bottom: auto !important;
         left: auto !important;
         transform: translateY(-50%) !important;
@@ -5124,11 +5582,56 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
         .awa-carousel
         > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor="viewport"]
         .awa-carousel__toggle:not([hidden]) {
-        top: var(--awa-carousel-button-offset, clamp(6px, 1.2vw, 16px)) !important;
-        right: var(--awa-carousel-button-offset, clamp(6px, 1.2vw, 16px)) !important;
+        top: 4px !important;
+        right: 4px !important;
+        inset-inline-end: 4px !important;
         bottom: auto !important;
         left: auto !important;
         transform: none !important;
+    }
+
+    /* H19: anti double-padding thumb+container (gap.dw 32 → ~16) */
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .content-top-home
+        .awa-shelf--carousel
+        .product-thumb {
+        padding: 8px !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .content-top-home
+        .awa-shelf--carousel
+        .product-thumb
+        :is(
+            .product-thumb-link,
+            .product-image-container,
+            .product-image-wrapper,
+            .first-thumb,
+            .second-thumb,
+            .awa-image-container--fluid
+        ) {
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .content-top-home
+        .awa-shelf--carousel
+        .product-thumb
+        :is(.product-image-photo, img) {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
+        object-position: center !important;
     }
 }
 
@@ -5149,7 +5652,7 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
         section.awa-footer-categories-expand
         .awa-footer-categories-expand__inner {
         display: grid !important;
-        grid-template-columns: minmax(96px, max-content) minmax(190px, max-content) minmax(0, 1fr) !important;
+        grid-template-columns: minmax(96px, max-content) minmax(0, 1fr) !important;
         align-items: center !important;
         column-gap: clamp(14px, 2vw, 28px) !important;
         row-gap: 10px !important;
@@ -5160,6 +5663,8 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
     html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
         section.awa-footer-categories-expand
         .awa-footer-categories-expand__heading {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
         min-width: 96px !important;
         margin: 0 !important;
         overflow: visible !important;
@@ -5169,6 +5674,7 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
     html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
         section.awa-footer-categories-expand
         .awa-footer-categories-expand__toggle {
+        display: none !important;
         justify-self: start !important;
         width: auto !important;
         max-width: 100% !important;
@@ -5178,6 +5684,8 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
     html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
         section.awa-footer-categories-expand
         .awa-footer-categories-expand__panel {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
         min-width: 0 !important;
         width: 100% !important;
     }
@@ -5262,61 +5770,62 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
             padding-block: 8px 12px !important;
         }
 
-        /* FIX-FOOTER-CATEGORIES-MOBILE-BAND-2026-07-06:
-           runtime mobile 390px mostrou .page_footer com 1321px de altura e a
-           seção Categorias pintada como faixa clara isolada entre o accordion
-           vermelho e o footer-bottom. O grid desktop acima é correto para
-           desktop, mas no mobile a seção precisa continuar no tema escuro e
-           recolhida sem reservar área extra. */
+        /* Footer mobile usa superfície clara: título e toggle permanecem visíveis,
+           enquanto o painel recolhido não reserva espaço. */
         html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
             section.awa-footer-categories-expand {
-            background: transparent !important;
-            background-color: transparent !important;
-            border: 0 !important;
+            background: var(--awa-bg-soft) !important;
+            background-color: var(--awa-bg-soft) !important;
+            border-top: 1px solid var(--awa-border) !important;
             box-shadow: none !important;
             margin: 0 !important;
-            padding: 10px 16px !important;
+            padding: 12px 16px !important;
             min-height: 0 !important;
         }
 
         html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
             section.awa-footer-categories-expand
             .awa-footer-categories-expand__inner {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            align-items: center !important;
-            gap: 0 !important;
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) !important;
+            align-items: stretch !important;
+            gap: 8px !important;
             width: 100% !important;
             min-height: 0 !important;
             padding: 0 !important;
             margin: 0 !important;
-            background: transparent !important;
-            background-color: transparent !important;
+            background: var(--awa-bg-soft) !important;
+            background-color: var(--awa-bg-soft) !important;
         }
 
         html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
             section.awa-footer-categories-expand
             .awa-footer-categories-expand__heading {
-            position: absolute !important;
-            width: 1px !important;
-            height: 1px !important;
-            margin: -1px !important;
+            position: static !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 !important;
             padding: 0 !important;
-            overflow: hidden !important;
-            clip: rect(0 0 0 0) !important;
-            white-space: nowrap !important;
+            overflow: visible !important;
+            clip: auto !important;
+            white-space: normal !important;
             border: 0 !important;
+            color: var(--awa-text) !important;
         }
 
         html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
             section.awa-footer-categories-expand
             .awa-footer-categories-expand__toggle {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
             width: 100% !important;
             min-height: 44px !important;
             justify-content: space-between !important;
-            color: var(--awa-bg) !important;
-            background: rgba(255, 255, 255, 0.08) !important;
-            border: 1px solid rgba(255, 255, 255, 0.28) !important;
+            color: var(--awa-text) !important;
+            background: var(--awa-bg) !important;
+            border: 1px solid var(--awa-border) !important;
             border-radius: var(--awa-radius-md, 8px) !important;
             box-shadow: none !important;
             margin: 0 !important;
@@ -5339,14 +5848,45 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
             .awa-footer-categories-expand__panel:not([hidden]) {
             flex: 0 0 100% !important;
             margin-top: 10px !important;
-            color: var(--awa-bg) !important;
-            background: rgba(0, 0, 0, 0.08) !important;
+            color: var(--awa-text) !important;
+            background: var(--awa-bg) !important;
             border-radius: var(--awa-radius-md, 8px) !important;
         }
     }
 }
 
-@media (min-width: 768px) {
+/* H25B: tablet 2 cols; desktop 3 cols (antes forçava 3 desde 768px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    @layer awa-visual-priority {
+        html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
+            #footer.footer-container
+            > .container
+            > .row.rowFlexMargin {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            align-items: start !important;
+            column-gap: clamp(24px, 3vw, 56px) !important;
+            row-gap: 24px !important;
+            max-width: var(--awa-home-terminal-shell, min(100%, 1280px)) !important;
+            margin-inline: auto !important;
+            width: 100% !important;
+        }
+
+        html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
+            #footer.footer-container
+            > .container
+            > .row.rowFlexMargin
+            > [class*="col-"] {
+            float: none !important;
+            width: auto !important;
+            max-width: none !important;
+            min-width: 0 !important;
+            padding-inline: 0 !important;
+        }
+    }
+}
+
+@media (min-width: 992px) {
     @layer awa-visual-priority {
         /* FIX-FOOTER-DESKTOP-FIRST-PAINT-2026-07-06:
            Evidência runtime e85cbc/H16-H20 em 1920px: no primeiro paint os
@@ -5395,7 +5935,7 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrap
         html body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
             #footer.footer-container
             .velaFooterTitle {
-            margin: 0 0 18px !important;
+            margin: 0 0 6px !important;
             padding: 0 !important;
             border: 0 !important;
             min-height: 0 !important;
@@ -5490,6 +6030,38 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
    ===================================================================== */
 body.account .page-main .fieldset > .field:not(.choice) {
     align-items: stretch !important;
+}
+
+/* Choice (cobrança/entrega padrão): .field global usa flex-direction:column
+   e empilha checkbox+label; força linha + checkbox 18px (não 44px). */
+body.account .page-main .fieldset > .field.choice,
+body.account .page-main .form-address-edit .field.choice {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    min-height: 0 !important;
+}
+
+body.account .page-main .fieldset > .field.choice > input[type='checkbox'],
+body.account .page-main .fieldset > .field.choice > input[type='radio'],
+body.account .page-main .form-address-edit .field.choice > input[type='checkbox'],
+body.account .page-main .form-address-edit .field.choice > input[type='radio'] {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    flex-shrink: 0 !important;
+    margin-top: 2px !important;
+}
+
+body.account .page-main .fieldset > .field.choice > .label,
+body.account .page-main .form-address-edit .field.choice > .label {
+    display: inline !important;
+    margin: 0 !important;
+    margin-block-end: 0 !important;
+    font-weight: 500 !important;
 }
 
 /* =====================================================================
@@ -5641,8 +6213,10 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .cat
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalogo-index-index, .catalogo-revista-index, .cms-page-view, .b2b-register-index) .page-wrapper .nav-breadcrumbs {
-    margin-bottom: 8px !important;
-    padding-top: 8px !important;
+    margin-bottom: 0 !important;
+    margin-block-end: 0 !important;
+    padding-top: 0 !important;
+    padding-block-start: 0 !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .cms-page-view) .page-wrapper :is(.page-title-wrapper, .category-view .page-title-wrapper) {
@@ -5698,46 +6272,1412 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .pag
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper li.item-product .info-price {
     margin-top: auto !important;
-    min-height: 64px !important;
+    min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-end !important;
 }
 
+/* 2026-07-26 bug 2.2: gate B2B quiet (secundário ao título do produto). */
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper li.item-product .b2b-login-to-see-price {
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    min-height: 64px !important;
-    margin: 8px 0 0 !important;
-    padding: 10px 12px !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+    min-height: 0 !important;
+    margin: 4px 0 0 !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
-    text-align: center !important;
-    background: color-mix(in srgb, var(--awa-primary, #b73337) 6%, #fff) !important;
-    border: 1px solid color-mix(in srgb, var(--awa-primary, #b73337) 22%, transparent) !important;
-    border-radius: 8px !important;
+    text-align: start !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper li.item-product .b2b-login-to-see-price__title {
     margin: 0 !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
     line-height: 1.3 !important;
-    color: var(--awa-text-primary, #333) !important;
+    color: var(--awa-text-muted, #64748b) !important;
+    text-transform: none !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper li.item-product .b2b-login-to-see-price__message {
     margin: 0 !important;
-    font-size: 11px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
     line-height: 1.35 !important;
-    color: var(--awa-text-muted, #666) !important;
+    color: var(--awa-primary, #b73337) !important;
     display: -webkit-box !important;
     -webkit-box-orient: vertical !important;
-    -webkit-line-clamp: 2 !important;
+    -webkit-line-clamp: 1 !important;
     overflow: hidden !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper li.item-product .product-info-cart {
     margin-top: 8px !important;
+}
+
+/* =====================================================================
+   AUDIT30 / debug-4b8a04 — fixes Alta (2026-07-16)
+   Evidência CDP: .price-container.weee { display:none } via .item-product .weee;
+   header grid-template 3ª track 44px → overflow do painel B2B sobre o logo;
+   promo bar B2B visível com sessão logada; H1 cart ilegível no dark mode.
+   ===================================================================== */
+
+/* 1) PLP — restaurar preço (Magento marca .price-container com class weee) */
+html body#html-body#html-body .page-wrapper .item-product .price-container.weee,
+html body#html-body#html-body .page-wrapper .item-product .price-container.price-final_price,
+html body#html-body#html-body .page-wrapper .item-deal-product .price-container.weee {
+    display: inline !important;
+    visibility: visible !important;
+}
+html body#html-body#html-body .page-wrapper .item-product .weee:not(.price-container),
+html body#html-body#html-body .page-wrapper .item-deal-product .weee:not(.price-container) {
+    display: none !important;
+}
+
+/* 2) Promo bar — ocultar quando já há painel B2B / cliente logado */
+html body#html-body.customer-logged-in #awa-b2b-promo-bar,
+html body#html-body.customer-logged-in .awa-b2b-promo-bar,
+html body#html-body:has(.b2b-status-panel) #awa-b2b-promo-bar,
+html body#html-body:has(.b2b-status-panel) .awa-b2b-promo-bar {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+/* 2b) H26: sem promo, colapsar .header-content fantasma (32/44px vazios) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body.customer-logged-in
+    .page-wrapper
+    .awa-site-header
+    #header.header-container,
+html body#html-body#html-body#html-body#html-body#html-body#html-body.customer-logged-in
+    .page-wrapper
+    .awa-site-header
+    #header.header-container
+    > .header-content,
+html body#html-body#html-body#html-body#html-body#html-body#html-body:has(.b2b-status-panel)
+    .page-wrapper
+    .awa-site-header
+    #header.header-container,
+html body#html-body#html-body#html-body#html-body#html-body#html-body:has(.b2b-status-panel)
+    .page-wrapper
+    .awa-site-header
+    #header.header-container
+    > .header-content {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+/* 3) Carrinho — H1 legível no dark mode */
+html body#html-body.awa-dark-mode.checkout-cart-index .page-wrapper :is(h1.page-title, .page-title-wrapper .page-title, .page-title) {
+    color: var(--awa-text-primary, #f1f5f9) !important;
+}
+
+/* 4) Header mobile logado — grid + anti-overlap (vence shorthand 44px) */
+@media (max-width: 767px) {
+    html body#html-body#html-body#html-body#html-body .page-wrapper
+        .awa-site-header:has(.b2b-status-panel)
+        :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row]) {
+        grid-template:
+            "toggle brand cart" 44px
+            "search search search" 44px
+            / 44px minmax(0, 1fr) minmax(96px, auto) !important;
+        grid-template-columns: 44px minmax(0, 1fr) minmax(96px, auto) !important;
+    }
+    html body#html-body#html-body#html-body#html-body .page-wrapper
+        .awa-site-header:has(.b2b-status-panel)
+        .awa-header-right-col {
+        max-width: min(140px, 38vw) !important;
+        width: auto !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        justify-self: end !important;
+        gap: 2px !important;
+    }
+    html body#html-body#html-body#html-body#html-body .page-wrapper
+        .awa-site-header:has(.b2b-status-panel)
+        :is(.awa-header-brand, .awa-header-brand-cell) {
+        max-width: min(120px, 32vw) !important;
+        overflow: hidden !important;
+    }
+    html body#html-body#html-body#html-body#html-body .page-wrapper
+        .awa-site-header .b2b-status-panel .b2b-status-trigger {
+        color: var(--awa-text-primary, #0f172a) !important;
+        background: transparent !important;
+        background-image: none !important;
+    }
+    html body#html-body#html-body#html-body#html-body .page-wrapper
+        .awa-site-header .b2b-status-panel
+        :is(.b2b-status-trigger__line1, .b2b-status-trigger__text) {
+        color: var(--awa-text-primary, #0f172a) !important;
+    }
+    /* Deptos. — não herdar color branco de button { color: #fff } do theme_option */
+    html body#html-body#html-body#html-body#html-body .page-wrapper
+        nav.fixed-bottom .mobile-bottom-link > li > button.toggle-nav-footer {
+        color: var(--awa-text-secondary, #475569) !important;
+        background: transparent !important;
+    }
+}
+
+/* =====================================================================
+   H20 (2026-07-17): ícones categoria 64→88 — unlayered para vencer head-preload
+   Evidência: icon box 72–88px mas img/picture travados em 64px (fill visual baixo).
+   ===================================================================== */
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .awa-category-carousel__icon {
+    width: 88px !important;
+    height: 88px !important;
+    min-width: 88px !important;
+    min-height: 88px !important;
+    max-width: 88px !important;
+    max-height: 88px !important;
+    /* FIX 2026-07-19: themes/LESS ainda aplica flex:0 0 36px no ícone — conflita com box 88px (H20). */
+    flex: 0 0 88px !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .awa-category-carousel__icon
+    :is(picture, img, svg) {
+    display: block !important;
+    width: 88px !important;
+    height: 88px !important;
+    min-width: 88px !important;
+    min-height: 88px !important;
+    max-width: 88px !important;
+    max-height: 88px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+}
+
+/* H20b: tablet também 88px — o downscale 64px em ≤991 revertia o fix e
+   perdia para head-preload/polish (evidência CDP @914: icon box 64). */
+@media (max-width: 991px) {
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .content-top-home
+        .awa-category-carousel__icon,
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .content-top-home
+        .awa-category-carousel__icon
+        :is(picture, img, svg) {
+        width: 88px !important;
+        height: 88px !important;
+        min-width: 88px !important;
+        min-height: 88px !important;
+        max-width: 88px !important;
+        max-height: 88px !important;
+    }
+}
+
+/* =====================================================================
+   H21 (2026-07-17): category carousel arrow overlap (area 1936 → 0)
+   Viewport tinha padding 52px mas overflow-x:visible — card vazava no gutter.
+   + hide label "Avaliação:" nos cards (ruído ao lado das estrelas).
+   H21b (2026-07-17): no mobile o gutter 58px desalinhava Bauletos (left=74px)
+   vs título (left=16px). Gutter só desktop; mobile padding 0 + scroll livre.
+   ===================================================================== */
+@layer awa-visual-priority {
+    /* 6× #html-body: vence align-grid terminal no race do CSS gate */
+    html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .top-home-content--category-carousel
+        .awa-category-carousel__viewport {
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+        padding-inline: 0 !important;
+    }
+
+    @media (min-width: 768px) {
+        html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+            .page-wrapper
+            .top-home-content--category-carousel
+            .awa-category-carousel__viewport {
+            padding-inline: 8px !important;
+        }
+    }
+
+    @media (max-width: 767px) {
+        html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+            .page-wrapper
+            .top-home-content--category-carousel
+            :is(.awa-category-carousel__prev, .awa-category-carousel__next) {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+    }
+
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .top-home-content--category-carousel
+        .awa-category-carousel__track {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        max-width: 100% !important;
+        overscroll-behavior-x: contain !important;
+    }
+
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .top-home-content--category-carousel
+        .awa-category-carousel__prev {
+        inset-inline-start: 4px !important;
+        left: 4px !important;
+    }
+
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .top-home-content--category-carousel
+        .awa-category-carousel__next {
+        inset-inline-end: 4px !important;
+        right: 4px !important;
+    }
+    /* H21c desktop: setas absolute nas laterais (vence static/relative quebrados) */
+    @media (min-width: 768px) {
+        html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+            .page-wrapper
+            .top-home-content--category-carousel
+            .awa-category-carousel__viewport {
+            position: relative !important;
+            display: block !important;
+        }
+
+        html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+            .page-wrapper
+            .top-home-content--category-carousel
+            :is(.awa-category-carousel__prev, .awa-category-carousel__next) {
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 3 !important;
+            display: inline-flex !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            margin: 0 !important;
+        }
+
+        html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+            .page-wrapper
+            .top-home-content--category-carousel
+            .awa-category-carousel__prev {
+            inset-inline-start: 4px !important;
+            left: 4px !important;
+            right: auto !important;
+        }
+
+        html body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+            .page-wrapper
+            .top-home-content--category-carousel
+            .awa-category-carousel__next {
+            inset-inline-end: 4px !important;
+            right: 4px !important;
+            left: auto !important;
+        }
+    }
+
+
+    /* H21B: label "Avaliação:" — sr-only nos product cards da home */
+    html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+        .page-wrapper
+        .content-top-home
+        .rating-summary
+        > .label {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
+}
+
+/* =====================================================================
+   H23 (2026-07-17): promo B2B tablet (768–991)
+   Evidência CDP @924px: plugin escondia lead-long; impeccable esconde
+   lead-short (@min-width:768, absolute/-9999) → só CTA. Restaurar
+   lead-long com ellipsis + altura 32px (textH/barH alinhados).
+   ===================================================================== */
+@media (min-width: 768px) and (max-width: 991px) {
+    html body#html-body#html-body#html-body.cms-index-index.page-layout-1column
+        .page-wrapper
+        .awa-site-header
+        #awa-b2b-promo-bar.awa-b2b-promo-bar {
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        overflow: hidden !important;
+    }
+
+    html body#html-body#html-body#html-body.cms-index-index.page-layout-1column
+        .page-wrapper
+        .awa-site-header
+        #awa-b2b-promo-bar.awa-b2b-promo-bar
+        :is(.awa-b2b-promo-bar__inner, .awa-b2b-promo-bar__layout, .awa-b2b-promo-bar__text) {
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        line-height: 32px !important;
+        overflow: hidden !important;
+        align-items: center !important;
+    }
+
+    html body#html-body#html-body#html-body.cms-index-index.page-layout-1column
+        .page-wrapper
+        .awa-site-header
+        #awa-b2b-promo-bar.awa-b2b-promo-bar
+        .awa-b2b-promo-bar__text {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        min-width: 0 !important;
+        max-width: calc(100% - 48px) !important;
+        white-space: nowrap !important;
+    }
+
+    html body#html-body#html-body#html-body.cms-index-index.page-layout-1column
+        .page-wrapper
+        .awa-site-header
+        #awa-b2b-promo-bar.awa-b2b-promo-bar
+        .awa-b2b-promo-bar__text
+        > .awa-b2b-promo-bar__lead {
+        display: inline-flex !important;
+        align-items: center !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 42% !important;
+        height: auto !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    /* Vence plugin tablet que forçava display:none no lead-long */
+    html body#html-body#html-body#html-body.cms-index-index.page-layout-1column
+        .page-wrapper
+        .awa-site-header
+        #awa-b2b-promo-bar.awa-b2b-promo-bar
+        .awa-b2b-promo-bar__text
+        > .awa-b2b-promo-bar__lead
+        .awa-b2b-promo-bar__lead-long {
+        display: inline-block !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        visibility: visible !important;
+        width: auto !important;
+        height: auto !important;
+        position: static !important;
+        inset: auto !important;
+        font-size: 12px !important;
+        line-height: 32px !important;
+    }
+
+    html body#html-body#html-body#html-body.cms-index-index.page-layout-1column
+        .page-wrapper
+        .awa-site-header
+        #awa-b2b-promo-bar.awa-b2b-promo-bar
+        .awa-b2b-promo-bar__cta {
+        display: inline-flex !important;
+        align-items: center !important;
+        flex: 0 0 auto !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        max-height: 28px !important;
+        line-height: 1 !important;
+        padding-block: 0 !important;
+    }
+
+    html body#html-body#html-body#html-body.cms-index-index.page-layout-1column
+        .page-wrapper
+        .awa-site-header
+        #awa-b2b-promo-bar.awa-b2b-promo-bar
+        .awa-b2b-promo-bar__cta
+        .awa-b2b-promo-bar__cta-long {
+        display: inline !important;
+    }
+}
+
+
+/* H25B — unlayered terminal (vence @layer awa-visual-priority + critical-home cache) */
+@media (min-width: 768px) and (max-width: 991px) {
+    html body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
+        #footer.footer-container > .container > .row.rowFlexMargin {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+@media (min-width: 992px) {
+    html body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer, .page-footer)
+        #footer.footer-container > .container > .row.rowFlexMargin {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+/* =====================================================================
+   H27 (2026-07-17): desktop sticky header + minicart
+   is-sticky ficava position:relative + contain/will-change prendiam o painel.
+   ===================================================================== */
+@layer awa-visual-priority {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
+        .page-wrapper
+        .awa-site-header[data-awa-header-mode="default"]
+        .header-wrapper-sticky.is-sticky,
+    html body#html-body#html-body#html-body#html-body#html-body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
+        .page-wrapper
+        .awa-site-header[data-awa-header-mode="default"]
+        .header-wrapper-sticky.awa-is-sticky {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 1000 !important;
+        overflow: visible !important;
+        contain: none !important;
+        will-change: auto !important;
+        transform: none !important;
+    }
+}
+/*awa-footer-density-desktop-r9e*/@media (min-width:768px){html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(footer,.page-footer,.page_footer) :is(a,.velaFooterLinks a,ul.velaFooterLinks a,ul.velaFooterLinks li>a){min-height:0!important;height:auto!important;padding-block:4px!important;padding-inline:0!important;line-height:1.35!important}}
+
+/* PIXEL-QA 2026-07-25: eixo footer/catalogo — desktop 24 / mobile 16 (contrato).
+   Vence awa-footer-terminal-lock (7×#html-body + padding 16 hardcoded). */
+@media (max-width:767px){
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(#footer.footer-container,.footer-bottom,footer.page-footer),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer{
+padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important;box-sizing:border-box!important}
+}
+@media (min-width:768px){
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(#footer.footer-container,.footer-bottom,footer.page-footer),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) #footer.footer-container{
+padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;box-sizing:border-box!important}
+/* Página /catalogo (catalogo-index-index): alinhar page-main ao eixo 24 */
+html body#html-body#html-body#html-body.catalogo-index-index .page-wrapper .page-main,
+html body#html-body#html-body#html-body.awa-catalog-page .page-wrapper .page-main,
+html body#html-body#html-body#html-body.catalogo-index-index .page-wrapper #maincontent,
+html body#html-body#html-body#html-body.awa-catalog-page .page-wrapper #maincontent{
+padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;box-sizing:border-box!important}
+}
+@media (max-width:767px){
+html body#html-body#html-body#html-body.catalogo-index-index .page-wrapper .page-main,
+html body#html-body#html-body#html-body.awa-catalog-page .page-wrapper .page-main,
+html body#html-body#html-body#html-body.catalogo-index-index .page-wrapper #maincontent,
+html body#html-body#html-body#html-body.awa-catalog-page .page-wrapper #maincontent{
+padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important;box-sizing:border-box!important}
+}
+
+/* PIXEL-QA 2026-07-25b: page-footer carrega o eixo; filhos sem pad horizontal (evita 24+24). */
+@media (min-width:768px){
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer){
+padding-inline:24px!important;padding-left:24px!important;padding-right:24px!important;box-sizing:border-box!important}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer :is(#footer.footer-container,.footer-container,.footer-bottom,.footer-bottom-inner),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(#footer.footer-container,.footer-container,.footer-bottom,.footer-bottom-inner){
+padding-left:0!important;padding-right:0!important;padding-inline:0!important;box-sizing:border-box!important}
+}
+@media (max-width:767px){
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer){
+padding-inline:16px!important;padding-left:16px!important;padding-right:16px!important;box-sizing:border-box!important}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer :is(#footer.footer-container,.footer-container,.footer-bottom,.footer-bottom-inner),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(#footer.footer-container,.footer-container,.footer-bottom,.footer-bottom-inner){
+padding-left:0!important;padding-right:0!important;padding-inline:0!important;box-sizing:border-box!important}
+}
+
+/* PIXEL-QA 2026-07-25c: footer no mesmo container 1280 + filhos sem pad-inline. */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,footer.page-footer){
+max-width:1280px!important;width:100%!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box!important}
+@media (max-width:767px){
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,footer.page-footer){
+padding-left:16px!important;padding-right:16px!important;padding-inline:16px!important}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer :is(#footer,#footer.footer-container,.footer-container,.footer-bottom,.footer-bottom-inner,.page_footer),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer #footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer .footer-bottom{
+padding-left:0!important;padding-right:0!important;padding-inline-start:0!important;padding-inline-end:0!important}
+}
+@media (min-width:768px){
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,footer.page-footer){
+padding-left:24px!important;padding-right:24px!important;padding-inline:24px!important}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer :is(#footer,#footer.footer-container,.footer-container,.footer-bottom,.footer-bottom-inner),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer #footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer .footer-bottom{
+padding-left:0!important;padding-right:0!important;padding-inline-start:0!important;padding-inline-end:0!important}
+}
+
+@layer awa-visual-priority{
+/* PIXEL-QA 2026-07-25d: eixo footer = page-footer; aninhados pad-inline 0 (vence layer). */
+html body#html-body .page-wrapper footer.page-footer{
+max-width:1280px!important;width:100%!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box!important}
+@media (max-width:767px){
+html body#html-body .page-wrapper footer.page-footer{padding-left:16px!important;padding-right:16px!important;padding-inline:16px!important}
+html body#html-body .page-wrapper footer.page-footer :is(.page_footer,#footer,#footer.footer-container,.footer-container,.footer-bottom,.footer-bottom-inner),
+html body#html-body .page-wrapper footer.page-footer > .page_footer,
+html body#html-body .page-wrapper footer.page-footer .footer-bottom{
+padding-left:0!important;padding-right:0!important;padding-inline:0!important;padding-inline-start:0!important;padding-inline-end:0!important}
+}
+@media (min-width:768px){
+html body#html-body .page-wrapper footer.page-footer{padding-left:24px!important;padding-right:24px!important;padding-inline:24px!important}
+html body#html-body .page-wrapper footer.page-footer :is(.page_footer,#footer,#footer.footer-container,.footer-container,.footer-bottom,.footer-bottom-inner),
+html body#html-body .page-wrapper footer.page-footer > .page_footer,
+html body#html-body .page-wrapper footer.page-footer .footer-bottom{
+padding-left:0!important;padding-right:0!important;padding-inline:0!important;padding-inline-start:0!important;padding-inline-end:0!important}
+}
+}
+
+@layer awa-visual-priority{
+/* PIXEL-QA 2026-07-25e: footer-bottom pad-inline 0 — 9 IDs para vencer terminal lock. */
+@media (max-width:767px),(min-width:768px){
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer .footer-bottom,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer > .page_footer .footer-bottom,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer :is(.footer-bottom,.footer-bottom-inner),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer > .page_footer,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper footer.page-footer :is(#footer,#footer.footer-container,.footer-container){
+padding-left:0!important;padding-right:0!important;padding-inline:0!important;padding-inline-start:0!important;padding-inline-end:0!important}
+}
+}
+
+/* >>> awa-ui-audit-4.1-2.2-20260726 <<< */
+/*
+ * AWA — Float / cookie collision + UI audit 2026-07-26 (bugs 4.1 + 2.2)
+ *
+ * 4.1 Evidência: WA bottom:15px vs .fixed-bottom h=72 → overlap.
+ *     Fix anterior com seletor fraco perdia; este usa bottom calc(72+12+safe).
+ *
+ * 2.2 Evidência CDP: alinhamento quiet perdia para align-grid com
+ *     body#html-body×5 + .wrapper.grid.products-grid .info-price (min-height:64).
+ *     Este patch usa #html-body×6 + caminho .products-grid/.info-price.
+ */
+@media (max-width: 991px) {
+    html body#html-body.awa-cookie-banner-active .page-wrapper .awa-dark-mode-toggle {
+        bottom: calc(var(--awa-cookie-banner-height, 230px) + 20px) !important;
+    }
+
+    html body#html-body .page-wrapper .awa-whatsapp-float,
+    html body#html-body .page-wrapper a.awa-whatsapp-float,
+    html body#html-body a.awa-whatsapp-float {
+        bottom: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        right: 16px !important;
+        z-index: 10002 !important;
+    }
+
+    html body#html-body.awa-cookie-banner-active .page-wrapper .awa-whatsapp-float,
+    html body#html-body.awa-cookie-banner-active .page-wrapper a.awa-whatsapp-float,
+    html body#html-body.awa-cookie-banner-active a.awa-whatsapp-float {
+        bottom: calc(72px + 12px + var(--awa-cookie-banner-height, 0px) + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + var(--awa-cookie-banner-height, 0px) + env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
+
+/* 2.2 — superar align-grid (#html-body×5) com ×6 + caminho grid/info-price */
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .info-price {
+    min-height: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .info-price
+    .b2b-login-to-see-price,
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price {
+    align-items: flex-start !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    gap: 2px !important;
+    justify-content: flex-start !important;
+    margin: 4px 0 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    text-align: start !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price__title {
+    color: var(--awa-text-muted, #64748b) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    text-transform: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price__message {
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 1 !important;
+    color: var(--awa-primary, #b73337) !important;
+    display: -webkit-box !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+
+/* H-pager-rwd1 (2026-08-02) — UNLAYERED all breakpoints.
+   CDP tablet/desktop: toolbar border-block 1px (themes+defer), amount below,
+   chrome inconsistente vs mobile. Mesmo contrato visual em 375/768/1280. */
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim {
+    border: 0 !important;
+    border-block: 0 !important;
+    border-block-start: 0 !important;
+    border-block-end: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin-block: 12px 0 !important;
+    padding: 0 !important;
+    padding-block: 0 !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    > .center {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    .toolbar-amount {
+    order: -1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    text-align: center !important;
+    width: 100% !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    color: var(--awa-text-muted, var(--awa-text-secondary, #64748b)) !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    .pages {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    .pages
+    .items.pages-items {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    .pages
+    .items.pages-items
+    > li.item {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    .pages
+    .items.pages-items
+    > li.item
+    :is(a, strong, a.page, strong.page, a.action) {
+    margin: 0 !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    .pages
+    .items.pages-items
+    > li.item:not(.pages-item-next):not(.pages-item-previous)
+    :is(a, strong) {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    line-height: 38px !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    .pages
+    .items.pages-items
+    > li.pages-item-next
+    a.action.next,
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    .toolbar.toolbar-products--bottom-slim
+    .pages
+    .items.pages-items
+    > li.pages-item-previous
+    a.action.previous {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 14px !important;
+    white-space: nowrap !important;
+    line-height: 38px !important;
+}
+
+@media (max-width: 767px) {
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+        .page-wrapper
+        .toolbar.toolbar-products--bottom-slim {
+        margin-block: 8px 0 !important;
+        gap: 8px !important;
+    }
+
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+        .page-wrapper
+        .toolbar.toolbar-products--bottom-slim
+        .pages
+        .items.pages-items {
+        gap: 4px !important;
+    }
+
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+        .page-wrapper
+        .toolbar.toolbar-products--bottom-slim
+        .pages
+        .items.pages-items
+        > li.item:not(.pages-item-next):not(.pages-item-previous)
+        :is(a, strong) {
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        line-height: 34px !important;
+    }
+
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+        .page-wrapper
+        .toolbar.toolbar-products--bottom-slim
+        .pages
+        .items.pages-items
+        > li.pages-item-next
+        a.action.next,
+    html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+        .page-wrapper
+        .toolbar.toolbar-products--bottom-slim
+        .pages
+        .items.pages-items
+        > li.pages-item-previous
+        a.action.previous {
+        height: 36px !important;
+        min-height: 36px !important;
+        padding: 0 10px !important;
+        line-height: 34px !important;
+    }
+}
+
+/* H-badge-clip (2026-08-02) — UNLAYERED.
+   Root cause: themes.min.css `.hot-onsale{max-width:50px}` clips long labels
+   ("LANÇAMENTO DISTRIBUIDORA"). CDP Cavaletes mobile: rendered 50px vs natural ~152px. */
+html body#html-body .page-wrapper .item-product .hot-onsale {
+    max-width: calc(100% - 16px) !important;
+    width: auto !important;
+    z-index: 5 !important;
+}
+
+html body#html-body .page-wrapper .item-product .hot-onsale :is(.onsale, .onsale.new-lable, .new-lable) {
+    max-width: 100% !important;
+    width: auto !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-height: 1.25 !important;
+}
+
+/* H-pdp-thumbs-row (2026-08-02) — UNLAYERED.
+   Root cause: awa-defer-global `.fotorama__nav--dots .fotorama__nav__shaft{flex-wrap:wrap}`
+   + thumbs forced visible → grade ~364px no mobile; buy-box abaixo da dobra.
+   CDP Titan PDP 375px: navH 364 → alvo <=80; thumbs 1 linha; dots ocultos se há thumbs. */
+html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav--dots .fotorama__nav__shaft {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    max-inline-size: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Thumbs já forçados visíveis no tema; dots duplicam chrome e somam altura. */
+@media (max-width: 767px) {
+    html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav--dots .fotorama__nav__frame--dot {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+}
+
+html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav--dots {
+    max-height: 88px !important;
+    overflow: hidden !important;
+}
+
+/* H-pdp-gallery-lcp (2026-08-02) — UNLAYERED.
+   :has(.fotorama-item) escondia img LCP (critical-fold + align-grid 5x #html-body
+   com width:0) enquanto _block-content-loading → caixa vazia.
+   CDP: ph.h=18, img display:none/width:0, fotorama-item sem imgs, api=null. */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product.media .gallery-placeholder._block-content-loading,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-main .product.media .gallery-placeholder._block-content-loading {
+    min-height: clamp(300px, 82vw, 460px) !important;
+    height: auto !important;
+    overflow: hidden !important;
+    display: block !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product.media .gallery-placeholder._block-content-loading > :is(img.gallery-placeholder__image, .gallery-placeholder__image),
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-main .product.media .gallery-placeholder._block-content-loading > :is(img.gallery-placeholder__image, .gallery-placeholder__image) {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    overflow: visible !important;
+    object-fit: contain !important;
+}
+
+/* H-pdp-shell10-layer (2026-08-02) — MUST stay in awa-visual-priority.
+   CDP repro shell9: ph border+radius inside .main-detail>.row = duas caixas.
+   Volta ao shell unificado: 1 moldura no row; galeria flush; stage/ph sem borda. */
+@layer awa-visual-priority {
+  html body#html-body.catalog-product-view .page-wrapper .awa-pdp-related,
+  html body#html-body.catalog-product-view .page-wrapper .column.main > .awa-pdp-related {
+    margin-top: 12px !important;
+    margin-block-start: 12px !important;
+    padding-top: 12px !important;
+    padding-block-start: 12px !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-block-start: 0 !important;
+    box-shadow: none !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media {
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    /* shell13: CDP repro13 — flex gap 16px entre skip-wrappers (h=0) e gallery
+       criava inset 16+16=32px (stageTopInset 17). Zerar gap no shell unificado. */
+    gap: 0 !important;
+    row-gap: 0 !important;
+    column-gap: 0 !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .gallery-placeholder,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .gallery-placeholder:has(.fotorama__img),
+  html body#html-body.catalog-product-view .page-wrapper .product.media .gallery-placeholder:has(.fotorama-item) {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama-item,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama {
+    background: var(--awa-bg, #fff) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: var(--awa-bg, #fff) !important;
+    animation: none !important;
+    border-radius: 0 !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav-wrap {
+    background: var(--awa-bg, #fff) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__thumb {
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav__frame--thumb {
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav__frame--thumb.fotorama__active {
+    border: 2px solid var(--awa-primary, var(--awa-red)) !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* H-pdp-shell11-layer (2026-08-02) — CDP pre-shell11:
+     H-THUMB-BORDER-EL: .fotorama__thumb-border 1px + frame active 2px = anel duplo.
+     H-INFO-NEST: overview/sku 1px (declutter :is colado pelo minify).
+     H-DETAIL-BORDER: .product-info-main border-top 1px dentro da card.
+     H-GALLERY-LETTERBOX: stage 615×456 vs img 456×456.
+     Sem :is() descendente — minify come o espaço antes de ':'. */
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__thumb-border {
+    display: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product-info-main,
+  html body#html-body.catalog-product-view .page-wrapper .detail-info.product-info-main,
+  html body#html-body.catalog-product-view .page-wrapper .detail-info {
+    border: 0 !important;
+    border-top: 0 !important;
+    border-block-start: 0 !important;
+    box-shadow: none !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product-info-main .product.attribute.overview,
+  html body#html-body.catalog-product-view .page-wrapper .product-info-main .product.attribute.sku,
+  html body#html-body.catalog-product-view .page-wrapper .product-info-main .product.alert.price {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-social-links,
+  html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-social-links .action.print-link,
+  html body#html-body.catalog-product-view .page-wrapper .product-info-main .product-social-links .fa {
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  /* shell12b: CDP repro12 — active thumb outline+border = anel duplo;
+     .fotorama__wrap bg slate-100 parece 2ª caixa dentro do row. */
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav__frame--thumb,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav__frame--thumb.fotorama__active,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav__frame--thumb:focus,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav__frame--thumb:focus-visible {
+    outline: none !important;
+    outline-width: 0 !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__wrap,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama-item,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav-wrap,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  /* shell12: do NOT lock aspect-ratio 1/1 — portrait assets need taller stage (CDP sideGap 77). */
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage {
+    aspect-ratio: auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    min-height: 0 !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage .fotorama__stage__shaft,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage .fotorama__stage__frame {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage .fotorama__img,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__stage img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav-wrap,
+  html body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav {
+    margin-top: 0 !important;
+    margin-block-start: 0 !important;
+    padding-top: 0 !important;
+    padding-block-start: 0 !important;
+    padding-bottom: 0 !important;
+    padding-block-end: 0 !important;
+  }
+}
+
+/* H-pdp-shell13-gap (2026-08-02) — UNLAYERED.
+  flex-grid-flow/defer-global setam .product.media{gap:var(--gap-tight)} unlayered;
+  regra em @layer awa-visual-priority perde. 5x #html-body vence. */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product.media {
+  gap: 0 !important;
+  row-gap: 0 !important;
+  column-gap: 0 !important;
+}
+
+/* H-pdp-shell14-nav (2026-08-02) — UNLAYERED.
+   CDP repro14: nav-wrap+nav margin-top 8+8 e pb 4 fora do contentHeight do
+   awa-pdp-gallery-sync → wrap 703 vs 711, thumbs clipped 7px (row overflow:hidden). */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav-wrap,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product.media .fotorama__nav {
+  margin-top: 0 !important;
+  margin-block-start: 0 !important;
+  margin-bottom: 0 !important;
+  margin-block-end: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-block-start: 0 !important;
+  padding-block-end: 0 !important;
+}
+
+/* H-pdp-b2b-gate-clean + H-pdp-tocart-green (2026-08-03) — UNLAYERED.
+   CDP pre: gate h=172 bg pink border 1px pad 16; tocart bg primary red.
+   Pedido: fundo branco, sem borda, centrado, compacto; ATC verde (grandes lojas). */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price.price-box,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .product-info-price .b2b-login-to-see-price {
+  background: var(--awa-bg, #fff) !important;
+  background-color: var(--awa-bg, #fff) !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-block: 0 !important;
+  border-inline: 0 !important;
+  border-inline-start: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  gap: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price > *,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price .b2b-register-cta,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price .price-label {
+  align-self: center !important;
+  text-align: center !important;
+  margin-inline: auto !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price a[href*="login"],
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price > a:first-of-type {
+  width: 100% !important;
+  max-width: 100% !important;
+  justify-content: center !important;
+}
+
+/* H-pdp-b2b-gate-compact (2026-08-03) — UNLAYERED.
+   CDP: gate h=138 (content 92 + gap 8 + child mt 8+8). Kill duplicate
+   margins; densify gap; register as text link with 44px tap via padding. */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price.price-box,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .product-info-price .b2b-login-to-see-price {
+  gap: 6px !important;
+  row-gap: 6px !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price > *,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price > a,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price .b2b-register-cta {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  margin-inline: auto !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .product-info-price .b2b-login-to-see-price::before {
+  /* H-pdp-b2b-gate-no-eyebrow (shell21): remove "Loja exclusiva…" pseudo */
+  content: none !important;
+  display: none !important;
+  margin: 0 !important;
+  margin-block: 0 !important;
+  padding: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .b2b-login-to-see-price .b2b-register-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  height: auto !important;
+  padding-block: 10px !important;
+  padding-inline: 8px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main .product-info-price {
+  gap: 8px !important;
+  row-gap: 8px !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .products-grid .item-product .info-price .b2b-login-to-see-price,
+html body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper li.item-product .b2b-login-to-see-price {
+  /* H-plp-b2b-gate-clean (shell22): vence head-preload border+pad e tint rosa */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  gap: 2px !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  text-align: start !important;
+}
+
+@layer awa-cta-green {
+  /* H-pdp-tocart-green: layered !important beats defer-global layered red */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main button#product-addtocart-button,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main button.action.tocart,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-add-form button.tocart,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main button#product-addtocart-button.action.primary {
+  background: var(--awa-success, #16a34a) !important;
+  background-color: var(--awa-success, #16a34a) !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-color: var(--awa-success, #16a34a) !important;
+  color: var(--awa-bg, #fff) !important;
+  box-shadow: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main button#product-addtocart-button:hover,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main button.action.tocart:hover,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-add-form button.tocart:hover,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main button#product-addtocart-button:focus-visible,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product-info-main button.action.tocart:focus-visible {
+  background: var(--awa-success-mid, var(--awa-success-dark, #15803d)) !important;
+  background-color: var(--awa-success-mid, var(--awa-success-dark, #15803d)) !important;
+  background-image: none !important;
+  color: var(--awa-bg, #fff) !important;
+  box-shadow: none !important;
+}
+
+/* H-pdp-crumb-align (2026-08-03) — UNLAYERED.
+   CDP: span left 25 vs card 33.5 (Δ-8.5); gap crumb→main 28 =
+   page-main pt12 + .page.messages mt8+mb8 (h=0). Align with #maincontent
+   padding-inline 24px; kill empty messages margins; densify desktop crumbs. */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs {
+  max-width: min(100%, 1280px) !important;
+  width: 100% !important;
+  margin-inline: auto !important;
+  padding-inline: 24px !important;
+  box-sizing: border-box !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs .container {
+  padding-inline: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+  margin-inline: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs .row {
+  margin-inline: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs [class*="col-"] {
+  padding-inline: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper #maincontent.page-main .page.messages,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .page-main > .page.messages {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper #maincontent.page-main .page.messages:not(:has(.message)),
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .page-main > .page.messages:empty {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+@media (min-width: 768px) {
+  html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs .items .item,
+  html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs .breadcrumbs .item {
+    min-height: 0 !important;
+    min-block-size: 0 !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs .items {
+    min-height: 0 !important;
+    padding-block-end: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs .items .item > a,
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .nav-breadcrumbs .breadcrumbs .item > a {
+  padding-inline: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* H-pdp-shell16-col-stretch — layered copy (beats other @layer !important) */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .main-detail > .row {
+  align-items: flex-start !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .main-detail > .row > [class*="col-"] {
+  align-self: flex-start !important;
+  height: auto !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product.media {
+  height: auto !important;
+  max-height: none !important;
+  flex: 0 0 auto !important;
+  flex-grow: 0 !important;
+}
+
+}
+
+/* H-pdp-shell16-col-stretch (2026-08-03) — UNLAYERED.
+   CDP proceed-1224: mediaH 641 vs stage+nav 528 → emptyBelowThumbs 113.
+   Cause: row align-items:stretch + .product.media flex-grow:1 (and
+   align-grid height:100%). Probe flex-start + flex-grow:0 → empty 0. */
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .main-detail > .row {
+  align-items: flex-start !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .main-detail > .row > [class*="col-"] {
+  align-self: flex-start !important;
+  height: auto !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper .product.media {
+  height: auto !important;
+  max-height: none !important;
+  flex: 0 0 auto !important;
+  flex-grow: 0 !important;
 }

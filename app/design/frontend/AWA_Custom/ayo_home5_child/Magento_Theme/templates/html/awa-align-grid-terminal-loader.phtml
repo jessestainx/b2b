@@ -4,16 +4,30 @@
  * AWA Align Grid Terminal — última camada CSS de grid/alinhamento (2026-06-11).
  * Carrega após awa-bundle-async-distill-lock em todas as páginas relevantes.
  *
+ * Em seguida emite awa-m2-visual-ssot (fonte canônica nas rotas com este loader)
+ * para vencer a cascata terminal (rating, shelf, carousel, cards, badge).
+ * OptimizeHeadStylesPlugin::consolidateM2VisualSsotTerminal() deduplica e garante
+ * a mesma folha nas rotas sem loader (Home/PLP). BUG-SHELL-SSOT-DUP-001.
+ *
  * @var \Magento\Framework\View\Element\Template $block
  */
-$alignGridUrl = $block->getViewFileUrl('css/awa-align-grid-terminal-2026-06-11.min.css');
-$alignGridVer = '20260708-plp-b2b-gate-align-r7';
+$alignGridUrl = $block->getViewFileUrl(
+    'css/' . \GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss::ALIGN_GRID_CSS_FILE
+) . \GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss::ALIGN_GRID_QUERY;
 $homeDensityGridUrl = $block->getViewFileUrl('css/awa-home-density-grid-20260611.min.css');
-$homeDensityGridVer = '20260623-shell1280-r20';
+$homeDensityGridVer = '20260716-nodark-r3';
+$m2VisualSsotUrl = $block->getViewFileUrl(
+    'css/' . \GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss::M2_VISUAL_SSOT_FILE
+) . \GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss::M2_VISUAL_SSOT_QUERY;
 ?>
 <link rel="stylesheet"
-      href="<?= $block->escapeUrl($alignGridUrl) ?>?v=<?= $block->escapeHtmlAttr($alignGridVer) ?>"
+      href="<?= $block->escapeUrl($alignGridUrl) ?>"
       media="all"
       data-awa-align-grid-terminal="1"
       data-awa-bundle="align-grid-terminal"/>
+<link rel="stylesheet"
+      href="<?= $block->escapeUrl($m2VisualSsotUrl) ?>"
+      media="all"
+      data-awa-m2-visual-ssot="1"
+      data-awa-bundle="m2-visual-ssot"/>
 <?php /* home-density-grid: injetado só no body-end via OptimizeHeadStylesPlugin (evita duplicata na home) */ ?>

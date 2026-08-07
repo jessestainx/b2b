@@ -30,14 +30,29 @@ $showReview = (bool) $this->getConfig('review');
 $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 $sectionTitle = trim((string) $this->getConfig('title'));
 $carouselLabel = $sectionTitle !== '' ? $sectionTitle : (string) __('Mais Vendidos');
-$b2bPriceGate = $this->helper(\GrupoAwamotos\B2B\Helper\Data::class);
+/** @var \GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel|null $bestsellerCard */
+$bestsellerCard = $block->getData('bestseller_card_view_model');
+$hasCardVm = $bestsellerCard instanceof \GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel;
 
 /** @var \GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay|null $homeShelfDisplay */
 $homeShelfDisplay = $block->getData('home_shelf_display_view_model');
 $renderAddToCart = $homeShelfDisplay instanceof \GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay
     ? $homeShelfDisplay->shouldRenderAddToCart($showCart, $isHomePage)
     : $showCart;
-$pricingHelper = $this->helper(\Magento\Framework\Pricing\Helper\Data::class);
+
+// Resolve uma vez — evita $this->helper() repetido no loop (deprecated Magento).
+$wishlistAllowed = $hasCardVm
+    ? $bestsellerCard->isWishlistAllowed()
+    : (!$isHomePage ? (bool) $this->helper(\Magento\Wishlist\Helper\Data::class)->isAllow() : false);
+$canViewPrices = $hasCardVm
+    ? $bestsellerCard->canViewPrices()
+    : (bool) $this->helper(\GrupoAwamotos\B2B\Helper\Data::class)->canViewPrices();
+$priceGateHeadline = $hasCardVm
+    ? $bestsellerCard->getPriceGateHeadline()
+    : (string) $this->helper(\GrupoAwamotos\B2B\Helper\Data::class)->getPriceGateHeadline();
+$priceGateDescription = $hasCardVm
+    ? $bestsellerCard->getPriceGateDescription()
+    : (string) $this->helper(\GrupoAwamotos\B2B\Helper\Data::class)->getPriceGateDescription();
 
 $shelfViewportKey = (string) ($block->getData('awa_shelf_viewport_key') ?: '');
 if ($shelfViewportKey === '' && $block->getData('category_ids')) {
@@ -117,8 +132,13 @@ $usingSalesFallback = $block instanceof \GrupoAwamotos\Theme\Block\HomeBestselle
                     $specialPriceToDate = $_product->getSpecialToDate();
                     $newFromDate = $_product->getNewsFromDate();
                     $newToDate = $_product->getNewsToDate();
-                    $isSale = $specialprice && ($specialPriceFromDate <= $now && $specialPriceToDate >= $now);
-                    $isNew = !$isSale && ($newFromDate <= $now && $newToDate >= $now);
+                    $isSale = $specialprice
+                        && ($specialPriceFromDate === null || $specialPriceFromDate === '' || $specialPriceFromDate <= $now)
+                        && ($specialPriceToDate === null || $specialPriceToDate === '' || $specialPriceToDate >= $now);
+                    $isNew = !$isSale
+                        && $newFromDate !== null && $newFromDate !== ''
+                        && $newFromDate <= $now
+                        && ($newToDate === null || $newToDate === '' || $newToDate >= $now);
 
                     if ($pos !== null) {
                         $position = ' style="left:' . $productImage->getWidth() . 'px;'
@@ -152,8 +172,8 @@ $usingSalesFallback = $block instanceof \GrupoAwamotos\Theme\Block\HomeBestselle
                                 <?php if (!$isHomePage): ?>
                                 <div class="actions-secondary">
                                     <ul class="product-extra-link add-to-links">
-                                        <li class="wishlist-product">
-                                            <?php if ($this->helper('Magento\Wishlist\Helper\Data')->isAllow()): ?>
+                        <li class="wishlist-product">
+                            <?php if ($wishlistAllowed): ?>
                                             <a href="#"
                                                class="wishlist-link action towishlist"
                                                data-post='<?= /* @noEscape */ $block->getAddToWishlistParams($_product) ?>'
@@ -167,7 +187,7 @@ $usingSalesFallback = $block instanceof \GrupoAwamotos\Theme\Block\HomeBestselle
                                         <li class="quickview-product">
                                             <a data-role="quickview-button"
                                                data-id="<?= (int) $_product->getId() ?>"
-                                               href="javascript:void(0);"
+                                               href="<?= $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())) ?>"
                                                data-href="<?= $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())) ?>"
                                                class="quickview-link"
                                                title="<?= $block->escapeHtmlAttr(__('Visualização Rápida')) ?>"
@@ -175,11 +195,10 @@ $usingSalesFallback = $block instanceof \GrupoAwamotos\Theme\Block\HomeBestselle
                                                 <i class="fa fa-eye" aria-hidden="true"></i>
                                             </a>
                                         </li>
-                                        <li class="compare-product">
-                                            <?php $compareHelper = $this->helper('Magento\Catalog\Helper\Product\Compare'); ?>
-                                            <a href="#"
-                                               class="compare-link action tocompare"
-                                               data-post='<?= /* @noEscape */ $compareHelper->getPostDataParams($_product) ?>'
+                        <li class="compare-product">
+                            <a href="#"
+                               class="compare-link action tocompare"
+                               data-post='<?= /* @noEscape */ ($hasCardVm ? $bestsellerCard->comparePostData($_product) : $this->helper(\Magento\Catalog\Helper\Product\Compare::class)->getPostDataParams($_product)) ?>'
                                                title="<?= $block->escapeHtmlAttr(__('Adicionar ao Comparador')) ?>"
                                                aria-label="<?= $block->escapeHtmlAttr(__('Adicionar ao Comparador')) ?>">
                                                 <i class="fa fa-retweet" aria-hidden="true"></i>
@@ -236,9 +255,9 @@ $usingSalesFallback = $block instanceof \GrupoAwamotos\Theme\Block\HomeBestselle
                                     <span class="awa-b2b-sku"><span class="awa-b2b-sku__label">REF: </span><span class="awa-b2b-sku__value"><?= $block->escapeHtml($_product->getSku()) ?></span></span>
                                 <?php endif; ?>
 
+                                <?php if (!$isHomePage): ?>
                                 <?php
-                                // Sprint 2 (2026-06-28): reviews sempre visiveis (rich results + CTR)
-                                // Fallback seguro: se Magento_Review nao estiver presente, oculta sem erro.
+                                // Reviews fora da home (PLP widgets). Home: densidade — nome/SKU/CTA.
                                 $_ratingHtml = '';
                                 try {
                                     $_ratingHtml = $block->getReviewsSummaryHtml($_product, $templateType);
@@ -251,19 +270,26 @@ $usingSalesFallback = $block instanceof \GrupoAwamotos\Theme\Block\HomeBestselle
                                     <?= /* @noEscape */ $_ratingHtml ?>
                                 </div>
                                 <?php endif; ?>
+                                <?php endif; ?>
 
-                                <?php if ($this->getConfig('show_price')): ?>
-                                    <div class="info-price">
-                                    <?php if ($b2bPriceGate->canViewPrices()): ?>
-                                        <?= /* @noEscape */ $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)) ?>
-                                    <?php else: ?>
-                                        <div class="b2b-login-to-see-price<?= $isHomePage ? ' b2b-login-to-see-price--home-card' : '' ?>">
-                                            <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()) ?></span>
-                                            <?php if (!$isHomePage): ?>
-                                                <span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bPriceGate->getPriceGateDescription()) ?></span>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
+                                <?php
+                                // show_price=1 deve renderizar preço OU gate B2B.
+                                // Não usar ($canViewPrices || !$isHomePage): na home o visitante
+                                // ficava só com "Ver produto" (bug 2026-08-07).
+                                $showPriceBlock = (bool) $this->getConfig('show_price');
+                                ?>
+                                <?php if ($showPriceBlock): ?>
+                    <div class="info-price">
+                    <?php if ($canViewPrices): ?>
+                        <?= /* @noEscape */ $hasCardVm
+                            ? $bestsellerCard->priceDisplayHtml($block->getProductPrice($_product))
+                            : $this->helper(\Rokanthemes\Themeoption\Helper\Data::class)->getPriceDisplayCustom($block->getProductPrice($_product)) ?>
+                    <?php else: ?>
+                        <div class="b2b-login-to-see-price">
+                            <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($priceGateHeadline) ?></span>
+                            <span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($priceGateDescription) ?></span>
+                        </div>
+                    <?php endif; ?>
                                     </div>
                                 <?php endif; ?>
                                 <?php if ($isHomePage): ?>

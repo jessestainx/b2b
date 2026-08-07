@@ -20,13 +20,13 @@ html body#html-body:is(.cms-page-view, .cms-noroute-index, .contact-index-index,
     --awa-cms-prose-max: min(100%, 800px);
 }
 
-/* Container — eixo 1280px, mesmo padding-inline das demais superfícies */
+/* Container — eixo 1280px; gutter site-wide 16 mobile / 24 tablet+ (Pixel QA) */
 html body#html-body:is(.cms-page-view, .cms-noroute-index, .contact-index-index, .curriculo-index-index, .curriculo-index-status)
 .page-wrapper :is(#maincontent.page-main.container, .page-main.container, .nav-breadcrumbs) {
     box-sizing: border-box !important;
     margin-inline: auto !important;
     max-width: var(--awa-cms-shell-max) !important;
-    padding-inline: clamp(12px, 2.5vw, 16px) !important;
+    padding-inline: clamp(16px, 3vw, 24px) !important;
     width: 100% !important;
 }
 
@@ -39,6 +39,10 @@ html body#html-body:is(.cms-page-view, .cms-noroute-index, .contact-index-index,
 html body#html-body:is(.cms-page-view, .cms-noroute-index, .contact-index-index, .curriculo-index-index, .curriculo-index-status)
 .page-wrapper .page-main .columns .column.main {
     padding-block: 0 !important;
+    /* SSOT-1 Onda 1: filho sem gutter — padding só em .page-main */
+    padding-inline: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 /* ─── Tier de leitura — prose 800px centralizado ─────────────────────────── */
@@ -152,11 +156,18 @@ html body#html-body.cms-page-view .awa-inst :is(.awa-info, .awa-b2b) {
 /* Tabelas (tabela de descontos B2B etc.) */
 html body#html-body.cms-page-view .awa-inst :is(.awa-table, table) {
     margin-block: var(--awa-cms-gap-md) !important;
+    display: table !important;
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
 }
 
 html body#html-body.cms-page-view .awa-inst :is(.awa-table, table) :is(th, td) {
     padding: var(--awa-cms-gap-sm) var(--awa-cms-gap-md) !important;
     border-color: var(--awa-border, var(--awa-border)) !important;
+    overflow-wrap: anywhere !important;
+    vertical-align: middle !important;
 }
 
 /* FAQ — itens compactos */
@@ -252,7 +263,8 @@ html body#html-body.cms-noroute-index .column.main .awa-404-page {
 @media (max-width: 575px) {
     html body#html-body:is(.cms-page-view, .cms-noroute-index, .contact-index-index, .curriculo-index-index, .curriculo-index-status)
     .page-wrapper :is(#maincontent.page-main.container, .page-main.container) {
-        padding-inline: 12px !important;
+        /* SSOT B: gutter mobile = 16 (não 12) */
+        padding-inline: 16px !important;
     }
 
     html body#html-body.cms-page-view .awa-inst :is(.awa-grid, .awa-hub, .awa-rights) {
@@ -269,4 +281,46 @@ html body#html-body.cms-noroute-index .column.main .awa-404-page {
     }
 }
 
+}
+
+
+/* BUG1 2026-08-03 — Nossas Marcas empty-state + sem H2 duplicado visual */
+html body#html-body.cms-nossas-marcas .column.main .awa-cms-nossas-marcas > h2 {
+    display: none !important;
+}
+html body#html-body.cms-nossas-marcas .awa-brand-empty {
+    margin-block: 16px 24px;
+    padding: 20px 16px;
+    border: 1px dashed color-mix(in srgb, var(--awa-primary, #b73337) 35%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 4%, #fff);
+    text-align: left;
+}
+html body#html-body.cms-nossas-marcas .awa-brand-empty__text {
+    margin: 0 0 12px;
+    color: var(--awa-text, #1a1a1a);
+    font-size: 15px;
+    line-height: 1.45;
+}
+html body#html-body.cms-nossas-marcas .awa-brand-empty__cta {
+    margin: 0;
+}
+html body#html-body.cms-nossas-marcas .awa-brand-empty__cta .action.primary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 4px;
+    background: var(--awa-primary, #b73337);
+    color: #fff !important;
+    text-decoration: none;
+    font-weight: 600;
+}
+html body#html-body.cms-nossas-marcas .awa-brand-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
 }

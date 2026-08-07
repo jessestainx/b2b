@@ -13,5 +13,6 @@
               content="Cadastre sua empresa no portal B2B da AWA Motos. Acesso a preços de atacado, crédito e cotações para revendas de peças para motos."/>
         <!-- register-override.css retirado 2026-06-12: regras em _b2b-register.less + _awa-visual-consolidation -->
         <css src="css/awa-b2b-auth-shell-final.css" order="10000"/>
+        <css src="css/awa-cnpj-autofill.css" order="10001"/>
     </head>
 </page>

@@ -1,0 +1,640 @@
+// =============================================================================
+// HOME-P0 visual fixes - Home/header/footer/carousels
+// Scope fechado para a Home AWA. Nao usar como limpeza de CSS morto.
+// =============================================================================
+
+@awa-home-p0-scope: ~'html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)';
+
+@{awa-home-p0-scope} {
+    // HOME-P0-006 - titulos do footer herdavam branco sobre fundo rosado claro.
+    .page-wrapper :is(.page_footer, .page-footer) :is(
+        .velaFooterTitle,
+        .velaFooterTitle.active,
+        .awa-footer-section__toggle,
+        .awa-footer-section__toggle.active
+    ) {
+        color: var(--awa-ink, CanvasText) !important; // vence regra legada do tema que injeta color branco no titulo.
+        text-shadow: none;
+    }
+
+    .page-wrapper :is(.page_footer, .page-footer) :is(
+        .velaFooterTitle,
+        .awa-footer-section__toggle
+    ):hover,
+    .page-wrapper :is(.page_footer, .page-footer) :is(
+        .velaFooterTitle,
+        .awa-footer-section__toggle
+    ):focus-visible {
+        color: var(--awa-primary) !important; // vence estado ativo branco do accordion legado.
+    }
+
+    // HOME-P0-006 - selos SVG brancos precisam de fundo escuro em desktop e mobile.
+    .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-sec-seals .awa-seal {
+        background: var(--awa-primary, CanvasText) !important; // os SVGs dos selos sao brancos e sumiam sobre fundo claro.
+        background-color: var(--awa-primary, CanvasText) !important;
+        border: 1px solid color-mix(in srgb, var(--awa-primary, CanvasText) 82%, CanvasText) !important;
+        box-shadow: none !important;
+    }
+
+    .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-sec-seals .awa-seal__img {
+        opacity: 1 !important; // vence estados legados que reduziam contraste dos selos.
+        filter: none !important;
+    }
+
+    .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-bottom__logo-col > a {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: var(--awa-primary, CanvasText) !important; // logo_rodape.png e branco e ficava invisivel no fundo claro desktop.
+        background-color: var(--awa-primary, CanvasText) !important;
+        border-radius: 8px !important;
+        min-height: 64px !important;
+        padding: 8px 12px !important;
+    }
+
+    .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-bottom__logo-img {
+        opacity: 1 !important;
+        filter: none !important;
+    }
+
+    @media (max-width: 767px) {
+        // HOME-P0-006 - camada mobile posterior voltava o accordion do footer para branco sem fundo.
+        .page-wrapper :is(.page_footer, .page-footer) button.awa-footer-section__toggle,
+        .page-wrapper :is(.page_footer, .page-footer) #footer.footer-container .velaFooterTitle button.awa-footer-section__toggle,
+        .page-wrapper :is(.page_footer, .page-footer) button.awa-footer-section__toggle:is(
+            .active,
+            [aria-expanded='true'],
+            [aria-expanded='false']
+        ) {
+            color: var(--awa-ink, CanvasText) !important; // necessario para vencer regra inline/terminal tardia do footer mobile.
+            -webkit-text-fill-color: var(--awa-ink, CanvasText) !important; // tema aplica text-fill branco em botoes.
+            background: transparent;
+            text-shadow: none !important;
+        }
+    }
+
+    // HOME-P0-007 - setas do hero estavam com texto escuro sobre botao vermelho.
+    .page-wrapper .content-top-home .top-home-content--above-fold .wrapper_slider .awa-hero-swiper__nav,
+    .page-wrapper .content-top-home .top-home-content--above-fold .wrapper_slider .awa-hero__button,
+    .page-wrapper .content-top-home .top-home-content--above-fold .awa-hero-swiper :is(
+        .awa-hero-swiper__nav,
+        .awa-hero__button,
+        .swiper-button-prev,
+        .swiper-button-next
+    ) {
+        color: var(--awa-bg) !important; // necessario para sobrescrever cascata global de .swiper-button.
+    }
+
+    .page-wrapper .content-top-home .top-home-content--above-fold .wrapper_slider .awa-hero-swiper__nav::after,
+    .page-wrapper .content-top-home .top-home-content--above-fold .wrapper_slider .awa-hero__button::after,
+    .page-wrapper .content-top-home .top-home-content--above-fold .awa-hero-swiper :is(
+        .awa-hero-swiper__nav,
+        .awa-hero__button,
+        .swiper-button-prev,
+        .swiper-button-next
+    )::after,
+    .page-wrapper .awa-hero-swiper :is(
+        .awa-hero-swiper__nav,
+        .awa-hero__button,
+        .swiper-button-prev,
+        .swiper-button-next
+    ) svg {
+        color: currentColor !important; // icones pseudo/SVG do Swiper herdam regra global escura.
+    }
+
+    // HOME-P0-007 - terminal vence legado/inline; controles ficam abaixo dos cards sem sobreposicao.
+    .page-wrapper .content-top-home .awa-shelf--carousel > :is(
+        .awa-owl-nav,
+        .awa-carousel__nav
+    ),
+    .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+        .awa-owl-nav,
+        .awa-carousel__nav
+    ) {
+        display: flex !important; // terminal: vence nav absoluto legado para nao cobrir cards.
+        position: static !important;
+        inset: auto !important;
+        justify-content: center !important;
+        order: 2 !important;
+        gap: 10px !important;
+        margin: 10px 0 0 !important;
+        min-height: 44px !important;
+        height: auto !important;
+        pointer-events: auto !important;
+        transform: none !important;
+    }
+
+    .page-wrapper .content-top-home .awa-shelf--carousel > .awa-owl-progress {
+        order: 3 !important; // terminal: mantem progresso apos botoes quando shelf usa flex.
+    }
+
+    .page-wrapper .content-top-home .awa-shelf--carousel > .awa-carousel {
+        order: 1 !important; // terminal: cards sempre antes dos controles.
+    }
+
+    .page-wrapper .content-top-home .awa-shelf--carousel > :is(
+        .awa-owl-nav,
+        .awa-carousel__nav
+    ) :is(.awa-owl-nav__btn, .awa-carousel__button),
+    .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+        .awa-owl-nav,
+        .awa-carousel__nav
+    ) :is(.awa-owl-nav__btn, .awa-carousel__button) {
+        position: static !important;
+        inset: auto !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        pointer-events: auto !important;
+    }
+
+    @media (max-width: 767px) {
+        .page-wrapper .content-top-home :is(
+            .awa-carousel-section,
+            .awa-grid-section,
+            .awa-home-niche-shelves,
+            .awa-home-section--below-fold
+        ) {
+            height: auto !important; // terminal: vence altura fixa que fazia a proxima secao invadir os controles.
+            min-height: 0 !important;
+            max-height: none !important;
+            overflow: visible !important;
+        }
+
+        .page-wrapper .content-top-home .awa-shelf--carousel > .awa-carousel,
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel__viewport {
+            height: auto !important; // terminal: vence height inline/legado que cortava cards no mobile.
+            min-height: 0 !important;
+            max-height: none !important;
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+        }
+
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel__track {
+            align-items: stretch !important; // terminal: mantem cards com altura coerente no trilho mobile.
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ) :is(.awa-owl-nav__btn--prev, .awa-carousel__button--prev),
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel
+            > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor='viewport']
+            .awa-owl-nav__btn--prev {
+            left: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important; // terminal: vence offset legado negativo.
+            right: auto !important;
+        }
+
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ) :is(.awa-owl-nav__btn--next, .awa-carousel__button--next),
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel
+            > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor='viewport']
+            .awa-owl-nav__btn--next {
+            right: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important; // terminal: vence offset legado negativo.
+            left: auto !important;
+        }
+
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ) :is(.awa-carousel__toggle, .awa-owl-nav__btn[aria-label*='Pausar']),
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel
+            > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor='viewport']
+            :is(.awa-carousel__toggle, .awa-owl-nav__btn[aria-label*='Pausar']) {
+            top: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important; // terminal: ancora pausa dentro do viewport.
+            right: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important;
+            left: auto !important;
+        }
+    }
+
+    @media (max-width: 1023px) {
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ) :is(.awa-owl-nav__btn, .awa-carousel__button) {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            min-height: 40px;
+        }
+
+        // HOME-P0-007 - no mobile as setas laterais ficavam sobre a imagem do produto.
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ) :is(.awa-owl-nav__btn--prev, .awa-carousel__button--prev) {
+            left: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important; // vence posicionamento calculado do runtime.
+            right: auto !important;
+        }
+
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ) :is(.awa-owl-nav__btn--next, .awa-carousel__button--next) {
+            right: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important; // vence posicionamento calculado do runtime.
+            left: auto !important;
+        }
+
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ) :is(.awa-carousel__toggle, .awa-owl-nav__btn[aria-label*='Pausar']) {
+            top: 8px !important; // evita cobrir imagem/produto no mobile.
+            right: 8px !important;
+        }
+    }
+
+    @media (max-width: 767px) {
+        // HOME-P0-008 - hero mobile usava viewport alto demais para banners panoramicos.
+        .page-wrapper .top-home-content--above-fold,
+        .page-wrapper .top-home-content--above-fold > .banner-slider.banner-slider2 {
+            height: auto !important; // vence trava legada de min-height 336px no plugin terminal.
+            min-height: 0 !important;
+            max-height: none !important;
+            padding-bottom: 8px;
+        }
+
+        .page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs,
+        .page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs :is(
+            .awa-hero-swiper,
+            .swiper-wrapper,
+            .banner_item,
+            .banner_item_bg,
+            .banner_item_bg > a,
+            picture
+        ) {
+            height: clamp(156px, 44vw, 190px) !important; // reduz espaco morto sem cortar banners mobile.
+            min-height: clamp(156px, 44vw, 190px) !important;
+            max-height: clamp(156px, 44vw, 190px) !important;
+        }
+
+        .page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs .banner_item_bg img {
+            width: 100% !important;
+            height: 100% !important; // vence regra legada height:auto que deixava o quadro alto vazio.
+            min-height: 0 !important;
+            max-height: none !important;
+            object-fit: contain !important;
+            object-position: center center !important;
+            background: var(--awa-bg, Canvas);
+        }
+
+        .page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs .text-banner {
+            display: none !important; // o texto vem embutido na arte do banner e a camada invisivel reservava altura.
+            height: 0 !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs :is(
+            .awa-hero__pagination,
+            .swiper-pagination,
+            .awa-hero-pause-btn
+        ) {
+            display: none !important; // autoplay mobile fica desativado; a linha de 44px criava espaco morto abaixo do banner.
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+        }
+
+        // HOME-P0-001 - CTA B2B mobile herdava min-height 540px e parecia duplicado/sobreposto.
+        .page-wrapper .content-top-home .awa-hero-b2b-cta {
+            height: auto !important;
+            min-height: 0 !important; // vence regra terminal antiga clamp(540px,145vw,620px).
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 12px 16px 16px !important;
+            overflow: visible !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-b2b-cta__inner {
+            display: grid !important;
+            gap: 10px !important;
+            height: auto !important;
+            min-height: 0 !important; // vence regra terminal antiga clamp(512px,138vw,592px).
+            max-height: none !important;
+            padding: 0 !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-benefits {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+            height: auto !important;
+            min-height: 0 !important; // vence regra terminal antiga clamp(420px,118vw,500px).
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            list-style: none !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-benefits__item,
+        .page-wrapper .content-top-home .awa-hero-benefits__link {
+            box-sizing: border-box !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            width: 100% !important;
+            min-height: 58px !important;
+            margin: 0 !important;
+            padding: 10px 12px !important;
+            overflow: visible !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-benefits__icon {
+            flex: 0 0 28px !important;
+            width: 28px !important;
+            min-width: 28px !important;
+            height: 28px !important;
+            min-height: 28px !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-benefits__icon :is(svg, img) {
+            width: 18px !important;
+            min-width: 18px !important;
+            height: 18px !important;
+            min-height: 18px !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-benefits__copy {
+            display: grid !important;
+            gap: 2px !important;
+            min-width: 0 !important;
+            text-align: left !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-benefits__title {
+            font-size: 13px !important;
+            line-height: 1.2 !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-benefits__text {
+            font-size: 12px !important;
+            line-height: 1.3 !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-b2b-cta__actions {
+            display: flex !important;
+            justify-content: center !important;
+            margin: 2px 0 0 !important;
+        }
+
+        .page-wrapper .content-top-home .awa-hero-b2b-cta__button {
+            width: 100% !important;
+            max-width: 260px !important;
+            min-height: 40px !important;
+            height: 40px !important;
+            padding: 0 14px !important;
+            font-size: 13px !important;
+            white-space: nowrap !important;
+        }
+
+        // HOME-P0-001 - FABs auxiliares cobriam o card/CTA B2B na primeira dobra mobile.
+        .page-wrapper :is(#awa-back-to-top, .awa-back-to-top, .awa-dark-mode-toggle) {
+            display: none !important; // vence JS inline dos botoes flutuantes na Home mobile.
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        // HOME-P0-006 - footer-bottom mobile recebia min-height 540px por CSS terminal legado.
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom {
+            box-sizing: border-box !important;
+            height: auto !important;
+            min-height: 0 !important; // vence trava terminal que criava uma area vazia antes de pagamento/selos.
+            max-width: calc(100% - 24px) !important;
+            margin: 0 auto !important;
+            padding: 12px !important;
+            overflow: visible !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom > .container,
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .footer-bottom-inner {
+            box-sizing: border-box !important;
+            display: grid !important;
+            gap: 10px !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-bottom__row {
+            box-sizing: border-box !important;
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) !important;
+            gap: 10px !important;
+            height: auto !important;
+            min-height: 0 !important;
+            justify-items: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-bottom__row > [class*='col-'] {
+            box-sizing: border-box !important;
+            display: grid !important;
+            gap: 8px !important;
+            height: auto !important;
+            min-height: 0 !important;
+            justify-items: center !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-bottom__row > .awa-footer-bottom__logo-col[class*='col-'] {
+            display: none !important; // logo_rodape.png e claro/transparente no fundo claro e virava espaco vazio no mobile.
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-bottom__logo-img {
+            display: block !important;
+            height: auto !important;
+            max-height: 48px !important;
+            max-width: 92px !important;
+            object-fit: contain !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom :is(.awa-footer-pay-sec, .awa-footer-sec) {
+            display: grid !important;
+            gap: 8px !important;
+            height: auto !important;
+            min-height: 0 !important;
+            justify-items: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom :is(.awa-footer-pay-logos, .awa-footer-sec-seals) {
+            align-items: center !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-bottom__copyright {
+            box-sizing: border-box !important;
+            display: grid !important;
+            gap: 6px !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            width: 100% !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .footer-bottom .awa-footer-bottom__copyright :is(
+            p,
+            .awa-footer-copyright__legal,
+            .awa-footer-copyright__disclaimer
+        ) {
+            margin: 0 !important;
+        }
+
+        // HOME-P0-006 - logo_bluu.png tambem e claro/transparente e sumia no fundo claro do footer mobile.
+        .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby {
+            height: auto !important;
+            min-height: 0 !important;
+            padding: 8px 16px !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby__inner {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            min-height: 32px !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby__link {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-height: 32px !important;
+            padding: 0 !important;
+            color: var(--awa-primary, currentColor) !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            text-decoration: none !important;
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby__logo {
+            display: none !important; // evita area vazia causada pelo PNG branco no fundo claro.
+        }
+
+        .page-wrapper :is(.page_footer, .page-footer) .awa-footer-devby__link::after {
+            content: 'Bluu Consulting';
+        }
+
+        // HOME-P0-007 - mobile: botoes absolutos ficavam sobre imagem/texto do card.
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ),
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel
+            > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor='viewport'] {
+            display: flex !important;
+            position: static !important;
+            inset: auto !important;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            min-height: 40px;
+            pointer-events: auto !important;
+            transform: none !important;
+        }
+
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel > :is(
+            .awa-owl-nav,
+            .awa-carousel__nav
+        ) :is(.awa-owl-nav__btn, .awa-carousel__button),
+        .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel
+            > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor='viewport']
+            :is(.awa-owl-nav__btn, .awa-carousel__button) {
+            position: static !important; // vence runtime absoluto do carrossel no mobile.
+            inset: auto !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            bottom: auto !important;
+            transform: none !important;
+        }
+    }
+}
+
+// Mesmas correcoes dentro das layers que ja vencem a Home com !important.
+@layer awa-hero-ui-lock {
+    @{awa-home-p0-scope} {
+        .page-wrapper .content-top-home .top-home-content--above-fold .wrapper_slider .awa-hero-swiper__nav,
+        .page-wrapper .content-top-home .top-home-content--above-fold .wrapper_slider .awa-hero__button {
+            color: var(--awa-bg) !important;
+        }
+
+        .page-wrapper .content-top-home .top-home-content--above-fold .wrapper_slider .awa-hero-swiper__nav::after,
+        .page-wrapper .content-top-home .top-home-content--above-fold .wrapper_slider .awa-hero__button::after {
+            color: currentColor !important;
+        }
+    }
+}
+
+@layer awa-header-first-paint-lock {
+    @media (max-width: 767px) {
+        @{awa-home-p0-scope} {
+            .page-wrapper .top-home-content--above-fold .wrapper_slider.visible-xs .text-banner {
+                display: none !important; // vence a propria layer first-paint que mantinha display:flex invisivel.
+                height: 0 !important;
+                max-height: 0 !important;
+                padding: 0 !important;
+                opacity: 0 !important;
+                visibility: hidden !important;
+                overflow: hidden !important;
+            }
+        }
+    }
+}
+
+@layer awa-visual-priority {
+    @media (min-width: 1024px) {
+        @{awa-home-p0-scope} {
+            .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel
+                > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor='viewport']
+                .awa-owl-nav__btn--prev {
+                left: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important;
+                right: auto !important;
+            }
+
+            .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel
+                > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor='viewport']
+                .awa-owl-nav__btn--next {
+                right: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important;
+                left: auto !important;
+            }
+
+            .page-wrapper .content-top-home .awa-shelf--carousel .awa-carousel
+                > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor='viewport']
+                :is(.awa-carousel__toggle, .awa-owl-nav__btn[aria-label*='Pausar']) {
+                top: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important;
+                right: var(--awa-carousel-button-offset, clamp(8px, 1vw, 16px)) !important;
+                left: auto !important;
+            }
+        }
+    }
+}

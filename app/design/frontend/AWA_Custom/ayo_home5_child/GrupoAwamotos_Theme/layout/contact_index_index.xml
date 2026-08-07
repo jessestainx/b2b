@@ -1,13 +1,8 @@
 <?xml version="1.0"?>
-<!-- AWA - Adiciona H1 visivel para contato -->
+<!-- AWA P2: H1 institucional removido — page.main.title já emite o único H1 em /contact -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceContainer name="content">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.institutional.h1"
-                   template="GrupoAwamotos_Theme::html/awa-institutional-h1.phtml"
-                   before="-"/>
-        </referenceContainer>
+        <referenceBlock name="awa.institutional.h1" remove="true"/>
     </body>
 </page>

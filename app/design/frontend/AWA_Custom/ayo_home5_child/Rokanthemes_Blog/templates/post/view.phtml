@@ -15,7 +15,7 @@ $_postNameStripped = $block->stripTags($_post->getTitle(), null, true);
             <a href="<?= $block->escapeUrl($_postUrl) ?>">
                 <img src="<?= $block->escapeUrl($this->getMediaFolder() . $_post->getThumbnailimage()) ?>"
                      alt="<?= $block->escapeHtmlAttr($_postNameStripped) ?>"
-                     loading="lazy"/>
+                     loading="lazy" decoding="async" width="1200" height="600"/>
             </a>
             <?= $this->getInfoHtml() ?>
         </div>

@@ -5,7 +5,7 @@
     var runtimeOwner = 'defer';
 
     function isDeferOwnerActive() {
-        return runtime.owner === runtimeOwner;
+        return runtime.functionalOwner === runtimeOwner;
     }
 
     function shouldBypassOnHome() {
@@ -39,13 +39,13 @@
         return;
     }
 
-    if (runtime.owner && runtime.owner !== runtimeOwner) {
+    if (runtime.functionalOwner && runtime.functionalOwner !== runtimeOwner) {
         return;
     }
 
-    runtime.owner = runtimeOwner;
-    runtime.ownerSource = runtime.ownerSource || 'awa-minicart-defer-init';
-    runtime.ownerClaimedAt = runtime.ownerClaimedAt || Date.now();
+    runtime.functionalOwner = runtimeOwner;
+    runtime.functionalOwnerSource = runtime.functionalOwnerSource || 'awa-minicart-defer-init';
+    runtime.functionalOwnerClaimedAt = runtime.functionalOwnerClaimedAt || Date.now();
 
     if (window.__awaMinicartDeferInit) {
         return;
@@ -105,6 +105,7 @@
 
         if (parts.trigger) {
             setAttributeIfChanged(parts.trigger, 'aria-expanded', 'false');
+            parts.trigger.classList.remove('is-open', 'active');
         }
 
         syncShellState(parts.shell, false);
@@ -245,6 +246,23 @@
         }
     }
 
+    /**
+     * Center via shared module. Skips checkout-cart-index (awa-cart-stack disables flyout).
+     *
+     * @param {HTMLElement|null} panel
+     */
+    function scheduleCenteredMinicartPanel(panel) {
+        if (document.body && document.body.classList.contains('checkout-cart-index')) {
+            return;
+        }
+
+        require(['js/awa-minicart-position'], function (minicartPosition) {
+            if (minicartPosition && typeof minicartPosition.scheduleCenterOpenMinicartPanel === 'function') {
+                minicartPosition.scheduleCenterOpenMinicartPanel(panel);
+            }
+        });
+    }
+
     function isDropdownExpanded(dropdown) {
         let wrapper;
         let style;
@@ -340,6 +358,27 @@
         }
     }
 
+    function syncFloatingCtas(hidden) {
+        document.querySelectorAll('#awa-back-to-top, .awa-whatsapp-float, [class*="whatsapp-float"]').forEach(function (node) {
+            if (!node || !node.style) {
+                return;
+            }
+
+            if (hidden) {
+                node.style.setProperty('opacity', '0', 'important');
+                node.style.setProperty('visibility', 'hidden', 'important');
+                node.style.setProperty('pointer-events', 'none', 'important');
+                node.style.setProperty('transform', 'translateY(8px)', 'important');
+                return;
+            }
+
+            node.style.removeProperty('opacity');
+            node.style.removeProperty('visibility');
+            node.style.removeProperty('pointer-events');
+            node.style.removeProperty('transform');
+        });
+    }
+
     function applyManualDropdownState(trigger, dropdown, expanded) {
         let wrapper = dropdown ? dropdown.closest('[data-block="minicart"], .minicart-wrapper') : null;
         let shell = getHeaderMinicartShell();
@@ -366,6 +405,16 @@
             targets.push(dropdown);
         }
 
+        // Cart page: awa-cart-stack disables the flyout — do not force display:flex.
+        if (document.body && document.body.classList.contains('checkout-cart-index')) {
+            if (trigger) {
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+            syncShellState(shell, false);
+            syncBodyScrollLock(false);
+            return;
+        }
+
         for (index = 0; index < targets.length; index += 1) {
             toggleClassIfChanged(targets[index], 'active', expanded);
             toggleClassIfChanged(targets[index], 'is-open', expanded);
@@ -379,10 +428,20 @@
 
         if (trigger) {
             trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            // Magento dropdownDialog usa triggerClass:"is-open" — manter em sync com aria-expanded
+            trigger.classList.toggle('is-open', expanded);
+            if (!expanded) {
+                trigger.classList.remove('active');
+            }
+        }
+
+        if (expanded && panel) {
+            scheduleCenteredMinicartPanel(panel);
         }
 
         syncShellState(shell, expanded);
         syncBodyScrollLock(expanded);
+        syncFloatingCtas(expanded);
     }
 
     function closeDropdown(trigger, dropdown) {
@@ -391,6 +450,9 @@
         if (!dropdown) {
             return;
         }
+
+        // Apply the lock transition immediately to avoid brief CTA overlap while dialog closes.
+        syncBodyScrollLock(false);
 
         if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.dropdownDialog === 'function') {
                 $dropdown = window.jQuery(dropdown);
@@ -413,6 +475,10 @@
         if (!dropdown) {
             return;
         }
+
+        // Apply the lock transition immediately to avoid brief CTA overlap while dialog opens.
+        syncBodyScrollLock(true);
+        syncFloatingCtas(true);
 
         function openNow() {
             if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.dropdownDialog === 'function') {
@@ -792,6 +858,10 @@
 
             trigger = target.closest(MINICART_TRIGGER_SELECTOR);
             if (!trigger) {
+                if (target.closest('.block-minicart')) {
+                    return;
+                }
+
                 shell = target.closest(HEADER_MINICART_SHELL_SELECTOR);
                 if (!shell) {
                     return;
@@ -807,6 +877,13 @@
 
             parts = getMinicartPartsForShell(shell);
             if (!trigger.closest('.awa-header-minicart, [data-awa-header-minicart-shell="true"]')) {
+                return;
+            }
+
+            if (isCheckoutCartPage()) {
+                event[MINICART_TRIGGER_GUARD_FLAG] = true;
+                stopMinicartEvent(event);
+                closeMinicartOnCartPage();
                 return;
             }
 
@@ -962,6 +1039,17 @@
         }
 
         let parts = getMinicartParts();
+        let wrapper = parts.dropdown ? parts.dropdown.closest('[data-block="minicart"], .minicart-wrapper') : null;
+        let panel = resolveMinicartPanel(parts.dropdown, wrapper);
+        let panelStyle = panel && window.getComputedStyle ? window.getComputedStyle(panel) : null;
+        let panelVisible = !!(
+            panel &&
+            panelStyle &&
+            panelStyle.display !== 'none' &&
+            panelStyle.visibility !== 'hidden' &&
+            panelStyle.opacity !== '0' &&
+            isVisible(panel)
+        );
         /*
          * Do not gate readiness by computed visibility:
          * several fallback styles hide .showcart while data-awa-minicart-ready="0",
@@ -974,10 +1062,16 @@
 
         if (parts.trigger) {
             setAttributeIfChanged(parts.trigger, 'aria-expanded', expanded ? 'true' : 'false');
+            parts.trigger.classList.toggle('is-open', expanded);
+            if (!expanded) {
+                parts.trigger.classList.remove('active');
+            }
         }
 
         syncShellState(parts.shell, expanded);
         syncBodyScrollLock(expanded);
+        syncFloatingCtas(expanded || panelVisible);
+
     }
 
     function scheduleBootstrapPasses() {
@@ -1116,6 +1210,7 @@
         bindShellFallbackNavigation();
         bindEscapeClose();
         bindContinueClose();
+        closeMinicartOnCartPage();
 
         if (guardsOnlyMode) {
             window.__awaMinicartDeferInit = true;

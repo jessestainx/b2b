@@ -233,6 +233,13 @@ define([
 
         form.dataset.awaCouponBound = '1';
 
+        var syncFormKey = function ($form) {
+            var formKey = ($.mage && $.mage.cookies) ? $.mage.cookies.get('form_key') : '';
+            if (formKey) {
+                $form.find('[name="form_key"]').val(formKey);
+            }
+        };
+
         var setFeedback = function (text, isError) {
             if (!feedback) {
                 return;
@@ -259,6 +266,7 @@ define([
                 return;
             }
 
+            syncFormKey($form);
             $form.find('.awa-minicart-coupon__remove').val('0');
             setFeedback($t('Aplicando cupom…'), false);
 
@@ -279,6 +287,7 @@ define([
             removeBtn.addEventListener('click', function () {
                 var $form = $(form);
 
+                syncFormKey($form);
                 $form.find('.awa-minicart-coupon__remove').val('1');
                 $form.find('[name="coupon_code"]').val('');
                 setFeedback($t('Removendo cupom…'), false);

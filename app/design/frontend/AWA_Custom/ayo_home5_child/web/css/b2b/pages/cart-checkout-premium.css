@@ -278,17 +278,27 @@ body.checkout-cart-index .cart.table-wrapper input.qty:focus-visible {
 }
 
 body.checkout-cart-index .cart.table-wrapper .action-delete,
-body.checkout-cart-index .cart.table-wrapper .action-edit,
-body.checkout-cart-index .cart.table-wrapper .action-towishlist,
 body.checkout-cart-index .cart.table-wrapper .action-tocompare {
     color: var(--awa-cc-text-2) !important;
 }
 
+/* H23: edit/wishlist têm fundo --awa-primary; texto cinza ficava ilegível */
+body.checkout-cart-index .cart.table-wrapper .action-edit,
+body.checkout-cart-index .cart.table-wrapper .action-towishlist {
+    color: #fff !important;
+}
+
 body.checkout-cart-index .cart.table-wrapper .action-delete:hover,
-body.checkout-cart-index .cart.table-wrapper .action-delete:focus-visible,
-body.checkout-cart-index .cart.table-wrapper .action-edit:hover,
-body.checkout-cart-index .cart.table-wrapper .action-edit:focus-visible {
+body.checkout-cart-index .cart.table-wrapper .action-delete:focus-visible {
     color: var(--awa-brand-primary) !important;
+}
+
+body.checkout-cart-index .cart.table-wrapper .action-edit:hover,
+body.checkout-cart-index .cart.table-wrapper .action-edit:focus-visible,
+body.checkout-cart-index .cart.table-wrapper .action-towishlist:hover,
+body.checkout-cart-index .cart.table-wrapper .action-towishlist:focus-visible {
+    color: #fff !important;
+    filter: brightness(0.92);
 }
 
 body.checkout-cart-index .cart.table-wrapper .action-delete:focus-visible,
@@ -1050,7 +1060,7 @@ body.checkout-cart-index .awa-cart-empty__suggestion {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-height: 36px;
+    min-height: 44px; /* WCAG 2.5.5 / Pixel QA touch ≥44 — era 36px */
     padding: 0 14px;
     border: 1px solid var(--awa-cc-border);
     border-radius: var(--awa-radius-pill);
@@ -1152,6 +1162,9 @@ body.checkout-cart-index .awa-cart-empty__categories-more {
     align-items: center;
     justify-content: center;
     margin-top: 14px;
+    min-height: 44px; /* WCAG 2.5.5 — link texto era ~22px */
+    padding-block: 10px;
+    box-sizing: border-box;
     font-size: 14px;
     font-weight: var(--awa-weight-semibold);
     color: var(--awa-brand-primary);
@@ -2728,7 +2741,7 @@ body.rokanthemes-onepagecheckout .b2b-order-notes-input:focus-visible {
    Magento DOM order: summary before form-cart — grid-column explícito.
    ============================================================ */
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
     html body.checkout-cart-index .page-wrapper .cart-container {
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) minmax(300px, 360px) !important;

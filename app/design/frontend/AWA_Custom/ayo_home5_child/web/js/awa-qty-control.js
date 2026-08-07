@@ -74,14 +74,33 @@ define([], function () {
             });
         }
 
-        root.addEventListener('click', function (event) {
-            let trigger = event.target.closest(triggerSelector);
+        /**
+         * Window capture runs before document capture listeners that call
+         * stopImmediatePropagation (tooling overlays, aggressive header guards).
+         * Scoping via root.contains keeps each stepper isolated.
+         *
+         * @param {MouseEvent} event
+         */
+        function onQtyTriggerClick(event) {
+            let trigger;
             let min;
             let step;
             let precision;
             let current;
             let nextValue;
             let direction;
+            let target = event && event.target;
+
+            if (!target || typeof target.closest !== 'function') {
+                return;
+            }
+
+            if (!root.isConnected) {
+                window.removeEventListener('click', onQtyTriggerClick, true);
+                return;
+            }
+
+            trigger = target.closest(triggerSelector);
 
             if (!trigger || !root.contains(trigger)) {
                 return;
@@ -115,6 +134,7 @@ define([], function () {
             if (flags.dispatchEvents !== false) {
                 input.dispatchEvent(new Event('input', { bubbles: true }));
                 input.dispatchEvent(new Event('change', { bubbles: true }));
+                input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
             }
 
             syncTriggerState(input, root, triggerSelector);
@@ -122,7 +142,9 @@ define([], function () {
             emit(root, 'awa:qty-control:change', {
                 value: input.value
             });
-        });
+        }
+
+        window.addEventListener('click', onQtyTriggerClick, true);
 
         emit(root, 'awa:qty-control:ready');
     };

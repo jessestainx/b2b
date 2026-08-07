@@ -6,22 +6,25 @@ declare(strict_types=1);
 
 /** @var \Magento\Framework\View\Element\Template $block */
 $shellUrl = $block->getViewFileUrl('css/awa-cms-shell-final.css');
-$assetVersion = '20260611-v3';
+$assetVersion = '20260726-ssot-b-cleancss';
 $shellUrlVersioned = $shellUrl . '?v=' . $assetVersion;
-$asyncInit = json_encode(
-    ['js/awa-async-stylesheet' => ['urls' => [$shellUrlVersioned]]],
-    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-);
 ?>
 <style id="awa-cms-shell-critical">
 /* Anti-FOUC — shell 1280px + prose 800px antes do shell-final.css.
-   Mesmo layer awa-shell-lock do CSS externo (ordem do layer já fixada lá). */
+   Mesmo layer awa-shell-lock do CSS externo (ordem do layer já fixada lá).
+   Gutter alinhado ao contrato Pixel QA: 16 mobile / 24 tablet+. */
 @layer awa-shell-lock {
 html body#html-body:is(.cms-page-view, .cms-noroute-index, .contact-index-index, .curriculo-index-index, .curriculo-index-status)
 .page-wrapper :is(#maincontent.page-main.container, .page-main.container) {
     max-width: min(100%, 1280px) !important;
     margin-inline: auto !important;
-    padding-inline: clamp(12px, 2.5vw, 16px) !important;
+    padding-inline: clamp(16px, 3vw, 24px) !important;
+}
+html body#html-body:is(.cms-page-view, .cms-noroute-index, .contact-index-index, .curriculo-index-index, .curriculo-index-status)
+.page-wrapper .page-main .columns .column.main {
+    padding-inline: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 html body#html-body.cms-page-view .column.main .awa-inst {
     width: 100% !important;
@@ -32,7 +35,6 @@ html body#html-body.cms-page-view .column.main .awa-inst {
 </style>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($shellUrlVersioned) ?>"/>
-<div class="awa-async-css-loader awa-cms-shell-final-async" hidden data-mage-init="<?= $block->escapeHtmlAttr($asyncInit) ?>"></div>
 <noscript>
     <link rel="stylesheet" href="<?= $block->escapeUrl($shellUrlVersioned) ?>"/>
 </noscript>

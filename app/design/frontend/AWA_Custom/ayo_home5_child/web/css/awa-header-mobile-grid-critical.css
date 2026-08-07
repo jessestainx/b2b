@@ -217,7 +217,7 @@ max-height:0!important;min-height:0!important;height:0!important;
 padding:0!important;margin:0!important;overflow:hidden!important;
 opacity:0!important;visibility:hidden!important;pointer-events:none!important;border:0!important}
 /* Offset de scroll ancorado ao stack condensado (header 56px + nav 48px) */
-html body#html-body.awa-header-is-sticky{--awa-header-scroll-offset:104px}
+html body#html-body.awa-header-is-sticky{--awa-header-scroll-offset:calc(var(--awa-header-main-row-h,68px) + var(--awa-header-nav-h,48px))}
 @media (max-width:767px){
 html body#html-body.awa-header-is-sticky{--awa-header-scroll-offset:112px}
 }

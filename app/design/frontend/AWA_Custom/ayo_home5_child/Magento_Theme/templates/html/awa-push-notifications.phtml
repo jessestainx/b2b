@@ -15,6 +15,8 @@
     w.__awaPushNotifInit = true;
 
     var STORAGE_KEY = 'awa-push-notif';
+    var MIN_PROMPT_DELAY_MS = 60000;
+    var MIN_PROMPT_SCROLL_PX = 500;
 
     function ensureHomeModalScheduler() {
         if (w.__awaRequestHomeModal) return;
@@ -62,8 +64,36 @@
                 callback();
             };
 
+            var hasMeaningfulEngagement = function () {
+                var scrollTop = w.scrollY
+                    || d.documentElement.scrollTop
+                    || (d.body ? d.body.scrollTop : 0)
+                    || 0;
+
+                return d.visibilityState !== 'hidden' && scrollTop >= MIN_PROMPT_SCROLL_PX;
+            };
+
             var schedule = function () {
-                setTimeout(run, 30000);
+                var delayElapsed = false;
+                var maybeRun;
+
+                var cleanup = function () {
+                    w.removeEventListener('scroll', maybeRun);
+                    d.removeEventListener('visibilitychange', maybeRun);
+                };
+
+                maybeRun = function () {
+                    if (!delayElapsed || !hasMeaningfulEngagement()) return;
+                    cleanup();
+                    run();
+                };
+
+                w.addEventListener('scroll', maybeRun, { passive: true });
+                d.addEventListener('visibilitychange', maybeRun);
+                w.setTimeout(function () {
+                    delayElapsed = true;
+                    maybeRun();
+                }, MIN_PROMPT_DELAY_MS);
             };
 
             if (d.readyState === 'complete') {

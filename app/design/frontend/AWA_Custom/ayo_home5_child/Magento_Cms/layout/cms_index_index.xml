@@ -53,6 +53,32 @@
              a body.cms-page-view — só desperdiçavam requests na home) -->
         <remove src="css/awa-cms-shell-final.css"/>
         <!-- awa-home-shell-final.css REMOVIDO 2026-06-25: arquivo placeholder (home funciona sem shell CSS separada). -->
+        <!--
+            Fase 6 fatia 1 (2026-08-07) — paridade HOME_GATE ↔ PageConfig.
+            Espelha HomeCssGateParity::LAYOUT_REMOVE_SRCS. Seed da fila idle fica em
+            awa-head-preload.phtml; OptimizeHeadStylesPlugin::HOME_GATE_CSS_FRAGMENTS
+            permanece como safety-net até 2 medições estáveis (não apagar regex ainda).
+            custom_default.css: Themeoption head.phtml (não PageConfig) — só via plugin.
+        -->
+        <remove src="css/awa-home-hover-lock.min.css"/>
+        <remove src="css/awa-home-hover-lock.css"/>
+        <remove src="css/awa-visual-audit-2026-05-18.min.css"/>
+        <remove src="css/awa-visual-audit-2026-05-18.css"/>
+        <remove src="css/awa-impeccable-audit-2026-05-28.min.css"/>
+        <remove src="css/awa-impeccable-audit-2026-05-28.css"/>
+        <remove src="css/awa-home-flex-grid-flow.min.css"/>
+        <remove src="css/awa-head-tail-bundle.min.css"/>
+        <remove src="css/awa-defer-global-bundle.min.css"/>
+        <remove src="css/awa-bundle-refinements.min.css"/>
+        <remove src="css/awa-home-gate-visual-bundle.min.css"/>
+        <remove src="css/awa-ui-simplify-terminal.min.css"/>
+        <remove src="css/awa-home-standardize-terminal-wins-2026-06-09.min.css"/>
+        <remove src="css/awa-footer-terminal-lock-v1.min.css"/>
+        <remove src="css/awa-align-grid-terminal-2026-06-11.min.css"/>
+        <remove src="css/awa-commerce-impeccable-refine.min.css"/>
+        <remove src="GrupoAwamotos_B2B::css/header/status-panel.css"/>
+        <remove src="css/awa-b2b-status-panel.min.css"/>
+        <remove src="css/awa-b2b-status-panel.css"/>
     </head>
     <body>
         <attribute name="data-mage-init">{}</attribute>
@@ -141,7 +167,7 @@
         <referenceBlock name="customer.data.invalidation.rules"
                         template="Magento_Theme::html/awa-customer-invalidation-defer.phtml"/>
 
-        <referenceContainer name="head.additional">
+        <referenceBlock name="head.additional">
             <!-- LCP critical CSS hero (links em awa.hero.preload.links no topo do head) -->
             <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
                    name="awa.hero.preload"
@@ -150,7 +176,7 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="awa.seo.head"
                    template="Magento_Cms::awa-seo-head.phtml"/>
-        </referenceContainer>
+        </referenceBlock>
 
         <referenceContainer name="page.top">
             <block class="Magento\Framework\View\Element\Template"
@@ -203,6 +229,7 @@
                 <argument name="home_shelf_display_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HomeShelfDisplay</argument>
                 <argument name="home_recent_orders_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HomeRecentOrders</argument>
                 <argument name="hero_responsive_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HeroResponsiveImage</argument>
+                <argument name="bestseller_card_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel</argument>
             </arguments>
             <block class="Rokanthemes\SlideBanner\Block\Slider"
                    name="slider.main"

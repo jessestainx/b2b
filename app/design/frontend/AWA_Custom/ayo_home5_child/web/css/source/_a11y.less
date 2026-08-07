@@ -344,12 +344,11 @@ input[type="radio"]::before {
 // Polite announcements (don't interrupt). Keep this scoped to dedicated live
 // regions; many visible widgets use aria-live for semantics and must remain in
 // normal document flow.
+// CANARIO 4A: do not toast-style .awa-sr-only / .visually-hidden [aria-live].
+// Those selectors matched [data-role=awa-vertical-menu-status] and leaked
+// "Menu de departamentos…" into the desktop nav gap (ghost / overlap).
 .awa-live-region[aria-live="polite"],
-.awa-sr-only[aria-live="polite"],
-.visually-hidden[aria-live="polite"],
-[role="status"].awa-live-region,
-[role="status"].awa-sr-only,
-[role="status"].visually-hidden {
+[role="status"].awa-live-region {
     position: absolute;
     inset-block-end: var(--awa-space-4, 16px);
     inset-inline-end: var(--awa-space-4, 16px);

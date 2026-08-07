@@ -101,7 +101,12 @@ body.catalog-category-view .awa-category-hero__overlay {
 
 body.catalog-category-view .awa-category-hero__bg-image {
     z-index: 0 !important;
-    position: relative !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: cover !important;
 }
 
 
@@ -249,7 +254,7 @@ body.catalog-noroute-index a:focus-visible {
 // 11. CSS CONFLICTS — Mitigação de :root duplicados
 // ============================================================================
 // Resolve 9 issues de css-conflicts (104× :root em contact/404, 107× em PDP)
-// 
+//
 // ESTRATÉGIA: Forçar tokens canônicos como ÚLTIMA declaração :root
 // (terminal-wins). Isso garante que mesmo que bundles declarem
 // :root redundantes, nossos tokens SEMPRE vencem.

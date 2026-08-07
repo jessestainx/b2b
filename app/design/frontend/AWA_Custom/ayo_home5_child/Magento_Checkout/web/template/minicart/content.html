@@ -33,7 +33,7 @@
                 attr: {
                     title: $t('Close')
                 },
-                click: closeMinicart()
+                click: closeMinicart
             ">
         <span translate="'Close'"></span>
     </button>
@@ -73,13 +73,8 @@
                     <a class="action primary awa-minicart-browse"
                        href="/"
                        data-action="close"
-                       data-bind="click: closeMinicart()">
+                       data-bind="click: closeMinicart">
                         <span translate="'Browse our catalog'"></span>
-                    </a>
-                </div>
-                <div class="secondary">
-                    <a class="action viewcart btn" data-bind="attr: {href: shoppingCartUrl}">
-                        <span translate="'View Cart'"></span>
                     </a>
                 </div>
             </div>
@@ -98,7 +93,7 @@
                             attr: {
                                 title: $t('Proceed to Checkout')
                             },
-                            click: closeMinicart(),
+                            click: closeMinicart,
                             text: $t('Proceed to Checkout')
                         "
                 ></button>

@@ -23,10 +23,14 @@ if ($disableAwaPostThemeoptionCss) {
       type="text/css"
       media="all"
       href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-round9-post-themeoption-overrides.css')) ?>" />
-<link rel="stylesheet"
-      type="text/css"
-      media="all"
-      href="<?= $block->escapeUrl($block->getViewFileUrl('css/awa-round10-footer-light-perfect.css')) ?>" />
+<?php
+/**
+ * awa-round10-footer-light-perfect.css removido (2026-07-22):
+ * conflitava com awa-footer-terminal-lock / critical stability (bg transparente
+ * vs tokens --awa-bg), gerando footer de cor diferente ao navegar home↔PLP.
+ * Autoridade única: GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss.
+ */
+?>
 <link rel="stylesheet"
       type="text/css"
       media="all"

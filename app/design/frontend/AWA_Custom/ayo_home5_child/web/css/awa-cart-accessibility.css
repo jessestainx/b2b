@@ -1,0 +1,37 @@
+/**
+ * Cart header visibility repair.
+ *
+ * The cart intentionally omits the global header bundle. Re-establish the
+ * hidden states that bundle supplies without changing search or navigation
+ * behaviour on any other route.
+ */
+body.checkout-cart-index .page-wrapper .awa-site-header .awa-sr-only:not(:focus):not(:active) {
+    /* Override the cart terminal stack, which resets these utility properties. */
+    position: absolute !important;
+    width: 1px !important;
+    min-width: 1px !important;
+    max-width: 1px !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    max-height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+body.checkout-cart-index .page-wrapper .awa-site-header .awa-search-helper-copy,
+body.checkout-cart-index .page-wrapper .awa-site-header #search_autocomplete[aria-hidden='true']:empty {
+    /* These elements are explicitly hidden in the full global header bundle. */
+    display: none !important;
+}
+
+@media (max-width: 767px) {
+    body.checkout-cart-index .page-wrapper .awa-site-header .awa-nav-quick-links {
+        /* Match the established mobile header state used on public catalog routes. */
+        display: none !important;
+    }
+}

@@ -5,10 +5,10 @@ html body#html-body .page-wrapper {
   max-width: 100%;
 }
 
+/* SSOT-1 Onda 1: gutter só no shell (.page-main / containers de seção).
+   .column.main e .cart-container NÃO repetem padding-inline (evita 16+16 no CMS mobile). */
 html body#html-body .page-main.container,
 html body#html-body .content-top-home .top-home-content.awa-home-section > .container,
-html body#html-body .columns .column.main,
-html body#html-body .cart-container,
 html body#html-body .main-detail,
 html body#html-body .b2b-login-shell,
 html body#html-body #b2b-register-shell {
@@ -60,7 +60,9 @@ html body#html-body :is(.item-product, .content-item-product, .product-item) {
   box-sizing: border-box;
 }
 
-/* Round 10 — alinhamento estrutural: header e shells de autenticação */
+/* Round 10 — alinhamento estrutural: header e shells de autenticação
+   SSOT-1 Onda 2: .awa-main-header (wrapper) NÃO aplica gutter — só sticky (mobile)
+   ou .awa-main-header__inner (desktop). Evita 16+24 no tablet CMS. */
 html body#html-body .page-wrapper .page-header,
 html body#html-body .page-wrapper .header.content,
 html body#html-body .page-wrapper .awa-main-header,
@@ -68,7 +70,7 @@ html body#html-body .page-wrapper .header-wrapper-sticky .page-header {
   width: 100%;
   max-width: var(--awa-grid-shell-max, min(100%, 1280px));
   margin-inline: auto;
-  padding-inline: var(--awa-page-pad, clamp(12px, 4vw, 24px));
+  padding-inline: 0;
   box-sizing: border-box;
 }
 
@@ -191,17 +193,128 @@ html body#html-body.b2b-auth-shell :is(
   margin-inline: auto;
 }
 
+/* Carrinho é page-layout-1column: summary vive DENTRO de .cart-container.
+   NÃO criar 2ª faixa em .columns (ficava vazia ~360px e apertava itens/preços). */
 html body#html-body.checkout-cart-index .page-main .columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--awa-gap-lg, 24px);
   align-items: start;
+  width: 100%;
 }
 
-@media (min-width: 992px) {
-  html body#html-body.checkout-cart-index .page-main .columns {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-  }
+html body#html-body.checkout-cart-index .page-main .columns .column.main {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+
+/* Preço unitário não pode truncar (ex.: "R$ 146,63" em célula de 58px) */
+html body#html-body.checkout-cart-index .page-wrapper .cart.table-wrapper .col.price {
+  min-width: 5.75rem;
+  width: auto;
+  white-space: nowrap;
+}
+
+/*
+ * H24: align-grid força a.action{display:inline-flex!important} com 3× #html-body,
+ * vencendo o hide do critical/shell. Wishlist/editar no carrinho devem ficar ocultos
+ * (só Remover) — evita truncamento e linhas de ~300px.
+ */
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  .cart.table-wrapper
+  .awa-cart-item-actions
+  :is(a.action-towishlist, a.action-edit, .action.towishlist, .action.action-edit) {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* H26: input qty do stepper não pode ficar com ~26px */
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  .cart.table-wrapper
+  .control.awa-qty-stepper
+  input.input-text.qty {
+  width: 3rem !important;
+  min-width: 2.75rem !important;
+  max-width: 4rem !important;
+  flex: 0 0 auto !important;
+  text-align: center !important;
+  padding-inline: 4px !important;
+}
+
+/*
+ * H29: #cart-summary é flex column com max-height (sticky).
+ * overflow:hidden em .block/.items (styles-l) zera o min-size flex →
+ * frete/cupom/métodos colapsam (height 0 / ~2px).
+ */
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  :is(#cart-summary, .cart-summary) {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  :is(#cart-summary, .cart-summary)
+  :is(
+    #block-shipping,
+    #block-discount,
+    .block.shipping,
+    .discount.coupon,
+    .checkout-methods-items,
+    .items.checkout-methods-items
+  ) {
+  overflow: visible !important;
+  flex-shrink: 0 !important;
+  min-height: min-content !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* H28: trust seals no sidebar — 2x2, nunca 4 cols (~65px/célula) */
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  :is(#cart-summary, .cart-summary)
+  .awa-cart-trust-seals__list {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px 16px !important;
+}
+
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  :is(#cart-summary, .cart-summary)
+  .awa-cart-trust-seals__item {
+  min-width: 0 !important;
+}
+
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  :is(#cart-summary, .cart-summary)
+  .awa-cart-trust-seals__label {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  :is(#cart-summary, .cart-summary)
+  .awa-cart-trust-seals__label
+  :is(strong, small) {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
 }
 
 html body#html-body.catalog-category-view .column.main {
@@ -368,14 +481,17 @@ html body#html-body .awa-footer-trust-item .awa-footer-trust-copy {
 }
 
 /* Round 6 — PDP hierarchy + cart empty overlap */
+/* SSOT 2026-07-30: título PDP alinhado ao cascade (18–22px / Rubik / balance). */
 html body#html-body#html-body#html-body#html-body.catalog-product-view
   .page-wrapper
   .product-info-main
   .page-title-wrapper
   :is(h1.page-title, .page-title, .page-title .base) {
-  font-size: clamp(22px, 1.25rem + 0.6vw, 30px) !important;
+  font-family: var(--awa-font-heading, "Rubik", system-ui, sans-serif) !important;
+  font-size: clamp(1.125rem, 1.05rem + 0.45vw, 1.375rem) !important;
   font-weight: 700 !important;
   line-height: 1.3 !important;
+  text-wrap: balance !important;
 }
 
 html body#html-body#html-body#html-body.catalog-product-view
@@ -648,6 +764,50 @@ html body#html-body:is(.b2b-auth-shell, .b2b-register-index, .customer-account-l
     justify-content: center !important;
     line-height: 1 !important;
     margin: 0 !important;
+  }
+
+  /*
+   * Round 24 — BUG-NAV-HOME-ICON (debug d5b5db):
+   * .icon-home recebe content U+E069 (simple-line-icons) mas
+   * [class*=" icon-"] força font-family: icomoon !important.
+   * Resultado: glifo ausente no item Início da bottom nav.
+   * Fix: alinhar font + content do simple-line-icons (mesmo set de Conta/Carrinho).
+   */
+  html body#html-body
+    nav.fixed-bottom
+    .mobile-bottom-link
+    .icon.icon-home,
+  html body#html-body
+    nav.fixed-bottom
+    .mobile-bottom-link
+    .icon-home {
+    font-family: 'simple-line-icons' !important;
+  }
+
+  html body#html-body
+    nav.fixed-bottom
+    .mobile-bottom-link
+    .icon-home::before {
+    content: '\e069' !important;
+    font-family: 'simple-line-icons' !important;
+  }
+
+  html body#html-body
+    nav.fixed-bottom
+    .mobile-bottom-link
+    > li.active
+    > a {
+    color: var(--awa-primary, #b73337) !important;
+    font-weight: 600 !important;
+  }
+
+  html body#html-body
+    nav.fixed-bottom
+    .mobile-bottom-link
+    > li.active
+    > a
+    .icon {
+    color: var(--awa-primary, #b73337) !important;
   }
 
   html body#html-body .page-wrapper
@@ -1128,4 +1288,83 @@ html body#html-body.b2b-auth-shell:is(
   padding-block: var(--b2b-auth-gap-sm, 8px) !important;
   box-sizing: border-box !important;
   line-height: 1.3 !important;
+}
+
+/*
+ * H31: resumo OPC — .product-item-inner em grid 2 col esmaga o nome (~81px).
+ * Empilhar nome/preço em coluna para o título usar a largura do sidebar.
+ */
+html body#html-body#html-body#html-body:is(
+  .checkout-index-index,
+  .rokanthemes-onepagecheckout,
+  .onepagecheckout-index-index
+)
+  .page-wrapper
+  .opc-block-summary
+  .product-item-details
+  .product-item-inner {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  grid-template-columns: none !important;
+}
+
+html body#html-body#html-body#html-body:is(
+  .checkout-index-index,
+  .rokanthemes-onepagecheckout,
+  .onepagecheckout-index-index
+)
+  .page-wrapper
+  .opc-block-summary
+  .product-item-name-block {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+html body#html-body#html-body#html-body:is(
+  .checkout-index-index,
+  .rokanthemes-onepagecheckout,
+  .onepagecheckout-index-index
+)
+  .page-wrapper
+  .opc-block-summary
+  .product-item-name {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/*
+ * H32: qty do resumo OPC (~26px) — width:100%!important do align-grid
+ * + botões ± 44px esmagam o input. Travar largura como no carrinho (H26).
+ */
+html body#html-body#html-body#html-body:is(
+  .checkout-index-index,
+  .rokanthemes-onepagecheckout,
+  .onepagecheckout-index-index
+)
+  .page-wrapper
+  .opc-block-summary
+  .details-qty
+  :is(input.qty, input.input-text.qty) {
+  width: 3rem !important;
+  min-width: 2.75rem !important;
+  max-width: 4rem !important;
+  flex: 0 0 auto !important;
+  text-align: center !important;
+  padding-inline: 4px !important;
+  box-sizing: border-box !important;
+}
+
+/*
+ * H33: sticky #cart-summary com max-height precisa scroll interno.
+ * overflow:visible (shorthand de cleanups) faz frete/cupom vazar do aside.
+ */
+html body#html-body#html-body#html-body.checkout-cart-index
+  .page-wrapper
+  :is(#cart-summary, .cart-summary) {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
 }

@@ -28,13 +28,19 @@ $modesLabelId = 'modes-label-' . $toolbarSlot;
             </strong>
         <?php else: ?>
             <?php $modeId = 'mode-' . $toolbarSlot . '-' . strtolower((string) $_code); ?>
+            <?php
+            // Não usar aria-labelledby com modes-label: o JS AWA reutiliza
+            // .modes-label como toggle "Mostrar/Ocultar Filtros", o que fazia
+            // leitores de tela anunciarem "Mostrar Filtros · Lista".
+            $modeAriaLabel = 'Ver como ' . (string) $_label;
+            ?>
             <a class="modes-mode mode-<?= $block->escapeHtmlAttr(strtolower((string) $_code)) ?>"
                title="<?= $block->escapeHtmlAttr((string) $_label) ?>"
                href="#"
                data-role="mode-switcher"
                data-value="<?= $block->escapeHtmlAttr(strtolower((string) $_code)) ?>"
                id="<?= $block->escapeHtmlAttr($modeId) ?>"
-               aria-labelledby="<?= $block->escapeHtmlAttr($modesLabelId) ?> <?= $block->escapeHtmlAttr($modeId) ?>">
+               aria-label="<?= $block->escapeHtmlAttr($modeAriaLabel) ?>">
                 <span><?= $block->escapeHtml((string) $_label) ?></span>
             </a>
         <?php endif; ?>

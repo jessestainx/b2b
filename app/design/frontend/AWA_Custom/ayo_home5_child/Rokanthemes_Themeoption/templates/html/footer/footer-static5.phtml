@@ -29,11 +29,11 @@ $whatsAppUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
 
 $emailLabel = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
     ? $footerData->getEmail()
-    : 'falecom@awamotos.com.br';
+    : 'awamotos@awamotos.com.br';
 
 $emailUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
     ? $footerData->getEmailUrl()
-    : 'mailto:falecom@awamotos.com.br';
+    : 'mailto:awamotos@awamotos.com.br';
 
 $facebookUrl = $footerData instanceof \GrupoAwamotos\Theme\ViewModel\FooterData
     ? $footerData->getFacebookUrl()
@@ -127,8 +127,6 @@ $socialLinks = [
                          aria-labelledby="awa-footer-quem-somos-toggle">
                         <ul class="velaFooterLinks" role="list">
                             <li><a href="<?= $escaper->escapeUrl($block->getUrl('about-us')) ?>"><?= $escaper->escapeHtml(__('Sobre a AWA Motos')) ?></a></li>
-                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('seja-revendedor')) ?>"><?= $escaper->escapeHtml(__('Cadastro de revendedores')) ?></a></li>
-                            <li><a href="<?= $escaper->escapeUrl($block->getUrl('blog')) ?>"><?= $escaper->escapeHtml(__('Blog AWA Motos')) ?></a></li>
                             <li><a href="<?= $escaper->escapeUrl($block->getUrl('trabalhe-conosco')) ?>"><?= $escaper->escapeHtml(__('Trabalhe Conosco')) ?></a></li>
                             <li><a href="<?= $escaper->escapeUrl($block->getUrl('nossas-marcas')) ?>"><?= $escaper->escapeHtml(__('Nossas Marcas')) ?></a></li>
                             <li><a href="<?= $escaper->escapeUrl($block->getUrl('catalogo')) ?>"><?= $escaper->escapeHtml(__('Catálogo')) ?></a></li>
@@ -223,8 +221,10 @@ $socialLinks = [
                             <a class="awa-footer-atendimento__store-link"
                                href="<?= $escaper->escapeUrl($mapsUrl) ?>"
                                target="_blank"
-                               rel="noopener noreferrer"
-                               aria-label="<?= $escaper->escapeHtmlAttr(__('Ver endereço da AWA Motos no Google Maps (abre em nova aba)')) ?>">
+                               rel="noopener noreferrer">
+                                <?php /* P1A-A11Y (2026-07-27): aria-label removido (WCAG 2.5.3) — não continha
+                                     o endereço visível; o texto + span sr-only "(abre em nova aba)" já formam
+                                     o nome acessível (mesmo padrão do A11Y-001). */ ?>
                                 <span class="awa-footer-atendimento__store-address"><?= $escaper->escapeHtml($addressLabel) ?></span>
                                 <span class="sr-only"><?= $escaper->escapeHtml(__('(abre em nova aba)')) ?></span>
                             </a>

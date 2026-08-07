@@ -428,6 +428,5 @@
     } else {
         safeInvoke("immediate init", init, null);
     }
-
-    return exportedApi;
+return exportedApi;
 });

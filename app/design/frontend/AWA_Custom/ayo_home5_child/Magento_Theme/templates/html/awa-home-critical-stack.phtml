@@ -13,11 +13,19 @@
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
-$stackUrl = $block->getViewFileUrl('css/awa-home-critical-stack-2026-06-11.min.css') . '?v=20260618-corporate-grid';
+
+use GrupoAwamotos\Theme\Model\MinicartAssetVersion;
+
+$stackUrl = $block->getViewFileUrl(
+    'css/' . \GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss::HOME_CRITICAL_STACK_FILE
+) . \GrupoAwamotos\Theme\Model\HeaderImpeccableCascadeLockCss::HOME_CRITICAL_STACK_QUERY;
 $stackEsc = $block->escapeUrl($stackUrl);
 ?>
 <link rel="preload" href="<?= $stackEsc ?>" as="style" fetchpriority="high"/>
-<link rel="stylesheet" href="<?= $stackEsc ?>" media="all" id="awa-home-critical-stack" data-awa-bundle="home-critical-stack" data-awa-first-paint-critical="stack"/>
+<?php /* PERF 2026-07-23: media=print onload — ~144KB fora do critical path.
+       Inline anti-FOUC + header condensed fragment cobrem 1º paint; print→all
+       (sem interaction gate) evita o CLS de gate ~5s. */ ?>
+<link rel="stylesheet" href="<?= $stackEsc ?>" media="print" onload="window.__awaCssQ?__awaCssQ(this):(/themes\.min|third-party-bundle|visual-bugfix|deferred-stack/.test(this.href||'')?(window.__awaCssPend=window.__awaCssPend||[]).push(this):(this.media='all'))" id="awa-home-critical-stack" data-awa-bundle="home-critical-stack" data-awa-first-paint-critical="stack"/>
 <noscript><link rel="stylesheet" href="<?= $stackEsc ?>"/></noscript>
 <?php
 /** awa-home-corporate-density-grid: removido de cms_index_index.xml (era media="all" blocking), carregado aqui async */
@@ -26,8 +34,19 @@ $__corpGridUrl = $block->escapeUrl(
 );
 ?>
 <link rel="preload" href="<?= $__corpGridUrl ?>" as="style"/>
-<link rel="stylesheet" href="<?= $__corpGridUrl ?>" media="all" data-awa-bundle="corp-grid" data-awa-first-paint-critical="corp-grid"/>
+<link rel="stylesheet" href="<?= $__corpGridUrl ?>" media="print" onload="window.__awaCssQ?__awaCssQ(this):(/themes\.min|third-party-bundle|visual-bugfix|deferred-stack/.test(this.href||'')?(window.__awaCssPend=window.__awaCssPend||[]).push(this):(this.media='all'))" data-awa-bundle="corp-grid" data-awa-first-paint-critical="corp-grid"/>
 <noscript><link rel="stylesheet" href="<?= $__corpGridUrl ?>"/></noscript>
+<?php
+/**
+ * Home remove awa.header.impeccable.critical.global (PSI), então o fragmento
+ * §CONDENSED precisa ser injetado aqui — senão sticky fica em 68/72px.
+ */
+?>
+<style id="awa-header-condensed-critical-home">
+<?= $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+    ->setTemplate('Magento_Theme::html/awa-header-condensed-critical-fragment.phtml')
+    ->toHtml() ?>
+</style>
 <?= $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
     ->setTemplate('Magento_Theme::html/awa-header-early-sticky-sync.phtml')
     ->toHtml() ?>
@@ -44,7 +63,10 @@ $__corpGridUrl = $block->escapeUrl(
     if (isHomeByPath || isHomeByBodyClass || isHomeByMarker) {
         return;
     }
-    var src = <?= json_encode($block->getViewFileUrl('js/awa-minicart-defer-init.js'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    var src = <?= json_encode(
+        $block->getViewFileUrl('js/awa-minicart-defer-init.js') . MinicartAssetVersion::query(),
+        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+    ) ?>;
     if (w.__awaMinicartDeferInit || d.querySelector('script[src="' + src + '"], script[data-awa-defer-init="' + src + '"]')) {
         return;
     }

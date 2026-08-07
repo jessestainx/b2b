@@ -1808,11 +1808,13 @@ body .page-wrapper .awa-site-header .awa-account-dropdown__trigger > .awa-header
   margin-bottom: 12px !important;
 }
 
+/* H15C: footer claro — badge com texto brand (antes branco do footer escuro). */
 .awa-footer-atendimento__store-badge {
   display: inline-block !important;
-  background: rgba(255,255,255,0.12) !important;
-  border: 1px solid rgba(255,255,255,0.28) !important;
-  color: rgba(255,255,255,0.90) !important;
+  background: color-mix(in srgb, var(--awa-primary) 12%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--awa-primary) 28%, transparent) !important;
+  color: var(--awa-primary) !important;
+  -webkit-text-fill-color: var(--awa-primary) !important;
   font-size: 11px !important;
   font-weight: 600 !important;
   letter-spacing: 0.06em !important;
@@ -3320,6 +3322,290 @@ body .page-wrapper .awa-site-header .awa-header-minicart[data-awa-minicart-ready
     color: var(--awa-brand-primary, var(--awa-primary));
 }
 
+/* H-search-popular-width (2026-08-02)
+   CDP: #awa-search-panel-a11y width=235 (100% de .control) vs search-col=343.
+   Mobile: fixed + CSS vars do compat JS. Pills: min-height 44→36, gap 6→8. */
+@media (max-width: 767px) {
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .awa-site-header .awa-header-search-col #awa-search-panel-a11y.mst-searchautocomplete__autocomplete,
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .header .top-search #awa-search-panel-a11y.mst-searchautocomplete__autocomplete {
+    position: fixed !important;
+    left: var(--awa-search-panel-left, 16px) !important;
+    width: var(--awa-search-panel-width, calc(100vw - 32px)) !important;
+    max-width: none !important;
+    right: auto !important;
+    top: var(--awa-search-panel-top, 104px) !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .awa-site-header #awa-search-panel-a11y .mst-searchautocomplete__wrapper,
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .awa-site-header #awa-search-panel-a11y .mst-searchautocomplete__results,
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .awa-site-header #awa-search-panel-a11y .mst-searchautocomplete__index.popular {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .awa-site-header #awa-search-panel-a11y .mst-searchautocomplete__index.popular ul {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    max-width: none !important;
+    gap: 8px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .awa-site-header #awa-search-panel-a11y .mst-searchautocomplete__index.popular ul li {
+    display: flex !important;
+    float: none !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .awa-site-header #awa-search-panel-a11y .mst-searchautocomplete__index.popular ul li a,
+  html body#html-body:is(.awa-search-focus-active, .searchautocomplete__active)
+    .page-wrapper .awa-site-header #awa-search-panel-a11y .mst-searchautocomplete__index.popular ul li a.title {
+    min-height: 36px !important;
+    height: auto !important;
+    padding: 6px 12px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* H-search-input-width (2026-08-02)
+   CDP: .top-search força grid "search cart" 1fr+44px, mas o cart NÃO é filho
+   (está em .awa-header-right-col / row brand). Coluna fantasma → #search ~235px.
+   Sem filho cart: 1 coluna; form ocupa 100%; input ~ searchCol-44 (lupa). */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body .page-wrapper .awa-site-header
+    .awa-header-search-col.top-search:not(:has(> .mini-cart-wrapper)):not(:has(> .minicart-wrapper)),
+  html body#html-body#html-body#html-body .page-wrapper .header
+    .top-search.awa-header-search-col:not(:has(> .mini-cart-wrapper)):not(:has(> .minicart-wrapper)) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: "search" !important;
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  html body#html-body#html-body#html-body .page-wrapper .awa-site-header
+    .awa-header-search-col.top-search:not(:has(> .mini-cart-wrapper)) > .block-search,
+  html body#html-body#html-body#html-body .page-wrapper .awa-site-header
+    .awa-header-search-col.top-search:not(:has(> .mini-cart-wrapper)) > .block-search .block-content,
+  html body#html-body#html-body#html-body .page-wrapper .awa-site-header
+    .awa-header-search-col.top-search:not(:has(> .mini-cart-wrapper)) form#search_mini_form {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+
+
+/* H-wa-overlap-bottom-nav (2026-08-02)
+   PLP: align-grid forçava bottom:16px → FAB sobre Carrinho da bottom nav.
+   Sobe para 84px e restaura fundo WhatsApp (unlayered `a` transparent). */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view)
+    .page-wrapper a.awa-whatsapp-float {
+    bottom: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+    inset-block-end: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+    background: #25d366 !important;
+    background-color: #25d366 !important;
+    color: #fff !important;
+    z-index: 10002 !important;
+  }
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index, .catalog-product-view)
+    .page-wrapper a.awa-whatsapp-float svg {
+    fill: currentColor !important;
+    color: #fff !important;
+  }
+}
+
+/* H-redundant-chrome (2026-08-02)
+   CDP: banner B2B e toolbar tinham border 1px envolvendo botões/controles
+   que já têm borda própria → chrome duplo. Remove só o container. */
+@media (max-width: 767px) {
+  /* 7x #html-body: vence inline OptimizeHeadStyles (6x) + first-paint-lock */
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .awa-plp-b2b-gate-banner {
+    border: 0 !important;
+    border-width: 0 !important;
+    border-color: transparent !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-inline: 0 !important;
+    padding-block: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products {
+    border: 0 !important;
+    border-width: 0 !important;
+    border-color: transparent !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+/* H-toolbar-chrome (2026-08-02)
+   CDP PLP mobile: ::before "Filtros" + modes space-between (gaps 75px) +
+   modes-label border-left:0 (pill cortada) + sorter border dentro do toolbar
+   (borda dupla).
+   H-toolbar-space (2026-08-02): pad-inline 12px desperdiçava 24px vs busca
+   categoria (343px); modes-label flex:0 deixava 98px ociosos à direita. */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products::before,
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products::after,
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .toolbar.toolbar-products::before,
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .toolbar.toolbar-products::after {
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    pointer-events: none !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-inline: 0 !important;
+    padding-block: 8px !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products .center {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products .modes {
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products .modes .modes-label[data-awa-filter-toggle="true"] {
+    border: 1px solid var(--awa-border, #e2e8f0) !important;
+    border-left: 1px solid var(--awa-border, #e2e8f0) !important;
+    border-left-width: 1px !important;
+    padding: 10px 12px !important;
+    padding-left: 12px !important;
+    border-radius: 8px !important;
+    background: var(--awa-bg, #fff) !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products .modes .modes-mode {
+    box-shadow: none !important;
+    border-radius: 8px !important;
+    flex: 0 0 44px !important;
+    width: 44px !important;
+    max-width: 44px !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products .toolbar-sorter.sorter {
+    border: 0 !important;
+    border-width: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products .toolbar-sorter.sorter select,
+  html body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper .shop-tab-select .toolbar.toolbar-products .toolbar-sorter.sorter .sorter-options {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+/* H-search-fa-before-left (2026-08-02)
+   CDP: .action.search::before FontAwesome "\f002" com position:absolute; left:14px
+   ancora no form (position:relative) → lupa vermelha sobre o placeholder à esquerda.
+   A lupa canônica é o SVG do botão à direita. Mata ::before/::after duplicados. */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header
+    .header .top-search > .block-search .action.search::before,
+  html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header
+    .header .top-search > .block-search button[type="submit"]::before,
+  html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header
+    .awa-header-search-col form#search_mini_form button.action.search::before,
+  html body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header
+    .awa-header-search-col form#search_mini_form button.action.search::after {
+    content: none !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: auto !important;
+    right: auto !important;
+    background: none !important;
+    pointer-events: none !important;
+  }
+}
+
 /* ============================================================================
    6. SEARCH QUERY SUGGESTIONS
    ============================================================================ */
@@ -4024,6 +4310,7 @@ input.mst-search-autocomplete__typeahead-overlay {
   }
 
   /* Painel de filtro mobile */
+  /* H-filter-drawer (2026-08-02): padding 20→12 (ritmo PLP) */
   #layered-ajax-filter-block.block.filter {
     position: fixed !important;
     top: 0 !important;
@@ -4037,12 +4324,56 @@ input.mst-search-autocomplete__typeahead-overlay {
     overflow-y: auto !important;
     transform: translateX(-100%) !important;
     transition: transform 0.25s ease !important;
-    padding: 20px 0 !important;
+    padding: 12px 0 !important;
   }
 
+  /* H-filter-drawer (2026-08-02): toggle real = body.awa-plp-filters-expanded
+     (unlayered !important; @layer translateX(0) NÃO vence este arquivo) */
   #layered-ajax-filter-block.block.filter._active,
-  body.filter-active .block.filter {
+  body.filter-active .block.filter,
+  body.awa-plp-filters-expanded #layered-ajax-filter-block.block.filter {
     transform: translateX(0) !important;
+  }
+
+  /* H-filter-drawer-inner-spacing (2026-08-02)
+     CDP: .item a min-height:44 (themes/styles-l) + li pad/margin → rows 58px.
+     Ritmo stack-tight: rows ~36, gap 0, title 36/8. Unlayered p/v themes !important. */
+  html body#html-body.awa-plp-filters-expanded #layered-ajax-filter-block.block.filter
+    .filter-options-title {
+    min-height: 36px !important;
+    height: auto !important;
+    padding-block: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  html body#html-body.awa-plp-filters-expanded #layered-ajax-filter-block.block.filter
+    .filter-options-item {
+    padding-block: 8px !important;
+    margin-bottom: 0 !important;
+  }
+
+  html body#html-body.awa-plp-filters-expanded #layered-ajax-filter-block.block.filter
+    .filter-options-item .items {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  html body#html-body.awa-plp-filters-expanded #layered-ajax-filter-block.block.filter
+    .filter-options-item .item {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+
+  html body#html-body.awa-plp-filters-expanded #layered-ajax-filter-block.block.filter
+    .filter-options-content .item a,
+  html body#html-body.awa-plp-filters-expanded #layered-ajax-filter-block.block.filter
+    .item a {
+    min-height: 36px !important;
+    height: auto !important;
+    padding: 8px 12px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
   }
 
   /* Header do painel */
@@ -4050,8 +4381,8 @@ input.mst-search-autocomplete__typeahead-overlay {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 0 20px 16px !important;
-    border-bottom: 2px solid var(--awa-red, var(--awa-primary)) !important;
+    padding: 0 12px 12px !important;
+    border-bottom: 1px solid var(--awa-border, #e5e7eb) !important;
     margin-bottom: 8px !important;
   }
 
@@ -8108,10 +8439,22 @@ body.checkout-cart-index .cart-container {
         margin: 20px auto !important;
     }
 
-    :is(body.checkout-index-index, body.rokanthemes-onepagecheckout) :is(.opc-wrapper, .opc-sidebar),
-    body.checkout-cart-index .cart-summary {
+    :is(body.checkout-index-index, body.rokanthemes-onepagecheckout) :is(.opc-wrapper, .opc-sidebar) {
         width: 100% !important;
         position: static !important;
+    }
+}
+
+@media (max-width: 991px) {
+    body.checkout-cart-index .cart-summary {
+        width: 100% !important;
+        max-width: 100% !important;
+        position: static !important;
+        float: none !important;
+    }
+    body.checkout-cart-index .cart-container .form-cart {
+        width: 100% !important;
+        float: none !important;
     }
 }
 
@@ -13667,6 +14010,9 @@ body.catalog-product-view .page-wrapper .fotorama__arr--next{
   justify-content: center !important;
   min-height: var(--awa-touch-target, 44px) !important;
   min-width: var(--awa-touch-target, 44px) !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
 }
 body.checkout-cart-index .page-wrapper .awa-cart-empty__suggestion{
   align-items: center !important;
@@ -15753,9 +16099,16 @@ body.catalog-product-view .product.media .fotorama__nav--dots{
 }
 body.catalog-product-view .product.media .fotorama__nav--dots .fotorama__nav__shaft{
   display: flex !important;
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   gap: var(--size-2xs, var(--awa-space-2)) !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
+  max-inline-size: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
+body.catalog-product-view .product.media .fotorama__nav--dots:has(.fotorama__nav__frame--thumb) .fotorama__nav__frame--dot{
+  display: none !important;
 }
 body.catalog-product-view .product.media .fotorama__nav--dots .fotorama__nav__frame{
   align-items: center !important;
@@ -17374,8 +17727,8 @@ body.catalog-product-view .fotorama--fullscreen .fotorama__arr{
   border-radius: var(--radius-full, 9999px) !important;
   box-shadow: 0 4px 16px color-mix(in srgb, #020617 18%, transparent) !important;
   cursor: pointer !important;
-  display: inline-flex !important;
   justify-content: center !important;
+  position: fixed !important;
   min-block-size: var(--awa-touch-target, 44px) !important;
   min-inline-size: var(--awa-touch-target, 44px) !important;
   opacity: 1 !important;
@@ -17451,8 +17804,8 @@ html body.catalog-product-view .product-info-main .page-title-wrapper{
 html body.catalog-product-view .product-info-main .page-title-wrapper .page-title .base{
   color: var(--pdp-modern-text, #1e293b) !important;
   display: block !important;
-  hyphens: auto !important;
-  text-wrap: balance !important;
+  hyphens: none !important; -webkit-hyphens: none !important; margin: 0 !important;
+  text-wrap: pretty !important;
 }
 html body.catalog-product-view .product-info-main .box-inner1 .awa-pdp-review-summary,
 html body.catalog-product-view .product-info-main .box-inner1 .product-reviews-summary{
@@ -18893,7 +19246,7 @@ body.catalog-product-view .product-info-main .b2b-login-to-see-price a:focus-vis
   outline-offset: 2px !important;
 }
 body.catalog-product-view .fotorama--fullscreen{
-  z-index: 68 !important;
+  z-index: 100200 !important;
 }
 body.catalog-product-view .modals-wrapper .modal-popup{
   z-index: 71 !important;
@@ -20076,3 +20429,4 @@ body#html-body:is(.catalog-product-view, .catalog-category-view, .catalogsearch-
     min-width: 44px !important;
   }
 }
+

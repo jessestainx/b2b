@@ -12,7 +12,12 @@
         <meta name="robots" content="NOINDEX,FOLLOW"/>
         <remove src="css/awa-plp-final-polish.css"/>
         <remove src="css/awa-visual-qa-category.css"/>
-        <!-- awa-plp-shell-final.css removido: referência órfã (404 em produção). -->
+        <!-- AWA vfix scope: search results only -->
+        <css src="css/awa-vfix-plp-search.css"/>
+        <!-- Reabilitado: arquivo existe em pub/static; trava altura #mst_categorySearch em 44px. -->
+        <css src="css/awa-plp-shell-final.css"/>
+        <!-- B2B: esconde tocart original quando login-to-cart.js injeta CTA (mesmo CSS da PDP/PLP) -->
+        <css src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
     </head>
     <body>
         <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>

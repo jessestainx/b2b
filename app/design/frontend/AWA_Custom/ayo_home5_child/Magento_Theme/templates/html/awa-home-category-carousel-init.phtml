@@ -6,8 +6,10 @@ declare(strict_types=1);
     'use strict';
 
     var started = false;
+    var ready = false;
     var requireRetries = 0;
     var maxRequireRetries = 80;
+    var pendingDir = 0; // -1 prev, +1 next (first-click race)
 
     function isCarouselIntentTarget(target) {
         if (!target || typeof target.closest !== 'function') {
@@ -15,6 +17,20 @@ declare(strict_types=1);
         }
 
         return !!target.closest('.top-home-content--category-carousel, #awa-cat-carousel, .awa-category-carousel__prev, .awa-category-carousel__next');
+    }
+
+    function applyPendingNav(track) {
+        var dir = pendingDir;
+        pendingDir = 0;
+        if (!track || !dir) {
+            return;
+        }
+        var items = track.querySelectorAll('.awa-category-carousel__item');
+        var style = w.getComputedStyle(track);
+        var gap = parseInt(style.gap, 10) || 16;
+        var itemW = items[0] ? (items[0].offsetWidth + gap) : 280;
+        var amount = Math.max(Math.floor(track.clientWidth / itemW) * itemW, 280);
+        track.scrollBy({ left: dir * amount, behavior: 'auto' });
     }
 
     function initCategoryCarousel() {
@@ -42,6 +58,8 @@ declare(strict_types=1);
                 if (typeof init === 'function') {
                     init({ mobileBreakpoint: 768 }, target);
                 }
+                ready = true;
+                applyPendingNav(target);
             });
         }
 
@@ -53,27 +71,41 @@ declare(strict_types=1);
         boot();
     }
 
+    function onIntent(event) {
+        var target = event && event.target ? event.target : null;
+        if (!isCarouselIntentTarget(target)) {
+            return;
+        }
+
+        var btn = target && target.closest
+            ? target.closest('.awa-category-carousel__prev, .awa-category-carousel__next')
+            : null;
+        if (btn && !ready) {
+            if (btn.classList.contains('awa-category-carousel__next')) {
+                pendingDir = 1;
+            } else if (btn.classList.contains('awa-category-carousel__prev')) {
+                pendingDir = -1;
+            }
+        }
+
+        initCategoryCarousel();
+    }
+
     function schedule() {
         var target = d.getElementById('awa-cat-carousel');
         if (!target) {
             return;
         }
 
-        var intentEvents = ['pointerdown', 'keydown', 'touchstart'];
-
-        function onIntent(event) {
-            if (!isCarouselIntentTarget(event && event.target ? event.target : null)) {
-                return;
-            }
-
-            intentEvents.forEach(function (name) {
-                w.removeEventListener(name, onIntent, true);
-            });
-            initCategoryCarousel();
+        var eager = function () { initCategoryCarousel(); };
+        if (typeof w.requestIdleCallback === 'function') {
+            w.requestIdleCallback(eager, { timeout: 1800 });
+        } else {
+            w.setTimeout(eager, 400);
         }
 
-        intentEvents.forEach(function (name) {
-            w.addEventListener(name, onIntent, { capture: true, passive: name !== 'keydown', once: false });
+        ['pointerdown', 'keydown', 'touchstart'].forEach(function (name) {
+            w.addEventListener(name, onIntent, { capture: true, passive: name !== 'keydown' });
         });
     }
 

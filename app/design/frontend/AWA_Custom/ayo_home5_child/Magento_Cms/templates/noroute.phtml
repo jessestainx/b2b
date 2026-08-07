@@ -26,7 +26,7 @@ $directUrl = static fn (string $path): string => $block->getUrl('', ['_direct' =
             <?= $block->escapeHtml(__('Verifique a URL ou use a busca no topo da página.')) ?>
         </p>
         <nav class="awa-404-page__links" aria-label="<?= $block->escapeHtmlAttr(__('Links úteis')) ?>">
-            <a href="<?= $block->escapeUrl($block->getUrl('')) ?>"><?= $block->escapeHtml(__('Ir para a Home')) ?></a>
+            <a href="<?= $block->escapeUrl($block->getUrl('')) ?>"><?= $block->escapeHtml(__('Ir para o início')) ?></a>
             <a href="<?= $block->escapeUrl($directUrl('bauletos.html')) ?>"><?= $block->escapeHtml(__('Bauletos')) ?></a>
             <a href="<?= $block->escapeUrl($directUrl('guidoes.html')) ?>"><?= $block->escapeHtml(__('Guidões')) ?></a>
             <a href="<?= $block->escapeUrl($directUrl('retrovisores.html')) ?>"><?= $block->escapeHtml(__('Retrovisores')) ?></a>

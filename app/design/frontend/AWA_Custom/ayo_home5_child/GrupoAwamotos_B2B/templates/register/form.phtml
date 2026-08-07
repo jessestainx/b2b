@@ -68,23 +68,6 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                     </button>
                 </nav>
 
-                <div class="b2b-register-step-nav" data-register-step-nav aria-label="<?= $block->escapeHtmlAttr(__('Navegação entre etapas')) ?>">
-                    <button type="button"
-                            class="b2b-register-step-prev b2b-btn-claim"
-                            disabled
-                            aria-label="<?= $block->escapeHtmlAttr(__('Voltar para etapa anterior')) ?>">
-                        <span><?= $block->escapeHtml(__('Voltar')) ?></span>
-                    </button>
-                    <p class="b2b-register-step-indicator" aria-live="polite">
-                        <span class="b2b-register-step-indicator__text"><?= $block->escapeHtml(__('Etapa %1 de %2', 1, 4)) ?></span>
-                    </p>
-                    <button type="button"
-                            class="b2b-register-step-next b2b-btn-entrar"
-                            aria-label="<?= $block->escapeHtmlAttr(__('Continuar para próxima etapa')) ?>">
-                        <span><?= $block->escapeHtml(__('Continuar')) ?></span>
-                    </button>
-                </div>
-
                 <!-- Dados da Empresa -->
                 <div class="form-section form-section--company" data-step="1" id="register-step-company">
                     <h2 class="form-section__heading"><?= $block->escapeHtml(__('Dados da Empresa')) ?></h2>
@@ -195,7 +178,7 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                 </div>
 
                 <!-- Endereço Comercial (auto-preenchido) -->
-                <div class="form-section form-section--address" id="address-section" data-step="2">
+                <div class="form-section form-section--address is-collapsed" id="address-section" data-step="2">
                     <h2 class="form-section__heading"><?= $block->escapeHtml(__('Endereço Comercial')) ?></h2>
 
                     <div class="field required">
@@ -281,7 +264,7 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                 </div>
 
                 <!-- Dados de Contato -->
-                <div class="form-section form-section--contact" data-step="3" id="register-step-contact">
+                <div class="form-section form-section--contact is-collapsed" data-step="3" id="register-step-contact">
                     <h2 class="form-section__heading"><?= $block->escapeHtml(__('Dados de Contato')) ?></h2>
 
                     <div class="field-row">
@@ -322,7 +305,7 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                 </div>
 
                 <!-- Segurança -->
-                <div class="form-section form-section--security" data-step="4" id="register-step-security">
+                <div class="form-section form-section--security is-collapsed" data-step="4" id="register-step-security">
                     <h2 class="form-section__heading"><?= $block->escapeHtml(__('Segurança')) ?></h2>
 
                     <div class="field required">
@@ -375,8 +358,25 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                     <div id="email-check-alert" class="email-check-alert is-hidden" role="alert" aria-live="polite" aria-hidden="true"></div>
                 </div>
 
-                <!-- Termos -->
-                <div class="form-section terms-section form-section--terms">
+                <div class="b2b-register-step-nav" data-register-step-nav aria-label="<?= $block->escapeHtmlAttr(__('Navegação entre etapas')) ?>">
+                    <button type="button"
+                            class="b2b-register-step-prev b2b-btn-claim"
+                            disabled
+                            aria-label="<?= $block->escapeHtmlAttr(__('Voltar para etapa anterior')) ?>">
+                        <span><?= $block->escapeHtml(__('Voltar')) ?></span>
+                    </button>
+                    <p class="b2b-register-step-indicator" aria-live="polite">
+                        <span class="b2b-register-step-indicator__text"><?= $block->escapeHtml(__('Etapa %1 de %2', 1, 4)) ?></span>
+                    </p>
+                    <button type="button"
+                            class="b2b-register-step-next b2b-btn-entrar"
+                            aria-label="<?= $block->escapeHtmlAttr(__('Continuar para próxima etapa')) ?>">
+                        <span><?= $block->escapeHtml(__('Continuar')) ?></span>
+                    </button>
+                </div>
+
+                <!-- Termos (visível só na etapa final — JS remove hidden) -->
+                <div class="form-section terms-section form-section--terms" hidden>
                     <div class="field choice required b2b-register-terms">
                         <input type="checkbox" name="terms" id="terms" value="1" class="checkbox" data-validate="{required:true}" required aria-required="true"
                             <?= $block->getFormValue('terms') === '1' ? ' checked="checked"' : '' ?>>
@@ -386,7 +386,7 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                     </div>
                 </div>
 
-                <div class="actions-toolbar b2b-login-actions">
+                <div class="actions-toolbar b2b-login-actions" hidden>
                     <div class="primary">
                         <button type="submit" class="b2b-btn-entrar create-b2b-account" title="<?= $block->escapeHtmlAttr(__('Criar Conta B2B')) ?>">
                             <span><?= $block->escapeHtml(__('Criar conta B2B')) ?></span>
@@ -403,7 +403,7 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
             <div class="b2b-login-ctas b2b-register-secondary-ctas">
                 <a href="<?= $escaper->escapeUrl($block->getUrl('b2b/account/login')) ?>"
                    class="b2b-btn-claim">
-                    <?= $block->escapeHtml(__('Já tem conta? Faça login')) ?>
+                    <?= $block->escapeHtml(__('Já tem conta? Entrar')) ?>
                 </a>
             </div>
         </div>

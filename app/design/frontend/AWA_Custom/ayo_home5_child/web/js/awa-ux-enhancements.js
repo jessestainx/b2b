@@ -260,7 +260,11 @@ define(['jquery'], function ($) {
     ============================================================ */
     function fixMobileTouch() {
         try {
-            if (window.innerWidth > 1024) return;
+            /* Não abortar em desktop: sorter/breadcrumb/footer falham ≥768 (Pixel-QA). */
+            let existing = document.getElementById('awa-touch-style');
+            if (existing) {
+                existing.remove();
+            }
 
             let style = document.createElement('style');
             style.id   = 'awa-touch-style';
@@ -275,35 +279,103 @@ define(['jquery'], function ($) {
                 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.catalog-product-view .page-wrapper :is(.rx-pdp-login-link,.awa-related-price-notice__login-link){',
                 'display:inline-flex!important;align-items:center!important;min-height:44px!important;',
                 'height:auto!important;padding-top:10px!important;padding-bottom:10px!important;',
-                'line-height:1.2!important;box-sizing:border-box!important}'
+                'line-height:1.2!important;box-sizing:border-box!important}',
+                /* select nativo: height:auto + min-height perde o piso em Chrome — forçar 44px */
+                'html body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper .toolbar.toolbar-products :is(.sorter-options,select.limiter-options,#sorter,#limiter){',
+                'min-height:44px!important;height:44px!important;max-height:none!important;',
+                'box-sizing:border-box!important;padding-block:8px!important}',
+                /* H-crumbs-compact: CSS inject — não forçar 44 no breadcrumb textual */
+                'html body#html-body#html-body#html-body#html-body :is(.breadcrumbs,.nav-breadcrumbs) a{',
+                'display:inline-flex!important;align-items:center!important;min-height:0!important;min-block-size:0!important;',
+                'height:auto!important;padding-block:2px!important;box-sizing:border-box!important}',
+                'html body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(button.awa-footer-section__toggle,.awa-footer-section__toggle){',
+                'min-height:44px!important;height:auto!important;max-height:none!important;',
+                'padding-block:10px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important}'
             ].join('');
             (document.body || document.documentElement).appendChild(style);
 
-            let productLinks = document.querySelectorAll(
+            function forceTouch44(nodes, props) {
+                nodes.forEach(function (el) {
+                    Object.keys(props).forEach(function (prop) {
+                        el.style.setProperty(prop, props[prop], 'important');
+                    });
+                });
+            }
+
+            forceTouch44(document.querySelectorAll(
                 '.wrapper.grid.products-grid .item-product .product-item-link,' +
                 '.products-grid .item-product .product-item-link,' +
                 '.awa-pdp-related .product-item-link,' +
                 '.rx-pdp-crosssell .product-item-link'
-            );
-            productLinks.forEach(function (link) {
-                link.style.setProperty('min-height', '44px', 'important');
-                link.style.setProperty('height', 'auto', 'important');
-                link.style.setProperty('max-height', 'none', 'important');
-                link.style.setProperty('padding-top', '4px', 'important');
-                link.style.setProperty('padding-bottom', '4px', 'important');
-                link.style.setProperty('box-sizing', 'border-box', 'important');
+            ), {
+                'min-height': '44px',
+                'height': 'auto',
+                'max-height': 'none',
+                'padding-top': '4px',
+                'padding-bottom': '4px',
+                'box-sizing': 'border-box'
             });
 
-            let loginLinks = document.querySelectorAll('.rx-pdp-login-link, .awa-related-price-notice__login-link');
-            loginLinks.forEach(function (link) {
-                link.style.setProperty('display', 'inline-flex', 'important');
-                link.style.setProperty('align-items', 'center', 'important');
-                link.style.setProperty('min-height', '44px', 'important');
-                link.style.setProperty('height', 'auto', 'important');
-                link.style.setProperty('padding-top', '10px', 'important');
-                link.style.setProperty('padding-bottom', '10px', 'important');
-                link.style.setProperty('line-height', '1.2', 'important');
-                link.style.setProperty('box-sizing', 'border-box', 'important');
+            forceTouch44(document.querySelectorAll('.rx-pdp-login-link, .awa-related-price-notice__login-link'), {
+                'display': 'inline-flex',
+                'align-items': 'center',
+                'min-height': '44px',
+                'height': 'auto',
+                'padding-top': '10px',
+                'padding-bottom': '10px',
+                'line-height': '1.2',
+                'box-sizing': 'border-box'
+            });
+
+            forceTouch44(document.querySelectorAll(
+                '.toolbar.toolbar-products #sorter,' +
+                '.toolbar.toolbar-products select.sorter-options,' +
+                '.toolbar.toolbar-products select.limiter-options,' +
+                '.toolbar.toolbar-products #limiter'
+            ), {
+                'min-height': '44px',
+                'height': '44px',
+                'max-height': 'none',
+                'box-sizing': 'border-box'
+            });
+
+            // H-crumbs-compact (2026-08-02): nav textual — 44px inflava .items ~50px (CDP).
+            forceTouch44(document.querySelectorAll('.breadcrumbs a, .nav-breadcrumbs a'), {
+                'display': 'inline-flex',
+                'align-items': 'center',
+                'min-height': '0',
+                'min-block-size': '0',
+                'height': 'auto',
+                'padding-block': '2px',
+                'box-sizing': 'border-box'
+            });
+
+            // Re-aplica no próximo frame (vence writers tardios / race com touch-44-terminal).
+            var crumbProps = {
+                'display': 'inline-flex',
+                'align-items': 'center',
+                'min-height': '0',
+                'min-block-size': '0',
+                'height': 'auto',
+                'padding-block': '2px',
+                'box-sizing': 'border-box'
+            };
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(function () {
+                    forceTouch44(document.querySelectorAll('.breadcrumbs a, .nav-breadcrumbs a'), crumbProps);
+                });
+            }
+
+            forceTouch44(document.querySelectorAll(
+                '.page_footer .awa-footer-section__toggle, .page-footer .awa-footer-section__toggle'
+            ), {
+                'min-height': '44px',
+                'height': 'auto',
+                'max-height': 'none',
+                'padding-block': '10px',
+                'display': 'flex',
+                'align-items': 'center',
+                'box-sizing': 'border-box'
             });
         } catch (e) {}
     }
@@ -318,6 +390,8 @@ define(['jquery'], function ($) {
     }
 
     function initSearchEnhance() {
+        // AWA 2026-07-22: busca só com lupa — sem botão limpar (X).
+        return;
         try {
             let searchInput = document.querySelector('#search, .header-search input[type="text"], .block-search input.input-text');
             if (!searchInput || document.getElementById('awa-search-clear')) return;
@@ -379,7 +453,7 @@ define(['jquery'], function ($) {
                 let form = searchRoot && searchRoot.querySelector('#search_mini_form');
                 let input = searchRoot && searchRoot.querySelector('#search');
                 let panel = searchControl && searchControl.querySelector('.mst-searchautocomplete__autocomplete._active');
-                let isMobile = window.matchMedia('(max-width: 991px)').matches;
+                let isMobile = window.matchMedia('(max-width: 767px)').matches;
                 let isActive = !!(form && (
                     form.matches(':focus-within')
                     || form.classList.contains('searchautocomplete__active')
@@ -390,8 +464,28 @@ define(['jquery'], function ($) {
                 let searchCol = document.querySelector('.awa-header-search-col');
                 let field = searchRoot && searchRoot.querySelector('.field.search');
                 let blockContent = searchRoot && searchRoot.querySelector('.block-content');
+                /* BUG-SHELL-MOBILE-CONDENSED-1ROW: não expandir search full-bleed no sticky condensed
+                   (grid-column:1/-1 + width:100% disputava com ícone 44px → overlap no logo). */
+                let isCondensed = !!(document.querySelector('.awa-site-header.awa-header-condensed')
+                    || document.querySelector('.header-wrapper-sticky.awa-header-condensed'));
 
-                if (isMobile && searchRoot) {
+                if (isMobile && searchRoot && isCondensed) {
+                    if (searchCol) {
+                        searchCol.style.setProperty('width', '44px', 'important');
+                        searchCol.style.setProperty('max-width', '44px', 'important');
+                        searchCol.style.setProperty('min-width', '44px', 'important');
+                        searchCol.style.setProperty('grid-column', 'auto', 'important');
+                        searchCol.style.setProperty('grid-area', 'search', 'important');
+                    }
+                    if (searchRoot) {
+                        searchRoot.style.setProperty('width', '44px', 'important');
+                        searchRoot.style.setProperty('max-width', '44px', 'important');
+                    }
+                    if (form) {
+                        form.style.setProperty('width', '44px', 'important');
+                        form.style.setProperty('max-width', '44px', 'important');
+                    }
+                } else if (isMobile && searchRoot) {
                     if (searchCol) {
                         searchCol.style.setProperty('width', '100%', 'important');
                         searchCol.style.setProperty('max-width', '100%', 'important');

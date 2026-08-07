@@ -12,7 +12,31 @@ if ($heroPreloadUrl === '') {
     return;
 }
 $heroMobileUrl = $block->getHeroImageMobileUrl() ?: $heroPreloadUrl;
+$heroSrcset = $block->getHeroImageSrcset();
+$heroMobileSrcset = $block->getHeroImageMobileSrcset() ?: $heroSrcset;
+$heroSizes = $block->getHeroImageSizes();
+$heroMobileSizes = $block->getHeroImageMobileSizes();
 ?>
-<!-- LCP Hero Image Preload — media queries + URL exata (sem imagesrcset; evita mismatch desktop 1920w vs preload 768w) -->
-<link rel="prefetch" href="<?= $block->escapeUrl($heroMobileUrl) ?>" as="image" media="(max-width: 767px)" fetchpriority="low"/>
-<link rel="prefetch" href="<?= $block->escapeUrl($heroPreloadUrl) ?>" as="image" media="(min-width: 768px)" fetchpriority="low"/>
+<?php
+/**
+ * Magento / web.dev LCP: rel=preload + fetchpriority=high com media query
+ * (prefetch/low atrasava descoberta do hero — regressão PSI).
+ * r44: imagesrcset/imagesizes alinham preload ao candidato 1200w tipico.
+ */
+?>
+<link rel="preload"
+      href="<?= $block->escapeUrl($heroMobileUrl) ?>"
+      as="image"
+      type="image/webp"
+      media="(max-width: 767px)"
+      <?php if ($heroMobileSrcset !== ''): ?>imagesrcset="<?= $block->escapeHtmlAttr($heroMobileSrcset) ?>"
+      imagesizes="<?= $block->escapeHtmlAttr($heroMobileSizes) ?>"
+      <?php endif; ?>fetchpriority="high"/>
+<link rel="preload"
+      href="<?= $block->escapeUrl($heroPreloadUrl) ?>"
+      as="image"
+      type="image/webp"
+      media="(min-width: 768px)"
+      <?php if ($heroSrcset !== ''): ?>imagesrcset="<?= $block->escapeHtmlAttr($heroSrcset) ?>"
+      imagesizes="<?= $block->escapeHtmlAttr($heroSizes) ?>"
+      <?php endif; ?>fetchpriority="high"/>

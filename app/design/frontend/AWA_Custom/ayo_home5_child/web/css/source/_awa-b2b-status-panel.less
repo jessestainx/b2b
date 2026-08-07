@@ -477,11 +477,19 @@ html body#html-body .page-wrapper .awa-site-header .awa-header-right-col:has(.b2
     }
 
     .b2b-status-trigger {
-        max-width: ~"min(200px, 42vw)";
-        gap: 10px;
+        max-width: ~"min(160px, 42vw)";
+        gap: 8px;
     }
 
+    /* Mobile: mostrar saudação curta; ocultar empresa (evita "Pan…") */
     .b2b-status-trigger__line1 {
+        display: block;
+        max-width: ~"min(12ch, 100%)";
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .b2b-status-trigger__line2 {
         display: none;
     }
 
@@ -505,13 +513,13 @@ html body#html-body .page-wrapper .awa-site-header .awa-header-right-col:has(.b2
 
 @media screen and (max-width: 480px) {
     .b2b-status-trigger {
-        max-width: ~"min(180px, 48vw)";
-        gap: 8px;
+        max-width: ~"min(150px, 46vw)";
+        gap: 6px;
     }
 
-    .b2b-status-trigger__line2 {
+    .b2b-status-trigger__line1 {
+        max-width: ~"min(11ch, 100%)";
         font-size: 12px;
-        max-width: 120px;
     }
 
     .b2b-status-trigger__chevron {

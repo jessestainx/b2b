@@ -62,9 +62,10 @@
     .header-wrapper-sticky.is-sticky {
       display: flex !important;
       flex-direction: column !important;
-      min-height: 124px !important;
-      height: 124px !important;
-      max-height: 124px !important;
+      /* 2026-07-17 Round5: 124 stale — SSOT sticky = main-row + nav (68+48) */
+      min-height: var(--awa-header-sticky-h, 116px) !important;
+      height: var(--awa-header-sticky-h, 116px) !important;
+      max-height: var(--awa-header-sticky-h, 116px) !important;
       padding: 0 !important;
       margin: 0 !important;
       overflow: visible !important;
@@ -220,10 +221,10 @@
     .header-control.awa-nav-bar .awa-nav-bar__inner,
     .header-control.header-nav .awa-nav-bar__inner {
       position: relative !important;
-      display: grid !important;
-      grid-template-columns: 206px minmax(0, 1fr) minmax(0, max-content) !important;
-      column-gap: 24px !important;
+      display: flex !important;
       align-items: center !important;
+      justify-content: flex-start !important;
+      gap: ~"clamp(16px, 1.5vw, 24px)" !important;
       padding: 0 !important;
     }
 
@@ -231,17 +232,18 @@
       position: static !important;
       inset-block-start: auto !important;
       inset-inline-start: auto !important;
-      grid-column: 3 !important;
-      justify-content: flex-end !important;
-      justify-self: end !important;
+      grid-column: auto !important;
+      justify-content: flex-start !important;
+      justify-self: start !important;
       margin: 0 !important;
       width: auto !important;
-      max-width: 100% !important;
+      max-width: none !important;
       min-width: 0 !important;
       min-height: 44px !important;
       height: 44px !important;
       max-height: 44px !important;
-      overflow: hidden !important;
+      overflow: visible !important;
+      flex: 0 0 auto !important;
     }
 
     .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {
@@ -430,7 +432,7 @@
     }
 
     .awa-header-search-col form#search_mini_form button.action.search {
-      color: var(--awa-text-inverse, var(--awa-white, Canvas)) !important;
+      color: var(--awa-primary, #b73337) !important;
       font-size: 0 !important;
       overflow: hidden !important;
       position: relative !important;
@@ -662,10 +664,10 @@
 
     .awa-header-search-col form#search_mini_form button.action.search {
       align-items: center !important;
-      background: var(--awa-primary, var(--awa-red)) !important;
+      background: transparent !important;
       border: 0 !important;
       border-radius: 0 var(--awa-radius-sm, 8px) var(--awa-radius-sm, 8px) 0 !important;
-      color: var(--awa-text-inverse, var(--awa-white, Canvas)) !important;
+      color: var(--awa-primary, #b73337) !important;
       display: inline-flex !important;
       height: 44px !important;
       justify-content: center !important;
@@ -743,8 +745,8 @@
     }
 
     .awa-header-search-col form#search_mini_form button.action.search {
-      background: var(--awa-primary, var(--awa-red)) !important;
-      color: var(--awa-text-inverse, var(--awa-white, Canvas)) !important;
+      background: transparent !important;
+      color: var(--awa-primary, #b73337) !important;
       font-size: 0 !important;
       overflow: hidden !important;
       position: relative !important;

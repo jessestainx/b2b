@@ -1,0 +1,60 @@
+<!--
+/**
+ * AWA Motos — Email Header (branded)
+ */
+-->
+<!--@subject {{trans "Header"}} @-->
+<!--@vars {
+"var logo_url":"Email Logo Image URL",
+"var logo_alt":"Email Logo Alt Text",
+"var logo_height":"Email Logo Image Height",
+"var logo_width":"Email Logo Image Width",
+"var template_styles|raw":"Template CSS"
+} @-->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <style type="text/css">
+        {{var template_styles|raw}}
+        {{css file="css/email.css"}}
+        .awa-bar { height: 4px; background-color: #D52F33; line-height: 4px; font-size: 0; }
+        .awa-header { padding: 24px 28px 16px 28px; text-align: center; background: #ffffff; }
+        .awa-header img { display: inline-block; max-width: 240px; height: auto; }
+    </style>
+</head>
+<body>
+{{inlinecss file="css/email-inline.css"}}
+
+<table class="wrapper" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f4;">
+    <tr>
+        <td class="wrapper-inner" align="center" style="padding:16px 8px;">
+            <table class="main" align="center" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border-collapse:collapse;">
+                <tr>
+                    <td class="awa-bar" style="height:4px;background-color:#D52F33;font-size:0;line-height:4px;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="header awa-header" style="padding:24px 28px 16px 28px;text-align:center;background:#ffffff;">
+                        <a class="logo" href="{{store url=""}}" style="text-decoration:none;">
+                            <img
+                                {{if logo_width}}
+                                    width="{{var logo_width}}"
+                                {{else}}
+                                    width="200"
+                                {{/if}}
+                                {{if logo_height}}
+                                    height="{{var logo_height}}"
+                                {{/if}}
+                                src="{{var logo_url}}"
+                                alt="{{var logo_alt}}"
+                                border="0"
+                                style="display:inline-block;max-width:240px;height:auto;border:0;"
+                            />
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="main-content" style="padding:8px 28px 24px 28px;font-family:Arial, Helvetica, sans-serif;color:#222222;font-size:14px;line-height:1.5;">

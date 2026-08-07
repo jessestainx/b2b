@@ -34,7 +34,8 @@ $productId = (int) $block->getProduct()->getId();
                class="cloud-zoom"
                rel="transparentImage: 'data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==', useWrapper: false, showTitle: false, zoomWidth:'100', adjustY:0, adjustX:0">
                 <img src="<?= $block->escapeUrl($mainImage->getData('medium_image_url')) ?>"
-                     alt="<?= $block->escapeHtmlAttr($block->getProduct()->getName()) ?>">
+                     alt="<?= $block->escapeHtmlAttr($block->getProduct()->getName()) ?>"
+                     width="800" height="800" decoding="async">
             </a>
         </div>
         <div class="quickview-thumbs-shell">
@@ -51,7 +52,8 @@ $productId = (int) $block->getProduct()->getId();
                                  data-href="<?= $block->escapeUrl($_image->getData('large_image_url')) ?>"
                                  data-thumb-image="<?= $block->escapeUrl($_image->getData('medium_image_url')) ?>"
                                  alt=""
-                                 loading="lazy">
+                                 loading="lazy"
+                                 width="100" height="100" decoding="async">
                         </li>
                     <?php endforeach; ?>
                 </ul>

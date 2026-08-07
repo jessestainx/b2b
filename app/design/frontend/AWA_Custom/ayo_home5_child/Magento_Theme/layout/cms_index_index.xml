@@ -1,5 +1,36 @@
 <?xml version="1.0"?>
+<!--
+    Extensão home-only (Magento_Theme) — Magento_Cms/cms_index_index.xml está immutable (chattr +i).
+    Práticas Magento: não carregar JS/CSS de features desligadas no critical path da home.
+-->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <!-- awa-home-corporate-density-grid-2026-06.css: movido para async em awa-home-critical-stack.phtml -->
+    <head>
+        <remove src="Magento_Theme::css/awa-dark-mode.css"/>
+        <!-- Home não deve carregar fix específico da landing CMS B2B -->
+        <remove src="css/awa-vfix-cms-b2b.css"/>
+        <!-- Home-only: pause toggle dos carrosséis — defer via awa-head-preload (GTmetrix 2026-07-23) -->
+        <remove src="css/awa-home-launches-toggle-fix.css"/>
+        <remove src="css/awa-home-launches-toggle-fix.min.css"/>
+    </head>
+    <body>
+        <!-- ajaxsuite/general/enabled=0 — blocos órfãos no HTML da home -->
+        <referenceBlock name="ajaxWishlistJs" remove="true"/>
+        <referenceBlock name="ajaxsuite.popup.wrapper" remove="true"/>
+        <!-- Home CMS não tem recently viewed/compare — evita storage-manager + 8 JS Magento_Catalog -->
+        <referenceBlock name="frontend-storage-manager" remove="true"/>
+        <referenceBlock name="customer.data.invalidation.rules" remove="true"/>
+        <!-- Home: PWA/push/toast/RUM duplicado — RUM já via awa-web-vitals-rum no head -->
+        <referenceBlock name="awa.pwa.install" remove="true"/>
+        <referenceBlock name="awa.push.notifications" remove="true"/>
+        <referenceBlock name="awa.toast.system" remove="true"/>
+        <referenceBlock name="awa.rum" remove="true"/>
+        <referenceBlock name="awa.scroll.reveal" remove="true"/>
+        <!-- Home: cleanup/perf monitor sem impacto visual — ~3KB inline -->
+        <referenceBlock name="awa.inline.js.extract" remove="true"/>
+
+        <!-- Bug #2 (2026-08-05): home content estava em page.top fora de <main#maincontent>,
+             deixando o landmark main vazio (~489B). Move para main (antes das columns). -->
+        <move element="content-top-home" destination="main" before="-"/>
+    </body>
 </page>

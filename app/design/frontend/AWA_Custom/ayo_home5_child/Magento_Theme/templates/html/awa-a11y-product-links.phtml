@@ -308,8 +308,71 @@ require(['domReady!'], function () {
         });
     }
 
+    function isListingGridThumb(thumb) {
+        var body = document.body;
+
+        return !!thumb &&
+            !!thumb.closest('.wrapper.grid.products-grid, .products-grid, .products-list') &&
+            !!body &&
+            (body.classList.contains('catalog-category-view') ||
+                body.classList.contains('catalogsearch-result-index'));
+    }
+
+    /**
+     * H13 e86806: carrosséis (PDP related / home shelves) já têm .product-thumb
+     * quadrado. min-height 220px esticava o container (ex.: 107×220) e cortava a foto.
+     */
+    function isFluidSquareThumb(thumb) {
+        return !!thumb &&
+            (!!thumb.closest(
+                '.awa-carousel-card-slot, .awa-pdp-related, .awa-shelf--carousel, ' +
+                '.block.related, .block.upsell, .block.crosssell, .products-related'
+            ) || isListingGridThumb(thumb));
+    }
+
+    function syncListingThumbObjectFit(thumb) {
+        if (!isListingGridThumb(thumb)) {
+            return;
+        }
+
+        var image = thumb.querySelector('.first-thumb img.product-image-photo, .first-thumb img');
+
+        if (image && window.getComputedStyle(image).objectFit !== 'contain') {
+            setImportantStyle(image, 'object-fit', 'contain');
+        }
+    }
+
+    function syncFluidSquareThumbBox(thumb) {
+        if (!isFluidSquareThumb(thumb)) {
+            return;
+        }
+
+        var first = thumb.querySelector('.first-thumb');
+        var container = first ? first.querySelector('.product-image-container') : null;
+        var wrapper = first ? first.querySelector('.product-image-wrapper') : null;
+
+        if (!container) {
+            return;
+        }
+
+        setImportantStyle(container, 'height', '100%');
+        setImportantStyle(container, 'min-height', '0');
+        setImportantStyle(container, 'max-height', '100%');
+        setImportantStyle(container, 'overflow', 'hidden');
+
+        if (wrapper) {
+            setImportantStyle(wrapper, 'overflow', 'hidden');
+        }
+    }
+
     function normalizeProductThumb(thumb) {
-        if (!thumb || thumb.getAttribute('data-awa-image-normalized') === 'true') {
+        if (!thumb) {
+            return;
+        }
+
+        if (thumb.getAttribute('data-awa-image-normalized') === 'true') {
+            syncListingThumbObjectFit(thumb);
+            syncFluidSquareThumbBox(thumb);
             return;
         }
 
@@ -319,11 +382,8 @@ require(['domReady!'], function () {
         var container = first ? first.querySelector('.product-image-container') : null;
         var wrapper = first ? first.querySelector('.product-image-wrapper') : null;
         var image = first ? first.querySelector('img.product-image-photo, img') : null;
-        var body = document.body;
-        var isListingGrid = !!thumb.closest('.wrapper.grid.products-grid, .products-grid, .products-list') &&
-            !!body &&
-            (body.classList.contains('catalog-category-view') ||
-                body.classList.contains('catalogsearch-result-index'));
+        var isListingGrid = isListingGridThumb(thumb);
+        var useFluidSquare = isFluidSquareThumb(thumb);
 
         if (!link || !first || !container || !wrapper || !image) {
             return;
@@ -350,10 +410,10 @@ require(['domReady!'], function () {
         setImportantStyle(container, 'position', 'relative');
         setImportantStyle(container, 'width', '100%');
         setImportantStyle(container, 'aspect-ratio', '1 / 1');
-        setImportantStyle(container, 'height', isListingGrid ? '100%' : 'auto');
-        setImportantStyle(container, 'min-height', isListingGrid ? '0' : 'var(--card-photo-min-h, 220px)');
-        setImportantStyle(container, 'max-height', isListingGrid ? '100%' : '100%');
-        setImportantStyle(container, 'overflow', isListingGrid ? 'hidden' : 'visible');
+        setImportantStyle(container, 'height', useFluidSquare ? '100%' : 'auto');
+        setImportantStyle(container, 'min-height', useFluidSquare ? '0' : 'var(--card-photo-min-h, 220px)');
+        setImportantStyle(container, 'max-height', useFluidSquare ? '100%' : '100%');
+        setImportantStyle(container, 'overflow', useFluidSquare ? 'hidden' : 'visible');
 
         setImportantStyle(wrapper, 'display', 'block');
         setImportantStyle(wrapper, 'position', 'absolute');
@@ -361,7 +421,7 @@ require(['domReady!'], function () {
         setImportantStyle(wrapper, 'width', '100%');
         setImportantStyle(wrapper, 'height', '100%');
         setImportantStyle(wrapper, 'padding-bottom', '0');
-        setImportantStyle(wrapper, 'overflow', isListingGrid ? 'hidden' : 'visible');
+        setImportantStyle(wrapper, 'overflow', useFluidSquare ? 'hidden' : 'visible');
 
         setImportantStyle(image, 'display', 'block');
         setImportantStyle(image, 'position', 'absolute');
@@ -417,6 +477,32 @@ require(['domReady!'], function () {
         }, 60);
     }
 
+    function stripDeptTriggerInlineTypography() {
+        document.querySelectorAll('[data-role="awa-vertical-menu-trigger"], .awa-vmenu-trigger-text').forEach(function (el) {
+            ['font-size', 'font-weight', 'line-height'].forEach(function (prop) {
+                el.style.removeProperty(prop);
+            });
+            if (!el.getAttribute('style')) {
+                el.removeAttribute('style');
+            }
+        });
+    }
+
+    function guardDeptTriggerInlineTypography() {
+        stripDeptTriggerInlineTypography();
+        if (window.__awaDeptTypographyStripObserver) {
+            return;
+        }
+        window.__awaDeptTypographyStripObserver = new MutationObserver(function () {
+            stripDeptTriggerInlineTypography();
+        });
+        window.__awaDeptTypographyStripObserver.observe(document.documentElement, {
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style']
+        });
+    }
+
     function bootstrapHeavyFixes() {
         if (window.__awaA11yProductLinksBooted) {
             return;
@@ -424,13 +510,26 @@ require(['domReady!'], function () {
 
         window.__awaA11yProductLinksBooted = true;
 
+        guardDeptTriggerInlineTypography();
+        window.requestAnimationFrame(guardDeptTriggerInlineTypography);
+        [0, 100, 500, 1500].forEach(function (delay) {
+            window.setTimeout(guardDeptTriggerInlineTypography, delay);
+        });
+
+
         runFixes(document);
         window.setTimeout(function () {
             runFixes(document);
         }, 400);
 
         document.addEventListener('contentUpdated', function (event) {
-            scheduleRun(event && event.target ? event.target : document);
+            var target = event && event.target ? event.target : document;
+
+            if (target.querySelector && target.querySelector(THUMB_SELECTOR)) {
+                renormalizeThumbs(target);
+            }
+
+            scheduleRun(target);
         });
 
         document.addEventListener('awa:product-images-ready', function (event) {

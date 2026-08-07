@@ -1563,7 +1563,8 @@ body .page-wrapper [id]:not(input, select, textarea, button) {
         width: 50px;
         height: 50px;
         right: 15px;
-        bottom: 15px;
+        /* 2026-07-26: 15px colidia com nav.fixed-bottom (~72px). Folga 12px. */
+        bottom: 84px;
     }
 
     .awa-whatsapp-float svg {
@@ -2992,8 +2993,12 @@ body .page-wrapper footer.page-footer {
     margin-top: var(--footer-space-xl);
     font-size: var(--footer-font-size-base);
     line-height: var(--awa-leading-loose);
-    content-visibility: auto; /* BP-34: footer always below-fold ? defer rendering */
-    contain-intrinsic-size: auto 400px;
+    /* Fixed menu backdrops live inside the Magento footer container. Keeping the
+       outer footer contained makes position:fixed resolve against the footer and
+       creates a circular height expansion after lazy rendering. */
+    content-visibility: visible;
+    contain: none;
+    contain-intrinsic-size: none;
 }
 
 /* Footer links ? contraste via token (WCAG AA: 5.3:1 sobre #1a1a1a) */
@@ -4403,9 +4408,11 @@ body .page-wrapper .item-product .sku {
     display: none;
 }
 
-body .page-wrapper .item-product .weee,
+/* Magento coloca class "weee" no .price-container do preço final —
+   NÃO ocultar .price-container (senão o preço some na PLP). */
+body .page-wrapper .item-product .weee:not(.price-container),
 body .page-wrapper .item-product [data-label="Excl. Tax"],
-body .page-wrapper .item-deal-product .weee {
+body .page-wrapper .item-deal-product .weee:not(.price-container) {
     display: none;
 }
 

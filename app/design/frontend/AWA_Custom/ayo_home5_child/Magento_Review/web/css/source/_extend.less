@@ -1,0 +1,61 @@
+//
+// Magento 2 best practice: override Magento_Review no tema filho.
+// Overlay nativo .rating-result > span (Luma / module-review).
+// Produção AWA também carrega awa-m2-visual-ssot.css via default_head_blocks.xml
+// porque styles-m.css está removido do critical path.
+//
+
+.page-wrapper :is(.product-item, .item-product, .awa-product-card, .product-item-info) {
+    .rating-summary .rating-result {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        width: 85px;
+        max-width: 85px;
+        height: 18px;
+        line-height: 18px;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 14px;
+        letter-spacing: 2px;
+
+        &::before {
+            content: '\2605\2605\2605\2605\2605';
+            color: var(--awa-border);
+            display: block;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            letter-spacing: 2px;
+        }
+
+        > span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            z-index: 1;
+
+            &::before {
+                content: '\2605\2605\2605\2605\2605';
+                color: var(--awa-warning);
+                display: block;
+                letter-spacing: 2px;
+            }
+
+            > span {
+                border: 0;
+                clip: rect(0, 0, 0, 0);
+                height: 1px;
+                margin: -1px;
+                overflow: hidden;
+                padding: 0;
+                position: absolute;
+                width: 1px;
+            }
+        }
+    }
+}

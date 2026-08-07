@@ -8,14 +8,15 @@
 :root {
     /* ── cls-nav — design tokens ─── */
     --cls-nav-c1: #b73337;
-    /* Offset real do stack sticky (~main-header + nav-bar, variando ~126–136px desktop) */
-    --awa-header-scroll-offset: 128px;
+    /* BUG-SHELL-CLS-NAV-OFFSET-001: SSOT geom desktop sticky 116 / mobile 112 */
+    --awa-header-scroll-offset: 116px;
 }
 @media (max-width: 767px) {
-    /* Mobile: header wrapper sticky ~96–100px antes do hero */
-    :root { --awa-header-scroll-offset: 100px; }
+    /* Mobile sticky box ~112 (promo+main); alinhado ao align-grid scroll-padding */
+    :root { --awa-header-scroll-offset: 96px!important; }
 }
 @media (min-width: 768px) and (max-width: 991px) {
+    /* Tablet: mantém 128 (cascade lock / scroll-padding tablet) */
     :root { --awa-header-scroll-offset: 128px; }
 }
 html { scroll-padding-top: var(--awa-header-scroll-offset); }
@@ -106,7 +107,7 @@ body#html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wra
 body#html-body .page-wrapper .awa-site-header .awa-header-minicart .action.showcart{
 display:inline-flex!important;align-items:center!important;justify-content:center!important;
 width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
-background:var(--cls-nav-c1,#b73337)!important;color:#fff!important;border-radius:8px!important;
+background:transparent!important;background-color:transparent!important;color:var(--awa-primary,#b73337)!important;border-radius:8px!important;
 border:0!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;cursor:pointer!important}
 html body .awa-site-header .header-wrapper-sticky :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row])>.top-search,
 html body .awa-site-header .header-wrapper-sticky :is(.awa-main-header__inner[data-awa-header-row],.wp-header[data-awa-header-row])>.awa-header-search-col,
@@ -214,7 +215,7 @@ button.action.search{position:static!important}
 @media(min-width:992px){
 .awa-header-minicart[data-awa-header-cart]{position:relative!important;width:auto!important;height:auto!important;overflow:visible!important;clip:auto!important;clip-path:none!important;display:flex!important;align-items:center!important}
 .awa-header-minicart .awa-header-cart-fallback{display:none!important;visibility:hidden!important;pointer-events:none!important}
-.awa-header-minicart:not(:has(.minicart-wrapper .showcart)) .awa-header-cart-fallback{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important;align-items:center!important;justify-content:center!important;width:44px!important;height:44px!important;background:var(--cls-nav-c1)!important;border-radius:8px!important;border:none!important;text-decoration:none!important;flex-shrink:0!important}
+.awa-header-minicart:not(:has(.minicart-wrapper .showcart)) .awa-header-cart-fallback{display:inline-flex!important;visibility:visible!important;pointer-events:auto!important;align-items:center!important;justify-content:center!important;width:44px!important;height:44px!important;background:transparent!important;background-color:transparent!important;border-radius:8px!important;border:none!important;text-decoration:none!important;flex-shrink:0!important}
 .awa-header-minicart:has(.minicart-wrapper .showcart) .awa-header-cart-fallback{display:none!important;visibility:hidden!important;pointer-events:none!important}
 /* ui-ux-pro-max — account prompt desktop (1º paint global) */
 #html-body .page-wrapper .awa-site-header .awa-header-contact-links.awa-header-account-prompt,
@@ -228,3 +229,5 @@ button.action.search{position:static!important}
 #html-body .page-wrapper .awa-site-header .awa-header-account-prompt .awa-header-account-prompt__link::after{content:none!important;display:none!important;background:none!important;background-image:none!important;width:0!important;height:0!important}
 #html-body .page-wrapper .awa-site-header .awa-header-account-prompt .awa-header-account-prompt__mobile-link{display:none!important;visibility:hidden!important;pointer-events:none!important}
 }
+
+@media(max-width:767px){:root{--awa-header-scroll-offset:96px!important}html{scroll-padding-top:96px!important;scroll-padding-block-start:96px!important}}

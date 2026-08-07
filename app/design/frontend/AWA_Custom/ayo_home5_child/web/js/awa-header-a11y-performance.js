@@ -584,6 +584,8 @@
 
         let status = root.querySelector('[data-awa-search-status="true"]');
         let describedBy;
+        let helpId = 'awa-search-help-portal';
+        let help;
 
         if (!status) {
             status = document.createElement('span');
@@ -598,15 +600,32 @@
             status.id = 'awa-search-status';
         }
 
+        /* Keep help copy outside header_main so DOM pickers do not surface it there. */
+        help = document.getElementById(helpId);
+        if (!help) {
+            help = document.createElement('span');
+            help.id = helpId;
+            help.className = 'awa-sr-only';
+            help.setAttribute('data-awa-search-help', 'true');
+            help.textContent = 'Digite ao menos 2 caracteres para começar a pesquisar.';
+            document.body.appendChild(help);
+        }
+
         if (input) {
             describedBy = normalizeText(input.getAttribute('aria-describedby'))
                 .split(' ')
                 .filter(Boolean);
 
+            if (describedBy.indexOf(helpId) === -1) {
+                describedBy.unshift(helpId);
+            }
+
             if (describedBy.indexOf(status.id) === -1) {
                 describedBy.push(status.id);
-                input.setAttribute('aria-describedby', describedBy.join(' '));
             }
+
+            input.setAttribute('aria-describedby', describedBy.join(' '));
+            input.removeAttribute('aria-description');
         }
 
         return status;
@@ -1280,35 +1299,44 @@
             }
         }
 
+        /* Quick links: layout via CSS (LESS + cascade lock). Não injetar
+         * style=!important — isso competia com o CSS, forçava overflow:hidden
+         * e apertava o gap na PDP. Apenas limpa resíduos inline legados. */
         quickWrap = document.querySelector('.awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links');
         quickList = quickWrap ? quickWrap.querySelector('.awa-nav-quick-links__list') : null;
 
         if (quickWrap) {
-            setImportantStyle(quickWrap, 'display', 'flex');
-            setImportantStyle(quickWrap, 'align-items', 'center');
-            setImportantStyle(quickWrap, 'position', 'static');
-            setImportantStyle(quickWrap, 'left', 'auto');
-            setImportantStyle(quickWrap, 'right', 'auto');
-            setImportantStyle(quickWrap, 'inset-inline-start', 'auto');
-            setImportantStyle(quickWrap, 'inset-inline-end', 'auto');
-            setImportantStyle(quickWrap, 'width', 'auto');
-            setImportantStyle(quickWrap, 'max-width', '100%');
-            setImportantStyle(quickWrap, 'min-width', '0');
-            setImportantStyle(quickWrap, 'overflow', 'hidden');
-            setImportantStyle(quickWrap, 'grid-column', '3');
-            setImportantStyle(quickWrap, 'justify-self', 'end');
-            setImportantStyle(quickWrap, 'margin', '0');
+            clearStyleProperties(quickWrap, [
+                'display',
+                'align-items',
+                'position',
+                'left',
+                'right',
+                'inset-inline-start',
+                'inset-inline-end',
+                'width',
+                'max-width',
+                'min-width',
+                'overflow',
+                'grid-column',
+                'justify-self',
+                'margin',
+                'justify-content'
+            ]);
         }
 
         if (quickList) {
-            setImportantStyle(quickList, 'display', 'flex');
-            setImportantStyle(quickList, 'align-items', 'center');
-            setImportantStyle(quickList, 'justify-content', 'flex-end');
-            setImportantStyle(quickList, 'max-width', '100%');
-            setImportantStyle(quickList, 'min-width', '0');
-            setImportantStyle(quickList, 'overflow', 'hidden');
-            setImportantStyle(quickList, 'padding-left', '0');
-            setImportantStyle(quickList, 'padding-right', '0');
+            clearStyleProperties(quickList, [
+                'display',
+                'align-items',
+                'justify-content',
+                'max-width',
+                'min-width',
+                'overflow',
+                'padding-left',
+                'padding-right',
+                'gap'
+            ]);
         }
 
         let accountIconLink = document.querySelector('.awa-header-account-prompt__icon');
@@ -1361,14 +1389,20 @@
             Array.prototype.forEach.call(
                 document.querySelectorAll('.awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__line2 .awa-header-account-prompt__link, .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__line2 .awa-header-account-prompt__link--register'),
                 function (link) {
-                    setImportantStyle(link, 'display', 'inline');
-                    setImportantStyle(link, 'font-size', '14px');
+                    // 2026-07-30: altura auto — 30px forçava line2 alto e desalinhava
+                    // "Para ver os preços" / "Entrar ou cadastre-se" vs ícone.
+                    setImportantStyle(link, 'display', 'inline-flex');
+                    setImportantStyle(link, 'align-items', 'center');
+                    setImportantStyle(link, 'height', 'auto');
+                    setImportantStyle(link, 'min-height', '0');
+                    setImportantStyle(link, 'max-height', 'none');
+                    setImportantStyle(link, 'font-size', '13px');
                     setImportantStyle(link, 'line-height', '1.2');
                     setImportantStyle(link, 'font-weight', '700');
                     setImportantStyle(link, 'background', 'transparent');
                     setImportantStyle(link, 'background-color', 'transparent');
                     setImportantStyle(link, 'color', 'var(--awa-primary)');
-                    setImportantStyle(link, 'padding', '0');
+                    setImportantStyle(link, 'padding', '0 2px');
                     setImportantStyle(link, 'margin', '0');
                     setImportantStyle(link, 'border', '0');
                     setImportantStyle(link, 'box-shadow', 'none');

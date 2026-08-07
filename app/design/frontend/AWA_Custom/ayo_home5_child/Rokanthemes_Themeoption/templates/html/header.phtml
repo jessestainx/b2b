@@ -30,7 +30,9 @@ $headerExperimentBucket = (int) ($headerExperimentPayload['bucket'] ?? 0);
 $headerExperimentSeed = (string) ($headerExperimentPayload['seed'] ?? 'guest:anonymous');
 $headerExperimentEnabled = !empty($headerExperimentPayload['enabled']);
 $headerExperimentActive = !empty($headerExperimentPayload['is_active']);
-$headerExperimentStateClass = $headerExperimentActive ? ' awa-header-exp-active' : ' awa-header-exp-control';
+// r70: uma classe BEM de variante (awa-header-exp--control|v2|…) + active só quando ativo.
+// Antes: awa-header-exp-control + awa-header-exp--control (redundante; zero CSS usava o state).
+$headerExperimentStateClass = $headerExperimentActive ? ' awa-header-exp-active' : '';
 $headerExperimentVariantClass = ' awa-header-exp--' . preg_replace('/[^a-z0-9_-]+/i', '-', strtolower($headerExperimentVariant));
 
 $logoChildBlock = $block->getChildBlock('logo');
@@ -138,8 +140,8 @@ $headerMode = $isPasswordAuthHeader
 			<div class="awa-b2b-promo-bar__inner awa-b2b-promo-bar__layout">
 				<p class="awa-b2b-promo-bar__text">
 					<span class="awa-b2b-promo-bar__lead">
-						<span class="awa-b2b-promo-bar__lead-long"><?= $escaper->escapeHtml(__('Ambiente exclusivo para vendas corporativas |')) ?></span>
-						<span class="awa-b2b-promo-bar__lead-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Vendas B2B')) ?></span>
+						<span class="awa-b2b-promo-bar__lead-long"><?= $escaper->escapeHtml(__('Ambiente exclusivo para vendas corporativas — ofertas especiais para o seu CNPJ.')) ?></span>
+						<span class="awa-b2b-promo-bar__lead-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Vendas B2B · CNPJ')) ?></span>
 					</span>
 						<?php /* A11Y-001: aria-label fixo no <a> — as variantes -long/-short trocam de
 						   visibilidade por breakpoint (uma delas some via display:none, a outra
@@ -154,30 +156,124 @@ $headerMode = $isPasswordAuthHeader
 						   axe-core/Lighthouse). "Cadastre-se — Cadastro B2B" so continha o
 						   texto curto; o texto longo ficava orfao. Rearranjado para conter
 						   ambos como substrings literais. */ ?>
+						<?php /* UX 2026-08-04: CTA no fim da frase (chip terminal), sem quebrar
+						   a sentença no meio — conversão B2B + hierarquia visual. */ ?>
 						<a href="<?= $escaper->escapeUrl($block->getUrl('b2b/register')) ?>" class="awa-b2b-promo-bar__cta" aria-label="<?= $escaper->escapeHtmlAttr(__('Cadastre agora — Cadastre-se no Cadastro B2B')) ?>">
 						<strong class="awa-b2b-promo-bar__cta-long" aria-hidden="true"><?= $escaper->escapeHtml(__('Cadastre agora')) ?></strong>
 						<strong class="awa-b2b-promo-bar__cta-short" aria-hidden="true"><?= $escaper->escapeHtml(__('Cadastre-se')) ?></strong>
 					</a>
-					<span class="awa-b2b-promo-bar__lead">
-						<span class="awa-b2b-promo-bar__lead-long"><?= $escaper->escapeHtml(__('sua empresa e confira ofertas especiais para o seu CNPJ.')) ?></span>
-						<span class="awa-b2b-promo-bar__lead-short" aria-hidden="true"></span>
-					</span>
 				</p>
 				<button type="button" id="awa-b2b-promo-close" class="awa-b2b-promo-close" aria-label="<?= $escaper->escapeHtmlAttr(__('Fechar')) ?>">&times;</button>
 			</div>
 		</div>
 		<script>
-			/* Promo bar: esconde imediatamente se já foi dispensado (previne CLS).
-			   Click listener delegado ao awa-header-runtime-bootstrap.js (defer). */
-			try {
-				if (localStorage.getItem('awa_b2b_promo_dismissed') === '1'
-					|| sessionStorage.getItem('awa_b2b_promo_dismissed_session') === '1') {
-					var _awaDismissedBar = document.getElementById('awa-b2b-promo-bar');
-					if (_awaDismissedBar) { _awaDismissedBar.style.display = 'none'; }
+			/* Fechamento síncrono: o primeiro clique não pode depender do runtime deferido. */
+			(function () {
+				var bar = document.getElementById('awa-b2b-promo-bar');
+				var closeButton = document.getElementById('awa-b2b-promo-close');
+
+				function setHiddenInert(el, hidden) {
+					if (!el) {
+						return;
+					}
+					if (hidden) {
+						el.setAttribute('aria-hidden', 'true');
+						el.setAttribute('inert', '');
+					} else {
+						el.removeAttribute('aria-hidden');
+						el.removeAttribute('inert');
+					}
 				}
-			} catch (e) {
-				/* localStorage indisponível (modo privado/CSP) — promo bar permanece visível */
-			}
+
+				function collapsePromo(persist) {
+					if (!bar) {
+						return;
+					}
+					bar.style.setProperty('display', 'none', 'important');
+					setHiddenInert(bar, true);
+					/* A11Y/BUG 2026-08-05: NÃO esconder #header.header-container —
+					   collapse antigo aplicava display:none+aria-hidden no shell
+					   inteiro (logo/busca/nav), deixando só o sticky clone e
+					   focáveis órfãos dentro de aria-hidden. */
+					var shell = bar.closest('#header.header-container');
+					if (shell) {
+						shell.style.removeProperty('display');
+						if (shell.getAttribute('aria-hidden') === 'true') {
+							shell.removeAttribute('aria-hidden');
+						}
+						shell.removeAttribute('inert');
+					}
+					if (persist) {
+						try {
+							localStorage.setItem('awa_b2b_promo_dismissed', '1');
+							sessionStorage.setItem('awa_b2b_promo_dismissed_session', '1');
+						} catch (storageError) {
+							/* Storage pode estar bloqueado; o fechamento atual ainda funciona. */
+						}
+					}
+				}
+
+				/* Recuperação: sessões com o bug antigo (shell escondido junto da promo). */
+				(function recoverShellFromLegacyDismiss() {
+					var shell = document.getElementById('header');
+					if (!shell || !bar) {
+						return;
+					}
+					var shellHidden = shell.style.display === 'none'
+						|| shell.getAttribute('aria-hidden') === 'true';
+					var barHidden = bar.style.display === 'none'
+						|| bar.getAttribute('aria-hidden') === 'true';
+					if (shellHidden && barHidden) {
+						shell.style.removeProperty('display');
+						shell.removeAttribute('aria-hidden');
+						shell.removeAttribute('inert');
+					}
+				}());
+
+				try {
+					if (localStorage.getItem('awa_b2b_promo_dismissed') === '1'
+						|| sessionStorage.getItem('awa_b2b_promo_dismissed_session') === '1') {
+						collapsePromo(false);
+					}
+				} catch (storageError) {
+					/* Storage indisponível: a barra permanece visível até ser fechada. */
+				}
+
+				if (closeButton) {
+					var handlePromoClose = function (event) {
+						var target = event.target && event.target.closest
+							? event.target.closest('#awa-b2b-promo-close')
+							: null;
+						if (target !== closeButton) {
+							return;
+						}
+						window.removeEventListener('click', handlePromoClose, true);
+						collapsePromo(true);
+					};
+					window.addEventListener('click', handlePromoClose, true);
+				}
+
+				/* Sync inicial: containers já aria-hidden no SSR (menu, cookie, etc.). */
+				(function syncInitialInert() {
+					var nodes = document.querySelectorAll(
+						'[aria-hidden="true"]:not([inert]),' +
+						'#awa-cookie-banner[hidden],' +
+						'.awa-header-account-prompt__customer[hidden],' +
+						'#awa-minicart-addons-source[hidden]'
+					);
+					var i;
+					var n;
+					for (i = 0; i < nodes.length; i += 1) {
+						n = nodes[i];
+						if (n.getAttribute('aria-hidden') === 'true' || n.hasAttribute('hidden')) {
+							n.setAttribute('inert', '');
+							if (!n.getAttribute('aria-hidden')) {
+								n.setAttribute('aria-hidden', 'true');
+							}
+						}
+					}
+				}());
+			}());
 		</script>
 	</div>
 </div>
@@ -194,7 +290,7 @@ $headerMode = $isPasswordAuthHeader
 							<div class="col-md-2 col-sm-2 col-xs-12 awa-header-brand awa-header-brand-cell" data-awa-header-brand="true">
 								<?= /* @noEscape — Logo: bloco PHP confiável */ $this->getChildHtml('logo') ?>
 							</div>
-							<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>"><svg class="awa-header-cart-link-icon" viewBox="0 0 24 24" aria-hidden="true" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span class="awa-cart-link-badge awa-badge-hidden" aria-hidden="true"></span><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
+							<a class="awa-header-cart-link" href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart')) ?>"><svg class="awa-header-cart-link-icon" viewBox="-0.25 0.5 24 24" aria-hidden="true" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"></path></svg><span class="awa-cart-link-badge awa-badge-hidden" aria-hidden="true"></span><span><?= $escaper->escapeHtml(__('Abrir carrinho')) ?></span></a>
 						</div>
 						<div class="awa-header-search-col top-search awa-header-actions" data-awa-header-search-row="true">
 							<?= /* @noEscape — Busca: bloco confiável */ $this->getChildHtml('topSearch') ?>
@@ -219,7 +315,7 @@ $headerMode = $isPasswordAuthHeader
                                                                         aria-expanded="false"
                                                                         aria-controls="awa-minicart-panel"
                                                                         role="button">
-									<svg class="awa-header-cart-fallback__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="var(--awa-primary, #b73337)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+									<svg class="awa-header-cart-fallback__icon" viewBox="-0.25 0.5 24 24" aria-hidden="true" focusable="false" fill="none" stroke="var(--awa-primary, #b73337)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
 										<circle cx="9" cy="20" r="1"/>
 										<circle cx="18" cy="20" r="1"/>
 										<path d="M3.5 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7.1"/>
@@ -256,11 +352,19 @@ $headerMode = $isPasswordAuthHeader
 						<?= /* @noEscape — Menu vertical: bloco Magento/Rokanthemes confiável, com fallback quando sections.phtml não recebe o grupo. */ $verticalMenuSectionsHtml ?>
 					</nav>
 				</div>
-				<div class="awa-header-primary-nav menu_primary" id="awa-primary-navigation" data-awa-main-nav-shell="true">
+				<?php
+				$__awaCustomTopnavHtml = trim((string) $this->getChildHtml('custom.topnav'));
+				$__awaTopnavIsEmpty = ($__awaCustomTopnavHtml === '');
+				?>
+				<div class="awa-header-primary-nav menu_primary" id="awa-primary-navigation" data-awa-main-nav-shell="true" data-awa-topnav-empty="<?= $__awaTopnavIsEmpty ? '1' : '0' ?>">
 					<div class="container-header-sticky">
+						<?php if ($__awaTopnavIsEmpty): ?>
+						<nav class="top-menu top-menu-sticky" aria-label="<?= $escaper->escapeHtmlAttr(__('Menu principal')) ?>" aria-hidden="true"></nav>
+						<?php else: ?>
 						<nav class="top-menu top-menu-sticky" aria-label="<?= $escaper->escapeHtmlAttr(__('Menu principal')) ?>">
-							<?= /* @noEscape — Topnav customizado: bloco do tema */ $this->getChildHtml('custom.topnav') ?>
+							<?= /* @noEscape — Topnav customizado: bloco do tema */ $__awaCustomTopnavHtml ?>
 						</nav>
+						<?php endif; ?>
 					</div>
 				</div>
 				<?= /* @noEscape — Quick links de categorias populares */ $this->getChildHtml('awaNavQuickLinks') ?>
@@ -285,584 +389,77 @@ $_hdrLayoutHandles = $block->getLayout()->getUpdate()->getHandles();
 $_hdrIsHomePage = in_array('cms_index_index', $_hdrLayoutHandles, true);
 ?>
 <?php if ($_hdrIsHomePage): ?>
-<script>
-(function (w, d) {
-    'use strict';
-
-    var lastSignature = '';
-    var emissionCount = 0;
-
-    function box(element) {
-        var rect = element && element.getBoundingClientRect();
-        var style = element && w.getComputedStyle(element);
-
-        return rect && style ? {
-            x: Math.round(rect.x),
-            y: Math.round(rect.y),
-            width: Math.round(rect.width),
-            height: Math.round(rect.height),
-            display: style.display,
-            position: style.position,
-            minHeight: style.minHeight,
-            paddingBlock: style.paddingBlock,
-            marginBlock: style.marginBlock,
-            overflow: style.overflow
-        } : null;
-    }
-
-    function emitPromoGeometry(reason) {
-        var data = {
-            reason: reason,
-            readyState: d.readyState,
-            viewportWidth: w.innerWidth,
-            promo: box(d.getElementById('awa-b2b-promo-bar')),
-            headerContent: box(d.querySelector('[data-awa-header-content="true"]')),
-            sticky: box(d.querySelector('[data-awa-sticky-container="true"]')),
-            main: box(d.querySelector('[data-awa-header-main="true"]')),
-            nav: box(d.querySelector('[data-awa-header-nav="true"]'))
-        };
-        var signature = JSON.stringify(data);
-        var fallbackUrl;
-
-        if (signature === lastSignature || emissionCount >= 5) {
-            return;
-        }
-        lastSignature = signature;
-        emissionCount += 1;
-
-        // #region agent log
-        fetch('http://localhost:7480/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'promo-bar-geometry',hypothesisId:'H121-H124',location:'header.phtml:promo-bar-geometry',message:'Promo bar and sticky header geometry transition',data:data,timestamp:Date.now()})}).catch(function () {});
-        // #endregion
-
-        fallbackUrl = '/b2b/account/login/?awa_dbg=1'
-            + '&sid=ca59a1&run=promo-bar-geometry&hyp=H125'
-            + '&loc=' + encodeURIComponent('header.phtml:promo-bar-geometry-same-origin')
-            + '&msg=' + encodeURIComponent('Promo bar geometry same-origin fallback')
-            + '&ts=' + Date.now()
-            + '&transport=promo-geometry'
-            + '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 900));
-
-        // #region agent log
-        (new Image()).src = fallbackUrl;
-        // #endregion
-    }
-
-    w.requestAnimationFrame(function () {
-        var targets = [
-            d.getElementById('awa-b2b-promo-bar'),
-            d.querySelector('[data-awa-header-content="true"]'),
-            d.querySelector('[data-awa-sticky-container="true"]')
-        ].filter(Boolean);
-        var resizeObserver = new ResizeObserver(function () {
-            emitPromoGeometry('resize');
-        });
-
-        targets.forEach(function (target) {
-            resizeObserver.observe(target);
-        });
-        emitPromoGeometry('first-frame');
-    });
-})(window, document);
+<?php
+/* Probes de geometria/home removidos (2026-07-17). Fixes visuais → CSS em awa-home-visual-fixes-inline. */
+$_awaDebugProbes = (string) $block->getRequest()->getParam('awa_debug') === '1';
+?>
+<?php if ($_awaDebugProbes): ?>
+<script id="awa-home-debug-probes-placeholder">
+/* awa_debug=1: reinstale probes do git history se necessário */
+console.info('[AWA] header debug probes disabled in tree; use git history to restore');
 </script>
+<?php endif; ?>
 <script>
+/* Home: sticky leve no scroll; runtime completo só na interação com controles.
+ * r45: NÃO chamar require() durante o parse do header — require.min.js é classic
+ * (sem defer) e o 1º require() sync competia com o paint LCP (~2.2s longtask,
+ * evidência soft-wrap inl_13). Armar boots só após window.load; interação após load. */
 (function (w, d) {
     'use strict';
+    var fullDone = false;
+    var stickyDone = false;
+    var canBoot = false;
 
-    var lastSignature = '';
-    var emissionCount = 0;
-
-    function box(selector) {
-        var element = d.querySelector(selector);
-        var rect = element && element.getBoundingClientRect();
-        var style = element && w.getComputedStyle(element);
-
-        return rect && style ? {
-            x: Math.round(rect.x),
-            y: Math.round(rect.y),
-            width: Math.round(rect.width),
-            height: Math.round(rect.height),
-            display: style.display,
-            position: style.position,
-            flexDirection: style.flexDirection,
-            gridTemplateColumns: style.gridTemplateColumns,
-            padding: style.padding
-        } : null;
-    }
-
-    function navRailState() {
-        var container = d.querySelector('[data-awa-header-nav="true"] > .container');
-        var inner = container && container.querySelector('.awa-nav-bar__inner');
-        var containerStyle = container && w.getComputedStyle(container);
-        var innerStyle = inner && w.getComputedStyle(inner);
-        var beforeStyle = container && w.getComputedStyle(container, '::before');
-        var afterStyle = container && w.getComputedStyle(container, '::after');
-        var containerRect = container && container.getBoundingClientRect();
-        var innerRect = inner && inner.getBoundingClientRect();
-
-        return containerRect && innerRect && containerStyle && innerStyle ? {
-            container: {
-                x: Math.round(containerRect.x),
-                width: Math.round(containerRect.width),
-                display: containerStyle.display,
-                gap: containerStyle.gap,
-                justifyContent: containerStyle.justifyContent,
-                padding: containerStyle.padding
-            },
-            inner: {
-                x: Math.round(innerRect.x),
-                width: Math.round(innerRect.width),
-                flex: innerStyle.flex,
-                margin: innerStyle.margin,
-                padding: innerStyle.padding,
-                transform: innerStyle.transform
-            },
-            pseudo: {
-                before: beforeStyle ? {
-                    content: beforeStyle.content,
-                    display: beforeStyle.display
-                } : null,
-                after: afterStyle ? {
-                    content: afterStyle.content,
-                    display: afterStyle.display
-                } : null
-            },
-            elementChildren: container.children.length
-        } : null;
-    }
-
-    function minicartState() {
-        function measure(selector) {
-            var element = d.querySelector(selector);
-            var rect = element && element.getBoundingClientRect();
-            var style = element && w.getComputedStyle(element);
-
-            return rect && style ? {
-                x: Math.round(rect.x),
-                y: Math.round(rect.y),
-                width: Math.round(rect.width),
-                height: Math.round(rect.height),
-                display: style.display,
-                visibility: style.visibility,
-                opacity: style.opacity,
-                position: style.position
-            } : null;
+    function armBoots() {
+        canBoot = true;
+if ((w.pageYOffset || 0) > 0) {
+            bootSticky();
         }
-
-        return {
-            rightColumn: measure('.awa-header-right-col'),
-            host: measure('.awa-header-minicart'),
-            wrapper: measure('.minicart-wrapper'),
-            showcart: measure('.minicart-wrapper .showcart'),
-            fallback: measure('.awa-header-cart-fallback'),
-            counter: measure('.minicart-wrapper .counter.qty')
-        };
     }
 
-    function stylesheetState() {
-        return Array.prototype.slice.call(d.querySelectorAll('link[rel="stylesheet"]'))
-            .filter(function (link) {
-                return /(?:styles-m|styles-l|themes)(?:\.min)?\.css/.test(link.href || '');
-            })
-            .map(function (link) {
-                return {
-                    file: (link.href || '').split('/').pop(),
-                    media: link.media || '',
-                    loaded: Boolean(link.sheet),
-                    disabled: Boolean(link.disabled)
-                };
-            });
-    }
-
-    function emitBreakpointGeometry(reason) {
-        var data = {
-            reason: reason,
-            readyState: d.readyState,
-            viewportWidth: w.innerWidth,
-            clientWidth: d.documentElement.clientWidth,
-            media: {
-                mobile: w.matchMedia('(max-width: 767px)').matches,
-                tablet: w.matchMedia('(min-width: 768px) and (max-width: 991px)').matches,
-                desktop: w.matchMedia('(min-width: 992px)').matches
-            },
-            mainContainer: box('.awa-main-header .header-main > .container'),
-            mainInner: box('.awa-main-header__inner'),
-            primaryRow: box('[data-awa-header-primary-row="true"]'),
-            navToggle: box('[data-awa-nav-toggle="true"]'),
-            searchColumn: box('[data-awa-header-search-row="true"]'),
-            nav: box('[data-awa-header-nav="true"]'),
-            stylesheets: stylesheetState()
-        };
-        var signature = JSON.stringify(data);
-        var fallbackUrl;
-
-        if (signature === lastSignature || emissionCount >= 6) {
-            return;
-        }
-        lastSignature = signature;
-        emissionCount += 1;
-
-        // #region agent log
-        fetch('http://localhost:7480/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'header-945-breakpoint',hypothesisId:'H126-H129',location:'header.phtml:breakpoint-geometry',message:'Header breakpoint geometry and stylesheet transition',data:data,timestamp:Date.now()})}).catch(function () {});
-        // #endregion
-
-        // #region agent log
-        fetch('http://localhost:7480/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'nav-rail-pre-fix',hypothesisId:'H131-H134',location:'header.phtml:nav-rail-state',message:'Navigation rail flex and clearfix geometry',data:{reason:reason,viewportWidth:w.innerWidth,rail:navRailState()},timestamp:Date.now()})}).catch(function () {});
-        // #endregion
-
-        // #region agent log
-        var railState = {
-            reason: reason,
-            viewportWidth: w.innerWidth,
-            rail: navRailState()
-        };
-        var railFallbackUrl = '/b2b/account/login/?awa_dbg=1'
-            + '&sid=ca59a1&run=nav-rail-pre-fix&hyp=H135'
-            + '&loc=' + encodeURIComponent('header.phtml:nav-rail-state-same-origin')
-            + '&msg=' + encodeURIComponent('Navigation rail same-origin fallback')
-            + '&ts=' + Date.now()
-            + '&transport=nav-rail'
-            + '&data=' + encodeURIComponent(JSON.stringify(railState).slice(0, 1400));
-        (new Image()).src = railFallbackUrl;
-        if (w.navigator && typeof w.navigator.sendBeacon === 'function') {
-            try {
-                w.navigator.sendBeacon(railFallbackUrl, JSON.stringify({
-                    sessionId: 'ca59a1',
-                    runId: 'nav-rail-pre-fix',
-                    hypothesisId: 'H135',
-                    location: 'header.phtml:nav-rail-state-same-origin',
-                    message: 'Navigation rail same-origin fallback',
-                    data: railState,
-                    timestamp: Date.now()
-                }));
-            } catch (ignore) {
-                // The image beacon above remains the fallback transport.
+    function bootFull() {
+        if (!canBoot || fullDone) { return; }
+        fullDone = true;
+        if (typeof w.require !== 'function') { w.setTimeout(bootFull, 200); fullDone = false; return; }
+        w.require(['awa-header-runtime-bootstrap'], function (initHeaderRuntime) {
+            if (typeof initHeaderRuntime === 'function') {
+                initHeaderRuntime();
             }
-        }
-        // #endregion
+            stickyDone = true;
+        }, function () {
+            fullDone = false;
+        });
+    }
 
-        // #region agent log
-        var minicartData = {
-            reason: reason,
-            viewportWidth: w.innerWidth,
-            state: minicartState()
-        };
-        fetch('http://localhost:7480/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'minicart-geometry-audit',hypothesisId:'H140-H143',location:'header.phtml:minicart-state',message:'Minicart hydration and geometry state',data:minicartData,timestamp:Date.now()})}).catch(function () {});
-        var minicartFallbackUrl = '/b2b/account/login/?awa_dbg=1'
-            + '&sid=ca59a1&run=minicart-geometry-audit&hyp=H144'
-            + '&loc=' + encodeURIComponent('header.phtml:minicart-state-same-origin')
-            + '&msg=' + encodeURIComponent('Minicart geometry same-origin fallback')
-            + '&ts=' + Date.now()
-            + '&transport=minicart-geometry'
-            + '&data=' + encodeURIComponent(JSON.stringify(minicartData).slice(0, 1400));
-        (new Image()).src = minicartFallbackUrl;
-        if (w.navigator && typeof w.navigator.sendBeacon === 'function') {
-            try {
-                w.navigator.sendBeacon(minicartFallbackUrl, JSON.stringify({
-                    sessionId: 'ca59a1',
-                    runId: 'minicart-geometry-audit',
-                    hypothesisId: 'H144',
-                    location: 'header.phtml:minicart-state-same-origin',
-                    message: 'Minicart geometry same-origin fallback',
-                    data: minicartData,
-                    timestamp: Date.now()
-                }));
-            } catch (ignore) {
-                // The image beacon above remains the fallback transport.
+    function bootSticky() {
+        if (!canBoot || stickyDone) { return; }
+        stickyDone = true;
+        if (typeof w.require !== 'function') { w.setTimeout(bootSticky, 200); stickyDone = false; return; }
+        w.require(['awa-header-sticky'], function (initStickyHeader) {
+            if (typeof initStickyHeader === 'function') {
+                initStickyHeader();
             }
-        }
-        // #endregion
-
-        fallbackUrl = '/b2b/account/login/?awa_dbg=1'
-            + '&sid=ca59a1&run=header-945-breakpoint&hyp=H130'
-            + '&loc=' + encodeURIComponent('header.phtml:breakpoint-geometry-same-origin')
-            + '&msg=' + encodeURIComponent('Header 945px breakpoint same-origin fallback')
-            + '&ts=' + Date.now()
-            + '&transport=header-breakpoint'
-            + '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 1600));
-
-        // #region agent log
-        (new Image()).src = fallbackUrl;
-        // #endregion
-    }
-
-    w.requestAnimationFrame(function () {
-        var targets = [
-            d.querySelector('.awa-main-header .header-main > .container'),
-            d.querySelector('.awa-main-header__inner'),
-            d.querySelector('[data-awa-nav-toggle="true"]'),
-            d.querySelector('[data-awa-header-nav="true"]')
-        ].filter(Boolean);
-        var resizeObserver = new ResizeObserver(function () {
-            emitBreakpointGeometry('resize');
-        });
-
-        targets.forEach(function (target) {
-            resizeObserver.observe(target);
-        });
-        emitBreakpointGeometry('first-frame');
-    });
-
-    Array.prototype.slice.call(d.querySelectorAll('link[rel="stylesheet"]'))
-        .filter(function (link) {
-            return /(?:styles-m|styles-l|themes)(?:\.min)?\.css/.test(link.href || '');
-        })
-        .forEach(function (link) {
-            link.addEventListener('load', function () {
-                emitBreakpointGeometry('stylesheet-load:' + (link.href || '').split('/').pop());
-            }, { once: true });
-        });
-
-    w.addEventListener('load', function () {
-        emitBreakpointGeometry('window-load');
-    }, { once: true });
-})(window, document);
-</script>
-<script id="awa-header-actions-shift-probe">
-// #region agent log
-(function (w, d) {
-    'use strict';
-
-    var sent = 0;
-    var lastSignature = '';
-
-    function metric(selector) {
-        var element = d.querySelector(selector);
-        var rect;
-        var style;
-
-        if (!element) {
-            return null;
-        }
-
-        rect = element.getBoundingClientRect();
-        style = w.getComputedStyle(element);
-
-        return {
-            x: Math.round(rect.x * 10) / 10,
-            y: Math.round(rect.y * 10) / 10,
-            w: Math.round(rect.width * 10) / 10,
-            h: Math.round(rect.height * 10) / 10,
-            display: style.display,
-            flex: style.flex,
-            justify: style.justifyContent,
-            justifySelf: style.justifySelf,
-            margin: style.margin,
-            order: style.order,
-            position: style.position,
-            transform: style.transform,
-            visibility: style.visibility
-        };
-    }
-
-    function capture(reason) {
-        var prompt = d.querySelector('.awa-header-account-prompt');
-        var script = d.querySelector('script[data-awa-account-prompt="1"]');
-        var data = {
-            reason: reason,
-            readyState: d.readyState,
-            elapsed: Math.round(w.performance.now()),
-            viewportWidth: w.innerWidth,
-            bodyClass: d.body ? d.body.className : '',
-            right: metric('.awa-header-right-col'),
-            prompt: metric('.awa-header-account-prompt'),
-            minicart: metric('.awa-header-minicart'),
-            cartWrapper: metric('.minicart-wrapper'),
-            guest: metric('.awa-header-account-prompt__guest'),
-            customer: metric('.awa-header-account-prompt__customer'),
-            state: prompt ? {
-                className: prompt.className,
-                authState: prompt.getAttribute('data-awa-auth-state'),
-                authPending: prompt.getAttribute('data-awa-auth-pending'),
-                hidden: prompt.hidden,
-                ariaHidden: prompt.getAttribute('aria-hidden')
-            } : null,
-            accountScript: script ? {
-                src: script.src,
-                ready: script.readyState || '',
-                resourceLoaded: w.performance.getEntriesByName(script.src).length > 0
-            } : null
-        };
-        var signature = JSON.stringify(data);
-        var fallbackUrl;
-
-        if (sent >= 10 || signature === lastSignature) {
-            return;
-        }
-
-        sent += 1;
-        lastSignature = signature;
-
-        fetch('http://localhost:7788/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'header-actions-shift-v1',hypothesisId:'H184-H187',location:'header.phtml:header-actions-shift-probe',message:'Header actions lifecycle geometry',data:data,timestamp:Date.now()})}).catch(function () {});
-
-        fallbackUrl = '/b2b/account/login/?awa_dbg=1'
-            + '&sid=ca59a1&run=header-actions-shift-v1&hyp=H184-H187'
-            + '&loc=' + encodeURIComponent('header.phtml:header-actions-shift-probe-same-origin')
-            + '&msg=' + encodeURIComponent('Header actions lifecycle geometry')
-            + '&ts=' + Date.now()
-            + '&transport=header-actions-shift'
-            + '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 2600));
-        (new Image()).src = fallbackUrl;
-    }
-
-    capture('body-end');
-    w.requestAnimationFrame(function () {
-        capture('first-frame');
-    });
-    d.addEventListener('DOMContentLoaded', function () {
-        w.requestAnimationFrame(function () {
-            capture('dom-content-loaded');
-        });
-    }, { once: true });
-    w.addEventListener('load', function () {
-        w.requestAnimationFrame(function () {
-            capture('window-load');
-        });
-    }, { once: true });
-    d.addEventListener('load', function (event) {
-        if (event.target && event.target.matches && event.target.matches('script[data-awa-account-prompt="1"]')) {
-            w.requestAnimationFrame(function () {
-                capture('account-script-load');
-            });
-        }
-    }, true);
-
-    if ('MutationObserver' in w) {
-        new MutationObserver(function (records) {
-            var reasons = records.map(function (record) {
-                return record.type + (record.attributeName ? ':' + record.attributeName : '');
-            });
-            w.requestAnimationFrame(function () {
-                capture('mutation:' + reasons.join(','));
-            });
-        }).observe(d.querySelector('.awa-header-right-col'), {
-            attributes: true,
-            attributeFilter: ['class', 'style', 'hidden', 'aria-hidden', 'data-awa-auth-state', 'data-awa-auth-pending'],
-            childList: true,
-            subtree: true
+        }, function () {
+            stickyDone = false;
         });
     }
 
-    if ('ResizeObserver' in w) {
-        var resizeObserver = new ResizeObserver(function () {
-            w.requestAnimationFrame(function () {
-                capture('resize');
-            });
-        });
-        [
-            d.querySelector('.awa-header-right-col'),
-            d.querySelector('.awa-header-account-prompt'),
-            d.querySelector('.awa-header-minicart')
-        ].filter(Boolean).forEach(function (element) {
-            resizeObserver.observe(element);
-        });
-    }
-})(window, document);
-// #endregion
-</script>
-<script id="awa-header-viewport-edge-probe">
-(function (w, d) {
-    'use strict';
-    var sent = 0;
-    var lastSignature = '';
-
-    function metric(element) {
-        var rect;
-        var style;
-
-        if (!element) {
-            return null;
-        }
-        rect = element.getBoundingClientRect();
-        style = w.getComputedStyle(element);
-
-        return {
-            x: Math.round(rect.x),
-            right: Math.round(rect.right),
-            width: Math.round(rect.width),
-            clientWidth: element.clientWidth,
-            scrollWidth: element.scrollWidth,
-            cssWidth: style.width,
-            minWidth: style.minWidth,
-            maxWidth: style.maxWidth,
-            margin: style.margin,
-            padding: style.padding,
-            boxSizing: style.boxSizing,
-            overflowX: style.overflowX,
-            scrollbarGutter: style.scrollbarGutter,
-            backgroundColor: style.backgroundColor
-        };
-    }
-
-    function capture(reason) {
-        var edgeNode = d.elementFromPoint(Math.max(0, w.innerWidth - 2), 60);
-        var data = {
-            reason: reason,
-            innerWidth: w.innerWidth,
-            html: metric(d.documentElement),
-            body: metric(d.body),
-            pageWrapper: metric(d.querySelector('.page-wrapper')),
-            header: metric(d.querySelector('.awa-site-header')),
-            sticky: metric(d.querySelector('.header-wrapper-sticky')),
-            edgeNode: edgeNode ? {
-                tag: edgeNode.tagName,
-                id: edgeNode.id || '',
-                className: String(edgeNode.className || '').slice(0, 140),
-                backgroundColor: w.getComputedStyle(edgeNode).backgroundColor
-            } : null
-        };
-        var signature = JSON.stringify(data);
-        var fallbackUrl;
-
-        if (sent >= 4 || signature === lastSignature) {
-            return;
-        }
-        sent += 1;
-        lastSignature = signature;
-
-        // #region agent log
-        fetch('http://localhost:7935/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'header-viewport-edge-pre-fix',hypothesisId:'H210-H214',location:'header.phtml:header-viewport-edge-probe',message:'Header viewport edge and ancestor width chain',data:data,timestamp:Date.now()})}).catch(function () {});
-        // #endregion
-
-        fallbackUrl = '/b2b/account/login/?awa_dbg=1'
-            + '&sid=ca59a1&run=header-viewport-edge-pre-fix&hyp=H210-H214'
-            + '&loc=' + encodeURIComponent('header.phtml:header-viewport-edge-probe-same-origin')
-            + '&msg=' + encodeURIComponent('Header viewport edge and ancestor width chain')
-            + '&ts=' + Date.now()
-            + '&transport=header-viewport-edge'
-            + '&data=' + encodeURIComponent(JSON.stringify(data).slice(0, 2400));
-        (new Image()).src = fallbackUrl;
-    }
-
-    capture('body-end');
-    w.requestAnimationFrame(function () {
-        capture('first-frame');
-    });
-    w.addEventListener('load', function () {
-        w.requestAnimationFrame(function () {
-            capture('window-load');
-        });
-    }, { once: true });
-})(window, document);
-</script>
-<script>
-/* awa-header-runtime-bootstrap: defer idle na home (sticky/focus-trap não são críticos no first paint) */
-(function (w, d) {
-    'use strict';
-    var done = false;
-    function boot() {
-        if (done) { return; }
-        done = true;
-        if (typeof w.require !== 'function') { w.setTimeout(boot, 200); done = false; return; }
-        var s = d.createElement('script');
-        s.type = 'text/x-magento-init';
-        s.textContent = JSON.stringify({ '*': { 'awa-header-runtime-bootstrap': {} } });
-        d.body.appendChild(s);
-        w.require(['mage/apply/main']);
-    }
     var events = ['pointerdown', 'touchstart', 'keydown'];
     events.forEach(function (ev) {
-        w.addEventListener(ev, boot, { capture: true, passive: ev !== 'keydown', once: true });
+        w.addEventListener(ev, bootFull, { capture: true, passive: ev !== 'keydown', once: true });
     });
+    w.addEventListener('scroll', bootSticky, { capture: true, passive: true, once: true });
+    w.addEventListener('pageshow', function () {
+        if (canBoot && (w.pageYOffset || 0) > 0) {
+            bootSticky();
+        }
+    }, { passive: true, once: true });
+
+    if (d.readyState === 'complete') {
+        armBoots();
+    } else {
+        w.addEventListener('load', armBoots, { once: true });
+    }
 })(window, document);
 </script>
 <?php else: ?>
@@ -882,3 +479,7 @@ $_hdrIsHomePage = in_array('cms_index_index', $_hdrLayoutHandles, true);
          JS (awa-header-sticky.js ResizeObserver) updates --awa-header-height and toggles display
          via body.awa-header-is-sticky. aria-hidden prevents screen reader exposure. */ ?>
 <div id="awa-header-cls-placeholder" aria-hidden="true"></div>
+
+
+
+

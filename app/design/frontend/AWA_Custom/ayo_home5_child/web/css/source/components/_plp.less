@@ -19,7 +19,7 @@
 // arquivos irmãos (_awa-plp-refine-terminal-2026-06.less, _awa-plp-polish-*,
 // _awa-plp-grid-mobile-*): string escapada com :is() nativo do CSS4.
 @c3-plp-scope: ~'html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)';
-@c3-card:      ~'.item-product, .product-item, .content-item-product';
+@c3-card:      ~':is(.item-product, .product-item, .content-item-product)';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // § 1 — Grid container gap (padroniza o espaçamento entre cards)
@@ -171,6 +171,7 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
+            /* Generic pager spacing; bottom-slim uses align-grid §H11A (terminal). */
             padding-block: 24px;
             flex-wrap: wrap;
 

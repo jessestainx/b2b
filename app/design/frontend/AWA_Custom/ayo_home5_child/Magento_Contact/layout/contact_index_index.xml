@@ -19,5 +19,6 @@
                    template="Magento_Theme::html/awa-cms-shell-final-loader.phtml"
                    after="-"/>
         </referenceBlock>
+        <referenceBlock name="awa.institutional.h1" remove="true"/>
     </body>
 </page>

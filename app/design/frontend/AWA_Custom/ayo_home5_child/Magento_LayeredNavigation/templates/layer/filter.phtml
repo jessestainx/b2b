@@ -1,0 +1,64 @@
+<?php
+/**
+ * Layered navigation filters — AWA theme override.
+ * Decodifica labels de preço que chegam entity-encoded via Phrase.
+ *
+ * @var \Magento\LayeredNavigation\Block\Navigation\FilterRenderer $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Magento\Framework\Locale\LocaleFormatter $localeFormatter
+ * @var \Magento\Catalog\Model\Layer\Filter\Item[] $filterItems
+ */
+declare(strict_types=1);
+
+$viewModel = $block->getData('product_layer_view_model');
+
+$awaDecodePriceLabel = static function ($label): string {
+    $text = (string) $label;
+    if ($text !== '' && str_contains($text, '&lt;span')) {
+        return htmlspecialchars_decode($text, ENT_QUOTES | ENT_HTML5);
+    }
+    return $text;
+};
+?>
+<ol class="items">
+    <?php foreach ($filterItems as $filterItem): ?>
+        <?php
+        $filter = $filterItem->getFilter();
+        $requestVar = method_exists($filter, 'getRequestVar') ? (string) $filter->getRequestVar() : '';
+        $isPrice = $requestVar === 'price';
+        $labelHtml = $isPrice
+            ? $awaDecodePriceLabel($filterItem->getLabel())
+            : (string) $filterItem->getLabel();
+        ?>
+        <li class="item">
+            <?php if ($filterItem->getCount() > 0): ?>
+                <a
+                    href="<?= $escaper->escapeUrl($filterItem->getUrl()) ?>"
+                    rel="nofollow"
+                ><?= /* @noEscape */ $labelHtml ?><?php
+                if ($viewModel && $viewModel->shouldDisplayProductCountOnLayer()): ?><span
+                        class="count">
+                            <?= /* @noEscape */ $localeFormatter->formatNumber((int) $filterItem->getCount()) ?><span
+                            class="filter-count-label"><?php
+                            if ($filterItem->getCount() == 1): ?>
+                                <?= $escaper->escapeHtml(__('item')) ?><?php
+                            else:
+                                ?><?= $escaper->escapeHtml(__('items')) ?><?php
+                            endif;?></span></span>
+                    <?php endif; ?></a>
+            <?php else: ?>
+                <?= /* @noEscape */ $labelHtml ?><?php
+                if ($viewModel && $viewModel->shouldDisplayProductCountOnLayer()): ?><span
+                        class="count">
+                            <?= /* @noEscape */ $localeFormatter->formatNumber((int) $filterItem->getCount()) ?><span
+                            class="filter-count-label"><?php
+                            if ($filterItem->getCount() == 1): ?>
+                                <?= $escaper->escapeHtml(__('item')) ?><?php
+                            else:
+                                ?><?= $escaper->escapeHtml(__('items')) ?><?php
+                            endif;?></span></span>
+                <?php endif; ?>
+            <?php endif; ?>
+        </li>
+    <?php endforeach ?>
+</ol>

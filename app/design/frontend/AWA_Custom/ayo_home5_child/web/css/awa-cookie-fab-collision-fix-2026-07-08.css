@@ -1,26 +1,92 @@
 /*
- * AWA — Fix isolado: FAB de modo escuro sobrepondo o botão "Permitir cookies" (mobile)
+ * AWA — Float / cookie collision + UI audit 2026-07-26 (bugs 4.1 + 2.2)
  *
- * Bug confirmado via CDP em checkout/cart/ (390x844):
- *   - .awa-dark-mode-toggle fixo em bottom:142px (regra em
- *     awa-visual-fixes-2026-06-29-final.css, @media max-width:991px)
- *   - #awa-cookie-banner com 2 botões empilhados ocupa ~230px de altura quando ativo
- *   - Resultado: overlap real de ~35x44px no canto superior direito do
- *     botão #awa-cookie-accept (evidência em .cursor/debug-d1ec6c.log)
+ * 4.1 Evidência: WA bottom:15px vs .fixed-bottom h=72 → overlap.
+ *     Fix anterior com seletor fraco perdia; este usa bottom calc(72+12+safe).
  *
- * Resolução: reutiliza a mesma variável --awa-cookie-banner-height já setada via JS
- * (GrupoAwamotos_CookieConsent/web/js/cookie-consent.js:65, banner.offsetHeight) e já
- * consumida pelo padrão existente em web/css/source/_awa-visual-fixes.less para
- * .awa-whatsapp-float e #awaBackToTop. Sem overlap em desktop (>=992px) — não alterado.
- *
- * Arquivo isolado (não edita awa-visual-fixes-2026-06-29-final.css nem
- * _awa-visual-fixes.less) para não conflitar com sessão concorrente em andamento
- * nesses arquivos (estado MM/M não commitado, mesmo timestamp 2026-07-08 19:12).
- * Especificidade do seletor > regra original para vencer o cascade
- * independente da ordem de carregamento.
+ * 2.2 Evidência CDP: alinhamento quiet perdia para align-grid com
+ *     body#html-body×5 + .wrapper.grid.products-grid .info-price (min-height:64).
+ *     Este patch usa #html-body×6 + caminho .products-grid/.info-price.
  */
 @media (max-width: 991px) {
     html body#html-body.awa-cookie-banner-active .page-wrapper .awa-dark-mode-toggle {
         bottom: calc(var(--awa-cookie-banner-height, 230px) + 20px) !important;
     }
+
+    html body#html-body .page-wrapper .awa-whatsapp-float,
+    html body#html-body .page-wrapper a.awa-whatsapp-float,
+    html body#html-body a.awa-whatsapp-float {
+        bottom: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        right: 16px !important;
+        z-index: 10002 !important;
+    }
+
+    html body#html-body.awa-cookie-banner-active .page-wrapper .awa-whatsapp-float,
+    html body#html-body.awa-cookie-banner-active .page-wrapper a.awa-whatsapp-float,
+    html body#html-body.awa-cookie-banner-active a.awa-whatsapp-float {
+        bottom: calc(72px + 12px + var(--awa-cookie-banner-height, 0px) + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + var(--awa-cookie-banner-height, 0px) + env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
+
+/* 2.2 — superar align-grid (#html-body×5) com ×6 + caminho grid/info-price */
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .info-price {
+    min-height: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .info-price
+    .b2b-login-to-see-price,
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price {
+    align-items: flex-start !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    gap: 2px !important;
+    justify-content: flex-start !important;
+    margin: 4px 0 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    text-align: start !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price__title {
+    color: var(--awa-text-muted, #64748b) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    text-transform: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price__message {
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 1 !important;
+    color: var(--awa-primary, #b73337) !important;
+    display: -webkit-box !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
 }

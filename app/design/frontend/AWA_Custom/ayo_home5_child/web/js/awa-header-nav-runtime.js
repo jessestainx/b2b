@@ -130,12 +130,12 @@ define([], function () {
                 let isOpen = isMenuOpen(menu.panel);
 
                 menu.trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                menu.trigger.setAttribute('aria-label', isOpen ? 'Fechar categorias' : 'Abrir categorias');
+                menu.trigger.setAttribute('aria-label', isOpen ? 'Fechar departamentos' : 'Abrir departamentos');
 
                 menu.panel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
 
                 if (menu.status) {
-                    menu.status.textContent = isOpen ? 'Menu de categorias aberto.' : 'Menu de categorias fechado. Pressione Enter para abrir.';
+                    menu.status.textContent = isOpen ? 'Menu de departamentos aberto.' : 'Menu de departamentos fechado. Pressione Enter para abrir.';
                 }
             }
 
@@ -386,5 +386,6 @@ define([], function () {
         }, true);
 
         bindMenuViewportBoundary();
+
     };
 });

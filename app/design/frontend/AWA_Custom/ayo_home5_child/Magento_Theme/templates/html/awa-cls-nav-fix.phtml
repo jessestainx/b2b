@@ -18,14 +18,16 @@
 :root {
     /* ── cls-nav — design tokens ─── */
     --cls-nav-c1: #b73337;
-    /* Offset real do stack sticky (~main-header + nav-bar, variando ~126–136px desktop) */
-    --awa-header-scroll-offset: 128px;
+    /* BUG-SHELL-MOBILE-STICKY-OVERSIZE-001: desktop 116 / mobile sticky=main 96 */
+    --awa-header-scroll-offset: 116px;
 }
 @media (max-width: 767px) {
-    /* Mobile: header wrapper sticky ~96–100px antes do hero */
-    :root { --awa-header-scroll-offset: 100px; }
+    /* Mobile: nav hidden; sticky=96 — 112 gerava faixa vazia abaixo da busca */
+    :root { --awa-header-scroll-offset: 96px !important; }
+    html { scroll-padding-top: 96px !important; scroll-padding-block-start: 96px !important; }
 }
 @media (min-width: 768px) and (max-width: 991px) {
+    /* Tablet: mantém 128 (cascade lock / scroll-padding tablet) */
     :root { --awa-header-scroll-offset: 128px; }
 }
 html { scroll-padding-top: var(--awa-header-scroll-offset); }

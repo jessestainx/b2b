@@ -31,12 +31,35 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             );
         }
 
+        function hidePromoBarForLoggedIn() {
+            let promo = document.getElementById('awa-b2b-promo-bar')
+                || document.querySelector('.awa-b2b-promo-bar');
+
+            document.body.classList.add('awa-customer-known');
+            document.body.classList.add('customer-logged-in');
+
+            if (!promo) {
+                return;
+            }
+
+            // AUDIT30-2026-07-16: cart critical forçava display:flex; marca + hide inline
+            promo.setAttribute('data-awa-promo-hidden', '1');
+            promo.style.setProperty('display', 'none', 'important');
+            promo.style.setProperty('visibility', 'hidden', 'important');
+            promo.style.setProperty('height', '0', 'important');
+            promo.style.setProperty('max-height', '0', 'important');
+            promo.style.setProperty('overflow', 'hidden', 'important');
+            promo.setAttribute('aria-hidden', 'true');
+            promo.setAttribute('inert', '');
+        }
+
         function updateRightCol(data) {
             let accountNav = document.querySelector('[data-awa-account-nav]');
             let rightCol = document.querySelector('[data-awa-header-right]');
             let customerLoggedIn = isLoggedIn(data);
 
             if (customerLoggedIn) {
+                hidePromoBarForLoggedIn();
                 if (accountNav) {
                     accountNav.style.removeProperty('display');
                     accountNav.removeAttribute('hidden');
@@ -390,20 +413,39 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
             pulseIfChanged();
         }
 
+        function applyCartLiveRegionSrOnly(region) {
+            if (!region) {
+                return;
+            }
+            /* Classe utilitária + inline: .awa-sr-live sozinho não tem regra CSS
+             * (só .awa-header-account-prompt__live.awa-sr-live). Sem isso o anúncio
+             * "Item adicionado ao carrinho" vaza visualmente no body. */
+            region.classList.add('awa-sr-only', 'awa-sr-live');
+            region.setAttribute('aria-live', 'polite');
+            region.setAttribute('aria-atomic', 'true');
+            region.style.cssText = 'position:fixed!important;top:0!important;left:0!important;'
+                + 'width:1px!important;height:1px!important;min-width:1px!important;'
+                + 'min-height:1px!important;max-width:1px!important;max-height:1px!important;'
+                + 'padding:0!important;margin:0!important;overflow:hidden!important;'
+                + 'clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;'
+                + 'white-space:nowrap!important;border:0!important;font-size:0!important;'
+                + 'line-height:0!important;contain:strict!important;';
+        }
+
         function ensureCartLiveRegion() {
             if (cartLiveRegion) {
+                applyCartLiveRegionSrOnly(cartLiveRegion);
                 return;
             }
             let existing = document.getElementById('awa-cart-live-region');
             if (existing) {
+                applyCartLiveRegionSrOnly(existing);
                 cartLiveRegion = existing;
                 return;
             }
             let region = document.createElement('div');
             region.id = 'awa-cart-live-region';
-            region.className = 'awa-sr-live';
-            region.setAttribute('aria-live', 'polite');
-            region.setAttribute('aria-atomic', 'true');
+            applyCartLiveRegionSrOnly(region);
             document.body.appendChild(region);
             cartLiveRegion = region;
         }
@@ -827,6 +869,19 @@ define(['Magento_Customer/js/customer-data'], function (customerData) {
         enhanceSearchExperience();
         ensureCartLiveRegion();
         setupMinicartFeedback();
+        // FPC guest HTML + customer section async: cookie/localStorage podem
+        // indicar logado antes do customer-data resolver — esconde promo já.
+        try {
+            let cookieMatch = document.cookie.match(/(?:^|;\s*)customer_logged_in=1(?:;|$)/);
+            let cacheRaw = window.localStorage ? window.localStorage.getItem('mage-cache-storage') : null;
+            let cacheObj = cacheRaw ? JSON.parse(cacheRaw) : null;
+            let cachedCustomer = cacheObj && cacheObj.customer ? cacheObj.customer : null;
+            if (cookieMatch || isLoggedIn(cachedCustomer) || hasB2bStatusPanel()) {
+                hidePromoBarForLoggedIn();
+            }
+        } catch (e) {
+            /* ignore storage parse errors */
+        }
         syncCustomerUi(customer());
         customer.subscribe(syncCustomerUi);
     };

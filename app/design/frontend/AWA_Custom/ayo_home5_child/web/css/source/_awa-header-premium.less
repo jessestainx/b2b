@@ -839,12 +839,13 @@ body .page-wrapper .page-header {
       background: rgba(183, 51, 55, 0.02) !important;
   }
 
-  /* ── POLISH 4: Botão search — gradiente sutil no hover ──────────────────── */
+  /* ── POLISH 4: Botão search — ghost hover (SSOT 2026-07-30) ──────────────── */
   #header .awa-header-search-col button.action.search:hover,
   #header .awa-header-search-col .actions .action.search:hover {
-      background: var(--awa-primary-hover, @awa-color-primary-dark) !important;
-      background-color: var(--awa-primary-hover, @awa-color-primary-dark) !important;
-      transition: background var(--awa-duration-fast, 0.15s) ease !important;
+      background: transparent !important;
+      background-color: transparent !important;
+      opacity: 0.88 !important;
+      transition: opacity var(--awa-duration-fast, 0.15s) ease !important;
   }
 
   /* ── POLISH 5: Navbar links — underline animado ─────────────────────────── */

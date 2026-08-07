@@ -114,6 +114,42 @@ define(['jquery', 'mage/translate'], function ($, $t) {
         }
     }
 
+
+    function syncSummaryClearance(bar) {
+        var summary = document.querySelector('.cart-summary');
+        var mq = window.matchMedia(MOBILE_MQ);
+        var clearance;
+        var top;
+        var maxH;
+        var barRect;
+
+        if (!summary) {
+            return;
+        }
+
+        if (!mq.matches || !bar || bar.hidden || !document.body.classList.contains('awa-cart-mobile-bar-active')) {
+            summary.style.removeProperty('max-height');
+            document.documentElement.style.removeProperty('--awa-cart-summary-max-h');
+            document.documentElement.style.removeProperty('--awa-cart-mobile-bar-clearance');
+
+            return;
+        }
+
+        barRect = bar.getBoundingClientRect();
+        clearance = Math.max(60, Math.round(barRect.height)) + 16;
+        document.documentElement.style.setProperty('--awa-cart-mobile-bar-clearance', clearance + 'px');
+        top = summary.getBoundingClientRect().top;
+        maxH = Math.floor(barRect.top - Math.max(top, 0) - 12);
+
+        if (maxH < 160) {
+            maxH = 160;
+        }
+
+        document.documentElement.style.setProperty('--awa-cart-summary-max-h', maxH + 'px');
+        summary.style.maxHeight = maxH + 'px';
+        summary.style.overflowY = 'auto';
+}
+
     function setBarVisible(bar, visible) {
         if (!bar) {
             return;
@@ -122,6 +158,7 @@ define(['jquery', 'mage/translate'], function ($, $t) {
         bar.hidden = !visible;
         bar.setAttribute('aria-hidden', visible ? 'false' : 'true');
         document.body.classList.toggle('awa-cart-mobile-bar-active', visible);
+        syncSummaryClearance(bar);
     }
 
     function bindCheckoutClick(bar) {
@@ -222,12 +259,26 @@ define(['jquery', 'mage/translate'], function ($, $t) {
             return;
         }
 
-        var bar = buildBar();
+        /* e86806: init pode rodar N vezes (require/contentUpdated) → N barras.
+           CDP cart: 3× .awa-cart-mobile-bar no mesmo rect. Reusa a existente. */
+        var bar = document.querySelector('body > .' + BAR_CLASS);
+        var isNew = !bar;
 
-        bindCheckoutClick(bar);
-        watchSummaryVisibility(bar);
+        if (isNew) {
+            bar = buildBar();
+            bindCheckoutClick(bar);
+            watchSummaryVisibility(bar);
+            window.addEventListener('resize', function () {
+                syncSummaryClearance(bar);
+            }, {passive: true});
+            window.addEventListener('scroll', function () {
+                syncSummaryClearance(bar);
+            }, {passive: true});
+        }
+
         syncContinueLink(bar);
         syncBarState(bar);
+        syncSummaryClearance(bar);
 
         var mq = window.matchMedia(MOBILE_MQ);
 
@@ -235,25 +286,27 @@ define(['jquery', 'mage/translate'], function ($, $t) {
             setBarVisible(bar, true);
         }
 
-        $(document).on('contentUpdated.awaCartMobileBar', function () {
+        $(document).off('contentUpdated.awaCartMobileBar').on('contentUpdated.awaCartMobileBar', function () {
             window.setTimeout(function () {
                 syncContinueLink(bar);
                 syncBarState(bar);
             }, 80);
         });
 
-        var checkoutList = document.querySelector('.checkout-methods-items');
+        if (isNew) {
+            var checkoutList = document.querySelector('.checkout-methods-items');
 
-        if (checkoutList && typeof MutationObserver !== 'undefined') {
-            var mo = new MutationObserver(function () {
-                syncBarState(bar);
-            });
+            if (checkoutList && typeof MutationObserver !== 'undefined') {
+                var mo = new MutationObserver(function () {
+                    syncBarState(bar);
+                });
 
-            mo.observe(checkoutList, {
-                attributes: true,
-                subtree: true,
-                attributeFilter: ['disabled', 'aria-disabled', 'class', 'href']
-            });
+                mo.observe(checkoutList, {
+                    attributes: true,
+                    subtree: true,
+                    attributeFilter: ['disabled', 'aria-disabled', 'class', 'href']
+                });
+            }
         }
     };
 });

@@ -35,10 +35,15 @@ if ($searchQueryText === '') {
                 <label class="label" for="search" id="awa-search-label" data-role="minisearch-label">
                     <span><?php echo $block->escapeHtml(__('Buscar')); ?></span>
                 </label>
-                <span id="awa-search-help" class="awa-sr-only" data-awa-search-help="true">
-                    <?php echo $block->escapeHtml(__('Digite ao menos 2 caracteres para começar a pesquisar.')); ?>
-                </span>
-                <span class="awa-sr-only"
+                <?php
+                /**
+                 * Do not put search-help copy under header_main (text OR attributes OR inline JS).
+                 * Cursor DOM picker aggregates header_main outerHTML and was showing
+                 * "Digite ao menos 2 caracteres…". Portal is created by theme JS on body.
+                 */
+                ?>
+                <span id="awa-search-status"
+                      class="awa-sr-only"
                       data-awa-search-status="true"
                       aria-live="polite"
                       aria-atomic="true"></span>
@@ -46,11 +51,6 @@ if ($searchQueryText === '') {
                     <input id="search"
                            aria-label="<?php echo $block->escapeHtmlAttr(__('Buscar produtos')) ?>"
                            data-awa-search-input="true"
-                           data-mage-init='{"quickSearch":{
-                               "formSelector":"#search_mini_form",
-                               "url":"<?php echo $block->escapeUrl($block->getUrl('search/ajax/suggest')); ?>",
-                               "destinationSelector":"#search_autocomplete"}
-                           }'
                            type="search"
                            name="<?php echo $block->escapeHtmlAttr($searchHelper->getQueryParamName()) ?>"
                            value="<?php echo $block->escapeHtmlAttr($searchQueryText) ?>"
@@ -60,7 +60,7 @@ if ($searchQueryText === '') {
                            maxlength="<?php echo (int) $searchHelper->getMaxQueryLength(); ?>"
                            role="combobox"
                            aria-labelledby="awa-search-label"
-                           aria-describedby="awa-search-help"
+                           aria-describedby="awa-search-status"
                            aria-autocomplete="both"
                            aria-expanded="false"
                            aria-haspopup="listbox"
@@ -88,7 +88,7 @@ if ($searchQueryText === '') {
                         class="action search"
                         data-awa-search-submit="true"
                         data-awa-search-icon="single-lupa">
-                    <span class="awa-sr-only"><?php echo $block->escapeHtml(__('Pesquisar catálogo')); ?></span>
+                    <?php /* Accessible name comes from aria-label; avoid extra text nodes under header_main. */ ?>
                     <svg xmlns="http://www.w3.org/2000/svg"
                          width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor"
@@ -101,9 +101,8 @@ if ($searchQueryText === '') {
                 </button>
             </div>
         </form>
-        <p class="awa-search-helper-copy" data-awa-search-helper-copy="true" aria-hidden="true">
-            <?php echo $block->escapeHtml(__('Busque por nome, código, SKU, marca ou modelo da moto.')); ?>
-        </p>
+        <?php /* Kept for CSS hooks; no copy — was display:none but still polluted header_main textContent. */ ?>
+        <p class="awa-search-helper-copy" data-awa-search-helper-copy="true" aria-hidden="true"></p>
     </div>
 </div>
 <?php if ($isHomePage): ?>

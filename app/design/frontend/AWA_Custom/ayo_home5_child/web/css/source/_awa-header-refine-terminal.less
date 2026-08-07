@@ -198,10 +198,11 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
     opacity: 1 !important;
   }
 
+  /* Search ghost SSOT — alinhado a FOUC r4 / cascade (CTA sólido = Departamentos) */
   #html-body .page-wrapper .awa-site-header form#search_mini_form button.action.search,
   #html-body .page-wrapper .awa-site-header .block-search .action.search {
-    background: var(--awa-primary, @awa-color-primary) !important;
-    color: @awa-color-white !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
     border: 0 !important;
     border-radius: 0 9px 9px 0 !important;
     min-width: 48px !important;
@@ -303,19 +304,23 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
     outline-offset: 2px !important;
   }
 
-  /* Minicart */
+  /* Minicart — ícone primary sem fundo (sem flash CTA vermelho) */
   #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart {
-    background: var(--awa-primary, @awa-color-primary) !important;
+    background: transparent !important;
+    background-color: transparent !important;
     border: 0 !important;
-    border-radius: var(--awa-radius-sm, 8px) !important;
-    padding: 8px 12px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
     min-height: 44px !important;
-    color: @awa-color-white !important;
-    transition: background-color 120ms ease !important;
+    color: var(--awa-primary, @awa-color-primary) !important;
+    transition: opacity 120ms ease !important;
   }
 
   #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart:hover {
-    background: var(--awa-primary-hover, @awa-color-primary-dark) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    opacity: 0.88 !important;
   }
 
   #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart:focus-visible {
@@ -325,8 +330,8 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
 
   #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart svg,
   #html-body .page-wrapper .awa-site-header .awa-header-minicart .minicart-wrapper .action.showcart .awa-minicart-icon {
-    stroke: @awa-color-white !important;
-    color: @awa-color-white !important;
+    stroke: var(--awa-primary, @awa-color-primary) !important;
+    color: var(--awa-primary, @awa-color-primary) !important;
   }
 
   #html-body .page-wrapper .awa-site-header .awa-header-brand-cell .logo img {
@@ -513,36 +518,56 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
     color: @awa-color-white !important;
   }
 
-/* Runtime proof db8b7e: on PDP desktop the quick links ended at right=2055
-   with a 1910px viewport. Keep the secondary nav inside the visible bar. */
+/* Quick links PDP: alinhar à direita com gap legível; overflow visível
+   (layout via CSS — sem inline JS). Antes: max 360px + gap ~8–12px apertava. */
 @media (min-width: 992px) {
+    html body#html-body.catalog-product-view .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner {
+        display: flex !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: clamp(16px, 1.5vw, 24px) !important;
+    }
+
     html body#html-body.catalog-product-view .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links {
-        flex: 0 1 ~"min(34vw, 360px)" !important;
-        margin-left: auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+        margin-left: 0 !important;
         min-width: 0 !important;
-        max-width: ~"min(34vw, 360px)" !important;
-        overflow: hidden !important;
+        max-width: none !important;
+        width: auto !important;
+        overflow: visible !important;
+        position: static !important;
+        justify-self: start !important;
+        grid-column: auto !important;
     }
 
     html body#html-body.catalog-product-view .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links__list {
-        flex: 1 1 auto !important;
-        justify-content: flex-end !important;
-        gap: clamp(8px, 0.8vw, 12px) !important;
+        display: flex !important;
+        flex: 0 1 auto !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: clamp(16px, 1.6vw, 28px) !important;
         min-width: 0 !important;
-        max-width: 100% !important;
-        overflow: hidden !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        list-style: none !important;
     }
 
     html body#html-body.catalog-product-view .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links__item {
-        flex: 0 1 auto !important;
+        flex: 0 0 auto !important;
         min-width: 0 !important;
     }
 
     html body#html-body.catalog-product-view .page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-quick-links__link {
-        max-width: 10rem !important;
-        overflow: hidden !important;
-        padding-inline: clamp(6px, 0.6vw, 8px) !important;
-        text-overflow: ellipsis !important;
+        max-width: none !important;
+        overflow: visible !important;
+        padding-inline: 4px !important;
+        text-overflow: clip !important;
         white-space: nowrap !important;
     }
 
@@ -782,6 +807,14 @@ body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
     min-height: 0 !important;
     max-height: 48px !important;
     object-fit: contain !important;
+  }
+
+  /* BUG3 2026-08-03: condensed wins over default sticky 48px */
+  html body#html-body .page-wrapper .awa-site-header.awa-header-condensed .header-wrapper-sticky .awa-header-brand-cell .logo img,
+  html body#html-body .page-wrapper .header-wrapper-sticky.is-sticky.awa-header-condensed .awa-header-brand-cell .logo img,
+  html body#html-body.awa-header-is-sticky .page-wrapper .awa-site-header.awa-header-condensed .awa-header-brand-cell .logo img {
+    height: 34px !important;
+    max-height: 34px !important;
   }
 
   html body#html-body .page-wrapper .awa-site-header .header-wrapper-sticky,

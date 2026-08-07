@@ -1,7 +1,10 @@
 /**
  * AWA Motos — Home Category Carousel
  * RequireJS widget: scroll nav, swipe, dots, keyboard, entrance animation.
- * Inicializado via data-mage-init no #awa-cat-carousel track element.
+ * Inicializado via awa-home-category-carousel-init.phtml (idle + intent).
+ * r22k: delegação de clique no root (nav no header).
+ * r22l: esconde nav/dots quando não há scroll significativo.
+ * r22m: re-sync idle após reveal/imagens (race do maxScroll).
  */
 define([], function () {
     'use strict';
@@ -71,6 +74,59 @@ define([], function () {
             return Math.max(0, track.scrollWidth - track.clientWidth);
         }
 
+        // r22l: ignore leftover sub-card scroll (desktop often has 8–40px) so we
+        // do not show a fake 2nd page / enabled Next that moves almost nothing.
+        function hasMeaningfulScroll() {
+            let maxScroll = getMaxScroll();
+            let item = items[0];
+            let minDelta = 48;
+            if (item) {
+                let style = getComputedStyle(track);
+                let gap = parseInt(style.gap, 10) || 16;
+                minDelta = Math.max(48, Math.floor((item.offsetWidth + gap) * 0.45));
+            }
+            return maxScroll >= minDelta;
+        }
+
+        function syncNavChrome() {
+            let meaningful = hasMeaningfulScroll();
+            let section = track.closest('.top-home-content--category-carousel')
+                || (root && root.classList && root.querySelector
+                    ? root
+                    : null);
+            if (section && section.classList) {
+                section.classList.toggle('is-awa-cat-nav-idle', !meaningful);
+            }
+            if (!meaningful) {
+                pageOffsets = [0];
+                if (dotsWrap) {
+                    dotsWrap.innerHTML = '';
+                    dotsWrap.style.display = 'none';
+                    dotsWrap.setAttribute('aria-hidden', 'true');
+                    dotsWrap.setAttribute('inert', '');
+                }
+                [prev, next].forEach(function (button) {
+                    if (!button) {
+                        return;
+                    }
+                    button.disabled = true;
+                    button.classList.add('is-disabled');
+                    button.setAttribute('aria-disabled', 'true');
+                    button.style.opacity = '0.45';
+                    button.style.pointerEvents = 'none';
+                    button.hidden = true;
+                });
+                return false;
+            }
+            [prev, next].forEach(function (button) {
+                if (!button) {
+                    return;
+                }
+                button.hidden = false;
+            });
+            return true;
+        }
+
         function buildPageOffsets() {
             let rawTrackW = Number(track.clientWidth) || 0;
             let trackW = Math.max(1, Math.floor(rawTrackW));
@@ -85,6 +141,11 @@ define([], function () {
             pageOffsets = [0];
 
             if (trackW <= 0 || maxScroll <= 0) {
+                return;
+            }
+
+            // Avoid phantom pages for sub-card leftovers (e.g. maxScroll=32 on 1440).
+            if (!hasMeaningfulScroll()) {
                 return;
             }
 
@@ -144,16 +205,29 @@ define([], function () {
 
         function updateNavState() {
             let maxScroll = getMaxScroll();
+            let meaningful = hasMeaningfulScroll();
             let atStart = track.scrollLeft <= 4;
             let atEnd = track.scrollLeft >= (maxScroll - 4);
 
             [prev, next].forEach(function (button, idx) {
-                let disabled = idx === 0 ? atStart : atEnd;
+                let disabled;
 
                 if (!button) {
                     return;
                 }
 
+                if (!meaningful) {
+                    button.hidden = true;
+                    button.disabled = true;
+                    button.classList.add('is-disabled');
+                    button.setAttribute('aria-disabled', 'true');
+                    button.style.opacity = '0.45';
+                    button.style.pointerEvents = 'none';
+                    return;
+                }
+
+                button.hidden = false;
+                disabled = idx === 0 ? atStart : atEnd;
                 button.disabled = disabled;
                 button.classList.toggle('is-disabled', disabled);
                 button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
@@ -168,22 +242,29 @@ define([], function () {
             let pages;
             let i;
 
-            if (!dotsWrap) {
-                return;
-            }
-
-            dotsWrap.innerHTML = '';
             trackW = track.offsetWidth;
             scrollW = track.scrollWidth;
             buildPageOffsets();
 
-            if (scrollW <= trackW) {
-                dotsWrap.style.display = 'none';
-                dotsWrap.setAttribute('aria-hidden', 'true');
-                dotsWrap.setAttribute('inert', '');
-                dotsWrap.removeAttribute('aria-label');
+            // r22m: always sync idle nav even when dots node is missing/empty.
+            if (!syncNavChrome() || scrollW <= trackW || pageOffsets.length < 2) {
+                if (dotsWrap) {
+                    dotsWrap.innerHTML = '';
+                    dotsWrap.style.display = 'none';
+                    dotsWrap.setAttribute('aria-hidden', 'true');
+                    dotsWrap.setAttribute('inert', '');
+                    dotsWrap.removeAttribute('aria-label');
+                }
+                updateNavState();
                 return;
             }
+
+            if (!dotsWrap) {
+                updateNavState();
+                return;
+            }
+
+            dotsWrap.innerHTML = '';
 
             dotsWrap.style.display = '';
             dotsWrap.removeAttribute('aria-hidden');
@@ -250,21 +331,34 @@ define([], function () {
             updateNavState();
         }
 
-        if (prev) {
-            prev.setAttribute('aria-controls', track.id);
-            prev.setAttribute('aria-keyshortcuts', 'ArrowLeft');
-            prev.addEventListener('click', function () {
-                track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
-            });
+        function bindNavButton(button, dir) {
+            if (!button) {
+                return;
+            }
+            button.setAttribute('aria-controls', track.id);
+            button.setAttribute('aria-keyshortcuts', dir < 0 ? 'ArrowLeft' : 'ArrowRight');
         }
 
-        if (next) {
-            next.setAttribute('aria-controls', track.id);
-            next.setAttribute('aria-keyshortcuts', 'ArrowRight');
-            next.addEventListener('click', function () {
+        bindNavButton(prev, -1);
+        bindNavButton(next, 1);
+
+        // r22k: delegate clicks on section root so header-moved buttons always work,
+        // even if nodes are replaced after first paint.
+        root.addEventListener('click', function (event) {
+            var btn = event.target && event.target.closest
+                ? event.target.closest('.awa-category-carousel__prev, .awa-category-carousel__next')
+                : null;
+            if (!btn || !root.contains(btn) || btn.disabled) {
+                return;
+            }
+            if (btn.classList.contains('awa-category-carousel__prev')) {
+                track.scrollBy({left: -getScrollAmount(), behavior: scrollBehavior()});
+                return;
+            }
+            if (btn.classList.contains('awa-category-carousel__next')) {
                 track.scrollBy({left: getScrollAmount(), behavior: scrollBehavior()});
-            });
-        }
+            }
+        });
 
         track.addEventListener('touchstart', function (event) {
             startX = event.touches[0].pageX;
@@ -322,13 +416,29 @@ define([], function () {
         track.addEventListener('scroll', scheduleDotsUpdate, {passive: true});
         buildDots();
         updateDots();
+        syncNavChrome();
+        updateNavState();
+
+        function remountChrome() {
+            buildDots();
+            updateDots();
+            syncNavChrome();
+            updateNavState();
+        }
+
+        // r22m: layout settles after fonts/images — re-check phantom scroll leftovers.
+        if (typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(remountChrome);
+            });
+        }
+        window.setTimeout(remountChrome, 300);
+        window.setTimeout(remountChrome, 1200);
+        window.addEventListener('load', remountChrome, {once: true, passive: true});
 
         window.addEventListener('resize', function () {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function () {
-                buildDots();
-                updateDots();
-            }, 200);
+            resizeTimer = setTimeout(remountChrome, 200);
         }, {passive: true});
 
         if ('IntersectionObserver' in window && !prefersReducedMotion()) {
@@ -352,6 +462,13 @@ define([], function () {
                     setTimeout(function () {
                         card.classList.remove('awa-carousel-hidden');
                         card.classList.add('awa-carousel-visible');
+                        if (i === cards.length - 1) {
+                            // Last card revealed — remeasure scroll leftover vs nav chrome.
+                            setTimeout(function () {
+                                buildDots();
+                                updateDots();
+                            }, 30);
+                        }
                     }, delay);
                 });
             }

@@ -3,6 +3,9 @@
  * AWA Motos - Custom Visual JS Loader
  * Centralized loader for child-theme behavioral scripts.
  */
+
+use GrupoAwamotos\Theme\Model\MinicartAssetVersion;
+
 $normalizeFlag = static function ($value, bool $default): bool {
     if ($value === null) {
         return $default;
@@ -34,6 +37,7 @@ $loadSearchCompatJs = $normalizeFlag($block->getData('load_search_compat_js'), f
 $loadB2bCheckoutCompatJs = $normalizeFlag($block->getData('load_b2b_checkout_compat_js'), false);
 $loadHomeCategoryCompatJs = $normalizeFlag($block->getData('load_home_category_compat_js'), false);
 $skipMinicartDeferInit = $normalizeFlag($block->getData('skip_minicart_defer_init'), false);
+$minicartRuntimeVersion = MinicartAssetVersion::RUNTIME;
 $request = $block->getRequest();
 $fullActionName = $request ? (string) $request->getFullActionName() : '';
 $pathInfo = $request ? (string) ($request->getOriginalPathInfo() ?: $request->getPathInfo()) : '';
@@ -293,24 +297,27 @@ HTML;
 };
 
 ?>
-<?php if ($loadHeaderJs && !$isCartOrCheckoutRoute): ?>
+<?php if ($loadHeaderJs && !$isCartOrCheckoutRoute && !$isCmsHomeRoute): ?>
 <script>
 (function (w) {
     var runtime = w.__awaHeaderMinicartRuntime = w.__awaHeaderMinicartRuntime || {};
-    if (!runtime.owner) {
-        runtime.owner = 'v2';
-        runtime.ownerSource = 'awa-custom-js-loader';
-        runtime.ownerClaimedAt = Date.now();
-    } else if (runtime.owner === 'v2') {
-        runtime.ownerClaimedAt = runtime.ownerClaimedAt || Date.now();
+    if (!runtime.cosmeticOwner) {
+        runtime.cosmeticOwner = 'v2';
+        runtime.cosmeticOwnerSource = 'awa-custom-js-loader';
+        runtime.cosmeticOwnerClaimedAt = Date.now();
+    } else if (runtime.cosmeticOwner === 'v2') {
+        runtime.cosmeticOwnerClaimedAt = runtime.cosmeticOwnerClaimedAt || Date.now();
     }
 })(window);
 </script>
 <?php endif; ?>
 
 <?php if ($loadHeaderJs): ?>
-<?php if (!$isCartOrCheckoutRoute): ?>
-<?= /* @noEscape */ $renderIntentScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-header-minicart-ui-v2.js')), [
+<?php /* Home: awa-minicart-ui-bootstrap-home cobre minicart — v2 duplicava requests/TBT. */ ?>
+<?php if (!$isCartOrCheckoutRoute && !$isCmsHomeRoute): ?>
+<?= /* @noEscape */ $renderIntentScriptLoader($block->escapeUrl(
+    $block->getViewFileUrl('js/awa-header-minicart-ui-v2.js') . '?v=' . rawurlencode($minicartRuntimeVersion)
+), [
     '.header .top-search',
     '.header [data-awa-header-minicart-shell="true"]',
     '.header [data-awa-header-minicart-fallback="true"]',
@@ -343,18 +350,21 @@ HTML;
         return;
     }
 
-    src = <?= json_encode($block->getViewFileUrl('js/awa-minicart-defer-init.js'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    src = <?= json_encode(
+        $block->getViewFileUrl('js/awa-minicart-defer-init.js') . '?v=' . rawurlencode($minicartRuntimeVersion),
+        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+    ) ?>;
     var runtime = w.__awaHeaderMinicartRuntime = w.__awaHeaderMinicartRuntime || {};
-    if (runtime.owner && runtime.owner !== 'defer') {
+    if (runtime.functionalOwner && runtime.functionalOwner !== 'defer') {
         return;
     }
     if (w.__awaMinicartDeferClaim || w.__awaMinicartDeferInit || d.querySelector('script[src="' + src + '"], script[data-awa-defer-init="' + src + '"]')) {
         return;
     }
 
-    runtime.owner = 'defer';
-    runtime.ownerSource = runtime.ownerSource || 'awa-custom-js-loader';
-    runtime.ownerClaimedAt = runtime.ownerClaimedAt || Date.now();
+    runtime.functionalOwner = 'defer';
+    runtime.functionalOwnerSource = runtime.functionalOwnerSource || 'awa-custom-js-loader';
+    runtime.functionalOwnerClaimedAt = runtime.functionalOwnerClaimedAt || Date.now();
     w.__awaMinicartDeferClaim = true;
 
     script = d.createElement('script');
@@ -439,7 +449,7 @@ HTML;
 <?= /* @noEscape */ $renderIdleScriptLoader($block->escapeUrl($block->getViewFileUrl('js/awa-footer-ux.js')), 2200) ?>
 <?php endif; ?>
 <?php if ($loadPdpStickyCtaJs): ?>
-<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-pdp-sticky-cta.js')) ?>" defer></script>
+<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-pdp-sticky-cta.js') . '?v=20260731-h27c-debug') ?>" defer></script>
 <?php endif; ?>
 <?php if ($shouldLoadCompatBootstrap): ?>
 <?php if ($isCmsHomeRoute): ?>
@@ -521,46 +531,7 @@ HTML;
     events.forEach(function (n) { w.addEventListener(n, boot, { capture: true, passive: n !== 'keydown', once: true }); });
 })(window, document);
 </script>
-<script>
-/* PD6: mesmo padrao — o require(['js/awa-scroll-reveal']) so roda depois do
-   tick sincrono do evento que disparou o boot. */
-(function (w) {
-    'use strict';
-    var done = false;
-    var events = ['pointerdown', 'keydown', 'touchstart'];
-
-    function runLoadScrollReveal() {
-        w.require(['js/awa-scroll-reveal'], function (init) {
-            if (typeof init === 'function') {
-                init();
-            }
-        });
-    }
-
-    function scheduleLoadScrollReveal() {
-        if (w.requestIdleCallback) {
-            w.requestIdleCallback(runLoadScrollReveal, { timeout: 300 });
-        } else {
-            w.setTimeout(runLoadScrollReveal, 0);
-        }
-    }
-
-    function loadScrollReveal() {
-        if (done) { return; }
-        if (typeof w.require !== 'function') {
-            w.setTimeout(loadScrollReveal, 200);
-            return;
-        }
-        done = true;
-        events.forEach(function (n) { w.removeEventListener(n, loadScrollReveal, true); });
-        scheduleLoadScrollReveal();
-    }
-
-    events.forEach(function (n) {
-        w.addEventListener(n, loadScrollReveal, { capture: true, passive: n !== 'keydown', once: true });
-    });
-}(window));
-</script>
+<?php /* Home: sem awa-scroll-reveal — animação cosmética; economiza require + TBT no 1º clique. */ ?>
 <?php elseif ($isCartPageOnly): ?>
 <script>
 /* Carrinho: toast/messages após idle curto — evita mage/apply no parse inicial */

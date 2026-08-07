@@ -61,7 +61,7 @@ body .page-wrapper .minicart-wrapper .mage-dropdown-dialog.ui-corner-all.ui-widg
     display: flex !important;
     flex-direction: column !important;
     height: auto !important;
-    left: auto !important;
+    left: 50% !important;
     margin: 0 !important;
     max-height: var(--awa-minicart-max-height) !important;
     max-width: var(--awa-minicart-width) !important;
@@ -70,9 +70,9 @@ body .page-wrapper .minicart-wrapper .mage-dropdown-dialog.ui-corner-all.ui-widg
     padding: 0 !important;
     pointer-events: auto !important;
     position: absolute !important;
-    right: 0 !important;
+    right: auto !important;
     top: calc(100% + var(--awa-space-2)) !important;
-    transform: none !important;
+    transform: translateX(-50%) !important;
     visibility: visible !important;
     width: var(--awa-minicart-width) !important;
     z-index: var(--awa-minicart-z-index) !important;
@@ -934,7 +934,7 @@ html body .page-wrapper .erp-widget-header .erp-widget-title {
     padding: 0 !important;
   }
 
-  /* §1-h: Botão de busca — override do display:none do styles-m.css (Magento core) */
+  /* §1-h: Botão de busca — ghost SSOT (fundo transparente + ícone primary; CTA sólido = Departamentos) */
   html body .page-wrapper #header.header-container .awa-header-search-col form .action.search,
   html body .page-wrapper #header.header-container .awa-header-search-col form button[type="submit"],
   html body .page-wrapper #header.header-container .block-search .action.search {
@@ -950,14 +950,15 @@ html body .page-wrapper .erp-widget-header .erp-widget-title {
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 6px 6px 0 !important;
-    background: var(--awa-primary, @awa-color-primary) !important;
-    color: @awa-color-white !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
     cursor: pointer !important;
     font-size: 0 !important;
   }
 
   html body .page-wrapper #header.header-container .awa-header-search-col form .action.search:hover {
-    background: oklch(from var(--awa-primary, @awa-color-primary) calc(l - 0.08) c h) !important;
+    background: transparent !important;
+    opacity: 0.88 !important;
   }
 
   /* §1-i: Ícone SVG dentro do botão — BUG-MOB-SEARCH-001 Fix: hide ::before if SVG present */
@@ -965,10 +966,10 @@ html body .page-wrapper .erp-widget-header .erp-widget-title {
     display: inline-flex !important;
     width: 18px !important;
     height: 18px !important;
-    stroke: @awa-color-white !important;
+    stroke: var(--awa-primary, #b73337) !important;
     fill: none !important;
     font-size: 18px !important;
-    color: @awa-color-white !important;
+    color: var(--awa-primary, #b73337) !important;
   }
 
   html body .page-wrapper #header.header-container .awa-header-search-col form .action.search::before {
@@ -1279,6 +1280,7 @@ html body .page-wrapper #header.header-container
 /* toque deve ser pelo menos 44px de largura para uso com polegar.            */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
+/* §promo-close-44 — WCAG 2.5.8 / Pixel QA (1º button do DOM). */
 #awa-b2b-promo-bar .awa-b2b-promo-close,
 button.awa-b2b-promo-close {
   position: absolute !important;
@@ -1288,24 +1290,17 @@ button.awa-b2b-promo-close {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  box-sizing: border-box !important;
   padding: 0 !important;
   flex-shrink: 0 !important;
   border-radius: 6px !important;
   transition: background-color 120ms ease !important;
-}
-
-@media (max-width: 991px) {
-  #awa-b2b-promo-bar .awa-b2b-promo-close,
-  button.awa-b2b-promo-close {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 44px !important;
-    min-height: 36px !important;
-  }
 }
 
 #awa-b2b-promo-bar .awa-b2b-promo-close:hover,
@@ -2194,17 +2189,18 @@ html body#html-body .page-wrapper #header .awa-b2b-promo-close:hover {
   html body#html-body .page-wrapper .awa-site-header
     .awa-header-minicart .minicart-wrapper .action.showcart {
     background: transparent !important;
-    border: 1px solid var(--awa-border, oklch(90% 0.008 20)) !important;
-    border-radius: var(--awa-radius-md, 8px) !important;
-    color: var(--awa-text, oklch(28% 0.02 20)) !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: var(--awa-primary, #b73337) !important;
     box-shadow: none !important;
   }
 
   html body#html-body .page-wrapper .awa-site-header
     .awa-header-minicart .minicart-wrapper .action.showcart:hover {
-    background: var(--awa-primary-subtle, color-mix(in oklch, var(--awa-primary) 7%, transparent)) !important;
-    border-color: color-mix(in oklch, var(--awa-primary) 24%, var(--awa-border)) !important;
-    color: var(--awa-primary, oklch(48% 0.14 20)) !important;
+    background: transparent !important;
+    opacity: 0.88 !important;
+    color: var(--awa-primary, #b73337) !important;
   }
 
   html body#html-body .page-wrapper .awa-site-header
@@ -2220,8 +2216,8 @@ html body#html-body .page-wrapper #header .awa-b2b-promo-close:hover {
     min-height: 20px !important;
     visibility: visible !important;
     opacity: 1 !important;
-    stroke: currentColor !important;
-    color: currentColor !important;
+    stroke: var(--awa-primary, #b73337) !important;
+    color: var(--awa-primary, #b73337) !important;
   }
 }
 
@@ -2398,24 +2394,29 @@ html body#html-body .page-wrapper .owl-wrapper-outer.autoHeight {
   transition: none !important;
 }
 
+/* H12 — footer claro (H10): colunas sem bloco vermelho; texto escuro legível.
+ * Antes: background primary nas .vela-content + títulos inverse → cards vermelhos
+ * sobre page_footer soft e contraste quebrado (título escuro / link claro misturados). */
 html body#html-body .page-wrapper .page-footer .page_footer,
 html body#html-body .page-wrapper .page-footer .page_footer .footer-container,
-html body#html-body .page-wrapper .page-footer .page_footer .vela-content.velaFooterMenu {
-  background: var(--awa-primary, oklch(48% 0.14 20)) !important;
+html body#html-body .page-wrapper .page-footer .page_footer .vela-content.velaFooterMenu,
+html body#html-body .page-wrapper .page-footer .page_footer .vela-content.awa-footer-atendimento {
+  background: transparent !important;
+  background-color: transparent !important;
   background-image: none !important;
 }
 
 html body#html-body .page-wrapper .page-footer .page_footer .velaFooterTitle,
 html body#html-body .page-wrapper .page-footer .page_footer h4.velaFooterTitle,
 html body#html-body .page-wrapper .page-footer .page_footer .footer-container .velaFooterTitle {
-  color: var(--awa-text-inverse, oklch(98% 0.004 20)) !important;
+  color: var(--awa-text, oklch(22% 0.012 27)) !important;
 }
 
 html body#html-body .page-wrapper .page-footer .page_footer .awa-footer-atendimento__store-name,
 html body#html-body .page-wrapper .page-footer .page_footer .awa-footer-atendimento__store-address,
 html body#html-body .page-wrapper .page-footer .page_footer p.awa-footer-atendimento__store-name,
 html body#html-body .page-wrapper .page-footer .page_footer p.awa-footer-atendimento__store-address {
-  color: var(--awa-text-inverse, oklch(98% 0.004 20)) !important;
+  color: var(--awa-text, oklch(22% 0.012 27)) !important;
 }
 
 /* §11 polish — account prompt auth transition (2026-05-28 refine) */
@@ -2486,6 +2487,24 @@ html body#html-body .page-wrapper .awa-site-header .awa-b2b-promo-bar__cta {
 
   html body#html-body .page-wrapper .awa-site-header .header-wrapper-sticky .awa-header-brand-cell .logo img {
     max-height: 48px !important;
+    width: auto !important;
+    object-fit: contain !important;
+  }
+
+  /* BUG3 2026-08-03: condensed/sticky — logo não pode vazar/cortar */
+  html body#html-body .page-wrapper .awa-site-header.awa-header-condensed .header-wrapper-sticky .awa-header-brand-cell,
+  html body#html-body .page-wrapper .header-wrapper-sticky.is-sticky .awa-header-brand-cell,
+  html body#html-body.awa-header-is-sticky .page-wrapper .awa-site-header .awa-header-brand-cell {
+    overflow: visible !important;
+    max-height: 40px !important;
+    height: 40px !important;
+  }
+  html body#html-body .page-wrapper .awa-site-header.awa-header-condensed .header-wrapper-sticky .awa-header-brand-cell .logo img,
+  html body#html-body .page-wrapper .header-wrapper-sticky.is-sticky .awa-header-brand-cell .logo img,
+  html body#html-body.awa-header-is-sticky .page-wrapper .awa-site-header .header-wrapper-sticky .awa-header-brand-cell .logo img,
+  html body#html-body.awa-header-is-sticky .page-wrapper .awa-site-header.awa-header-condensed .awa-header-brand-cell .logo img {
+    height: 34px !important;
+    max-height: 34px !important;
     width: auto !important;
     object-fit: contain !important;
   }
@@ -2581,14 +2600,15 @@ body.awa-header-is-sticky #awa-header-cls-placeholder {
 
 // ── §BUG-H-004  Minicart dropdown overflow em viewports pequenos ──────────────
 // Evidência: .block-minicart.empty right: 370px em 360px viewport (10px overflow)
-// Fix: limitar largura a 100vw e manter alinhado à direita
+// Fix: limitar largura e centralizar no viewport
 @media (max-width: 480px) {
     body .page-wrapper .minicart-wrapper .block-minicart,
     body .page-wrapper .minicart-wrapper .mage-dropdown-dialog.ui-dialog .block-minicart {
         max-width: calc(100vw - 8px) !important;
         width: calc(100vw - 8px) !important;
-        right: 0 !important;
-        left: auto !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
     }
 }
 

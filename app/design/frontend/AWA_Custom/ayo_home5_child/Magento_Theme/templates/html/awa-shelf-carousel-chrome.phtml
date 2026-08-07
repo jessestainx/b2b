@@ -12,7 +12,13 @@ $progressLabel = (string) __('Progresso do carrossel');
 $noscriptHint = (string) __('Deslize horizontalmente ou use as setas para ver mais produtos.');
 $controlsAttr = $viewportId !== '' ? ' aria-controls="' . $block->escapeHtmlAttr($viewportId) . '"' : '';
 ?>
-<div class="awa-owl-nav awa-carousel__nav awa-carousel-chrome-ssr" aria-hidden="false" data-awa-chrome="ssr"<?= /* @noEscape */ $controlsAttr ?>>
+<?php
+/**
+ * data-awa-nav-anchor="viewport" no SSR: evita CLS desktop (nav 32px em fluxo → absolute 0×0
+ * quando awa-scroll-carousel.js ancora no viewport). Estado final = overlay no carrossel.
+ */
+?>
+<div class="awa-owl-nav awa-carousel__nav awa-carousel-chrome-ssr" aria-hidden="false" data-awa-chrome="ssr" data-awa-nav-anchor="viewport"<?= /* @noEscape */ $controlsAttr ?>>
     <button type="button"
             class="awa-owl-nav__btn awa-carousel__arrow awa-carousel__arrow--prev awa-owl-nav__btn--prev"
             aria-label="<?= $block->escapeHtmlAttr($prevLabel) ?>"

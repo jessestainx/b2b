@@ -436,21 +436,32 @@ html body#html-body .page-wrapper :is(.page_footer, .page-footer) :is(
     padding: @awa-space-2 @awa-space-3 !important;
 }
 
-// Faixa comercial + WhatsApp na coluna atendimento
-html body#html-body .page-wrapper :is(.page_footer, .page-footer) :is(
-    .awa-footer-business-contact__action,
-    ul.awa-footer-atendimento__actions a
-) {
-    align-items: center !important;
-    box-sizing: border-box !important;
-    display: inline-flex !important;
-    min-height: @awa-footer-touch-target !important;
-    padding-block: @awa-space-2 !important;
-    padding-inline: @awa-space-2 !important;
-}
+    // Faixa comercial + WhatsApp: touch 44px só no mobile
+    html body#html-body .page-wrapper :is(.page_footer, .page-footer) :is(
+        .awa-footer-business-contact__action,
+        ul.awa-footer-atendimento__actions a
+    ) {
+        align-items: center !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        padding-block: 4px !important;
+        padding-inline: 0 !important;
+        min-height: 0 !important;
+    }
 
-// Links de coluna + pills de categorias expandível: mobile e superfícies touch
-@media (max-width: (@awa-breakpoint-md - 1px)), (pointer: coarse) {
+    @media (max-width: 767px) {
+        html body#html-body .page-wrapper :is(.page_footer, .page-footer) :is(
+            .awa-footer-business-contact__action,
+            ul.awa-footer-atendimento__actions a
+        ) {
+            min-height: @awa-footer-touch-target !important;
+            padding-block: @awa-space-2 !important;
+            padding-inline: @awa-space-2 !important;
+        }
+    }
+
+// Links de coluna + pills: touch targets só em viewport mobile (não em desktop com pointer:coarse)
+@media (max-width: 767px) {
     html body#html-body .page-wrapper :is(.page_footer, .page-footer) {
         ul.velaFooterLinks {
             display: flex;
@@ -471,6 +482,20 @@ html body#html-body .page-wrapper :is(.page_footer, .page-footer) :is(
         ul.awa-footer-categories-list a {
             padding-inline: @awa-space-3 !important;
         }
+    }
+}
+
+// Desktop: densidade compacta (vence residual de themes/critical)
+@media (min-width: 768px) {
+    html body#html-body .page-wrapper :is(.page_footer, .page-footer) ul.velaFooterLinks {
+        gap: 2px;
+    }
+
+    html body#html-body .page-wrapper :is(.page_footer, .page-footer) ul.velaFooterLinks a,
+    html body#html-body .page-wrapper :is(.page_footer, .page-footer) ul.awa-footer-categories-list a {
+        min-height: 0 !important;
+        padding-block: 4px !important;
+        padding-inline: 0 !important;
     }
 }
 

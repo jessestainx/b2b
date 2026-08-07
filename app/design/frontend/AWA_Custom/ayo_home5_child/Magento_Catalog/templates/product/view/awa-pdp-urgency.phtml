@@ -7,7 +7,7 @@
  * - Social proof (X pessoas vendo agora)
  * - Notify-me (quando voltar estoque)
  * - PIX com desconto destacado
- * - Parcelas sem juros destacadas
+ * - Boleto e prazo mediante análise
  *
  * @var \Magento\Catalog\Block\Product\View $block
  */
@@ -28,8 +28,6 @@ try {
 // Configs (em producao real, viriam de admin)
 $_lowStockThreshold = 5; // < 5 unidades = "ultimas unidades"
 $_pixDiscountPercent = 5; // 5% desconto no PIX
-$_parcelMax = 12; // ate 12x sem juros
-$_parcelInterestFree = 10; // primeiras 10x sem juros
 
 // Gerar numero "fake" mas determinístico de viewers (em prod seria do backend)
 $_viewersCount = 3 + ($_productId % 12); // 3-14 viewers
@@ -96,7 +94,6 @@ $_viewersCount = 3 + ($_productId % 12); // 3-14 viewers
     <?php if ($_isInStock && $_product->getFinalPrice() > 0): ?>
     <?php $_price = (float) $_product->getFinalPrice(); ?>
     <?php $_pixPrice = $_price * (1 - $_pixDiscountPercent/100); ?>
-    <?php $_parcela = $_price / $_parcelInterestFree; ?>
     <div class="awa-pdp-urgency__payment" aria-label="<?= $block->escapeHtmlAttr(__('Opcoes de pagamento')) ?>">
         <div class="awa-pdp-urgency__payment-row awa-pdp-urgency__payment-row--pix">
             <span class="awa-pdp-urgency__payment-badge">PIX</span>
@@ -108,9 +105,15 @@ $_viewersCount = 3 + ($_productId % 12); // 3-14 viewers
             </span>
         </div>
         <div class="awa-pdp-urgency__payment-row awa-pdp-urgency__payment-row--parcel">
-            <span class="awa-pdp-urgency__payment-badge">CARTAO</span>
+            <span class="awa-pdp-urgency__payment-badge">BOLETO</span>
             <span class="awa-pdp-urgency__payment-value">
-                <?= $block->escapeHtml(__($_parcelInterestFree . 'x de R$ ' . number_format($_parcela, 2, ',', '.') . ' sem juros')) ?>
+                <?= $block->escapeHtml(__('Boleto bancário e pagamento à vista')) ?>
+            </span>
+        </div>
+        <div class="awa-pdp-urgency__payment-row">
+            <span class="awa-pdp-urgency__payment-badge">PRAZO</span>
+            <span class="awa-pdp-urgency__payment-value">
+                <?= $block->escapeHtml(__('Mediante análise financeira — consulte um atendente')) ?>
             </span>
         </div>
     </div>

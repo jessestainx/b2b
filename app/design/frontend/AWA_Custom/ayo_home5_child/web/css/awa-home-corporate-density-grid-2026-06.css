@@ -205,7 +205,7 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.awa-section-header, .awa-shelf__header, .awa-category-carousel__header) {
   align-items: center !important;
   display: flex !important;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--awa-home-corp-space-2) var(--awa-home-corp-gap) !important;
   justify-content: space-between !important;
   margin: 0 0 var(--awa-home-corp-space-2) !important;
@@ -213,11 +213,13 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
   padding: var(--awa-home-corp-space-1) 0 var(--awa-home-corp-space-2) !important;
 }
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.awa-section-header__left, .awa-shelf__heading, .awa-category-carousel__heading) {
-  align-items: baseline;
+  align-items: flex-start;
   display: flex;
-  flex: 1 1 260px;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
+  flex-direction: column;
+  flex-wrap: nowrap;
   gap: var(--awa-home-corp-space-1) var(--awa-home-corp-space-2);
+  max-width: calc(100% - 8rem);
   min-width: 0;
 }
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper .content-top-home :is(.awa-section-header__title, .awa-shelf__title, .awa-category-carousel__header h2) {
@@ -835,12 +837,7 @@ body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5
   color: var(--awa-text-muted) !important;
   line-height: 1.42 !important;
 }
-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper :is(.page_footer, .page-footer) .awa-footer-categories-expand {
-  background: var(--awa-bg-surface) !important;
-  border: 1px solid var(--awa-border) !important;
-  border-radius: var(--awa-home-corp-card-radius) !important;
-  color: var(--awa-text) !important;
-}
+body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper :is(.page_footer, .page-footer) .awa-footer-categories-expand {background: #fff !important;background-color: #fff !important;border: 0 !important;border-radius: 0 !important;box-shadow: none !important;color: var(--awa-text) !important;}
 body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper :is(.page_footer, .page-footer) .awa-footer-categories-expand :is(a, button) {
   color: var(--awa-text) !important;
   opacity: 1 !important;

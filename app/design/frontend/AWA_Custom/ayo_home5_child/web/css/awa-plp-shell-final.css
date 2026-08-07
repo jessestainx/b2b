@@ -135,10 +135,19 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
     padding: var(--awa-plp-gap-sm) var(--awa-plp-gap-md) var(--awa-plp-gap-md) !important;
 }
 
-/* Hero + toolbar — ritmo compacto */
+/* Hero + toolbar — ritmo compacto
+   Gap vertical só no wrapper (.category-view-move). Hero sem margin-block-end:
+   margin:0 sozinho NÃO zera logical margin-block-end na cascata AWA. */
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
-.page-wrapper :is(.awa-category-hero, .category-view-move) {
-    margin-block-end: var(--awa-plp-gap-md) !important;
+.page-wrapper .category-view-move {
+    margin-block-end: var(--awa-plp-stack-gap, var(--awa-plp-gap-md)) !important;
+}
+
+html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .awa-category-hero {
+    margin: 0 !important;
+    margin-block: 0 !important;
+    margin-block-end: 0 !important;
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
@@ -173,8 +182,10 @@ html body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
 }
 
 html body#html-body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper .breadcrumbs {
-    margin-block-end: var(--awa-plp-gap-xs) !important;
-    padding: var(--awa-plp-gap-sm) var(--awa-plp-gap-md) !important;
+    margin: 0 !important;
+    margin-block: 0 !important;
+    padding-block: 0 !important;
+    padding-inline: 0 !important;
 }
 
 /* Terminal density pass — corporate PLP grid, cards and controls in 4-16px rhythm. */
@@ -186,7 +197,9 @@ html body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-i
 
 html body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
 .page-wrapper .page-main > .columns.layout.layout-2-col {
-    gap: var(--awa-plp-gap-md) !important;
+    column-gap: var(--awa-plp-gap-md) !important;
+    row-gap: 0 !important;
+    gap: 0 var(--awa-plp-gap-md) !important;
 }
 
 html body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
@@ -376,4 +389,110 @@ html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearc
     .page-wrapper .wrapper.grid.products-grid .item-product .product-item-link {
         font-size: 12px !important;
     }
+}
+
+/* 2026-07-16 — PLP visual bugs: hero H1 visível + busca de categoria com placeholder */
+/* 2026-08-02 — PLP compact stack: tokens AWA (--awa-stack-tight / space-3 = 12px) */
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper {
+    --awa-plp-stack-gap: var(--awa-stack-tight, var(--awa-space-3, 12px));
+}
+
+/* Breadcrumbs: sem margem própria — o gap crumbs→hero vem só de #maincontent padding-top */
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .nav-breadcrumbs {
+    margin: 0 !important;
+    margin-block: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .breadcrumbs {
+    margin: 0 !important;
+    margin-block: 0 !important;
+    padding-block: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .breadcrumbs .items {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.4 !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .category-view-move {
+    margin: 0 0 var(--awa-plp-stack-gap) !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .awa-category-hero {
+    min-height: 112px !important;
+    max-height: 140px !important;
+    height: auto !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    margin-block: 0 !important;
+    margin-block-end: 0 !important;
+    padding-block: var(--awa-space-3, 12px) !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .awa-category-hero h1.awa-category-hero__title {
+    overflow: visible !important;
+    white-space: normal !important;
+    line-height: 1.15 !important;
+    margin: 0 0 var(--awa-space-1, 4px) !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .mst_categorySearch {
+    position: relative !important;
+    margin: 0 0 var(--awa-plp-stack-gap) !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .mst_categorySearch #mst_categorySearch {
+    width: 100% !important;
+    /* Beat awa-layout-bundle html body input { height:48px !important }. */
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    padding: 0 44px 0 14px !important;
+    border: 1px solid var(--awa-border) !important;
+    border-radius: var(--awa-radius-md, 8px) !important;
+    background: var(--awa-bg) !important;
+    color: var(--awa-text) !important;
+    font-size: 14px !important;
+    line-height: 44px !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .mst_categorySearch #mst_categorySearch::placeholder {
+    color: var(--awa-text-secondary) !important;
+    opacity: 1 !important;
+}
+
+html body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+.page-wrapper .awa-plp-b2b-gate-banner {
+    margin: 0 0 var(--awa-plp-stack-gap) !important;
+    padding: var(--awa-space-3, 12px) !important;
+    min-height: 0 !important;
+    height: auto !important;
+    box-sizing: border-box !important;
 }

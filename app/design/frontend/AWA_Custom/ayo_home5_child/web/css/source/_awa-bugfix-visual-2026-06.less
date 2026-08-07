@@ -69,16 +69,16 @@ html body#html-body .page-wrapper
 // =============================================================================
 
 @{awa-bfv-pdp} .product.media
-    .gallery-placeholder:has(.fotorama-item) > .gallery-placeholder__image,
+    .gallery-placeholder:has(.fotorama__img) > .gallery-placeholder__image,
 @{awa-bfv-pdp} .product.media
-    .gallery-placeholder:has(.fotorama-item) > img.gallery-placeholder__image {
+    .gallery-placeholder:has(.fotorama__img) > img.gallery-placeholder__image {
     display: none !important;
     height: 0 !important;
     overflow: hidden !important;
 }
 
 // Colapsar o grid para uma única linha quando fotorama presente
-@{awa-bfv-pdp} .product.media .gallery-placeholder:has(.fotorama-item) {
+@{awa-bfv-pdp} .product.media .gallery-placeholder:has(.fotorama__img) {
     display: block !important;
     grid-template-rows: none !important;
 }
@@ -301,19 +301,19 @@ html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_h
         margin-bottom: 0 !important;
     }
 
-    // Na home o <main> é vazio (conteúdo real vive em .content-top-home,
-    // irmão anterior do main). Blocos defer/debug inflam o main (~194px).
-    // Fix: caixa fixa 48px + overflow hidden — único espaçador antes do footer.
+    // BUG-10 UPDATE 2026-08-05: content-top-home agora vive DENTRO de #maincontent.
+    // A caixa 48px + overflow:hidden colapsava o landmark e puxava o footer/newsletter
+    // por cima do hero. Altura volta a auto (styles-l carrega depois do refine).
     html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
         .page-wrapper main.page-main#maincontent,
     html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
         .page-wrapper .page-main#maincontent {
         padding-block: 0 !important;
         margin-block: 0 !important;
-        min-height: 48px !important;
-        height: 48px !important;
-        max-height: 48px !important;
-        overflow: hidden !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
         box-sizing: border-box !important;
     }
 
@@ -1351,9 +1351,10 @@ body.b2b-reorder-history .b2b-reorder-page .reorder-items {
     }
 
     body:is(.account, [class*='b2b-']) .sidebar-main .nav.item {
-        flex: 0 0 100% !important;
+        flex: 0 0 auto !important;
         width: 100% !important;
         max-width: 100% !important;
+        height: auto !important;
     }
 }
 
@@ -1370,14 +1371,16 @@ body.b2b-reorder-history .b2b-reorder-page .reorder-items {
 body.b2b-account-dashboard .minicart-wrapper .block-minicart,
 body.b2b-account-shell .minicart-wrapper .block-minicart {
     position: fixed !important;
-    top: 64px !important;
+    top: 0 !important;
     right: 0 !important;
     left: auto !important;
-    width: 340px !important;
-    max-height: calc(100vh - 68px) !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: min(380px, 100vw) !important;
+    max-height: 100dvh !important;
     overflow-y: auto !important;
-    z-index: 9999 !important;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12) !important;
+    z-index: 100130 !important;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18) !important;
 }
 
 // =============================================================================
@@ -1475,7 +1478,7 @@ body:is(.account, [class*='b2b-']) .sidebar-main .block-collapsible-nav {
     box-sizing: border-box !important;
 }
 
-// BUG-10 terminal — vence impeccable-refine min-height:0 em #maincontent (async body-end)
+// BUG-10 terminal UPDATE 2026-08-05 — content-top-home dentro do main: auto height
 @media (min-width: 768px) {
     html body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
         .page-wrapper main.page-main#maincontent,
@@ -1483,10 +1486,10 @@ body:is(.account, [class*='b2b-']) .sidebar-main .block-collapsible-nav {
         .page-wrapper .page-main#maincontent {
         padding-block: 0 !important;
         margin-block: 0 !important;
-        min-height: 48px !important;
-        height: 48px !important;
-        max-height: 48px !important;
-        overflow: hidden !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
         box-sizing: border-box !important;
     }
 }

@@ -4,243 +4,19 @@
  * @module awa-menu-controller
  */
 define([
-    'domReady!',
-    'js/vendor/floating-ui.amd'
-], function (domReady, FloatingUIDOM) {
+    'domReady!'
+], function (domReady) {
     'use strict';
+
+    /* UMD já carregado pelo bootstrap (script defer) — evita AMD path quebrado. */
+    var FloatingUIDOM = window.FloatingUIDOM || null;
 
     var DESKTOP_MIN = 992;
     var PORTAL_CLASS = 'awa-vmf-portal';
     var ACTIVE_CLASS = 'awa-vmf-active';
     var DOC_BOOTED = false;
-    var RUNTIME_STYLE_FIX_ID = 'awa-vmenu-runtime-fixes';
+    var RUNTIME_STYLE_FIX_ID = 'awa-vmenu-runtime-fixes-v2';
     var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-    var AWA_DEBUG_ENDPOINT = 'http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3';
-    var AWA_DEBUG_ENDPOINT_IPV4 = 'http://127.0.0.1:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3';
-    var AWA_DEBUG_SAME_ORIGIN_INGEST = '/b2b/account/login/';
-    var AWA_DEBUG_SESSION = 'ca59a1';
-
-    function emitServerBeacon(payload) {
-        try {
-            var dataText = '';
-            try {
-                dataText = encodeURIComponent(
-                    JSON.stringify(payload.data || {}).slice(0, 240)
-                );
-            } catch (e) {}
-            var qs = '?awa_dbg=1'
-                + '&sid=' + encodeURIComponent(AWA_DEBUG_SESSION)
-                + '&run=' + encodeURIComponent(payload.runId || '')
-                + '&hyp=' + encodeURIComponent(payload.hypothesisId || '')
-                + '&loc=' + encodeURIComponent(payload.location || '')
-                + '&msg=' + encodeURIComponent(payload.message || '')
-                + '&ts=' + encodeURIComponent(String(payload.timestamp || Date.now()))
-                + '&data=' + dataText;
-            var src = AWA_DEBUG_SAME_ORIGIN_INGEST + qs + '&transport=img';
-            var img = new Image();
-            img.src = src;
-            if (navigator && typeof navigator.sendBeacon === 'function') {
-                try {
-                    navigator.sendBeacon(
-                        AWA_DEBUG_SAME_ORIGIN_INGEST + qs + '&transport=sendbeacon',
-                        JSON.stringify({
-                            sessionId: payload.sessionId || '',
-                            runId: payload.runId || '',
-                            hypothesisId: payload.hypothesisId || '',
-                            location: payload.location || '',
-                            message: payload.message || '',
-                            timestamp: payload.timestamp || Date.now()
-                        })
-                    );
-                } catch (err) {}
-            }
-        } catch (e) {}
-    }
-
-    function sendDebugLog(runId, hypothesisId, location, message, data) {
-        var payload = {
-            sessionId: AWA_DEBUG_SESSION,
-            runId: runId,
-            hypothesisId: hypothesisId,
-            location: location,
-            message: message,
-            data: data || {},
-            timestamp: Date.now()
-        };
-        emitServerBeacon(payload);
-        fetch(AWA_DEBUG_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Debug-Session-Id': AWA_DEBUG_SESSION
-            },
-            body: JSON.stringify(payload)
-        }).catch(function () {});
-        fetch(AWA_DEBUG_ENDPOINT_IPV4, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Debug-Session-Id': AWA_DEBUG_SESSION
-            },
-            body: JSON.stringify(payload)
-        }).catch(function () {});
-    }
-    // #region agent log
-    sendDebugLog(
-        'pre-fix',
-        'H0',
-        'awa-menu-controller.js:init',
-        'Module initialized',
-        {
-            href: window.location.href,
-            userAgent: navigator.userAgent,
-            fetchLooksNative: String(window.fetch).indexOf('[native code]') !== -1
-        }
-    );
-    // #endregion
-    // #region agent log
-    sendDebugLog(
-        'pre-fix',
-        'H14',
-        'awa-menu-controller.js:init:selectors',
-        'Menu selector inventory on current route',
-        {
-            href: window.location.href,
-            triggerCount: document.querySelectorAll('[data-role="awa-vertical-menu-trigger"]').length,
-            panelCount: document.querySelectorAll('[data-role="awa-vertical-menu-panel"]').length,
-            navCount: document.querySelectorAll('[data-role="awa-vertical-menu"], .navigation.verticalmenu.side-verticalmenu').length
-        }
-    );
-    // #endregion
-    // #region agent log
-    (function installHomeMenuDeliveryProbe() {
-        var panel = document.querySelector('[data-role="awa-vertical-menu-panel"]');
-        var fold = document.querySelector('.content-top-home > .top-home-content--above-fold');
-        var benefitsInner = document.querySelector('.awa-hero-b2b-cta__inner.container');
-        var scriptResource = performance.getEntriesByType('resource').filter(function (entry) {
-            return entry.name.indexOf('/js/awa-menu-controller.js') !== -1;
-        }).pop();
-        sendDebugLog(
-            'home-menu-client-delivery',
-            'H112',
-            'awa-menu-controller.js:init:delivery',
-            'Menu controller delivery and initial viewport identity',
-            {
-                controllerRevision: '20260711-home-column-v1',
-                viewportWidth: window.innerWidth,
-                clientWidth: document.documentElement.clientWidth,
-                devicePixelRatio: window.devicePixelRatio,
-                desktopMatch: isDesktop(),
-                scriptUrl: scriptResource ? scriptResource.name : '',
-                panelState: panel ? panel.getAttribute('data-awa-menu-state') || '' : '',
-                panelDisplay: panel ? window.getComputedStyle(panel).display : '',
-                panelClass: panel ? panel.className : ''
-            }
-        );
-
-        if (!window.MutationObserver || !panel || !fold || !benefitsInner) {
-            return;
-        }
-        var mutationCount = 0;
-        var observer = new MutationObserver(function (records) {
-            if (mutationCount >= 6) {
-                observer.disconnect();
-                return;
-            }
-            mutationCount += 1;
-            window.requestAnimationFrame(function () {
-                var panelRect = panel.getBoundingClientRect();
-                var hero = document.querySelector('.awa-hero-swiper');
-                var heroRect = hero ? hero.getBoundingClientRect() : null;
-                sendDebugLog(
-                    'home-menu-late-mutation',
-                    'H113-H115',
-                    'awa-menu-controller.js:mutation:home-composition',
-                    'Late mutation affecting menu composition',
-                    {
-                        count: mutationCount,
-                        changed: records.map(function (record) {
-                            return {
-                                target: record.target === panel
-                                    ? 'panel'
-                                    : (record.target === fold ? 'fold' : 'benefits'),
-                                attribute: record.attributeName || ''
-                            };
-                        }).slice(0, 6),
-                        viewportWidth: window.innerWidth,
-                        desktopMatch: isDesktop(),
-                        bodyActive: document.body.classList.contains('awa-home-menu-column-active'),
-                        panelState: panel.getAttribute('data-awa-menu-state') || '',
-                        panelDisplay: window.getComputedStyle(panel).display,
-                        foldInline: fold.getAttribute('style') || '',
-                        benefitsInline: benefitsInner.getAttribute('style') || '',
-                        panelRight: Math.round(panelRect.right),
-                        heroLeft: heroRect ? Math.round(heroRect.left) : null,
-                        overlap: heroRect ? Math.max(0, Math.round(panelRect.right - heroRect.left)) : null
-                    }
-                );
-            });
-        });
-        observer.observe(panel, {
-            attributes: true,
-            attributeFilter: ['class', 'style', 'aria-hidden', 'data-awa-menu-state']
-        });
-        observer.observe(fold, {
-            attributes: true,
-            attributeFilter: ['class', 'style']
-        });
-        observer.observe(benefitsInner, {
-            attributes: true,
-            attributeFilter: ['class', 'style']
-        });
-    }());
-    // #endregion
-    if (!window.__AWA_MENU_DEBUG_ERROR_HOOKED) {
-        window.__AWA_MENU_DEBUG_ERROR_HOOKED = true;
-        window.addEventListener('error', function (event) {
-            if (window.__AWA_MENU_DEBUG_ERROR_SENT) {
-                return;
-            }
-            window.__AWA_MENU_DEBUG_ERROR_SENT = true;
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H20',
-                'awa-menu-controller.js:window:error',
-                'First uncaught window error observed',
-                {
-                    href: window.location.href,
-                    message: event && event.message ? String(event.message) : '',
-                    source: event && event.filename ? String(event.filename) : '',
-                    line: event && event.lineno ? Number(event.lineno) : 0,
-                    col: event && event.colno ? Number(event.colno) : 0
-                }
-            );
-            // #endregion
-        }, true);
-        window.addEventListener('unhandledrejection', function (event) {
-            if (window.__AWA_MENU_DEBUG_REJECTION_SENT) {
-                return;
-            }
-            window.__AWA_MENU_DEBUG_REJECTION_SENT = true;
-            var reasonText = '';
-            try {
-                reasonText = event && event.reason ? String(event.reason) : '';
-            } catch (err) {}
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H21',
-                'awa-menu-controller.js:window:unhandledrejection',
-                'First unhandled promise rejection observed',
-                {
-                    href: window.location.href,
-                    reason: reasonText.slice(0, 180)
-                }
-            );
-            // #endregion
-        }, true);
-    }
 
     function isDesktop() {
         return window.matchMedia
@@ -307,48 +83,14 @@ define([
                 + '[data-role="awa-vertical-menu-trigger"]'
             )))
             : [];
-        var shouldReserveMenuColumn = open && isDesktop();
 
-        if (!shouldReserveMenuColumn) {
-            [fold, banner, benefitsInner, categorySection]
-                .concat(categoryNodes)
-                .forEach(restoreHomeMenuStyles);
-            document.body.classList.remove('awa-home-menu-column-active');
-            return;
-        }
-
-        applyHomeMenuStyle(fold, {
-            'padding-inline-start': '336px',
-            'padding-inline-end': '16px'
-        });
-        applyHomeMenuStyle(banner, {
-            'width': '100%',
-            'max-width': '100%',
-            'margin-inline': '0'
-        });
-        applyHomeMenuStyle(benefitsInner, {
-            'padding-inline-start': '320px',
-            'padding-inline-end': '0'
-        });
-        applyHomeMenuStyle(categorySection, {
-            'padding-block-start': '48px'
-        });
-        if (window.innerWidth >= 1024) {
-            categoryNodes.forEach(function (element) {
-                applyHomeMenuStyle(element, {
-                    'width': '304px',
-                    'min-width': '304px',
-                    'max-width': '304px'
-                });
-            });
-            applyHomeMenuStyle(categoryRoot, {
-                'flex': '0 0 304px'
-            });
-        } else {
-            categoryNodes.forEach(restoreHomeMenuStyles);
-        }
-        document.body.classList.add('awa-home-menu-column-active');
+        /* CLS: never push above-fold when Departamentos opens (panel overlays). */
+        [fold, banner, benefitsInner, categorySection]
+            .concat(categoryNodes)
+            .forEach(restoreHomeMenuStyles);
+        document.body.classList.remove('awa-home-menu-column-active');
     }
+
 
 
     function rafThrottle(fn) {
@@ -544,24 +286,72 @@ define([
             return true;
         }
 
-        return parseFloat(window.getComputedStyle(node).fontSize) < 12;
+        var cs = window.getComputedStyle(node);
+        var size = parseFloat(cs.fontSize);
+        var weight = parseInt(cs.fontWeight, 10) || 400;
+        /* DS vertical menu: alvo 14/600 — corrige 13–13.5/500 legado */
+        return size < 14 || weight < 600;
     }
+
+    function stripDeptTriggerInlineTypography(trigger) {
+        if (!trigger) {
+            return;
+        }
+
+        ['font-size', 'font-weight', 'line-height'].forEach(function (prop) {
+            trigger.style.removeProperty(prop);
+        });
+
+        var triggerText = trigger.querySelector('.awa-vmenu-trigger-text');
+        if (!triggerText) {
+            return;
+        }
+
+        ['font-size', 'font-weight', 'line-height'].forEach(function (prop) {
+            triggerText.style.removeProperty(prop);
+        });
+    }
+
+    function guardDeptTriggerInlineTypography(trigger) {
+        if (!trigger || trigger.dataset.awaTypographyStripObserved === '1') {
+            stripDeptTriggerInlineTypography(trigger);
+            return;
+        }
+
+        trigger.dataset.awaTypographyStripObserved = '1';
+        stripDeptTriggerInlineTypography(trigger);
+
+        var observer = new MutationObserver(function () {
+            stripDeptTriggerInlineTypography(trigger);
+        });
+        observer.observe(trigger, { attributes: true, attributeFilter: ['style'] });
+
+        var triggerText = trigger.querySelector('.awa-vmenu-trigger-text');
+        if (triggerText) {
+            observer.observe(triggerText, { attributes: true, attributeFilter: ['style'] });
+        }
+    }
+
+    window.__awaGuardDeptTriggerTypography = guardDeptTriggerInlineTypography;
 
     function applyMenuLinkTypography(root, enable) {
         if (!root) {
             return;
         }
 
+        /* L1: NÃO setar color inline no <a> — isso vencia o CSS de :hover/.awa-vmf-active
+         * e deixava Bauletos com label vermelho + link escuro (evidência CDP). */
         var linkProps = ['font-size', 'font-weight', 'line-height', 'color'];
         root.querySelectorAll('a.level-top, .navigation.custommenu li.level0 > a, .top-menu a.level-top').forEach(function (anchor) {
             if (enable) {
                 if (!needsTypographyFix(anchor)) {
                     return;
                 }
-                anchor.style.setProperty('font-size', '13px', 'important');
-                anchor.style.setProperty('font-weight', '500', 'important');
-                anchor.style.setProperty('line-height', '1.35', 'important');
-                anchor.style.setProperty('color', 'var(--awa-text-primary, #333333)', 'important');
+                /* DS vertical menu: 14/600 — não reverter para 13/500 legado */
+                anchor.style.setProperty('font-size', '14px', 'important');
+                anchor.style.setProperty('font-weight', '600', 'important');
+                anchor.style.setProperty('line-height', '1.25', 'important');
+                anchor.style.removeProperty('color');
             } else {
                 linkProps.forEach(function (prop) {
                     anchor.style.removeProperty(prop);
@@ -571,11 +361,11 @@ define([
 
         root.querySelectorAll('.navigation__label').forEach(function (label) {
             if (enable) {
-                if (!needsTypographyFix(label)) {
-                    return;
-                }
-                label.style.setProperty('font-size', '13px', 'important');
-                label.style.setProperty('font-weight', '500', 'important');
+                label.style.setProperty('font-size', '14px', 'important');
+                label.style.setProperty('font-weight', '600', 'important');
+                label.style.setProperty('line-height', '1.25', 'important');
+                /* Label sempre espelha a cor do link (hover/active/default). */
+                label.style.setProperty('color', 'inherit', 'important');
             } else {
                 linkProps.forEach(function (prop) {
                     label.style.removeProperty(prop);
@@ -585,14 +375,30 @@ define([
     }
 
     function ensureRuntimeMenuStyles() {
+        /* Remove injector legado (cache antigo / bundle stale) que competia com v2+. */
+        var legacyStyle = document.getElementById('awa-vmenu-runtime-fixes');
+        if (legacyStyle && legacyStyle.parentNode) {
+            legacyStyle.parentNode.removeChild(legacyStyle);
+        }
+        /* Evita reescrever ~4KB de CSS a cada hover/attach; troca se marker antigo. */
         var existing = document.getElementById(RUNTIME_STYLE_FIX_ID);
-        if (existing) {
-            document.head.appendChild(existing);
+        if (existing && existing.getAttribute('data-awa-menu-css') === 'opt-v4') {
             return;
         }
-
+        if (existing && existing.parentNode) {
+            existing.parentNode.removeChild(existing);
+        }
         var styleEl = document.createElement('style');
         styleEl.id = RUNTIME_STYLE_FIX_ID;
+        styleEl.setAttribute('data-awa-menu-css', 'opt-v4');
+        /* L1/especificidade: impeccable-refine usa html body#html-body… no nav-bar e
+         * vencía color:primary do runtime (bg active aplicava; texto ficava --awa-text).
+         * Martelo #html-body×5 alinha ao padrão align-grid do tema. */
+        var vmenuActiveLink =
+            'html body#html-body#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header '
+            + '.navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown '
+            + '> li.ui-menu-item.level0:is(:hover, .awa-vmf-active, .vmm-active, :focus-within) '
+            + '> a.level-top.navigation__link';
         styleEl.textContent = [
             '#html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 {',
             '  box-sizing: border-box !important;',
@@ -602,15 +408,40 @@ define([
             '  margin: 0 !important;',
             '  padding: 0 !important;',
             '}',
+            '#html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown {',
+            '  gap: var(--awa-space-1, 4px) !important;',
+            '  padding: var(--awa-space-2, 8px) !important;',
+            '  background: var(--awa-bg-surface, #fff) !important;',
+            '  border: 1px solid var(--awa-border, #e5e7eb) !important;',
+            '  border-radius: 0 0 var(--awa-radius-md, 8px) var(--awa-radius-md, 8px) !important;',
+            '  box-shadow: 0 8px 24px color-mix(in srgb, CanvasText 10%, transparent) !important;',
+            '}',
             '#html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link,',
             'body .page-wrapper .navigation.verticalmenu .togge-menu > li.ui-menu-item.level0 > a.level-top.navigation__link {',
             '  box-sizing: border-box !important;',
             '  width: 100% !important;',
             '  height: 100% !important;',
             '  min-height: var(--awa-vmenu-item-h, 48px) !important;',
-            '  line-height: 1.3 !important;',
+            '  padding: 0 var(--awa-space-3, 12px) !important;',
+            '  border-radius: 8px !important;',
+            '  line-height: 1.25 !important;',
+            '  font-size: 14px !important;',
+            '  font-weight: 600 !important;',
             '  display: flex !important;',
             '  align-items: center !important;',
+            '  gap: var(--awa-space-3, 12px) !important;',
+            '  color: var(--awa-text, var(--awa-dark, #333333)) !important;',
+            '}',
+            'html body#html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown > li.ui-menu-item.level0 > a.level-top.navigation__link .navigation__label {',
+            '  color: inherit !important;',
+            '}',
+            vmenuActiveLink + ' {',
+            '  background: color-mix(in srgb, var(--awa-primary, #b73337) 8%, transparent) !important;',
+            '  color: var(--awa-primary, #b73337) !important;',
+            '}',
+            vmenuActiveLink + ' .navigation__label {',
+            '  color: inherit !important;',
+            '  background: transparent !important;',
             '}',
             '#html-body .page-wrapper .navigation.verticalmenu.side-verticalmenu > ul.togge-menu.list-category-dropdown > li.awa-vem-extra-li {',
             '  box-sizing: border-box !important;',
@@ -647,8 +478,17 @@ define([
             '  outline-offset: 1px !important;',
             '  border-radius: 6px !important;',
             '}',
-            'body .awa-vmf-portal .navigation__inner-item--level1.subcategory-second-level > a {',
-            '  color: var(--awa-text-primary, #333333) !important;',
+            /* --awa-text-primary está invertido (#f1f5f9) em algumas páginas; portal é fundo claro. */
+            'body .awa-vmf-portal {',
+            '  color: var(--awa-text, var(--awa-dark, #333333)) !important;',
+            '  --awa-text-primary: var(--awa-text, var(--awa-dark, #333333));',
+            '  --awa-hc-text-2: var(--awa-text, var(--awa-dark, #333333));',
+            '}',
+            'body .awa-vmf-portal :is(.navigation__inner-item--level1.subcategory-second-level > a, a.title-cat-mega-menu, .subchildmenu li a, .navigation__inner-item--all a) {',
+            '  color: var(--awa-text, var(--awa-dark, #333333)) !important;',
+            '}',
+            'body .awa-vmf-portal :is(.navigation__inner-item--level1.subcategory-second-level > a, a.title-cat-mega-menu, .subchildmenu li a):hover {',
+            '  color: var(--awa-primary, #b73337) !important;',
             '}',
             '@media (min-width: 992px) {',
             '  #html-body [data-role="awa-vertical-menu-panel"] > li.ui-menu-item.level0 > .submenu:not([data-awa-vmf-portaled="1"]),',
@@ -671,7 +511,8 @@ define([
             '  }',
             '}'
         ].join('\n');
-        document.head.appendChild(styleEl);
+        /* Final do documento: vence sheets injetados depois do <head> com mesma origem. */
+        (document.documentElement || document.head).appendChild(styleEl);
     }
 
     function applyTopLinkRuntimeFixes(root) {
@@ -679,7 +520,11 @@ define([
             return;
         }
         root.style.setProperty('--awa-vmenu-item-h', '48px');
-        root.querySelectorAll(':scope > li.ui-menu-item.level0').forEach(function (item) {
+        var items = root.querySelectorAll('li.ui-menu-item.level0');
+        items.forEach(function (item) {
+            if (item.parentElement !== root) {
+                return;
+            }
             item.style.setProperty('box-sizing', 'border-box', 'important');
             item.style.setProperty('width', '100%', 'important');
             item.style.setProperty('height', 'var(--awa-vmenu-item-h)', 'important');
@@ -687,22 +532,38 @@ define([
             item.style.setProperty('margin', '0', 'important');
             item.style.setProperty('padding', '0', 'important');
         });
-        root.querySelectorAll(':scope > li.ui-menu-item.level0 > a.level-top.navigation__link').forEach(function (link) {
+        root.querySelectorAll('li.ui-menu-item.level0 > a.level-top').forEach(function (link) {
+            if (link.parentElement && link.parentElement.parentElement !== root) {
+                return;
+            }
             link.classList.add('awa-vmenu-link-runtime');
             link.style.setProperty('box-sizing', 'border-box', 'important');
             link.style.setProperty('width', '100%', 'important');
             link.style.setProperty('height', '100%', 'important');
             link.style.setProperty('min-height', 'var(--awa-vmenu-item-h, 48px)', 'important');
-            link.style.setProperty('line-height', '1.3', 'important');
+            link.style.setProperty('padding', '0 12px', 'important');
+            link.style.setProperty('border-radius', '8px', 'important');
+            link.style.setProperty('line-height', '1.25', 'important');
+            link.style.setProperty('font-size', '14px', 'important');
+            link.style.setProperty('font-weight', '600', 'important');
+            link.style.setProperty('display', 'flex', 'important');
+            link.style.setProperty('align-items', 'center', 'important');
+            link.style.setProperty('gap', '12px', 'important');
         });
-        root.querySelectorAll(':scope > li.awa-vem-extra-li').forEach(function (item) {
+        root.querySelectorAll(':scope > li.awa-vem-extra-li, li.awa-vem-extra-li').forEach(function (item) {
+            if (item.parentElement !== root) {
+                return;
+            }
             item.style.setProperty('box-sizing', 'border-box', 'important');
             item.style.setProperty('width', '100%', 'important');
             item.style.setProperty('max-width', '100%', 'important');
             item.style.setProperty('overflow', 'hidden', 'important');
         });
         if (isDesktop()) {
-            root.querySelectorAll(':scope > li.ui-menu-item.level0 > .open-children-toggle.navigation__toggle').forEach(function (btn) {
+            root.querySelectorAll('li.ui-menu-item.level0 > .open-children-toggle.navigation__toggle').forEach(function (btn) {
+                if (btn.parentElement && btn.parentElement.parentElement !== root) {
+                    return;
+                }
                 btn.style.setProperty('display', 'none', 'important');
                 btn.style.setProperty('opacity', '0', 'important');
                 btn.style.setProperty('pointer-events', 'none', 'important');
@@ -715,33 +576,6 @@ define([
                 btn.style.setProperty('outline', 'none', 'important');
             });
         }
-        window.requestAnimationFrame(function () {
-            var firstItem = root.querySelector(':scope > li.ui-menu-item.level0:not(.orther-link)');
-            var firstLink = firstItem
-                ? firstItem.querySelector(':scope > a.level-top.navigation__link')
-                : null;
-            var itemRect = firstItem ? firstItem.getBoundingClientRect() : null;
-            var linkRect = firstLink ? firstLink.getBoundingClientRect() : null;
-            // #region agent log
-            sendDebugLog(
-                'post-level0-box-fix',
-                'H68-H71',
-                'awa-menu-controller.js:applyTopLinkRuntimeFixes:box-model',
-                'Level-zero box model and panel overflow after normalization',
-                {
-                    panelClientWidth: root.clientWidth,
-                    panelScrollWidth: root.scrollWidth,
-                    panelClientHeight: root.clientHeight,
-                    panelScrollHeight: root.scrollHeight,
-                    itemHeight: itemRect ? Math.round(itemRect.height) : null,
-                    itemWidth: itemRect ? Math.round(itemRect.width) : null,
-                    itemMarginRight: firstItem ? window.getComputedStyle(firstItem).marginRight : '',
-                    itemPadding: firstItem ? window.getComputedStyle(firstItem).padding : '',
-                    linkHeight: linkRect ? Math.round(linkRect.height) : null
-                }
-            );
-            // #endregion
-        });
     }
 
     /* ── FlyoutPortal ─────────────────────────────────────────────────── */
@@ -749,29 +583,9 @@ define([
         var self = this;
         this.root = root;
         this.portals = [];
-        this._debugEnterCount = 0;
-        this._debugAttachSkipCount = 0;
         this._onEnter = function (e) {
             var li = e.target.closest('li.level0.parent, li.level0.navigation__item--parent');
             if (li && self.root.contains(li)) {
-                if (self._debugEnterCount < 3) {
-                    self._debugEnterCount += 1;
-                    // #region agent log
-                    sendDebugLog(
-                        'pre-fix',
-                        'H23',
-                        'awa-menu-controller.js:FlyoutPortal.onEnter',
-                        'Flyout hover enter matched a parent level0 item',
-                        {
-                            href: window.location.href,
-                            menuId: li.getAttribute('data-menu') || '',
-                            liClassName: li.className,
-                            submenuFound: !!self.findSubmenu(li),
-                            rootClassName: self.root ? self.root.className : ''
-                        }
-                    );
-                    // #endregion
-                }
                 self.attach(li);
             }
         };
@@ -781,28 +595,6 @@ define([
                 : null;
             if (!li || !self.root.contains(li)) {
                 return;
-            }
-            if (self._debugEnterCount < 6) {
-                self._debugEnterCount += 1;
-                var submenu = self.findSubmenu(li);
-                var submenuStyle = submenu ? window.getComputedStyle(submenu) : null;
-                // #region agent log
-                sendDebugLog(
-                    'pre-fix',
-                    'H34',
-                    'awa-menu-controller.js:FlyoutPortal.onOver',
-                    'Mouseover fallback reached parent level0 candidate',
-                    {
-                        href: window.location.href,
-                        menuId: li.getAttribute('data-menu') || '',
-                        liClassName: li.className,
-                        submenuFound: !!submenu,
-                        submenuDisplay: submenuStyle ? submenuStyle.display : '',
-                        submenuPosition: submenuStyle ? submenuStyle.position : '',
-                        activePortalCount: document.querySelectorAll('.' + PORTAL_CLASS).length
-                    }
-                );
-                // #endregion
             }
             self.attach(li);
         };
@@ -839,19 +631,6 @@ define([
 
     FlyoutPortal.prototype.mount = function () {
         if (!this.root || this.root.dataset.awaFlyoutMounted === '1') {
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H24',
-                'awa-menu-controller.js:FlyoutPortal.mount:skip',
-                'Flyout mount skipped due missing/already mounted root',
-                {
-                    href: window.location.href,
-                    hasRoot: !!this.root,
-                    mountedFlag: this.root ? (this.root.dataset.awaFlyoutMounted || '') : ''
-                }
-            );
-            // #endregion
             return;
         }
         this.root.dataset.awaFlyoutMounted = '1';
@@ -860,20 +639,6 @@ define([
         this.root.addEventListener('mouseleave', this._onLeave, true);
         window.addEventListener('scroll', this._reposition, { passive: true });
         window.addEventListener('resize', this._reposition, { passive: true });
-        // #region agent log
-        sendDebugLog(
-            'pre-fix',
-            'H24',
-            'awa-menu-controller.js:FlyoutPortal.mount:ready',
-            'Flyout mount completed and listeners attached',
-            {
-                href: window.location.href,
-                rootClassName: this.root.className || '',
-                rootTagName: this.root.tagName || '',
-                parentCount: this.root.querySelectorAll('li.level0.parent, li.level0.navigation__item--parent').length
-            }
-        );
-        // #endregion
     };
 
     FlyoutPortal.prototype.findSubmenu = function (li) {
@@ -886,9 +651,26 @@ define([
         }
 
         ensureRuntimeMenuStyles();
-        portal.style.setProperty('width', 'min(560px, calc(100vw - 32px))', 'important');
-        portal.style.setProperty('min-width', 'min(520px, calc(100vw - 32px))', 'important');
-        portal.style.setProperty('max-width', '560px', 'important');
+
+        /* Reentrada: só re-aplica estilos de imagem (CMS lazy). */
+        if (portal.dataset.awaLayoutFixed === '1') {
+            portal.querySelectorAll('.navigation__inner-item--level1.imagem.img-subcategory img, .navigation__inner-item--level1.imagem img').forEach(function (image) {
+                image.style.setProperty('display', 'block', 'important');
+                image.style.setProperty('width', '100%', 'important');
+                image.style.setProperty('height', 'auto', 'important');
+                image.style.setProperty('max-height', '280px', 'important');
+                image.style.setProperty('object-fit', 'contain', 'important');
+                image.style.setProperty('object-position', 'top center', 'important');
+            });
+            return;
+        }
+
+        /* DS polish: flyout denso B2B (antes 560px gerava whitespace em categorias curtas) */
+        portal.style.setProperty('width', 'min(380px, calc(100vw - 32px))', 'important');
+        portal.style.setProperty('min-width', 'min(280px, calc(100vw - 32px))', 'important');
+        portal.style.setProperty('max-width', '380px', 'important');
+        portal.style.setProperty('padding', '16px', 'important');
+        portal.style.setProperty('border-radius', '8px', 'important');
         portal.style.setProperty('overflow-x', 'hidden', 'important');
 
         var row = portal.querySelector('.row');
@@ -899,16 +681,37 @@ define([
             row.style.setProperty('margin', '0', 'important');
         }
 
-        var lists = portal.querySelectorAll('.navigation__inner-list--level1, .subchildmenu.mega-columns');
+        /*
+         * FIX: não aplicar grid 2-col no .submenu externo (também tem
+         * .navigation__inner-list--level1). Isso esmagava o ul interno em ~186px
+         * e a coluna de texto virava ~26px — links sobrepunham a imagem.
+         */
+        var outerSubmenu = portal.querySelector(
+            ':scope > .submenu, :scope > .navigation__submenu, :scope > [id^="submenu-menu-"]'
+        );
+        if (outerSubmenu) {
+            outerSubmenu.style.setProperty('display', 'block', 'important');
+            outerSubmenu.style.setProperty('width', '100%', 'important');
+            outerSubmenu.style.setProperty('max-width', '100%', 'important');
+            outerSubmenu.style.setProperty('margin', '0', 'important');
+            outerSubmenu.style.setProperty('padding', '0', 'important');
+            outerSubmenu.style.removeProperty('grid-template-columns');
+            outerSubmenu.style.setProperty('grid-template-columns', 'none', 'important');
+        }
+
+        var lists = portal.querySelectorAll(
+            'ul.subchildmenu.navigation__inner-list--level1, ul.subchildmenu.mega-columns'
+        );
         lists.forEach(function (list) {
             list.style.setProperty('display', 'grid', 'important');
-            list.style.setProperty('grid-template-columns', 'minmax(96px, 1fr) minmax(124px, 140px)', 'important');
-            list.style.setProperty('column-gap', '16px', 'important');
-            list.style.setProperty('row-gap', '8px', 'important');
-            list.style.setProperty('padding', '16px 12px 14px 16px', 'important');
+            list.style.setProperty('grid-template-columns', 'minmax(0, 1fr) 120px', 'important');
+            list.style.setProperty('column-gap', '12px', 'important');
+            list.style.setProperty('row-gap', '4px', 'important');
+            list.style.setProperty('padding', '0', 'important');
             list.style.setProperty('width', '100%', 'important');
             list.style.setProperty('max-width', '100%', 'important');
             list.style.setProperty('margin', '0', 'important');
+            list.style.setProperty('list-style', 'none', 'important');
         });
 
         var textItems = portal.querySelectorAll(
@@ -917,6 +720,7 @@ define([
         textItems.forEach(function (item) {
             item.style.setProperty('grid-column', '1', 'important');
             item.style.setProperty('display', 'block', 'important');
+            item.style.setProperty('float', 'none', 'important');
             item.style.setProperty('width', '100%', 'important');
             item.style.setProperty('max-width', '100%', 'important');
             item.style.setProperty('min-width', '0', 'important');
@@ -925,13 +729,16 @@ define([
         var imageItems = portal.querySelectorAll('.navigation__inner-item--level1.imagem.img-subcategory, .navigation__inner-item--level1.imagem');
         imageItems.forEach(function (item) {
             item.style.setProperty('grid-column', '2', 'important');
-            item.style.setProperty('grid-row', '1 / span 10', 'important');
-            item.style.setProperty('width', '140px', 'important');
-            item.style.setProperty('min-width', '124px', 'important');
-            item.style.setProperty('max-width', '140px', 'important');
+            item.style.setProperty('grid-row', '1 / span 20', 'important');
+            item.style.setProperty('display', 'block', 'important');
+            item.style.setProperty('float', 'none', 'important');
+            item.style.setProperty('width', '120px', 'important');
+            item.style.setProperty('min-width', '120px', 'important');
+            item.style.setProperty('max-width', '120px', 'important');
             item.style.setProperty('margin', '0', 'important');
             item.style.setProperty('padding', '0', 'important');
             item.style.setProperty('align-self', 'start', 'important');
+            item.style.setProperty('justify-self', 'end', 'important');
             item.style.setProperty('max-height', '280px', 'important');
             item.style.setProperty('overflow', 'hidden', 'important');
             var image = item.querySelector('img');
@@ -944,47 +751,15 @@ define([
                 image.style.setProperty('object-position', 'top center', 'important');
             }
         });
+        portal.dataset.awaLayoutFixed = '1';
     };
 
     FlyoutPortal.prototype.attach = function (li) {
         if (!isDesktop()) {
-            if (this._debugAttachSkipCount < 2) {
-                this._debugAttachSkipCount += 1;
-                // #region agent log
-                sendDebugLog(
-                    'pre-fix',
-                    'H25',
-                    'awa-menu-controller.js:attach:skip-mobile',
-                    'Flyout attach aborted because viewport is not desktop',
-                    {
-                        href: window.location.href,
-                        viewportW: window.innerWidth,
-                        viewportH: window.innerHeight
-                    }
-                );
-                // #endregion
-            }
             return;
         }
         var submenu = this.findSubmenu(li);
         if (!submenu || submenu.dataset.awVmfPortaled === '1') {
-            if (this._debugAttachSkipCount < 4) {
-                this._debugAttachSkipCount += 1;
-                // #region agent log
-                sendDebugLog(
-                    'pre-fix',
-                    'H26',
-                    'awa-menu-controller.js:attach:skip-no-submenu',
-                    'Flyout attach aborted due submenu missing or already portaled',
-                    {
-                        href: window.location.href,
-                        menuId: li ? (li.getAttribute('data-menu') || '') : '',
-                        submenuFound: !!submenu,
-                        submenuPortaled: submenu ? (submenu.dataset.awVmfPortaled || '') : ''
-                    }
-                );
-                // #endregion
-            }
             return;
         }
         var portal = document.createElement('div');
@@ -992,39 +767,17 @@ define([
         portal.dataset.awVmfLiMenu = li.getAttribute('data-menu') || '';
         portal.appendChild(submenu);
         document.body.appendChild(portal);
-        var restoredFocusNodes = restorePortaledFocusState(portal);
+        restorePortaledFocusState(portal);
         this.applyLayoutFixes(portal);
         submenu.dataset.awVmfPortaled = '1';
         li.classList.add(ACTIVE_CLASS);
         li.setAttribute('data-awa-submenu-open', 'true');
         var self = this;
-        var autoUpdateCount = 0;
         if (FloatingUIDOM && typeof FloatingUIDOM.autoUpdate === 'function') {
             portal._awaCleanupAutoUpdate = FloatingUIDOM.autoUpdate(
                 li,
                 portal,
                 function () {
-                    if (autoUpdateCount < 4) {
-                        autoUpdateCount += 1;
-                        var panelRect = self.root.getBoundingClientRect();
-                        var portalRect = portal.getBoundingClientRect();
-                        // #region agent log
-                        sendDebugLog(
-                            'post-layout-shift-fix',
-                            'H67',
-                            'awa-menu-controller.js:attach:auto-update',
-                            'Floating UI autoUpdate requested flyout reposition',
-                            {
-                                updateCount: autoUpdateCount,
-                                panelTop: Math.round(panelRect.top),
-                                portalTop: Math.round(portalRect.top),
-                                deltaBeforeUpdate: Math.round(panelRect.top - portalRect.top),
-                                viewportW: window.innerWidth,
-                                viewportH: window.innerHeight
-                            }
-                        );
-                        // #endregion
-                    }
                     self.position(li, portal);
                 },
                 {
@@ -1039,23 +792,6 @@ define([
         }
         this.portals.push(portal);
 
-        // #region agent log
-        sendDebugLog(
-            'pre-fix',
-            'H1',
-            'awa-menu-controller.js:attach',
-            'Flyout attach classes and structural context',
-            {
-                liMenu: li.getAttribute('data-menu') || '',
-                portalClassName: portal.className,
-                submenuClassName: submenu.className,
-                submenuPortaled: submenu.dataset.awVmfPortaled || '',
-                panelState: this.root && this.root.getAttribute('data-awa-menu-state'),
-                panelAriaHidden: this.root && this.root.getAttribute('aria-hidden')
-            }
-        );
-        // #endregion
-
         var active = document.activeElement;
         if (active && li.contains(active)) {
             var firstSubLink = portal.querySelector('a[href]');
@@ -1065,289 +801,16 @@ define([
                 });
             }
         }
-        var firstRestoredLink = portal.querySelector('a[href]');
-        // #region agent log
-        sendDebugLog(
-            'post-fix',
-            'H52',
-            'awa-menu-controller.js:attach:focus-restore',
-            'Portaled flyout hidden-focus state restored',
-            {
-                menuId: li.getAttribute('data-menu') || '',
-                restored: restoredFocusNodes,
-                inert: firstRestoredLink ? firstRestoredLink.hasAttribute('inert') : null,
-                tabindex: firstRestoredLink ? firstRestoredLink.getAttribute('tabindex') : null,
-                ariaHidden: firstRestoredLink ? firstRestoredLink.getAttribute('aria-hidden') : null,
-                owned: firstRestoredLink ? firstRestoredLink.getAttribute('data-awa-hidden-focus-sync') : null
-            }
-        );
-        // #endregion
 
         this.bindPortalKeyboard(portal, li);
 
-        window.requestAnimationFrame(function () {
-            this.applyLayoutFixes(portal);
-            var firstSubchild = portal.querySelector('.subchildmenu, .navigation__inner-list--level1');
-            var firstLink = portal.querySelector('.subchildmenu a, .navigation__inner-list--level1 a');
-            var imageNode = portal.querySelector('.imagem.img-subcategory, .navigation__inner-item--level1.imagem');
-            var rowNode = portal.querySelector('.row');
-            var firstLinkRect = firstLink ? firstLink.getBoundingClientRect() : null;
-            var imageRect = imageNode ? imageNode.getBoundingClientRect() : null;
-            var overlap = false;
-            if (firstLinkRect && imageRect) {
-                overlap = !(firstLinkRect.right <= imageRect.left
-                    || firstLinkRect.left >= imageRect.right
-                    || firstLinkRect.bottom <= imageRect.top
-                    || firstLinkRect.top >= imageRect.bottom);
-            }
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H2-H3',
-                'awa-menu-controller.js:attach:raf',
-                'Flyout computed layout snapshot',
-                {
-                    portalWidth: Math.round(portal.getBoundingClientRect().width),
-                    portalHeight: Math.round(portal.getBoundingClientRect().height),
-                    portalMinWidth: window.getComputedStyle(portal).minWidth,
-                    portalMaxWidth: window.getComputedStyle(portal).maxWidth,
-                    portalOverflowY: window.getComputedStyle(portal).overflowY,
-                    submenuDisplay: submenu ? window.getComputedStyle(submenu).display : '',
-                    submenuPosition: submenu ? window.getComputedStyle(submenu).position : '',
-                    subchildDisplay: firstSubchild ? window.getComputedStyle(firstSubchild).display : '',
-                    subchildFloat: firstSubchild ? window.getComputedStyle(firstSubchild).float : '',
-                    subchildGrid: firstSubchild ? window.getComputedStyle(firstSubchild).gridTemplateColumns : '',
-                    rowWidth: rowNode ? Math.round(rowNode.getBoundingClientRect().width) : 0,
-                    listWidth: firstSubchild ? Math.round(firstSubchild.getBoundingClientRect().width) : 0,
-                    imagePosition: imageNode ? window.getComputedStyle(imageNode).position : '',
-                    imageFloat: imageNode ? window.getComputedStyle(imageNode).float : '',
-                    imageWidth: imageNode ? window.getComputedStyle(imageNode).width : '',
-                    textImageOverlap: overlap
-                }
-            );
-            // #endregion
-            var portalRect = portal.getBoundingClientRect();
-            var submenuRect = submenu ? submenu.getBoundingClientRect() : null;
-            var textNode = portal.querySelector(
-                '.navigation__inner-item--level1.subcategory-title, '
-                + '.navigation__inner-item--level1.subcategory-second-level, '
-                + '.navigation__inner-item--all'
-            );
-            var textRect = textNode ? textNode.getBoundingClientRect() : null;
-            var textLink = textNode ? textNode.querySelector('a') : firstLink;
-            var textStyle = textLink ? window.getComputedStyle(textLink) : null;
-            var imageStyle = imageNode ? window.getComputedStyle(imageNode) : null;
-            var imageElement = imageNode ? imageNode.querySelector('img') : null;
-            var imageElementStyle = imageElement ? window.getComputedStyle(imageElement) : null;
-            var level0Links = this.root
-                ? this.root.querySelectorAll(':scope > li.ui-menu-item.level0 > a.level-top.navigation__link')
-                : [];
-            var minLevel0Height = 0;
-            var maxLevel0Height = 0;
-            Array.prototype.forEach.call(level0Links, function (link) {
-                var height = Math.round(link.getBoundingClientRect().height);
-                if (!height) {
-                    return;
-                }
-                minLevel0Height = minLevel0Height ? Math.min(minLevel0Height, height) : height;
-                maxLevel0Height = Math.max(maxLevel0Height, height);
-            });
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H44',
-                'awa-menu-controller.js:attach:geometry',
-                'Rendered flyout geometry after layout fixes',
-                {
-                    pw: Math.round(portalRect.width),
-                    ph: Math.round(portalRect.height),
-                    sw: submenuRect ? Math.round(submenuRect.width) : 0,
-                    tw: textRect ? Math.round(textRect.width) : 0,
-                    tx2: textRect ? Math.round(textRect.right) : 0,
-                    ix1: imageRect ? Math.round(imageRect.left) : 0,
-                    iw: imageRect ? Math.round(imageRect.width) : 0,
-                    ov: overlap
-                }
-            );
-            // #endregion
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H45',
-                'awa-menu-controller.js:attach:typography',
-                'Rendered flyout text readability properties',
-                {
-                    fs: textStyle ? textStyle.fontSize : '',
-                    lh: textStyle ? textStyle.lineHeight : '',
-                    c: textStyle ? textStyle.color : '',
-                    bg: textStyle ? textStyle.backgroundColor : '',
-                    op: textStyle ? textStyle.opacity : '',
-                    vis: textStyle ? textStyle.visibility : '',
-                    td: textStyle ? textStyle.textDecorationLine : ''
-                }
-            );
-            // #endregion
-            var titleSpan = portal.querySelector(
-                '.navigation__inner-item--level1.subcategory-title span'
-            );
-            var secondLevelLink = portal.querySelector(
-                '.navigation__inner-item--level1.subcategory-second-level > a'
-            );
-            var titleStyle = titleSpan ? window.getComputedStyle(titleSpan) : null;
-            var secondLevelStyle = secondLevelLink ? window.getComputedStyle(secondLevelLink) : null;
-            var portalStyle = window.getComputedStyle(portal);
-            var submenuStyle = submenu ? window.getComputedStyle(submenu) : null;
-            var beforeStyle = secondLevelLink
-                ? window.getComputedStyle(secondLevelLink, '::before')
-                : null;
-            var afterStyle = secondLevelLink
-                ? window.getComputedStyle(secondLevelLink, '::after')
-                : null;
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H48',
-                'awa-menu-controller.js:attach:title-style',
-                'Actual flyout title span computed typography',
-                {
-                    found: !!titleSpan,
-                    txt: titleSpan ? String(titleSpan.textContent || '').trim().slice(0, 40) : '',
-                    fs: titleStyle ? titleStyle.fontSize : '',
-                    fw: titleStyle ? titleStyle.fontWeight : '',
-                    lh: titleStyle ? titleStyle.lineHeight : '',
-                    c: titleStyle ? titleStyle.color : '',
-                    op: titleStyle ? titleStyle.opacity : '',
-                    vis: titleStyle ? titleStyle.visibility : ''
-                }
-            );
-            // #endregion
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H49',
-                'awa-menu-controller.js:attach:link-style',
-                'Actual flyout second-level link computed typography',
-                {
-                    found: !!secondLevelLink,
-                    txt: secondLevelLink ? String(secondLevelLink.textContent || '').trim().slice(0, 40) : '',
-                    fs: secondLevelStyle ? secondLevelStyle.fontSize : '',
-                    fw: secondLevelStyle ? secondLevelStyle.fontWeight : '',
-                    lh: secondLevelStyle ? secondLevelStyle.lineHeight : '',
-                    c: secondLevelStyle ? secondLevelStyle.color : '',
-                    bg: secondLevelStyle ? secondLevelStyle.backgroundColor : '',
-                    op: secondLevelStyle ? secondLevelStyle.opacity : ''
-                }
-            );
-            // #endregion
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H50',
-                'awa-menu-controller.js:attach:surface-style',
-                'Flyout parent surface and compositing properties',
-                {
-                    pbg: portalStyle.backgroundColor,
-                    pop: portalStyle.opacity,
-                    pfl: portalStyle.filter,
-                    sbg: submenuStyle ? submenuStyle.backgroundColor : '',
-                    sop: submenuStyle ? submenuStyle.opacity : '',
-                    svis: submenuStyle ? submenuStyle.visibility : '',
-                    mix: submenuStyle ? submenuStyle.mixBlendMode : ''
-                }
-            );
-            // #endregion
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H51',
-                'awa-menu-controller.js:attach:link-pseudo',
-                'Flyout second-level pseudo-element traces',
-                {
-                    bc: beforeStyle ? beforeStyle.content : '',
-                    bd: beforeStyle ? beforeStyle.display : '',
-                    bw: beforeStyle ? beforeStyle.width : '',
-                    bco: beforeStyle ? beforeStyle.color : '',
-                    ac: afterStyle ? afterStyle.content : '',
-                    ad: afterStyle ? afterStyle.display : '',
-                    aw: afterStyle ? afterStyle.width : ''
-                }
-            );
-            // #endregion
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H46',
-                'awa-menu-controller.js:attach:overflow',
-                'Rendered flyout overflow and scrollbar properties',
-                {
-                    cw: portal.clientWidth,
-                    sw: portal.scrollWidth,
-                    ch: portal.clientHeight,
-                    sh: portal.scrollHeight,
-                    ox: window.getComputedStyle(portal).overflowX,
-                    oy: window.getComputedStyle(portal).overflowY,
-                    sg: window.getComputedStyle(portal).scrollbarGutter
-                }
-            );
-            // #endregion
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H47',
-                'awa-menu-controller.js:attach:image-items',
-                'Rendered image and menu item consistency properties',
-                {
-                    ip: imageStyle ? imageStyle.position : '',
-                    id: imageStyle ? imageStyle.display : '',
-                    iw: imageRect ? Math.round(imageRect.width) : 0,
-                    ih: imageRect ? Math.round(imageRect.height) : 0,
-                    ew: imageElement ? Math.round(imageElement.getBoundingClientRect().width) : 0,
-                    eh: imageElement ? Math.round(imageElement.getBoundingClientRect().height) : 0,
-                    fit: imageElementStyle ? imageElementStyle.objectFit : '',
-                    lmin: minLevel0Height,
-                    lmax: maxLevel0Height
-                }
-            );
-            // #endregion
-            var nestedList = portal.querySelector('.navigation__inner-list--level2, .subchildmenu[data-level="2"]');
-            var nestedListStyle = nestedList ? window.getComputedStyle(nestedList) : null;
-            var activeLink = getItemLink(li);
-            var activeLinkStyle = activeLink ? window.getComputedStyle(activeLink) : null;
-            var activeLinkBefore = activeLink ? window.getComputedStyle(activeLink, '::before') : null;
-            var visualAuditData = {
-                menuId: li.getAttribute('data-menu') || '',
-                portalTop: Math.round(portalRect.top),
-                portalHeight: Math.round(portalRect.height),
-                portalClientHeight: portal.clientHeight,
-                portalScrollHeight: portal.scrollHeight,
-                portalOverflowY: portalStyle.overflowY,
-                nestedFound: !!nestedList,
-                nestedDisplay: nestedListStyle ? nestedListStyle.display : '',
-                nestedHeight: nestedList ? Math.round(nestedList.getBoundingClientRect().height) : 0,
-                imageFound: !!imageElement,
-                imageComplete: imageElement ? imageElement.complete : null,
-                imageNaturalWidth: imageElement ? imageElement.naturalWidth : 0,
-                imageNaturalHeight: imageElement ? imageElement.naturalHeight : 0,
-                level1Color: secondLevelStyle ? secondLevelStyle.color : '',
-                level1Class: secondLevelLink && secondLevelLink.parentElement
-                    ? secondLevelLink.parentElement.className
-                    : '',
-                activeBorderTop: activeLinkStyle ? activeLinkStyle.borderTop : '',
-                activeOutline: activeLinkStyle ? activeLinkStyle.outline : '',
-                activeBeforeDisplay: activeLinkBefore ? activeLinkBefore.display : '',
-                activeBeforeColor: activeLinkBefore ? activeLinkBefore.backgroundColor : ''
-            };
-            // #region agent log
-            fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'visual-audit',hypothesisId:'H55-H59',location:'awa-menu-controller.js:attach:visual-audit',message:'Flyout visual defect evidence',data:visualAuditData,timestamp:Date.now()})}).catch(function(){});
-            sendDebugLog(
-                'visual-audit',
-                'H55-H59',
-                'awa-menu-controller.js:attach:visual-audit',
-                'Flyout visual defect evidence',
-                visualAuditData
-            );
-            // #endregion
-        }.bind(this));
+        /* Segundo passe só se houver imagem (CMS às vezes monta após o 1º paint). */
+        if (portal.querySelector('.imagem.img-subcategory, .navigation__inner-item--level1.imagem')) {
+            window.requestAnimationFrame(function () {
+                this.applyLayoutFixes(portal);
+            }.bind(this));
+        }
+
     };
 
     FlyoutPortal.prototype.bindPortalKeyboard = function (portal, li) {
@@ -1397,17 +860,6 @@ define([
         if (!FloatingUIDOM || typeof FloatingUIDOM.computePosition !== 'function') {
             portal.style.position = 'fixed';
             portal.style.zIndex = '99990';
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H4',
-                'awa-menu-controller.js:position:fallback',
-                'Floating UI unavailable fallback positioning',
-                {
-                    floatingUiAvailable: false
-                }
-            );
-            // #endregion
             return;
         }
         var panelElement = this.root;
@@ -1421,7 +873,6 @@ define([
             ]
         }).then(function (data) {
             var panelRect = panelElement ? panelElement.getBoundingClientRect() : null;
-            var liRect = li.getBoundingClientRect();
             var panelTop = panelRect ? Math.max(8, panelRect.top) : Math.max(8, data.y);
             var availableHeight = Math.max(160, window.innerHeight - panelTop - 8);
             portal.style.setProperty(
@@ -1444,54 +895,6 @@ define([
                 top: anchoredTop + 'px',
                 zIndex: '99990'
             });
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H4',
-                'awa-menu-controller.js:position:computed',
-                'Floating UI computed flyout coordinates',
-                {
-                    x: Math.round(data.x),
-                    anchoredX: Math.round(anchoredLeft),
-                    panelRight: panelRect ? Math.round(panelRect.right) : null,
-                    y: Math.round(data.y),
-                    placement: data.placement || '',
-                    strategy: data.strategy || '',
-                    viewportW: window.innerWidth,
-                    viewportH: window.innerHeight
-                }
-            );
-            // #endregion
-            var anchorData = {
-                menuId: li.getAttribute('data-menu') || '',
-                strategy: data.strategy || '',
-                computedY: Math.round(data.y),
-                panelTop: panelRect ? Math.round(panelRect.top) : null,
-                panelRight: panelRect ? Math.round(panelRect.right) : null,
-                itemTop: Math.round(liRect.top),
-                itemRight: Math.round(liRect.right),
-                anchoredLeft: Math.round(anchoredLeft),
-                overlapAfterPosition: panelRect
-                    ? Math.max(0, Math.round(panelRect.right - anchoredLeft))
-                    : null,
-                anchoredTop: Math.round(anchoredTop),
-                portalHeight: Math.round(portal.getBoundingClientRect().height),
-                portalMaxHeight: window.getComputedStyle(portal).maxHeight,
-                availableHeight: Math.round(availableHeight),
-                clientHeight: portal.clientHeight,
-                scrollHeight: portal.scrollHeight,
-                viewportHeight: window.innerHeight
-            };
-            // #region agent log
-            fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'post-anchor-fix',hypothesisId:'H61-H62',location:'awa-menu-controller.js:position:panel-anchor',message:'Flyout uses fixed strategy and panel vertical anchor',data:anchorData,timestamp:Date.now()})}).catch(function(){});
-            sendDebugLog(
-                'post-anchor-fix',
-                'H61-H62',
-                'awa-menu-controller.js:position:panel-anchor',
-                'Flyout uses fixed strategy and panel vertical anchor',
-                anchorData
-            );
-            // #endregion
         });
     };
 
@@ -1649,19 +1052,16 @@ define([
             return;
         }
 
-        var props = ['height', 'max-height', 'min-height', 'overflow'];
         var node = this.nav;
+        var navInner = document.querySelector('.awa-nav-bar__inner');
 
         while (node) {
             if (open) {
-                node.style.setProperty('height', 'auto', 'important');
-                node.style.setProperty('max-height', 'none', 'important');
-                node.style.setProperty('min-height', '0', 'important');
+                /* Evita CLS: não forçar height/max-height/min-height no shell do header.
+                   Apenas destrava overflow para flyouts no desktop. */
                 node.style.setProperty('overflow', 'visible', 'important');
             } else {
-                props.forEach(function (prop) {
-                    node.style.removeProperty(prop);
-                });
+                node.style.removeProperty('overflow');
             }
 
             if (node.classList && (
@@ -1672,6 +1072,12 @@ define([
                 break;
             }
             node = node.parentElement;
+        }
+
+        if (navInner) {
+            navInner.style.removeProperty('height');
+            navInner.style.removeProperty('min-height');
+            navInner.style.removeProperty('max-height');
         }
     };
 
@@ -1718,101 +1124,32 @@ define([
 
         void panelEl.offsetHeight;
 
-        var maxPx = Math.min(window.innerHeight * 0.7, 560);
-        var contentPx = Math.max(this.measurePanelContentHeight(), panelEl.scrollHeight);
-        var target = Math.min(Math.max(contentPx, 160), maxPx);
-        var toggleButtons = panelEl.querySelectorAll(':scope > li.ui-menu-item.level0 > .open-children-toggle.navigation__toggle');
-        var visibleToggles = 0;
-        toggleButtons.forEach(function (btn) {
-            if (window.getComputedStyle(btn).display !== 'none') {
-                visibleToggles += 1;
-            }
-        });
-
         panelEl.style.setProperty('max-height', 'min(70vh, 560px)', 'important');
-        panelEl.style.setProperty('height', target + 'px', 'important');
+        panelEl.style.setProperty('height', 'auto', 'important');
         panelEl.style.setProperty('min-height', '120px', 'important');
-        applyMenuLinkTypography(panelEl, true);
-        applyTopLinkRuntimeFixes(panelEl);
-        if (panelEl.dataset.awaHeightAuditLogged !== '1') {
-            panelEl.dataset.awaHeightAuditLogged = '1';
-            window.requestAnimationFrame(function () {
-                var panelRect = panelEl.getBoundingClientRect();
-                var children = Array.prototype.map.call(panelEl.children, function (child) {
-                    var rect = child.getBoundingClientRect();
-                    var style = window.getComputedStyle(child);
-                    return {
-                        cls: child.className || child.tagName,
-                        menu: child.getAttribute('data-menu') || '',
-                        display: style.display,
-                        position: style.position,
-                        height: Math.round(rect.height),
-                        scrollHeight: child.scrollHeight,
-                        top: Math.round(rect.top - panelRect.top),
-                        bottom: Math.round(rect.bottom - panelRect.top)
-                    };
-                });
-                var visibleChildren = children.filter(function (child) {
-                    return child.display !== 'none' && child.height > 0;
-                });
-                var hiddenWithSize = children.filter(function (child) {
-                    return child.display === 'none' && (child.height > 0 || child.scrollHeight > 0);
-                });
-                var visibleSubmenus = Array.prototype.map.call(
-                    panelEl.querySelectorAll(':scope > li.level0 > .submenu, :scope > li.level0 > .navigation__submenu'),
-                    function (submenu) {
-                        var rect = submenu.getBoundingClientRect();
-                        var style = window.getComputedStyle(submenu);
-                        return {
-                            parent: submenu.parentElement ? (submenu.parentElement.getAttribute('data-menu') || '') : '',
-                            display: style.display,
-                            position: style.position,
-                            height: Math.round(rect.height),
-                            scrollHeight: submenu.scrollHeight
-                        };
-                    }
-                ).filter(function (submenu) {
-                    return submenu.display !== 'none' || submenu.height > 0;
-                });
-                // #region agent log
-                sendDebugLog(
-                    'panel-height-audit',
-                    'H72-H75',
-                    'awa-menu-controller.js:syncPanelHeight:contributors',
-                    'Direct children contributing to vertical panel scroll height',
-                    {
-                        clientHeight: panelEl.clientHeight,
-                        scrollHeight: panelEl.scrollHeight,
-                        visibleHeightSum: visibleChildren.reduce(function (sum, child) {
-                            return sum + child.height;
-                        }, 0),
-                        visibleChildren: visibleChildren,
-                        hiddenWithSize: hiddenWithSize,
-                        visibleSubmenus: visibleSubmenus
-                    }
-                );
-                // #endregion
-            });
-        }
-        // #region agent log
-        sendDebugLog(
-            'pre-fix',
-            'H5',
-            'awa-menu-controller.js:syncPanelHeight',
-            'Vertical panel scroll area sizing',
-            {
-                targetHeight: target,
-                panelClientWidth: panelEl.clientWidth,
-                panelScrollWidth: panelEl.scrollWidth,
-                panelClientHeight: panelEl.clientHeight,
-                panelScrollHeight: panelEl.scrollHeight,
-                paddingRight: window.getComputedStyle(panelEl).paddingRight,
-                overflowY: window.getComputedStyle(panelEl).overflowY,
-                toggleCount: toggleButtons.length,
-                visibleToggles: visibleToggles
+        /* BUG-H2: sob sticky, top:44px invade chrome do header — alinhar sob stickyBottom. */
+        (function alignPanelBelowSticky() {
+            var sticky = document.querySelector('.header-wrapper-sticky.is-sticky');
+            var navNode = panelEl.closest('[data-role="awa-vertical-menu"], .navigation.verticalmenu');
+            var stickyBottom;
+            var navTop;
+            var neededTop;
+            if (!sticky || !navNode) {
+                return;
             }
-        );
-        // #endregion
+            stickyBottom = sticky.getBoundingClientRect().bottom;
+            navTop = navNode.getBoundingClientRect().top;
+            neededTop = Math.ceil(stickyBottom - navTop);
+            if (neededTop >= 0) {
+                panelEl.style.setProperty('top', neededTop + 'px', 'important');
+            }
+        }());
+        /* Tipografia/links já aplicados no syncAria(open) — evita N× querySelectorAll no resize. */
+        if (panelEl.dataset.awaTypographyReady !== '1') {
+            applyMenuLinkTypography(panelEl, true);
+            applyTopLinkRuntimeFixes(panelEl);
+            panelEl.dataset.awaTypographyReady = '1';
+        }
     };
 
     DeptMenu.prototype.syncSearchRow = function (open) {
@@ -1841,8 +1178,9 @@ define([
             }
             self.syncPanelHeight();
             attempt += 1;
-            if (attempt < 5) {
-                window.setTimeout(run, attempt === 1 ? 16 : 48);
+            /* 2 passes bastam (layout + fontes); 5× era custo morto de debug. */
+            if (attempt < 2) {
+                window.setTimeout(run, 32);
             }
         }
         window.requestAnimationFrame(run);
@@ -1873,458 +1211,19 @@ define([
                 this.panel.style.setProperty('padding-right', '12px', 'important');
                 this.panel.style.setProperty('scrollbar-gutter', 'stable', 'important');
                 ensureRuntimeMenuStyles();
-                applyTopLinkRuntimeFixes(this.panel);
                 this.syncSearchRow(true);
                 applyMenuLinkTypography(this.panel, true);
                 applyMenuLabelNormalization(this.panel);
-                // #region agent log
-                (function logSearchGeometry(stage, panel) {
-                    var searchRow = panel.querySelector(':scope > [data-role="awa-vmenu-search-row"]');
-                    var searchWrap = searchRow
-                        ? searchRow.querySelector('.awa-vmenu-search-wrap')
-                        : null;
-                    var searchInput = searchWrap
-                        ? searchWrap.querySelector('.awa-vmenu-search-input')
-                        : null;
-                    var snapshot = function (node) {
-                        var rect;
-                        var style;
-
-                        if (!node) {
-                            return null;
-                        }
-                        rect = node.getBoundingClientRect();
-                        style = window.getComputedStyle(node);
-
-                        return {
-                            rect: {
-                                x: Math.round(rect.x),
-                                y: Math.round(rect.y),
-                                w: Math.round(rect.width),
-                                h: Math.round(rect.height)
-                            },
-                            position: style.position,
-                            display: style.display,
-                            float: style.float,
-                            left: style.left,
-                            insetInlineStart: style.insetInlineStart,
-                            margin: style.margin,
-                            padding: style.padding,
-                            transform: style.transform,
-                            width: style.width,
-                            boxSizing: style.boxSizing,
-                            offsetLeft: node.offsetLeft,
-                            offsetParent: node.offsetParent
-                                ? String(node.offsetParent.className || node.offsetParent.id || node.offsetParent.tagName).slice(0, 120)
-                                : null
-                        };
-                    };
-
-                    fetch('http://localhost:7935/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Debug-Session-Id': 'ca59a1'
-                        },
-                        body: JSON.stringify({
-                            sessionId: 'ca59a1',
-                            runId: 'vmenu-search-offset-pre-fix',
-                            hypothesisId: 'H201-H205',
-                            location: 'awa-menu-controller.js:syncAria:open:search-geometry',
-                            message: 'Vertical menu search coordinate chain',
-                            data: {
-                                stage: stage,
-                                viewportWidth: window.innerWidth,
-                                panelCount: document.querySelectorAll('[data-role="awa-vertical-menu-panel"]').length,
-                                inputCount: document.querySelectorAll('.awa-vmenu-search-input').length,
-                                inputBelongsToPanel: !!(searchInput && searchInput.closest('[data-role="awa-vertical-menu-panel"]') === panel),
-                                panel: snapshot(panel),
-                                searchRow: snapshot(searchRow),
-                                searchWrap: snapshot(searchWrap),
-                                searchInput: snapshot(searchInput)
-                            },
-                            timestamp: Date.now()
-                        })
-                    }).catch(function () {});
-                    sendDebugLog(
-                        'vmenu-search-offset-pre-fix',
-                        'H201-H205',
-                        'awa-menu-controller.js:syncAria:open:search-geometry-fallback',
-                        'Compact vertical menu search coordinate chain',
-                        {
-                            s: stage,
-                            v: window.innerWidth,
-                            c: [
-                                document.querySelectorAll('[data-role="awa-vertical-menu-panel"]').length,
-                                document.querySelectorAll('.awa-vmenu-search-input').length,
-                                searchInput && searchInput.closest('[data-role="awa-vertical-menu-panel"]') === panel ? 1 : 0
-                            ],
-                            p: compactGeometry(panel),
-                            r: compactGeometry(searchRow),
-                            w: compactGeometry(searchWrap),
-                            i: compactGeometry(searchInput)
-                        }
-                    );
-
-                    function compactGeometry(node) {
-                        var rect = node ? node.getBoundingClientRect() : null;
-
-                        return rect ? [
-                            Math.round(rect.x),
-                            Math.round(rect.y),
-                            Math.round(rect.width),
-                            Math.round(rect.height),
-                            node.offsetLeft
-                        ] : null;
-                    }
-                    sendDebugLog(
-                        'vmenu-search-offset-pre-fix',
-                        'H201-H204',
-                        'awa-menu-controller.js:syncAria:open:search-style-fallback',
-                        'Compact vertical menu search positioning styles',
-                        {
-                            r: compactStyle(searchRow),
-                            w: compactStyle(searchWrap),
-                            i: compactStyle(searchInput)
-                        }
-                    );
-
-                    function compactStyle(node) {
-                        var style = node ? window.getComputedStyle(node) : null;
-
-                        return style ? [
-                            style.position,
-                            style.float,
-                            style.left,
-                            style.marginLeft,
-                            style.transform,
-                            node.offsetParent
-                                ? String(node.offsetParent.className || node.offsetParent.id || node.offsetParent.tagName).slice(0, 45)
-                                : ''
-                        ] : null;
-                    }
-                }('immediate', this.panel));
-                // #endregion
-                // #region agent log
-                var visibleInactiveSubmenus = Array.prototype.filter.call(
-                    this.panel.querySelectorAll(':scope > li.ui-menu-item.level0 > .submenu, :scope > li.ui-menu-item.level0 > .navigation__submenu'),
-                    function (submenu) {
-                        return !submenu.closest('.' + PORTAL_CLASS)
-                            && window.getComputedStyle(submenu).display !== 'none';
-                    }
-                );
-                var levelZeroHeights = Array.prototype.map.call(
-                    this.panel.querySelectorAll(':scope > li.ui-menu-item.level0'),
-                    function (item) {
-                        return Math.round(item.getBoundingClientRect().height);
-                    }
-                );
-                fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'post-race-fix',hypothesisId:'H53-H54',location:'awa-menu-controller.js:open:layout-guard',message:'Inactive submenu race guard and scrollbar geometry',data:{visibleInactiveSubmenus:visibleInactiveSubmenus.length,maxLevelZeroHeight:levelZeroHeights.length?Math.max.apply(Math,levelZeroHeights):0,clientWidth:this.panel.clientWidth,scrollWidth:this.panel.scrollWidth,clientHeight:this.panel.clientHeight,scrollHeight:this.panel.scrollHeight,scrollbarGutter:window.getComputedStyle(this.panel).scrollbarGutter},timestamp:Date.now()})}).catch(function(){});
-                // #endregion
                 applyTruncationTitles(this.panel);
-                var firstParentItem = this.panel.querySelector(':scope > li.ui-menu-item.level0.navigation__item--parent, :scope > li.ui-menu-item.level0.parent');
-                var firstParentLink = this.panel.querySelector(':scope > li.ui-menu-item.level0.navigation__item--parent > a.level-top.navigation__link, :scope > li.ui-menu-item.level0.parent > a.level-top.navigation__link');
-                var firstParentAfter = firstParentLink ? window.getComputedStyle(firstParentLink, '::after') : null;
-                var probeRect = firstParentItem ? firstParentItem.getBoundingClientRect() : null;
-                var probeX = probeRect ? Math.round(probeRect.left + (probeRect.width / 2)) : 0;
-                var probeY = probeRect ? Math.round(probeRect.top + (probeRect.height / 2)) : 0;
-                var topAtProbe = (probeRect && probeRect.width > 0 && probeRect.height > 0)
-                    ? document.elementFromPoint(probeX, probeY)
-                    : null;
-                // #region agent log
-                sendDebugLog(
-                    'pre-fix',
-                    'H9',
-                    'awa-menu-controller.js:syncAria:open',
-                    'Immediate open-state parent ::after snapshot',
-                    {
-                        href: window.location.href,
-                        panelState: this.panel.getAttribute('data-awa-menu-state') || '',
-                        runtimeStylePresent: !!document.getElementById(RUNTIME_STYLE_FIX_ID),
-                        panelPointerEvents: window.getComputedStyle(this.panel).pointerEvents,
-                        firstParentPointerEvents: firstParentItem ? window.getComputedStyle(firstParentItem).pointerEvents : '',
-                        firstParentRectW: probeRect ? Math.round(probeRect.width) : 0,
-                        firstParentRectH: probeRect ? Math.round(probeRect.height) : 0,
-                        probeInsideFirstParent: !!(topAtProbe && firstParentItem && firstParentItem.contains(topAtProbe)),
-                        probeTopTag: topAtProbe ? topAtProbe.tagName : '',
-                        probeTopClass: topAtProbe ? String(topAtProbe.className || '').slice(0, 120) : '',
-                        probeTopSrc: (topAtProbe && topAtProbe.tagName === 'IMG')
-                            ? String(topAtProbe.currentSrc || topAtProbe.src || '').slice(0, 180)
-                            : '',
-                        probeTopPointerEvents: topAtProbe ? window.getComputedStyle(topAtProbe).pointerEvents : '',
-                        probeTopPosition: topAtProbe ? window.getComputedStyle(topAtProbe).position : '',
-                        probeTopZIndex: topAtProbe ? window.getComputedStyle(topAtProbe).zIndex : '',
-                        probeTopClosestLevel0Class: (topAtProbe && topAtProbe.closest)
-                            ? (function () {
-                                var probeLi = topAtProbe.closest('li.ui-menu-item.level0');
-                                return probeLi ? String(probeLi.className || '').slice(0, 120) : '';
-                            }())
-                            : '',
-                        firstParentClass: firstParentLink && firstParentLink.parentElement ? firstParentLink.parentElement.className : '',
-                        afterContent: firstParentAfter ? firstParentAfter.content : '',
-                        afterDisplay: firstParentAfter ? firstParentAfter.display : '',
-                        afterOpacity: firstParentAfter ? firstParentAfter.opacity : ''
-                    }
-                );
-                // #endregion
-                // #region agent log
-                sendDebugLog(
-                    'pre-fix',
-                    'H38',
-                    'awa-menu-controller.js:syncAria:open:probe-compact',
-                    'Compact probe for top element intercepting first level0 item',
-                    {
-                        href: window.location.href,
-                        panelState: this.panel.getAttribute('data-awa-menu-state') || '',
-                        probeInsideFirstParent: !!(topAtProbe && firstParentItem && firstParentItem.contains(topAtProbe)),
-                        probeTopTag: topAtProbe ? topAtProbe.tagName : '',
-                        probeTopClass: topAtProbe ? String(topAtProbe.className || '').slice(0, 60) : '',
-                        probeTopSrc: (topAtProbe && topAtProbe.tagName === 'IMG')
-                            ? String(topAtProbe.currentSrc || topAtProbe.src || '').slice(0, 120)
-                            : '',
-                        probeTopPointerEvents: topAtProbe ? window.getComputedStyle(topAtProbe).pointerEvents : '',
-                        probeTopZIndex: topAtProbe ? window.getComputedStyle(topAtProbe).zIndex : ''
-                    }
-                );
-                // #endregion
-                if (this.panel.dataset.awaDocPointerProbeBound !== '1') {
-                    this.panel.dataset.awaDocPointerProbeBound = '1';
-                    this.panel._awaDocPointerProbeCount = 0;
-                    document.addEventListener('pointermove', function (evt) {
-                        if (!this.panel || !this.isOpen || this.panel._awaDocPointerProbeCount >= 6) {
-                            return;
-                        }
-                        this.panel._awaDocPointerProbeCount += 1;
-                        var x = evt ? Math.round(evt.clientX || 0) : 0;
-                        var y = evt ? Math.round(evt.clientY || 0) : 0;
-                        var topNode = document.elementFromPoint(x, y);
-                        // #region agent log
-                        sendDebugLog(
-                            'pre-fix',
-                            'H39',
-                            'awa-menu-controller.js:syncAria:doc-pointermove-probe',
-                            'Document pointermove probe while panel open',
-                            {
-                                href: window.location.href,
-                                count: this.panel._awaDocPointerProbeCount,
-                                pointerX: x,
-                                pointerY: y,
-                                targetTag: evt && evt.target ? evt.target.tagName : '',
-                                targetClass: evt && evt.target ? String(evt.target.className || '').slice(0, 80) : '',
-                                topTag: topNode ? topNode.tagName : '',
-                                topClass: topNode ? String(topNode.className || '').slice(0, 80) : '',
-                                topPointerEvents: topNode ? window.getComputedStyle(topNode).pointerEvents : '',
-                                inPanel: !!(topNode && this.panel.contains(topNode)),
-                                inNav: !!(topNode && this.nav && this.nav.contains(topNode))
-                            }
-                        );
-                        // #endregion
-                    }.bind(this), true);
-                }
-                if (this.nav && this.nav.dataset.awaNavPointerProbeBound !== '1') {
-                    this.nav.dataset.awaNavPointerProbeBound = '1';
-                    this.nav._awaNavPointerProbeCount = 0;
-                    this.nav.addEventListener('pointerover', function (evt) {
-                        if (!this.nav || this.nav._awaNavPointerProbeCount >= 5) {
-                            return;
-                        }
-                        this.nav._awaNavPointerProbeCount += 1;
-                        var target = evt && evt.target ? evt.target : null;
-                        var level0Li = target && target.closest
-                            ? target.closest('li.ui-menu-item.level0')
-                            : null;
-                        // #region agent log
-                        sendDebugLog(
-                            'pre-fix',
-                            'H37',
-                            'awa-menu-controller.js:syncAria:nav-pointerover-probe',
-                            'Pointerover captured in nav scope while menu is open',
-                            {
-                                href: window.location.href,
-                                count: this.nav._awaNavPointerProbeCount,
-                                isOpen: !!this.isOpen,
-                                targetTag: target ? target.tagName : '',
-                                targetClass: target ? String(target.className || '').slice(0, 120) : '',
-                                targetPointerEvents: target ? window.getComputedStyle(target).pointerEvents : '',
-                                level0Class: level0Li ? String(level0Li.className || '').slice(0, 120) : ''
-                            }
-                        );
-                        // #endregion
-                    }.bind(this), true);
-                }
-                if (this.panel.dataset.awaHoverProbeBound !== '1') {
-                    this.panel.dataset.awaHoverProbeBound = '1';
-                    this.panel._awaHoverProbeCount = 0;
-                    this.panel.addEventListener('mouseover', function (evt) {
-                        if (!this.panel || this.panel._awaHoverProbeCount >= 4) {
-                            return;
-                        }
-                        this.panel._awaHoverProbeCount += 1;
-                        var target = evt && evt.target ? evt.target : null;
-                        var targetParent = target && target.closest
-                            ? target.closest('li.level0.parent, li.level0.navigation__item--parent')
-                            : null;
-                        // #region agent log
-                        sendDebugLog(
-                            'pre-fix',
-                            'H36',
-                            'awa-menu-controller.js:syncAria:hover-probe',
-                            'Panel mouseover probe event reached menu panel',
-                            {
-                                href: window.location.href,
-                                count: this.panel._awaHoverProbeCount,
-                                targetTag: target ? target.tagName : '',
-                                targetClass: target ? String(target.className || '').slice(0, 120) : '',
-                                hasClosestParentLevel0: !!targetParent,
-                                closestParentClass: targetParent ? String(targetParent.className || '').slice(0, 120) : ''
-                            }
-                        );
-                        // #endregion
-                    }.bind(this), true);
-                }
-                window.requestAnimationFrame(function () {
-                    var rafParentLink = this.panel ? this.panel.querySelector(':scope > li.ui-menu-item.level0.navigation__item--parent > a.level-top.navigation__link, :scope > li.ui-menu-item.level0.parent > a.level-top.navigation__link') : null;
-                    var rafAfter = rafParentLink ? window.getComputedStyle(rafParentLink, '::after') : null;
-                    var hero = document.querySelector('.awa-hero-swiper');
-                    var benefits = document.querySelector('.awa-hero-benefits');
-                    var categoryTitle = Array.prototype.find.call(
-                        document.querySelectorAll('.awa-section-header__title'),
-                        function (title) {
-                            return (title.textContent || '').indexOf('Compre por categoria') !== -1;
-                        }
-                    );
-                    var panelRect = this.panel ? this.panel.getBoundingClientRect() : null;
-                    var heroRect = hero ? hero.getBoundingClientRect() : null;
-                    var benefitsRect = benefits ? benefits.getBoundingClientRect() : null;
-                    var categoryRect = categoryTitle ? categoryTitle.getBoundingClientRect() : null;
-                    // #region agent log
-                    (function logSearchGeometryAfterFrame(panel) {
-                        var searchRow = panel
-                            ? panel.querySelector(':scope > [data-role="awa-vmenu-search-row"]')
-                            : null;
-                        var searchWrap = searchRow
-                            ? searchRow.querySelector('.awa-vmenu-search-wrap')
-                            : null;
-                        var searchInput = searchWrap
-                            ? searchWrap.querySelector('.awa-vmenu-search-input')
-                            : null;
-                        var compactRect = function (node) {
-                            var rect = node ? node.getBoundingClientRect() : null;
-
-                            return rect ? {
-                                x: Math.round(rect.x),
-                                y: Math.round(rect.y),
-                                w: Math.round(rect.width),
-                                h: Math.round(rect.height)
-                            } : null;
-                        };
-
-                        fetch('http://localhost:7935/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Debug-Session-Id': 'ca59a1'
-                            },
-                            body: JSON.stringify({
-                                sessionId: 'ca59a1',
-                                runId: 'vmenu-search-offset-pre-fix',
-                                hypothesisId: 'H202-H205',
-                                location: 'awa-menu-controller.js:syncAria:open:search-geometry-raf',
-                                message: 'Vertical menu search geometry after layout frame',
-                                data: {
-                                    panel: compactRect(panel),
-                                    searchRow: compactRect(searchRow),
-                                    searchWrap: compactRect(searchWrap),
-                                    searchInput: compactRect(searchInput),
-                                    rowInlineStyle: searchRow ? searchRow.getAttribute('style') || '' : '',
-                                    wrapInlineStyle: searchWrap ? searchWrap.getAttribute('style') || '' : '',
-                                    inputInlineStyle: searchInput ? searchInput.getAttribute('style') || '' : ''
-                                },
-                                timestamp: Date.now()
-                            })
-                        }).catch(function () {});
-                        sendDebugLog(
-                            'vmenu-search-offset-pre-fix',
-                            'H202-H205',
-                            'awa-menu-controller.js:syncAria:open:search-geometry-raf-fallback',
-                            'Compact vertical menu search geometry after layout frame',
-                            {
-                                p: compactRect(panel),
-                                r: compactRect(searchRow),
-                                w: compactRect(searchWrap),
-                                i: compactRect(searchInput)
-                            }
-                        );
-                    }(this.panel));
-                    // #endregion
-                    // #region agent log
-                    sendDebugLog(
-                        'pre-fix',
-                        'H10',
-                        'awa-menu-controller.js:syncAria:open:raf',
-                        'Post-frame parent ::after snapshot',
-                        {
-                            href: window.location.href,
-                            panelState: this.panel ? this.panel.getAttribute('data-awa-menu-state') || '' : '',
-                            runtimeStylePresent: !!document.getElementById(RUNTIME_STYLE_FIX_ID),
-                            afterContent: rafAfter ? rafAfter.content : '',
-                            afterDisplay: rafAfter ? rafAfter.display : '',
-                            afterOpacity: rafAfter ? rafAfter.opacity : ''
-                        }
-                    );
-                    // #endregion
-                    // #region agent log
-                    fetch('http://localhost:7306/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ca59a1'},body:JSON.stringify({sessionId:'ca59a1',runId:'home-menu-composition-pre-fix',hypothesisId:'H104-H107',location:'awa-menu-controller.js:syncAria:open:composition',message:'Open menu composition against hero and next section',data:{panelPosition:this.panel?window.getComputedStyle(this.panel).position:null,panelRect:panelRect?{x:Math.round(panelRect.x),y:Math.round(panelRect.y),right:Math.round(panelRect.right),bottom:Math.round(panelRect.bottom),w:Math.round(panelRect.width),h:Math.round(panelRect.height)}:null,heroRect:heroRect?{x:Math.round(heroRect.x),y:Math.round(heroRect.y),right:Math.round(heroRect.right),bottom:Math.round(heroRect.bottom),w:Math.round(heroRect.width),h:Math.round(heroRect.height)}:null,benefitsRect:benefitsRect?{x:Math.round(benefitsRect.x),y:Math.round(benefitsRect.y),right:Math.round(benefitsRect.right),bottom:Math.round(benefitsRect.bottom),w:Math.round(benefitsRect.width),h:Math.round(benefitsRect.height)}:null,horizontalOverlap:panelRect&&heroRect?Math.max(0,Math.round(panelRect.right-heroRect.left)):null,categoryGap:panelRect&&categoryRect?Math.round(categoryRect.top-panelRect.bottom):null,bodyClass:document.body.className,navClass:this.nav?this.nav.className:'',heroParentClass:hero&&hero.parentElement?hero.parentElement.className:''},timestamp:Date.now()})}).catch(function(){});
-                    sendDebugLog(
-                        'home-menu-composition-pre-fix',
-                        'H104-H107',
-                        'awa-menu-controller.js:syncAria:open:composition',
-                        'Open menu composition against hero and next section',
-                        {
-                            panelPosition: this.panel ? window.getComputedStyle(this.panel).position : null,
-                            panelRect: panelRect ? {
-                                x: Math.round(panelRect.x),
-                                y: Math.round(panelRect.y),
-                                right: Math.round(panelRect.right),
-                                bottom: Math.round(panelRect.bottom),
-                                w: Math.round(panelRect.width),
-                                h: Math.round(panelRect.height)
-                            } : null,
-                            heroRect: heroRect ? {
-                                x: Math.round(heroRect.x),
-                                y: Math.round(heroRect.y),
-                                right: Math.round(heroRect.right),
-                                bottom: Math.round(heroRect.bottom),
-                                w: Math.round(heroRect.width),
-                                h: Math.round(heroRect.height)
-                            } : null,
-                            benefitsRect: benefitsRect ? {
-                                x: Math.round(benefitsRect.x),
-                                y: Math.round(benefitsRect.y),
-                                right: Math.round(benefitsRect.right),
-                                bottom: Math.round(benefitsRect.bottom),
-                                w: Math.round(benefitsRect.width),
-                                h: Math.round(benefitsRect.height)
-                            } : null,
-                            horizontalOverlap: panelRect && heroRect
-                                ? Math.max(0, Math.round(panelRect.right - heroRect.left))
-                                : null,
-                            categoryGap: panelRect && categoryRect
-                                ? Math.round(categoryRect.top - panelRect.bottom)
-                                : null,
-                            bodyClass: document.body.className,
-                            navClass: this.nav ? this.nav.className : '',
-                            heroParentClass: hero && hero.parentElement ? hero.parentElement.className : ''
-                        }
-                    );
-                    // #endregion
-                }.bind(this));
+                applyTopLinkRuntimeFixes(this.panel);
+                this.panel.dataset.awaTypographyReady = '1';
                 if (isDesktop()) {
                     this.schedulePanelHeight();
                 }
             } else {
                 this.syncSearchRow(false);
                 applyMenuLinkTypography(this.panel, false);
+                delete this.panel.dataset.awaTypographyReady;
                 ['display', 'flex-direction', 'visibility', 'opacity', 'height', 'min-height', 'max-height', 'overflow', 'overflow-x', 'overflow-y'].forEach(function (prop) {
                     this.panel.style.removeProperty(prop);
                 }, this);
@@ -2348,16 +1247,35 @@ define([
         }
         clearTimeout(this.closeTimer);
         this.isOpen = true;
+        this._openScrollY = window.scrollY || window.pageYOffset || 0;
         this.syncAria(true);
     };
 
+    DeptMenu.prototype.isDomOpen = function () {
+        if (!this.trigger && !this.panel) {
+            return false;
+        }
+        if (this.trigger && this.trigger.getAttribute('aria-expanded') === 'true') {
+            return true;
+        }
+        if (!this.panel) {
+            return false;
+        }
+        return this.panel.getAttribute('data-awa-menu-state') === 'open'
+            || this.panel.classList.contains('menu-open')
+            || this.panel.classList.contains('vmm-open')
+            || this.panel.getAttribute('aria-hidden') === 'false';
+    };
+
     DeptMenu.prototype.close = function () {
-        if (!this.isOpen) {
+        /* H22: fechar mesmo com isOpen dessincronizado do DOM (painel aberto, flag false). */
+        if (!this.isOpen && !this.isDomOpen()) {
             return;
         }
         clearTimeout(this.hoverTimer);
         clearTimeout(this.closeTimer);
         this.isOpen = false;
+        this._openScrollY = null;
         this.syncAria(false);
     };
 
@@ -2383,37 +1301,16 @@ define([
 
     DeptMenu.prototype.bind = function (flyout) {
         var self = this;
-        // #region agent log
-        sendDebugLog(
-            'pre-fix',
-            'H15',
-            'awa-menu-controller.js:DeptMenu.bind:entry',
-            'DeptMenu bind entry snapshot',
-            {
-                href: window.location.href,
-                hasTrigger: !!this.trigger,
-                hasPanel: !!this.panel,
-                hasNav: !!this.nav,
-                navReadyFlag: this.nav ? (this.nav.dataset.awaMenuControllerReady || '') : ''
-            }
-        );
-        // #endregion
+        this.trigger = this.nav.querySelector('[data-role="awa-vertical-menu-trigger"]');
+        this.panel = this.nav.querySelector('[data-role="awa-vertical-menu-panel"]');
         if (!this.trigger || !this.panel) {
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H15',
-                'awa-menu-controller.js:DeptMenu.bind:abort',
-                'DeptMenu bind aborted due missing trigger/panel',
-                {
-                    href: window.location.href,
-                    hasTrigger: !!this.trigger,
-                    hasPanel: !!this.panel
-                }
-            );
-            // #endregion
             return;
         }
+
+        guardDeptTriggerInlineTypography(this.trigger);
+        window.requestAnimationFrame(function () {
+            guardDeptTriggerInlineTypography(self.trigger);
+        });
 
         if (
             document.body.classList.contains('awa-menu-dept-open')
@@ -2431,7 +1328,27 @@ define([
                 mobileDrawer.openDrawer();
                 return;
             }
+            var wasOpen = self.isOpen
+                || self.trigger.getAttribute('aria-expanded') === 'true'
+                || self.panel.getAttribute('data-awa-menu-state') === 'open'
+                || self.panel.classList.contains('menu-open')
+                || self.panel.classList.contains('vmm-open');
+
             self.toggle();
+
+            // If first click remains closed due race/late init, force deterministic open.
+            if (!wasOpen) {
+                window.requestAnimationFrame(function () {
+                    var openAfterToggle = self.trigger.getAttribute('aria-expanded') === 'true'
+                        || self.panel.getAttribute('data-awa-menu-state') === 'open'
+                        || self.panel.classList.contains('menu-open')
+                        || self.panel.classList.contains('vmm-open');
+
+                    if (!openAfterToggle) {
+                        self.open();
+                    }
+                });
+            }
         });
 
         this.trigger.addEventListener('keydown', function (e) {
@@ -2484,7 +1401,28 @@ define([
         }, true);
 
         document.addEventListener('click', function (e) {
-            if (!self.isOpen || self.nav.contains(e.target)) {
+            var target = e && e.target ? e.target : null;
+            var targetElement = target && target.nodeType === 3 ? target.parentElement : target;
+            var navSelector = '[data-role="awa-vertical-menu"], .navigation.verticalmenu.side-verticalmenu';
+            var currentNav = targetElement && targetElement.closest
+                ? targetElement.closest(navSelector)
+                : null;
+            if (!currentNav) {
+                currentNav = document.querySelector(navSelector);
+            }
+            var insideCurrentNav = !!(currentNav && targetElement && currentNav.contains(targetElement));
+            var insideSelfNav = !!(targetElement && self.nav && self.nav.contains(targetElement));
+            var insideKnownMenu = !!(
+                targetElement && targetElement.closest && targetElement.closest(
+                    '[data-role="awa-vertical-menu-trigger"], [data-role="awa-vertical-menu-panel"], .title-category-dropdown.our_categories, .navigation.verticalmenu.side-verticalmenu'
+                )
+            );
+            if (
+                !self.isOpen
+                || insideSelfNav
+                || insideCurrentNav
+                || insideKnownMenu
+            ) {
                 return;
             }
             self.close();
@@ -2522,6 +1460,43 @@ define([
             syncHomeMenuComposition(self.isOpen);
         }, { passive: true });
 
+        /* H22: menu sticky aberto cobre Lançamentos (~141k px²). Fechar no scroll
+           da página (não no scroll interno do painel). Threshold evita micro-jitter. */
+        if (!this._scrollCloseBound) {
+            this._scrollCloseBound = true;
+            var SCROLL_CLOSE_PX = 40;
+            window.addEventListener('scroll', function (evt) {
+                if (!isDesktop()) {
+                    return;
+                }
+                var domOpen = self.isDomOpen();
+                if (!self.isOpen && !domOpen) {
+                    return;
+                }
+                if (!self.isOpen && domOpen) {
+                    self.isOpen = true;
+                    if (typeof self._openScrollY !== 'number') {
+                        self._openScrollY = window.scrollY || window.pageYOffset || 0;
+                    }
+                }
+                var target = evt && evt.target;
+                if (target && target !== document && target !== document.documentElement
+                    && target !== document.body && self.panel && self.panel.contains(target)) {
+                    return;
+                }
+                var y = window.scrollY || window.pageYOffset || 0;
+                var base = typeof self._openScrollY === 'number' ? self._openScrollY : y;
+                var delta = Math.abs(y - base);
+                if (delta < SCROLL_CLOSE_PX) {
+                    return;
+                }
+                if (flyout && typeof flyout.closeAll === 'function') {
+                    flyout.closeAll();
+                }
+                self.close();
+            }, { passive: true, capture: true });
+        }
+
         this.panel.querySelectorAll('.open-children-toggle').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -2538,21 +1513,7 @@ define([
                 sub.style.display = opened ? '' : 'none';
             });
         });
-        // #region agent log
-        sendDebugLog(
-            'pre-fix',
-            'H16',
-            'awa-menu-controller.js:DeptMenu.bind:ready',
-            'DeptMenu bind completed and listeners attached',
-            {
-                href: window.location.href,
-                isOpen: !!this.isOpen,
-                panelState: this.panel.getAttribute('data-awa-menu-state') || '',
-                ariaExpanded: this.trigger.getAttribute('aria-expanded') || '',
-                parentCount: this.panel.querySelectorAll(':scope > li.ui-menu-item.level0.parent, :scope > li.ui-menu-item.level0.navigation__item--parent').length
-            }
-        );
-        // #endregion
+
     };
 
     DeptMenu.prototype.bindLimitShow = function () {
@@ -3185,22 +2146,103 @@ define([
         }.bind(this.root));
     };
 
+    /* Instâncias DeptMenu — fechamento global (sticky header / escape) */
+    var DEPT_MENU_INSTANCES = [];
+
+    function closeAllDeptMenus(reason) {
+        var closed = 0;
+        for (var i = 0; i < DEPT_MENU_INSTANCES.length; i++) {
+            var instance = DEPT_MENU_INSTANCES[i];
+            if (instance && (instance.isOpen || (typeof instance.isDomOpen === 'function' && instance.isDomOpen()))) {
+                try {
+                    if (instance._flyout && typeof instance._flyout.closeAll === 'function') {
+                        instance._flyout.closeAll();
+                    }
+                    instance.close();
+                    closed += 1;
+                } catch (err) { /* ignore */ }
+            }
+        }
+        /* Fallback DOM: garante fechamento mesmo se a lista de instâncias estiver vazia/stale. */
+        if (closed === 0) {
+            document.querySelectorAll('[data-role="awa-vertical-menu-trigger"][aria-expanded="true"]').forEach(function (trigger) {
+                try {
+                    trigger.setAttribute('aria-expanded', 'false');
+                    trigger.classList.remove('active');
+                    closed += 1;
+                } catch (err) { /* ignore */ }
+            });
+            document.querySelectorAll('[data-role="awa-vertical-menu-panel"]').forEach(function (panel) {
+                try {
+                    panel.setAttribute('data-awa-menu-state', 'closed');
+                    panel.setAttribute('aria-hidden', 'true');
+                    panel.classList.remove('menu-open', 'vmm-open');
+                    ['display', 'flex-direction', 'visibility', 'opacity', 'height', 'min-height', 'max-height', 'overflow', 'overflow-x', 'overflow-y'].forEach(function (prop) {
+                        panel.style.removeProperty(prop);
+                    });
+                } catch (err) { /* ignore */ }
+            });
+        }
+        document.body.classList.remove('awa-menu-dept-open');
+        return closed;
+    }
+
+    window.__awaCloseDeptMenus = closeAllDeptMenus;
+
+    if (!window.__awaDeptStickyCloseBound) {
+        window.__awaDeptStickyCloseBound = true;
+        document.addEventListener('awa:header-sticky-change', function (evt) {
+            if (evt && evt.detail && evt.detail.sticky) {
+                closeAllDeptMenus('sticky-event');
+            }
+        });
+    }
+
+    /* H22: fechamento global no scroll da página (complementa sticky-event).
+       Com header sticky, qualquer scroll fecha — evita painel cobrindo Lançamentos. */
+    if (!window.__awaDeptScrollCloseBound) {
+        window.__awaDeptScrollCloseBound = true;
+        var __awaDeptScrollCloseY = null;
+        var __awaDeptScrollCloseTicking = false;
+        window.addEventListener('scroll', function () {
+            if (!isDesktop()) {
+                return;
+            }
+            var anyOpen = !!document.querySelector(
+                '[data-role="awa-vertical-menu-trigger"][aria-expanded="true"],'
+                + '[data-role="awa-vertical-menu-panel"][data-awa-menu-state="open"]'
+            );
+            if (!anyOpen) {
+                __awaDeptScrollCloseY = null;
+                return;
+            }
+            var isSticky = !!document.querySelector('.header-wrapper-sticky.is-sticky')
+                || document.body.classList.contains('awa-header-is-sticky');
+            var y = window.scrollY || window.pageYOffset || 0;
+            if (!isSticky) {
+                if (__awaDeptScrollCloseY === null) {
+                    __awaDeptScrollCloseY = y;
+                    return;
+                }
+                if (Math.abs(y - __awaDeptScrollCloseY) < 40) {
+                    return;
+                }
+            }
+            if (__awaDeptScrollCloseTicking) {
+                return;
+            }
+            __awaDeptScrollCloseTicking = true;
+            window.requestAnimationFrame(function () {
+                __awaDeptScrollCloseTicking = false;
+                __awaDeptScrollCloseY = null;
+                closeAllDeptMenus(isSticky ? 'page-scroll-sticky' : 'page-scroll');
+            });
+        }, {passive: true});
+    }
+
     /* ── Widget entry (per vertical menu nav) ───────────────────────── */
     return function (config, element) {
         if (!window.__AWA_MENU_V2) {
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H17',
-                'awa-menu-controller.js:widget:guard',
-                'Widget exited because __AWA_MENU_V2 is falsy',
-                {
-                    href: window.location.href,
-                    markerType: typeof window.__AWA_MENU_V2,
-                    markerValue: String(window.__AWA_MENU_V2)
-                }
-            );
-            // #endregion
             return;
         }
 
@@ -3208,70 +2250,16 @@ define([
             ? element
             : document.querySelector('[data-role="awa-vertical-menu"]');
         if (!nav) {
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H18',
-                'awa-menu-controller.js:widget:no-nav',
-                'Widget could not resolve vertical menu root',
-                {
-                    href: window.location.href,
-                    elementProvided: !!(element && element.nodeType === 1),
-                    selectorCount: document.querySelectorAll('[data-role="awa-vertical-menu"]').length
-                }
-            );
-            // #endregion
             return;
         }
-        // #region agent log
-        sendDebugLog(
-            'pre-fix',
-            'H19',
-            'awa-menu-controller.js:widget:nav-found',
-            'Widget resolved vertical menu root',
-            {
-                href: window.location.href,
-                navClassName: nav.className,
-                triggerCountInNav: nav.querySelectorAll('[data-role="awa-vertical-menu-trigger"]').length,
-                panelCountInNav: nav.querySelectorAll('[data-role="awa-vertical-menu-panel"]').length,
-                navInSticky: !!nav.closest('.header-wrapper-sticky'),
-                navRectW: Math.round(nav.getBoundingClientRect().width),
-                navRectH: Math.round(nav.getBoundingClientRect().height)
-            }
-        );
-        // #endregion
         var dept = new DeptMenu(nav, config || {});
         var flyout = new FlyoutPortal(nav.querySelector('[data-role="awa-vertical-menu-panel"]') || nav);
+        dept._flyout = flyout;
+        DEPT_MENU_INSTANCES.push(dept);
         try {
             dept.bind(flyout);
             flyout.mount();
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H19',
-                'awa-menu-controller.js:widget:bind-success',
-                'Widget bind and flyout mount completed',
-                {
-                    href: window.location.href,
-                    navReadyFlagBeforeSet: nav.dataset.awaMenuControllerReady || '',
-                    portalRootClass: (flyout.root && flyout.root.className) || ''
-                }
-            );
-            // #endregion
         } catch (bindErr) {
-            // #region agent log
-            sendDebugLog(
-                'pre-fix',
-                'H22',
-                'awa-menu-controller.js:widget:bind-error',
-                'Widget bind threw runtime error',
-                {
-                    href: window.location.href,
-                    message: bindErr && bindErr.message ? String(bindErr.message) : '',
-                    stack: bindErr && bindErr.stack ? String(bindErr.stack).slice(0, 180) : ''
-                }
-            );
-            // #endregion
         }
 
         if (!DOC_BOOTED) {

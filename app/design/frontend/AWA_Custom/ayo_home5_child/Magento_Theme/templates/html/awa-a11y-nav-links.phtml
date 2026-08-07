@@ -16,6 +16,45 @@ $isCmsHomeRoute = in_array('cms_index_index', $layoutHandles, true);
 $a11yNavConfig = [
     'isHome' => $isCmsHomeRoute,
 ];
+$a11yNavUrl = $block->getViewFileUrl('js/awa-a11y-nav-links.min.js');
 ?>
 <script id="awa-a11y-nav-config" type="application/json"><?= /* @noEscape */ json_encode($a11yNavConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?></script>
-<script src="<?= $block->escapeUrl($block->getViewFileUrl('js/awa-a11y-nav-links.min.js')) ?>" defer></script>
+<?php if ($isCmsHomeRoute): ?>
+<script>
+(function (w, d) {
+    'use strict';
+    var src = <?= /* @noEscape */ json_encode($a11yNavUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    var loaded = false;
+    function load() {
+        if (loaded || d.getElementById('awa-a11y-nav-links-js')) {
+            return;
+        }
+        loaded = true;
+        var s = d.createElement('script');
+        s.id = 'awa-a11y-nav-links-js';
+        s.src = src;
+        s.async = true;
+        (d.body || d.documentElement).appendChild(s);
+    }
+    function onIntent(ev) {
+        var t = ev && ev.target;
+        if (t && t.closest && t.closest('.block-vertical-nav, .block-vmenu, .navigation, .nav-sections, .header-control, .awa-nav-bar, [data-awa-nav-toggle]')) {
+            ['pointerdown', 'keydown', 'touchstart'].forEach(function (n) {
+                w.removeEventListener(n, onIntent, true);
+            });
+            load();
+        }
+    }
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (n) {
+        w.addEventListener(n, onIntent, { capture: true, passive: n !== 'keydown' });
+    });
+    if ('requestIdleCallback' in w) {
+        w.requestIdleCallback(load, { timeout: 6000 });
+    } else {
+        w.setTimeout(load, 4000);
+    }
+})(window, document);
+</script>
+<?php else: ?>
+<script src="<?= $block->escapeUrl($a11yNavUrl) ?>" defer></script>
+<?php endif; ?>

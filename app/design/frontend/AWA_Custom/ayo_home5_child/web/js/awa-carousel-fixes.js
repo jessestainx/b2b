@@ -1,0 +1,157 @@
+(function (w, d) {
+    'use strict';
+    if (w.__awaCarouselFixesInit) { return; }
+    w.__awaCarouselFixesInit = true;
+
+    var SWIPER_SELECTORS = [
+        '.swiper', '.awa-hero-swiper', '.products-swiper',
+        '.awa-shelf--carousel', '.rokan-bestseller.awa-shelf',
+        '.rokan-newproduct.awa-shelf', '.awa-pdp-related',
+        '.block.related', '.block.upsell', '.awa-pdp-mostviewed',
+        '.awa-home-niche-shelves__panel .rokan-bestseller',
+        '.awa-home-niche-shelves__panel .rokan-newproduct'
+    ];
+
+    /**
+     * C2/C7: aria-label + min-width/height nas setas
+     */
+    function fixArrows() {
+        // Swiper buttons
+        var arrows = d.querySelectorAll(
+            '.swiper-button-prev:not([data-awa-fixed]),' +
+            '.swiper-button-next:not([data-awa-fixed]),' +
+            '.owl-prev:not([data-awa-fixed]),' +
+            '.owl-next:not([data-awa-fixed])'
+        );
+        arrows.forEach(function (btn) {
+            var isPrev = btn.classList.contains('swiper-button-prev') ||
+                         btn.classList.contains('owl-prev');
+            var label = isPrev ? 'Slide anterior' : 'Pr\u00f3ximo slide';
+            if (!btn.getAttribute('aria-label')) {
+                btn.setAttribute('aria-label', label);
+            }
+            if (!btn.getAttribute('role')) {
+                btn.setAttribute('role', 'button');
+            }
+            // C7: Touch target 44x44px
+            btn.style.minWidth = '44px';
+            btn.style.minHeight = '44px';
+            btn.setAttribute('data-awa-fixed', '1');
+        });
+    }
+
+    /**
+     * C5: aria-label nos pagination dots
+     */
+    function fixPagination() {
+        // Swiper bullets
+        var bullets = d.querySelectorAll(
+            '.swiper-pagination-bullet:not([data-awa-fixed]),' +
+            '.owl-dot:not([data-awa-fixed])'
+        );
+        bullets.forEach(function (bullet, i) {
+            var label = 'Ir para slide ' + (i + 1);
+            if (!bullet.getAttribute('aria-label')) {
+                bullet.setAttribute('aria-label', label);
+            }
+            if (!bullet.getAttribute('role')) {
+                bullet.setAttribute('role', 'button');
+            }
+            bullet.setAttribute('data-awa-fixed', '1');
+        });
+    }
+
+    /**
+     * C3: text-banner position absolute (se ja tem CSS class)
+     */
+    function fixTextBanner() {
+        var banners = d.querySelectorAll('.text-banner:not([data-awa-fixed])');
+        banners.forEach(function (b) {
+            // So aplicar se o parent tem position:relative
+            var parent = b.parentElement;
+            if (parent && getComputedStyle(parent).position === 'static') {
+                parent.style.position = 'relative';
+            }
+            b.setAttribute('data-awa-fixed', '1');
+        });
+    }
+
+    /**
+     * C6: Keyboard navigation (setas para navegar)
+     */
+    function fixKeyboardNav() {
+        d.querySelectorAll('.swiper, .owl-carousel').forEach(function (el) {
+            if (el.hasAttribute('data-awa-kbd-bound')) return;
+            el.setAttribute('data-awa-kbd-bound', '1');
+            el.setAttribute('tabindex', '0');
+            el.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowLeft') {
+                    var prev = el.querySelector('.swiper-button-prev, .owl-prev');
+                    if (prev) prev.click();
+                } else if (e.key === 'ArrowRight') {
+                    var next = el.querySelector('.swiper-button-next, .owl-next');
+                    if (next) next.click();
+                }
+            });
+        });
+    }
+
+    /**
+     * C7: aria-live para anuncio de slide
+     */
+    function fixAriaLive() {
+        d.querySelectorAll('.swiper[role="region"], .owl-carousel[role="region"]').forEach(function (el) {
+            if (!el.hasAttribute('aria-live')) {
+                el.setAttribute('aria-live', 'polite');
+            }
+            if (!el.hasAttribute('aria-atomic')) {
+                el.setAttribute('aria-atomic', 'true');
+            }
+        });
+    }
+
+    /**
+     * Aplicar todas as correcoes
+     */
+
+    function applyAll() {
+        fixArrows();
+        fixPagination();
+        fixTextBanner();
+        fixKeyboardNav();
+        fixAriaLive();
+    }
+
+    /**
+     * MutationObserver para pegar novos swipers adicionados
+     */
+    function initObserver() {
+        if (typeof MutationObserver === 'undefined') return;
+        var pending = null;
+        var observer = new MutationObserver(function () {
+            if (pending) clearTimeout(pending);
+            pending = setTimeout(applyAll, 100);
+        });
+        observer.observe(d.body || d.documentElement, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', function () {
+            applyAll();
+            initObserver();
+            // Tentar de novo apos Swiper inicializar (pode demorar)
+            setTimeout(applyAll, 1000);
+            setTimeout(applyAll, 3000);
+            setTimeout(applyAll, 5000);
+        }, { once: true });
+    } else {
+        applyAll();
+        initObserver();
+        setTimeout(applyAll, 1000);
+        setTimeout(function () { applyAll(); }, 3000);
+        setTimeout(applyAll, 5000);
+    }
+})(window, document);

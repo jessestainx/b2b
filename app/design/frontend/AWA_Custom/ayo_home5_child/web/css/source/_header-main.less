@@ -453,51 +453,65 @@ body .page-wrapper .awa-site-header {
       }
     }
 
-    // Botão do carrinho: fundo vermelho 44×44
+    // Botão do carrinho: ícone primary sem fundo (evita flash CTA vermelho no 1º paint)
     .awa-main-header .awa-header-minicart .minicart-wrapper {
 
       .action.showcart {
         align-items: center;
-        background: var(--awa-hdr-primary);
+        background: transparent;
+        background-color: transparent;
         border: none;
-        border-radius: var(--awa-hdr-radius);
+        border-radius: 0;
         box-shadow: none;
-        color: @awa-white;
+        color: var(--awa-hdr-primary, @awa-primary);
         display: inline-flex !important;
         height: @h-cart-btn;
         justify-content: center;
         min-width: @h-cart-btn;
         padding: 0;
         position: relative !important;
-        transition: background @transition-fast;
+        transition: opacity @transition-fast;
         width: @h-cart-btn;
 
         &:hover {
-          background: var(--awa-hdr-primary-dark);
-          color: @awa-white;
+          background: transparent;
+          background-color: transparent;
+          color: var(--awa-hdr-primary-dark, @awa-primary-dark);
+          opacity: 0.88;
         }
 
         &:focus-visible {
-          outline: 2px solid @awa-white;
-          outline-offset: -3px;
-          box-shadow: 0 0 0 3px var(--awa-hdr-primary);
+          outline: 2px solid var(--awa-hdr-primary, @awa-primary);
+          outline-offset: 2px;
+          box-shadow: none;
         }
 
         &::before {
-          color: @awa-white;
+          color: currentColor;
           font-size: var(--awa-font-xl);
           line-height: 1;
         }
+
+        .awa-minicart-icon {
+          color: currentColor;
+          fill: none;
+          stroke: currentColor;
+        }
+
+        .awa-minicart-icon circle {
+          fill: currentColor;
+          stroke: none;
+        }
       }
 
-      // Badge: fundo branco + texto vermelho (contraste sobre fundo vermelho)
+      // Badge: pill primary sobre ícone sem fundo
       .counter.qty {
         align-items: center;
-        background: @awa-white;
-        border: 1.5px solid var(--awa-hdr-primary);
+        background: var(--awa-hdr-primary, @awa-primary);
+        border: 0;
         border-radius: 999px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        color: var(--awa-hdr-primary);
+        box-shadow: none;
+        color: @awa-white;
         display: inline-flex !important;
         font-size: 10px;
         font-weight: 700;

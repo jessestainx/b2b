@@ -211,6 +211,14 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
             shell.classList.toggle('awa-header-minicart--ready', ready);
             shell.classList.toggle('awa-header-minicart--expanded', expanded);
         }
+
+        // Keep .block-minicart.empty in sync with counter (panel has no KO scope).
+        // Template must not hardcode empty — that left the class stuck with items in cart.
+        if (panel) {
+            var counter = trigger ? trigger.querySelector('.counter.qty') : null;
+            var cartEmpty = !counter || counter.classList.contains('empty');
+            panel.classList.toggle('empty', cartEmpty);
+        }
     }
 
     function scheduleDropdownStateSync() {
@@ -230,6 +238,36 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
         document.addEventListener('contentUpdated', scheduleDropdownStateSync, true);
     }
 
+    function preloadMinicartPosition() {
+        if (typeof require !== 'function') {
+            return;
+        }
+
+        require(['js/awa-minicart-position'], function () {
+            /* warm AMD cache before first open */
+        });
+    }
+
+    function centerAfterOpen(panelEl) {
+        if (!panelEl || typeof require !== 'function') {
+            return;
+        }
+
+        require(['js/awa-minicart-position'], function (minicartPosition) {
+            if (!minicartPosition) {
+                return;
+            }
+
+            // Center immediately to avoid right-edge 44px flash, then re-center as KO hydrates.
+            if (typeof minicartPosition.centerOpenMinicartPanel === 'function') {
+                minicartPosition.centerOpenMinicartPanel(panelEl);
+            }
+            if (typeof minicartPosition.scheduleCenterOpenMinicartPanel === 'function') {
+                minicartPosition.scheduleCenterOpenMinicartPanel(panelEl);
+            }
+        });
+    }
+
     function openDropdownWithRetry(maxAttempts) {
         var attempts = 0;
 
@@ -246,16 +284,19 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
                 if ($block.length && $block.data('mageDropdownDialog')) {
                     $block.dropdownDialog('open');
                     scheduleDropdownStateSync();
+                    centerAfterOpen($block.get(0));
                     window.__awaMinicartOpenAfterInit = false;
                     return;
                 }
 
                 if (attempts < maxAttempts) {
                     window.setTimeout(attemptOpen, 75);
+                } else {
                 }
             }, function () {
                 if (attempts < maxAttempts) {
                     window.setTimeout(attemptOpen, 75);
+                } else {
                 }
             });
         }
@@ -320,9 +361,7 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
             return false;
         }
 
-        // Guard: verifica se o minicart-content-wrapper já foi inicializado pelo KO
-        // (ocorre quando text/x-magento-init processou Magento_Ui/js/core/app antes deste bootstrap).
-        // Se já está bound, pular appModule() e executar apenas tarefas secundárias.
+        // Guard: already bound by Magento x-magento-init (non-home paths).
         var contentWrapper = document.getElementById('minicart-content-wrapper');
 
         if (contentWrapper && ko.dataFor(contentWrapper)) {
@@ -339,6 +378,8 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
             return true;
         }
 
+        // Hydrate is ideally done before requiring Magento_Ui/js/core/app (see launch()).
+        // Keep idempotent call here for any other entry points.
         hydrateDeferredMinicartShell();
 
         try {
@@ -349,6 +390,9 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
             }
             return false;
         }
+
+        // Safety net when KO bootstrap already ran before hydrate.
+        applyMinicartKnockoutBindings();
 
         if (payload.loaderUrl) {
             require(['Magento_Ui/js/block-loader'], function (blockLoader) {
@@ -369,6 +413,71 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
         return true;
     }
 
+    /**
+     * Home defer: document ko.applyBindings() may attach a parent context to the
+     * wrapper without rendering the scope template. Replay Magento scope.js
+     * applyComponents once minicart_content exists in uiRegistry.
+     */
+    function applyMinicartKnockoutBindings() {
+        require(['ko', 'uiRegistry', 'mage/translate'], function (koLib, registry, $t) {
+            var contentEl = document.getElementById('minicart-content-wrapper');
+            var triggerEl = document.querySelector('[data-block="minicart"] .showcart[data-bind]');
+
+            function applyScopeToElement(el, component) {
+                var bindingContext;
+                var childContext;
+
+                if (!el || !component) {
+                    return false;
+                }
+
+                if (el.id === 'minicart-content-wrapper' && el.querySelector('.block-title')) {
+                    return true;
+                }
+
+                bindingContext = koLib.contextFor(el) || koLib.contextFor(document.body);
+
+                if (!bindingContext || typeof bindingContext.createChildContext !== 'function') {
+                    return false;
+                }
+
+                childContext = bindingContext.createChildContext(component);
+                koLib.utils.extend(childContext, {
+                    $t: $t
+                });
+                koLib.utils.arrayForEach(koLib.virtualElements.childNodes(el), koLib.cleanNode);
+                koLib.applyBindingsToDescendants(childContext, el);
+
+                return !!(el.id !== 'minicart-content-wrapper' || el.querySelector('.block-title'));
+            }
+
+            if (contentEl && contentEl.querySelector('.block-title')) {
+                return;
+            }
+
+            registry.get('minicart_content', function (component) {
+                function tryApply() {
+                    applyScopeToElement(contentEl, component);
+                    applyScopeToElement(triggerEl, component);
+                    return !!(contentEl && contentEl.querySelector('.block-title'));
+                }
+
+                var contentOk = tryApply();
+
+                // Magento remote template engine can resolve async — retry briefly.
+                if (!contentOk) {
+                    [150, 400, 1000].forEach(function (delay) {
+                        window.setTimeout(function () {
+                            if (contentEl && !contentEl.querySelector('.block-title')) {
+                                tryApply();
+                            }
+                        }, delay);
+                    });
+                }
+            });
+        });
+    }
+
     function bootstrapMinicartUi(payload, options) {
         options = options || {};
 
@@ -384,6 +493,8 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
             window.__awaMinicartOpenAfterInit = true;
         }
 
+        preloadMinicartPosition();
+
         if (window.__awaMinicartUiInit) {
             if (options.openAfterInit) {
                 openDropdownWithRetry(16);
@@ -392,6 +503,11 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
         }
 
         if (window.__awaMinicartUiBootstrapping) {
+            if (options.openAfterInit && window.__awaMinicartUiReady && typeof window.__awaMinicartUiReady.then === 'function') {
+                window.__awaMinicartUiReady.then(function () {
+                    openDropdownWithRetry(32);
+                });
+            }
             return window.__awaMinicartUiReady || Promise.resolve();
         }
 
@@ -400,6 +516,10 @@ define(['js/awa-customer-sections-gate', 'ko'], function (whenCustomerSectionsRe
         window.__awaMinicartUiReady = new Promise(function (resolve) {
             function launch() {
                 window.setTimeout(function () {
+                    // CRITICAL: inject data-bind BEFORE first Magento_Ui/js/core/app require,
+                    // because knockout/bootstrap calls ko.applyBindings() as a load side-effect.
+                    hydrateDeferredMinicartShell();
+
                     preloadMinicartTemplates(payload.jsLayout, function () {
                         require(['Magento_Ui/js/core/app'], function (appModule) {
                             var ok = runAppInit(appModule, payload);

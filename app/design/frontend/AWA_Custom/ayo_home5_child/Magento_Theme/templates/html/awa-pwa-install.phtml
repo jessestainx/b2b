@@ -85,7 +85,8 @@
 
     var STORAGE_KEY = 'awa-pwa-install-dismissed';
     var DISMISS_DAYS = 7;
-    var MIN_SESSION_MS = 45000;
+    var MIN_PROMPT_DELAY_MS = 60000;
+    var MIN_PROMPT_SCROLL_PX = 500;
     var promptEl = null;
     var deferredPrompt = null;
     var previousFocus = null;
@@ -137,8 +138,36 @@
                 callback();
             };
 
+            var hasMeaningfulEngagement = function () {
+                var scrollTop = w.scrollY
+                    || d.documentElement.scrollTop
+                    || (d.body ? d.body.scrollTop : 0)
+                    || 0;
+
+                return d.visibilityState !== 'hidden' && scrollTop >= MIN_PROMPT_SCROLL_PX;
+            };
+
             var schedule = function () {
-                setTimeout(run, MIN_SESSION_MS);
+                var delayElapsed = false;
+                var maybeRun;
+
+                var cleanup = function () {
+                    w.removeEventListener('scroll', maybeRun);
+                    d.removeEventListener('visibilitychange', maybeRun);
+                };
+
+                maybeRun = function () {
+                    if (!delayElapsed || !hasMeaningfulEngagement()) return;
+                    cleanup();
+                    run();
+                };
+
+                w.addEventListener('scroll', maybeRun, { passive: true });
+                d.addEventListener('visibilitychange', maybeRun);
+                w.setTimeout(function () {
+                    delayElapsed = true;
+                    maybeRun();
+                }, MIN_PROMPT_DELAY_MS);
             };
 
             if (d.readyState === 'complete') {

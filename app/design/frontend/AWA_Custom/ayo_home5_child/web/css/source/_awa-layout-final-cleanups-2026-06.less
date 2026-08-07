@@ -126,7 +126,7 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
         align-items: center !important;
         min-height: 40px !important;
         padding: 8px 10px !important;
-        border-radius: 6px !important;
+        border-radius: var(--awa-radius-sm, 8px) !important;
         text-decoration: none !important;
     }
 
@@ -368,28 +368,30 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     }
 }
 
+/* BUG-SHELL-CSS-SOURCE-SSOT-001: tablet = main 64 + nav 48 → sticky 112
+ * (antes: sticky 132 / main 88 / inner 80 — forçava paliativo JS). */
 @media (min-width: 768px) and (max-width: 991px) {
     html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header :is(.header-wrapper-sticky, .header-wrapper-sticky.is-sticky) {
-        height: 132px !important;
-        min-height: 132px !important;
-        max-height: 132px !important;
+        height: var(--awa-header-sticky-h, 112px) !important;
+        min-height: var(--awa-header-sticky-h, 112px) !important;
+        max-height: var(--awa-header-sticky-h, 112px) !important;
         overflow: visible !important;
     }
 
     html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header .header.awa-main-header {
-        height: 88px !important;
-        min-height: 88px !important;
-        max-height: 88px !important;
-        padding: 0 12px !important;
+        height: var(--awa-header-main-row-h, 64px) !important;
+        min-height: var(--awa-header-main-row-h, 64px) !important;
+        max-height: var(--awa-header-main-row-h, 64px) !important;
+        padding: 0 !important;
     }
 
     html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header :is(.header_main.awa-main-header-inner-wrap, .header-main, .awa-main-header__inner.wp-header) {
-        height: 80px !important;
-        min-height: 80px !important;
-        max-height: 80px !important;
-        width: ~"min(1280px, calc(100% - 24px))" !important;
-        max-inline-size: var(--awa-container-max, 1280px) !important;
-        margin: 0 auto !important;
+        height: var(--awa-header-main-row-h, 64px) !important;
+        min-height: var(--awa-header-main-row-h, 64px) !important;
+        max-height: var(--awa-header-main-row-h, 64px) !important;
+        width: 100% !important;
+        max-inline-size: 100% !important;
+        margin: 0 !important;
     }
 
     html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header .awa-main-header__inner.wp-header {
@@ -430,11 +432,11 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     }
 
     html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header .awa-nav-quick-links {
-        margin-inline-start: auto !important;
+        margin-inline-start: 0 !important;
         min-height: 44px !important;
         max-height: 44px !important;
         align-items: center !important;
-        justify-content: flex-end !important;
+        justify-content: flex-start !important;
     }
 
     html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) .page-wrapper .awa-site-header .awa-nav-quick-links__list {
@@ -778,8 +780,8 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     }
 
     .awa-site-header .awa-nav-quick-links {
-        justify-content: flex-end !important;
-        margin-inline-start: auto !important;
+        justify-content: flex-start !important;
+        margin-inline-start: 0 !important;
         min-height: 44px !important;
         max-height: 44px !important;
     }
@@ -804,14 +806,16 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     }
 }
 
+/* BUG-SHELL-CSS-SOURCE-SSOT-001: home tablet alinhado ao contrato 64+48=112
+ * (promo fechada); :has(promo) sobe via tokens do contract-grid. */
 @media (min-width: 768px) and (max-width: 991px) {
     html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .page-wrapper {
         .awa-site-header {
             --awa-header-control-h: 44px !important;
             --awa-header-action-radius: 8px !important;
-            min-height: 148px !important;
-            max-height: 148px !important;
-            height: 148px !important;
+            min-height: var(--awa-header-stack-h, 112px) !important;
+            max-height: none !important;
+            height: auto !important;
             overflow: visible !important;
         }
 
@@ -819,9 +823,9 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
         .awa-site-header #header.header-container > .header-content,
         .awa-site-header #awa-b2b-promo-bar,
         .awa-site-header #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__inner, .awa-b2b-promo-bar__layout) {
-            height: 32px !important;
-            min-height: 32px !important;
-            max-height: 32px !important;
+            height: var(--awa-header-promo-h, 0px) !important;
+            min-height: var(--awa-header-promo-h, 0px) !important;
+            max-height: var(--awa-header-promo-h, 0px) !important;
             padding: 0 !important;
             margin: 0 !important;
             overflow: hidden !important;
@@ -829,28 +833,32 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
 
         .awa-site-header .header-wrapper-sticky,
         .awa-site-header .header-wrapper-sticky.is-sticky {
-            height: 104px !important;
-            min-height: 104px !important;
-            max-height: 104px !important;
+            height: var(--awa-header-sticky-h, 112px) !important;
+            min-height: var(--awa-header-sticky-h, 112px) !important;
+            max-height: var(--awa-header-sticky-h, 112px) !important;
             overflow: visible !important;
         }
 
+        /* P2.1 2026-07-28: nested width calc(100%-24px) on header_main + header-main
+           (+ padding 12px no .header) encolhia o shell em cascata (758→734→710)
+           vs page-main 758. Contrato: gutter só no inner (24), filhos width 100%. */
         .awa-site-header .header.awa-main-header {
-            height: 96px !important;
-            min-height: 96px !important;
-            max-height: 96px !important;
-            padding: 0 12px !important;
+            height: var(--awa-header-main-row-h, 64px) !important;
+            min-height: var(--awa-header-main-row-h, 64px) !important;
+            max-height: var(--awa-header-main-row-h, 64px) !important;
+            padding: 0 !important;
             overflow: visible !important;
         }
 
-        .awa-site-header :is(.header_main.awa-main-header-inner-wrap, .header-main, .header-main > .container, .awa-main-header__inner.wp-header) {
-            height: 88px !important;
-            min-height: 88px !important;
-            max-height: 88px !important;
-            width: ~"min(1280px, calc(100% - 24px))" !important;
-            max-inline-size: var(--awa-container-max, 1280px) !important;
+        .awa-site-header :is(.header_main.awa-main-header-inner-wrap, .header-main, .header-main > .container) {
+            height: var(--awa-header-main-row-h, 64px) !important;
+            min-height: var(--awa-header-main-row-h, 64px) !important;
+            max-height: var(--awa-header-main-row-h, 64px) !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            max-inline-size: 100% !important;
             padding: 0 !important;
-            margin: 0 auto !important;
+            margin: 0 !important;
             overflow: visible !important;
         }
 
@@ -861,11 +869,15 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
             grid-template-columns: minmax(132px, 156px) minmax(320px, 1fr) minmax(236px, 300px) !important;
             grid-template-areas: "brand search actions" !important;
             gap: clamp(8px, 1.2vw, 12px) !important;
-            height: 88px !important;
-            min-height: 88px !important;
-            max-height: 88px !important;
-            padding: 0 !important;
-            margin: 0 auto !important;
+            height: var(--awa-header-main-row-h, 64px) !important;
+            min-height: var(--awa-header-main-row-h, 64px) !important;
+            max-height: var(--awa-header-main-row-h, 64px) !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            max-inline-size: 100% !important;
+            padding-inline: 24px !important;
+            box-sizing: border-box !important;
+            margin: 0 !important;
             overflow: visible !important;
         }
 
@@ -1019,11 +1031,11 @@ html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
         }
 
         .awa-site-header .awa-nav-quick-links {
-            margin-inline-start: auto !important;
+            margin-inline-start: 0 !important;
             min-height: 44px !important;
             max-height: 44px !important;
             align-items: center !important;
-            justify-content: flex-end !important;
+            justify-content: flex-start !important;
         }
 
         .awa-site-header .awa-nav-quick-links__list {
@@ -1325,6 +1337,22 @@ html body#html-body .page-wrapper :is(.page_footer, .page-footer) {
         padding: 6px 10px !important;
         line-height: 1.2 !important;
     }
+
+    @media (min-width: 480px) {
+        .awa-footer-categories-list > li {
+            display: block !important;
+            min-width: 0 !important;
+        }
+
+        .awa-footer-categories-list > li > a {
+            box-sizing: border-box !important;
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-height: 44px !important;
+        }
+    }
 }
 
 @media (max-width: 991px) {
@@ -1605,16 +1633,8 @@ html body#html-body .page-wrapper {
     }
 
     :is(.page_footer, .page-footer) {
-        .awa-footer-section__toggle,
-        .velaFooterLinks a,
-        .awa-footer-atendimento__actions a,
-        .awa-footer-atendimento__phone a,
-        .awa-footer-atendimento__email a,
         .awa-footer-pro__social-link {
             min-height: 44px !important;
-        }
-
-        .awa-footer-pro__social-link {
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -1622,6 +1642,30 @@ html body#html-body .page-wrapper {
             min-width: 44px !important;
             height: 44px !important;
             padding: 6px !important;
+        }
+    }
+
+    @media (max-width: 767px) {
+        :is(.page_footer, .page-footer) {
+            .awa-footer-section__toggle,
+            .velaFooterLinks a,
+            .awa-footer-atendimento__actions a,
+            .awa-footer-atendimento__phone a,
+            .awa-footer-atendimento__email a {
+                min-height: 44px !important;
+            }
+        }
+    }
+
+    @media (min-width: 768px) {
+        :is(.page_footer, .page-footer) {
+            .awa-footer-section__toggle,
+            .velaFooterLinks a,
+            .awa-footer-atendimento__actions a,
+            .awa-footer-atendimento__phone a,
+            .awa-footer-atendimento__email a {
+                min-height: 0 !important;
+            }
         }
     }
 }
@@ -1876,7 +1920,10 @@ html body#html-body:not(.cms-home):not(.cms-index-index):not(.cms-homepage_ayo_h
             border: 1px solid var(--awa-border-subtle, color-mix(in srgb, CanvasText 10%, Canvas)) !important;
             border-radius: var(--awa-radius-sm, 8px) !important;
             box-shadow: none !important;
-            overflow: hidden !important;
+            /* H29: overflow:hidden + flex-shrink em #cart-summary (max-height)
+               esmagava #block-shipping/#block-discount/.items a height:0.
+               clip visual do radius fica a cargo do fundo; não colapsar flex. */
+            overflow: visible !important;
         }
 
         :is(.block, .card, .fieldset, .panel, .order-details-items, .table-wrapper, .items) :is(h1, h2, h3, h4, .title) {
@@ -1964,12 +2011,19 @@ html body#html-body:not(.cms-home):not(.cms-index-index):not(.cms-homepage_ayo_h
     .product-info-main .page-title-wrapper {
         margin: 0 !important;
         padding-bottom: 8px !important;
-        border-bottom: 1px solid var(--awa-border-subtle, color-mix(in srgb, CanvasText 10%, Canvas)) !important;
+        border-bottom: 1px solid var(--awa-border) !important;
     }
 
-    .product-info-main .page-title-wrapper .page-title {
-        font-size: clamp(1.4rem, 1.05rem + 1vw, 1.75rem) !important;
-        line-height: 1.2 !important;
+    /* SSOT PDP title — alinhado ao cascade terminal (títulos longos B2B). */
+    .product-info-main .page-title-wrapper .page-title,
+    .product-info-main .page-title-wrapper .page-title .base {
+        font-family: var(--awa-font-heading, "Rubik", system-ui, sans-serif) !important;
+        font-size: clamp(1.125rem, 1.05rem + 0.45vw, 1.375rem) !important;
+        font-weight: 700 !important;
+        line-height: 1.3 !important;
+        letter-spacing: -0.01em !important;
+        color: var(--awa-text) !important;
+        text-wrap: balance !important;
         margin: 0 !important;
     }
 
@@ -2366,7 +2420,8 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
         }
 
         .top-home-content--above-fold .banner_item {
-            min-height: clamp(220px, 40vw, 420px) !important;
+            /* Altura pelo aspect-ratio da imagem — min-height alto criava faixa vazia sob o hero */
+            min-height: 0 !important;
             overflow: hidden !important;
             border: 0 !important;
         }
@@ -2380,34 +2435,52 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
             object-position: center !important;
         }
 
+        /* H17B: overlay ancorado no rodapé do slide — NÃO stretch full-height
+           (top/bottom:0 + width 840px cobria 100% da imagem do hero). */
         .top-home-content--above-fold .banner_item .text-banner {
+            position: absolute !important;
             left: 0 !important;
             right: 0 !important;
-            top: 0 !important;
+            top: auto !important;
             bottom: 0 !important;
-            width: ~"min(68vw, 840px)" !important;
+            inset: auto 0 0 0 !important;
+            width: 100% !important;
             max-width: 100% !important;
-            padding: clamp(12px, 2.4vw, 24px) !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            gap: 6px !important;
+            padding: clamp(12px, 1.6vw, 20px) clamp(16px, 3vw, 40px) !important;
+            align-items: flex-start !important;
+            justify-content: flex-end !important;
             color: var(--awa-text-inverse, CanvasText) !important;
             box-sizing: border-box !important;
             text-shadow: 0 1px 2px color-mix(in srgb, CanvasText 24%, transparent) !important;
             z-index: 2 !important;
+            background: linear-gradient(
+                to top,
+                rgb(15 23 42 / 62%) 0%,
+                rgb(15 23 42 / 28%) 55%,
+                transparent 100%
+            ) !important;
         }
 
         .top-home-content--above-fold .text-banner h2,
         .top-home-content--above-fold .text-banner .slide-title {
             color: inherit !important;
             text-wrap: balance !important;
-            font-size: clamp(1.25rem, 1rem + 1vw, 2rem) !important;
+            font-size: clamp(1.125rem, 0.95rem + 0.7vw, 1.75rem) !important;
             line-height: 1.2 !important;
-            margin-block-end: 8px !important;
+            margin: 0 !important;
+            margin-block-end: 4px !important;
+            max-width: 36ch !important;
         }
 
         .top-home-content--above-fold .text-banner p,
         .top-home-content--above-fold .text-banner .slide-desc {
             color: inherit !important;
             text-wrap: pretty !important;
-            max-width: 60ch !important;
+            max-width: 48ch !important;
             font-size: var(--awa-fs-sm, 0.875rem) !important;
             line-height: 1.4 !important;
             margin: 0 !important;
@@ -2456,9 +2529,9 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
         }
 
         .awa-category-carousel__icon {
-            width: 36px !important;
-            height: 36px !important;
-            flex: 0 0 36px !important;
+            width: 88px !important;
+            height: 88px !important;
+            flex: 0 0 88px !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -2890,14 +2963,14 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
         width: 100% !important;
     }
 
-    .awa-home-niche-shelves__tabs {
+    :where(.awa-dead-niche-tabs) {
         display: flex !important;
         flex-wrap: wrap !important;
         gap: var(--awa-space-2, 8px) !important;
         margin-bottom: var(--awa-space-2, 8px) !important;
     }
 
-    .awa-home-niche-shelves__tab {
+    :where(.awa-dead-niche-tab) {
         min-height: 44px !important;
         border-radius: 9999px !important;
         padding: 0 var(--awa-space-3, 12px) !important;
@@ -2914,7 +2987,7 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
         text-wrap: balance !important;
     }
 
-    .awa-home-niche-shelves__tab.is-active {
+    :where(.awa-dead-niche-tab).is-active {
         background: var(--awa-primary, CanvasText) !important;
         color: var(--awa-text-inverse, CanvasText) !important;
         border-color: var(--awa-primary, CanvasText) !important;
@@ -2946,7 +3019,7 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
         min-width: 0 !important;
     }
 
-    .awa-home-niche-shelves__panel-head {
+    :where(.awa-dead-niche-panel-head) {
         display: flex !important;
         align-items: flex-start !important;
         justify-content: space-between !important;
@@ -3014,7 +3087,7 @@ html body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) .pa
             justify-content: center !important;
         }
 
-        .awa-home-niche-shelves__panel-head {
+        :where(.awa-dead-niche-panel-head) {
             align-items: center !important;
             flex-direction: column !important;
         }

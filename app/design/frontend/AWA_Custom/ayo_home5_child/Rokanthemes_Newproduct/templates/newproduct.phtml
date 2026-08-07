@@ -160,7 +160,7 @@ $viewportId = $homeShelfDisplay instanceof \GrupoAwamotos\Theme\ViewModel\HomeSh
                                         <li class="quickview-product">
                                             <a data-role="quickview-button"
                                                data-id="<?= (int) $_product->getId() ?>"
-                                               href="javascript:void(0);"
+                                               href="<?= $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())) ?>"
                                                data-href="<?= $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())) ?>"
                                                class="quickview-link"
                                                title="<?= $block->escapeHtmlAttr(__('Visualização Rápida')) ?>"
@@ -229,8 +229,9 @@ $viewportId = $homeShelfDisplay instanceof \GrupoAwamotos\Theme\ViewModel\HomeSh
                                     <span class="awa-b2b-sku"><span class="awa-b2b-sku__label">REF: </span><span class="awa-b2b-sku__value"><?= $block->escapeHtml($_product->getSku()) ?></span></span>
                                 <?php endif; ?>
 
+                                <?php if (!$isHomePage): ?>
                                 <?php
-                                // Sprint 2 (2026-06-28): reviews sempre visiveis (rich results + CTR)
+                                // Reviews fora da home. Home: densidade — nome/SKU/CTA.
                                 $_ratingHtml = '';
                                 try {
                                     $_ratingHtml = $block->getReviewsSummaryHtml($_product, $templateType);
@@ -243,21 +244,25 @@ $viewportId = $homeShelfDisplay instanceof \GrupoAwamotos\Theme\ViewModel\HomeSh
                                     <?= /* @noEscape */ $_ratingHtml ?>
                                 </div>
                                 <?php endif; ?>
+                                <?php endif; ?>
 
-                                <?php if ($this->getConfig('show_price')): ?>
+                                <?php
+                                // show_price=1 deve renderizar preço OU gate B2B (mesmo contrato do bestseller).
+                                $showPriceBlock = (bool) $this->getConfig('show_price');
+                                ?>
+                                <?php if ($showPriceBlock): ?>
                                     <div class="info-price">
                                     <?php if ($b2bPriceGate->canViewPrices()): ?>
                                         <?= /* @noEscape */ $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)) ?>
                                     <?php else: ?>
-                                        <div class="b2b-login-to-see-price<?= $isHomePage ? ' b2b-login-to-see-price--home-card' : '' ?>">
+                                        <div class="b2b-login-to-see-price">
                                             <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bPriceGate->getPriceGateHeadline()) ?></span>
-                                            <?php if (!$isHomePage): ?>
-                                                <span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bPriceGate->getPriceGateDescription()) ?></span>
-                                            <?php endif; ?>
+                                            <span class="b2b-login-to-see-price__message"><?= $block->escapeHtml($b2bPriceGate->getPriceGateDescription()) ?></span>
                                         </div>
                                     <?php endif; ?>
                                     </div>
                                 <?php endif; ?>
+
                                 <?php if ($isHomePage): ?>
                                     <a class="awa-card-view-product action secondary"
                                        href="<?= $block->escapeUrl($_product->getProductUrl()) ?>"

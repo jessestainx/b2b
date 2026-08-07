@@ -1,0 +1,52 @@
+<?php
+/**
+ * AWA — Brand list widget override (BUG 1)
+ * Empty-state quando não há marcas cadastradas em rokanthemes_brand.
+ *
+ * @var \Rokanthemes\Brand\Block\Widget\Brandlist $block
+ */
+declare(strict_types=1);
+
+$_brandCollection = $block->getBrandCollection();
+$title = $block->getConfig('widget_title');
+$show_brand_name = $block->getConfig('show_brand_name');
+$blockId = (string) time();
+?>
+<?php if ($_brandCollection && $_brandCollection->count()) : ?>
+<div class="block-widget-rokanthemes-brand awa-brand-widget">
+    <?php if ($title) : ?>
+    <div class="block-title"><strong><?= $block->escapeHtml($title) ?></strong></div>
+    <?php endif; ?>
+    <div class="block-content brandowl-play">
+        <ul id="rokanthemes-carousel<?= $block->escapeHtmlAttr($blockId) ?>" class="awa-brand-grid">
+            <?php foreach ($_brandCollection as $_brand) : ?>
+            <li class="item">
+                <div class="brand-item">
+                    <div class="brand-image">
+                        <a href="<?= $block->escapeUrl($_brand->getUrl()) ?>" title="<?= $block->escapeHtmlAttr($_brand->getName()) ?>">
+                            <img src="<?= $block->escapeUrl($_brand->getThumbnailUrl()) ?>" alt="<?= $block->escapeHtmlAttr($_brand->getName()) ?>" loading="lazy" width="120" height="80"/>
+                        </a>
+                    </div>
+                    <?php if ($show_brand_name) : ?>
+                    <div class="brand-name">
+                        <a href="<?= $block->escapeUrl($_brand->getUrl()) ?>" title="<?= $block->escapeHtmlAttr($_brand->getName()) ?>"><?= $block->escapeHtml($_brand->getName()) ?></a>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+</div>
+<?php else : ?>
+<div class="awa-brand-empty" role="status" data-awa-debug="brand-empty" data-awa-session="032237">
+    <p class="awa-brand-empty__text">
+        <?= $block->escapeHtml(__('Em breve publicaremos as marcas parceiras da AWA Motos nesta página.')) ?>
+    </p>
+    <p class="awa-brand-empty__cta">
+        <a class="action primary" href="<?= $block->escapeUrl($block->getUrl('catalogo')) ?>">
+            <?= $block->escapeHtml(__('Ver catálogo completo')) ?>
+        </a>
+    </p>
+</div>
+<?php endif; ?>

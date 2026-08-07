@@ -238,6 +238,31 @@ define(['jquery'], function ($) {
         }
     }
 
+    /**
+     * Labels de preço do layered nav chegam entity-encoded (&lt;span class="price"&gt;).
+     * Decodifica no DOM quando o HTML ainda contém entidades (FPC/AJAX legado).
+     */
+    function fixEscapedPriceFilterLabels(root) {
+        var scope = root && root.querySelectorAll ? root : document;
+        var nodes = scope.querySelectorAll(
+            '.filter-options-content a, .filter-options-content li.item, .filter-current .items .item'
+        );
+        var fixed = 0;
+        nodes.forEach(function (el) {
+            var html = el.innerHTML || '';
+            if (html.indexOf('&lt;span') === -1 && html.indexOf('&amp;lt;span') === -1) {
+                return;
+            }
+            el.innerHTML = html
+                .replace(/&amp;lt;/g, '&lt;')
+                .replace(/&amp;gt;/g, '&gt;')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>');
+            fixed += 1;
+        });
+        return fixed;
+    }
+
     function applyPlpA11y() {
         let isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
         let isCategoryOrSearch = document.body &&
@@ -247,6 +272,13 @@ define(['jquery'], function ($) {
         $('.toolbar.toolbar-products').each(function () {
             $(this).attr('data-awa-component', $(this).attr('data-awa-component') || 'plp-toolbar');
         });
+
+        fixEscapedPriceFilterLabels(document);
+
+        var $catSearch = $('#mst_categorySearch');
+        if ($catSearch.length && !$catSearch.attr('placeholder')) {
+            $catSearch.attr('placeholder', 'Buscar produtos nesta categoria');
+        }
 
         /* Filter panel heading — FPC/AJAX pode omitir .filter-title do template */
         ensureFilterTitle();
@@ -311,14 +343,21 @@ define(['jquery'], function ($) {
 
             if ($filter.length && $toolbar.length && $label.length) {
                 $label.attr({ role: 'button', tabindex: '0', 'data-awa-filter-toggle': 'true' });
+                /* modes-label vira toggle de filtros: remove aria-labelledby dos
+                   mode switchers (evita "Mostrar Filtros · Lista" no SR). */
+                $label.siblings('a.modes-mode').each(function () {
+                    var $mode = $(this);
+                    var modeName = trimText($mode.find('span').first().text() || $mode.attr('title') || '');
+                    $mode.removeAttr('aria-labelledby');
+                    if (modeName) {
+                        $mode.attr('aria-label', 'Ver como ' + modeName);
+                    }
+                });
 
-                if (isMobile && !$body.attr('data-awa-filter-init')) {
-                    $body.attr('data-awa-filter-init', 'true')
-                        .addClass('awa-plp-filters-collapsed')
-                        .removeClass('awa-plp-filters-expanded');
-                } else if (!isMobile) {
-                    $body.removeClass('awa-plp-filters-collapsed awa-plp-filters-expanded');
-                }
+                /* e86806: sync classes to LIVE viewport (not init-time isMobile).
+                   CDP: load desktop then Emulation 375 → label "Ocultar" while
+                   .block.filter display:none (aria-expanded true). */
+                syncFilterViewportState();
 
                 $label.off('keydown.awaFilterToggle').on('keydown.awaFilterToggle', function (e) {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -330,7 +369,7 @@ define(['jquery'], function ($) {
                 $(document)
                     .off('click.awaFilterToggle', '.toolbar .modes .modes-label[data-awa-filter-toggle="true"]')
                     .on('click.awaFilterToggle', '.toolbar .modes .modes-label[data-awa-filter-toggle="true"]', function (e) {
-                        if (isMobile) {
+                        if (isMobileViewport()) {
                             e.preventDefault();
                             $body.toggleClass('awa-plp-filters-collapsed');
                             $body.toggleClass('awa-plp-filters-expanded', !$body.hasClass('awa-plp-filters-collapsed'));
@@ -338,7 +377,46 @@ define(['jquery'], function ($) {
                         }
                     });
 
+                var onFilterViewport = function () {
+                    syncFilterViewportState();
+                    updateFilterLabel();
+                };
+                if (window.matchMedia) {
+                    var filterMql = window.matchMedia('(max-width: 767px)');
+                    if (filterMql.addEventListener) {
+                        filterMql.addEventListener('change', onFilterViewport);
+                    } else if (filterMql.addListener) {
+                        filterMql.addListener(onFilterViewport);
+                    }
+                }
+                /* CDP/Emulation e alguns browsers: resize sem 'change' no MQL */
+                var filterResizeTimer = null;
+                $(window).off('resize.awaFilterToggle').on('resize.awaFilterToggle', function () {
+                    if (filterResizeTimer) {
+                        clearTimeout(filterResizeTimer);
+                    }
+                    filterResizeTimer = setTimeout(onFilterViewport, 50);
+                });
+
                 updateFilterLabel();
+            }
+        }
+
+        function isMobileViewport() {
+            return !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
+        }
+
+        function syncFilterViewportState() {
+            var $b = $('body');
+            if (isMobileViewport()) {
+                if (!$b.attr('data-awa-filter-init')) {
+                    $b.attr('data-awa-filter-init', 'true');
+                }
+                if (!$b.hasClass('awa-plp-filters-collapsed') && !$b.hasClass('awa-plp-filters-expanded')) {
+                    $b.addClass('awa-plp-filters-collapsed').removeClass('awa-plp-filters-expanded');
+                }
+            } else {
+                $b.removeClass('awa-plp-filters-collapsed awa-plp-filters-expanded');
             }
         }
 
@@ -347,13 +425,47 @@ define(['jquery'], function ($) {
             var $label = $('.shop-tab-select .toolbar.toolbar-products').find('.modes .modes-label').first();
             var $filter = $('#layered-ajax-filter-block, .block.filter').first();
             if (!$label.length) { return; }
-            let isMob    = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+            syncFilterViewportState();
+            let isMob    = isMobileViewport();
             let collapsed = isMob && $body.hasClass('awa-plp-filters-collapsed');
-            $label.text(collapsed ? 'Mostrar Filtros ·' : 'Ocultar Filtros ·')
-                  .attr('aria-expanded', collapsed ? 'false' : 'true');
+            var filterText = collapsed ? 'Mostrar Filtros' : 'Ocultar Filtros';
+            $label.text(filterText)
+                  .attr({
+                      'aria-expanded': collapsed ? 'false' : 'true',
+                      'aria-label': filterText
+                  });
             if ($filter.length) {
                 $filter.attr('aria-hidden', collapsed ? 'true' : 'false');
             }
+            // #region agent log
+            try {
+                var listMode = document.querySelector('.toolbar .modes a.modes-mode.mode-list');
+                fetch('http://localhost:7242/ingest/85de6e60-1f5e-477a-a2b3-4840c3c33dfd', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Debug-Session-Id': 'f85cea'
+                    },
+                    body: JSON.stringify({
+                        sessionId: 'f85cea',
+                        runId: 'post-fix-plp-a11y',
+                        hypothesisId: 'A',
+                        location: 'awa-custom-home-category-compat.js:updateFilterLabel',
+                        message: 'plp filter/mode a11y labels',
+                        data: {
+                            vw: window.innerWidth || 0,
+                            filterText: filterText,
+                            filterAria: $label.attr('aria-label') || null,
+                            listLabelledBy: listMode ? listMode.getAttribute('aria-labelledby') : null,
+                            listAriaLabel: listMode ? listMode.getAttribute('aria-label') : null,
+                            listAccNameOk: !!(listMode && listMode.getAttribute('aria-label') &&
+                                !/Filtros/i.test(listMode.getAttribute('aria-label') || ''))
+                        },
+                        timestamp: Date.now()
+                    })
+                }).catch(function () {});
+            } catch (e) {}
+            // #endregion
         }
     }
 

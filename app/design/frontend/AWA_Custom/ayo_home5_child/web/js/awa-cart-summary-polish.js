@@ -59,8 +59,14 @@ define(['jquery', 'domReady!'], function ($) {
             $trigger.attr('aria-expanded', 'true');
         }
 
+        /* title usa data-role=title (não trigger) no carrinho Magento */
+        $block.find('[data-role="title"]').attr({
+            'aria-expanded': 'true',
+            'aria-selected': 'true'
+        });
+
         if ($content.length) {
-            $content.show();
+            $content.show().attr('aria-hidden', 'false');
         }
     }
 

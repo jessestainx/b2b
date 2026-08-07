@@ -20,6 +20,28 @@ $cookieSettings = $block->getData('cookie_settings');
 /** @var CustomerData|null $customerDataBlock */
 $customerDataBlock = $block->getLayout()->createBlock(CustomerData::class);
 
+$sectionNames = $sectionNamesProvider ? $sectionNamesProvider->getSectionNames() : [];
+$request = $block->getRequest();
+$fullAction = (string) $request->getFullActionName();
+$layoutHandles = $block->getLayout() ? $block->getLayout()->getUpdate()->getHandles() : [];
+$pathInfo = (string) ($request->getOriginalPathInfo() ?: $request->getPathInfo());
+$isCmsHome = $fullAction === 'cms_index_index'
+    || in_array('cms_index_index', $layoutHandles, true)
+    || trim($pathInfo, '/') === '';
+/* Home: section/load com 18 seções puxava storage/wishlist/compare/PayPal sem UI.
+   Mantém só o necessário para header B2B + minicart + mensagens. */
+if ($isCmsHome) {
+    $homeSectionAllow = [
+        'messages',
+        'customer',
+        'cart',
+        'directory-data',
+        'captcha',
+        'b2b_panel',
+    ];
+    $sectionNames = array_values(array_intersect($sectionNames, $homeSectionAllow));
+}
+
 $sectionOptions = [
     'sections' => $block->getSections(),
     'clientSideSections' => $block->getClientSideSections(),
@@ -27,7 +49,7 @@ $sectionOptions = [
         $block->getUrl(null, ['_secure' => true]),
         $block->getUrl(null, ['_secure' => false]),
     ])),
-    'sectionNames' => $sectionNamesProvider ? $sectionNamesProvider->getSectionNames() : [],
+    'sectionNames' => $sectionNames,
 ];
 
 $customerOptions = [

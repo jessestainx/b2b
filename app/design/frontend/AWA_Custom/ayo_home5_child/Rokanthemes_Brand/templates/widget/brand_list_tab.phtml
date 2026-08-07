@@ -23,7 +23,7 @@ $blockId = strtotime('now');
 			<?php $active = (1 == $tab) ? 'active' : '' ?>
 			<div class="item title <?= $active ?>">
 				<a class="switch" href="#brand-tab-<?= $blockId.$tab;?>">
-					<img src="<?php echo $_brand->getThumbnailUrl(); ?>" alt="<?php echo $_brand->getName(); ?>"/>
+					<img src="<?php echo $_brand->getThumbnailUrl(); ?>" alt="<?php echo $_brand->getName(); ?>" width="120" height="80" decoding="async" loading="lazy" />
 					<?php if($show_brand_name){ ?>
 					<span><?php echo $_brand->getName() ?></span>
 					<?php } ?>

@@ -1,113 +1,38 @@
 /**
  * AWA Motos - Dark Mode Support (2026-06-28)
  *
- * Implementa dark mode usando prefers-color-scheme + classe .awa-dark-mode
- * aplicada via JS para override manual.
+ * Dark mode SOMENTE via classe .awa-dark-mode (toggle / localStorage).
+ * Auto prefers-color-scheme removido em 2026-07-16: vazava --awa-bg-surface/#1e293b
+ * no header sticky em OS dark, sem .awa-dark-mode no body (toggle ausente).
  *
- * @version 1.0
+ * @version 1.1
  */
 
-/* ============================================
-   Auto dark mode (baseado em OS preference)
-   ============================================ */
-@media (prefers-color-scheme: dark) {
-    :root:not(.awa-light-mode) {
-        --awa-bg-page: #0f172a;
-        --awa-bg-surface: #1e293b;
-        --awa-bg-elevated: #334155;
-        --awa-text-primary: #f1f5f9;
-        --awa-text-secondary: #cbd5e1;
-        --awa-text-muted: #94a3b8;
-        --awa-border: #334155;
-        --awa-border-strong: #475569;
-        --awa-primary: #ef4444;
-        --awa-primary-hover: #dc2626;
-        --awa-accent: #60a5fa;
-        --awa-success: #22c55e;
-        --awa-warning: #f59e0b;
-        --awa-error: #ef4444;
-        --awa-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-    }
+/* Light tokens explícitos — evita herdar surface escura de caches/OS */
+html body:not(.awa-dark-mode) {
+    --awa-bg-page: #ffffff;
+    --awa-bg-surface: #ffffff;
+    --awa-bg-elevated: #f9fafb;
+    --awa-text-primary: #111827;
+    --awa-text-secondary: #4b5563;
+    --awa-text-muted: #6b7280;
+    --awa-border: #e5e7eb;
+    --awa-border-subtle: #e5e7eb;
+}
 
-    body:not(.awa-light-mode) {
-        background: var(--awa-bg-page, #0f172a) !important;
-        color: var(--awa-text-primary, #f1f5f9) !important;
-    }
-
-    /* Product cards */
-    .awa-product-card:not(.awa-light-mode *) {
-        background: var(--awa-bg-surface) !important;
-        color: var(--awa-text-primary) !important;
-    }
-    .product-item-info {
-        background: var(--awa-bg-surface) !important;
-        color: var(--awa-text-primary) !important;
-    }
-    .product-item-info .product-name,
-    .product-item-info .product-item-link {
-        color: var(--awa-text-primary) !important;
-    }
-    .product-item-info .price {
-        color: #4ade80 !important;
-    }
-
-    /* Header */
-    .awa-site-header,
-    .page-header {
-        background: #1e293b !important;
-        border-bottom: 1px solid #334155 !important;
-    }
-
-    /* Footer */
-    footer {
-        background: #020617 !important;
-        color: #cbd5e1 !important;
-    }
-    footer a {
-        color: #cbd5e1 !important;
-    }
-
-    /* Inputs */
-    input, select, textarea {
-        background: #1e293b !important;
-        color: #f1f5f9 !important;
-        border-color: #334155 !important;
-    }
-    input::placeholder, textarea::placeholder {
-        color: #64748b !important;
-    }
-
-    /* Cards / sections */
-    .awa-home-section,
-    .awa-section-header,
-    .awa-carousel-section,
-    .awa-grid-section {
-        background: transparent !important;
-    }
-
-    /* Skip link + focus */
-    .awa-skip-link {
-        background: #1e293b !important;
-        color: #f1f5f9 !important;
-    }
-
-    /* Modal / popup */
-    .awa-pwa-install-prompt__card,
-    .awa-newsletter-popup__card,
-    .awa-exit-popup__content,
-    .awa-cart-progress,
-    .awa-mobile-bottom-nav {
-        background: #1e293b !important;
-        color: #f1f5f9 !important;
-        border-color: #334155 !important;
-    }
+html body:not(.awa-dark-mode) .page-wrapper .header-wrapper-sticky,
+html body:not(.awa-dark-mode) .page-wrapper .header-wrapper-sticky.is-sticky,
+html body:not(.awa-dark-mode) .page-wrapper .awa-site-header .header-wrapper-sticky {
+    background: var(--awa-bg, #ffffff) !important;
+    background-color: var(--awa-bg, #ffffff) !important;
+    color: var(--awa-text, #111827) !important;
 }
 
 /* ============================================
    Manual override (.awa-dark-mode forcado)
    ============================================ */
-body.awa-dark-mode,
-.awa-dark-mode {
+html body.awa-dark-mode:not(.b2b-auth-shell),
+body.awa-dark-mode:not(.b2b-auth-shell) {
     --awa-bg-page: #0f172a;
     --awa-bg-surface: #1e293b;
     --awa-bg-elevated: #334155;
@@ -115,84 +40,74 @@ body.awa-dark-mode,
     --awa-text-secondary: #cbd5e1;
     --awa-text-muted: #94a3b8;
     --awa-border: #334155;
+    --awa-border-subtle: #475569;
     --awa-primary: #ef4444;
     --awa-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-.awa-dark-mode body {
     background: #0f172a !important;
     color: #f1f5f9 !important;
 }
 
-.awa-dark-mode .awa-product-card,
-.awa-dark-mode .product-item-info,
-.awa-dark-mode .awa-section-header,
-.awa-dark-mode .awa-site-header,
-.awa-dark-mode .page-header,
-.awa-dark-mode footer {
+body.awa-dark-mode .awa-product-card,
+body.awa-dark-mode .product-item-info,
+body.awa-dark-mode .awa-section-header,
+body.awa-dark-mode .awa-site-header,
+body.awa-dark-mode .header-wrapper-sticky,
+body.awa-dark-mode .awa-main-header,
+body.awa-dark-mode .page-header,
+body.awa-dark-mode footer {
     background: #1e293b !important;
     color: #f1f5f9 !important;
     border-color: #334155 !important;
 }
 
-.awa-dark-mode .product-item-info .product-name,
-.awa-dark-mode .product-item-info .product-item-link,
-.awa-dark-mode footer a {
+body.awa-dark-mode .product-item-info .product-name,
+body.awa-dark-mode .product-item-info .product-item-link,
+body.awa-dark-mode footer a {
     color: #f1f5f9 !important;
 }
 
-.awa-dark-mode .product-item-info .price {
+body.awa-dark-mode .product-item-info .price {
     color: #4ade80 !important;
 }
 
-.awa-dark-mode input,
-.awa-dark-mode select,
-.awa-dark-mode textarea {
+body.awa-dark-mode:not(.b2b-auth-shell) input,
+body.awa-dark-mode:not(.b2b-auth-shell) select,
+body.awa-dark-mode:not(.b2b-auth-shell) textarea {
     background: #0f172a !important;
     color: #f1f5f9 !important;
     border-color: #334155 !important;
 }
 
-.awa-dark-mode button,
-.awa-dark-mode .action {
-    background: #334155 !important;
-    color: #f1f5f9 !important;
-}
-
-.awa-dark-mode button.primary,
-.awa-dark-mode .action.primary {
-    background: #b73337 !important;
-}
-
-.awa-dark-mode .awa-mobile-bottom-nav {
+body.awa-dark-mode .awa-mobile-bottom-nav {
     background: #0f172a !important;
     border-top: 1px solid #1e293b !important;
 }
 
-.awa-dark-mode .awa-mobile-bottom-nav__item {
+body.awa-dark-mode .awa-mobile-bottom-nav__item {
     color: #cbd5e1 !important;
 }
 
-.awa-dark-mode .awa-mobile-bottom-nav__item[aria-current="page"],
-.awa-dark-mode .awa-mobile-bottom-nav__item.is-active {
+body.awa-dark-mode .awa-mobile-bottom-nav__item[aria-current="page"],
+body.awa-dark-mode .awa-mobile-bottom-nav__item.is-active {
     color: #ef4444 !important;
 }
 
-.awa-dark-mode .awa-skip-link,
-.awa-dark-mode .awa-pwa-install-prompt__card,
-.awa-dark-mode .awa-newsletter-popup__card,
-.awa-dark-mode .awa-exit-popup__content {
+body.awa-dark-mode .awa-skip-link,
+body.awa-dark-mode .awa-pwa-install-prompt__card,
+body.awa-dark-mode .awa-newsletter-popup__card,
+body.awa-dark-mode .awa-exit-popup__content {
     background: #1e293b !important;
     color: #f1f5f9 !important;
 }
 
-.awa-dark-mode .awa-pwa-install-prompt__cta,
-.awa-dark-mode button.primary,
-.awa-dark-mode .action.primary {
+body.awa-dark-mode .awa-pwa-install-prompt__cta,
+body.awa-dark-mode button.primary,
+body.awa-dark-mode .action.primary {
     background: #b73337 !important;
+    color: #fff !important;
 }
 
-.awa-dark-mode img {
+body.awa-dark-mode img {
     opacity: 0.9;
 }
 
@@ -206,16 +121,6 @@ body.awa-light-mode {
     --awa-text-secondary: #4b5563;
     --awa-border: #e5e7eb;
     --awa-primary: #b73337;
-}
-
-/* ============================================
-   Imagens e graficos - ajuste automatico
-   ============================================ */
-@media (prefers-color-scheme: dark) {
-    .awa-logo img,
-    header img:not([src*="banner"]):not([src*="slider"]) {
-        filter: brightness(0.95) contrast(1.05);
-    }
 }
 
 /* ============================================

@@ -3,13 +3,18 @@ declare(strict_types=1);
 /**
  * AWA - H1 visível para páginas institucionais
  *
+ * Boas práticas Magento 2: request via $block (DI), sem ObjectManager.
+ *
  * @var \Magento\Framework\View\Element\Template $block
  */
-$request = \Magento\Framework\App\ObjectManager::getInstance()
-    ->get(\Magento\Framework\App\RequestInterface::class);
-$fullAction = $request->getFullActionName();
+$request = $block->getRequest();
+$fullAction = $request ? (string) $request->getFullActionName() : '';
 $pageTitle = null;
-$pageHeading = null;
+
+// Magento_Contact já emite page.main.title (H1). Não duplicar.
+if ($fullAction === 'contact_index_index') {
+    return;
+}
 
 // Tentar pegar título da página CMS
 if ($fullAction === 'cms_page_view') {
@@ -28,14 +33,6 @@ if ($fullAction === 'cms_page_view') {
             $pageTitle = $cmsPage->getTitle();
         }
     }
-}
-
-// Fallback para action conhecida
-$titles = [
-    'contact_index_index' => 'Fale Conosco',
-];
-if (!$pageTitle && isset($titles[$fullAction])) {
-    $pageTitle = $titles[$fullAction];
 }
 
 if (empty($pageTitle)) {

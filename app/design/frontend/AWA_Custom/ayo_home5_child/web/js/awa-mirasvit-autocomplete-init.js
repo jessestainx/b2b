@@ -15,21 +15,38 @@
 
     var selector = cfg.selector || 'input#search, input#mobile_search, .minisearch input[type="text"]';
     var started = false;
+    /**
+     * Digitação real ocorrida ANTES do bootstrap terminar.
+     * Valor pré-preenchido (ex.: catalogsearch/?q=) NÃO marca isto — evita suggest duplicado.
+     */
+    var typedBeforeBootstrap = false;
+
+    d.addEventListener('input', function (event) {
+        var target = event && event.target;
+
+        if (started || !target || typeof target.closest !== 'function') {
+            return;
+        }
+
+        if (target.closest('#search, #mobile_search, .minisearch, #search_mini_form, .block-search')) {
+            typedBeforeBootstrap = true;
+        }
+    }, true);
 
     /**
-     * PD2 fix (fix/pd2-search-autocomplete-p0): o bootstrap do autocomplete Mirasvit e
-     * assincrono (fetch de templates + require de modulos). Se o usuario digitar antes
-     * desse bootstrap terminar, as teclas sao perdidas silenciosamente (nenhum listener
-     * do componente ainda esta ligado ao input). Apos o componente terminar de
-     * inicializar, reproduzimos a query ja digitada disparando um evento "input"
-     * sintetico, para que o proprio componente processe o valor pendente.
+     * PD2 fix: bootstrap assíncrono. Só re-dispara input se o usuário digitou
+     * enquanto os módulos ainda carregavam. Não reexecutar query da URL na PLP.
      */
     function replayPendingQuery($searchInput) {
         var value = ($searchInput.val() || '').trim();
+        var panelActive = !!d.querySelector(
+            '.mst-searchautocomplete__autocomplete._active, .mst-searchautocomplete__autocomplete.is-open'
+        );
 
-        if (value.length < 2) {
+        if (value.length < 2 || !typedBeforeBootstrap || panelActive) {
             return;
         }
+
 
         window.setTimeout(function () {
             var el = $searchInput.get(0);
@@ -135,6 +152,14 @@
                             }
 
                             $searchInput.data('awaMirasvitAutocompleteInit', 1);
+
+                            try {
+                                if ($searchInput.data('mageQuickSearch')) {
+                                    $searchInput.quickSearch('destroy');
+                                }
+                                $searchInput.removeAttr('data-mage-init');
+                            } catch (eQs) {}
+
 
                             if (cfg.isTypeaheadEnabled) {
                                 new typeahead($searchInput).init(cfg.config);

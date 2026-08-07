@@ -4,6 +4,7 @@
  * See COPYING.txt for license details.
  */
 use Magento\Framework\App\Action\Action;
+use Mirasvit\Core\Service\CspService;
 // @codingStandardsIgnoreFile
 ?>
 <?php
@@ -12,6 +13,7 @@ use Magento\Framework\App\Action\Action;
  *
  * @var \Magento\Catalog\Block\Product\ListProduct $block
  */
+$nonce = CspService::getNonce();
 ?>
 <?php
 $_productCollection = $block->getLoadedProductCollection();
@@ -184,15 +186,21 @@ if ($_b2bActive) {
 							<?php endif; ?>
 							<?php $helper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel'); ?>
 								<?php if($helper->isProductNew($_product)): ?>
-								<div class="onsale new-lable">
-								    <?php echo $block->escapeHtml(__('Lançamento Distribuidora')); ?>
+								<?php
+								    /** Short label fits Ayo .hot-onsale max-width:50px; full meaning in title. */
+								    $awaNewBadgeTitle = (string) __('Lançamento Distribuidora');
+								    $awaNewBadgeLabel = (string) __('Novo');
+								?>
+								<div class="onsale new-lable"
+								     title="<?= $block->escapeHtmlAttr($awaNewBadgeTitle) ?>">
+								    <?= $block->escapeHtml($awaNewBadgeLabel) ?>
 								</div>
 							<?php endif; ?>
 						</div>
 						<div class="actions-secondary">
 							<ul class="product-extra-link add-to-links">
 								<li class="quickview-product">
-									<a class="quickview-link" data-role="quickview-button" data-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>" href="javascript: void(0);" data-href="<?php echo $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())); ?>" role="button" aria-label="<?php echo $block->escapeHtml(__('Visualização rápida de %1', $_product->getName())); ?>" title="<?php echo $block->escapeHtml(__('Quick view')); ?>"></a>
+									<a class="quickview-link" data-role="quickview-button" data-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>" href="<?php echo $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())); ?>" data-href="<?php echo $block->escapeUrl($block->getUrl('quickview/product/quickview/id/' . $_product->getId())); ?>" role="button" aria-label="<?php echo $block->escapeHtml(__('Visualização rápida de %1', $_product->getName())); ?>" title="<?php echo $block->escapeHtml(__('Quick view')); ?>"></a>
 								</li>
 							</ul>
 						</div>
@@ -208,17 +216,11 @@ if ($_b2bActive) {
             <span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
             <span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
         </div>
-        <?php if ($_b2bActive && $b2bCanAddToCart && $_product->isSaleable()): ?>
-            <div class="awa-b2b-logistics">
-                <span class="awa-b2b-badge awa-b2b-badge--success">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    <?= $block->escapeHtml(__('Pronta Entrega')) ?>
-                </span>
-            </div>
-        <?php endif; ?>
+						<?php if (!$_b2bActive): ?>
 						<div class="product-rating">
 							<?php echo $block->getReviewsSummaryHtml($_product, $templateType, true); ?>
 						</div>
+						<?php endif; ?>
 						<div class="info-price" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
                         <?php if ($b2bCanViewPrices): ?>
                             <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
@@ -313,9 +315,11 @@ if ($_b2bActive) {
 							<span class="awa-b2b-sku__label"><?php echo $block->escapeHtml(__('Cod:')); ?></span>
 							<span class="awa-b2b-sku__value"><?php echo $block->escapeHtml($_product->getSku()); ?></span>
 						</div>
+						<?php if (!$_b2bActive): ?>
 						<div class="product-rating">
 							<?php echo $block->getReviewsSummaryHtml($_product, $templateType, true); ?>
 						</div>
+						<?php endif; ?>
 						<div class="info-price" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
                         <?php if ($b2bCanViewPrices): ?>
                             <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>

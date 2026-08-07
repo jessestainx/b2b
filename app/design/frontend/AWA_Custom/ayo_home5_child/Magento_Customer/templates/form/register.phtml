@@ -425,7 +425,7 @@ require(['jquery'], function($) {
                 var rawCnpj = $(this).val().replace(/[^\d]/g, '');
 
                 if (rawCnpj.length === 14) {
-                    cnpjInput.after('<span id="awa-cnpj-loading" style="color: var(--cust-reg-c1); font-size: 12px; display: block; margin-top: 4px;">Buscando dados na Receita...</span>');
+                    cnpjInput.after('<span id="awa-cnpj-loading" class="awa-cnpj-status awa-cnpj-status--loading">Buscando dados na Receita...</span>');
 
                     $.ajax({
                         url: 'https://brasilapi.com.br/api/cnpj/v1/' + rawCnpj,
@@ -433,7 +433,7 @@ require(['jquery'], function($) {
                         dataType: 'json',
                         success: function(data) {
                             $('#awa-cnpj-loading').remove();
-                            cnpjInput.after('<span class="awa-cnpj-success" style="color: green; font-size: 12px; display: block; margin-top: 4px;">CNPJ Encontrado ✓</span>');
+                            cnpjInput.after('<span class="awa-cnpj-status awa-cnpj-status--success">CNPJ Encontrado ✓</span>');
 
                             // Preencher Razão Social / Company
                             if (companyInput.length) {
@@ -453,12 +453,12 @@ require(['jquery'], function($) {
                             if (cityInput.length) cityInput.val(data.municipio);
 
                             // Limpar msg após 4s
-                            setTimeout(function(){ $('.awa-cnpj-success').fadeOut() }, 4000);
+                            setTimeout(function(){ $('.awa-cnpj-status--success').fadeOut() }, 4000);
                         },
                         error: function() {
                             $('#awa-cnpj-loading').remove();
-                            cnpjInput.after('<span class="awa-cnpj-error" style="color: red; font-size: 12px; display: block; margin-top: 4px;">CNPJ Inválido ou API indisponível</span>');
-                            setTimeout(function(){ $('.awa-cnpj-error').fadeOut() }, 4000);
+                            cnpjInput.after('<span class="awa-cnpj-status awa-cnpj-status--error">CNPJ Inválido ou API indisponível</span>');
+                            setTimeout(function(){ $('.awa-cnpj-status--error').fadeOut() }, 4000);
                         }
                     });
                 }

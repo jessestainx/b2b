@@ -136,13 +136,13 @@ $isHomePage = in_array('cms_index_index', $layoutHandles, true);
     <span class="awa-header-account-prompt__text">
         <?php /* Guest state (default on FPC pages) */ ?>
         <span class="awa-header-account-prompt__guest"<?= /* @noEscape */ $guestHiddenAttr ?>>
-            <span class="awa-header-account-prompt__line1"><?= $block->escapeHtml(__('Para ver os preços faça o')) ?></span>
+            <span class="awa-header-account-prompt__line1"><?= $block->escapeHtml(__('Para ver os preços')) ?></span>
             <span class="awa-header-account-prompt__line2 awa-header-account-prompt__actions">
                 <a class="awa-header-account-prompt__link awa-header-account-prompt__link--login"
                    href="<?= $block->escapeUrl($loginUrl) ?>"
                    rel="nofollow"
                    data-awa-auth-link="true">
-                    <?= $block->escapeHtml(__('Login')) ?>
+                    <?= $block->escapeHtml(__('Entrar')) ?>
                 </a>
                 <span class="awa-header-account-prompt__separator" aria-hidden="true"><?= $block->escapeHtml(__('ou')) ?></span>
                 <a class="awa-header-account-prompt__link awa-header-account-prompt__link--register"
@@ -169,6 +169,7 @@ $isHomePage = in_array('cms_index_index', $layoutHandles, true);
             </button>
             <div class="awa-account-dropdown__menu" role="menu"
                  aria-hidden="true"
+                 inert
                  aria-label="<?= $block->escapeHtmlAttr(__('Opções da conta')) ?>">
                 <a class="awa-account-dropdown__item"
                    href="<?= $block->escapeUrl($accountUrl) ?>"
@@ -258,7 +259,7 @@ if ($isB2bEnabled):
     $b2bPanelCssUrl     = $block->getViewFileUrl('GrupoAwamotos_B2B::css/header/status-panel.css');
     $b2bPanelThemeCssUrl = $block->getViewFileUrl('css/awa-b2b-status-panel.css');
     $b2bHydrateJsUrl    = $block->getViewFileUrl('GrupoAwamotos_B2B::js/b2b-panel-hydrate.js');
-    $cssBust = '20260707-b2b-dropdown-anchor';
+    $cssBust = '20260716-v75-b2b-shell-header';
 ?>
 <?php /* CSS não-bloqueante — pattern: media="print" swap para "all" no onload */ ?>
 <link rel="stylesheet"

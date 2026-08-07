@@ -54,6 +54,30 @@
     inline-size: 100%;
 }
 
+/* Checkbox/radio: label ao lado (não empilhar como campo de texto) */
+.field.choice {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--awa-space-2, 8px);
+}
+
+.field.choice > input[type='checkbox'],
+.field.choice > input[type='radio'] {
+    flex-shrink: 0;
+    inline-size: 18px;
+    block-size: 18px;
+    min-inline-size: 18px;
+    min-block-size: 18px;
+    margin-block-start: 2px;
+}
+
+.field.choice > .label,
+.field.choice > label {
+    display: inline;
+    margin-block-end: 0;
+    font-weight: var(--awa-weight-medium, 500);
+}
+
 .field--horizontal {
     flex-direction: row;
     align-items: center;

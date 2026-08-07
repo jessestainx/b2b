@@ -160,14 +160,60 @@
 
     .price-box,
     .price-wrapper,
-    .price-container {
-        min-height: 1.5em; // reserva espaço mesmo sem preço visível (guests B2B)
+    .price-container,
+    .info-price {
+        min-height: var(--awa-modern-card-price-min-height, 56px); // reserva espaço mesmo sem preço visível (guests B2B)
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center; // centraliza placeholder B2B
+    }
+
+    // B2B Price Gate Placeholder stabilization
+    .b2b-login-to-see-price {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100%;
+        min-height: var(--awa-modern-card-price-min-height, 56px) !important;
+        text-align: center;
+        margin: 0 !important;
+        
+        .b2b-login-to-see-price__title {
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            color: var(--awa-primary) !important;
+            text-transform: uppercase;
+            line-height: 1.2 !important;
+            display: block;
+        }
+        
+        .b2b-login-to-see-price__message {
+            font-size: 10px !important;
+            color: var(--awa-muted) !important;
+            margin-top: 2px !important;
+            display: block;
+            line-height: 1.3 !important;
+        }
+
+        // Related Products PDP specific fix
+        &--home-card {
+            min-height: var(--awa-modern-card-price-min-height, 48px) !important;
+        }
     }
 
     .product-item-actions,
     .actions-primary,
     .action.tocart {
         margin-top: auto; // sempre cola no fundo do card
+    }
+}
+
+// PDP Related Products / Upsell alignment
+.block.related, .block.upsell, .block.crosssell {
+    .product-item-link {
+        min-height: 2.8em; // consistency
     }
 }
 

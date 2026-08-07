@@ -2,195 +2,52 @@
 /**
  * AWA Motos — Open Graph + Twitter Card Meta Tags
  *
- * Injeta meta tags de compartilhamento social em todas as páginas.
- * Suporta contextos: Home, PLP (categoria), PDP (produto), CMS pages.
- *
- * Audit 2026-04-23: nenhuma og:* encontrada — compartilhamento social
- * mostra preview genérico no WhatsApp/Facebook/Instagram.
- *
- * Carregado via: Magento_Theme/layout/default_head_blocks.xml
+ * Usa ViewModel via DI (GrupoAwamotos\Theme\ViewModel\OpenGraph).
+ * Sem ObjectManager — compatível com boas práticas Magento 2 / FPC.
  *
  * @var \Magento\Framework\View\Element\Template $block
- * @var \Magento\Framework\View\TemplateEngine\Php $this
  */
 
-use Magento\Framework\App\ObjectManager;
-use Magento\Framework\View\Page\Config as PageConfig;
-use Magento\Store\Model\StoreManagerInterface;
+declare(strict_types=1);
 
-$objectManager = ObjectManager::getInstance();
+use GrupoAwamotos\Theme\ViewModel\OpenGraph;
 
-/** @var \Magento\Framework\App\Request\Http $request */
-$request = $block->getRequest();
-$actionName = $request->getFullActionName(); // cms_index_index, catalog_category_view, catalog_product_view, etc.
-
-/** @var StoreManagerInterface $storeManager */
-$storeManager = $objectManager->get(StoreManagerInterface::class);
-$store = $storeManager->getStore();
-$storeUrl = rtrim($store->getBaseUrl(), '/');
-$storeName = $store->getName() ?: 'AWA Motos';
-
-// ── Defaults ──────────────────────────────────────────────────────────────────
-$ogTitle       = $storeName . ' — Peças e Acessórios para Motos';
-$ogDescription = 'Peças e acessórios para motocicletas com entrega para todo Brasil. Preços especiais para revendedores B2B.';
-$ogImage       = $storeUrl . '/media/logo/stores/1/awamotos-og-default.jpg';
-$ogImageWidth  = 500;
-$ogImageHeight = 500;
-$ogUrl         = $storeUrl . $request->getPathInfo();
-$ogType        = 'website';
-
-// ── Contexto: PDP ─────────────────────────────────────────────────────────────
-if ($actionName === 'catalog_product_view') {
-    try {
-        /** @var \Magento\Framework\Registry $registry */
-        $registry = $objectManager->get(\Magento\Framework\Registry::class);
-        $product = $registry->registry('current_product');
-
-        if ($product && $product->getId()) {
-            $ogTitle       = $product->getName() . ' | ' . $storeName;
-            // SEO-004: fallback hierárquico: meta_description real → short_desc → pageConfig (plugin) → name-based
-            $productMetaDesc = trim(strip_tags((string) $product->getMetaDescription()));
-            $productShortDesc = trim(strip_tags((string) $product->getShortDescription()));
-            $productName = trim(strip_tags((string) $product->getName()));
-            // Detectar meta_description genérica (= nome uppercase sem valor real)
-            $isGenericMeta = ($productMetaDesc !== '' && mb_strtoupper($productMetaDesc, 'UTF-8') === mb_strtoupper($productName, 'UTF-8'));
-            if ($productMetaDesc !== '' && !$isGenericMeta) {
-                $ogDescription = $productMetaDesc;
-            } elseif ($productShortDesc !== '') {
-                $ogDescription = $productShortDesc;
-            } else {
-                // Tenta pageConfig — o plugin ProductMetaDescriptionFallback gera descrição rica aqui
-                $pageConfig = $objectManager->get(\Magento\Framework\View\Page\Config::class);
-                $pageDesc = trim((string) $pageConfig->getDescription());
-                $isGenericPage = ($pageDesc === '' || mb_strtoupper($pageDesc, 'UTF-8') === mb_strtoupper($productName, 'UTF-8'));
-                if (!$isGenericPage) {
-                    $ogDescription = mb_substr($pageDesc, 0, 200);
-                } elseif ($productName !== '') {
-                    // Último recurso: normalizar nome e montar sentença
-                    $displayName = ($productName === mb_strtoupper($productName, 'UTF-8'))
-                        ? mb_convert_case($productName, MB_CASE_TITLE, 'UTF-8')
-                        : $productName;
-                    $ogDescription = $displayName . ' na ' . $storeName
-                        . '. Compre com qualidade e entrega rápida para todo o Brasil.';
-                }
-            }
-            $ogDescription = mb_substr($ogDescription, 0, 200);
-            $ogType        = 'product';
-            $ogUrl         = $product->getProductUrl();
-
-            // Imagem do produto
-            /** @var \Magento\Catalog\Helper\Image $imageHelper */
-            $imageHelper = $objectManager->get(\Magento\Catalog\Helper\Image::class);
-            $productImage = $imageHelper->init($product, 'product_page_image_large')
-                ->setImageFile($product->getImage())
-                ->getUrl();
-            if ($productImage && !str_contains($productImage, 'placeholder')) {
-                $ogImage = $productImage;
-                // Tentar obter dimensões reais da imagem original do produto (do disco)
-                $productImgFile = $product->getImage(); // ex: /1/1/filename.jpg
-                if ($productImgFile && $productImgFile !== 'no_selection') {
-                    $productImgPath = BP . '/pub/media/catalog/product' . $productImgFile;
-                    if (file_exists($productImgPath)) {
-                        $productImgSize = @getimagesize($productImgPath);
-                        if ($productImgSize && $productImgSize[0] > 0) {
-                            $ogImageWidth  = $productImgSize[0];
-                            $ogImageHeight = $productImgSize[1];
-                        }
-                    }
-                }
-            }
-        }
-    } catch (\Exception $e) { /* silently fail */ }
-
-// ── Contexto: PLP (Categoria) ─────────────────────────────────────────────────
-} elseif ($actionName === 'catalog_category_view') {
-    try {
-        /** @var \Magento\Framework\Registry $registry */
-        $registry = $objectManager->get(\Magento\Framework\Registry::class);
-        $category = $registry->registry('current_category');
-
-        if ($category && $category->getId()) {
-            $ogTitle       = $category->getName() . ' | ' . $storeName;
-            $ogDescription = $category->getMetaDescription()
-                ?: 'Compre ' . $category->getName() . ' na ' . $storeName . '. ' . $ogDescription;
-            $ogDescription = mb_substr(strip_tags($ogDescription), 0, 200);
-            $ogUrl         = $category->getUrl();
-
-            if ($category->getImageUrl()) {
-                $catImg = $category->getImageUrl();
-                // Garantir URL absoluta (getImageUrl() pode retornar path relativo)
-                if ($catImg && !str_starts_with($catImg, 'http')) {
-                    $catImg = $storeUrl . '/' . ltrim($catImg, '/');
-                }
-                $ogImage = $catImg;
-                $ogImageWidth  = null;
-                $ogImageHeight = null;
-                // Tentar obter dimensões reais da imagem de categoria (do disco)
-                $catImgRaw = $category->getImage(); // ex: /media/catalog/category/img.png
-                if ($catImgRaw) {
-                    $pubDir = BP . '/pub';
-                    $catImgFile = $pubDir . '/' . ltrim($catImgRaw, '/');
-                    if (file_exists($catImgFile)) {
-                        $catImgSize = @getimagesize($catImgFile);
-                        if ($catImgSize && $catImgSize[0] > 0) {
-                            $ogImageWidth  = $catImgSize[0];
-                            $ogImageHeight = $catImgSize[1];
-                        }
-                    }
-                }
-            }
-        }
-    } catch (\Exception $e) { /* silently fail */ }
-
-// ── Contexto: CMS Page ────────────────────────────────────────────────────────
-} elseif ($actionName === 'cms_page_view' || $actionName === 'cms_index_index') {
-    try {
-        /** @var \Magento\Framework\Registry $registry */
-        $registry = $objectManager->get(\Magento\Framework\Registry::class);
-        $cmsPage = $registry->registry('cms_page');
-
-        if ($cmsPage && $cmsPage->getId()) {
-            $cmsTitle = $cmsPage->getTitle() ?: $storeName;
-            $ogTitle  = $cmsTitle . ($cmsTitle !== $storeName ? ' | ' . $storeName : '');
-            if ($cmsPage->getMetaDescription()) {
-                $ogDescription = mb_substr(strip_tags($cmsPage->getMetaDescription()), 0, 200);
-            }
-        }
-
-        // SEO-005: fallback — se og:description ainda é o default, tenta pageConfig
-        // (para cms_index_index, a CMS page pode não estar registrada mas pageConfig já tem a desc)
-        if ($ogDescription === 'Peças e acessórios para motocicletas com entrega para todo Brasil. Preços especiais para revendedores B2B.') {
-            /** @var \Magento\Framework\View\Page\Config $pageConfig */
-            $pageConfig = $objectManager->get(\Magento\Framework\View\Page\Config::class);
-            $configDesc = trim((string) $pageConfig->getDescription());
-            if ($configDesc !== '') {
-                $ogDescription = mb_substr(strip_tags($configDesc), 0, 200);
-            }
-        }
-    } catch (\Exception $e) { /* silently fail */ }
+$viewModel = $block->getData('view_model') ?: $block->getData('open_graph_view_model');
+if (!$viewModel instanceof OpenGraph) {
+    return;
 }
 
-// Sanitize
-$ogTitle       = htmlspecialchars(strip_tags($ogTitle), ENT_QUOTES, 'UTF-8');
-$ogDescription = htmlspecialchars(strip_tags($ogDescription), ENT_QUOTES, 'UTF-8');
-$ogImage       = htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8');
-$ogUrl         = htmlspecialchars($ogUrl, ENT_QUOTES, 'UTF-8');
-$ogType        = htmlspecialchars($ogType, ENT_QUOTES, 'UTF-8');
+$meta = $viewModel->getMetaData();
+$esc = static function (string $value) use ($block): string {
+    return $block->escapeHtmlAttr($value);
+};
+$urlEsc = static function (string $value) use ($block): string {
+    return $block->escapeUrl($value);
+};
 ?>
 <!-- AWA Motos — Open Graph / Social Meta Tags -->
-<meta property="og:type"        content="<?= $ogType ?>">
-<meta property="og:site_name"   content="AWA Motos">
-<meta property="og:title"       content="<?= $ogTitle ?>">
-<meta property="og:description" content="<?= $ogDescription ?>">
-<meta property="og:image"       content="<?= $ogImage ?>">
-<meta property="og:image:alt"   content="<?= $ogTitle ?>">
-<?php if ($ogImageWidth): ?><meta property="og:image:width"  content="<?= (int)$ogImageWidth ?>">
-<meta property="og:image:height" content="<?= (int)$ogImageHeight ?>"><?php endif; ?>
-<meta property="og:url"         content="<?= $ogUrl ?>">
-<meta property="og:locale"      content="pt_BR">
+<meta property="og:type"        content="<?= $esc($meta['type'] ?? 'website') ?>">
+<meta property="og:site_name"   content="<?= $esc($meta['site_name'] ?? 'AWA Motos') ?>">
+<meta property="og:title"       content="<?= $esc($meta['title'] ?? '') ?>">
+<meta property="og:description" content="<?= $esc($meta['description'] ?? '') ?>">
+<meta property="og:image"       content="<?= $urlEsc($meta['image'] ?? '') ?>">
+<meta property="og:image:alt"   content="<?= $esc($meta['image_alt'] ?? ($meta['title'] ?? '')) ?>">
+<?php if (!empty($meta['image_width']) && !empty($meta['image_height'])): ?>
+<meta property="og:image:width"  content="<?= $esc((string) $meta['image_width']) ?>">
+<meta property="og:image:height" content="<?= $esc((string) $meta['image_height']) ?>">
+<?php endif; ?>
+<meta property="og:url"         content="<?= $urlEsc($meta['url'] ?? '') ?>">
+<meta property="og:locale"      content="<?= $esc($meta['locale'] ?? 'pt_BR') ?>">
+<?php if (($meta['type'] ?? '') === 'product' && !empty($meta['price_amount'])): ?>
+<meta property="product:price:amount"   content="<?= $esc($meta['price_amount']) ?>">
+<meta property="product:price:currency" content="<?= $esc($meta['price_currency'] ?? 'BRL') ?>">
+<?php endif; ?>
+<?php if (!empty($meta['availability'])): ?>
+<meta property="product:availability" content="<?= $esc($meta['availability']) ?>">
+<?php endif; ?>
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="<?= $ogTitle ?>">
-<meta name="twitter:description" content="<?= $ogDescription ?>">
-<meta name="twitter:image"       content="<?= $ogImage ?>">
-<meta name="twitter:image:alt"   content="<?= $ogTitle ?>">
+<meta name="twitter:title"       content="<?= $esc($meta['title'] ?? '') ?>">
+<meta name="twitter:description" content="<?= $esc($meta['description'] ?? '') ?>">
+<meta name="twitter:image"       content="<?= $urlEsc($meta['image'] ?? '') ?>">
+<meta name="twitter:image:alt"   content="<?= $esc($meta['image_alt'] ?? ($meta['title'] ?? '')) ?>">

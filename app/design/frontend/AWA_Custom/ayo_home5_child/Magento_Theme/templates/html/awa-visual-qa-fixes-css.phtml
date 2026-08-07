@@ -1,11 +1,7 @@
 <?php
 declare(strict_types=1);
-/** Visual QA fixes — loads on all storefront pages except home (handled via awa-head-preload.phtml) */
+/** Visual QA fixes — async em todas as rotas (critical-home cobre above-fold na home). */
 $cssUrl = $block->getViewFileUrl('css/awa-visual-qa-fixes-2026-06-17.min.css');
-$isHome = (string) $block->getRequest()->getFullActionName() === 'cms_index_index';
 ?>
-<?php if ($isHome): ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=14" media="all" data-awa-first-paint-critical="visual-qa"/>
-<?php else: ?>
-<link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=14" media="print" onload="this.media='all'" data-awa-visual-qa-fixes="1"/>
-<?php endif; ?>
+<link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>?v=20260730-p1-ssot-title" media="print" onload="this.media='all'" data-awa-visual-qa-fixes="1"/>
+

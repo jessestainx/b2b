@@ -13,7 +13,7 @@ if (!empty($GLOBALS['__awaShelfCarouselLoaderEmitted'])) {
 }
 $GLOBALS['__awaShelfCarouselLoaderEmitted'] = true;
 
-$assetVersion = '20260703-carousel-contract-v9';
+$assetVersion = '20260806-carousel-a11y-r1';
 $cssUrl = $block->getViewFileUrl('css/awa-shelf-carousel.min.css') . '?v=' . $assetVersion;
 $contractCssUrl = $block->getViewFileUrl('css/awa-carousel-contract.min.css') . '?v=' . $assetVersion;
 $jsUrl = $block->getViewFileUrl('js/awa-scroll-carousel.min.js') . '?v=' . $assetVersion;
@@ -21,23 +21,33 @@ $homeBootstrapUrl = $block->getViewFileUrl('js/awa-home-shelf-bootstrap.min.js')
 $request = $block->getRequest();
 $isHomePage = $request && $request->getFullActionName() === 'cms_index_index';
 ?>
+<?php if ($isHomePage): ?>
+<?php /* Home: CSS shelf+contract vão em awa-home-deferred-stack (plugin). Só JS aqui.
+ * Config JSON é a fonte canônica da URL do runtime (bootstrap já lê #awa-home-shelf-bootstrap-config). */ ?>
+<script type="application/json" id="awa-home-shelf-bootstrap-config"><?= /* @noEscape */ json_encode(
+    ['jsSrc' => $jsUrl],
+    JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+) ?></script>
+<script src="<?= $block->escapeUrl($homeBootstrapUrl) ?>"
+        defer
+        data-awa-shelf-js="<?= $block->escapeUrl($jsUrl) ?>"
+        data-awa-shelf-loader="1"></script>
+<?php else: ?>
+<?php /* PSI: print→all — geometria pré-init coberta onde há critical inline. */ ?>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($cssUrl) ?>"
       data-awa-shelf-js="<?= $block->escapeHtmlAttr($jsUrl) ?>"
       data-awa-shelf-loader="1"
-      media="<?= $isHomePage ? 'all' : 'print' ?>"
-      <?= $isHomePage ? 'data-awa-first-paint-critical="shelf-carousel"' : 'onload="this.media=\'all\'"' ?>/>
+      media="print"
+      onload="this.media='all'"/>
 <link rel="stylesheet"
       href="<?= $block->escapeUrl($contractCssUrl) ?>"
       data-awa-carousel-contract="1"
-      media="<?= $isHomePage ? 'all' : 'print' ?>"
-      <?= $isHomePage ? 'data-awa-first-paint-critical="carousel-contract"' : 'onload="this.media=\'all\'"' ?>/>
+      media="print"
+      onload="this.media='all'"/>
 <noscript>
     <link rel="stylesheet" href="<?= $block->escapeUrl($cssUrl) ?>"/>
     <link rel="stylesheet" href="<?= $block->escapeUrl($contractCssUrl) ?>"/>
 </noscript>
-<?php if ($isHomePage): ?>
-<script src="<?= $block->escapeUrl($homeBootstrapUrl) ?>" defer></script>
-<?php else: ?>
 <script src="<?= $block->escapeUrl($jsUrl) ?>" defer></script>
 <?php endif; ?>

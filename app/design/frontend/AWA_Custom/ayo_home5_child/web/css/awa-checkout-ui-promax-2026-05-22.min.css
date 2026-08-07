@@ -1,0 +1,5 @@
+/* AWA checkout legacy compatibility stub.
+   The active checkout CSS is loaded by awa-checkout-polish.min.css,
+   awa-checkout-layout-lock.css, and awa-checkout-shell-final.css.
+   This file intentionally contains no overrides; it prevents the legacy
+   async loader URL from returning an HTML 404 as a stylesheet. */

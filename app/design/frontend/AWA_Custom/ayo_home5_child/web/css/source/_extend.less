@@ -340,8 +340,8 @@ body.checkout-cart-index {
         --awa-oklch-ink: oklch(22% 0.012 27);
         --awa-oklch-text: oklch(32% 0.012 27);
         --awa-oklch-muted: oklch(48% 0.01 27);
-        --awa-oklch-surface: oklch(99.2% 0.006 27);
-        --awa-oklch-soft: oklch(97.2% 0.008 27);
+        --awa-oklch-surface: oklch(100% 0 0);
+        --awa-oklch-soft: oklch(97% 0 0);
         --awa-oklch-border: oklch(90% 0.01 27);
         --awa-primary: var(--awa-oklch-primary);
         --awa-primary-hover: var(--awa-oklch-primary-hover);
@@ -1776,15 +1776,16 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             :is(.block-search, .block-content, .awa-search-action-wrapper, form#search_mini_form, form.minisearch) {
                 width: 100% !important;
                 max-width: none !important;
-                height: 32px !important;
-                min-height: 32px !important;
-                max-height: 32px !important;
+                /* DS row 68px: control = 44px (não 32px da promo — desalinha busca vs logo/B2B) */
+                height: 44px !important;
+                min-height: 44px !important;
+                max-height: 44px !important;
                 margin: 0 !important;
             }
 
             form#search_mini_form {
                 display: grid !important;
-                grid-template-columns: minmax(0, 1fr) 48px !important;
+                grid-template-columns: minmax(0, 1fr) 44px !important;
                 overflow: visible !important;
                 border: 1px solid var(--awa-border) !important;
                 border-radius: 0 !important;
@@ -1793,22 +1794,22 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             }
 
             form#search_mini_form :is(.field.search, .field.search .control, .actions) {
-                height: 32px !important;
-                min-height: 32px !important;
-                max-height: 32px !important;
+                height: 44px !important;
+                min-height: 44px !important;
+                max-height: 44px !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
 
             form#search_mini_form input#search {
-                height: 32px !important;
-                min-height: 32px !important;
+                height: 44px !important;
+                min-height: 44px !important;
                 border: 0 !important;
                 box-shadow: none !important;
                 padding: 0 @awa-space-3 !important;
                 color: var(--awa-text, @awa-color-text-primary) !important;
-                font-size: 12px !important;
-                line-height: 32px !important;
+                font-size: 14px !important;
+                line-height: 44px !important;
             }
 
             form#search_mini_form input#search::placeholder {
@@ -1820,11 +1821,11 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                width: 48px !important;
-                min-width: 48px !important;
-                height: 32px !important;
-                min-height: 32px !important;
-                max-height: 32px !important;
+                width: 44px !important;
+                min-width: 44px !important;
+                height: 44px !important;
+                min-height: 44px !important;
+                max-height: 44px !important;
                 border: 0 !important;
                 border-radius: 0 !important;
                 background: transparent !important;
@@ -1895,6 +1896,7 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             justify-content: center !important;
         }
 
+        /* Minicart: sem fundo/borda, ícone primary maior */
         .awa-header-minicart .minicart-wrapper a.showcart.header-mini-cart,
         .awa-header-minicart .minicart-wrapper .action.showcart,
         .awa-header-minicart .awa-header-cart-fallback {
@@ -1902,21 +1904,31 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             min-width: 44px !important;
             height: 44px !important;
             min-height: 44px !important;
+            border: 0 !important;
             border-radius: 0 !important;
             background: transparent !important;
-            color: var(--awa-primary) !important;
+            background-color: transparent !important;
+            color: var(--awa-primary, #b73337) !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
             box-shadow: none !important;
+            outline: none !important;
         }
 
-        .awa-header-minicart :is(.awa-minicart-icon, .awa-header-cart-fallback__icon) {
+        .awa-header-minicart .action.showcart :is(.awa-minicart-icon, .awa-header-cart-fallback__icon),
+        .awa-header-minicart .awa-header-cart-fallback :is(.awa-minicart-icon, .awa-header-cart-fallback__icon) {
             width: 28px !important;
             height: 28px !important;
-            color: var(--awa-primary) !important;
-            fill: var(--awa-primary) !important;
-            stroke: var(--awa-primary) !important;
+            color: var(--awa-primary, #b73337) !important;
+            fill: none !important;
+            stroke: var(--awa-primary, #b73337) !important;
+        }
+
+        .awa-header-minicart .action.showcart .awa-minicart-icon circle,
+        .awa-header-minicart .awa-header-cart-fallback .awa-header-cart-fallback__icon circle {
+            fill: var(--awa-primary, #b73337) !important;
+            stroke: none !important;
         }
 
         .header-control.awa-nav-bar,
@@ -2053,12 +2065,13 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
             display: flex !important;
             visibility: visible !important;
             pointer-events: auto !important;
-            align-items: stretch !important;
+            align-items: center !important;
             justify-content: flex-start !important;
-            flex: 0 1 auto !important;
+            flex: 0 0 auto !important;
             width: auto !important;
             min-width: 0 !important;
-            height: 48px !important;
+            height: 44px !important;
+            /* H-B: margin:0 anulava o empurrão à direita em flex (primary-nav hidden) */
             margin: 0 !important;
             padding: 0 !important;
         }
@@ -2112,3 +2125,8 @@ html body#html-body:not(.onepagecheckout-index-index):not(.checkout-index-index)
 
 // 1.12. VISUAL AUDIT JUL 2026 — 13 correções UX/UI (menu, footer, PLP, B2B, PWA)
 // (import único acima — linha ~2107)
+
+// 1.13. M2 visual SSOT (rating / shelf header / carousel viewport) — 2026-08-01
+// Produção também registra web/css/awa-m2-visual-ssot.css em default_head_blocks.xml
+// porque styles-m.css está removido do head.
+@import (once) '_awa-m2-visual-ssot';

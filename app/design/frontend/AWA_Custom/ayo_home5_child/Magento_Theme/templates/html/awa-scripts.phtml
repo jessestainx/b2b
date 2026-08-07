@@ -59,7 +59,7 @@ $useSlimGlobalScripts = $isCheckoutFlowRoute || $isCustomerAccountRoute;
 <?php endif; ?>
 <?php if ($isCmsHomeRoute): ?>
 <script type="text/javascript">
-(function (d) {
+(function (d, w) {
     /* Visual Autopilot 2026-07-02: fix do hero slider deslocado -5px em desktop/tablet.
        O full-bleed do hero usa width:100vw + margin-left:calc(50% - 50vw)
        (awa-home-standardize-terminal-wins-2026-06-09.css). `100vw` inclui a faixa da
@@ -69,15 +69,31 @@ $useSlimGlobalScripts = $isCheckoutFlowRoute || $isCustomerAccountRoute;
        property para a regra de full-bleed compensar via calc(); fallback 0px preserva o
        comportamento antigo se JS falhar. Não pode ir em awa-head-preload.phtml: o plugin
        GrupoAwamotos\Theme\Plugin\Response\OptimizeHeadStylesPlugin reescreve/descarta
-       <script>/<style> ad-hoc injetados no <head> daquele template. */
+       <script>/<style> ad-hoc injetados no <head> daquele template.
+       r45: NÃO setProperty no parse — forçava style recalc sync ~2.3s (LCP ~2.8s).
+       Adia para load+rAF; --awa-scrollbar-w default 0px até lá (scrollbar-gutter:stable). */
     'use strict';
-    var sw = window.innerWidth - d.documentElement.clientWidth;
-    d.documentElement.style.setProperty('--awa-scrollbar-w', Math.max(sw, 0) + 'px');
-    window.addEventListener('resize', function () {
-        var w = window.innerWidth - d.documentElement.clientWidth;
-        d.documentElement.style.setProperty('--awa-scrollbar-w', Math.max(w, 0) + 'px');
-    }, { passive: true });
-})(document);
+
+    function applyScrollbarVar() {
+        var sw = w.innerWidth - d.documentElement.clientWidth;
+        d.documentElement.style.setProperty('--awa-scrollbar-w', Math.max(sw, 0) + 'px');
+    }
+    function scheduleApply() {
+if (w.requestAnimationFrame) {
+            w.requestAnimationFrame(function () {
+                w.requestAnimationFrame(applyScrollbarVar);
+            });
+        } else {
+            w.setTimeout(applyScrollbarVar, 0);
+        }
+    }
+    if (d.readyState === 'complete') {
+        scheduleApply();
+    } else {
+        w.addEventListener('load', scheduleApply, { once: true });
+    }
+    w.addEventListener('resize', applyScrollbarVar, { passive: true });
+})(document, window);
 </script>
 <script type="text/javascript">
 (function (w) {
@@ -99,9 +115,17 @@ $useSlimGlobalScripts = $isCheckoutFlowRoute || $isCustomerAccountRoute;
         }, 120);
     }
 
-    runWhenRequire(function () {
-        w.require(['js/awa-nav-cls-fix-reset']);
-    }, 'awa-nav-cls-fix-reset-home');
+    // r45: nav-cls-reset também só após load (evita require sync no parse da home).
+    function bootNavCls() {
+        runWhenRequire(function () {
+            w.require(['js/awa-nav-cls-fix-reset']);
+        }, 'awa-nav-cls-fix-reset-home');
+    }
+    if (w.document.readyState === 'complete') {
+        bootNavCls();
+    } else {
+        w.addEventListener('load', bootNavCls, { once: true });
+    }
 
     function loadHomeDeferredModules() {
         runWhenRequire(function () {
@@ -115,9 +139,15 @@ $useSlimGlobalScripts = $isCheckoutFlowRoute || $isCustomerAccountRoute;
 
     var intentEvents = ['pointerdown', 'keydown', 'touchstart'];
     var homeDeferStarted = false;
+    var shelfIntentSel = '.product-item, .item-product, .awa-shelf, .products-grid, .hot-deal-tab-slider-customcss, .rokan-bestseller, .rokan-newproduct, [data-role="tocart-form"], .action.tocart, .awa-qty';
 
-    function onHomeIntent() {
+    function onHomeIntent(evt) {
+        var target;
         if (homeDeferStarted) {
+            return;
+        }
+        target = evt && evt.target;
+        if (!target || !target.closest || !target.closest(shelfIntentSel)) {
             return;
         }
         homeDeferStarted = true;
@@ -128,7 +158,7 @@ $useSlimGlobalScripts = $isCheckoutFlowRoute || $isCustomerAccountRoute;
     }
 
     intentEvents.forEach(function (name) {
-        w.addEventListener(name, onHomeIntent, { capture: true, passive: name !== 'keydown', once: true });
+        w.addEventListener(name, onHomeIntent, { capture: true, passive: name !== 'keydown' });
     });
 }(window));
 </script>

@@ -670,6 +670,17 @@ body .page-wrapper .navigation.verticalmenu.side-verticalmenu {
 }
 
 /* ── Backdrop ao abrir menu (header) ─────────────────────────────────────── */
+/* FIX 2026-07-19: idle overlay com pointer-events:auto + visibility:hidden
+   (tema Ayo) — força none quando inativo; auto só com body.background_shadow*. */
+html body#html-body :is(.shadow_bkg, .shadow_bkg_show) {
+  pointer-events: none !important;
+}
+
+html body#html-body:is(.background_shadow, .background_shadow_show, .nav-open, .awa-vertical-menu-open)
+  :is(.shadow_bkg, .shadow_bkg_show) {
+  pointer-events: auto !important;
+}
+
 body .shadow_bkg_show,
 body .page-wrapper .shadow_bkg_show {
   background: color-mix(in srgb, var(--awa-text, #0f172a) 42%, transparent) !important;

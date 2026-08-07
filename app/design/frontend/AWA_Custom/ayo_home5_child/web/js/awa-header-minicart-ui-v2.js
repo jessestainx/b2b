@@ -6,11 +6,11 @@
     'use strict';
 
     var runtime = window.__awaHeaderMinicartRuntime = window.__awaHeaderMinicartRuntime || {};
-    if (!runtime.owner) {
-        runtime.owner = 'v2';
-        runtime.ownerSource = 'awa-header-minicart-ui-v2.js';
-        runtime.ownerClaimedAt = Date.now();
-    } else if (runtime.owner !== 'v2') {
+    if (!runtime.cosmeticOwner) {
+        runtime.cosmeticOwner = 'v2';
+        runtime.cosmeticOwnerSource = 'awa-header-minicart-ui-v2.js';
+        runtime.cosmeticOwnerClaimedAt = Date.now();
+    } else if (runtime.cosmeticOwner !== 'v2') {
         return;
     }
 
@@ -27,12 +27,14 @@
     var resizeScheduled = false;
     var scrollScheduled = false;
     var searchSyncScheduled = false;
+    var searchSyncLastAt = 0;
     var layoutSyncScheduled = false;
     var searchSyncRunning = false;
     var layoutSyncRunning = false;
     var stickyScrollScheduled = false;
     var overlaySyncScheduled = false;
     var overlaySyncRunning = false;
+    var overlaySyncLastAt = 0;
 
     function bodyEl() {
         return document.body;
@@ -62,7 +64,23 @@
     }
 
     function isVisible(el) {
-        return !!el && !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+        var inlineDisplay;
+        var inlineVisibility;
+        if (!el) {
+            return false;
+        }
+        if (el.hasAttribute && el.hasAttribute('hidden')) {
+            return false;
+        }
+        if (el.getAttribute && el.getAttribute('aria-hidden') === 'true') {
+            return false;
+        }
+        inlineDisplay = el.style ? el.style.display : '';
+        inlineVisibility = el.style ? el.style.visibility : '';
+        if (inlineDisplay === 'none' || inlineVisibility === 'hidden') {
+            return false;
+        }
+        return true;
     }
 
     function isHomePage() {
@@ -95,6 +113,128 @@
         el.style.setProperty(prop, value, 'important');
     }
 
+    function isValidMinicartQtyChange(origin, changed) {
+        return String(origin) !== String(changed) &&
+            String(changed).length > 0 &&
+            Number(changed) == changed && // eslint-disable-line eqeqeq
+            Number(changed) > 0;
+    }
+
+    function syncMinicartUpdateButtonForInput(input) {
+        var row;
+        var button;
+        var baseQty;
+        var changedQty;
+        var shouldShowUpdate;
+
+        if (!input || !input.classList || !input.classList.contains('cart-item-qty')) {
+            return;
+        }
+
+        row = input.closest('.details-qty');
+        button = row ? row.querySelector('.update-cart-item') : null;
+
+        if (!button) {
+            return;
+        }
+        baseQty = input.getAttribute('data-item-qty');
+        changedQty = input.value;
+        shouldShowUpdate = isValidMinicartQtyChange(baseQty, changedQty);
+
+        if (shouldShowUpdate) {
+            button.style.removeProperty('display');
+            button.style.removeProperty('visibility');
+            button.style.removeProperty('inline-size');
+            button.style.removeProperty('block-size');
+            button.style.removeProperty('min-inline-size');
+            button.style.removeProperty('min-block-size');
+            button.style.removeProperty('overflow');
+            button.style.removeProperty('margin');
+            button.style.removeProperty('padding');
+            button.style.removeProperty('border');
+            button.style.removeProperty('pointer-events');
+        } else {
+            button.style.setProperty('display', 'none', 'important');
+        }
+
+    }
+
+    function syncMinicartUpdateButtons(root) {
+        var scope = root && root.querySelectorAll ? root : document;
+
+        scope.querySelectorAll('.block-minicart .cart-item-qty').forEach(syncMinicartUpdateButtonForInput);
+    }
+
+    function onMinicartQtyEvent(evt) {
+        var input;
+
+        if (!evt.target) {
+            return;
+        }
+
+        if (evt.type === 'awa:qty-control:change') {
+            input = evt.target.querySelector ? evt.target.querySelector('.cart-item-qty') : null;
+        } else {
+            input = evt.target.closest ? evt.target.closest('.block-minicart .cart-item-qty') : null;
+        }
+
+        syncMinicartUpdateButtonForInput(input);
+    }
+
+    function onMinicartOpenIntent(evt) {
+        if (!evt.target || !evt.target.closest) {
+            return;
+        }
+
+        if (evt.target.closest('[data-block="minicart"] .showcart, .minicart-wrapper .showcart')) {
+            syncMinicartUpdateButtons(document);
+        }
+    }
+
+    function bindMinicartOpenSync() {
+        var bind = function ($) {
+            $(document)
+                .off('dropdowndialogopen.awaMinicartUpdateSync')
+                .on('dropdowndialogopen.awaMinicartUpdateSync', function () {
+                    syncMinicartUpdateButtons(document);
+                });
+        };
+
+        if (window.jQuery) {
+            bind(window.jQuery);
+            return;
+        }
+
+        if (window.require) {
+            window.require(['jquery'], bind);
+        }
+    }
+
+    function initMinicartUpdateButtonObserver() {
+        var root = document.querySelector('[data-block="minicart"]');
+        var observer;
+
+        if (!root || !window.MutationObserver || root.getAttribute('data-awa-update-button-observed') === '1') {
+            return;
+        }
+
+        root.setAttribute('data-awa-update-button-observed', '1');
+        observer = new MutationObserver(function (mutations) {
+            var shouldSync = mutations.some(function (mutation) {
+                return mutation.type === 'childList' && (mutation.addedNodes.length || mutation.removedNodes.length);
+            });
+
+            if (shouldSync) {
+                syncMinicartUpdateButtons(root);
+            }
+        });
+
+        observer.observe(root, {
+            childList: true,
+            subtree: true
+        });
+    }
+
     function setOverlayStyleImportant(el, prop, value) {
         if (!el) {
             return;
@@ -119,7 +259,12 @@
     var syncFlags = { search: false, layout: false, scroll: false, resize: false };
 
     function scheduleSearchSync() {
+        var elapsed;
         if (isMinicartOverlayActive()) {
+            return;
+        }
+        elapsed = Date.now() - searchSyncLastAt;
+        if (elapsed < 120 && syncFlags.search) {
             return;
         }
         schedule(function searchSyncJob() {
@@ -127,6 +272,7 @@
                 return;
             }
             searchSyncRunning = true;
+            searchSyncLastAt = Date.now();
             try {
                 ensureSearchCompat();
                 syncSearchPanelState();
@@ -217,7 +363,7 @@
             if (!item.matches || !item.matches('[role="option"], li')) {
                 item = item.closest('[role="option"], li');
             }
-            if (!item || !isVisible(item)) {
+            if (!item || item.hasAttribute('hidden') || item.getAttribute('aria-hidden') === 'true') {
                 continue;
             }
             dup = false;
@@ -416,24 +562,27 @@
             }
         }
 
-        options = getSearchOptions(ctx);
+        /* INP: não varrer todos os <li> + getComputedStyle a cada tecla.
+           Contagem leve via querySelector; getSearchOptions só se painel aberto. */
         panelOpen = !!(ctx.panel && (
-            (isVisible(ctx.panel) && window.getComputedStyle(ctx.panel).display !== 'none') ||
-            (ctx.form.contains(document.activeElement) &&
-                ctx.panel.children.length > 0 &&
-                (options.length > 0 || (ctx.panel.textContent || '').trim() !== ''))
+            ctx.panel.classList.contains('_active') ||
+            ctx.panel.classList.contains('is-open') ||
+            ctx.panel.getAttribute('aria-hidden') === 'false' ||
+            (ctx.form.contains(document.activeElement) && ctx.panel.children.length > 0)
         ));
 
-        if (ctx.resultsRoot && isVisible(ctx.resultsRoot)) {
-            hasResults = options.length > 0 || ctx.resultsRoot.querySelectorAll('li').length > 0;
-            text = (ctx.resultsRoot.textContent || '').trim();
-        } else if (ctx.panel) {
-            text = (ctx.panel.textContent || '').trim();
-            hasResults = options.length > 0 || text !== '' || ctx.panel.children.length > 0;
+        if (ctx.resultsRoot || ctx.panel) {
+            hasResults = !!(
+                (ctx.panel && ctx.panel.querySelector('li, .mst-searchautocomplete__item')) ||
+                (ctx.resultsRoot && ctx.resultsRoot.querySelector('li'))
+            );
+            text = '';
         } else {
             hasResults = false;
             text = '';
         }
+
+        options = panelOpen && hasResults ? getSearchOptions(ctx) : [];
 
         if (ctx.form.getAttribute('data-awa-panel-closed') === 'true') {
             panelOpen = false;
@@ -523,6 +672,7 @@
         condensed = window.scrollY >= 48;
         wrap.classList.toggle('awa-header-condensed', condensed);
         body.classList.toggle('awa-header-condensed', condensed);
+
     }
 
     function syncPlpToolbarOffset() {
@@ -815,12 +965,17 @@
         wraps.forEach(function (wrap) {
             var panel = wrap.querySelector('.block-minicart');
             var close = wrap.querySelector('.block-minicart .action.close, .block-minicart .close');
+            var showcart = wrap.querySelector('.showcart, .action.showcart');
             if (close && typeof close.click === 'function') {
                 close.click();
             }
             wrap.classList.remove('active', 'show', 'is-open');
+            if (showcart) {
+                showcart.classList.remove('is-open', 'active');
+                showcart.setAttribute('aria-expanded', 'false');
+            }
             if (panel) {
-                panel.classList.remove('_active');
+                panel.classList.remove('_active', 'active', 'is-open');
                 // BUG-a1f9f3 v10: display:none !important inline impedia reabrir o dropdown
                 // (inline vence o CSS terminal display:flex !important).
                 panel.style.removeProperty('display');
@@ -845,9 +1000,23 @@
     }
 
     function isOverlayVisible(el) {
-        return !!el && !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length) &&
-            window.getComputedStyle(el).display !== 'none' &&
-            window.getComputedStyle(el).visibility !== 'hidden';
+        var inlineDisplay;
+        var inlineVisibility;
+        if (!el) {
+            return false;
+        }
+        if (el.hasAttribute && el.hasAttribute('hidden')) {
+            return false;
+        }
+        if (el.getAttribute && el.getAttribute('aria-hidden') === 'true') {
+            return false;
+        }
+        inlineDisplay = el.style ? el.style.getPropertyValue('display') : '';
+        inlineVisibility = el.style ? el.style.getPropertyValue('visibility') : '';
+        if (inlineDisplay === 'none' || inlineVisibility === 'hidden') {
+            return false;
+        }
+        return true;
     }
 
     function getOpenMinicartPanel() {
@@ -930,11 +1099,8 @@
         var panel = getOpenMinicartPanel();
         var wrap = panel ? panel.closest('.minicart-wrapper') : null;
         var header = document.querySelector('.awa-site-header');
-        var cart = document.querySelector('.awa-site-header .awa-header-minicart');
-        var headerRect;
-        var cartRect;
-        var right;
         var isDesktop = !!(window.matchMedia && window.matchMedia('(min-width: 992px)').matches);
+        var nextLayoutKey;
 
         // AWA Fix: skip fixed positioning in auth shells to avoid conflict with absolute positioning
         if (typeof isAuthShell === 'function' && isAuthShell()) {
@@ -947,33 +1113,21 @@
         if (!wrap || !(wrap.classList.contains('active') || wrap.classList.contains('show') || wrap.classList.contains('is-open'))) {
             return;
         }
-        headerRect = header ? header.getBoundingClientRect() : { bottom: 0 };
-        cartRect = cart ? cart.getBoundingClientRect() : { right: window.innerWidth - 24 };
-        right = Math.max(16, Math.round(window.innerWidth - cartRect.right));
-        var nextLayoutKey = [
-            Math.round(headerRect.bottom),
-            right,
-            Math.round(window.innerWidth)
+
+        nextLayoutKey = [
+            Math.round(window.innerWidth),
+            Math.round(header ? header.getBoundingClientRect().bottom : 0)
         ].join('|');
         if (nextLayoutKey === minicartPanelLayoutKey) {
             return;
         }
         minicartPanelLayoutKey = nextLayoutKey;
-        panel.style.removeProperty('display');
-        panel.style.removeProperty('visibility');
-        panel.style.removeProperty('pointer-events');
-        panel.style.removeProperty('opacity');
-        setStyleImportant(panel, 'position', 'fixed');
-        setStyleImportant(panel, 'top', Math.max(0, Math.round(headerRect.bottom + 8)) + 'px');
-        setStyleImportant(panel, 'right', right + 'px');
-        setStyleImportant(panel, 'left', 'auto');
-        setStyleImportant(panel, 'width', 'min(380px, calc(100vw - 32px))');
-        setStyleImportant(panel, 'max-width', 'min(380px, calc(100vw - 32px))');
-        setStyleImportant(panel, 'min-width', '280px');
-        // BUG-a1f9f3 v10: z-index 1200 ficava abaixo do header (100120) — painel atrás/clippado.
-        setStyleImportant(panel, 'z-index', 'var(--awa-z-minicart, 1300)');
-        setStyleImportant(panel, 'max-height', 'calc(100vh - ' + Math.max(0, Math.round(headerRect.bottom + 24)) + 'px)');
-        setStyleImportant(panel, 'overflow-y', 'auto');
+
+        require(['js/awa-minicart-position'], function (minicartPosition) {
+            if (minicartPosition && typeof minicartPosition.centerOpenMinicartPanel === 'function') {
+                minicartPosition.centerOpenMinicartPanel(panel);
+            }
+        });
     }
 
     function syncHeaderOverlayExclusivity() {
@@ -1034,14 +1188,25 @@
     }
 
     function scheduleOverlaySync() {
+        var elapsed;
         if (overlaySyncScheduled) {
             return;
         }
+        elapsed = Date.now() - overlaySyncLastAt;
         overlaySyncScheduled = true;
-        window.requestAnimationFrame(function () {
+
+        function run() {
             overlaySyncScheduled = false;
+            overlaySyncLastAt = Date.now();
             syncHeaderOverlayExclusivity();
-        });
+        }
+
+        if (elapsed < 100) {
+            window.setTimeout(run, 100 - elapsed);
+            return;
+        }
+
+        window.requestAnimationFrame(run);
     }
 
     function buildLayoutFingerprint() {
@@ -1110,12 +1275,21 @@
             setStyleImportant(row, 'min-width', '0');
 
             if (searchCol) {
+                /* H-search-input-width (2026-08-02): cart vive em .awa-header-right-col (row brand),
+                   não em .awa-header-search-col. Reservar 44px aqui cria coluna fantasma e
+                   deixa #search em ~235px. Só use 1fr+44px se o cartWrap for filho real. */
                 setStyleImportant(searchCol, 'display', 'grid');
-                setStyleImportant(searchCol, 'grid-template-columns', 'minmax(0, 1fr) 44px');
-                setStyleImportant(searchCol, 'grid-template-areas', '"search cart"');
+                if (cartWrap) {
+                    setStyleImportant(searchCol, 'grid-template-columns', 'minmax(0, 1fr) 44px');
+                    setStyleImportant(searchCol, 'grid-template-areas', '"search cart"');
+                    setStyleImportant(searchCol, 'gap', '8px');
+                } else {
+                    setStyleImportant(searchCol, 'grid-template-columns', 'minmax(0, 1fr)');
+                    setStyleImportant(searchCol, 'grid-template-areas', '"search"');
+                    setStyleImportant(searchCol, 'gap', '0');
+                }
                 setStyleImportant(searchCol, 'grid-template-rows', '44px');
                 setStyleImportant(searchCol, 'align-items', 'center');
-                setStyleImportant(searchCol, 'gap', '8px');
                 setStyleImportant(searchCol, 'width', '100%');
                 setStyleImportant(searchCol, 'min-width', '0');
                 setStyleImportant(searchCol, 'min-height', '44px');
@@ -1230,7 +1404,8 @@
             scheduleOverlaySync();
             if (evt.type === 'click') {
                 scheduleLayoutSync();
-            } else {
+            } else if (evt.type !== 'input') {
+                /* input: Mirasvit + compat já sincronizam; sync aqui = INP ruim */
                 scheduleSearchSync();
             }
             return;
@@ -1429,6 +1604,17 @@
         document.addEventListener('mouseover', suppressVerticalMenuWhenMinicartActive, true);
         document.addEventListener('click', onDelegatedInteraction, true);
         document.addEventListener('input', onDelegatedInteraction, true);
+        document.addEventListener('input', onMinicartQtyEvent, true);
+        document.addEventListener('change', onMinicartQtyEvent, true);
+        document.addEventListener('keyup', onMinicartQtyEvent, true);
+        document.addEventListener('awa:qty-control:change', onMinicartQtyEvent, true);
+        document.addEventListener('click', onMinicartOpenIntent, true);
+        document.addEventListener('contentUpdated', function (evt) {
+            syncMinicartUpdateButtons(evt.target);
+        }, true);
+        initMinicartUpdateButtonObserver();
+        syncMinicartUpdateButtons(document);
+        bindMinicartOpenSync();
         initObservers();
     }
 
@@ -1472,17 +1658,15 @@
     }
 
     function fixOpenMinicartPanel() {
-        var panel = document.querySelector('.minicart-wrapper .block-minicart._active, .minicart-wrapper.active .block-minicart');
+        var panel = document.querySelector('.minicart-wrapper .block-minicart._active, .minicart-wrapper.active .block-minicart, .minicart-wrapper.is-open .block-minicart');
         if (!panel) {
             return;
         }
-        panel.style.setProperty('position', 'absolute', 'important');
-        panel.style.setProperty('top', 'calc(100% + 8px)', 'important');
-        panel.style.setProperty('right', '0', 'important');
-        panel.style.setProperty('left', 'auto', 'important');
-        panel.style.setProperty('z-index', '1200', 'important');
-        panel.style.setProperty('max-height', '78vh', 'important');
-        panel.style.setProperty('overflow', 'auto', 'important');
+        require(['js/awa-minicart-position'], function (minicartPosition) {
+            if (minicartPosition && typeof minicartPosition.centerOpenMinicartPanel === 'function') {
+                minicartPosition.centerOpenMinicartPanel(panel);
+            }
+        });
     }
 
     function onCartInteraction() {

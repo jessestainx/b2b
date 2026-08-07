@@ -9,11 +9,12 @@
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
     .page-wrapper .awa-site-header {
     --awa-header-promo-h: 32px;
-    --awa-header-main-row-h: 76px;
-    --awa-header-inner-row-h: 64px;
+    /* 2026-07-17 Round5: alinhar SSOT 68+48 (era 76/124/156) */
+    --awa-header-main-row-h: 68px;
+    --awa-header-inner-row-h: 68px;
     --awa-header-nav-h: 48px;
-    --awa-header-stack-h: 124px;
-    --awa-header-site-h: 156px;
+    --awa-header-stack-h: calc(var(--awa-header-main-row-h) + var(--awa-header-nav-h));
+    --awa-header-site-h: calc(var(--awa-header-promo-h) + var(--awa-header-stack-h));
     --awa-header-control-h: 44px;
     --awa-header-action-radius: 8px;
     --awa-header-desktop-bottom: 156px;
@@ -228,8 +229,8 @@
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 var(--awa-header-action-radius) var(--awa-header-action-radius) 0 !important;
-    background: var(--awa-primary, oklch(48% .14 20)) !important;
-    color: var(--awa-text-inverse, Canvas) !important;
+    background: transparent !important;
+    color: var(--awa-primary, #b73337) !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
@@ -457,27 +458,34 @@
     .page-wrapper .awa-site-header .awa-nav-quick-links {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-end !important;
-    flex: 1 1 auto !important;
+    justify-content: flex-start !important;
+    flex: 0 0 auto !important;
     min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
     height: 44px !important;
     max-height: 44px !important;
-    margin-left: auto !important;
-    overflow: hidden !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+    justify-self: start !important;
+    grid-column: auto !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
     .page-wrapper .awa-site-header .awa-nav-quick-links__list {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-end !important;
-    gap: ~"clamp(16px, 2vw, 32px)" !important;
+    justify-content: flex-start !important;
+    gap: ~"clamp(16px, 1.6vw, 28px)" !important;
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
     margin: 0 !important;
     padding: 0 !important;
     list-style: none !important;
+    overflow: visible !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
@@ -527,48 +535,50 @@
   }
 }
 
+/* BUG-SHELL-CSS-SOURCE-SSOT-001: tablet 64+48=112; mobile 96 / :has(promo)=140.
+ * Antes: tablet sticky 104/main 96/inner 88 e mobile sticky 112/main 104. */
 @media (min-width: 768px) and (max-width: 991px) {
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header {
-    min-height: 148px !important;
-    max-height: 148px !important;
-    height: 148px !important;
+    min-height: var(--awa-header-stack-h, 112px) !important;
+    max-height: none !important;
+    height: auto !important;
     overflow: visible !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header :is(#header.header-container, #header.header-container > .header-content, #awa-b2b-promo-bar) {
-    height: 44px !important;
-    min-height: 44px !important;
-    max-height: 44px !important;
+    height: var(--awa-header-promo-h, 0px) !important;
+    min-height: var(--awa-header-promo-h, 0px) !important;
+    max-height: var(--awa-header-promo-h, 0px) !important;
     overflow: hidden !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header .header-wrapper-sticky {
-    height: 104px !important;
-    min-height: 104px !important;
-    max-height: 104px !important;
+    height: var(--awa-header-sticky-h, 112px) !important;
+    min-height: var(--awa-header-sticky-h, 112px) !important;
+    max-height: var(--awa-header-sticky-h, 112px) !important;
     overflow: visible !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header .header.awa-main-header {
-    height: 96px !important;
-    min-height: 96px !important;
-    max-height: 96px !important;
+    height: var(--awa-header-main-row-h, 64px) !important;
+    min-height: var(--awa-header-main-row-h, 64px) !important;
+    max-height: var(--awa-header-main-row-h, 64px) !important;
     /* AWA fix: fluid padding matches page container clamp(16px,3vw,24px) — eliminates
        horizontal drift between header and page content at tablet breakpoint (768-991px). */
-    padding-block: 4px !important;
+    padding-block: 0 !important;
     padding-inline: var(--awa-page-main-pad, clamp(16px, 3vw, 24px)) !important;
     overflow: visible !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header :is(.header_main.awa-main-header-inner-wrap, .header-main, .header-main > .container, .awa-main-header__inner.wp-header) {
-    height: 88px !important;
-    min-height: 88px !important;
-    max-height: 88px !important;
+    height: var(--awa-header-main-row-h, 64px) !important;
+    min-height: var(--awa-header-main-row-h, 64px) !important;
+    max-height: var(--awa-header-main-row-h, 64px) !important;
     overflow: visible !important;
   }
 
@@ -584,33 +594,33 @@
 @media (max-width: 767px) {
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header {
-    min-height: 160px !important;
-    max-height: 160px !important;
-    height: 160px !important;
+    min-height: var(--awa-header-stack-h, 96px) !important;
+    max-height: none !important;
+    height: auto !important;
     overflow: visible !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header :is(#header.header-container, #header.header-container > .header-content, #awa-b2b-promo-bar) {
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
+    height: var(--awa-header-promo-h, 0px) !important;
+    min-height: var(--awa-header-promo-h, 0px) !important;
+    max-height: var(--awa-header-promo-h, 0px) !important;
     overflow: hidden !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header .header-wrapper-sticky {
-    height: 112px !important;
-    min-height: 112px !important;
-    max-height: 112px !important;
+    height: var(--awa-header-sticky-h, 96px) !important;
+    min-height: var(--awa-header-sticky-h, 96px) !important;
+    max-height: var(--awa-header-sticky-h, 96px) !important;
     overflow: visible !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index)
     .page-wrapper .awa-site-header .header.awa-main-header {
-    height: 104px !important;
-    min-height: 104px !important;
-    max-height: 104px !important;
+    height: var(--awa-header-main-row-h, 96px) !important;
+    min-height: var(--awa-header-main-row-h, 96px) !important;
+    max-height: var(--awa-header-main-row-h, 96px) !important;
     overflow: visible !important;
   }
 }
@@ -620,14 +630,14 @@
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
     .page-wrapper .awa-site-header {
     --awa-header-promo-h: 32px !important;
-    --awa-header-main-row-h: 76px !important;
-    --awa-header-inner-row-h: 64px !important;
+    --awa-header-main-row-h: 68px !important;
+    --awa-header-inner-row-h: 68px !important;
     --awa-header-nav-h: 48px !important;
-    --awa-header-stack-h: 124px !important;
-    --awa-header-site-h: 156px !important;
-    height: 156px !important;
-    min-height: 156px !important;
-    max-height: 156px !important;
+    --awa-header-stack-h: calc(var(--awa-header-main-row-h) + var(--awa-header-nav-h)) !important;
+    --awa-header-site-h: calc(var(--awa-header-promo-h) + var(--awa-header-stack-h)) !important;
+    height: var(--awa-header-site-h) !important;
+    min-height: var(--awa-header-site-h) !important;
+    max-height: var(--awa-header-site-h) !important;
     background: var(--awa-bg, Canvas) !important;
     overflow: visible !important;
     position: relative !important;
@@ -743,18 +753,18 @@
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
     .page-wrapper .awa-site-header :is(.header-wrapper-sticky, .header-wrapper-sticky.is-sticky) {
-    height: 124px !important;
-    min-height: 124px !important;
-    max-height: 124px !important;
+    height: var(--awa-header-sticky-h, var(--awa-header-stack-h)) !important;
+    min-height: var(--awa-header-sticky-h, var(--awa-header-stack-h)) !important;
+    max-height: var(--awa-header-sticky-h, var(--awa-header-stack-h)) !important;
     padding: 0 !important;
     overflow: visible !important;
   }
 
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
     .page-wrapper .awa-site-header .header.awa-main-header {
-    height: 76px !important;
-    min-height: 76px !important;
-    max-height: 76px !important;
+    height: var(--awa-header-main-row-h, 68px) !important;
+    min-height: var(--awa-header-main-row-h, 68px) !important;
+    max-height: var(--awa-header-main-row-h, 68px) !important;
     /* AWA fix: use canonical desktop page-pad token instead of hardcoded 16px */
     padding: 0 var(--awa-page-pad-desktop, 24px) !important;
     background: var(--awa-bg, Canvas) !important;
@@ -1101,7 +1111,7 @@
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
-    margin-left: auto !important;
+    margin-left: 0 !important;
     overflow: hidden !important;
   }
 
@@ -1109,7 +1119,7 @@
     .page-wrapper .awa-site-header .awa-nav-quick-links .awa-nav-quick-links__list {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    justify-content: flex-start !important;
     gap: ~"clamp(18px, 2vw, 30px)" !important;
     height: 44px !important;
     margin: 0 !important;
@@ -1354,19 +1364,23 @@
     padding: 0 !important;
   }
 
+  /* 2026-08-04: padronizar eixo shell 1280+pad24 — min-width:100% quebrava max-width:1280 */
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
     .page-wrapper .awa-site-header .header-control.header-nav > .container > .awa-nav-bar__inner,
   html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index):not(.b2b-account-dashboard)
     .page-wrapper .awa-site-header .header-control.awa-nav-bar > .container > .awa-nav-bar__inner {
-    flex: 0 0 100% !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
+    flex: 0 1 auto !important;
+    width: min(100%, var(--awa-header-shell-max, 1280px)) !important;
+    min-width: 0 !important;
+    max-width: min(100%, var(--awa-header-shell-max, 1280px)) !important;
+    margin-inline: auto !important;
+    margin-block: 0 !important;
     position: relative !important;
-    left: 0 !important;
+    left: auto !important;
     right: auto !important;
     transform: none !important;
+    padding-inline: var(--awa-header-shell-pad, 24px) !important;
+    box-sizing: border-box !important;
   }
 }
 

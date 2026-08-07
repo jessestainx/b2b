@@ -231,11 +231,14 @@ html body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_
 
 html body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
-  :is(.awa-section-header__link, .awa-shelf__view-all) {
-  min-height: 32px !important;
-  padding: 6px 10px !important;
+  :is(.awa-section-header__link, .awa-shelf__view-all, .awa-shelf-view-all) {
+  min-height: 44px !important;
+  padding: 8px 12px !important;
   border-radius: 8px !important;
   align-self: center !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
 html body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -281,21 +284,21 @@ html body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_
 html body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-category-carousel__icon {
-  width: 72px !important;
-  height: 72px !important;
-  min-width: 72px !important;
-  min-height: 72px !important;
-  padding: var(--awa-density-2) !important;
+  width: 88px !important;
+  height: 88px !important;
+  min-width: 88px !important;
+  min-height: 88px !important;
+  padding: 0 !important;
 }
 
 html body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .awa-category-carousel__icon
   :is(img, picture img) {
-  width: 54px !important;
-  height: 54px !important;
-  max-width: 54px !important;
-  max-height: 54px !important;
+  width: 88px !important;
+  height: 88px !important;
+  max-width: 88px !important;
+  max-height: 88px !important;
 }
 
 @media (max-width: 767px) {
@@ -412,8 +415,12 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   grid-row: 1 !important;
   justify-self: end !important;
   margin: 0 !important;
-  min-height: 32px !important;
-  padding: 6px 10px !important;
+  /* H17A: alinhar ao target 44px das prateleiras (antes 32/36) */
+  min-height: 44px !important;
+  padding: 8px 12px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -510,10 +517,12 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   display: none !important;
 }
 
+/* H19: subtítulos voltam — eram display:none (§30) e achatavam a hierarquia
+   (título + Ver todos sem contexto). Só esconde vazios. */
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .content-top-home
-  :is(.awa-section-header__subtitle, .awa-category-carousel__subtitle) {
+  :is(.awa-section-header__subtitle, .awa-category-carousel__subtitle):empty {
   display: none !important;
 }
 
@@ -540,7 +549,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .content-top-home
-  :is(.awa-section-header__link, .awa-shelf__view-all, .awa-category-carousel__header .awa-section-header__link) {
+  :is(.awa-section-header__link, .awa-shelf__view-all, .awa-category-carousel__header .awa-section-header__link, .awa-shelf-view-all) {
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -548,8 +557,12 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   color: var(--awa-primary, var(--awa-primary)) !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  min-height: 32px !important;
-  padding: 4px 0 !important;
+  /* H17A: target único 44px (categoria + prateleiras) */
+  min-height: 44px !important;
+  padding: 8px 12px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
   text-decoration: none !important;
 }
 
@@ -701,10 +714,12 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   }
 }
 
+/* P1-C home (2026-07-28): tipografia de badge só no .onsale/.sticker/.product-label —
+   NÃO no container vazio .hot-onsale (especificidade 3×#html-body vencía o refine). */
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .content-top-home
-  :is(.onsale, .hot-onsale, .sticker, .product-label, .discount-badge, .sticker.discount) {
+  :is(.onsale, .sticker, .product-label, .discount-badge, .sticker.discount) {
   border-radius: 4px !important;
   box-shadow: none !important;
   font-size: 10px !important;
@@ -713,6 +728,35 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   line-height: 1.2 !important;
   padding: 3px 6px !important;
   text-transform: uppercase !important;
+}
+
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .hot-onsale {
+  text-transform: none !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: normal !important;
+  line-height: inherit !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .hot-onsale:not(:has(.onsale)) {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  padding: 0 !important;
 }
 
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -807,11 +851,11 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5) {
   --awa-home-card-radius: 8px;
   --awa-home-card-pad: 8px;
-  --awa-home-section-gap: 8px;
+  --awa-home-section-gap: var(--awa-stack-tight, 12px);
   --awa-home-thumb-ratio: 1 / 1;
 }
 
-/* Ritmo vertical entre seções — 24px (escala 4/8/12/16/24) */
+/* Ritmo vertical entre seções — SSOT 12px (escala AWA / PLP) */
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
   .page-wrapper
   .content-top-home
@@ -821,7 +865,7 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
     .top-home-content--category-carousel,
     .awa-hero-b2b-cta
   ):not(.top-home-content--above-fold) {
-  padding-block: var(--awa-home-section-gap) !important;
+  padding-block: 0 !important;
 }
 
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -1233,13 +1277,19 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
 }
 
 @layer awa-visual-priority {
+  /* §hero-box-r1: content-box + padding-inline 16 expandia o hero p/ vw+32 e
+     cortava 16px da imagem (imgOverflow falso no Pixel QA; clip real à direita).
+     border-box + padding-inline 0 = full-bleed alinhado ao critical CSS. */
   html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
     .page-wrapper
     .content-top-home
     #awa-main-content.top-home-content--above-fold {
-    box-sizing: content-box !important;
+    box-sizing: border-box !important;
     margin-block: 0 !important;
-    padding-block: 4px !important;
+    max-width: 100% !important;
+    padding-block: 0 !important;
+    padding-inline: 0 !important;
+    width: 100% !important;
   }
 }
 
@@ -1656,3 +1706,5 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
     max-height: 44px !important;
   }
 }
+
+/* Dark mode desativado (2026-07-16): bloco prefers-color-scheme / awa-dark-mode removido. */

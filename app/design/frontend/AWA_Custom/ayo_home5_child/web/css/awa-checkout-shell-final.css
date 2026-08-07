@@ -28,7 +28,7 @@ html body#html-body:is(
     box-sizing: border-box !important;
     margin-inline: auto !important;
     max-width: 100% !important;
-    padding-inline: clamp(12px, 2.5vw, 16px) !important;
+    padding-inline: 16px !important;
     width: 100% !important;
 }
 
@@ -44,7 +44,7 @@ html body#html-body:is(
     box-sizing: border-box !important;
     margin-inline: auto !important;
     max-width: var(--awa-checkout-shell-max) !important;
-    padding-inline: clamp(12px, 2.5vw, 16px) !important;
+    padding-inline: 16px !important;
     width: 100% !important;
 }
 
@@ -170,7 +170,7 @@ html body#html-body.checkout-onepage-success {
     --awa-checkout-gap-md: 12px;
     --awa-checkout-gap-lg: 16px;
     --awa-grid-shell-max: min(100%, 1280px);
-    --awa-grid-container-pad: clamp(12px, 2.5vw, 16px);
+    --awa-grid-container-pad: 16px;
 }
 
 html body#html-body.checkout-onepage-success .page-wrapper .page-main.container {
@@ -475,4 +475,17 @@ html body#html-body:is(
     ) .modal-popup.new-shipping-address-modal.modal-slide._inner-scroll._show #shipping-new-address-form {
         grid-template-columns: minmax(0, 1fr) !important;
     }
+}
+
+/* SSOT-1 Onda 4: checkout gutter ≥768 = 24 */
+@media (min-width: 768px) {
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.page-wrapper .page-main.container,
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index)
+.page-wrapper :is(#header .header-container,.awa-checkout-header-shell .awa-checkout-header-content,.awa-checkout-header-content) {
+  padding-inline: 24px !important;
+}
+html body#html-body:is(.checkout-index-index,.rokanthemes-onepagecheckout,.onepagecheckout-index-index) {
+  --awa-grid-container-pad: 24px;
+}
 }

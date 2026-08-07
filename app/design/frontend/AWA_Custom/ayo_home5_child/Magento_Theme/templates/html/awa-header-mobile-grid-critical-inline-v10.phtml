@@ -6,8 +6,12 @@
  *
  * @var \Magento\Framework\View\Element\Template $block
  */
-$__headerGridCriticalUrl = $block->getViewFileUrl('css/awa-header-mobile-grid-critical.min.css') . '?v=20260619-header-clean';
+
+use GrupoAwamotos\Theme\Model\MinicartAssetVersion;
+
+$__headerGridCriticalUrl = $block->getViewFileUrl('css/awa-header-mobile-grid-critical.min.css') . '?v=20260717-scroll-offset-116';
 $__headerGridCriticalEsc = $block->escapeUrl($__headerGridCriticalUrl);
+$__minicartRuntimeVersion = MinicartAssetVersion::RUNTIME;
 ?>
 <link rel="preload" href="<?= $__headerGridCriticalEsc ?>" as="style" fetchpriority="high"/>
 <link rel="stylesheet" href="<?= $__headerGridCriticalEsc ?>" media="all" id="awa-header-mobile-grid-critical"/>
@@ -31,9 +35,9 @@ $__headerGridCriticalEsc = $block->escapeUrl($__headerGridCriticalUrl);
         if (w.__awaMinicartDeferClaim || d.querySelector('script[src="' + src + '"], script[data-awa-defer-init="' + src + '"]')) {
             return;
         }
-        runtime.owner = 'defer';
-        runtime.ownerSource = runtime.ownerSource || 'awa-header-mobile-grid-critical-inline-v10';
-        runtime.ownerClaimedAt = runtime.ownerClaimedAt || Date.now();
+        runtime.functionalOwner = 'defer';
+        runtime.functionalOwnerSource = runtime.functionalOwnerSource || 'awa-header-mobile-grid-critical-inline-v10';
+        runtime.functionalOwnerClaimedAt = runtime.functionalOwnerClaimedAt || Date.now();
         w.__awaMinicartDeferClaim = true;
 
         script = d.createElement('script');
@@ -51,11 +55,11 @@ $__headerGridCriticalEsc = $block->escapeUrl($__headerGridCriticalUrl);
 
         attempts += 1;
 
-        if (runtime.owner === 'v2') {
+        if (runtime.functionalOwner && runtime.functionalOwner !== 'defer') {
             return;
         }
 
-        if (w.__awaMinicartDeferClaim || runtime.owner === 'defer') {
+        if (w.__awaMinicartDeferClaim || runtime.functionalOwner === 'defer') {
             appendDeferScript();
             return;
         }
@@ -72,10 +76,10 @@ $__headerGridCriticalEsc = $block->escapeUrl($__headerGridCriticalUrl);
     if (isHomeByPath || isHomeByBodyClass || isHomeByMarker) {
         return;
     }
-    src = <?= json_encode($block->getViewFileUrl('js/awa-minicart-defer-init.js'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
-    if (runtime.owner === 'v2') {
-        return;
-    }
+    src = <?= json_encode(
+        $block->getViewFileUrl('js/awa-minicart-defer-init.js') . '?v=' . rawurlencode($__minicartRuntimeVersion),
+        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+    ) ?>;
 
     waitForRuntimeOwner();
 }(window, document));

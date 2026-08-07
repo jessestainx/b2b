@@ -644,9 +644,11 @@ body .page-wrapper .item-product .sku {
     display: none;
 }
 
-body .page-wrapper .item-product .weee,
+/* Magento coloca class "weee" no .price-container do preço final —
+   NÃO ocultar .price-container (senão o preço some na PLP). */
+body .page-wrapper .item-product .weee:not(.price-container),
 body .page-wrapper .item-product [data-label="Excl. Tax"],
-body .page-wrapper .item-deal-product .weee {
+body .page-wrapper .item-deal-product .weee:not(.price-container) {
     display: none;
 }
 

@@ -49,13 +49,18 @@ body.catalog-product-view .fotorama__fullscreen-icon {
   box-shadow: 0 2px 6px rgba(0,0,0,.08);
 }
 
-/* --- 2. PRODUCT TITLE --- */
+/* --- 2. PRODUCT TITLE (SSOT — alinhado ao cascade/align-grid) --- */
 body.catalog-product-view .page-title-wrapper .page-title .base {
-  font-size: clamp(22px, 3.2vw, 30px);
-  font-weight: 800;
-  line-height: 1.2;
-  color: var(--awa-text-primary);
-  letter-spacing: -.01em;
+  font-family: var(--awa-font-heading, "Rubik", system-ui, sans-serif);
+  font-size: clamp(1.125rem, 1.05rem + 0.45vw, 1.375rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--awa-text, var(--awa-text-primary));
+  letter-spacing: -0.01em;
+  hyphens: none;
+  -webkit-hyphens: none;
+  margin: 0;
+  text-wrap: balance;
 }
 
 /* --- 3. PRICE --- */
@@ -67,12 +72,12 @@ body.catalog-product-view .product-info-price .price {
   letter-spacing: -.02em;
 }
 body.catalog-product-view .product-info-price .old-price .price {
-  font-size: 18px; font-weight: 500; color: #9CA3AF;
+  font-size: 18px; font-weight: 500; color: var(--awa-text-muted, #9CA3AF);
   text-decoration: line-through;
 }
 body.catalog-product-view .product-info-price .price-label {
   font-size: 11px; text-transform: uppercase;
-  letter-spacing: .06em; color: #6B7280; font-weight: 600;
+  letter-spacing: .06em; color: var(--awa-text-muted, #6B7280); font-weight: 600;
 }
 
 /* --- 4. SOCIAL PROOF --- */
@@ -101,7 +106,7 @@ body.catalog-product-view .awa-b2b-pdp-sku .awa-b2b-sku__value {
   font-weight: 700; font-size: 15px; color: var(--awa-text-primary);
 }
 body.catalog-product-view .awa-b2b-pdp-sku .awa-b2b-sku__label {
-  font-size: 12px; color: #9CA3AF; text-transform: uppercase; letter-spacing: .04em;
+  font-size: 12px; color: var(--awa-text-muted, #9CA3AF); text-transform: uppercase; letter-spacing: .04em;
 }
 body.catalog-product-view .awa-stock-level { font-weight: 600; font-size: 13px; }
 body.catalog-product-view .awa-stock-level--ok { color: #059669; }
@@ -208,7 +213,7 @@ body.catalog-product-view .awa-pdp-trust-bar__item {
   align-items: center; text-align: center; gap: 6px;
   padding: 12px 8px; background: #F9FAFB;
   border: 1px solid #F3F4F6; border-radius: 10px;
-  font-size: 11px; font-weight: 600; color: #374151;
+  font-size: 11px; font-weight: 600; color: var(--awa-text, #374151);
   line-height: 1.3; transition: background .15s;
 }
 body.catalog-product-view .awa-pdp-trust-bar__item:hover { background: #F3F4F6; }
@@ -230,7 +235,7 @@ body.catalog-product-view .b2b-quote-button-container .b2b-primary-btn:hover {
   transform: translateY(-1px);
 }
 body.catalog-product-view .b2b-quote-button-container .b2b-quote-note {
-  font-size: 12px; color: #6B7280; text-align: center; margin-top: 4px;
+  font-size: 12px; color: var(--awa-text-muted, #6B7280); text-align: center; margin-top: 4px;
 }
 
 /* --- 12. SECONDARY B2B CTAs --- */
@@ -242,7 +247,7 @@ body.catalog-product-view .awa-b2b-secondary-ctas__button {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 14px; border: 1.5px solid #E5E7EB;
   border-radius: 10px; background: var(--awa-bg);
-  font-size: 13px; font-weight: 500; color: #374151;
+  font-size: 13px; font-weight: 500; color: var(--awa-text, #374151);
   cursor: pointer; transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
   text-decoration: none; white-space: nowrap;
 }
@@ -292,7 +297,7 @@ body.catalog-product-view .awa-pdp-related .product-item .price {
   font-size: 17px; font-weight: 800; color: var(--awa-primary, var(--awa-primary));
 }
 body.catalog-product-view .awa-pdp-related .product-item .old-price .price {
-  font-size: 13px; font-weight: 500; color: #9CA3AF;
+  font-size: 13px; font-weight: 500; color: var(--awa-text-muted, #9CA3AF);
 }
 /* Hide stray "SEU PRECO" text in related */
 body.catalog-product-view .awa-pdp-related .price-box {
@@ -321,16 +326,16 @@ body.catalog-product-view .products-swiper .swiper-button-prev:hover {
 }
 body.catalog-product-view .products-swiper .swiper-button-next::after,
 body.catalog-product-view .products-swiper .swiper-button-prev::after {
-  font-size: 14px; font-weight: 700; color: #374151;
+  font-size: 14px; font-weight: 700; color: var(--awa-text, #374151);
 }
 
 /* --- 15. BREADCRUMBS --- */
 body.catalog-product-view .breadcrumbs {
   padding: 12px 0 8px; font-size: 13px;
 }
-body.catalog-product-view .breadcrumbs li { font-size: 13px; color: #6B7280; }
+body.catalog-product-view .breadcrumbs li { font-size: 13px; color: var(--awa-text-muted, #6B7280); }
 body.catalog-product-view .breadcrumbs a {
-  color: #6B7280; text-decoration: none; transition: color .15s;
+  color: var(--awa-text-muted, #6B7280); text-decoration: none; transition: color .15s;
 }
 body.catalog-product-view .breadcrumbs a:hover { color: var(--awa-primary, var(--awa-primary)); }
 body.catalog-product-view .breadcrumbs strong { color: var(--awa-text-primary); font-weight: 600; }
@@ -352,7 +357,7 @@ body.catalog-product-view .awa-pdp-related .product-item:hover .view-product {
     border-radius: 0; margin: 0 -15px; box-shadow: none;
   }
   body.catalog-product-view .fotorama__stage { border-radius: 0; }
-  body.catalog-product-view .page-title-wrapper .page-title .base { font-size: 20px; }
+  /* título: herda SSOT clamp — sem override px competindo */
   body.catalog-product-view .product-info-price .price { font-size: 26px; }
   body.catalog-product-view .awa-pdp-trust-bar {
     grid-template-columns: repeat(2, 1fr); gap: 6px;
@@ -497,105 +502,166 @@ body.catalog-product-view .product-info-stock-sku .stock.unavailable::before {
 
 /* ==========================================================================
    B2B Pricing Notice — PDP (visitantes não logados)
-   MEL-02: Substituir o tiny 11px gray uppercase .price-label por um
-   notice card visualmente proeminente com CTA de login B2B.
-   O HTML renderizado é:
-   .b2b-login-to-see-price.price-box > .price-label > a[href=.../login/]
+   HTML (HideFinalPricePlugin + PriceVisibility):
+   .b2b-login-to-see-price.price-box > a + a.b2b-register-cta
+   Sem wrapper .price-label; CTAs reais no DOM (sem ::after/content falso).
+   !important + #html-body: necessário — ui-simplify/themes forçam
+   display:block !important em .b2b-login-to-see-price.price-box.
    ========================================================================== */
 
-/* Reset do generic .price-label que aplica 11px + uppercase + gray */
-body.catalog-product-view
-  .product-info-price
-  .b2b-login-to-see-price
-  .price-label {
-  font-size: unset !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  color: inherit !important;
-  font-weight: unset !important;
-}
-
-/* Container: notice card estilo "bloqueado para visitante" */
-body.catalog-product-view
+html body#html-body.catalog-product-view
+  .page-wrapper
+  .product-info-main
   .product-info-price
   .b2b-login-to-see-price {
   display: flex !important;
   flex-direction: column !important;
+  align-items: stretch !important;
   gap: 8px !important;
   padding: 16px !important;
-  background: #fef9f9 !important;
-  border: 1.5px solid color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 30%, transparent) !important;
-  border-radius: 12px !important;
   box-sizing: border-box !important;
   width: 100% !important;
+  background: color-mix(in srgb, var(--awa-primary) 6%, var(--awa-bg, #fff)) !important;
+  border: 1.5px solid color-mix(in srgb, var(--awa-primary) 28%, transparent) !important;
+  border-radius: 12px !important;
 }
 
-/* Texto de contexto antes do link via ::before no container */
-body.catalog-product-view
+html body#html-body.catalog-product-view
+  .page-wrapper
+  .product-info-main
   .product-info-price
   .b2b-login-to-see-price::before {
-  content: "🔒 Loja exclusiva para clientes B2B" !important;
+  content: "Loja exclusiva para clientes B2B" !important;
+  display: block !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   color: var(--awa-text-muted, #6b7280) !important;
   letter-spacing: 0.02em !important;
 }
 
-/* Link de login: botão primário AWA */
-body.catalog-product-view
+html body#html-body#html-body.catalog-product-view
+  .page-wrapper
+  .product-info-main
   .product-info-price
   .b2b-login-to-see-price
-  a {
+  a:not(.b2b-register-cta) {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  min-height: 48px !important;
   height: 48px !important;
   padding: 0 24px !important;
-  background: var(--awa-primary, var(--awa-primary)) !important;
-  color: var(--awa-bg) !important;
+  background: var(--awa-primary) !important;
+  color: #fff !important; /* contraste CTA — vence ui-simplify :is(a,.price-label a) */
+  -webkit-text-fill-color: #fff !important;
   font-size: 15px !important;
   font-weight: 700 !important;
   text-decoration: none !important;
   border-radius: 8px !important;
   letter-spacing: 0.02em !important;
   transition: background-color 0.15s ease, transform 0.1s ease !important;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 30%, transparent) !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--awa-primary) 30%, transparent) !important;
 }
 
-body.catalog-product-view
+html body#html-body.catalog-product-view
+  .page-wrapper
+  .product-info-main
   .product-info-price
   .b2b-login-to-see-price
-  a:hover {
-  background: color-mix(in srgb, var(--awa-primary, var(--awa-primary)) 85%, #000) !important;
+  a:not(.b2b-register-cta):hover {
+  background: color-mix(in srgb, var(--awa-primary) 85%, #000) !important;
   transform: translateY(-1px) !important;
 }
 
-/* Link secundário de cadastro via ::after no .price-label */
-body.catalog-product-view
+html body#html-body.catalog-product-view
+  .page-wrapper
+  .product-info-main
   .product-info-price
   .b2b-login-to-see-price
-  .price-label::after {
-  content: "Novo cliente? Cadastre-se grátis →" !important;
-  display: block !important;
-  font-size: 12px !important;
-  color: var(--awa-primary, var(--awa-primary)) !important;
-  text-align: center !important;
-  margin-top: 4px !important;
-  cursor: default !important;
+  a.b2b-register-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  align-self: flex-start !important;
+  min-height: 44px !important;
+  height: auto !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--awa-primary) !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-/* Mobile: ajuste de padding */
+html body#html-body.catalog-product-view
+  .page-wrapper
+  .product-info-main
+  .product-info-price
+  .b2b-login-to-see-price
+  a.b2b-register-cta:hover,
+html body#html-body.catalog-product-view
+  .page-wrapper
+  .product-info-main
+  .product-info-price
+  .b2b-login-to-see-price
+  a.b2b-register-cta:focus-visible {
+  color: var(--awa-primary) !important;
+  text-decoration: underline !important;
+  transform: none !important;
+}
+
 @media (max-width: 767px) {
-  body.catalog-product-view
+  html body#html-body.catalog-product-view
+    .page-wrapper
+    .product-info-main
     .product-info-price
     .b2b-login-to-see-price {
     padding: 12px !important;
   }
 
-  body.catalog-product-view
+  html body#html-body.catalog-product-view
+    .page-wrapper
+    .product-info-main
     .product-info-price
     .b2b-login-to-see-price
-    a {
-    height: 52px !important; /* target maior em mobile */
+    a:not(.b2b-register-cta) {
+    min-height: 52px !important;
+    height: 52px !important;
   }
+}
+
+/* =============================================================================
+ * AWA visual bugs 2026-08-03 — BUG2 gallery arrows + BUG7 stock badge
+ * Session debug 032237 — keep until post-fix verified
+ * ========================================================================== */
+body.catalog-product-view .product.media {
+  position: relative;
+}
+body.catalog-product-view .product.media .fotorama__stage {
+  position: relative;
+}
+/* Anchora setas na área da imagem ativa, não na largura total do wrap */
+body.catalog-product-view .product.media .fotorama__arr {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 5;
+}
+body.catalog-product-view .product.media .fotorama__arr--prev {
+  left: 12px !important;
+  right: auto !important;
+}
+body.catalog-product-view .product.media .fotorama__arr--next {
+  right: 12px !important;
+  left: auto !important;
+}
+/* Badge estoque: só o span (template child remove o label) */
+body.catalog-product-view .product-info-stock-sku .stock.available,
+body.catalog-product-view .product-info-stock-sku .stock.unavailable {
+  font-size: 0.8rem;
+}
+body.catalog-product-view .product-info-stock-sku .stock.available > span,
+body.catalog-product-view .product-info-stock-sku .stock.unavailable > span {
+  font-size: inherit;
 }

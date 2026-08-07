@@ -52,8 +52,16 @@ declare(strict_types=1);
         );
     }
 
+    function isCheckoutShellPage() {
+        return d.body && (
+            d.body.classList.contains('checkout-cart-index')
+            || d.body.classList.contains('checkout-index-index')
+            || d.body.classList.contains('onepagecheckout-index-index')
+        );
+    }
+
     function shouldHideFloatingToggle() {
-        if (isProductPage()) {
+        if (isProductPage() || isCheckoutShellPage()) {
             return true;
         }
         return isCatalogListPage()
@@ -70,9 +78,7 @@ declare(strict_types=1);
             if (stored === 'true') return 'dark';
             if (stored === 'false') return 'light';
         } catch (e) {}
-        if (w.matchMedia && w.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
+        /* B2B storefront: light por padrão. Não seguir OS — evitava faixa escura no sticky. */
         return 'light';
     }
 
@@ -106,8 +112,9 @@ declare(strict_types=1);
 
     function init() {
         btn = d.querySelector('[data-awa-dark-mode-toggle]');
-        if (!btn) return;
+        /* Sempre aplicar tema — mesmo sem botão (PLP/checkout escondem o toggle). */
         applyTheme(getPreference());
+        if (!btn) return;
         btn.addEventListener('click', function () {
             if (isProductPage()) {
                 applyTheme('light');
@@ -146,8 +153,13 @@ declare(strict_types=1);
     transition: all 0.2s ease !important;
     position: relative !important;
 }
-body.catalog-product-view .awa-dark-mode-toggle {
+body.catalog-product-view .awa-dark-mode-toggle,
+body.checkout-cart-index .awa-dark-mode-toggle,
+body.checkout-index-index .awa-dark-mode-toggle,
+body.onepagecheckout-index-index .awa-dark-mode-toggle {
     display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 @layer awa-visual-priority {

@@ -1,23 +1,9 @@
 <?php
 /**
- * AWA - PLP mobile filter button + drawer
+ * AWA - PLP filter drawer (FAB removido — audit #19; toolbar "Mostrar Filtros").
  */
 declare(strict_types=1);
 ?>
-<button type="button"
-        class="awa-plp-filter-button"
-        data-action="toggle-filter"
-        aria-controls="awa-plp-filter-drawer"
-        aria-expanded="false"
-        aria-label="<?= $block->escapeHtmlAttr(__('Abrir filtros')) ?>">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <line x1="4" y1="6" x2="20" y2="6"/>
-        <line x1="4" y1="12" x2="14" y2="12"/>
-        <line x1="4" y1="18" x2="10" y2="18"/>
-    </svg>
-    <span><?= $block->escapeHtml(__('Filtros')) ?></span>
-</button>
-
 <aside id="awa-plp-filter-drawer"
        class="awa-plp-filter-drawer"
        role="dialog"
@@ -52,32 +38,3 @@ declare(strict_types=1);
         </footer>
     </div>
 </aside>
-
-<script>
-require(['jquery'], function($) {
-    'use strict';
-    $(function() {
-        var $btn = $('.awa-plp-filter-button');
-        var $drawer = $('#awa-plp-filter-drawer');
-        var $body = $('body');
-        
-        $btn.on('click', function() {
-            $drawer.attr('aria-hidden', 'false').addClass('is-open');
-            $body.css('overflow', 'hidden');
-            $btn.attr('aria-expanded', 'true');
-        });
-        
-        $('[data-filter-close]', $drawer).on('click', function() {
-            $drawer.attr('aria-hidden', 'true').removeClass('is-open');
-            $body.css('overflow', '');
-            $btn.attr('aria-expanded', 'false').focus();
-        });
-        
-        $(document).on('keydown', function(e) {
-            if (e.key === 'Escape' && $drawer.hasClass('is-open')) {
-                $('[data-filter-close]', $drawer).first().trigger('click');
-            }
-        });
-    });
-});
-</script>
