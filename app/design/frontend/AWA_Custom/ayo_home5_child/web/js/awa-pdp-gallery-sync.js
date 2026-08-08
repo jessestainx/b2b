@@ -14,7 +14,7 @@
     /* shell15 (2026-08-02): shell12 raised cap to 900 → stage=colW (615) and
        undid hopt (stage 440 / ph ~546). CDP wasteInfo ~211px + user "aproveita
        espacamentos". Restore compact caps; object-fit:contain handles letterbox. */
-    var MAX_STAGE_DESKTOP_PX = 440;
+    var MAX_STAGE_DESKTOP_PX = 528;
     var MAX_STAGE_MOBILE_PX = 360;
     var MAX_NAV_PX = 88;
 
