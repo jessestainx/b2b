@@ -340,4 +340,56 @@
   }
 }
 
+/* ==========================================================================
+   12. PLP (categoria) — alinhamento ao design system (Onda 3B)
+   Medido via Playwright (diag 3A): nomes em Open Sans 13px (fora do DS),
+   cards com shadow:none (achatados vs home), badge hot-onsale VAZIO.
+   ========================================================================== */
+
+/* 12a. Tipografia do nome do produto: Open Sans → fonte body do DS */
+html body .products .product-item-name,
+html body .products .product-item-name a {
+  font-family: var(--awa-font-body);
+}
+
+/* 12b. Card da grade: mesma sombra dos cards da home */
+html body .products-grid .product-item {
+  box-shadow: var(--awa-shadow-card);
+}
+
+/* 12c. Badge "Novo": shell vazio não renderiza; com conteúdo, ancora igual à home */
+html body .products .product-item { position: relative; }
+html body .products .product-item .hot-onsale {
+  position: absolute;
+  top: var(--awa-sp-2);
+  left: var(--awa-sp-2);
+  z-index: 2;
+  margin: 0;
+}
+html body .products .product-item .hot-onsale:empty { display: none; }
+
+
+/* ==========================================================================
+   13. PDP — CTAs da área de ação alinhados ao DS (Onda 3B)
+   Medido via Playwright (diag 3A): radius misturados 0/4/8/12 nos CTAs;
+   tocart primary residual em verde-Magento (display:none p/ guest, mas
+   visível p/ logado). Padrão: radius-m (12px) + primary vermelho AWA.
+   ========================================================================== */
+html body.catalog-product-view .product-info-main .action,
+html body.catalog-product-view .product-info-main .b2b-login-to-buy-btn {
+  border-radius: var(--awa-radius-m);
+}
+html body.catalog-product-view .product-info-main .action.primary,
+html body.catalog-product-view .product-info-main .action.tocart {
+  background: var(--awa-brand);
+  border-color: var(--awa-brand);
+  color: #fff;
+}
+html body.catalog-product-view .product-info-main .action.primary:hover,
+html body.catalog-product-view .product-info-main .action.tocart:hover {
+  background: var(--awa-brand-dark);
+  border-color: var(--awa-brand-dark);
+  color: #fff;
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
