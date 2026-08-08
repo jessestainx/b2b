@@ -346,15 +346,22 @@
    cards com shadow:none (achatados vs home), badge hot-onsale VAZIO.
    ========================================================================== */
 
-/* 12a. Tipografia do nome do produto: Open Sans → fonte body do DS */
-html body .products .product-item-name,
-html body .products .product-item-name a {
-  font-family: var(--awa-font-body);
+/* 12a. Tipografia do nome do produto: Open Sans → fonte body do DS
+   v2 (3B.2): o link real é a.product-item-link dentro de .item-product;
+   a regra inimiga (awa-super-global) usa !important — booster + !important. */
+html body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper
+:is(.product-item-link,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  font-family: var(--awa-font-body) !important;
 }
 
-/* 12b. Card da grade: mesma sombra dos cards da home */
-html body .products-grid .product-item {
-  box-shadow: var(--awa-shadow-card);
+/* 12b. Card da grade: mesma sombra dos cards da home
+   v2 (3B.2): o card real é .item-product; styles-l.min.css força
+   box-shadow:none com ID real + !important — booster + !important. */
+html body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper
+:is(.item-product, .product-item,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  box-shadow: var(--awa-shadow-card) !important;
 }
 
 /* 12c. Badge "Novo": shell vazio não renderiza; com conteúdo, ancora igual à home */
@@ -390,6 +397,12 @@ html body.catalog-product-view .product-info-main .action.tocart:hover {
   background: var(--awa-brand-dark);
   border-color: var(--awa-brand-dark);
   color: #fff;
+}
+
+/* 13b. CTA "Ver preço atacado" (âncora sem .action / sem classe própria) —
+   fallback via ancestral .b2b-login-to-see-price > a — mesmo raio dos CTAs */
+html body.catalog-product-view .product-info-main .b2b-login-to-see-price > a {
+  border-radius: var(--awa-radius-m);
 }
 
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
