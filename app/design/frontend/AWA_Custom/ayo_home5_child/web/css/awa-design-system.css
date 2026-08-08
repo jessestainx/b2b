@@ -399,10 +399,12 @@ html body.catalog-product-view .product-info-main .action.tocart:hover {
   color: #fff;
 }
 
-/* 13b. CTA "Ver preço atacado" (âncora sem .action / sem classe própria) —
-   fallback via ancestral .b2b-login-to-see-price > a — mesmo raio dos CTAs */
-html body.catalog-product-view .product-info-main .b2b-login-to-see-price > a {
-  border-radius: var(--awa-radius-m);
+/* 13b. CTA "Ver preço atacado" (âncora sem .action) — mesmo raio dos CTAs
+   v2 (3B.3): styles-l força 8px com #html-body real + !important no MESMO
+   seletor ancestral (.b2b-login-to-see-price a) — booster + !important. */
+html body:is(.catalog-product-view) .page-wrapper .product-info-main .b2b-login-to-see-price
+:is(a, #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  border-radius: var(--awa-radius-m) !important;
 }
 
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
