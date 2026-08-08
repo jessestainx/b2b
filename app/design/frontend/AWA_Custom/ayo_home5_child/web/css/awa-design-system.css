@@ -443,7 +443,34 @@ html body:is(.catalog-category-view, .catalogsearch-result-index) .filter-option
   transition: background-color .2s ease;
 }
 html body:is(.catalog-category-view, .catalogsearch-result-index) .filter-options .filter-options-title:hover {
-  background: var(--awa-surface-alt);
+  /* round9 aplica este MESMO tint com !important hoje; este é o fallback
+     documentado — quando o patch for estrangulado, a transição é invisível */
+  background: rgba(183, 51, 55, .04);
+}
+
+/* ==========================================================================
+   16. Funil auth/busca — alinhamento fino ao DS (Onda 4B)
+   Evidência 4A: steps do wizard B2B em 10px (fora de token), h1 da busca
+   em Poppins (display oficial = Rubik), inputs do auth em Arial (UA default).
+   ========================================================================== */
+:root { --awa-font-mono: 'JetBrains Mono', monospace; } /* SKU/Cod: mono ADOTADO como padrão (escanabilidade). Não é bug. */
+
+/* 16a. Wizard de cadastro B2B: steps 10px → 8px
+   Seletor real (Parte 2): button.progress-step dentro de .b2b-register-progress */
+html body .b2b-register-progress .progress-step {
+  border-radius: var(--awa-ds-radius-sm);
+}
+
+/* 16b. Título da busca: Poppins → Rubik
+   Seletor real (Parte 2): h1.page-title (+ .base interno) */
+html body.catalogsearch-result-index h1.page-title,
+html body.catalogsearch-result-index h1.page-title .base {
+  font-family: var(--awa-font-display);
+}
+
+/* 16c. Inputs/selects/textareas: Arial (UA default) → fonte body do DS */
+html body :is(input, select, textarea) {
+  font-family: var(--awa-font-body);
 }
 
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
