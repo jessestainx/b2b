@@ -407,4 +407,24 @@ html body:is(.catalog-product-view) .page-wrapper .product-info-main .b2b-login-
   border-radius: var(--awa-radius-m) !important;
 }
 
+/* ==========================================================================
+   14. Toolbar PLP: controles no mesmo raio (Onda 3D)
+   Evidência 3C: modes 4px (!important do align-grid-terminal) e toggle
+   "Ocultar filtros" 999px convivendo com sorter/limiter/paginação a 8px.
+   Padrão: --awa-radius-sm (8px) em TODOS os controles da toolbar.
+   ========================================================================== */
+:root { --awa-radius-sm: 8px; } /* já existia em outros patches; o DS vira a fonte */
+
+/* 14a. Modos grid/list: 4px → 8px (precisa de booster: inimigo tem !important) */
+html body:is(.catalog-category-view, .catalogsearch-result-index) .page-wrapper
+:is(.modes-mode,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  border-radius: var(--awa-radius-sm) !important;
+}
+
+/* 14b. Toggle "Ocultar filtros": pill 999px → 8px (inimigo sem !important) */
+html body:is(.catalog-category-view, .catalogsearch-result-index) .toolbar .modes .modes-label {
+  border-radius: var(--awa-radius-sm);
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
