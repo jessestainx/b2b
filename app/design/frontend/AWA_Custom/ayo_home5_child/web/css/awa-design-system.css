@@ -433,4 +433,17 @@ html body:is(.catalog-category-view, .catalogsearch-result-index) .toolbar .mode
   border-radius: var(--awa-ds-radius-sm);
 }
 
+/* ==========================================================================
+   15. Filtros da PLP: títulos de seção no padrão DS (Onda 3F)
+   Evidência 3C: .filter-options-title com radius 0 e nenhum hover —
+   único controle da sidebar sem affordance. Aditivo: raio + hover sutil.
+   ========================================================================== */
+html body:is(.catalog-category-view, .catalogsearch-result-index) .filter-options .filter-options-title {
+  border-radius: var(--awa-ds-radius-sm);
+  transition: background-color .2s ease;
+}
+html body:is(.catalog-category-view, .catalogsearch-result-index) .filter-options .filter-options-title:hover {
+  background: var(--awa-surface-alt);
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
