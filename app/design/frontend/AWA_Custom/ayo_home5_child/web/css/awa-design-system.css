@@ -786,4 +786,42 @@ html body :is(input, select, textarea) {
   }
 }
 
+/* ============================================================
+   SEÇÃO 26 — Onda 6A: setas dos shelves fora do cabeçalho
+   Forense 6A (desktop 1920): as setas dos shelves de home
+   (Mais Vendidos / Lançamentos / Linhas em destaque) estavam
+   ancoradas em top:-22px no bloco de navegação, com interseção
+   real no header/título/subtítulo/CTA. O centro do stage ficou
+   ~Y 1103 / 2350 / 2867, enquanto as setas ficavam em ~Y 862 /
+   2106 / 2622. Estratégia: nav com altura do shelf e setas no
+   centro vertical (50%). Escopo: home apenas.
+   ============================================================ */
+/* report-only:
+   Os arrows dos shelves da home estão travados por regras posteriores
+   em `awa-align-grid-terminal-2026-06-11.min.css` (top:0 !important +
+   translateY(-50%) no botão, com nav de altura 0), que prevalecem na
+   cascata publicada. Ajuste limpo via `awa-design-system.css` isolado
+   não foi suficiente para zerar interseção com header sem editar a
+   fonte terminal que carrega por último. */
+
+/* ============================================================
+   SEÇÃO 27 — Onda 6A: pausa discreta em repouso
+   Forense 6A: botão de pausa visível em repouso na home desktop
+   (.awa-hero-pause-btn). O controle permanece no DOM e reaparece
+   no hover/focus-within para manter acessibilidade.
+   ============================================================ */
+html body.cms-index-index :is(.awa-hero-pause-btn, .awa-hero__pause) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity .2s ease !important;
+}
+
+html body.cms-index-index :is(.top-home-content, .awa-hero, .awa-home-section):hover
+  :is(.awa-hero-pause-btn, .awa-hero__pause),
+html body.cms-index-index :is(.top-home-content, .awa-hero, .awa-home-section):focus-within
+  :is(.awa-hero-pause-btn, .awa-hero__pause) {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
