@@ -824,4 +824,41 @@ html body.cms-index-index :is(.top-home-content, .awa-hero, .awa-home-section):f
   visibility: visible !important;
 }
 
+/* ============================================================
+   SEÇÃO 25 — Onda 5H.2: anti-CLS busca — sorter/toolbar (Causa C)
+   Mineração de /tmp/awa-5h-sorter-investigate.json: salto 0.0683 a
+   t~14s (flip deferred no timeout do gate).
+   Regras copiadas de: themes.min.css e
+   awa-visual-bugfix-terminal-20260707.min.css.
+   ============================================================ */
+html body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catalog-product-view,.checkout-cart-index,.account,.customer-account-index,[class*=b2b-]) .page-wrapper :is(.column.main,.col-main) {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: var(--awa-text, #333) !important;
+}
+
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper .toolbar.toolbar-products {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  html body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper .toolbar.toolbar-products :is(.modes,.toolbar-sorter,.field.limiter,.pages) {
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper .toolbar.toolbar-products :is(.sorter-options,select.limiter-options) {
+    box-sizing: border-box !important;
+    flex: 1 1 160px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
