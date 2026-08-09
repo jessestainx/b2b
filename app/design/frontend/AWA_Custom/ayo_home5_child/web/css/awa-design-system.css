@@ -741,4 +741,49 @@ html body :is(input, select, textarea) {
   }
 }
 
+/* ============================================================
+   SEÇÃO 25 — Onda 5H: estabilização sorter/toolbar da busca (CLS)
+   Evidência 5H (iPhone 13, q=freio): shift 0.0684 em ~t14s com
+   fontes pesadas saindo de media=print (printN 1→0):
+   - select.sorter-options: display block→flex; x/y/w mudam
+   - .field.limiter: flex-direction row→column; .control x16→138
+   - .search.results: font-size 16→14 (y/h mudam)
+   Origem observada: cascata tardia de themes.min.css +
+   awa-align-grid-terminal-2026-06-11.min.css.
+   Estratégia: pré-aplicar o estado final com especificidade alta
+   para evitar reflow tardio. Escopo: só ≤767px.
+   ============================================================ */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body.catalogsearch-result-index
+    .page-wrapper .toolbar.toolbar-products .toolbar-sorter.sorter .sorter-options {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body.catalogsearch-result-index
+    .page-wrapper .toolbar.toolbar-products .toolbar-sorter {
+    height: 46px !important;
+    min-height: 46px !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body.catalogsearch-result-index
+    .page-wrapper .toolbar.toolbar-products .field.limiter {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body.catalogsearch-result-index
+    .page-wrapper .toolbar.toolbar-products .field.limiter .control {
+    width: 114px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body.catalogsearch-result-index
+    .page-wrapper .search.results {
+    font-size: 14px !important;
+    line-height: 21px !important;
+  }
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
