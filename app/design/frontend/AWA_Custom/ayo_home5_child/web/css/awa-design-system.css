@@ -679,4 +679,16 @@ html body :is(input, select, textarea) {
   }
 }
 
+/* ============================================================
+   SEÇÃO 23 — Onda 5F: reserva das tabs da busca (anti-CLS)
+   5E.2 mediu: .mst-search__result-tabs nasce ~79px e cresce para
+   95px estáveis (3 loads) → salto tardio, CLS ~0.278. Reserva o
+   espaço final desde o início. Escopo: só ≤767px.
+   ============================================================ */
+@media (max-width: 767px) {
+  html body.catalogsearch-result-index :is(.mst-search__result-tabs, #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    min-height: 95px !important;
+  }
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */

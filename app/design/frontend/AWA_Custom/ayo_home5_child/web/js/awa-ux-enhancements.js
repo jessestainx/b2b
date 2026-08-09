@@ -284,10 +284,12 @@ define(['jquery'], function ($) {
                 'html body#html-body#html-body#html-body#html-body:is(.catalog-category-view,.catalogsearch-result-index) .page-wrapper .toolbar.toolbar-products :is(.sorter-options,select.limiter-options,#sorter,#limiter){',
                 'min-height:44px!important;height:44px!important;max-height:none!important;',
                 'box-sizing:border-box!important;padding-block:8px!important}',
-                /* H-crumbs-compact: CSS inject — não forçar 44 no breadcrumb textual */
+                /* H-crumbs-compact: só ≥768px — mobile precisa alvo ≥36px (Onda 5F) */
+                '@media (min-width:768px){',
                 'html body#html-body#html-body#html-body#html-body :is(.breadcrumbs,.nav-breadcrumbs) a{',
                 'display:inline-flex!important;align-items:center!important;min-height:0!important;min-block-size:0!important;',
                 'height:auto!important;padding-block:2px!important;box-sizing:border-box!important}',
+                '}',
                 'html body#html-body#html-body#html-body#html-body .page-wrapper :is(.page_footer,.page-footer) :is(button.awa-footer-section__toggle,.awa-footer-section__toggle){',
                 'min-height:44px!important;height:auto!important;max-height:none!important;',
                 'padding-block:10px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important}'
@@ -340,30 +342,33 @@ define(['jquery'], function ($) {
             });
 
             // H-crumbs-compact (2026-08-02): nav textual — 44px inflava .items ~50px (CDP).
-            forceTouch44(document.querySelectorAll('.breadcrumbs a, .nav-breadcrumbs a'), {
-                'display': 'inline-flex',
-                'align-items': 'center',
-                'min-height': '0',
-                'min-block-size': '0',
-                'height': 'auto',
-                'padding-block': '2px',
-                'box-sizing': 'border-box'
-            });
-
-            // Re-aplica no próximo frame (vence writers tardios / race com touch-44-terminal).
-            var crumbProps = {
-                'display': 'inline-flex',
-                'align-items': 'center',
-                'min-height': '0',
-                'min-block-size': '0',
-                'height': 'auto',
-                'padding-block': '2px',
-                'box-sizing': 'border-box'
-            };
-            if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(function () {
-                    forceTouch44(document.querySelectorAll('.breadcrumbs a, .nav-breadcrumbs a'), crumbProps);
+            // Onda 5F: compact só desktop (≥768px); mobile fica com alvo ≥36px via CSS/DS.
+            if (window.matchMedia('(min-width: 768px)').matches) {
+                forceTouch44(document.querySelectorAll('.breadcrumbs a, .nav-breadcrumbs a'), {
+                    'display': 'inline-flex',
+                    'align-items': 'center',
+                    'min-height': '0',
+                    'min-block-size': '0',
+                    'height': 'auto',
+                    'padding-block': '2px',
+                    'box-sizing': 'border-box'
                 });
+
+                // Re-aplica no próximo frame (vence writers tardios / race com touch-44-terminal).
+                var crumbProps = {
+                    'display': 'inline-flex',
+                    'align-items': 'center',
+                    'min-height': '0',
+                    'min-block-size': '0',
+                    'height': 'auto',
+                    'padding-block': '2px',
+                    'box-sizing': 'border-box'
+                };
+                if (window.requestAnimationFrame) {
+                    window.requestAnimationFrame(function () {
+                        forceTouch44(document.querySelectorAll('.breadcrumbs a, .nav-breadcrumbs a'), crumbProps);
+                    });
+                }
             }
 
             forceTouch44(document.querySelectorAll(
