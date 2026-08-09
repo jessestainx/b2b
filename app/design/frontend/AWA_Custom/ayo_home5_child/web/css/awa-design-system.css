@@ -862,3 +862,161 @@ html body#html-body:is(.catalog-category-view,.catalogsearch-result-index,.catal
 }
 
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
+
+/* ==========================================================================
+   SEÇÃO 29 — REDESIGN R1 (Onda 7): FUNDAÇÃO VISUAL
+   ----------------------------------------------------------------------
+   Reskin via design system (Caminho A). Marca preservada: vermelho
+   --awa-brand + logo AWA. Escopo: tipografia (família/peso/cor), botões,
+   inputs, links de conteúdo, preços, foco acessível, seleção.
+   REGRA DE OURO DESTA SEÇÃO: ZERO GEOMETRIA — nenhuma altura, largura,
+   margem, padding, display ou position é alterado (risco de CLS ≈ 0).
+   Soberania preservada: NÃO mexe em breadcrumbs, toolbar/sorter, tabs da
+   busca, grid Bootstrap, setas dos shelves, geometria do hero nem alvos de
+   toque (Seções 2–28 seguem intactas e soberanas em seus alvos).
+   !important + booster :is(#awa-boost×12): necessário contra themes.min.css
+   e patches terminais — mesmo critério documentado das Seções 17–28.
+   Tokens aqui ESTENDEM a SEÇÃO 1 (nada é redefinido).
+   ========================================================================== */
+
+/* 29.0 — Tokens adicionais (complementam a SEÇÃO 1) */
+:root {
+  --awa-brand-soft:  #f9eeee;                 /* tint suave da marca (badges/hover leve) */
+  --awa-focus-ring:  rgba(183, 51, 55, .30);  /* anel de foco da marca */
+  --awa-shadow-md:   0 6px 16px rgba(16, 24, 40, .12); /* elevação de hover */
+  --awa-radius-ctl:  8px;                     /* raio de controles: entre --awa-radius-s e -m */
+  --awa-text:        #3f454d;                 /* corpo de texto (um tom acima do ink) */
+}
+
+/* 29.1 — Tipografia global: família/peso/cor. Tamanhos NÃO mudam nesta onda.
+   Escopo .page-main nos títulos: header e footer entram só na Onda R2. */
+html body {
+  font-family: var(--awa-font-body) !important;
+  color: var(--awa-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+html body .page-wrapper .page-main :is(h1, h2, h3, h4, h5, h6,
+    .page-title, .page-title span,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  font-family: var(--awa-font-display) !important;
+  color: var(--awa-ink) !important;
+  font-weight: 700 !important;
+}
+html body .page-wrapper .page-main :is(h1, h2, .page-title, .page-title span,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  letter-spacing: -0.01em;
+}
+
+/* 29.2 — Botões: hierarquia nova. Primário = marca; secundário = outline neutro.
+   Alturas, paddings e min-heights NÃO são alterados (toque = Seção 22).
+   Ícones de header/lista (carrinho, busca, wishlist, compare, delete, close)
+   ficam de fora das cores. */
+html body .page-wrapper :is(.action, button.action, input[type="submit"],
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  border-radius: var(--awa-radius-ctl) !important;
+  font-family: var(--awa-font-display) !important;
+  font-weight: 600 !important;
+  letter-spacing: .01em;
+  text-transform: none !important;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease !important;
+}
+html body .page-wrapper :is(.action:not(.primary):not(.action-primary):not(.tocart):not(.showcart):not(.search):not(.towishlist):not(.tocompare):not(.delete):not(.close):not(.back),
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  background: var(--awa-surface) !important;
+  border: 1px solid var(--awa-line) !important;
+  color: var(--awa-ink) !important;
+  box-shadow: none !important;
+}
+html body .page-wrapper :is(.action:not(.primary):not(.action-primary):not(.tocart):not(.showcart):not(.search):not(.towishlist):not(.tocompare):not(.delete):not(.close):not(.back):hover,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  background: var(--awa-surface) !important;
+  border-color: var(--awa-ink) !important;
+  color: var(--awa-ink) !important;
+}
+html body .page-wrapper :is(.action.primary, .action-primary, .action.tocart, input[type="submit"],
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  background: var(--awa-brand) !important;
+  border: 1px solid var(--awa-brand) !important;
+  color: #fff !important;
+}
+html body .page-wrapper :is(.action.primary:hover, .action-primary:hover, .action.tocart:hover, input[type="submit"]:hover,
+    .action.primary:focus, .action-primary:focus, .action.tocart:focus, input[type="submit"]:focus,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  background: var(--awa-brand-dark) !important;
+  border-color: var(--awa-brand-dark) !important;
+  color: #fff !important;
+  box-shadow: var(--awa-shadow-md) !important;
+}
+
+/* 29.3 — Inputs/selects/textarea: borda, raio, foco com anel da marca.
+   font-size NÃO é tocado (16px mobile = soberania das Seções 17/17b). */
+html body .page-wrapper :is(input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="range"]):not([type="hidden"]), select, textarea,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  background: var(--awa-surface) !important;
+  border: 1px solid var(--awa-line) !important;
+  border-radius: var(--awa-radius-ctl) !important;
+  font-family: var(--awa-font-body) !important;
+  color: var(--awa-ink) !important;
+}
+html body .page-wrapper :is(input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="range"]):not([type="hidden"]):focus, select:focus, textarea:focus,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  border-color: var(--awa-brand) !important;
+  box-shadow: 0 0 0 3px var(--awa-focus-ring) !important;
+  outline: 0 !important;
+}
+
+/* 29.4 — Links de conteúdo (só .page-main; header/footer/nav = Onda R2). */
+html body .page-wrapper .page-main :is(a,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  color: var(--awa-brand);
+  text-decoration: none;
+}
+html body .page-wrapper .page-main :is(a:hover,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  color: var(--awa-brand-dark);
+  text-decoration: underline;
+}
+/* Breadcrumbs discretos (a geometria deles é da Seção 22 — intocada). */
+html body .page-wrapper :is(.breadcrumbs a,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  color: var(--awa-ink-soft) !important;
+}
+html body .page-wrapper :is(.breadcrumbs a:hover,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  color: var(--awa-ink) !important;
+}
+/* Nome de produto = tinta; hover = marca (padrão marketplace moderno). */
+html body .page-wrapper :is(.product-item-link, .product.name a, .product-item-name a,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  color: var(--awa-ink) !important;
+  font-weight: 500;
+}
+html body .page-wrapper :is(.product-item-link:hover, .product.name a:hover, .product-item-name a:hover,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  color: var(--awa-brand) !important;
+  text-decoration: none !important;
+}
+
+/* 29.5 — Preços: peso/cor novos. Tamanhos intocados. */
+html body .page-wrapper :is(.price-box .price, .product-info-price .price, .product-info-main .price,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  font-family: var(--awa-font-display) !important;
+  font-weight: 700 !important;
+  color: var(--awa-ink) !important;
+}
+html body .page-wrapper :is(.old-price .price, .price-box .old-price .price,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  color: var(--awa-ink-soft) !important;
+  font-weight: 500 !important;
+}
+
+/* 29.6 — Foco acessível (teclado) e seleção de texto na marca. */
+html body :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--awa-brand) !important;
+  outline-offset: 2px;
+}
+::selection {
+  background: var(--awa-brand);
+  color: #fff;
+}
