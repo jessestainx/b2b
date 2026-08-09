@@ -570,4 +570,113 @@ html body :is(input, select, textarea) {
   }
 }
 
+/* ============================================================
+   SEÇÃO 22 — Onda 5E: alvos de toque ≥36px no mobile (Apple HIG 44 /
+   WCAG 2.5.8). 5A/5E.2 mediu: promo CTA 28, breadcrumbs 19-22,
+   chips busca 20, toggle registro 19. Escopo: só ≤767px.
+   Winner-analysis: promo tinha height/max-height fixos; breadcrumbs
+   têm inline !important (awa-ux-enhancements.js: min-height:0 /
+   padding-block:2px) — DS não vence essas props; usa line-height/
+   font-size (não setados no inline) para crescer a caixa.
+   NÃO cobre (decisão documentada): skip-links (a11y intencional)
+   e product-item-link (imagem do card é o alvo real; 31px ≥ 24px).
+   ============================================================ */
+@media (max-width: 767px) {
+  /* promo: height fixa inimiga → auto + min-height */
+  html body :is(.awa-b2b-promo-bar__cta, #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    align-items: center !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 40px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  /* breadcrumbs: JS inline trava min-height/padding no <a>; line-height
+     sozinho perde se o flex pai (ul.items) comprime com min-height:0 +
+     overflow:hidden. Liberar cadeia item→a. */
+  html body .breadcrumbs .items,
+  html body .nav-breadcrumbs .items {
+    min-height: 40px !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    align-items: center !important;
+  }
+  html body .breadcrumbs .items > .item,
+  html body .nav-breadcrumbs .items > .item {
+    min-height: 36px !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  html body .breadcrumbs a,
+  html body .nav-breadcrumbs a {
+    font-size: 14px !important;
+    line-height: 36px !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
+  html body .breadcrumbs a span,
+  html body .nav-breadcrumbs a span {
+    display: inline-block !important;
+    font-size: 14px !important;
+    line-height: 36px !important;
+    padding-block: 0 !important;
+  }
+
+  @layer awa-visual-priority {
+    html body#html-body#html-body#html-body .page-wrapper
+    :is(.awa-b2b-promo-bar__cta,
+        #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+      height: auto !important;
+      max-height: none !important;
+      min-height: 40px !important;
+    }
+
+    html body#html-body#html-body#html-body .page-wrapper
+    :is(.breadcrumbs .items, .nav-breadcrumbs .items) {
+      min-height: 40px !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    html body#html-body#html-body#html-body .page-wrapper
+    :is(.breadcrumbs .items > .item, .nav-breadcrumbs .items > .item) {
+      min-height: 36px !important;
+      overflow: visible !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    html body#html-body#html-body#html-body .page-wrapper
+    :is(.breadcrumbs a, .nav-breadcrumbs a,
+        #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+      font-size: 14px !important;
+      line-height: 36px !important;
+      overflow: visible !important;
+      flex-shrink: 0 !important;
+    }
+    html body#html-body#html-body#html-body .page-wrapper
+    :is(.breadcrumbs a span, .nav-breadcrumbs a span) {
+      display: inline-block !important;
+      font-size: 14px !important;
+      line-height: 36px !important;
+    }
+  }
+
+  /* chips busca: eram inline (h=20) → inline-flex + min-height */
+  html body :is(.mst-search-in__item, #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 36px !important;
+  }
+
+  /* toggle registro: já inline-flex — preservar + min-height 44 */
+  html body :is(.form-section__toggle, #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 44px !important;
+  }
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
