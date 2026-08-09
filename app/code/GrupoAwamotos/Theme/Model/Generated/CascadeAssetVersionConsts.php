@@ -13,10 +13,10 @@ namespace GrupoAwamotos\Theme\Model\Generated;
  */
 final class CascadeAssetVersionConsts
 {
-    public const ALIGN_GRID = '?v=20260807-l2c-qty';
+    public const ALIGN_GRID = '?v=20260809-onda6b2-align';
     public const FOOTER = '?v=d72a7f033192';
     public const HOME_CRITICAL_STACK = '?v=958aa478f8b6';
-    public const HOME_DEFERRED_STACK = '?v=6a3d93d97d6c';
+    public const HOME_DEFERRED_STACK = '?v=20260809-onda6b2-stack';
     public const M2_VISUAL_SSOT = '?v=f4e09118737d';
     public const REFINE = '?v=4a18e0d41a1f';
     public const SUPER_GLOBAL = '?v=04033c253ee9';

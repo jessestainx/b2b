@@ -21602,15 +21602,22 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .page-wrapper
   .content-top-home
   .awa-shelf--carousel
+  > .awa-owl-nav:not(.awa-owl-nav--header-mounted),
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-shelf--carousel
+  .awa-carousel
   > .awa-owl-nav:not(.awa-owl-nav--header-mounted) {
   position: absolute !important;
   inset-inline: 0 !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
+  top: calc(50% - 18px) !important;
+  bottom: auto !important;
+  transform: none !important;
   height: 0 !important;
   width: 100% !important;
   pointer-events: none !important;
-  z-index: 3 !important;
+  z-index: 6 !important;
 }
 
 html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
@@ -21618,10 +21625,20 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .content-top-home
   .awa-shelf--carousel
   > .awa-owl-nav:not(.awa-owl-nav--header-mounted)
+  .awa-owl-nav__btn,
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-shelf--carousel
+  .awa-carousel
+  > .awa-owl-nav:not(.awa-owl-nav--header-mounted)
   .awa-owl-nav__btn {
   pointer-events: auto !important;
   position: absolute !important;
   top: 0 !important;
+  bottom: auto !important;
+  inset-block-start: 0 !important;
+  inset-block-end: auto !important;
   transform: translateY(-50%) !important;
 }
 
@@ -21629,6 +21646,13 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .page-wrapper
   .content-top-home
   .awa-shelf--carousel
+  > .awa-owl-nav:not(.awa-owl-nav--header-mounted)
+  .awa-carousel__arrow--prev,
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-shelf--carousel
+  .awa-carousel
   > .awa-owl-nav:not(.awa-owl-nav--header-mounted)
   .awa-carousel__arrow--prev {
   inset-inline-start: 8px !important;
@@ -21644,6 +21668,20 @@ html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-hom
   .page-wrapper
   .content-top-home
   .awa-shelf--carousel
+  .awa-carousel
+  > .awa-owl-nav:not(.awa-owl-nav--header-mounted)
+  .awa-carousel__arrow--next,
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-shelf--carousel
+  > .awa-owl-nav:not(.awa-owl-nav--header-mounted)
+  .awa-carousel__toggle,
+html body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-shelf--carousel
+  .awa-carousel
   > .awa-owl-nav:not(.awa-owl-nav--header-mounted)
   .awa-carousel__toggle {
   inset-inline-end: 8px !important;
@@ -25453,3 +25491,115 @@ html body#html-body#html-body#html-body#html-body.b2b-restricted-mode [data-b2b-
     padding: 0 !important;
 }
 
+/* ==========================================================================
+   Onda 6B — home shelves: setas no centro do stage (fonte terminal)
+   Escopo: somente home + shelves rokan. PDP related permanece intocado.
+   ========================================================================== */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-home .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-homepage_ayo_home5 .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr {
+  position: absolute !important;
+  inset: calc(50% - 18px) 0 auto 0 !important;
+  top: calc(50% - 18px) !important;
+  right: 0 !important;
+  bottom: auto !important;
+  left: 0 !important;
+  height: 0 !important;
+  transform: none !important;
+  pointer-events: none !important;
+  z-index: 6 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn,.awa-carousel__arrow,.awa-carousel__button,.owl-prev,.owl-next),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-home .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn,.awa-carousel__arrow,.awa-carousel__button,.owl-prev,.owl-next),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-homepage_ayo_home5 .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn,.awa-carousel__arrow,.awa-carousel__button,.owl-prev,.owl-next) {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: auto !important;
+  inset-block-start: 0 !important;
+  inset-block-end: auto !important;
+  transform: translateY(-50%) !important;
+  pointer-events: auto !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn--prev,.awa-carousel__arrow--prev,.awa-carousel__button--prev,.owl-prev),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-home .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn--prev,.awa-carousel__arrow--prev,.awa-carousel__button--prev,.owl-prev),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-homepage_ayo_home5 .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn--prev,.awa-carousel__arrow--prev,.awa-carousel__button--prev,.owl-prev) {
+  left: 8px !important;
+  right: auto !important;
+  inset-inline-start: 8px !important;
+  inset-inline-end: auto !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-index-index .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn--next,.awa-carousel__arrow--next,.awa-carousel__button--next,.owl-next),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-home .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn--next,.awa-carousel__arrow--next,.awa-carousel__button--next,.owl-next),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-homepage_ayo_home5 .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr :is(.awa-owl-nav__btn--next,.awa-carousel__arrow--next,.awa-carousel__button--next,.owl-next) {
+  right: 8px !important;
+  left: auto !important;
+  inset-inline-end: 8px !important;
+  inset-inline-start: auto !important;
+}
+
+
+
+/* === Onda 6B.2 — lock final nav-anchor viewport (fonte única align-grid) === */
+@media (min-width: 768px) {
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-shelf--carousel[class*="rokan-"]
+  > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr[data-awa-nav-anchor="viewport"] {
+  position: absolute !important;
+  inset: 220px 0 auto 0 !important;
+  top: 220px !important;
+  bottom: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 0 !important;
+  transform: none !important;
+  pointer-events: none !important;
+  z-index: 6 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .content-top-home
+  .awa-shelf--carousel[class*="rokan-"]
+  > .awa-owl-nav.awa-carousel__nav.awa-carousel-chrome-ssr[data-awa-nav-anchor="viewport"]
+  :is(.awa-owl-nav__btn, .awa-carousel__arrow, .awa-carousel__button, .owl-prev, .owl-next) {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: auto !important;
+  inset-block-start: 0 !important;
+  inset-block-end: auto !important;
+  transform: translateY(-50%) !important;
+  pointer-events: auto !important;
+}
+}
+
+
+/* === Onda 6B.2 — emergency specificity lock (selector parity com themes viewport nav) === */
+@media (min-width: 768px) {
+html body#html-body.cms-index-index .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor="viewport"],
+html body#html-body.cms-home .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor="viewport"],
+html body#html-body.cms-homepage_ayo_home5 .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor="viewport"] {
+  top: 220px !important;
+  bottom: auto !important;
+  inset: 220px 0 auto 0 !important;
+  height: 0 !important;
+  transform: none !important;
+  pointer-events: none !important;
+  z-index: 6 !important;
+}
+
+html body#html-body.cms-index-index .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor="viewport"] :is(.awa-owl-nav__btn, .awa-carousel__arrow, .awa-carousel__button, .owl-prev, .owl-next),
+html body#html-body.cms-home .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor="viewport"] :is(.awa-owl-nav__btn, .awa-carousel__arrow, .awa-carousel__button, .owl-prev, .owl-next),
+html body#html-body.cms-homepage_ayo_home5 .page-wrapper .content-top-home .awa-shelf--carousel[class*="rokan-"] > .awa-owl-nav.awa-carousel__nav[data-awa-nav-anchor="viewport"] :is(.awa-owl-nav__btn, .awa-carousel__arrow, .awa-carousel__button, .owl-prev, .owl-next) {
+  top: 0 !important;
+  bottom: auto !important;
+  inset-block-start: 0 !important;
+  inset-block-end: auto !important;
+  transform: translateY(-50%) !important;
+  pointer-events: auto !important;
+}
+}

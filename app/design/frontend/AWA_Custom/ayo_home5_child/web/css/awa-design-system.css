@@ -825,7 +825,7 @@ html body.cms-index-index :is(.top-home-content, .awa-hero, .awa-home-section):f
 }
 
 /* ============================================================
-   SEÇÃO 25 — Onda 5H.2: anti-CLS busca — sorter/toolbar (Causa C)
+   SEÇÃO 28 — Onda 5H.2: anti-CLS busca — sorter/toolbar (Causa C)
    Mineração de /tmp/awa-5h-sorter-investigate.json: salto 0.0683 a
    t~14s (flip deferred no timeout do gate).
    Regras copiadas de: themes.min.css e

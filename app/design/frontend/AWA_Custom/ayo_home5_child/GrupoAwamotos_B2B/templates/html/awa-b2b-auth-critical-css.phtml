@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 
 
-$cookieFixUrl = $block->getViewFileUrl('css/awa-cookie-consent-fix.min.css');
+$cookieFixUrl = $block->getViewFileUrl('css/awa-cookie-consent-fix.min.css') . '?v=20260809-onda6b2-cookie';
 $cookieFixUrlJson = json_encode($block->escapeUrl($cookieFixUrl), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 ?>
 <style id="awa-b2b-auth-critical-inline">

@@ -4681,32 +4681,26 @@ CSS;
                 . ' .content-top-home .awa-shelf--carousel .awa-carousel{'
                 . 'position:relative!important;box-sizing:border-box!important}'
                 . '@media(min-width:768px){'
+                /* neutralizado na Onda 6B.3 — geometria das setas pertence ao align-grid-terminal */
                 . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
                 . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
                 . ' .content-top-home .awa-shelf--carousel'
                 . ' :is(.awa-owl-nav.awa-carousel__nav,.awa-owl-nav.awa-carousel-chrome-ssr,'
                 . '.awa-carousel__nav.awa-carousel-chrome-ssr,'
                 . '.awa-owl-nav[data-awa-nav-anchor="viewport"]){'
-                . 'position:absolute!important;top:50%!important;left:0!important;right:0!important;'
-                . 'bottom:auto!important;inset:auto 0 auto 0!important;'
+                // 6B.3: removidos top/inset/height:0/transform — SSOT = align-grid-terminal
+                . 'position:absolute!important;left:0!important;right:0!important;'
                 . 'display:flex!important;justify-content:space-between!important;align-items:center!important;'
-                // r74/r75/r77: faixa height:0 no first-paint (CLS). max-height:none permite
-                // awa-scroll-carousel.js aplicar height do viewport via inline !important,
-                // para toggle top:4px e setas top:50% ancorarem no retângulo real.
-                . 'height:0!important;min-height:0!important;max-height:none!important;'
                 . 'width:auto!important;margin:0!important;padding:0!important;'
-                . 'transform:translateY(-50%)!important;'
                 . 'pointer-events:none!important;z-index:4!important;box-sizing:border-box!important;'
                 . 'background:transparent!important;border:0!important;overflow:visible!important}'
-                // r77 visual: relative+space-between + toggle autoplay (3º filho) centrava
-                // a seta next. Absolute nas laterais (mesmo layer first-paint) alinha ao
-                // contrato viewport e deixa o toggle no canto sem roubar o slot do next.
+                // r77: absolute nas laterais (prev/next) + toggle no canto — sem top/transform das setas
                 . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
                 . ':is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper'
                 . ' .content-top-home .awa-shelf--carousel .awa-owl-nav'
                 . ' :is(.awa-owl-nav__btn,.awa-carousel__arrow,.awa-carousel__button){'
-                . 'position:absolute!important;top:50%!important;transform:translateY(-50%)!important;'
-                . 'inset:auto!important;margin:0!important;pointer-events:auto!important;'
+                // 6B.3: removidos top:50%/transform/inset — SSOT = align-grid-terminal
+                . 'position:absolute!important;margin:0!important;pointer-events:auto!important;'
                 . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
                 . 'box-sizing:border-box!important}'
                 . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
