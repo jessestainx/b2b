@@ -5652,8 +5652,9 @@ CSS;
             . '.toolbar.toolbar-products select.limiter-options,'
             . '.toolbar.toolbar-products #limiter"),'
             . '{height:"44px","min-height":"44px","max-height":"none","box-sizing":"border-box"});'
-            /* H-crumbs-compact: sempre compacto + reapply após ux-enhancements
+            /* H-crumbs-compact (Onda 5G): compact só ≥768px — mobile precisa alvo ≥36px (Sec22).
                (CDP: JS antigo/race com forceTouch44 44 inflava .items ~50px). */
+            . 'if(window.matchMedia("(min-width: 768px)").matches){'
             . 'var crumbP={display:"inline-flex","align-items":"center","min-height":"0",'
             . '"min-block-size":"0",height:"auto","padding-block":"2px","box-sizing":"border-box"};'
             . 'var crumbBusy=false;'
@@ -5678,6 +5679,7 @@ CSS;
             . 'if(ts){mo.observe(ts,{childList:true,characterData:true,subtree:true});}};'
             . 'boot();setTimeout(boot,1000);setTimeout(boot,3000);'
             . 'setTimeout(function(){try{mo.disconnect();}catch(e){}},12000);}}catch(e){}'
+            . '}'
             . 'set(q(".page_footer .awa-footer-section__toggle,'
             . '.page-footer .awa-footer-section__toggle"),'
             . '{"min-height":"44px",height:"auto","max-height":"none",'

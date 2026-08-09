@@ -691,4 +691,54 @@ html body :is(input, select, textarea) {
   }
 }
 
+/* ============================================================
+   SEÇÃO 24 — Onda 5G: anti-CLS busca (veredito C)
+   Evidência 5G (iPhone 13, q=freio, 3 loads):
+   1) DIV.row em .search.results: h=0→116 no flip print→all
+      (Sec21 já hoistou margin/float; faltava clearfix Bootstrap)
+      Origem: awa-third-party-bundle.min.css
+   2) CLS 0.2369 em div.search.results: na verdade o bloco SOBE
+      ~36px porque .mst-search-in__wrapper colapsa 72→36 quando
+      themes aplica font-size 14px e os chips cabem em 1 linha
+      (antes wrap 2×36 com font 16). Fix: tipografia/nowrap cedo.
+   Escopo ≤767px.
+   ============================================================ */
+@media (max-width: 767px) {
+  /* de awa-third-party-bundle.min.css */
+  .row:after,
+  .row:before {
+    display: table;
+    content: " ";
+  }
+
+  /* de awa-third-party-bundle.min.css */
+  .row:after {
+    clear: both;
+  }
+
+  /* chips "Buscar em": estabiliza em 1 linha (altura final ~36) */
+  html body.catalogsearch-result-index .mst-search-in__wrapper {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    white-space: nowrap !important;
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    min-height: 36px !important;
+  }
+  html body.catalogsearch-result-index .mst-search-in__wrapper
+  :is(.mst-search-in__title, .mst-search-in__item, .name, .count) {
+    font-size: 14px !important;
+    white-space: nowrap !important;
+  }
+
+  /* toolbar bottom / .row: pós-clearfix ainda 104→116 no flip — piso = H final */
+  html body.catalogsearch-result-index .search.results > .row {
+    min-height: 116px !important;
+  }
+  html body.catalogsearch-result-index .search.results .sort-pagi-bar-bottom,
+  html body.catalogsearch-result-index .search.results .toolbar-products--bottom-slim {
+    min-height: 116px !important;
+  }
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
