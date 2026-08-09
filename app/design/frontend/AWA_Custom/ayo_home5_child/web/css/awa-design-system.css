@@ -473,4 +473,15 @@ html body :is(input, select, textarea) {
   font-family: var(--awa-font-body);
 }
 
+/* ============================================================
+   SEÇÃO 17 — Onda 5B: inputs/selects ≥16px no mobile (anti-zoom iOS)
+   5A mediu 14px em search/newsletter/sorter/limiter/qty — o Safari
+   do iOS dá auto-zoom em foco de input <16px. Escopo: só ≤767px.
+   ============================================================ */
+@media (max-width: 767px) {
+  html body .page-wrapper :is(input, select, textarea, #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+    font-size: 16px !important;
+  }
+}
+
 /* Fim do arquivo. Próxima correção? Nova seção AQUI — nunca arquivo novo. */
