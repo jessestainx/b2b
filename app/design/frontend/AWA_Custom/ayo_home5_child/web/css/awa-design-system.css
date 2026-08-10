@@ -1091,3 +1091,35 @@ html body#html-body.cms-lancamentos.cms-page-view
       #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
   display: none !important;
 }
+
+/* ============================================================
+   SEÇÃO 30E — QF-ITEM1: grade CatalogWidget full-width (CMS Lançamentos)
+   Sintoma: ol.product-items.widget-product-grid com width/max-width ~520px
+   + grid-template-columns: repeat(5,1fr) → cards ~90px (tiras).
+   PLP /lancamentos.html não afetada (seletores só .cms-lancamentos).
+   Follow-up 8B/R4 continua válido (portão B2B no template).
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .awa-cms-lancamentos
+  .block.widget
+  .products-grid
+  ol.product-items.widget-product-grid {
+  max-width: none !important;
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: var(--awa-grid-gap, 16px) !important;
+  float: none !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .awa-cms-lancamentos
+  .block.widget
+  .products-grid
+  ol.product-items.widget-product-grid
+  > li.product-item {
+  width: auto !important;
+  max-width: none !important;
+  float: none !important;
+}
