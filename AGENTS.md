@@ -121,25 +121,25 @@ app/code/GrupoAwamotos/NomeModulo/
 ### Protocolo antes de editar
 
 1. **Identifique a zona** — verifique se o arquivo pertence ao tema filho (`AWA_Custom/ayo_home5_child`) ou a um módulo customizado (`app/code/GrupoAwamotos/`). Nunca edite `app/code/Rokanthemes/*`.
-2. **Leia o bundle correto** — para CSS, identifique qual bundle gerencia a área:
-   - Header/footer → `awa-bundle-core.unmin.css`
-   - Páginas de categoria/PLP → `awa-bundle-category.unmin.css`
-   - PDP (produto) → `awa-bundle-site.unmin.css`
-   - Variáveis globais → `awa-core-variables.unmin.css` (tokens)
+2. **Identifique a camada correta** — a cascata real vigente (2026-08, ver `CSS_INVENTORY.md` no tema) é carregada por `Magento_Theme/templates/html/awa-head-preload.phtml` (lógica condicional por rota), `awa-align-grid-terminal-loader.phtml` (PDP/checkout/CMS/B2B) e plugins PHP (`OptimizeHeadStylesPlugin.php`, `HomeCssGateParity.php`). Os antigos `awa-bundle-core/category/phases/refinements` **não existem mais**; `awa-bundle-site.css` é um shim vazio proposital — não referenciá-lo.
 3. **Verifique `var/view_preprocessed`** — em produção, templates PHTML são servidos de `var/view_preprocessed/pub/static/app/design/frontend/AWA_Custom/ayo_home5_child/`. Após criar override, copie manualmente o arquivo para lá antes de limpar cache.
-4. **Nunca use hex hardcoded** — use sempre `var(--awa-red)`, `var(--awa-primary)` etc. do `awa-core-variables.unmin.css`.
+4. **Nunca use hex hardcoded** — use sempre `var(--awa-red)`, `var(--awa-primary)` etc. Fonte canônica dos tokens: `web/css/source/_awa-variables.less` (vars LESS `@awa-*`) + `web/css/source/_tokens.less` (custom properties `--awa-*`).
+5. **Cuidado com rename de CSS** — `OptimizeHeadStylesPlugin.php`, `HeaderImpeccableCascadeLockCss.php` e `HomeCssGateParity.php` fazem match por **nome de arquivo via regex** (~15 pontos hardcoded, ex.: `awa-align-grid-terminal-2026-06-11`). Renomear/mover arquivo sem atualizar esses pontos quebra injeção/dedup silenciosamente (o `__emitDeferredCss` do head-preload omite links de arquivos ausentes sem erro). Sempre `grep` pelo nome antes de renomear.
 
-### Cascata CSS (ordem de prioridade, última ganha)
+### Cascata CSS (ordem de prioridade, última ganha) — vigente 2026-08
 
 1. `styles-m.css` / `styles-l.css` (LESS compilado Magento)
-2. `themes.css` / `themes5.css` (tema Ayo pai)
-3. `awa-bundle-core.css` — base global AWA
-4. `awa-bundle-category.css` — PLP específico
-5. `awa-bundle-phases.css` — variáveis CSS, `!important` pontual
-6. `awa-bundle-site.css` — "final wins" geral
-7. `awa-bundle-refinements.css` — carrega por último, overrides globais
+2. `themes.css` (merge herdado do tema pai)
+3. `awa-super-global-20260611m.min.css` — base global
+4. `awa-layout-bundle-20260611m.min.css` — layout estrutural
+5. `awa-commerce-impeccable-refine.min.css` — refinamentos (substitui o antigo refinements)
+6. `awa-align-grid-terminal-2026-06-11.min.css` — grid/locks terminais (PDP, checkout, CMS, B2B; via loader dedicado)
+7. `awa-m2-visual-ssot.min.css` — SSOT final (rating/shelf/carousel/cards/badge)
+8. `css/awa-design-system.css` — último `<css>` do `default_head_blocks.xml`
 
-Para novos estilos que precisam ter prioridade: adicionar no bundle de menor nível que abrange o contexto, **com seletor específico**, evitando `!important`.
+Via `default_head_blocks.xml` também carregam: `awa-visual-fixes-2026-06-29-final.css`, `awa-visual-noise-2026-07-15-r2.css`, `awa-cookie-fab-collision-fix-2026-07-08.min.css`. Home/PLP têm folhas condicionais extras via `awa-head-preload.phtml` (paint gate + fila `__awaCssQ`).
+
+Para novos estilos que precisam ter prioridade: adicionar na camada de menor nível que abrange o contexto, **com seletor específico**, evitando `!important`.
 
 ### Deploy após edição
 
