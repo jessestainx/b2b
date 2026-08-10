@@ -3250,3 +3250,186 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
     min-width: calc(120px + 8px) !important;
   }
 }
+
+/* ============================================================
+   SEÇÃO 38 — VOPT: chrome das setas do carrossel de categorias
+   Evidência vopt-arrow: next absolute z=3 overlap Pedaleiras 56px.
+   Fundo sólido + borda/sombra para a seta ler como controle, não
+   como corte do card em peek.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  :is(.awa-category-carousel__prev,.awa-category-carousel__next) {
+  background: var(--awa-surface, Canvas) !important;
+  border: 1px solid var(--awa-border-subtle, var(--awa-border)) !important;
+  box-shadow: 0 2px 10px color-mix(in srgb, CanvasText 14%, transparent) !important;
+  z-index: 5 !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  :is(.awa-category-carousel__prev,.awa-category-carousel__next):hover {
+  background: color-mix(in srgb, var(--awa-brand, var(--awa-primary)) 8%, var(--awa-surface, Canvas)) !important;
+  border-color: color-mix(in srgb, var(--awa-brand, var(--awa-primary)) 35%, var(--awa-border-subtle, var(--awa-border))) !important;
+}
+
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__item[href*="suportes"]
+  .awa-category-carousel__icon:not(:has(img)) {
+  background-color: var(--awa-surface, Canvas) !important;
+  background-image: url("../images/category-carousel/suportes.webp") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__item[href*="suportes"]
+  .awa-category-carousel__icon:not(:has(img))
+  svg {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ============================================================
+   SEÇÃO 39 — VOPT: restaurar "Ver todos" mobile (categorias)
+   Evidência vopt-mob: link display:none (FIX-HOME-CTA-GHOST-SPACE
+   em awa-visual-fixes @layer awa-visual-priority).
+   DS unlayered NÃO vence !important layered (Cascade L5 + ordem
+   de layers AWA). Por isso §39 entra na MESMA layer, depois no
+   source order, para reabrir o CTA sem ghost space.
+   ============================================================ */
+@layer awa-visual-priority {
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .top-home-content--category-carousel
+    header.awa-category-carousel__header.awa-section-header {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    height: auto !important;
+    min-height: 44px !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .top-home-content--category-carousel
+    header.awa-category-carousel__header.awa-section-header
+    .awa-section-header__left {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .top-home-content--category-carousel
+    header.awa-category-carousel__header.awa-section-header
+    a.awa-section-header__link.awa-shelf__view-all.awa-category-carousel__cta-link {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: static !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: auto !important;
+    min-width: 44px !important;
+    max-width: none !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    border: 0 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    color: var(--awa-brand, var(--awa-primary)) !important;
+    text-decoration: none !important;
+  }
+}
+}
+
+/* ============================================================
+   SEÇÃO 40 — VOPT: remover dots fantasma (desktop)
+   Evidência H10: #awa-cat-dots h=44 w=1184, botões 44x44
+   transparentes → retângulos vazios + gap antes de Mais Vendidos.
+   Desktop: setas bastam (display:none). Mobile: pills compactas.
+   ============================================================ */
+@media (min-width: 768px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    :is(#awa-cat-dots, .awa-category-carousel__dots) {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    :is(#awa-cat-dots, .awa-category-carousel__dots) {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-block: 8px 0 !important;
+    padding: 0 !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__dot {
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    background: color-mix(in srgb, var(--awa-text, CanvasText) 28%, transparent) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__dot::before,
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__dot::after {
+    content: none !important;
+    display: none !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__dot:is(.active, [aria-pressed="true"], [aria-current="page"]) {
+    background: var(--awa-brand, var(--awa-primary)) !important;
+    width: 18px !important;
+  }
+}
