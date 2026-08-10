@@ -80,6 +80,17 @@ async function stabilizePage(page: Page): Promise<void> {
       .awa-cookie-banner {
         display: none !important;
       }
+
+      /* Scrim de foco da busca: em ambiente de teste o input #search pode
+         ficar "focado" sem interação e o backdrop escurece a página inteira
+         (rgba(15,23,42,.48)), invalidando baselines. É overlay de interação,
+         não layout sob auditoria — ocultar deterministicamente. A regra do
+         tema usa seletor classe+ID com !important; igualar a especificidade
+         (este style tag é injetado por último e vence o empate). */
+      .awa-search-focus-backdrop#awa-search-focus-backdrop,
+      div.awa-search-focus-backdrop#awa-search-focus-backdrop {
+        display: none !important;
+      }
     `,
   }).catch(() => {});
 

@@ -720,7 +720,7 @@ color-scheme: light;
 --footer-text-bright: var(--awa-cons-c78, var(--awa-bg-muted));
 --footer-accent: var(--awa-cons-c29);
 --footer-border: color-mix(in srgb, transparent, white 10%);
---footer-font: var(--awa-font, 'Poppins', sans-serif);
+--footer-font: var(--awa-font, 'Rubik', sans-serif);
 --footer-font-size-small: 12px;
 --footer-font-size-base: 14px;
 --footer-font-size-heading: 16px;

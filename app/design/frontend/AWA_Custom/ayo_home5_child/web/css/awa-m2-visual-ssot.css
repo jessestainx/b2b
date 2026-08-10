@@ -380,3 +380,87 @@ html body#html-body .page-wrapper :is(
   overflow: hidden !important;
   border: 0 !important;
 }
+
+/* -------------------------------------------------------------------------- */
+/* 4) Padronização design system — audit de layout 2026-08-10                  */
+/* Par tipográfico canônico: display/headings = Rubik (--awa-font-heading),    */
+/* UI/body = Source Sans 3 (--awa-font-body) — self-hosted em web/fonts/.      */
+/* Escala de espaçamento: 4/8/12/16/24 (--awa-space-*). Evidências: probe      */
+/* computed styles 1920/768/375 (sessão 2026-08-10).                           */
+/* -------------------------------------------------------------------------- */
+
+/* 4a) Nav principal — o tema pai (themes.min.css) declara 'Poppins' direto em
+   links de navegação e a família não é carregada (renderiza fallback). UI
+   chrome usa a família body canônica. */
+html body#html-body .page-wrapper .awa-site-header :is(
+  .navigation.custommenu a,
+  .navigation .level0 > a,
+  .awa-nav-bar a
+) {
+  font-family: var(--awa-font-body, 'Source Sans 3', sans-serif);
+}
+
+/* 4b) Headings genéricos — themes.min.css declara 'Poppins' direto em h1-h6;
+   headings seguem a família display canônica. */
+html body#html-body .page-wrapper :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--awa-font-heading, 'Rubik', Arial, sans-serif);
+}
+
+/* 4c) Cards de prateleira — padding interno era 6px e gap 9px (ambos fora da
+   escala 4/8/12/16) → 8px. As regras genéricas abaixo cobrem PLP/busca.
+   O bloco home-scoped seguinte precisa de DOIS reforços contra o lock H22c do
+   align-grid terminal (padding 6px/gap 4-9px !important, ~linha 20532):
+   (1) está DENTRO de @layer awa-visual-priority — para !important a cascata
+       INVERTE e !important layered vence unlayered, então entramos na MESMA
+       layer do lock (mesma técnica da Seção 14a do design-system.css);
+   (2) 6×#html-body vs 5×#html-body do lock — dentro da mesma layer, vence por
+       especificidade independente da ordem de carga (SSOT carrega ANTES do
+       terminal no <head>).
+   O arquivo do terminal está congelado (trabalho não commitado de outro
+   agente) — REVISAR e fundir lá quando for commitado. */
+html body#html-body .page-wrapper :is(.item-product, .awa-carousel-card-slot, .product-item-info) {
+  padding: var(--awa-space-2, 8px);
+}
+@layer awa-visual-priority {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .awa-shelf--carousel
+    :is(.item-product, .content-item-product, .awa-carousel-card-slot) {
+    /* !important: vence o lock !important layered do align-grid terminal —
+       justificativa no cabeçalho da 4c acima. */
+    padding: var(--awa-space-2, 8px) !important;
+    gap: var(--awa-space-2, 8px) !important;
+  }
+}
+
+/* 4d) CTA do card ("VER PRODUTO"/add-to-cart) — REVISADO 2026-08-10:
+   o audit inicial sinalizou Rubik/12px/margin fracionária como inconsistência,
+   mas a investigação mostrou que são ESCOLHAS DELIBERADAS do guia oficial:
+   - font Rubik: design-system.css §29.2 define `font-family: var(--awa-font-display)
+     !important` em TODOS os .action (hierarquia tipográfica de botões);
+   - font-size 12px no mobile: awa-home-launches-toggle-fix + terminal usam
+     12px + nowrap para caber "VER PRODUTO" em cards de 375px;
+   - margin-top fracionária (11.8px): valor computado de `margin-top: auto`
+     (técnica que fixa o CTA na base do card em trilhos de altura igual).
+   NENHUMA correção aplicada aqui — o CTA já está conforme o guia. O bloco
+   fica como registro para futuros audits não reabrirem o falso positivo. */
+
+/* 4e) Viewport do carrossel — padding vertical divergia (4px desktop/tablet
+   vs 6px mobile) → 4px unificado na escala. Bloco home-scoped boosted na
+   mesma layer do terminal — ver 4c. */
+html body#html-body .page-wrapper .awa-carousel__viewport {
+  padding-top: var(--awa-space-1, 4px);
+  padding-bottom: var(--awa-space-1, 4px);
+}
+@layer awa-visual-priority {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .awa-shelf--carousel
+    .awa-carousel__viewport {
+    /* !important: vence locks !important layered do align-grid terminal — 4c. */
+    padding-top: var(--awa-space-1, 4px) !important;
+    padding-bottom: var(--awa-space-1, 4px) !important;
+  }
+}

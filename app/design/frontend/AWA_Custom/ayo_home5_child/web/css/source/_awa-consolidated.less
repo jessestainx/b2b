@@ -90,7 +90,7 @@
     --awa-cons-c88: #bac;
 }
 
-]633;E;head -19 "$TARGET";c301c9c4-fcb5-426d-af33-847345ee1878]633;C// =============================================================================
+// =============================================================================
 // AWA CONSOLIDATED CSS
 // =============================================================================
 // Gerado pela consolida??o dos arquivos awa-*.css avulsos em 2026-04-26.
@@ -298,8 +298,10 @@
        N?o migrar em massa c?digo existente ? apenas novas adi??es.
        Ref: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_logical_properties */
 
-    /* Tipografia ? Poppins carregada pelo Ayo via Google Fonts */
-    --awa-font: 'Poppins', -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
+    /* Tipografia — par canônico AWA (SSOT: awa-design-system.css):
+       display/headings = Rubik, body/UI = Source Sans 3 (self-hosted em web/fonts/).
+       Poppins NÃO é carregada pelo tema — referência legada removida (audit 2026-08-10). */
+    --awa-font: 'Rubik', 'Open Sans', Arial, sans-serif;
     --awa-font-size: 16px;
     --awa-line-height: var(--awa-leading-loose);
 
