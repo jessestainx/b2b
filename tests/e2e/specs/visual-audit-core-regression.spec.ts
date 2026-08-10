@@ -13,7 +13,7 @@
  * Preferencialmente execute via `pw-visual-audit.config.ts`, que já limita os projetos
  * aos breakpoints desktop/mobile mais úteis para baseline visual.
  */
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   COMMON,
   dismissCookie,
@@ -24,7 +24,7 @@ import {
 const BASE = 'https://awamotos.com';
 const URLS = {
   home: BASE,
-  plp: `${BASE}/bagageiros-bauls.html`,
+  plp: `${BASE}/bagageiros.html`,
   pdp: `${BASE}/bagageiro-titan-125-modelo-00-04-fan-125-modelo-05-08-cromado-macico-3015.html`,
   checkout: `${BASE}/checkout/`,
 } as const;
@@ -73,6 +73,13 @@ async function stabilizePage(page: Page): Promise<void> {
         opacity: 0 !important;
         visibility: hidden !important;
       }
+
+      /* Cookie banner aparece via JS após o stabilize; ocultar de forma
+         determinística para não poluir/overlaps nos baselines. */
+      #awa-cookie-banner,
+      .awa-cookie-banner {
+        display: none !important;
+      }
     `,
   }).catch(() => {});
 
@@ -98,6 +105,53 @@ async function openStable(page: Page, url: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/**
+ * Espera as imagens visíveis na viewport (com margem) terminarem de carregar.
+ * Evita layout shift de lazy-load entre o scroll e a captura do screenshot.
+ */
+async function waitForViewportImages(page: Page, timeoutMs = 4_000): Promise<void> {
+  await page.evaluate(async (deadline) => {
+    const pending = Array.from(document.images).filter((img) => {
+      const rect = img.getBoundingClientRect();
+      return !img.complete && rect.bottom > -300 && rect.top < window.innerHeight + 300;
+    });
+
+    if (pending.length === 0) {
+      return;
+    }
+
+    await Promise.race([
+      Promise.all(pending.map((img) => new Promise<void>((resolve) => {
+        img.addEventListener('load', () => resolve(), { once: true });
+        img.addEventListener('error', () => resolve(), { once: true });
+      }))),
+      new Promise<void>((resolve) => setTimeout(resolve, deadline)),
+    ]);
+  }, timeoutMs).catch(() => {});
+}
+
+/**
+ * Abre o menu vertical de forma determinística (trigger → painel visível).
+ * Sem isso o bounding box oscila entre trigger fechado (~206px) e painel aberto,
+ * quebrando o baseline por diferença de dimensão do clip.
+ */
+async function openVerticalMenuPanel(page: Page): Promise<boolean> {
+  const trigger = page.locator('[data-role="awa-vertical-menu-trigger"]').first();
+  const panel = page.locator('[data-role="awa-vertical-menu-panel"]').first();
+
+  if (!(await trigger.isVisible({ timeout: 3_000 }).catch(() => false))) {
+    return false;
+  }
+
+  if (!(await panel.isVisible().catch(() => false))) {
+    await trigger.click({ force: true }).catch(() => {});
+    await panel.waitFor({ state: 'visible', timeout: 4_000 }).catch(() => {});
+  }
+
+  const ready = await safeWait(page, 600);
+  return ready && (await panel.isVisible().catch(() => false));
 }
 
 function clampClip(box: ClipRegion, viewport: { width: number; height: number }): ClipRegion | null {
@@ -283,6 +337,7 @@ async function expectRegionScreenshot(
   name: string,
   clip: ClipRegion,
   maxDiffPixelRatio = DEFAULT_MAX_DIFF,
+  mask: Locator[] = [],
 ): Promise<boolean> {
   if (page.isClosed()) {
     return false;
@@ -293,6 +348,7 @@ async function expectRegionScreenshot(
       clip,
       maxDiffPixelRatio,
       animations: 'disabled',
+      mask,
     });
     return true;
   } catch (error) {
@@ -335,7 +391,14 @@ test.describe('Visual Audit — Core baselines', () => {
       return;
     }
 
-    const clip = await clipFromSelector(page, MENU_SELECTORS);
+    const menuOpen = await openVerticalMenuPanel(page);
+    if (!menuOpen) {
+      test.skip();
+      return;
+    }
+
+    // Clip determinístico: container do menu com painel aberto (estado fixo).
+    const clip = await clipFromSelector(page, ['[data-role="awa-vertical-menu"]', ...MENU_SELECTORS]);
     if (!clip) {
       test.skip();
       return;
@@ -363,7 +426,24 @@ test.describe('Visual Audit — Core baselines', () => {
       return;
     }
 
-    const captured = await expectRegionScreenshot(page, 'core-cards-desktop.png', topViewportClip(page, 720), 0.06);
+    // Lazy-load de imagens do grid desloca o conteúdo ~20px; espera e re-ancora.
+    await waitForViewportImages(page);
+    await page.evaluate(() => window.scrollTo(0, 520)).catch(() => {});
+    if (!(await safeWait(page, 400))) {
+      test.skip();
+      return;
+    }
+
+    // Header sticky pode aparecer/esconder conforme o scroll; mascarar para
+    // o baseline refletir apenas o grid de cards.
+    const headerMask = HEADER_SELECTORS.map((selector) => page.locator(selector).first());
+    const captured = await expectRegionScreenshot(
+      page,
+      'core-cards-desktop.png',
+      topViewportClip(page, 720),
+      0.06,
+      headerMask,
+    );
     if (!captured) {
       test.skip();
     }
@@ -384,7 +464,14 @@ test.describe('Visual Audit — Core baselines', () => {
       return;
     }
 
-    const captured = await expectRegionScreenshot(page, 'core-product-desktop.png', clip, 0.05);
+    // Blocos dinâmicos: urgência (estoque real), prova social (contador de
+    // views do dia) e contagem de reviews; mascarar para baseline estável.
+    const dynamicMask = [
+      page.locator('.awa-pdp-urgency').first(),
+      page.locator('.product-social-proof').first(),
+      page.locator('.product-reviews-summary .reviews-actions').first(),
+    ];
+    const captured = await expectRegionScreenshot(page, 'core-product-desktop.png', clip, 0.05, dynamicMask);
     if (!captured) {
       test.skip();
     }

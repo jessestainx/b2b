@@ -85,7 +85,7 @@ test.describe('CLS — Cumulative Layout Shift por página', () => {
 
   const pagesToCheck = [
     { label: 'Home',    url: BASE },
-    { label: 'PLP',     url: `${BASE}/bagageiros-bauls.html` },
+    { label: 'PLP',     url: `${BASE}/bagageiros.html` },
     { label: 'Busca',   url: `${BASE}/catalogsearch/result/?q=retrovisor` },
   ];
 
@@ -128,7 +128,7 @@ test.describe('LCP — Largest Contentful Paint', () => {
   });
 
   test(`LCP < ${LCP_THRESHOLD_MS}ms — PLP`, async ({ page }) => {
-    const ok = await navigateTo(page, `${BASE}/bagageiros-bauls.html`);
+    const ok = await navigateTo(page, `${BASE}/bagageiros.html`);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(1_000);
 
@@ -159,7 +159,7 @@ test.describe('CLS — Imagens sem dimensões (causam layout shift)', () => {
   });
 
   test('PLP: max 10 imagens sem width/height', async ({ page }) => {
-    const ok = await navigateTo(page, `${BASE}/bagageiros-bauls.html`);
+    const ok = await navigateTo(page, `${BASE}/bagageiros.html`);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 

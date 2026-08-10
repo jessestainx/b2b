@@ -102,7 +102,7 @@ test.describe('Mobile — Filtros de PLP', () => {
   test.use({ viewport: { width: 375, height: 667 } });
 
   test('Sidebar de filtros não vaza fora da tela em mobile', async ({ page }) => {
-    const ok = await navigateTo(page, `${BASE}/bagageiros-bauls.html`);
+    const ok = await navigateTo(page, `${BASE}/bagageiros.html`);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -116,7 +116,7 @@ test.describe('Mobile — Filtros de PLP', () => {
   });
 
   test('Grid de produtos PLP: 1-2 colunas em 375px', async ({ page }) => {
-    const ok = await navigateTo(page, `${BASE}/bagageiros-bauls.html`);
+    const ok = await navigateTo(page, `${BASE}/bagageiros.html`);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_000);
 
@@ -138,7 +138,7 @@ test.describe('Mobile — Filtros de PLP', () => {
   });
 
   test('Screenshot — PLP mobile 375px', async ({ page }) => {
-    const ok = await navigateTo(page, `${BASE}/bagageiros-bauls.html`);
+    const ok = await navigateTo(page, `${BASE}/bagageiros.html`);
     if (!ok) { test.skip(); return; }
     await page.waitForTimeout(2_500);
     await expect(page).toHaveScreenshot('mobile-plp-375.png', {
@@ -201,7 +201,7 @@ test.describe('Mobile — Regressão de overflow (5 páginas)', () => {
 
   const pages = [
     { label: 'Home',      url: BASE },
-    { label: 'PLP',       url: `${BASE}/bagageiros-bauls.html` },
+    { label: 'PLP',       url: `${BASE}/bagageiros.html` },
     { label: 'Busca',     url: `${BASE}/catalogsearch/result/?q=retrovisor` },
     { label: 'B2B Login', url: `${BASE}/b2b/account/login/` },
     { label: '404',       url: `${BASE}/pagina-inexistente-abc123` },

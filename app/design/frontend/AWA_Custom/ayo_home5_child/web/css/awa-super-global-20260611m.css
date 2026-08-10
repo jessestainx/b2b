@@ -83,7 +83,12 @@
 
 
 /* === awa-bundle-core.css === */
-@layer awa-reset, awa-core, awa-layout, awa-components, awa-consistency, awa-fixes, awa-grid;
+/* Ordem de camadas pretendida: awa-reset, awa-core, awa-layout, awa-components,
+   awa-consistency, awa-fixes, awa-grid.
+   NÃO usar a forma statement `@layer a, b;` aqui: cleancss 5.6.3 a trata como
+   at-rule de bloco e ENGOLE o bloco seguinte (bug confirmado 2026-08-10 —
+   o primeiro :root deste arquivo era descartado do .min.css inteiro).
+   A ordem é estabelecida pela primeira ocorrência de cada @layer bloco abaixo. */
 :root{
 color-scheme: light;
 --awa-red: var(--awa-primary, var(--awa-primary));
@@ -3035,7 +3040,7 @@ body .page-wrapper .header .top-search > .block-search form.minisearch{display:f
    vive em @layer awa-fixes, então seu !important vence QUALQUER !important fora de layer
    (align-grid-terminal, cascade-lock v18 inline), independente de especificidade — regra
    de cascade layers, não de especificidade. display:block quebrava o grid/flex do form,
-   empurrando o botão de busca para fora da linha do input só nas rotas catalog_*/
+   empurrando o botão de busca para fora da linha do input só nas rotas catalog_* e
    catalogsearch_* em mobile (≤767px). Trocado para flex, alinhado às demais ~15 regras
    deste arquivo para o mesmo form#search_mini_form. */body .page-wrapper .header .top-search > .block-search .field.search{display:block !important;width:100% !important;min-width:var(--awa-zero, 0) !important;margin:0 !important;padding-right:var(--awa-size-38, 38px) !important;box-sizing:border-box !important;}body .page-wrapper .header .top-search > .block-search .control{width:100% !important;min-width:var(--awa-zero, 0) !important;}body .page-wrapper .header .top-search > .block-search .actions{position:absolute;top:0 !important;right:0 !important;width:var(--awa-size-38, 38px) !important;min-width:var(--awa-size-38, 38px) !important;height:100% !important;margin:0 !important;padding:0 !important;display:flex !important;align-items:stretch;justify-content:stretch;z-index:var(--awa-z-2, 2) !important;}body .page-wrapper .header .top-search > .block-search .action.search,
 body .page-wrapper .header .top-search > .block-search button[type="submit"]{width:var(--awa-size-38, 38px) !important;min-width:var(--awa-size-38, 38px) !important;height:100% !important;padding:0 !important;display:inline-flex !important;align-items:center;justify-content:center;}body .page-wrapper .header .top-search > .block-search .action.search::before,
@@ -3732,6 +3737,4 @@ body .page-wrapper #header.header-container[data-awa-header-shell="true"] .awa-h
 #search_autocomplete.searchsuite-autocomplete .all-results,
 .search-autocomplete.searchsuite-autocomplete .all-results,
 #search_autocomplete.searchsuite-autocomplete .no-result,
-.search-autocomplete.searchsuite-autocomplete .no-result{grid-column:1 / -1;margin:0 !important;}#search_autocomplete.searchsuite-autocomplete .see-all,
-.search-autocomplete.searchsuite-autocomplete .see-all,
-#search_autocomplete.searchsuit
+.search-autocomplete.searchsuite-autocomplete .no-result{grid-column:1 / -1;margin:0 !important;}
