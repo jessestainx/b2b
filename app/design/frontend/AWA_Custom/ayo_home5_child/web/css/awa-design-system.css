@@ -3724,3 +3724,143 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
   }
 }
 }
+
+/* ============================================================
+   SEÇÃO 43 — 9A reentry: Autocomplete B2B (residual pós-§36)
+   Append-only 2026-08-10. Não altera §36–§42c.
+   Evidência Fase 0 (/tmp/awa-9a-phase0-table.txt, screenshots
+   awa-9a-diag-home_d1920-*, cascade/close-retest):
+   - Módulo: Mirasvit_SearchAutocomplete; show_cart=0, show_sku=1.
+   - Pílula preta = .sku (já neutra via §36.1) — reforço aqui.
+   - Fantasmas = li vazios (KO+§36.2); residual empty-state "pastilha"
+     com linha fina no painel sem itens.
+   - ATC guest = 0 (config + §36.3) — reforço guest-only.
+   - Fechamento: §36.4b esconde :not(._active); clique fora deixa
+     .is-open linger — reforço .is-open:not(._active) + aria-hidden.
+   - ESC: awa-header-minicart-ui-v2 / compat (JS AWA já no ar; sem JS novo).
+   Escopo: .mst-searchautocomplete__autocomplete apenas (sem global).
+   config:set: não necessário.
+   ============================================================ */
+
+/* 43.1 Pílula SKU — neutro (era preta; show_sku=1 mantido p/ B2B) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item
+  .sku {
+  background: color-mix(in srgb, var(--awa-text, CanvasText) 6%, var(--awa-surface, Canvas)) !important;
+  color: var(--awa-text-secondary, var(--awa-text)) !important;
+  border: 1px solid var(--awa-border-subtle, var(--awa-border)) !important;
+  border-radius: var(--awa-radius-pill, 999px) !important;
+  box-shadow: none !important;
+}
+
+/* 43.2 Linhas-fantasma residual — empty-state + li sem conteúdo */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  li.mst-searchautocomplete__item:empty,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  li.mst-searchautocomplete__item:not(:has(a, img, .title, .meta, .sku)) {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* empty-result: sem borda fantasma / tipografia legível */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__empty-result {
+  display: block !important;
+  padding: 16px 14px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--awa-text-secondary, var(--awa-text)) !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
+  background: transparent !important;
+}
+
+/* índices sem itens visíveis — evita faixa/linha vazia */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__index:not(:has(li.mst-searchautocomplete__item a, li.mst-searchautocomplete__item img, li.mst-searchautocomplete__item .title)) {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 43.3 ATC guest no dropdown — defesa (config show_cart=0) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:not(.customer-logged-in)
+  .mst-searchautocomplete__autocomplete
+  :is(.to-cart, .mst__add_to_cart, a.mst__add_to_cart, .action.tocart, button.tocart) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 43.4 Fechamento CSS — is-open pode linger após clique fora;
+   aria-hidden=true também deve esconder (sem editar JS de módulo). */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete:not(._active),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete.is-open:not(._active),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete[aria-hidden="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete._active:not([aria-hidden="true"]) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  max-height: min(52vh, 560px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* 43.5 Ritmo visual do dropdown (escopo local) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete._active {
+  border-radius: var(--awa-radius-ctl, 8px) !important;
+  background: var(--awa-surface, Canvas) !important;
+  border: 1px solid var(--awa-border-subtle, var(--awa-border)) !important;
+  box-shadow: 0 8px 24px color-mix(in srgb, CanvasText 12%, transparent) !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item {
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item:hover,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item._active {
+  background: color-mix(in srgb, var(--awa-brand, var(--awa-primary)) 8%, var(--awa-surface, Canvas)) !important;
+}
