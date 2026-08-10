@@ -3910,3 +3910,63 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
   padding: 16px 14px !important;
   pointer-events: auto !important;
 }
+
+/* ============================================================
+   SEÇÃO 43c — 9A: fallback #search_autocomplete fecha de verdade
+   Evidência /tmp/awa-9a-accept-mst-only.json: guest frequentemente
+   vê AWA fallback (#search_autocomplete.searchsuite-autocomplete)
+   em vez do painel Mirasvit. Clique fora remove .is-open mas deixa
+   .active/.has-results → harden
+   (_awa-search-header-harden-2026-06.less:45) força display:block
+   via :is(.is-open,.active,.has-results,…).
+   Correção: esconder fallback quando NÃO tem .is-open (estado AWA
+   de aberto). Escopo só #search_autocomplete / .searchsuite —
+   não toca MST ._active. Sem JS novo.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  #search_autocomplete:not(.is-open),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .searchsuite-autocomplete:not(.is-open):not(._active) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  #search_autocomplete.is-open,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .searchsuite-autocomplete.is-open {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  max-height: min(52vh, 560px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* ATC guest no fallback (defesa) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:not(.customer-logged-in)
+  .page-wrapper
+  .awa-site-header
+  :is(#search_autocomplete, .searchsuite-autocomplete)
+  :is(.to-cart, .mst__add_to_cart, a.mst__add_to_cart, .action.tocart, button.tocart) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
