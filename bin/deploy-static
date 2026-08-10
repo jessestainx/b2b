@@ -18,11 +18,17 @@ cd "$ROOT_DIR"
 
 LOCALES="${*:-pt_BR en_US}"
 
+# Pre-flight: bloqueia deploy com .min.css stale (Fase P1 — build reproduzível).
+# Roda ANTES de apagar pub/static/frontend: falha aqui = nada é tocado.
+bash "$ROOT_DIR/scripts/check-awa-min-pairs.sh" || exit 1
+
 echo "[deploy-static] Limpando pub/static/frontend..."
 sudo rm -rf pub/static/frontend pub/static/_cache pub/static/deployed_version.txt 2>/dev/null || true
 
 echo "[deploy-static] Deployando conteúdo estático: $LOCALES"
-sudo -u www-data php bin/magento setup:static-content:deploy $LOCALES -f
+# --theme: restringe ao tema filho (AGENTS.md). adminhtml não é apagado pelo rm acima
+# e permanece intacto; temas pai são resolvidos pela cadeia de herança do tema filho.
+sudo -u www-data php bin/magento setup:static-content:deploy $LOCALES -f --theme AWA_Custom/ayo_home5_child
 
 echo "[deploy-static] Corrigindo ownership dos symlinks (jessessh:www-data)..."
 sudo find pub/static/frontend -type l -exec chown -h jessessh:www-data {} \;
