@@ -1078,3 +1078,16 @@ html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5,.catal
     color: #fff !important;
   }
 }
+
+/* ============================================================
+   SEÇÃO 30D — QF-AUDIT: ocultar ATC no CMS Lançamentos (todos os users)
+   Server-side gated (Aditivo 3=a). PLP /lancamentos.html mantém ATC logado.
+   Follow-up 8B/R4: override Magento_CatalogWidget grid com portão real.
+   ============================================================ */
+html body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .awa-cms-lancamentos
+  :is(form[data-role="tocart-form"], .action.tocart, .btn-add-to-cart,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  display: none !important;
+}
