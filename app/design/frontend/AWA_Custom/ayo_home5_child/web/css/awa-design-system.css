@@ -2911,3 +2911,39 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
   box-shadow: var(--awa-card-canonical-hover-shadow) !important;
   border-color: var(--awa-card-canonical-hover-border) !important;
 }
+
+/* ============================================================
+   33.10 CMS /lancamentos mobile — 1 coluna (R3bc E8)
+   Evidência m390: §30E2 força repeat(2,…) → cards ~118–153px;
+   CTAs B2B (§30F) quebram em 4–5 linhas → shell ilegível.
+   Correção append-only: 1fr ≤767px; CTAs compactos (font/pad).
+   Não altera §30E/§30E2 desktop; tokens only.
+   ============================================================ */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+    .page-wrapper
+    .column.main
+    .awa-cms-lancamentos
+    .products-grid
+    :is(ol.product-items, ol.product-items.widget-product-grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: var(--awa-gap-sm, 12px) !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+    .page-wrapper
+    .page-main
+    .awa-cms-lancamentos
+    .b2b-login-to-see-price
+    :is(
+      a[href*="/b2b/account/login/"],
+      a.b2b-register-cta,
+      a[href*="/b2b/register/"]
+    ) {
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+    padding: 10px 12px !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+}
