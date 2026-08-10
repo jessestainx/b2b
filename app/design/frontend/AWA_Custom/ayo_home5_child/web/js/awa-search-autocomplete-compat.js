@@ -302,7 +302,12 @@ define([
 			}
 			setSearchFocusActive(false);
 			document.body.classList.remove('searchautocomplete__active');
-			var input = findScoped($form, options.inputSelector).get(0);
+			var $input = findScoped($form, options.inputSelector);
+			var $mst = getMirasvitPanel($form, options);
+			if ($mst.length) {
+				demotePanelClosed($form, $mst, $input);
+			}
+			var input = $input.get(0);
 			if (input) {
 				input.blur();
 			}
@@ -343,7 +348,8 @@ define([
 
 	function demotePanelClosed($form, $panel, $input) {
 		$form.removeClass('is-open has-results').addClass('is-empty');
-		$panel.removeClass('is-open active has-results');
+		/* 9A S4: Mirasvit uses ._active (not .active). CSS §36.4b hides :not(._active). */
+		$panel.removeClass('is-open active _active has-results');
 		setPanelAriaHidden($panel, 'true');
 
 		if ($input.length) {
@@ -932,7 +938,19 @@ define([
 
 			if (event.type === 'keyup' && event.key === 'Escape') {
 				clearFallback($form, options);
-				demotePanelClosed($form, findScoped($form, options.panelSelector), $(this));
+				var $mstPanel = getMirasvitPanel($form, options);
+				var $closePanel = $mstPanel.length ? $mstPanel : findScoped($form, options.panelSelector);
+				demotePanelClosed($form, $closePanel, $(this));
+				/* #region agent log */
+				fetch('http://localhost:7657/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'09add6'},body:JSON.stringify({sessionId:'09add6',runId:'9a-esc-fix',hypothesisId:'H4',location:'awa-search-autocomplete-compat.js:Escape',message:'esc_demote',data:{hasMst:!!$mstPanel.length,cls:($closePanel.attr('class')||''),active:$closePanel.hasClass('_active')},timestamp:Date.now()})}).catch(function(){});
+				/* #endregion */
+				$(this).removeClass('searchautocomplete__active');
+				if (document.body) {
+					document.body.classList.remove('searchautocomplete__active');
+					setSearchFocusActive(false);
+				}
+				$(this).trigger('blur');
+				return;
 			}
 
 			if (event.type === 'input' || event.type === 'keyup' || event.type === 'focusin') {
