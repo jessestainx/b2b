@@ -1020,3 +1020,61 @@ html body :is(a, button, input, select, textarea, [tabindex]):focus-visible {
   background: var(--awa-brand);
   color: #fff;
 }
+
+/* ============================================================
+   SEÇÃO 30A — QF-AUDIT: pausa discreta em repouso (hero+shelves+PDP related)
+   Vence critical-home opacity:1 e §27 fraca (sem #html-body/booster).
+   Controles permanecem no DOM; hover/focus-within/focus-visible reexibem.
+   ============================================================ */
+html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5,.catalog-product-view)
+  .page-wrapper
+  :is(.awa-hero-pause-btn,.awa-hero__pause,.awa-carousel__toggle,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity .2s ease, visibility .2s ease !important;
+}
+
+html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5,.catalog-product-view)
+  .page-wrapper
+  :is(.top-home-content,.awa-hero,.awa-home-section,.awa-shelf--carousel,.awa-pdp-related,.block.related):is(:hover,:focus-within)
+  :is(.awa-hero-pause-btn,.awa-hero__pause,.awa-carousel__toggle,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost),
+html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5,.catalog-product-view)
+  .page-wrapper
+  :is(.awa-hero-pause-btn,.awa-hero__pause,.awa-carousel__toggle):focus-visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* ============================================================
+   SEÇÃO 30B — QF-AUDIT: cart-empty CTA brand (vence align-grid verde)
+   Inimigo: awa-align-grid-terminal @layer awa-visual-priority
+            … awa-cart-empty--simple a.awa-cart-empty__cta
+            background: var(--awa-success,#16a34a) (6× #html-body).
+   Evidência QF: !important unlayered PERDE para !important layered
+   (precedente Seção 11/DS). Solução: mesmo @layer + 12× #html-body
+   (especificidade > inimigo) + tokens --awa-brand / --awa-radius-ctl.
+   ============================================================ */
+@layer awa-visual-priority {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index
+    .page-wrapper
+    .cart-empty.awa-cart-empty--simple
+    a.awa-cart-empty__cta {
+    background: var(--awa-brand) !important;
+    background-color: var(--awa-brand) !important;
+    border-color: var(--awa-brand) !important;
+    border-radius: var(--awa-radius-ctl) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.checkout-cart-index
+    .page-wrapper
+    .cart-empty.awa-cart-empty--simple
+    a.awa-cart-empty__cta:is(:hover,:focus-visible) {
+    background: var(--awa-brand-dark) !important;
+    background-color: var(--awa-brand-dark) !important;
+    border-color: var(--awa-brand-dark) !important;
+    color: #fff !important;
+  }
+}
