@@ -1209,3 +1209,74 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
     gap: var(--awa-gap-sm, 12px) !important;
   }
 }
+
+/* ============================================================
+   SEÇÃO 30F — QF-ITEM1C: shell B2B legível no CMS /lancamentos
+   Relação: não altera §30D (ATC), §30E/30E2 (grid). Complementa.
+   Causa: §29.4 força color:var(--awa-brand) em .page-main a (booster
+   12×#awa-boost), enquanto .b2b-login-to-see-price a mantém
+   background brand (awa-audit-bundle) → vermelho-sobre-vermelho.
+   Mapa: CMS ilegível; PLP shell=spans (sem esses CTAs); HOME sem
+   shell; PDP related já branco/brand (não estender).
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .page-main
+  .awa-cms-lancamentos
+  .b2b-login-to-see-price
+  a[href*="/b2b/account/login/"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background-color: var(--awa-brand) !important;
+  color: #fff !important;
+  border: 1px solid var(--awa-brand) !important;
+  border-radius: var(--awa-radius-ctl, 8px) !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .page-main
+  .awa-cms-lancamentos
+  .b2b-login-to-see-price
+  a[href*="/b2b/account/login/"]:is(:hover, :focus-visible) {
+  background-color: var(--awa-brand-dark) !important;
+  border-color: var(--awa-brand-dark) !important;
+  color: #fff !important;
+  text-decoration: none !important;
+}
+/* Secundário: registro — texto brand sobre fundo claro (não sólido brand) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .page-main
+  .awa-cms-lancamentos
+  .b2b-login-to-see-price
+  :is(a.b2b-register-cta, a[href*="/b2b/register/"]) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background-color: #fff !important;
+  color: var(--awa-brand) !important;
+  border: 1px solid var(--awa-brand) !important;
+  border-radius: var(--awa-radius-ctl, 8px) !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .page-main
+  .awa-cms-lancamentos
+  .b2b-login-to-see-price
+  :is(a.b2b-register-cta, a[href*="/b2b/register/"]):is(:hover, :focus-visible) {
+  background-color: color-mix(in oklch, var(--awa-brand) 8%, #fff) !important;
+  color: var(--awa-brand-dark) !important;
+  border-color: var(--awa-brand-dark) !important;
+  text-decoration: underline !important;
+}
