@@ -1787,3 +1787,261 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
     }
   }
 }
+
+/* ============================================================
+   SEÇÃO 32 — R3a: Hero home (safe-zone texto, setas, pause, dots)
+   Evidência /tmp/awa-r3a-diag.json (10/08):
+   - .slide-title "Atacado…" x=379 overlaps .awa-hero-swiper__nav--prev
+     (x=367..411) — padding H17B só clamp(16px,3vw,40px).
+   - Inimigo: awa-align-grid-terminal H17B-r2 @layer awa-visual-priority
+     (.text-banner:not(:empty) padding … 40px) — NÃO editar (arquivo sujo).
+   - Setas: computed 44×44 translúcidas sobre a zona de texto (left:28px).
+   - Pause: .awa-hero-pause-btn.awa-hero-pause-btn--visible; §30A já zera
+     opacity em repouso, mas JS adiciona --visible — reforço explícito.
+   - Pagination .awa-hero__pagination height:52 sobrepõe rodapé do overlay.
+   - Transição: Swiper effect=fade crossFade=true → 2 slides visíveis (JS;
+     só registro, sem correção CSS nesta onda).
+   Técnica: mesmo @layer awa-visual-priority + 12×#html-body (lição §31.5d).
+   ============================================================ */
+
+@layer awa-visual-priority {
+  /* --- 32.1 Safe-zone de texto (neutraliza H17B padding 40px) --- */
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .top-home-content--above-fold
+    .banner_item
+    .text-banner:not(:empty),
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    .top-home-content--above-fold
+    .text-banner:not(:empty) {
+    box-sizing: border-box !important;
+    /* Laterais ≥ seta 40 + folga; base ≥ dots — texto nunca sob setas/paginação */
+    padding: clamp(12px, 1.6vw, 20px) 96px 88px 96px !important;
+    overflow: visible !important;
+  }
+
+  /* --- 32.2 Setas discretas ~40px fora da zona de texto ---
+     Inimigo: align-grid §22/--awa-home-touch-target 44px + left:28px
+     (body#html-body… .awa-hero-swiper__nav). Reduz e afasta. */
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    :is(
+      button.awa-hero-swiper__nav,
+      .awa-hero-swiper__nav,
+      .swiper-button-prev,
+      .swiper-button-next,
+      #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost
+    ) {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    background: color-mix(in srgb, var(--awa-surface, #fff) 92%, transparent) !important;
+    background-color: color-mix(in srgb, var(--awa-surface, #fff) 92%, transparent) !important;
+    color: var(--awa-ink, #333) !important;
+    border: 1px solid color-mix(in srgb, var(--awa-ink, #333) 12%, transparent) !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    :is(.awa-hero-swiper__nav, .swiper-button-prev, .swiper-button-next):is(:hover, :focus-visible) {
+    background: var(--awa-brand) !important;
+    background-color: var(--awa-brand) !important;
+    border-color: var(--awa-brand) !important;
+    color: #fff !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    :is(.awa-hero-swiper__nav--prev, .swiper-button-prev) {
+    left: 12px !important;
+    right: auto !important;
+    inset-inline-start: 12px !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    :is(.awa-hero-swiper__nav--next, .swiper-button-next) {
+    right: 12px !important;
+    left: auto !important;
+    inset-inline-end: 12px !important;
+  }
+
+  /* --- 32.4 Pagination/dots sem overlap com conteúdo do overlay ---
+     Inimigo: critical-home / align-grid height:52px + bottom clamp. */
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .awa-hero-swiper
+    > :is(.swiper-pagination, .swiper-pagination.awa-hero__pagination) {
+    bottom: 10px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 36px !important;
+    padding-block: 0 !important;
+    z-index: 5 !important;
+  }
+
+  /* Tablet: safe-zone um pouco menor, mesma lógica */
+  @media (max-width: 991px) and (min-width: 768px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .content-top-home
+      .top-home-content--above-fold
+      .text-banner:not(:empty) {
+      padding: 12px 72px 72px 72px !important;
+    }
+  }
+
+  /* Mobile visible-xs: setas já no rodapé (align-grid); reforça safe-zone lateral */
+  @media (max-width: 767px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .wrapper_slider.visible-xs
+      .text-banner:not(:empty) {
+      padding: 12px 20px 56px 20px !important;
+    }
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .wrapper_slider.visible-xs
+      :is(.awa-hero-swiper__nav, .swiper-button-prev, .swiper-button-next) {
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      min-height: 36px !important;
+      max-width: 36px !important;
+      max-height: 36px !important;
+    }
+  }
+}
+
+/* --- 32.3 Pause oculto em repouso (estende §30A ao --visible do JS)
+   §30A cobre .awa-hero-pause-btn mas o runtime adiciona
+   .awa-hero-pause-btn--visible; reforço com booster 12× + --visible.
+   Hover/focus-within do hero reexibe (a11y). */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  :is(
+    .awa-hero-pause-btn,
+    .awa-hero__pause,
+    .awa-hero-pause-btn.awa-hero-pause-btn--visible,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost
+  ) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 0.2s ease, visibility 0.2s ease !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold:is(:hover, :focus-within)
+  :is(
+    .awa-hero-pause-btn,
+    .awa-hero__pause,
+    .awa-hero-pause-btn.awa-hero-pause-btn--visible,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost
+  ),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--above-fold
+  :is(.awa-hero-pause-btn, .awa-hero__pause):focus-visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* --- 32.5 Transição ghost: NÃO corrigir — Swiper fade+crossFade (JS lib). --- */
+
+/* --- 32.1b Tablet/mobile: mesma esp. que §32.1 (.banner_item .text-banner)
+   Evidência accept: @media 768 aplicava pad vertical mas horizontais
+   permaneciam 96px (regra desktop sem media, +1 classe .banner_item).
+   inSlide t768 falhou por overflow vertical residual do overlay. */
+@layer awa-visual-priority {
+  @media (max-width: 991px) and (min-width: 768px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .content-top-home
+      .top-home-content--above-fold
+      .banner_item
+      .text-banner:not(:empty) {
+      padding: 12px 72px 72px 72px !important;
+      max-height: calc(100% - 8px) !important;
+      overflow: hidden !important;
+    }
+  }
+  @media (max-width: 767px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .wrapper_slider.visible-xs
+      .banner_item
+      .text-banner:not(:empty) {
+      padding: 12px 20px 56px 20px !important;
+      max-height: calc(100% - 4px) !important;
+      overflow: hidden !important;
+    }
+  }
+}
+
+/* --- 32.1c Tablet: overlay ancorado no bottom (sem top:8px / overflow clip)
+   Evidência t768: .text-banner com top≈8px + max-height fazia .slide-title
+   layoutar 18px ACIMA do hero (dTop=-18). overflow:hidden mascarava o clip.
+   Correção: top:auto; bottom:0; height:auto; max-height:85%; overflow:visible. */
+@layer awa-visual-priority {
+  @media (max-width: 991px) and (min-width: 768px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .content-top-home
+      .top-home-content--above-fold
+      .banner_item
+      .text-banner:not(:empty) {
+      top: auto !important;
+      bottom: 0 !important;
+      inset: auto 0 0 0 !important;
+      height: auto !important;
+      max-height: 85% !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+      padding: 12px 72px 56px 72px !important;
+    }
+  }
+  @media (max-width: 767px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .wrapper_slider.visible-xs
+      .banner_item
+      .text-banner:not(:empty) {
+      top: auto !important;
+      bottom: 0 !important;
+      inset: auto 0 0 0 !important;
+      height: auto !important;
+      max-height: 80% !important;
+      overflow: visible !important;
+      padding: 10px 20px 48px 20px !important;
+    }
+  }
+}
+
+/* --- 32.1d Tablet: +4px padding-top para dTop≥0 (evidência dTop=-2.1) --- */
+@layer awa-visual-priority {
+  @media (max-width: 991px) and (min-width: 768px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .content-top-home
+      .top-home-content--above-fold
+      .banner_item
+      .text-banner:not(:empty) {
+      padding: 16px 72px 56px 72px !important;
+    }
+  }
+}
