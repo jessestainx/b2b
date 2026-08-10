@@ -1123,3 +1123,89 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
   max-width: none !important;
   float: none !important;
 }
+
+/* ============================================================
+   SEÇÃO 30E2 — QF-ITEM1B: reforço grid /lancamentos + ATC
+   Relação: complementa §30E (a48bb00f3). Não altera §30D/§30E.
+   Causa raiz (evidência Playwright): regras de prose-measure em CMS
+     html body#html-body.cms-page-view .column.main :is(p,ul,ol,blockquote)
+       { max-width: var(--awa-measure-prose[,65ch]) !important }
+   dão match no ol.product-items do CatalogWidget e comprimem a grade
+   (~65ch) + repeat(5,1fr) / width:calc(23.5%) → cards em tiras.
+   Também: cms-page-view :is(p,li){max-width:72ch} no product-item.
+   §30D já dá match (display:none); 30E2 reforça ATC com booster 12×.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .column.main
+  .awa-cms-lancamentos
+  :is(
+    ol.product-items,
+    ol.product-items.widget-product-grid,
+    ul.product-items,
+    .products-grid ol,
+    .products-grid ul
+  ) {
+  max-width: none !important;
+  width: 100% !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .column.main
+  .awa-cms-lancamentos
+  .products-grid
+  :is(ol.product-items, ol.product-items.widget-product-grid) {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: var(--awa-grid-gap, 16px) !important;
+  float: none !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .column.main
+  .awa-cms-lancamentos
+  .products-grid
+  :is(ol.product-items, ol.product-items.widget-product-grid)
+  > li.product-item {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  float: none !important;
+  box-sizing: border-box !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .column.main
+  .awa-cms-lancamentos
+  .product-item
+  img.product-image-photo {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+}
+/* ATC: reforço §30D (já matchava; booster 12× para cascata inimiga futura) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+  .page-wrapper
+  .awa-cms-lancamentos
+  :is(
+    form[data-role="tocart-form"],
+    .action.tocart,
+    .btn-add-to-cart,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost
+  ) {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body.cms-lancamentos.cms-page-view
+    .page-wrapper
+    .column.main
+    .awa-cms-lancamentos
+    .products-grid
+    :is(ol.product-items, ol.product-items.widget-product-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: var(--awa-gap-sm, 12px) !important;
+  }
+}
