@@ -3864,3 +3864,49 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
   .mst-searchautocomplete__item._active {
   background: color-mix(in srgb, var(--awa-brand, var(--awa-primary)) 8%, var(--awa-surface, Canvas)) !important;
 }
+
+/* ============================================================
+   SEÇÃO 43b — hotfix 9A: empty-result vazando sobre resultados
+   Evidência aceitação: /tmp/awa-9a-final-d1920-retrovisor.png e
+   guid_o.png — lista PRODUTOS (N) + texto "Nenhum resultado…"
+   no mesmo painel.
+   Causa: §43.2 forçou display:block !important em
+   .mst-searchautocomplete__empty-result, vencendo o
+   data-bind visible:noResults do Knockout.
+   Correção append-only: esconder empty-result quando há itens
+   reais; manter bloco só no empty-state verdadeiro.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete:has(
+    li.mst-searchautocomplete__item a,
+    li.mst-searchautocomplete__item img,
+    li.mst-searchautocomplete__item .title,
+    li.mst-searchautocomplete__item .sku
+  )
+  .mst-searchautocomplete__empty-result {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  pointer-events: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete:not(:has(
+    li.mst-searchautocomplete__item a,
+    li.mst-searchautocomplete__item img,
+    li.mst-searchautocomplete__item .title,
+    li.mst-searchautocomplete__item .sku
+  ))
+  .mst-searchautocomplete__empty-result {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 16px 14px !important;
+  pointer-events: auto !important;
+}
