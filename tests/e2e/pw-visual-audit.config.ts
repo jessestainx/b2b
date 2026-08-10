@@ -12,6 +12,7 @@ export default defineConfig({
   testDir: path.join(__dirname, 'specs'),
   testMatch: /(?:visual-audit-.*|layout-container-grid)\.spec\.ts/,
   outputDir: path.join(__dirname, 'test-results'),
+  snapshotDir: path.join(__dirname, 'snapshots'),
 
   timeout: 120_000,
   expect: { timeout: 10_000 },
