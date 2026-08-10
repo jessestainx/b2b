@@ -346,6 +346,60 @@ define([
 		return true;
 	}
 
+
+	function closeAllMirasvitAutocompletePanels(reason) {
+		var $panels = $('.mst-searchautocomplete__autocomplete._active, .mst-searchautocomplete__autocomplete.is-open');
+		if (!$panels.length) {
+			return false;
+		}
+
+		$panels.each(function () {
+			var $panel = $(this);
+			$panel.removeClass('is-open active _active has-results');
+			setPanelAriaHidden($panel, 'true');
+		});
+
+		$('form.form.minisearch, #search_mini_form').removeClass('is-open has-results').addClass('is-empty');
+		$('#search, input[name="q"]').removeClass('searchautocomplete__active').attr('aria-expanded', 'false');
+
+		if (document.body) {
+			document.body.classList.remove('searchautocomplete__active');
+			setSearchFocusActive(false);
+		}
+
+		/* #region agent log */
+		try {
+			document.documentElement.setAttribute('data-awa-9a-esc', reason || '1');
+			document.documentElement.setAttribute('data-awa-9a-esc-ts', String(Date.now()));
+		} catch (eAttr) {}
+		fetch('http://localhost:7657/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'09add6'},body:JSON.stringify({sessionId:'09add6',runId:'9a-esc-fix2',hypothesisId:'H4',location:'awa-search-autocomplete-compat.js:closeAllMirasvit',message:'esc_close_all',data:{reason:reason||'',count:$panels.length},timestamp:Date.now()})}).catch(function(){});
+		/* #endregion */
+
+		return true;
+	}
+
+	function bindGlobalEscapeClose() {
+		if (window.__awaSearchEscMstBound) {
+			return;
+		}
+		window.__awaSearchEscMstBound = true;
+
+		/* Capture phase: fecha mesmo se outro handler parar o bubble no keyup. */
+		document.addEventListener('keydown', function (event) {
+			if (!event || event.key !== 'Escape') {
+				return;
+			}
+			if (!$('.mst-searchautocomplete__autocomplete._active').length) {
+				return;
+			}
+			closeAllMirasvitAutocompletePanels('capture-keydown');
+			var active = document.activeElement;
+			if (active && active.blur) {
+				active.blur();
+			}
+		}, true);
+	}
+
 	function demotePanelClosed($form, $panel, $input) {
 		$form.removeClass('is-open has-results').addClass('is-empty');
 		/* 9A S4: Mirasvit uses ._active (not .active). CSS §36.4b hides :not(._active). */
@@ -933,22 +987,15 @@ define([
 
 		scheduleSync();
 
-		$form.on('focusin.awaSearchCompat input.awaSearchCompat keyup.awaSearchCompat', options.inputSelector, function (event) {
+		$form.on('focusin.awaSearchCompat input.awaSearchCompat keyup.awaSearchCompat keydown.awaSearchCompat', options.inputSelector, function (event) {
 			let query = $.trim($(this).val() || '');
 
-			if (event.type === 'keyup' && event.key === 'Escape') {
+			if ((event.type === 'keyup' || event.type === 'keydown') && event.key === 'Escape') {
 				clearFallback($form, options);
+				closeAllMirasvitAutocompletePanels('form-' + event.type);
 				var $mstPanel = getMirasvitPanel($form, options);
 				var $closePanel = $mstPanel.length ? $mstPanel : findScoped($form, options.panelSelector);
 				demotePanelClosed($form, $closePanel, $(this));
-				/* #region agent log */
-				fetch('http://localhost:7657/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'09add6'},body:JSON.stringify({sessionId:'09add6',runId:'9a-esc-fix',hypothesisId:'H4',location:'awa-search-autocomplete-compat.js:Escape',message:'esc_demote',data:{hasMst:!!$mstPanel.length,cls:($closePanel.attr('class')||''),active:$closePanel.hasClass('_active')},timestamp:Date.now()})}).catch(function(){});
-				/* #endregion */
-				$(this).removeClass('searchautocomplete__active');
-				if (document.body) {
-					document.body.classList.remove('searchautocomplete__active');
-					setSearchFocusActive(false);
-				}
 				$(this).trigger('blur');
 				return;
 			}
