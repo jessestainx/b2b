@@ -3433,3 +3433,294 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
     width: 18px !important;
   }
 }
+
+/* ============================================================
+   SEÇÃO 41 — VOPT: padronizar "Ver todos" mobile nas shelves
+   Evidência: categorias + Linhas OK; Mais Vendidos/Lançamentos
+   usam .awa-shelf-view-all--desktop-only (hide r18 inline em
+   @layer awa-visual-priority). Inconsistência de padrão B2B.
+   Restaura CTA 44px no mesmo layer; 12×#html-body > r18 (6×).
+   ============================================================ */
+@layer awa-visual-priority {
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    :is(.awa-section-header, .awa-shelf__header)
+    a.awa-shelf-view-all--desktop-only,
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    :is(.awa-section-header, .awa-shelf__header)
+    a.awa-section-header__link.awa-shelf-view-all--desktop-only,
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    :is(.awa-section-header, .awa-shelf__header)
+    a.awa-shelf__view-all.awa-shelf-view-all--desktop-only {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: static !important;
+    inset: auto !important;
+    clip: auto !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: auto !important;
+    min-width: 44px !important;
+    max-width: none !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    border: 0 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    color: var(--awa-brand, var(--awa-primary)) !important;
+    text-decoration: none !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    :is(.awa-section-header, .awa-shelf__header)
+    a.awa-shelf-view-all--desktop-only::after {
+    content: none !important;
+  }
+  /* Header shelves: título | CTA na mesma linha (padrão categorias §39) */
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    :is(.awa-section-header, .awa-shelf__header):has(a.awa-shelf-view-all--desktop-only) {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .content-top-home
+    :is(.awa-section-header, .awa-shelf__header):has(a.awa-shelf-view-all--desktop-only)
+    :is(.awa-section-header__left, .awa-shelf__header-left) {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}
+}
+
+/* ============================================================
+   SEÇÃO 42 — R5 Home pós-auditoria browser (hero / seta / subtítulo / FAB)
+   Missão pediu §37; slots §37–41 já ocupados por VOPT → append §42.
+   Append-only 2026-08-10. Não altera §33–§41.
+   Evidência /tmp/awa-r5-diag-report.json + CDP mobile.
+   ============================================================ */
+
+/* --- 42.1 Hero mobile: exclusividade do slide ativo
+   Item1 auditoria: .swiper-slide-active opacity:0 enquanto
+   .swiper-slide-next opacity:1 (fade desync).
+   Causa: Swiper effect=fade + autoplay 3s +
+   awa-commerce-impeccable-refine
+   .swiper-fade .swiper-slide:not(.swiper-slide-active){opacity:0!important}
+   (e inline opacity do Swiper). NÃO é double-init (1 instância
+   no hero mobile; desktop .wrapper_slider.hidden-xs display:none).
+   Neutraliza: só o ativo visível no mobile; desktop intocado
+   (crossfade preservado). */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .awa-hero-swiper.swiper-fade
+    .swiper-slide.swiper-slide-active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 2 !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .awa-hero-swiper.swiper-fade
+    .swiper-slide:not(.swiper-slide-active) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
+}
+
+/* --- 42.2 Seta categorias desktop: fora do 1º card
+   Item2: .awa-category-carousel__prev ∩ Bauletos = 704px², gap=-16.
+   Causa: awa-align-grid-terminal-2026-06-11.css L569/L20325
+   inset-inline-start:4px !important (arquivo SUJO → override DS).
+   Neutraliza: prev em -20px (gap≥0); next simétrico -20px.
+   Desktop only — mobile setas ok / sem overlap medido. */
+@media (min-width: 768px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__prev {
+    inset-inline-start: -20px !important;
+    left: -20px !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__next {
+    inset-inline-end: -20px !important;
+    right: -20px !important;
+  }
+}
+
+/* --- 42.3 Subtítulo categorias mobile: sem truncar
+   Item3: white-space:nowrap; text-overflow:ellipsis;
+   scrollWidth 267 > clientWidth 241 → "reposição rá…".
+   Causa: awa-head-preload.phtml:2105 nowrap!important (inline).
+   polish-20260629 max-width:28ch NÃO é o computed (max-width:100%);
+   nowrap é o gatilho. Escopo cirúrgico: só subtitle do
+   category-carousel header. Desktop já normal (não truncava). */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    header.awa-category-carousel__header
+    :is(.awa-category-carousel__subtitle, .awa-section-header__subtitle) {
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow: visible !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+}
+
+/* --- 42.4 FAB AiAssistant × bottom nav mobile
+   Item4: #awa-ai-chat-root ∩ nav.fixed-bottom = 2464px², gap=-60;
+   z-index 9999 vs 999. AiAssistant/ INTOCÁVEL → só DS.
+   Neutraliza: sobe FAB acima da bottom nav (+ cookie se visível).
+   Desktop intocado. */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    #awa-ai-chat-root {
+    bottom: calc(var(--awa-mobile-bottom-nav-h, 72px) + 12px) !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:has(#awa-cookie-banner.awa-cookie-banner--visible)
+    #awa-ai-chat-root,
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:has(#awa-cookie-banner[aria-hidden="false"])
+    #awa-ai-chat-root {
+    bottom: calc(var(--awa-mobile-bottom-nav-h, 72px) + 88px + 12px) !important;
+  }
+}
+
+/* ============================================================
+   SEÇÃO 42b — R5 reentry @layer awa-visual-priority
+   Aceitação H2/H3 falhou: §42 unlayered !important PERDE para
+   align-grid / head-preload em @layer (lição DS §11/§31.5d —
+   para !important, layered vence unlayered).
+   Reaplica 42.1–42.4 no mesmo @layer awa-visual-priority, source
+   order após §41. Não altera §42 original (append-only).
+   ============================================================ */
+@layer awa-visual-priority {
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .awa-hero-swiper.swiper-fade
+    .swiper-slide.swiper-slide-active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 2 !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .awa-hero-swiper.swiper-fade
+    .swiper-slide:not(.swiper-slide-active) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    header.awa-category-carousel__header
+    :is(.awa-category-carousel__subtitle, .awa-section-header__subtitle) {
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow: visible !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    #awa-ai-chat-root {
+    bottom: calc(var(--awa-mobile-bottom-nav-h, 72px) + 12px) !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:has(#awa-cookie-banner.awa-cookie-banner--visible)
+    #awa-ai-chat-root,
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:has(#awa-cookie-banner[aria-hidden="false"])
+    #awa-ai-chat-root {
+    bottom: calc(var(--awa-mobile-bottom-nav-h, 72px) + 88px + 12px) !important;
+  }
+}
+@media (min-width: 768px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__prev {
+    inset-inline-start: -20px !important;
+    left: -20px !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__next {
+    inset-inline-end: -20px !important;
+    right: -20px !important;
+  }
+}
+}
+
+/* ============================================================
+   SEÇÃO 42c — R5 hero mobile: hard-cut (sem fade intermediário)
+   H1 pós-42b: overlaps=0 (OK) mas activeOp ainda caía a 0 em
+   frames de troca (Swiper fade inline opacity no slide que ainda
+   carrega .swiper-slide-active). Neutraliza: desliga transição
+   de opacity no mobile + estado binário active/duplicate-active.
+   Desktop intocado.
+   ============================================================ */
+@layer awa-visual-priority {
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .awa-hero-swiper.swiper-fade
+    .swiper-slide {
+    transition: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .awa-hero-swiper.swiper-fade
+    .swiper-slide:is(.swiper-slide-active, .swiper-slide-duplicate-active) {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 2 !important;
+  }
+}
+}
