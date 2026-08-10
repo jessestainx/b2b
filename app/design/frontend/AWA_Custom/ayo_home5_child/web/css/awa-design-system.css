@@ -2886,3 +2886,28 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
 
 /* 34.4 — overlays listados e NÃO escondidos sem aprovação:
    .awa-mobile-drawer-overlay (menu). Fim §34. */
+
+
+/* ============================================================
+   33.9 PLP — repouso sem sombra + hover canônico (R3bc E5)
+   Evidência: PLP .item-product já vinha com shadow em repouso;
+   :hover §33.6 não alterava computed. Tokens only.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  :is(.wrapper.grid.products-grid, .product-grid)
+  .item-product {
+  box-shadow: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  :is(.wrapper.grid.products-grid, .product-grid)
+  .item-product:hover,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  :is(.wrapper.grid.products-grid, .product-grid)
+  .item-product:focus-visible {
+  box-shadow: var(--awa-card-canonical-hover-shadow) !important;
+  border-color: var(--awa-card-canonical-hover-border) !important;
+}
