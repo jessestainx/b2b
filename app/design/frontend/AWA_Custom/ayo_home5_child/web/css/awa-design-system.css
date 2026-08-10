@@ -1280,3 +1280,510 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
   border-color: var(--awa-brand-dark) !important;
   text-decoration: underline !important;
 }
+
+/* ============================================================
+   SEÇÃO 31 — R2: Header/Footer consistência global
+   Escopo: .awa-site-header / .page-footer apenas (NÃO links CMS genéricos).
+   Relação: complementar a §17b (search font) e §30*; não altera §30D–F.
+   ============================================================ */
+
+/* --- 31.1 Busca: lupa ancorada à direita INTERNA do campo (todas as páginas)
+   Inimigo: awa-align-grid-terminal §APF / flex rules forçam
+   form#search_mini_form { display:flex } + .actions { position:static; flex:0 0 48px }
+   → lupa vira coluna irmã FORA do input (pior na home; CMS grid mascara).
+   Técnica: form position:relative + .actions absolute right; input com
+   padding-inline-end; neutraliza flex/grid concorrentes. Autocomplete JS
+   intocado (Onda 9).
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-search-col
+  :is(form#search_mini_form, form.minisearch, #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  flex: unset !important;
+  grid-template-columns: none !important;
+  grid-template-areas: none !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-search-col
+  :is(form#search_mini_form, form.minisearch)
+  :is(.field.search, .field.search .control, [data-awa-search-control]) {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: none !important;
+  box-sizing: border-box !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-search-col
+  :is(form#search_mini_form, form.minisearch)
+  input#search {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  margin: 0 !important;
+  padding-block: 8px !important;
+  padding-inline: 14px 48px !important;
+  box-sizing: border-box !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-search-col
+  :is(form#search_mini_form, form.minisearch)
+  :is(.actions, [data-awa-search-actions]) {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+  height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: none !important;
+  z-index: 2 !important;
+  box-sizing: border-box !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-search-col
+  :is(form#search_mini_form, form.minisearch)
+  button.action.search {
+  position: static !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--awa-brand) !important;
+  border-radius: var(--awa-radius-ctl, 8px) !important;
+  box-sizing: border-box !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-search-col
+  :is(form#search_mini_form, form.minisearch)
+  button.action.search:is(:hover, :focus-visible) {
+  color: var(--awa-brand-dark) !important;
+  background: color-mix(in oklch, var(--awa-brand) 8%, transparent) !important;
+}
+
+/* --- 31.2 Conta: gap ≥8px; pílula sem clip
+   Inimigo: max-width/overflow apertados + pílula com padding insuficiente
+   (home: line2 clientW < scrollW; register sw>cw; overlap em "ou").
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt {
+  max-width: none !important;
+  min-width: 220px !important;
+  width: auto !important;
+  overflow: visible !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt
+  :is(.awa-header-account-prompt__guest, .awa-header-account-prompt__text, .awa-header-account-prompt__copy) {
+  max-width: none !important;
+  overflow: visible !important;
+  min-width: 0 !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt
+  .awa-header-account-prompt__line2 {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  column-gap: 8px !important;
+  max-width: none !important;
+  width: max-content !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt
+  a.awa-header-account-prompt__link--register {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  max-width: none !important;
+  min-width: max-content !important;
+  width: auto !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+  padding: 4px 12px !important;
+  margin-inline-start: 0 !important;
+  background: var(--awa-brand) !important;
+  background-color: var(--awa-brand) !important;
+  color: #fff !important;
+  border: 1px solid var(--awa-brand) !important;
+  border-radius: var(--awa-radius-pill, 999px) !important;
+  line-height: 1.2 !important;
+  box-sizing: border-box !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt
+  a.awa-header-account-prompt__link--register:is(:hover, :focus-visible) {
+  background: var(--awa-brand-dark) !important;
+  background-color: var(--awa-brand-dark) !important;
+  border-color: var(--awa-brand-dark) !important;
+  color: #fff !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt
+  a.awa-header-account-prompt__link--login {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+}
+
+/* --- 31.3 Badge carrinho: tokens DS; ocultar a 0 itens
+   Inimigo: .counter.qty.empty visível na home (quadradinho amarelado/0)
+   enquanto CMS já esconde. Decisão: ocultar empty em todas as páginas.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .minicart-wrapper
+  :is(.counter.qty.empty, .counter.empty, #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .minicart-wrapper
+  .counter.qty:not(.empty) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 5px !important;
+  border-radius: var(--awa-radius-pill, 999px) !important;
+  background: var(--awa-brand) !important;
+  background-color: var(--awa-brand) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+
+/* --- 31.4 Footer sociais: tokens DS + hover brand
+   Inimigo: color rgb(51,51,51) / fundo cinza-azulado fora da paleta;
+   hover não troca ícone para brand.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  :is(.awa-footer-pro__social-link, .awa-footer-pro__social a) {
+  color: var(--awa-ink-soft, #6b7280) !important;
+  background: var(--awa-surface-alt, #f7f7f8) !important;
+  background-color: var(--awa-surface-alt, #f7f7f8) !important;
+  border: 1px solid var(--awa-line, #e7e7ea) !important;
+  border-radius: 50% !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  :is(.awa-footer-pro__social-link, .awa-footer-pro__social a)
+  :is(svg, i, span) {
+  color: var(--awa-ink-soft, #6b7280) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  :is(.awa-footer-pro__social-link, .awa-footer-pro__social a):is(:hover, :focus-visible) {
+  color: #fff !important;
+  background: var(--awa-brand) !important;
+  background-color: var(--awa-brand) !important;
+  border-color: var(--awa-brand) !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  :is(.awa-footer-pro__social-link, .awa-footer-pro__social a):is(:hover, :focus-visible)
+  :is(svg, i, span) {
+  color: #fff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* --- 31.2b Conta: gap real via separator + margin (DOM = span.separator)
+   Evidência pós-31: gap computado 6px (override) e "ou" é
+   .awa-header-account-prompt__separator, não text node.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt
+  .awa-header-account-prompt__line2 {
+  gap: 8px !important;
+  column-gap: 8px !important;
+  row-gap: 0 !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt
+  .awa-header-account-prompt__separator {
+  display: inline-flex !important;
+  margin: 0 !important;
+  padding: 0 2px !important;
+  flex: 0 0 auto !important;
+  color: var(--awa-ink-soft, #6b7280) !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .awa-site-header
+  .awa-header-account-prompt
+  a.awa-header-account-prompt__link--register {
+  margin-inline-start: 8px !important;
+}
+
+/* --- 31.5 Header cross-page: largura da busca alinhada (±2px)
+   Evidência pós-31: home inputW=742 vs CMS/PLP/PDP≈710 (Δ≈32).
+   Causa: coluna de busca recebe fr restante variável (prompt/minicart).
+   Técnica: max-width comum no col+form desktop ≥992px.
+   ============================================================ */
+@media (min-width: 992px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    .page-wrapper
+    .awa-site-header
+    .awa-header-search-col {
+    max-width: 710px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 710px !important;
+    justify-self: stretch !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    .page-wrapper
+    .awa-site-header
+    .awa-header-search-col
+    :is(form#search_mini_form, form.minisearch) {
+    max-width: 710px !important;
+    width: 100% !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    .page-wrapper
+    .awa-site-header
+    .awa-header-search-col
+    input#search {
+    max-width: 710px !important;
+  }
+}
+
+/* --- 31.4b Sociais hover brand (reforço — :hover não vencía 31.4)
+   Evidência: hover permanecia bg surface-alt / color #333.
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  a.awa-footer-pro__social-link:hover,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  a.awa-footer-pro__social-link:focus-visible,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  .awa-footer-pro__social
+  a:hover,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  .awa-footer-pro__social
+  a:focus-visible {
+  color: #fff !important;
+  background: var(--awa-brand) !important;
+  background-color: var(--awa-brand) !important;
+  border-color: var(--awa-brand) !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  a.awa-footer-pro__social-link:hover :is(svg, i, span),
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  a.awa-footer-pro__social-link:focus-visible :is(svg, i, span) {
+  color: #fff !important;
+  stroke: #fff !important;
+  fill: none !important;
+}
+
+/* --- 31.5b / 31.4c — vencer align-grid tardio (mesma esp. 12×#html-body)
+   Evidência: align-grid-terminal carrega DEPOIS do DS e declara
+   .awa-header-search-col{max-width:100%!important} com 12×#html-body
+   → empate de especificidade, ordem final ganha. Solução: 15× +
+   .top-search.awa-header-actions + [data-awa-header-mode=default].
+   ============================================================ */
+@media (min-width: 992px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-search-col.top-search.awa-header-actions {
+    max-width: 708px !important;
+    width: 708px !important;
+    min-width: 0 !important;
+    flex: 0 1 708px !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-search-col.top-search.awa-header-actions
+    :is(.block-search, .block-content, form#search_mini_form, form.minisearch) {
+    max-width: 708px !important;
+    width: 100% !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    .page-wrapper
+    .awa-site-header[data-awa-header-mode="default"]
+    .awa-header-search-col.top-search.awa-header-actions
+    input#search {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  a.awa-footer-pro__social-link:is(:hover, :focus-visible, :active) {
+  background: var(--awa-brand) !important;
+  background-color: var(--awa-brand) !important;
+  border-color: var(--awa-brand) !important;
+  color: #fff !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .page-wrapper
+  .page-footer
+  a.awa-footer-pro__social-link:is(:hover, :focus-visible, :active)
+  :is(svg, svg *, i, span) {
+  color: #fff !important;
+  stroke: #fff !important;
+  fill: none !important;
+}
+
+/* --- 31.5c Home: equalizar track da busca via grid (C4)
+   Evidência CDP: max-width:708px casa no col mas computed permanece none
+   (preload-critical-home / ui-simplify :is(.cms-index-index) max-width:none).
+   parent grid resolve 160px 744px 272px. Correção: limitar a track do meio
+   a 708px no inner do header (todas as páginas desktop).
+   ============================================================ */
+@media (min-width: 992px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+    .page-wrapper
+    .awa-site-header
+    :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row], .wp-header[data-awa-header-row]) {
+    grid-template-columns: 160px minmax(0, 708px) minmax(240px, 280px) !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .awa-site-header
+    :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row]) {
+    grid-template-columns: 160px minmax(0, 708px) minmax(240px, 280px) !important;
+  }
+}
+
+/* ============================================================
+   SEÇÃO 31.5d — R2 C4: home busca ±2px via @layer first-paint-lock
+   Evidência: §31.5–31.5c unlayered perdem para
+   #awa-home-cls-geometry-guard @layer awa-header-first-paint-lock
+   (max-width:none + grid 160/1fr/272). Em !important, layer vence
+   unlayered independente da especificidade (Cascade L5).
+   Prova Playwright: trial no mesmo @layer → max 708, inputW 706,
+   grid 160px 708px 272px. Alvo: igualar CMS/PLP (~706±2).
+   ============================================================ */
+@layer awa-header-first-paint-lock {
+  @media (min-width: 992px) {
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .awa-site-header[data-awa-header-mode="default"]
+      .awa-header-search-col.top-search.awa-header-actions {
+      max-width: 708px !important;
+      width: 708px !important;
+      min-width: 0 !important;
+      flex: 0 1 708px !important;
+      justify-self: stretch !important;
+    }
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .awa-site-header[data-awa-header-mode="default"]
+      .awa-header-search-col.top-search.awa-header-actions
+      :is(.block-search, .block-content, form#search_mini_form, form.minisearch, input#search) {
+      max-width: 100% !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+    }
+    html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+      .page-wrapper
+      .awa-site-header
+      :is(.awa-main-header__inner.wp-header, .awa-main-header__inner[data-awa-header-row]) {
+      grid-template-columns: 160px 708px 272px !important;
+    }
+  }
+}
