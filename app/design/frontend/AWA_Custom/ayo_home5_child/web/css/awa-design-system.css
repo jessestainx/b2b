@@ -3193,3 +3193,60 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
   height: auto !important;
   max-height: none !important;
 }
+
+/* ============================================================
+   SEÇÃO 37 — VOPT: carrossel categorias (peek/fade/snap)
+   Evidência: Pedaleiras ~72% cortado; track scroll + viewport clip.
+   Fade na borda direita; snap mandatory; spacer ::after para último
+   card (Suportes) entrar inteiro (152px desktop / 128px mobile).
+   ============================================================ */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__viewport {
+  scroll-snap-type: x mandatory !important;
+  scroll-padding-inline: 0 12px !important;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 36px), transparent 100%) !important;
+  mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 36px), transparent 100%) !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__track {
+  padding-inline-end: 0 !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__track::after {
+  content: "" !important;
+  flex: 0 0 calc(144px + 8px) !important;
+  width: calc(144px + 8px) !important;
+  min-width: calc(144px + 8px) !important;
+  height: 1px !important;
+  pointer-events: none !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+  .page-wrapper
+  .top-home-content--category-carousel
+  .awa-category-carousel__item {
+  scroll-snap-align: start !important;
+  scroll-snap-stop: normal !important;
+}
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__viewport {
+    -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 20px), transparent 100%) !important;
+    mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 20px), transparent 100%) !important;
+  }
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__track::after {
+    flex-basis: calc(120px + 8px) !important;
+    width: calc(120px + 8px) !important;
+    min-width: calc(120px + 8px) !important;
+  }
+}
