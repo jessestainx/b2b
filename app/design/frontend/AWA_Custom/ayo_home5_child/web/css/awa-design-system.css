@@ -3051,3 +3051,145 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
   min-height: 128px;
   box-sizing: border-box;
 }
+
+/* ============================================================
+   SEÇÃO 36 — 9A: Autocomplete B2B consistente (guest)
+   Append-only 2026-08-10. Não altera §33–§35.
+   Evidência Fase 0 (/tmp/awa-9a-diag*, debug-09add6):
+   - Módulo: Mirasvit_SearchAutocomplete; home carrega
+     html/mirasvit-ac-templates.pt_BR.html (defer).
+   - Linhas-fantasma: li.mst-searchautocomplete__item vazios após
+     KO ReferenceError "description is not defined" (API sem description;
+     isShowDescription=false ainda avalia bare `description`).
+     Fix KO em templates AWA + hide CSS de li vazios.
+   - ATC: config isShowCartButton=false; defesa CSS guest.
+   - Pílula: .sku — reestilo brand/neutro (não preto sólido).
+   - Fechamento: retest pós-KO; sem JS novo (regra 10).
+   Escopo: .mst-searchautocomplete__autocomplete apenas.
+   ============================================================ */
+
+/* 36.1 Pílula / SKU — neutro brand (não preto) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item
+  .sku {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 22px !important;
+  padding: 0 8px !important;
+  border-radius: var(--awa-radius-pill, 999px) !important;
+  background: color-mix(in srgb, var(--awa-text, CanvasText) 6%, var(--awa-surface, Canvas)) !important;
+  color: var(--awa-text-secondary, var(--awa-text)) !important;
+  border: 1px solid var(--awa-border-subtle, var(--awa-border)) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+/* stock_status residual (se config religar) — nunca preto sólido */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item
+  .stock_status {
+  background: color-mix(in srgb, var(--awa-brand, var(--awa-primary)) 10%, var(--awa-surface, Canvas)) !important;
+  color: var(--awa-brand, var(--awa-primary)) !important;
+  border-radius: var(--awa-radius-pill, 999px) !important;
+}
+
+/* 36.2 Linhas-fantasma — li sem conteúdo após falha/parcial de template */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  li.mst-searchautocomplete__item:empty,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  li.mst-searchautocomplete__item:not(:has(a, img, .title, .meta, .sku)) {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 36.3 ATC guest no dropdown — defesa (config já show_cart=0) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:not(.customer-logged-in)
+  .mst-searchautocomplete__autocomplete
+  :is(.to-cart, .mst__add_to_cart, a.mst__add_to_cart, .action.tocart, button.tocart) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 36.4 Fechamento — spinner não captura clique residual */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__spinner:not(:only-child) {
+  pointer-events: none !important;
+}
+
+/* 36.5 Ritmo visual do dropdown */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete {
+  border-radius: var(--awa-radius-ctl, 8px) !important;
+  background: var(--awa-surface, Canvas) !important;
+  border: 1px solid var(--awa-border-subtle, var(--awa-border)) !important;
+  box-shadow: 0 8px 24px color-mix(in srgb, CanvasText 12%, transparent) !important;
+  overflow: hidden !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item {
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item:hover,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item._active {
+  background: color-mix(in srgb, var(--awa-brand, var(--awa-primary)) 8%, var(--awa-surface, Canvas)) !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item
+  .title a,
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete
+  .mst-searchautocomplete__item
+  a.title {
+  font-size: 14px !important;
+  color: var(--awa-text) !important;
+  text-decoration: none !important;
+}
+
+/* 36.4b Fechamento CSS — home não carrega Mirasvit display:none base
+   Evidência 9a-close-probe: fora remove ._active mas mantém is-open;
+   computed display=block (sem regra hide). themes só tem ._active{display:block}.
+   ESC não altera classes → S4 ESC continua JS (regra 10 / proposta). */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete:not(._active) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body
+  .mst-searchautocomplete__autocomplete._active {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}

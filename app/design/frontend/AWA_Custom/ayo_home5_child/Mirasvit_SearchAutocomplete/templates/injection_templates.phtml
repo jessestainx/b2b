@@ -62,7 +62,7 @@
 </script>
 
 <script id="magento_catalog_product" type="text/x-custom-template">
-    <!-- ko if: (imageUrl && $parents[2].config.isShowImage) -->
+    <!-- ko if: ($data.imageUrl && $parents[2].config.isShowImage) -->
     <a rel="noreferrer" data-bind="attr: {href: url}">
         <div class="mst-product-image-wrapper"><img data-bind="attr: {src: imageUrl, alt: name || ''}" loading="lazy" decoding="async" alt=""/></div>
     </a>
@@ -72,7 +72,7 @@
         <div class="title">
             <a rel="noreferrer" data-bind="html: name, attr: {href: url}, highlight"></a>
 
-            <!-- ko if: (sku && $parents[2].config.isShowSku) -->
+            <!-- ko if: ($data.sku && $parents[2].config.isShowSku) -->
             <span class="sku" data-bind="text: sku, highlight"></span>
             <!-- /ko -->
 
@@ -83,15 +83,15 @@
             <!-- /ko -->
         </div>
 
-        <!-- ko if: (description && $parents[2].config.isShowDescription) -->
-        <div class="description" data-bind="text: description, highlight"></div>
+        <!-- ko if: ($data.description && $parents[2].config.isShowDescription) -->
+        <div class="description" data-bind="text: $data.description, highlight"></div>
         <!-- /ko -->
 
-        <!-- ko if: (stockStatus && $parents[2].config.isShowStockStatus) -->
-        <span class="stock_status" data-bind="text: stockStatus, processStockStatus"></span>
+        <!-- ko if: ($data.stockStatus && $parents[2].config.isShowStockStatus) -->
+        <span class="stock_status" data-bind="text: $data.stockStatus, processStockStatus"></span>
         <!-- /ko -->
 
-        <!-- ko if: (addToCartUrl && $parents[2].config.isShowCartButton) -->
+        <!-- ko if: ($data.addToCartUrl && $parents[2].config.isShowCartButton) -->
         <div class="to-cart">
             <a class="action primary mst__add_to_cart" data-bind="attr: { _href: addToCartUrl }">
                 <span><?= $block->escapeHtml(__('Add To Cart')) ?></span>
@@ -100,7 +100,7 @@
         <!-- /ko -->
     </div>
 
-    <!-- ko if: (price && $parents[2].config.isShowPrice) -->
+    <!-- ko if: ($data.price && $parents[2].config.isShowPrice) -->
     <div class="store">
         <div data-bind="html: price" class="price"></div>
     </div>
