@@ -267,6 +267,7 @@ sudo -u www-data php bin/magento setup:static-content:deploy pt_BR en_US -f --th
 
 ## 7. Pendências imediatas fora deste documento
 
-- Validação do deploy P0 em andamento (8 mins regenerados): suite visual-core + curl + logs ao término.
-- `tests/e2e/scripts/visual-baseline-guard.mjs` ausente (script npm quebrado) — restaurar na P1.
-- Baseline de checkout não cobre visitante anônimo (skip esperado) — cobrir com sessão autenticada na P2.
+- Validação do deploy P0 em andamento (8 mins regenerados): suite visual-core + curl + logs ao término. ✅ (2026-08-10)
+- `tests/e2e/scripts/visual-baseline-guard.mjs` ausente (script npm quebrado) — restaurar na P1. ✅ (2026-08-10)
+- Baseline de checkout não cobre visitante anônimo (skip esperado) — cobrir com sessão autenticada na P2 (depende de credenciais TEST_USER/TEST_PASS no ambiente).
+- P2 parcial (2026-08-10): merge dos 3 datados já estava concluído em `awa-visual-fixes-2026-06-29-final` (c380d1fa3); `<style>` do 503 extraído para `pub/errors/default/css/maintenance.css`; AGENTS.md sincronizado. Restam da P2: refs mortas no `OptimizeHeadStylesPlugin.php` (congelado — agente 9A) e checkout autenticado.

@@ -137,7 +137,7 @@ app/code/GrupoAwamotos/NomeModulo/
 7. `awa-m2-visual-ssot.min.css` — SSOT final (rating/shelf/carousel/cards/badge)
 8. `css/awa-design-system.css` — último `<css>` do `default_head_blocks.xml`
 
-Via `default_head_blocks.xml` também carregam: `awa-visual-fixes-2026-06-29-final.css`, `awa-visual-noise-2026-07-15-r2.css`, `awa-cookie-fab-collision-fix-2026-07-08.min.css`. Home/PLP têm folhas condicionais extras via `awa-head-preload.phtml` (paint gate + fila `__awaCssQ`).
+Via `default_head_blocks.xml` também carrega `css/awa-visual-fixes-2026-06-29-final.css` (folha consolidada — absorveu `awa-visual-noise-2026-07-15-r2` e `awa-cookie-fab-collision-fix-2026-07-08`, que não são mais servidos; refs residuais no `OptimizeHeadStylesPlugin.php` são matchers mortos a limpar na P5). Home/PLP têm folhas condicionais extras via `awa-head-preload.phtml` (paint gate + fila `__awaCssQ`).
 
 Para novos estilos que precisam ter prioridade: adicionar na camada de menor nível que abrange o contexto, **com seletor específico**, evitando `!important`.
 
