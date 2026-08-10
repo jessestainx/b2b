@@ -188,14 +188,17 @@
         <!--
             AWA 2026-07-15: refinamento de ruído visual desktop (home/footer),
             baseado em métricas runtime do probe H6/H8.
+            CONSOLIDADO 2026-08-10 (P2): conteúdo fundido em
+            awa-visual-fixes-2026-06-29-final.css (seção "MERGED — ex-awa-visual-noise").
+            Arquivo-fonte preservado em web/css/ para referência do deferred-stack build.
         -->
-        <css src="css/awa-visual-noise-2026-07-15-r2.css"/>
         <!--
-            AWA 2026-07-08: fix isolado (arquivo próprio, não edita o CSS acima em
-            estado MM não commitado) — FAB modo escuro colidindo com botão
-            "Permitir cookies" no mobile. Ver comentário no próprio arquivo CSS.
+            AWA 2026-07-08: fix isolado — FAB modo escuro colidindo com botão
+            "Permitir cookies" no mobile.
+            CONSOLIDADO 2026-08-10 (P2): conteúdo fundido em
+            awa-visual-fixes-2026-06-29-final.css (seção "MERGED — ex-awa-cookie-fab").
+            Arquivo-fonte preservado em web/css/ para referência do deferred-stack build.
         -->
-        <css src="css/awa-cookie-fab-collision-fix-2026-07-08.min.css"/>
         <!--
             AWA 2026-08-01 / BUG-SHELL-SSOT-DUP-001 (2026-08-05):
             awa-m2-visual-ssot NÃO é registrado aqui.

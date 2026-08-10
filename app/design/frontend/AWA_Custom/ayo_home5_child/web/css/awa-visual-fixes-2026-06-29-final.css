@@ -7681,3 +7681,156 @@ html body#html-body#html-body#html-body#html-body#html-body.catalog-product-view
   flex: 0 0 auto !important;
   flex-grow: 0 !important;
 }
+
+/* ============================================================================
+ * MERGED 2026-08-10 — ex-awa-visual-noise-2026-07-15-r2.css
+ * (consolidação P2: arquivo dedicado removido do default_head_blocks.xml)
+ * ========================================================================== */
+/**
+ * AWA Visual Noise Reduction (2026-07-15 r2)
+ * Runtime-driven desktop refinements for home/footer controls.
+ */
+@media (min-width: 992px) {
+  html body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--category-carousel
+    .awa-category-carousel__cta-link {
+    align-items: center !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    min-width: 36px !important;
+    padding: 6px 12px !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body:is(.cms-index-index, .cms-home, .cms-homepage_ayo_home5)
+    .page-wrapper
+    .top-home-content--above-fold
+    .wrapper_slider.hidden-xs
+    .awa-hero-swiper
+    > .awa-hero-pause-btn {
+    align-items: center !important;
+    background: color-mix(in srgb, var(--awa-primary, #b73337) 78%, white 22%) !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
+    display: inline-flex !important;
+    height: 36px !important;
+    justify-content: center !important;
+    min-height: 36px !important;
+    min-width: 36px !important;
+    padding: 0 !important;
+    width: 36px !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body .page-wrapper #footer .vela-content li {
+    min-height: 0 !important;
+    padding-block: 0 !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body .page-wrapper #footer .vela-content li > a {
+    align-items: center !important;
+    display: inline-flex !important;
+    height: auto !important;
+    line-height: 1.3 !important;
+    min-height: 30px !important;
+    padding-block: 3px !important;
+  }
+}
+
+/* ============================================================================
+ * MERGED 2026-08-10 — ex-awa-cookie-fab-collision-fix-2026-07-08.css
+ * (consolidação P2: arquivo dedicado removido do default_head_blocks.xml)
+ * ========================================================================== */
+/*
+ * AWA — Float / cookie collision + UI audit 2026-07-26 (bugs 4.1 + 2.2)
+ *
+ * 4.1 Evidência: WA bottom:15px vs .fixed-bottom h=72 → overlap.
+ *     Fix anterior com seletor fraco perdia; este usa bottom calc(72+12+safe).
+ *
+ * 2.2 Evidência CDP: alinhamento quiet perdia para align-grid com
+ *     body#html-body×5 + .wrapper.grid.products-grid .info-price (min-height:64).
+ *     Este patch usa #html-body×6 + caminho .products-grid/.info-price.
+ */
+@media (max-width: 991px) {
+    html body#html-body.awa-cookie-banner-active .page-wrapper .awa-dark-mode-toggle {
+        bottom: calc(var(--awa-cookie-banner-height, 230px) + 20px) !important;
+    }
+
+    html body#html-body .page-wrapper .awa-whatsapp-float,
+    html body#html-body .page-wrapper a.awa-whatsapp-float,
+    html body#html-body a.awa-whatsapp-float {
+        bottom: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+        right: 16px !important;
+        z-index: 10002 !important;
+    }
+
+    html body#html-body.awa-cookie-banner-active .page-wrapper .awa-whatsapp-float,
+    html body#html-body.awa-cookie-banner-active .page-wrapper a.awa-whatsapp-float,
+    html body#html-body.awa-cookie-banner-active a.awa-whatsapp-float {
+        bottom: calc(72px + 12px + var(--awa-cookie-banner-height, 0px) + env(safe-area-inset-bottom, 0px)) !important;
+        inset-block-end: calc(72px + 12px + var(--awa-cookie-banner-height, 0px) + env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
+
+/* 2.2 — superar align-grid (#html-body×5) com ×6 + caminho grid/info-price */
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .info-price {
+    min-height: 0 !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .info-price
+    .b2b-login-to-see-price,
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price {
+    align-items: flex-start !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    gap: 2px !important;
+    justify-content: flex-start !important;
+    margin: 4px 0 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    text-align: start !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price__title {
+    color: var(--awa-text-muted, #64748b) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    text-transform: none !important;
+}
+
+html body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+    .page-wrapper
+    :is(.products-grid, .wrapper.grid.products-grid)
+    .item-product
+    .b2b-login-to-see-price__message {
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 1 !important;
+    color: var(--awa-primary, #b73337) !important;
+    display: -webkit-box !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
