@@ -367,13 +367,6 @@ define([
 			setSearchFocusActive(false);
 		}
 
-		/* #region agent log */
-		try {
-			document.documentElement.setAttribute('data-awa-9a-esc', reason || '1');
-			document.documentElement.setAttribute('data-awa-9a-esc-ts', String(Date.now()));
-		} catch (eAttr) {}
-		fetch('http://localhost:7657/ingest/9a5bd517-cd53-4948-bac5-5aea194478a3',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'09add6'},body:JSON.stringify({sessionId:'09add6',runId:'9a-esc-fix2',hypothesisId:'H4',location:'awa-search-autocomplete-compat.js:closeAllMirasvit',message:'esc_close_all',data:{reason:reason||'',count:$panels.length},timestamp:Date.now()})}).catch(function(){});
-		/* #endregion */
 
 		return true;
 	}
