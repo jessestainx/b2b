@@ -2947,3 +2947,107 @@ html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#
     text-align: center !important;
   }
 }
+
+/* ============================================================
+   SEÇÃO 35 — R4: PLP refinada (filtro único, ATC guest, sort)
+   Append-only 2026-08-10. Não altera §33/§34.
+   Evidência Fase 0 (/tmp/awa-r4-diag.json + debug-09add6):
+   - Bloco FUNCIONAL único: #layered-ajax-filter-block (Rokanthemes
+     LayeredAjax) título "Comprar por" — URL muda + grid muda.
+   - "Filtrar por" / "Opções de compra" AUSENTES no HTML live.
+   - Poluição: .filter-options-item com links ?cat= (ex. Arrow cat=89
+     filho de Retrovisores) duplica navegação por categoria.
+   - ATC guest: já 0 no DOM via list.phtml+canAddToCart; defesa CSS.
+   - Sort: 3/3 Posição = catalog/frontend/default_sort_by (sem config:set).
+   - Mobile: .modes-label[data-awa-filter-toggle] abre o mesmo bloco.
+   Tokens: var(--awa-*) only.
+   ============================================================ */
+
+/* 35.1 Filtro canônico + esconder poluição categoria (cat=)
+   Mantém #layered-ajax-filter-block; oculta grupo Categoria com
+   links ?cat=/&cat= (duplica nav). Marca/atributos permanecem. */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  :is(#layered-ajax-filter-block, .block.filter)
+  .filter-options-item:has(
+    a[href*="?cat="],
+    a[href*="&cat="]
+  ) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Defesa: drawer morto (#awa-plp-filter-drawer) / FAB legado — não competir
+   com o toggle canônico .modes-label[data-awa-filter-toggle] (audit #19). */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index)
+  .page-wrapper
+  :is(#awa-plp-filter-drawer, .awa-plp-filter-button, .awa-filter-toggle) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 35.2 ATC guest — alinhado §30D / política B2B
+   Seletor guest provado: body SEM .customer-logged-in.
+   Logado (.customer-logged-in) NÃO é afetado. */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index):not(.customer-logged-in)
+  .page-wrapper
+  :is(.products.wrapper, .product-grid, .products-grid, .wrapper.grid.products-grid)
+  :is(
+    form[data-role="tocart-form"],
+    button.action.tocart,
+    .btn-add-to-cart,
+    #awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost#awa-boost
+  ) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 35.3 Sort — evidência: default Posição idêntico nas 3 PLPs e igual ao
+   config catalog/frontend/default_sort_by=position. Sem config:set.
+   Homework merchandising se o dono quiser name/price. */
+
+/* 35.4 Mobile — botão Mostrar Filtros deve revelar o bloco canônico
+   (não drawer legado). Reforço quando body.awa-plp-filters-expanded. */
+@media (max-width: 767px) {
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index).awa-plp-filters-expanded
+    .page-wrapper
+    :is(#layered-ajax-filter-block, .sidebar-main .block.filter, .sidebar-main-1 .block.filter) {
+    display: flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index).awa-plp-filters-collapsed
+    .page-wrapper
+    :is(#layered-ajax-filter-block, .sidebar-main .block.filter, .sidebar-main-1 .block.filter) {
+    /* JS já seta; reforço para não vazar drawer legado */
+    pointer-events: none;
+  }
+}
+
+/* 35.5 CLS PLP — evidência r4-cls: maior shift BODY 1904→1920 (scrollbar
+   gutter) + banner B2B/grid (pré-R4). §35.1 cat-hide ΔCLS≈+0.03 (não causa).
+   Mitigação CSS-only: scrollbar-gutter estável no PLP. */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index) {
+  scrollbar-gutter: stable;
+}
+html:has(body.catalog-category-view),
+html:has(body.catalogsearch-result-index) {
+  scrollbar-gutter: stable;
+}
+
+/* Reserva mínima do banner B2B guest (evita salto 88→128 no 1º paint) */
+html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body:is(.catalog-category-view, .catalogsearch-result-index):not(.customer-logged-in)
+  .page-wrapper
+  .awa-plp-b2b-gate-banner {
+  min-height: 128px;
+  box-sizing: border-box;
+}
