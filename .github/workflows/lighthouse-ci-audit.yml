@@ -62,22 +62,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-
-      - name: Install LHCI
-        run: npm ci --ignore-scripts
 
       - name: Run Lighthouse CI (warn-only)
         continue-on-error: true
-        run: npx lhci autorun --config=.github/lighthouse/lighthouserc.audit-conservative.cjs
+        run: |
+          npx --yes @lhci/cli@0.14.0 autorun \
+            --config=.github/lighthouse/lighthouserc.audit-conservative.cjs
 
       - name: Upload Lighthouse artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-ci-audit-${{ github.run_id }}
-          path: |
-            .lighthouseci/audit-conservative/**
-            .lighthouseci/**
+          path: .lighthouseci/**
           if-no-files-found: warn
           retention-days: 14
+          include-hidden-files: true

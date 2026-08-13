@@ -1,12 +1,16 @@
 /** @type {import('@lhci/cli').LhciConfig} */
+const base = (process.env.LHCI_BASE_URL || '').replace(/\/$/, '');
+const urls = [
+  base + '/',
+  base + '/bagageiros.html',
+  base + '/b2b/account/login/',
+];
+
 module.exports = {
   ci: {
     collect: {
-      urls: [
-        process.env.LHCI_BASE_URL + '/',
-        process.env.LHCI_BASE_URL + '/bagageiros.html',
-        process.env.LHCI_BASE_URL + '/b2b/account/login/',
-      ],
+      url: urls,
+      urls: urls,
       numberOfRuns: parseInt(process.env.LHCI_RUNS || '1', 10),
       settings: {
         formFactor: 'desktop',
