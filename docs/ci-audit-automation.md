@@ -10,7 +10,7 @@ Repositório canônico: `https://github.com/jessestainx/b2b`.
 
 | Workflow | Acionamento | Risco |
 |---|---|---|
-| `magento-ci.yml` | PR, push `main`, tag `v*` | Contém **deploy staging e produção** via SSH |
+| `magento-ci.yml` | PR, push `main`, dispatch | Validação Magento 2 estática. **Sem SSH / sem cache:flush**. |
 | `visual-quality-gate.yml` | PR, push `main`, cron, dispatch | Playwright + Lighthouse; produção só com opt-in |
 | `e2e-pr-smoke.yml` | PR | Smoke E2E; `awamotos.com` bloqueado sem opt-in |
 | `e2e-nightly-full.yml` | cron 04:00 UTC + dispatch | Suite E2E completa |
@@ -183,3 +183,21 @@ Nenhum cache Magento, Redis, Varnish ou serviço precisa ser tocado: estes arqui
 4. Isolar `magento-ci.yml` jobs `deploy-staging` / `deploy-production` atrás de `environment` GitHub com reviewer (hoje um tag `v*` dispara deploy).
 5. Adicionar `dry-run` aos scripts destrutivos existentes em vez de um espelho separado.
 6. Codex CLI só em clone, sandbox `read-only`.
+
+## 9. magento-ci.yml (práticas Magento 2)
+
+O workflow antigo era YAML inválido (`uses` + `run` no mesmo step), disparava falha em **qualquer push** e o job de staging SSH no DocumentRoot de produção.
+
+Agora:
+
+- Validação em PR e push em `main`: `composer validate`, `php -l` custom, PHTML/XML do tema filho e `GrupoAwamotos`, recusa `env.php`/`auth.json` versionados.
+- PHPCS `Magento2` só no código custom, **não bloqueante** até existir baseline.
+- Sem MySQL/Redis/OpenSearch (não há testes de integração neste job).
+- Sem `setup:upgrade`, `setup:di:compile`, `cache:flush`, restart PHP-FPM ou `git pull`.
+- Runbook de deploy (dry-run) só via `workflow_dispatch` → `print-deploy-runbook`.
+- Sequência Magento 2 correta (DevDocs): compile → static-content `pt_BR --theme AWA_Custom/ayo_home5_child` → `setup:upgrade --keep-generated`.
+
+```bash
+gh workflow run magento-ci.yml --repo jessestainx/b2b --ref rescue/production-20260712 -f action=validate
+gh workflow run magento-ci.yml --repo jessestainx/b2b -f action=print-deploy-runbook
+```

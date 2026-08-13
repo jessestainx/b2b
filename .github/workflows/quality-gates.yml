@@ -45,3 +45,6 @@ jobs:
           bash -n ./scripts/ci/validate-doc-links.sh
           bash -n ./scripts/ci/audit-repo-readonly.sh
           bash -n ./scripts/ci/vps-audit-dry-run.sh
+          bash -n ./scripts/ci/lint-magento-phtml.sh
+          bash -n ./scripts/ci/lint-magento-xml.sh
+          bash -n ./scripts/ci/magento-deploy-sequence.sh

@@ -1,214 +1,129 @@
-# AWA Motos — CI/CD Pipeline
-# 
-# Este workflow roda em:
-#   - Pull requests (validação)
-#   - Push em main (deploy staging)
-#   - Tag v* (deploy produção)
-
-name: AWA Motos CI/CD
+# Magento 2.4 CI — validação estática. Sem deploy automático.
+#
+# Práticas Magento 2 / AWA:
+#   - Validar só código custom (GrupoAwamotos + tema filho).
+#   - Não SSH, não cache:flush, não setup:upgrade neste workflow.
+#   - Deploy de produção não roda em push/tag; exige workflow_dispatch + confirmação.
+#   - Staging não pode apontar para o DocumentRoot de produção.
+name: magento-ci
 
 on:
   pull_request:
-    branches: [main, develop]
   push:
     branches: [main]
-    tags: ['v*']
   workflow_dispatch:
+    inputs:
+      action:
+        description: "validate (padrão) ou imprimir runbook de deploy"
+        required: true
+        default: validate
+        type: choice
+        options:
+          - validate
+          - print-deploy-runbook
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: magento-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  PHP_VERSION: '8.4'
-  NODE_VERSION: '20'
-  MAGENTO_ROOT: ${{ github.workspace }}
+  PHP_VERSION: "8.4"
 
 jobs:
-  # ====================================
-  # 1. VALIDAÇÃO (sempre roda)
-  # ====================================
   validate:
-    name: 🔍 Validate code
+    name: Magento static validation
+    if: github.event_name != 'workflow_dispatch' || inputs.action == 'validate'
     runs-on: ubuntu-22.04
-    if: github.event_name == 'pull_request'
-    
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: magento
-          MYSQL_DATABASE: magento_test
-        ports: ['3306:3306']
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-      
-      redis:
-        image: redis:7
-        ports: ['6379:6379']
-    
-      elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-        env:
-          discovery.type: single-node
-          xpack.security.enabled: 'false'
-          ES_JAVA_OPTS: '-Xms512m -Xmx512m'
-        ports: ['9200:9200']
-    
+    timeout-minutes: 25
+
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2.36.0
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: intl,mbstring,curl,gd,zip,xml,bcmath,opcache
-      
-      - name: Validate PHTML syntax
+          coverage: none
+          extensions: bcmath, ctype, curl, dom, gd, intl, mbstring, opcache, pdo_mysql, soap, sockets, xsl, zip
+          tools: composer:v2
+
+      - name: Recusar env.php e auth.json no Git
         run: |
-          find app/design -name "*.phtml" -newer composer.json | while read f; do
-            php -l "$f" || exit 1
-          done
-      
-      - name: Validate XML layout
-        run: |
-          find app/design -name "*.xml" | while read f; do
-            xmllint --noout "$f" || exit 1
-          done
-      
-      - name: Validate JS/TS
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-        run: |
-          if [ -d "pwa-studio" ]; then
-            cd pwa-studio
-            npm ci
-            npm run lint || true
+          set -euo pipefail
+          if git ls-files --error-unmatch app/etc/env.php >/dev/null 2>&1; then
+            echo "app/etc/env.php não deve estar no repositório (Magento 2)."
+            exit 1
           fi
-      
-      - name: Magento code sniffer
-        run: |
-          composer global require --dev "squizlabs/php_codesniffer=*"
-          composer global require --dev "magento/magento-coding-standard"
-          vendor/bin/phpcs --standard=Magento2 app/code || true
-      
-      - name: Security audit (composer)
-        run: |
-          composer audit --no-dev || true
+          if git ls-files --error-unmatch auth.json >/dev/null 2>&1; then
+            echo "auth.json não deve estar no repositório (Magento 2)."
+            exit 1
+          fi
+          echo "OK: env.php e auth.json fora do Git."
 
-  # ====================================
-  # 2. DEPLOY STAGING (em push main)
-  # ====================================
-  deploy-staging:
-    name: 🚀 Deploy to staging
-    runs-on: ubuntu-22.04
-    needs: validate
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: staging
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
-      
-      - name: Deploy to staging
-        run: |
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
-            cd /home/user/htdocs/srv1113343.hstgr.cloud
-            bash scripts/deploy/pre-deploy.sh
-            git pull origin main
-            composer install --no-dev --optimize-autoloader
-            bin/magento setup:upgrade --keep-generated
-            bin/magento setup:di:compile
-            bin/magento setup:static-content:deploy -t AWA_Custom/ayo_home5_child
-            bin/magento cache:flush
-            bash scripts/warmup/warm-cache.sh
-            sudo systemctl restart php8.4-fpm
-          EOF
-      
-      - name: Health check
-        run: |
-          sleep 10
-          curl -fsS https://staging.awamotos.com/ || exit 1
-          bash scripts/monitoring/health-check.sh
+      - name: Composer validate
+        run: composer validate --no-check-all --no-interaction
 
-  # ====================================
-  # 3. DEPLOY PRODUÇÃO (em tag)
-  # ====================================
-  deploy-production:
-    name: 🎯 Deploy to production
-    runs-on: ubuntu-22.04
-    needs: deploy-staging
-    if: startsWith(github.ref, 'refs/tags/v')
-    environment: production
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
-      
-      - name: Deploy to production
-        run: |
-          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
-            cd /home/user/htdocs/srv1113343.hstgr.cloud
-            
-            # Backup antes de deploy
-            bash scripts/backup/magento-backup.sh
-            
-            # Ativar manutenção
-            bin/magento maintenance:enable
-            
-            # Pull código
-            git pull origin main
-            composer install --no-dev --optimize-autoloader
-            
-            # Upgrade + compile + deploy
-            bin/magento setup:upgrade --keep-generated
-            bin/magento setup:di:compile
-            bin/magento setup:static-content:deploy -t AWA_Custom/ayo_home5_child -l
-            
-            # Limpar cache + warmup
-            bin/magento cache:flush
-            bash scripts/warmup/warm-cache.sh
-            
-            # Reiniciar PHP-FPM
-            sudo systemctl restart php8.4-fpm
-            
-            # Desativar manutenção
-            bin/magento maintenance:disable
-            
-            # Health check final
-            bash scripts/monitoring/health-check.sh
-          EOF
+      - name: PHP custom (GrupoAwamotos / Awa / scripts)
+        run: bash ./scripts/ci/lint-custom-php.sh
 
-  # ====================================
-  # 4. LIGHTHOUSE CI (sempre em PR)
-  # ====================================
-  lighthouse:
-    name: 🏮 Lighthouse audit
-    runs-on: ubuntu-22.04
-    needs: validate
-    if: github.event_name == 'pull_request'
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      - name: Run Lighthouse CI
+      - name: PHTML custom (tema filho + GrupoAwamotos)
+        run: bash ./scripts/ci/lint-magento-phtml.sh
+
+      - name: XML well-formed (tema filho + GrupoAwamotos)
         run: |
-          npm ci
-          npm run lighthouse:collect || echo "collect completed"
-          npm run lighthouse:assert || echo "assertions failed (non-blocking)"
-      
-      - name: Upload Lighthouse report
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxml2-utils
+          bash ./scripts/ci/lint-magento-xml.sh
+
+      - name: PHPCS Magento2 (custom, não bloqueante)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer global require --no-interaction magento/magento-coding-standard
+          PHPCS="$HOME/.config/composer/vendor/bin/phpcs"
+          if [ ! -x "$PHPCS" ]; then PHPCS="$HOME/.composer/vendor/bin/phpcs"; fi
+          mkdir -p artifacts/phpcs
+          "$PHPCS" --standard=Magento2 \
+            --extensions=php,phtml \
+            --ignore=*/vendor/*,*/Test/*,*/tests/* \
+            --report=full \
+            --report-file=artifacts/phpcs/magento2.txt \
+            app/code/GrupoAwamotos \
+            app/design/frontend/AWA_Custom \
+            || true
+          echo "PHPCS Magento2 gerou artifacts/phpcs/magento2.txt (não bloqueia até haver baseline)."
+
+      - name: Upload PHPCS report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-report
-          path: .lighthouseci/manifest.json
+          name: magento-phpcs-${{ github.run_id }}
+          path: artifacts/phpcs/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+  deploy-runbook:
+    name: Magento deploy runbook (dry-run)
+    if: github.event_name == 'workflow_dispatch' && inputs.action == 'print-deploy-runbook'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Imprimir sequência Magento 2 (sem executar)
+        run: bash ./scripts/ci/magento-deploy-sequence.sh
+
+      - name: Recusar DocumentRoot de produção neste job
+        run: |
+          set -euo pipefail
+          echo "Este job não faz SSH. Deploy real exige host de staging distinto e GO operacional."
+          echo "DocumentRoot de produção (srv1113343 / awamotos.com) está bloqueado neste workflow."
