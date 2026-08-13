@@ -1,0 +1,74 @@
+# Auditoria estática somente leitura. Sem deploy, sem SSH, sem Magento mutável.
+name: audit-readonly
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_vps_pattern_inventory:
+        description: "Incluir inventário dry-run dos alvos de limpeza VPS (não apaga nada)"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: audit-readonly-${{ github.repository }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Static read-only audit
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    env:
+      AUDIT_OUT_DIR: ${{ github.workspace }}/artifacts/audit-readonly
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2.36.0
+        with:
+          php-version: "8.4"
+          coverage: none
+          tools: composer:v2
+
+      - name: Confirm read-only job
+        run: echo "Job de auditoria estática. Sem SSH, sem Magento mutável, sem exclusão."
+
+      - name: Inventário e varredura somente leitura
+        run: bash ./scripts/ci/audit-repo-readonly.sh
+
+      - name: Sintaxe PHP customizada
+        run: bash ./scripts/ci/lint-custom-php.sh
+
+      - name: Sintaxe shell CI
+        run: |
+          set -euo pipefail
+          for f in scripts/ci/*.sh; do
+            bash -n "$f"
+            echo "OK $f"
+          done
+
+      - name: Inventário dry-run de limpeza VPS (checkout)
+        if: ${{ inputs.include_vps_pattern_inventory }}
+        env:
+          AUDIT_OUT_DIR: ${{ github.workspace }}/artifacts/vps-audit-dry-run
+        run: bash ./scripts/ci/vps-audit-dry-run.sh
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-readonly-${{ github.run_id }}
+          path: |
+            artifacts/audit-readonly/**
+            artifacts/vps-audit-dry-run/**
+          if-no-files-found: warn
+          retention-days: 14

@@ -43,3 +43,5 @@ jobs:
           bash -n ./scripts/ci/validate-governance.sh
           bash -n ./scripts/ci/check-conventional-commits.sh
           bash -n ./scripts/ci/validate-doc-links.sh
+          bash -n ./scripts/ci/audit-repo-readonly.sh
+          bash -n ./scripts/ci/vps-audit-dry-run.sh

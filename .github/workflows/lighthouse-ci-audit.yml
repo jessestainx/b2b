@@ -1,0 +1,83 @@
+# Lighthouse CI conservador contra URLs públicas. Sem deploy.
+# Tráfego HTTP de leitura (como um visitante). Limites em warn, 1 run.
+name: lighthouse-ci-audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "URL pública base (ex: https://awamotos.com)"
+        required: true
+        default: "https://awamotos.com"
+        type: string
+      allow_production_traffic:
+        description: "Permitir GET em awamotos.com (1 run, 3 URLs, simulate)"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: lighthouse-ci-audit-${{ github.repository }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Conservative Lighthouse
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      LHCI_BASE_URL: ${{ inputs.base_url }}
+      LHCI_RUNS: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Guard URL
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, re, sys
+          raw = os.environ.get("LHCI_BASE_URL", "").strip().rstrip("/")
+          allow = os.environ.get("ALLOW_PROD", "false").lower() == "true"
+          if not re.match(r"^https://", raw):
+              print("::error::Use apenas HTTPS.")
+              sys.exit(1)
+          host = re.sub(r"^https://", "", raw).split("/")[0].split(":")[0].lower()
+          if "awamotos.com" in host and not allow:
+              print("::error::awamotos.com bloqueado. Marque allow_production_traffic.")
+              sys.exit(1)
+          print("LHCI_BASE_URL=" + raw)
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as fh:
+              fh.write("LHCI_BASE_URL=" + raw + "\n")
+          PY
+        env:
+          ALLOW_PROD: ${{ inputs.allow_production_traffic }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install LHCI
+        run: npm ci --ignore-scripts
+
+      - name: Run Lighthouse CI (warn-only)
+        continue-on-error: true
+        run: npx lhci autorun --config=.github/lighthouse/lighthouserc.audit-conservative.cjs
+
+      - name: Upload Lighthouse artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-ci-audit-${{ github.run_id }}
+          path: |
+            .lighthouseci/audit-conservative/**
+            .lighthouseci/**
+          if-no-files-found: warn
+          retention-days: 14
