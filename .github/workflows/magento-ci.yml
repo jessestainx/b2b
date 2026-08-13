@@ -27,7 +27,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: magento-ci-${{ github.ref }}
+  group: magento-ci-${{ github.ref }}-${{ github.event.inputs.action || github.event_name }}
   cancel-in-progress: true
 
 env:
