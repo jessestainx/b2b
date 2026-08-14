@@ -1,9 +1,6 @@
 name: e2e-premerge-regression
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 concurrency:

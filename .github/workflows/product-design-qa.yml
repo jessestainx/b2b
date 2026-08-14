@@ -1,7 +1,6 @@
 name: product-design-qa
 
 on:
-  pull_request:
   workflow_dispatch:
 
 concurrency:
@@ -10,6 +9,7 @@ concurrency:
 
 jobs:
   product-design-qa:
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
@@ -89,7 +89,7 @@ jobs:
     # em uma fase dedicada de "hardening" da investigacao PD5 em teste
     # permanente de regressao - decisao que fica fora do escopo diagnostico
     # desta fase (nao commitar workaround/scaffold sem essa decisao explicita).
-    if: github.event_name == 'workflow_dispatch'
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

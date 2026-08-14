@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - rescue/production-20260712
 
 jobs:
   governance-and-syntax:

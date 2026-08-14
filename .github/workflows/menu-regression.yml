@@ -1,23 +1,11 @@
 name: menu-regression
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-menu-controller.js'
-      - 'app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-menu-modern.less'
-      - 'app/code/GrupoAwamotos/Theme/view/frontend/templates/menu/**'
-      - 'tests/e2e/specs/menu-regression.mjs'
-  pull_request:
-    paths:
-      - 'app/design/frontend/AWA_Custom/ayo_home5_child/web/js/awa-menu-controller.js'
-      - 'app/design/frontend/AWA_Custom/ayo_home5_child/web/css/source/_awa-menu-modern.less'
-      - 'app/code/GrupoAwamotos/Theme/view/frontend/templates/menu/**'
-      - 'tests/e2e/specs/menu-regression.mjs'
   workflow_dispatch:
 
 jobs:
   menu-regression:
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

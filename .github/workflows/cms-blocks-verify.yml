@@ -2,9 +2,13 @@ name: Verify CMS Blocks
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - rescue/production-20260712
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - rescue/production-20260712
 
 jobs:
   cms-blocks-static-audit:

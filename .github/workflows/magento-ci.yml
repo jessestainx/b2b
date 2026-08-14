@@ -10,7 +10,9 @@ name: magento-ci
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+      - rescue/production-20260712
   workflow_dispatch:
     inputs:
       action:
