@@ -10,26 +10,33 @@ on:
       - main
       - rescue/production-20260712
 
+permissions:
+  contents: read
+
 jobs:
   cms-blocks-static-audit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
-      - name: Static placeholder audit (StoreConfigurator)
+      - name: Static dummy-copy audit (StoreConfigurator)
         run: |
-          set -e
+          set -euo pipefail
           FILE=app/code/GrupoAwamotos/StoreSetup/Setup/StoreConfigurator.php
-          echo "Auditing $FILE for disallowed placeholder tokens..."
-          # Lista de tokens que não devem aparecer em produção (placeholders antigos / genéricos)
-          TOKENS='Banner Placeholder|Placeholder|TODO|Your Phone|your@email|0000-0000'
-          if grep -E "$TOKENS" "$FILE"; then
-            echo "Encontrado placeholder proibido. Falhando."
+          echo "Auditing $FILE for dummy CMS copy..."
+          if [ ! -f "$FILE" ]; then
+            echo "::error::Arquivo ausente: $FILE"
             exit 1
-          else
-            echo "OK: Nenhum placeholder proibido encontrado."
           fi
+          # Cópia dummy de contato/lorem — não a palavra solta Placeholder
+          # (casa ensurePlaceholderBanners, Magento placeholder/image.jpg, SVG de bootstrap).
+          TOKENS='Your Phone|your@email|0000-0000|[Ll]orem [Ii]psum|TODO:|FIXME'
+          if grep -nE "$TOKENS" "$FILE"; then
+            echo "::error::Encontrada cópia dummy/proibida em StoreConfigurator."
+            exit 1
+          fi
+          echo "OK: nenhuma cópia dummy encontrada."
 
       - name: Optional full Magento block verification (requires DB)
         if: ${{ env.FULL_BLOCK_AUDIT == '1' }}
