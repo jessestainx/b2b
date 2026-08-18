@@ -13,7 +13,7 @@
               file="admin_new_customer.html"
               type="html"
               module="GrupoAwamotos_B2B"
-              area="adminhtml"/>
+              area="frontend"/>
     
     <!-- Template: Cliente aprovado -->
     <template id="grupoawamotos_b2b_customer_approved"
@@ -29,7 +29,7 @@
               file="admin_pending_approvals.html"
               type="html"
               module="GrupoAwamotos_B2B"
-              area="adminhtml"/>
+              area="frontend"/>
 
     <!-- Template: Cliente rejeitado -->
     <template id="grupoawamotos_b2b_customer_rejected"
@@ -45,7 +45,7 @@
               file="admin_new_quote.html"
               type="html"
               module="GrupoAwamotos_B2B"
-              area="adminhtml"/>
+              area="frontend"/>
     
     <!-- Template: Cotação respondida (para cliente) -->
     <template id="grupoawamotos_b2b_quote_replied"
@@ -85,6 +85,6 @@
               file="registration_admin.html"
               type="html"
               module="GrupoAwamotos_B2B"
-              area="adminhtml"/>
+              area="frontend"/>
     
 </config>

@@ -17,19 +17,22 @@ class TransactionalEmailConfigSynchronizer
      */
     private const CANONICAL_EMAIL = 'awamotos@awamotos.com.br';
 
+    /** From SMTP autenticado (Hostinger rejeita From que não pertence ao usuário). */
+    private const SMTP_FROM_EMAIL = 'sac@awamotos.com';
+
     private const DEFAULT_VALUES = [
         'trans_email/ident_general/name' => 'AWA Motos',
-        'trans_email/ident_general/email' => self::CANONICAL_EMAIL,
+        'trans_email/ident_general/email' => self::SMTP_FROM_EMAIL,
         'trans_email/ident_support/name' => 'Suporte AWA Motos',
-        'trans_email/ident_support/email' => self::CANONICAL_EMAIL,
+        'trans_email/ident_support/email' => self::SMTP_FROM_EMAIL,
         'trans_email/ident_sales/name' => 'Vendas AWA Motos',
-        'trans_email/ident_sales/email' => self::CANONICAL_EMAIL,
+        'trans_email/ident_sales/email' => self::SMTP_FROM_EMAIL,
         'trans_email/ident_custom1/name' => 'Contato AWA Motos',
-        'trans_email/ident_custom1/email' => self::CANONICAL_EMAIL,
+        'trans_email/ident_custom1/email' => self::SMTP_FROM_EMAIL,
         'trans_email/ident_custom2/name' => 'Atacado AWA Motos',
-        'trans_email/ident_custom2/email' => self::CANONICAL_EMAIL,
+        'trans_email/ident_custom2/email' => self::SMTP_FROM_EMAIL,
         'trans_email/ident_storepickup/name' => 'AWA Motos Retirada',
-        'trans_email/ident_storepickup/email' => self::CANONICAL_EMAIL,
+        'trans_email/ident_storepickup/email' => self::SMTP_FROM_EMAIL,
         'grupoawamotos_theme/contact/email' => self::CANONICAL_EMAIL,
         'contact/email/recipient_email' => self::CANONICAL_EMAIL,
         'grupoawamotos_maintenance/contact/email' => self::CANONICAL_EMAIL,
@@ -50,7 +53,7 @@ class TransactionalEmailConfigSynchronizer
         'sales_email/creditmemo/copy_to' => self::CANONICAL_EMAIL,
         'sales_email/creditmemo_comment/copy_to' => self::CANONICAL_EMAIL,
         'sales_email/order_ready_for_pickup/copy_to' => self::CANONICAL_EMAIL,
-        'system/gmailsmtpapp/debug/from_email' => self::CANONICAL_EMAIL,
+        'system/gmailsmtpapp/debug/from_email' => self::SMTP_FROM_EMAIL,
     ];
 
     public function __construct(

@@ -141,10 +141,7 @@ class NotificationService
                     'store' => \Magento\Store\Model\Store::DEFAULT_STORE_ID,
                 ])
                 ->setTemplateVars($templateVars)
-                ->setFromByScope([
-                    'email' => 'awamotos@awamotos.com.br',
-                    'name' => 'AWA Motos Monitoring'
-                ])
+                ->setFromByScope('general')
                 ->addTo($recipients)
                 ->getTransport();
 

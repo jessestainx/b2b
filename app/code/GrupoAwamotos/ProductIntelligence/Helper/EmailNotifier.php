@@ -161,20 +161,6 @@ class EmailNotifier extends AbstractHelper
 
             $storeId = (int) $this->storeManager->getDefaultStoreView()->getId();
 
-            $transport = $this->transportBuilder
-                ->setTemplateIdentifier($templateId)
-                ->setTemplateOptions([
-                    'area' => \Magento\Framework\App\Area::AREA_FRONTEND,
-                    'store' => $storeId
-                ])
-                ->setTemplateVars($templateVars)
-                ->setFromByScope([
-                    'email' => 'awamotos@awamotos.com.br',
-                    'name' => 'Product Intelligence - Sistema de Recomendacoes'
-                ])
-                ->addTo(explode(',', $emailTo))
-                ->getTransport();
-
             $this->emulation->startEnvironmentEmulation(
                 $storeId,
                 \Magento\Framework\App\Area::AREA_FRONTEND,
@@ -189,10 +175,7 @@ class EmailNotifier extends AbstractHelper
                         'store' => $storeId
                     ])
                     ->setTemplateVars($templateVars)
-                    ->setFromByScope([
-                        'email' => 'awamotos@awamotos.com.br',
-                        'name' => 'Product Intelligence - Sistema de Recomendacoes'
-                    ])
+                    ->setFromByScope('general')
                     ->addTo(explode(',', $emailTo))
                     ->getTransport();
 
