@@ -32,31 +32,39 @@ $lists = $viewModel->getCustomerLists();
                     value="cancel">
                 <span><?= $block->escapeHtml(__('Cancelar')) ?></span>
             </button>
-            <a id="b2b-delete-dialog-confirm"
-               href="#"
-               class="action delete b2b-confirm-dialog__btn-confirm"
-               role="button">
+            <button type="button"
+                    id="b2b-delete-dialog-confirm"
+                    class="action delete b2b-confirm-dialog__btn-confirm">
                 <span><?= $block->escapeHtml(__('Excluir lista')) ?></span>
-            </a>
+            </button>
         </div>
     </form>
 </dialog>
 
 <div class="b2b-shoppinglist-index b2b-page-shell"
-     data-mage-init='<?= /* @noEscape */ json_encode(['GrupoAwamotos_B2B/js/shoppinglist/index' => new \stdClass()]) ?>'>
+     data-mage-init='<?= /* @noEscape */ json_encode(
+         ['GrupoAwamotos_B2B/js/shoppinglist/index' => new \stdClass()],
+         JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+     ) ?>'>
+    <p class="b2b-live-region" data-role="shoppinglist-index-live" aria-live="polite"></p>
     <div class="b2b-section-header">
         <h1><?= $block->escapeHtml(__('Listas de compras')) ?></h1>
         <p class="section-subtitle"><?= $block->escapeHtml(__('Salve conjuntos de peças e adicione tudo ao carrinho quando precisar.')) ?></p>
     </div>
 
     <div class="shoppinglist-actions-top">
-        <button type="button" id="btn-create-list" class="action primary" title="<?= $block->escapeHtmlAttr(__('Criar lista')) ?>">
+        <button type="button"
+                id="btn-create-list"
+                class="action primary"
+                title="<?= $block->escapeHtmlAttr(__('Criar lista')) ?>"
+                aria-expanded="false"
+                aria-controls="create-list-form">
             <span><?= $block->escapeHtml(__('Criar lista')) ?></span>
         </button>
     </div>
 
     <!-- Create List Form (hidden by default) -->
-    <div class="shoppinglist-create-form" id="create-list-form" style="display:none;">
+    <div class="shoppinglist-create-form" id="create-list-form" hidden>
         <form action="<?= $block->escapeUrl($block->getCreateUrl()) ?>" method="post"
               data-mage-init='{"validation":{}}'>
             <?= $block->getBlockHtml('formkey') ?>
@@ -66,6 +74,8 @@ $lists = $viewModel->getCustomerLists();
                 </label>
                 <div class="control">
                     <input type="text" id="list-name" name="name" required
+                           aria-required="true"
+                           autocomplete="off"
                            data-validate="{required:true}"
                            placeholder="<?= $block->escapeHtmlAttr(__('Ex: Peças para revisão')) ?>" />
                 </div>
@@ -91,8 +101,18 @@ $lists = $viewModel->getCustomerLists();
     </div>
 
     <?php if ($lists->getSize() === 0): ?>
-        <div class="message info empty">
-            <span><?= $block->escapeHtml(__('Nenhuma lista criada. Use "Criar lista" para montar um conjunto fixo de peças.')) ?></span>
+        <div class="awa-empty-state" role="status" aria-live="polite">
+            <p class="awa-empty-state__title"><?= $block->escapeHtml(__('Nenhuma lista criada')) ?></p>
+            <p class="awa-empty-state__hint"><?= $block->escapeHtml(__('Use “Criar lista” para montar um conjunto fixo de peças.')) ?></p>
+            <div class="awa-empty-state__actions">
+                <button type="button"
+                        class="action primary"
+                        data-trigger-create-list
+                        aria-expanded="false"
+                        aria-controls="create-list-form">
+                    <span><?= $block->escapeHtml(__('Criar lista')) ?></span>
+                </button>
+            </div>
         </div>
     <?php else: ?>
         <div class="shoppinglist-grid">
@@ -100,11 +120,11 @@ $lists = $viewModel->getCustomerLists();
                 <?php $itemCount = $viewModel->getItemsCount((int) $list->getId()); ?>
                 <div class="shoppinglist-card">
                     <div class="card-header">
-                        <h3 class="list-name">
+                        <h2 class="list-name">
                             <a href="<?= $block->escapeUrl($block->getViewUrl((int) $list->getId())) ?>">
                                 <?= $block->escapeHtml($list->getName()) ?>
                             </a>
-                        </h3>
+                        </h2>
                         <?php if ($list->getData('is_default')): ?>
                             <span class="default-badge"><?= $block->escapeHtml(__('Padrão')) ?></span>
                         <?php endif; ?>
@@ -120,13 +140,28 @@ $lists = $viewModel->getCustomerLists();
                         <a href="<?= $block->escapeUrl($block->getViewUrl((int) $list->getId())) ?>" class="action view">
                             <span><?= $block->escapeHtml(__('Ver Itens')) ?></span>
                         </a>
-                        <a href="<?= $block->escapeUrl($block->getAddToCartUrl((int) $list->getId())) ?>" class="action primary add-to-cart">
-                            <span><?= $block->escapeHtml(__('Adicionar ao carrinho')) ?></span>
-                        </a>
+                        <form method="post"
+                              action="<?= $block->escapeUrl($block->getAddToCartUrl((int) $list->getId())) ?>"
+                              class="shoppinglist-card-addtocart-form">
+                            <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
+                            <input type="hidden" name="id" value="<?= (int) $list->getId() ?>" />
+                            <button type="submit" class="action primary add-to-cart">
+                                <span><?= $block->escapeHtml(__('Adicionar ao carrinho')) ?></span>
+                            </button>
+                        </form>
+                        <form method="post"
+                              action="<?= $block->escapeUrl($block->getDeleteUrl((int) $list->getId())) ?>"
+                              id="shoppinglist-delete-form-<?= (int) $list->getId() ?>"
+                              class="shoppinglist-card-delete-form">
+                            <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
+                            <input type="hidden" name="id" value="<?= (int) $list->getId() ?>" />
+                        </form>
                         <button type="button"
-                                class="action delete action--trigger-delete-dialog"
+                                class="action secondary action--trigger-delete-dialog"
+                                data-delete-form="shoppinglist-delete-form-<?= (int) $list->getId() ?>"
                                 data-delete-url="<?= $block->escapeUrl($block->getDeleteUrl((int) $list->getId())) ?>"
                                 data-list-name="<?= $block->escapeHtmlAttr($list->getName()) ?>"
+                                aria-label="<?= $block->escapeHtmlAttr(__('Excluir lista %1', $list->getName())) ?>"
                                 aria-haspopup="dialog">
                             <span><?= $block->escapeHtml(__('Excluir')) ?></span>
                         </button>

@@ -10,7 +10,9 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class Create implements HttpPostActionInterface
 {
@@ -20,7 +22,8 @@ class Create implements HttpPostActionInterface
         private readonly RequestInterface $request,
         private readonly FormKeyValidator $formKeyValidator,
         private readonly MessageManagerInterface $messageManager,
-        private readonly ShoppingListService $shoppingListService
+        private readonly ShoppingListService $shoppingListService,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -42,8 +45,14 @@ class Create implements HttpPostActionInterface
         try {
             $this->shoppingListService->createList($name, '', (int) $this->customerSession->getCustomerId());
             $this->messageManager->addSuccessMessage(__('Lista "%1" criada.', $name));
-        } catch (\Throwable $e) {
-            $this->messageManager->addErrorMessage(__('Erro: %1', $e->getMessage()));
+        } catch (LocalizedException $exception) {
+            $this->messageManager->addErrorMessage($exception->getMessage());
+        } catch (\Throwable $exception) {
+            $this->logger->error(
+                '[B2B ShoppingList Create] Falha ao criar lista.',
+                ['exception' => $exception]
+            );
+            $this->messageManager->addErrorMessage(__('Não foi possível criar a lista agora. Tente novamente.'));
         }
         return $redirect->setPath('b2b/shoppinglist/index');
     }

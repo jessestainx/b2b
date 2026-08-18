@@ -11,6 +11,7 @@ namespace GrupoAwamotos\B2B\Block\Customer\ShoppingList;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use GrupoAwamotos\B2B\Model\ShoppingListService;
 use GrupoAwamotos\B2B\Model\ShoppingList;
 
@@ -25,6 +26,7 @@ class ViewBlock extends Template
      * @var ShoppingListService
      */
     private $shoppingListService;
+    private TimezoneInterface $timezone;
 
     /**
      * @var ShoppingList|null
@@ -41,11 +43,13 @@ class ViewBlock extends Template
         Context $context,
         RequestInterface $request,
         ShoppingListService $shoppingListService,
-        array $data = []
+        array $data = [],
+        ?TimezoneInterface $timezone = null
     ) {
         parent::__construct($context, $data);
         $this->request = $request;
         $this->shoppingListService = $shoppingListService;
+        $this->timezone = $timezone ?? $context->getLocaleDate();
     }
 
     /**
@@ -132,5 +136,33 @@ class ViewBlock extends Template
     {
         $list = $this->getCurrentList();
         return $list ? $this->getUrl('b2b/shoppinglist/setrecurring', ['id' => $list->getId()]) : '#';
+    }
+
+    /**
+     * @param string|\DateTimeInterface|null $date
+     * @param int $format
+     * @param bool $showTime
+     * @param string|null $timezone
+     */
+    public function formatDate(
+        $date = null,
+        $format = \IntlDateFormatter::SHORT,
+        $showTime = false,
+        $timezone = null
+    ): string {
+        if (func_num_args() <= 1) {
+            if ($date === null || $date === '') {
+                return '-';
+            }
+
+            $raw = $date instanceof \DateTimeInterface ? $date->format('c') : (string) $date;
+            try {
+                return $this->timezone->date(new \DateTime($raw))->format('d/m/Y');
+            } catch (\Exception) {
+                return substr($raw, 0, 10);
+            }
+        }
+
+        return (string) parent::formatDate($date, $format, $showTime, $timezone);
     }
 }

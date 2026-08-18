@@ -10,7 +10,9 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class AddToCart implements HttpPostActionInterface
 {
@@ -20,7 +22,8 @@ class AddToCart implements HttpPostActionInterface
         private readonly RequestInterface $request,
         private readonly FormKeyValidator $formKeyValidator,
         private readonly MessageManagerInterface $messageManager,
-        private readonly ShoppingListService $shoppingListService
+        private readonly ShoppingListService $shoppingListService,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -49,8 +52,14 @@ class AddToCart implements HttpPostActionInterface
             foreach ($errors as $err) {
                 $this->messageManager->addWarningMessage($err);
             }
-        } catch (\Throwable $e) {
-            $this->messageManager->addErrorMessage(__('Erro: %1', $e->getMessage()));
+        } catch (LocalizedException $exception) {
+            $this->messageManager->addErrorMessage($exception->getMessage());
+        } catch (\Throwable $exception) {
+            $this->logger->error(
+                '[B2B ShoppingList AddToCart] Falha ao adicionar lista no carrinho.',
+                ['list_id' => $listId, 'exception' => $exception]
+            );
+            $this->messageManager->addErrorMessage(__('Não foi possível adicionar os itens no carrinho agora. Tente novamente.'));
         }
         return $redirect->setPath('checkout/cart');
     }

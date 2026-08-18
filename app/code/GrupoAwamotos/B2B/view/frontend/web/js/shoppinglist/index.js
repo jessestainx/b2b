@@ -7,20 +7,50 @@ define(['jquery'], function ($) {
         var $cancelButton = $root.find('#btn-cancel-create');
         var $createForm = $root.find('#create-list-form');
         var $nameInput = $root.find('#list-name');
+        var $liveRegion = $root.find('[data-role="shoppinglist-index-live"]');
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var motionMs = reduceMotion ? 0 : 200;
+
+        function announce(message)
+        {
+            if (!$liveRegion.length || !message) {
+                return;
+            }
+
+            $liveRegion.text('');
+            window.setTimeout(function () {
+                $liveRegion.text(message);
+            }, 30);
+        }
 
         // ── Create form ──────────────────────────────────────────────────────
         function showCreateForm()
         {
-            $createForm.stop(true, true).slideDown(200);
-            $createButtons.hide().attr('aria-expanded', 'true');
+            if (!$createForm.length || !$createForm.prop('hidden')) {
+                return;
+            }
+
+            $createForm.prop('hidden', false).removeAttr('hidden');
+            $createForm.stop(true, true).slideDown(motionMs);
+            $createButtons.hide();
+            setCreateButtonsExpanded(true);
             $nameInput.trigger('focus');
+            announce('Formulário de criação de lista aberto.');
         }
 
         function hideCreateForm()
         {
-            $createForm.stop(true, true).slideUp(200);
-            $createButtons.show().attr('aria-expanded', 'false');
+            if (!$createForm.length || $createForm.prop('hidden')) {
+                return;
+            }
+
+            $createForm.stop(true, true).slideUp(motionMs, function () {
+                $createForm.prop('hidden', true).attr('hidden', 'hidden');
+            });
+            $createButtons.show();
+            setCreateButtonsExpanded(false);
             $createButtons.first().trigger('focus');
+            announce('Formulário de criação de lista fechado.');
         }
 
         $createButtons.on('click', showCreateForm);
@@ -30,42 +60,134 @@ define(['jquery'], function ($) {
         var dialog = document.getElementById('b2b-delete-list-dialog');
         var dialogConfirmBtn = document.getElementById('b2b-delete-dialog-confirm');
         var dialogCancelBtn = document.getElementById('b2b-delete-dialog-cancel');
+        var dialogDesc = document.getElementById('b2b-delete-dialog-desc');
+        var defaultDialogDesc = dialogDesc ? dialogDesc.textContent : '';
+        var pendingDeleteFormId = '';
+        var pendingDeleteUrl = '';
+        var openerButton = null;
 
-        if (!dialog || typeof dialog.showModal !== 'function') {
+        function setCreateButtonsExpanded(expanded)
+        {
+            $createButtons.attr('aria-expanded', expanded ? 'true' : 'false');
+        }
+
+        function submitDeleteForm(formId)
+        {
+            var form = formId ? document.getElementById(formId) : null;
+
+            if (!form) {
+                return;
+            }
+
+            form.submit();
+        }
+
+        function getConfirmHref()
+        {
+            var href = dialogConfirmBtn.getAttribute('href');
+
+            if (!href || href === '#') {
+                return '';
+            }
+
+            return href;
+        }
+
+        function resolveDeleteAction()
+        {
+            var href = getConfirmHref();
+
+            if (pendingDeleteFormId) {
+                announce('Exclusão confirmada. Enviando solicitação.');
+                submitDeleteForm(pendingDeleteFormId);
+                return true;
+            }
+
+            if (pendingDeleteUrl) {
+                window.location.href = pendingDeleteUrl;
+                return true;
+            }
+
+            if (href) {
+                window.location.href = href;
+                return true;
+            }
+
+            return false;
+        }
+
+        function getDeleteDialogMessage(listName)
+        {
+            if (!listName) {
+                return defaultDialogDesc;
+            }
+
+            return 'Os itens salvos em "' + listName + '" serão removidos permanentemente. Esta ação não pode ser desfeita.';
+        }
+
+        function openDeleteDialog(deleteFormId, deleteUrl, listName, opener)
+        {
+            openerButton = opener;
+            pendingDeleteFormId = deleteFormId ? String(deleteFormId) : '';
+            pendingDeleteUrl = deleteUrl ? String(deleteUrl) : '';
+
+            if (dialogDesc) {
+                dialogDesc.textContent = getDeleteDialogMessage(listName);
+            }
+
+            dialog.showModal();
+            // Foco vai para o botão Cancelar (ação segura por padrão — WCAG 3.3.4)
+            dialogCancelBtn.focus();
+            announce(listName ? 'Confirmar exclusão da lista ' + listName + '.' : 'Confirmar exclusão da lista.');
+        }
+
+        if (!dialog || typeof dialog.showModal !== 'function' || !dialogConfirmBtn || !dialogCancelBtn) {
             // Fallback para browsers que não suportam <dialog> (Safari < 15.4)
             $root.on('click', '.action--trigger-delete-dialog', function (event) {
-                var deleteUrl = $(this).data('delete-url');
-                if (deleteUrl && window.confirm($(this).data('list-name')
+                var deleteFormId = $(this).data('delete-form');
+                if (deleteFormId && window.confirm($(this).data('list-name')
                     ? 'Excluir a lista "' + $(this).data('list-name') + '"? Esta ação não pode ser desfeita.'
                     : 'Excluir esta lista? Esta ação não pode ser desfeita.')) {
-                    window.location.href = deleteUrl;
+                    announce('Exclusão confirmada. Enviando solicitação.');
+                    submitDeleteForm(String(deleteFormId));
                 }
             });
             return;
         }
 
-        // Mantém referência ao botão que abriu o dialog para devolver foco ao fechar
-        var openerButton = null;
-
         $root.on('click', '.action--trigger-delete-dialog', function () {
-            var deleteUrl = $(this).data('delete-url');
-            openerButton = this;
-
-            // Aponta o link de confirmação para a URL de exclusão correta
-            dialogConfirmBtn.href = deleteUrl;
-
-            dialog.showModal();
-            // Foco vai para o botão Cancelar (ação segura por padrão — WCAG 3.3.4)
-            dialogCancelBtn.focus();
+            var $trigger = $(this);
+            openDeleteDialog(
+                $trigger.data('delete-form'),
+                $trigger.data('delete-url'),
+                $trigger.data('list-name'),
+                this
+            );
         });
 
         dialogCancelBtn.addEventListener('click', function () {
             dialog.close('cancel');
+            announce('Exclusão cancelada.');
+        });
+
+        dialogConfirmBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            if (resolveDeleteAction()) {
+                return;
+            }
+
+            dialog.close('cancel');
         });
 
         dialog.addEventListener('close', function () {
+            pendingDeleteFormId = '';
+            pendingDeleteUrl = '';
+            if (dialogDesc) {
+                dialogDesc.textContent = defaultDialogDesc;
+            }
             // Devolve foco ao elemento que abriu o dialog
-            if (openerButton) {
+            if (openerButton && typeof openerButton.focus === 'function') {
                 openerButton.focus();
                 openerButton = null;
             }

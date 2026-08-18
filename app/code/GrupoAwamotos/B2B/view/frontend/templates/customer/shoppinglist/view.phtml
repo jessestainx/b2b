@@ -14,27 +14,32 @@ $shoppingListViewConfig = [
 ];
 ?>
 <?php if (!$list): ?>
-    <div class="message info">
-        <span><?= $block->escapeHtml(__('Lista de compras não encontrada.')) ?></span>
-    </div>
-    <div class="actions-toolbar">
-        <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>" class="action back">
-            <span><?= $block->escapeHtml(__('Voltar para Listas')) ?></span>
-        </a>
+    <div class="b2b-shoppinglist-view b2b-page-shell">
+        <div class="awa-empty-state" role="status" aria-live="polite">
+            <p class="awa-empty-state__title"><?= $block->escapeHtml(__('Lista de compras não encontrada')) ?></p>
+            <p class="awa-empty-state__hint"><?= $block->escapeHtml(__('A lista pode ter sido excluída ou o link está desatualizado.')) ?></p>
+            <div class="awa-empty-state__actions">
+                <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>" class="action primary">
+                    <span><?= $block->escapeHtml(__('Voltar para Listas')) ?></span>
+                </a>
+            </div>
+        </div>
     </div>
 <?php else: ?>
     <?php $items = $viewModel->getListItems((int) $list->getId()); ?>
     <div class="b2b-shoppinglist-view b2b-page-shell"
-         data-mage-init='<?= /* @noEscape */ json_encode(['GrupoAwamotos_B2B/js/shoppinglist/view' => $shoppingListViewConfig]) ?>'>
-        <div class="block-title">
-            <div class="title-row">
-                <strong><?= $block->escapeHtml($list->getName()) ?></strong>
-                <?php if ($list->getData('is_default')): ?>
-                    <span class="default-badge"><?= $block->escapeHtml(__('Padrão')) ?></span>
-                <?php endif; ?>
-            </div>
+         data-mage-init='<?= /* @noEscape */ json_encode(
+             ['GrupoAwamotos_B2B/js/shoppinglist/view' => $shoppingListViewConfig],
+             JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+         ) ?>'>
+        <p class="b2b-live-region" data-role="shoppinglist-live" aria-live="polite"></p>
+        <div class="b2b-section-header">
+            <h1><?= $block->escapeHtml($list->getName()) ?></h1>
             <?php if ($list->getData('description')): ?>
-                <p class="list-description"><?= $block->escapeHtml($list->getData('description')) ?></p>
+                <p class="section-subtitle"><?= $block->escapeHtml($list->getData('description')) ?></p>
+            <?php endif; ?>
+            <?php if ($list->getData('is_default')): ?>
+                <span class="default-badge"><?= $block->escapeHtml(__('Padrão')) ?></span>
             <?php endif; ?>
         </div>
 
@@ -43,9 +48,13 @@ $shoppingListViewConfig = [
                 <span><?= $block->escapeHtml(__('Voltar para Listas')) ?></span>
             </a>
             <?php if ($items->getSize() > 0): ?>
-                <a href="<?= $block->escapeUrl($block->getAddToCartUrl()) ?>" class="action primary add-all-cart">
-                    <span><?= $block->escapeHtml(__('Adicionar Tudo ao Carrinho')) ?></span>
-                </a>
+                <form method="post" action="<?= $block->escapeUrl($block->getAddToCartUrl()) ?>" class="shoppinglist-add-all-form">
+                    <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
+                    <input type="hidden" name="id" value="<?= (int) $list->getId() ?>" />
+                    <button type="submit" class="action primary add-all-cart">
+                        <span><?= $block->escapeHtml(__('Adicionar Tudo ao Carrinho')) ?></span>
+                    </button>
+                </form>
             <?php endif; ?>
         </div>
 
@@ -62,12 +71,17 @@ $shoppingListViewConfig = [
                             <input type="checkbox" name="is_recurring" value="1"
                                    id="recurring-toggle-input"
                                    <?= $list->getData('is_recurring') ? 'checked' : '' ?>
-                                   data-role="recurring-toggle" />
+                                   data-role="recurring-toggle"
+                                   aria-labelledby="recurring-toggle-label"
+                                   aria-controls="recurring-options"
+                                   aria-expanded="<?= $list->getData('is_recurring') ? 'true' : 'false' ?>" />
                             <span class="recurring-slider"></span>
                         </label>
-                        <span class="toggle-label"><?= $block->escapeHtml(__('Ativar pedido automático')) ?></span>
+                        <span id="recurring-toggle-label" class="toggle-label"><?= $block->escapeHtml(__('Ativar pedido automático')) ?></span>
                     </div>
-                    <div class="recurring-options<?= !$list->getData('is_recurring') ? ' recurring-options--collapsed' : '' ?>" id="recurring-options">
+                    <div class="recurring-options<?= !$list->getData('is_recurring') ? ' recurring-options--collapsed' : '' ?>"
+                         id="recurring-options"
+                         aria-hidden="<?= $list->getData('is_recurring') ? 'false' : 'true' ?>">
                         <label for="recurring_interval"><?= $block->escapeHtml(__('Repetir a cada')) ?></label>
                         <select name="recurring_interval" id="recurring_interval" class="recurring-select">
                             <?php
@@ -81,7 +95,7 @@ $shoppingListViewConfig = [
                         </select>
                         <?php if ($list->getData('next_order_date')): ?>
                             <span class="next-order-info">
-                                <?= $block->escapeHtml(__('Próximo pedido: %1', date('d/m/Y', strtotime($list->getData('next_order_date'))))) ?>
+                                <?= $block->escapeHtml(__('Próximo pedido: %1', $block->formatDate((string) $list->getData('next_order_date')))) ?>
                             </span>
                         <?php endif; ?>
                     </div>
@@ -93,21 +107,23 @@ $shoppingListViewConfig = [
         <?php endif; ?>
 
         <?php if ($items->getSize() === 0): ?>
-            <div class="message info empty">
-                <span><?= $block->escapeHtml(__('Esta lista está vazia. Navegue pelo catálogo para adicionar produtos.')) ?></span>
+            <div class="awa-empty-state" role="status" aria-live="polite">
+                <p class="awa-empty-state__title"><?= $block->escapeHtml(__('Esta lista está vazia')) ?></p>
+                <p class="awa-empty-state__hint"><?= $block->escapeHtml(__('Navegue pelo catálogo para adicionar produtos.')) ?></p>
             </div>
         <?php else: ?>
-            <div class="shoppinglist-items-table-wrapper">
-                <table class="shoppinglist-items-table">
+            <div class="table-wrapper shoppinglist-items-table-wrapper">
+                <table class="shoppinglist-items-table" aria-label="<?= $block->escapeHtmlAttr(__('Itens da lista de compras')) ?>">
+                    <caption class="sr-only"><?= $block->escapeHtml(__('Itens da lista de compras')) ?></caption>
                     <thead>
                         <tr>
-                            <th class="col-image"><?= $block->escapeHtml(__('Produto')) ?></th>
-                            <th class="col-name"><?= $block->escapeHtml(__('Nome')) ?></th>
-                            <th class="col-sku"><?= $block->escapeHtml(__('SKU')) ?></th>
-                            <th class="col-price"><?= $block->escapeHtml(__('Preço')) ?></th>
-                            <th class="col-qty"><?= $block->escapeHtml(__('Qtd')) ?></th>
-                            <th class="col-subtotal"><?= $block->escapeHtml(__('Subtotal')) ?></th>
-                            <th class="col-actions"><?= $block->escapeHtml(__('Ações')) ?></th>
+                            <th scope="col" class="col-image"><?= $block->escapeHtml(__('Produto')) ?></th>
+                            <th scope="col" class="col-name"><?= $block->escapeHtml(__('Nome')) ?></th>
+                            <th scope="col" class="col-sku"><?= $block->escapeHtml(__('SKU')) ?></th>
+                            <th scope="col" class="col-price"><?= $block->escapeHtml(__('Preço')) ?></th>
+                            <th scope="col" class="col-qty"><?= $block->escapeHtml(__('Qtd')) ?></th>
+                            <th scope="col" class="col-subtotal"><?= $block->escapeHtml(__('Subtotal')) ?></th>
+                            <th scope="col" class="col-actions"><?= $block->escapeHtml(__('Ações')) ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -156,6 +172,8 @@ $shoppingListViewConfig = [
                                            name="qty"
                                            value="<?= (int) $qty ?>"
                                            min="1"
+                                           inputmode="numeric"
+                                           aria-label="<?= $block->escapeHtmlAttr(__('Quantidade do item SKU %1', $item->getData('sku') ?: ($product ? $product->getSku() : (string) $item->getId()))) ?>"
                                            data-item-id="<?= (int) $item->getId() ?>"
                                            data-update-url="<?= $block->escapeUrl($block->getUpdateItemUrl()) ?>" />
                                 </td>
@@ -163,12 +181,22 @@ $shoppingListViewConfig = [
                                     <?= /* @noEscape */ $viewModel->formatPrice($lineTotal) ?>
                                 </td>
                                 <td class="col-actions" data-th="<?= $block->escapeHtmlAttr(__('Ações')) ?>">
-                                    <a href="<?= $block->escapeUrl($block->getRemoveItemUrl((int) $item->getId())) ?>"
-                                       class="action delete"
-                                       title="<?= $block->escapeHtmlAttr(__('Remover')) ?>"
-                                       data-confirm="<?= $block->escapeHtmlAttr(__('Remover este item da lista?')) ?>">
-                                        <span>&times;</span>
-                                    </a>
+                                    <form method="post"
+                                          action="<?= $block->escapeUrl($block->getRemoveItemUrl((int) $item->getId())) ?>"
+                                          id="shoppinglist-remove-item-form-<?= (int) $item->getId() ?>"
+                                          class="shoppinglist-remove-item-form">
+                                        <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
+                                        <input type="hidden" name="item_id" value="<?= (int) $item->getId() ?>" />
+                                        <input type="hidden" name="list_id" value="<?= (int) $list->getId() ?>" />
+                                        <button type="button"
+                                                class="action delete"
+                                                title="<?= $block->escapeHtmlAttr(__('Remover')) ?>"
+                                                data-confirm="<?= $block->escapeHtmlAttr(__('Remover este item da lista?')) ?>"
+                                                data-target-form="shoppinglist-remove-item-form-<?= (int) $item->getId() ?>"
+                                                aria-label="<?= $block->escapeHtmlAttr(__('Remover item %1 da lista', $item->getData('sku') ?: (string) $item->getId())) ?>">
+                                            <span><?= $block->escapeHtml(__('Remover')) ?></span>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -183,9 +211,13 @@ $shoppingListViewConfig = [
             </div>
 
             <div class="shoppinglist-bottom-actions">
-                <a href="<?= $block->escapeUrl($block->getAddToCartUrl()) ?>" class="action primary add-all-cart">
-                    <span><?= $block->escapeHtml(__('Adicionar Tudo ao Carrinho')) ?></span>
-                </a>
+                <form method="post" action="<?= $block->escapeUrl($block->getAddToCartUrl()) ?>" class="shoppinglist-add-all-form">
+                    <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
+                    <input type="hidden" name="id" value="<?= (int) $list->getId() ?>" />
+                    <button type="submit" class="action primary add-all-cart">
+                        <span><?= $block->escapeHtml(__('Adicionar Tudo ao Carrinho')) ?></span>
+                    </button>
+                </form>
                 <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>" class="action secondary">
                     <span><?= $block->escapeHtml(__('Voltar para Listas')) ?></span>
                 </a>

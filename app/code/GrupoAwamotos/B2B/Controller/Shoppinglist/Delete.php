@@ -10,7 +10,9 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class Delete implements HttpPostActionInterface
 {
@@ -20,7 +22,8 @@ class Delete implements HttpPostActionInterface
         private readonly RequestInterface $request,
         private readonly FormKeyValidator $formKeyValidator,
         private readonly MessageManagerInterface $messageManager,
-        private readonly ShoppingListService $shoppingListService
+        private readonly ShoppingListService $shoppingListService,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -42,8 +45,14 @@ class Delete implements HttpPostActionInterface
         try {
             $this->shoppingListService->deleteList($listId);
             $this->messageManager->addSuccessMessage(__('Lista excluída.'));
-        } catch (\Throwable $e) {
-            $this->messageManager->addErrorMessage(__('Erro: %1', $e->getMessage()));
+        } catch (LocalizedException $exception) {
+            $this->messageManager->addErrorMessage($exception->getMessage());
+        } catch (\Throwable $exception) {
+            $this->logger->error(
+                '[B2B ShoppingList Delete] Falha ao excluir lista.',
+                ['list_id' => $listId, 'exception' => $exception]
+            );
+            $this->messageManager->addErrorMessage(__('Não foi possível excluir a lista agora. Tente novamente.'));
         }
         return $redirect->setPath('b2b/shoppinglist/index');
     }

@@ -8,12 +8,13 @@ use GrupoAwamotos\B2B\Model\ShoppingListService;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
 
-class RemoveItem implements HttpPostActionInterface
+class UpdateItem implements HttpPostActionInterface
 {
     public function __construct(
         private readonly CustomerSession $customerSession,
@@ -25,34 +26,37 @@ class RemoveItem implements HttpPostActionInterface
     ) {
     }
 
-    public function execute()
+    public function execute(): Json
     {
         $result = $this->resultJsonFactory->create();
+
         if (!$this->customerSession->isLoggedIn()) {
             return $result->setData(['success' => false, 'message' => __('Faça login.')]);
         }
+
         if (!$this->formKeyValidator->validate($this->request)) {
             return $result->setData(['success' => false, 'message' => __('Requisição inválida.')]);
         }
+
         $itemId = (int) $this->request->getParam('item_id');
-        if (!$itemId) {
+        $qty = (float) ($this->request->getParam('qty', 1) ?: 1);
+
+        if ($itemId <= 0) {
             return $result->setData(['success' => false, 'message' => __('Item não especificado.')]);
         }
+
         try {
-            $this->shoppingListService->removeItem($itemId);
-            return $result->setData(['success' => true, 'message' => __('Item removido.')]);
+            $this->shoppingListService->updateItem($itemId, $qty);
+            return $result->setData(['success' => true, 'message' => __('Quantidade atualizada.')]);
         } catch (LocalizedException $exception) {
             return $result->setData(['success' => false, 'message' => $exception->getMessage()]);
         } catch (\Throwable $exception) {
             $this->logger->error(
-                '[B2B ShoppingList RemoveItem] Falha ao remover item da lista.',
-                ['item_id' => $itemId, 'exception' => $exception]
+                '[B2B ShoppingList UpdateItem] Falha ao atualizar quantidade.',
+                ['item_id' => $itemId, 'qty' => $qty, 'exception' => $exception]
             );
 
-            return $result->setData([
-                'success' => false,
-                'message' => __('Não foi possível remover o item agora. Tente novamente.')
-            ]);
+            return $result->setData(['success' => false, 'message' => __('Erro ao atualizar quantidade.')]);
         }
     }
 }

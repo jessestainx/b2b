@@ -1,8 +1,22 @@
 <?php
 /** @var \GrupoAwamotos\B2B\Block\Account\Subscription\ListSubscription $block */
 $subscriptions = $block->getSubscriptions();
+$subscriptionActionsConfig = [
+    'GrupoAwamotos_B2B/js/account/subscription-actions' => [
+        'messages' => [
+            'deleteTitle' => (string)__('Remover assinatura'),
+            'deleteConfirm' => (string)__('Tem certeza de que deseja remover a assinatura "%1"?'),
+            'deleteAction' => (string)__('Remover')
+        ],
+        'liveRegionSelector' => '[data-role="subscription-live"]'
+    ]
+];
 ?>
-<div class="b2b-subscriptions-list b2b-page-shell">
+<div class="b2b-subscriptions-list b2b-page-shell"
+     data-mage-init='<?= /* @noEscape */ json_encode(
+         $subscriptionActionsConfig,
+         JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+     ) ?>'>
     <div class="b2b-section-header">
         <h1><?= $block->escapeHtml(__('Assinaturas de pedidos')) ?></h1>
         <p class="section-subtitle"><?= $block->escapeHtml(__('Pedidos recorrentes gerados na frequência que você definir.')) ?></p>
@@ -12,11 +26,14 @@ $subscriptions = $block->getSubscriptions();
             </a>
         </div>
     </div>
+    <span class="b2b-live-region" data-role="subscription-live" aria-live="polite" aria-atomic="true"></span>
 
     <?php if ($subscriptions->getSize() > 0): ?>
         <div class="table-wrapper subscriptions-history">
-            <table class="data table table-subscriptions-items history" id="my-subscriptions-table">
-                <caption class="table-caption"><?= $block->escapeHtml(__('Assinaturas')) ?></caption>
+            <table class="data table table-subscriptions-items history"
+                   id="my-subscriptions-table"
+                   aria-label="<?= $block->escapeHtmlAttr(__('Tabela de assinaturas de pedidos')) ?>">
+                <caption class="table-caption sr-only"><?= $block->escapeHtml(__('Assinaturas')) ?></caption>
                 <thead>
                     <tr>
                         <th scope="col" class="col name"><?= $block->escapeHtml(__('Nome')) ?></th>
@@ -41,18 +58,30 @@ $subscriptions = $block->getSubscriptions();
                                 </span>
                             </td>
                             <td data-th="<?= $block->escapeHtmlAttr(__('Próxima Execução')) ?>" class="col next-run">
-                                <?= $subscription->getNextRunAt() ? $block->escapeHtml(date('d/m/Y', strtotime($subscription->getNextRunAt()))) : '-' ?>
+                                <?= $subscription->getNextRunAt() ? $block->escapeHtml($block->formatDate((string) $subscription->getNextRunAt())) : '-' ?>
                             </td>
                             <td data-th="<?= $block->escapeHtmlAttr(__('Ações')) ?>" class="col actions">
-                                <a href="<?= $block->escapeUrl($block->getEditUrl($subscription)) ?>" class="action edit">
+                                <a href="<?= $block->escapeUrl($block->getEditUrl($subscription)) ?>"
+                                   class="action edit"
+                                   aria-label="<?= $block->escapeHtmlAttr(__('Editar assinatura %1', $subscription->getName())) ?>">
                                     <span><?= $block->escapeHtml(__('Editar')) ?></span>
                                 </a>
-                                <a href="<?= $block->escapeUrl($block->getDeleteUrl($subscription)) ?>"
-                                   class="action delete"
-                                   data-role="delete-subscription"
-                                   data-subscription-id="<?= (int)$subscription->getId() ?>">
-                                    <span><?= $block->escapeHtml(__('Remover')) ?></span>
-                                </a>
+                                <form method="post"
+                                      action="<?= $block->escapeUrl($block->getDeleteUrl($subscription)) ?>"
+                                      id="subscription-delete-form-<?= (int) $subscription->getId() ?>"
+                                      class="subscription-delete-form">
+                                    <?= $block->getBlockHtml('formkey') ?>
+                                    <input type="hidden" name="id" value="<?= (int) $subscription->getId() ?>">
+                                    <button type="button"
+                                            class="action delete"
+                                            data-role="delete-subscription"
+                                            data-target-form="subscription-delete-form-<?= (int) $subscription->getId() ?>"
+                                            data-subscription-id="<?= (int) $subscription->getId() ?>"
+                                            data-subscription-name="<?= $block->escapeHtmlAttr($subscription->getName()) ?>"
+                                            aria-label="<?= $block->escapeHtmlAttr(__('Remover assinatura %1', $subscription->getName())) ?>">
+                                        <span><?= $block->escapeHtml(__('Remover')) ?></span>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -60,7 +89,7 @@ $subscriptions = $block->getSubscriptions();
             </table>
         </div>
     <?php else: ?>
-        <div class="awa-empty-state" role="status">
+        <div class="awa-empty-state" role="status" aria-live="polite">
             <p class="awa-empty-state__title"><?= $block->escapeHtml(__('Nenhuma assinatura ativa')) ?></p>
             <p class="awa-empty-state__hint"><?= $block->escapeHtml(__('Crie uma assinatura para repetir pedidos automaticamente na frequência escolhida.')) ?></p>
             <div class="awa-empty-state__actions">
