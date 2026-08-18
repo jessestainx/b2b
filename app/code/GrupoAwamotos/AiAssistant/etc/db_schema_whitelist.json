@@ -1,0 +1,52 @@
+{
+    "grupoawamotos_ai_conversation_log": {
+        "column": {
+            "log_id": true,
+            "session_id": true,
+            "customer_id": true,
+            "channel": true,
+            "user_message": true,
+            "assistant_response": true,
+            "tools_called": true,
+            "model_used": true,
+            "tokens_used": true,
+            "status": true,
+            "error_detail": true,
+            "ip_hash": true,
+            "created_at": true
+        },
+        "index": {
+            "AWA_AI_CONV_LOG_SESSION_ID": true,
+            "AWA_AI_CONV_LOG_CUSTOMER_ID": true,
+            "AWA_AI_CONV_LOG_CHANNEL": true,
+            "AWA_AI_CONV_LOG_CREATED_AT": true,
+            "AWA_AI_CONV_LOG_STATUS": true,
+            "GRUPOAWAMOTOS_AI_CONVERSATION_LOG_SESSION_ID": true,
+            "GRUPOAWAMOTOS_AI_CONVERSATION_LOG_CUSTOMER_ID": true,
+            "GRUPOAWAMOTOS_AI_CONVERSATION_LOG_CHANNEL": true,
+            "GRUPOAWAMOTOS_AI_CONVERSATION_LOG_CREATED_AT": true,
+            "GRUPOAWAMOTOS_AI_CONVERSATION_LOG_STATUS": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "grupoawamotos_ai_rate_limit": {
+        "column": {
+            "rate_id": true,
+            "ip_hash": true,
+            "requests_count": true,
+            "window_start": true,
+            "updated_at": true
+        },
+        "index": {
+            "AWA_AI_RATE_LIMIT_WINDOW_START": true,
+            "GRUPOAWAMOTOS_AI_RATE_LIMIT_WINDOW_START": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "AWA_AI_RATE_LIMIT_IP_HASH": true,
+            "GRUPOAWAMOTOS_AI_RATE_LIMIT_IP_HASH": true
+        }
+    }
+}

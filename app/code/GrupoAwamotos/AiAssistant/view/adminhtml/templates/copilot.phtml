@@ -1,0 +1,315 @@
+<?php
+/**
+ * @var \GrupoAwamotos\AiAssistant\Block\Adminhtml\Copilot $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+if (!$block->isEnabled()): ?>
+    <div class="message message-warning warning">
+        <div><?= $escaper->escapeHtml(__('O Copiloto IA está desabilitado. Acesse Stores → Configuration → AWA Motos → Assistente de IA para habilitá-lo e configurar a chave Groq.')) ?></div>
+    </div>
+<?php return; endif; ?>
+
+<div class="awa-copilot-page" id="awa-copilot-root">
+    <div class="awa-copilot-layout">
+
+        <!-- Painel lateral: sugestões de prompts -->
+        <aside class="awa-copilot-sidebar">
+            <h3 class="awa-copilot-sidebar__title"><?= $escaper->escapeHtml(__('Sugestões')) ?></h3>
+            <ul class="awa-copilot-prompts" id="awa-copilot-prompts">
+                <li><button type="button" class="awa-copilot-prompt-btn" data-prompt="Qual o resumo de vendas de hoje?"><?= $escaper->escapeHtml(__('Resumo de vendas hoje')) ?></button></li>
+                <li><button type="button" class="awa-copilot-prompt-btn" data-prompt="Quais são os 10 produtos mais vendidos nos últimos 30 dias?"><?= $escaper->escapeHtml(__('Top produtos (30 dias)')) ?></button></li>
+                <li><button type="button" class="awa-copilot-prompt-btn" data-prompt="Quantos clientes novos tivemos nos últimos 7 dias?"><?= $escaper->escapeHtml(__('Clientes novos (7 dias)')) ?></button></li>
+                <li><button type="button" class="awa-copilot-prompt-btn" data-prompt="Qual o estoque atual do SKU "><?= $escaper->escapeHtml(__('Estoque por SKU…')) ?></button></li>
+                <li><button type="button" class="awa-copilot-prompt-btn" data-prompt="Me mostre os detalhes do pedido número "><?= $escaper->escapeHtml(__('Detalhe de pedido…')) ?></button></li>
+                <li><button type="button" class="awa-copilot-prompt-btn" data-prompt="Qual o status B2B do CNPJ "><?= $escaper->escapeHtml(__('Status B2B por CNPJ…')) ?></button></li>
+            </ul>
+            <div class="awa-copilot-sidebar__note">
+                <strong><?= $escaper->escapeHtml(__('Somente leitura')) ?></strong><br>
+                <?= $escaper->escapeHtml(__('O copiloto nunca executa ações de escrita. Para aprovar cadastros, editar pedidos ou alterar configurações, use o menu Admin correspondente.')) ?>
+            </div>
+        </aside>
+
+        <!-- Área principal de chat -->
+        <main class="awa-copilot-main">
+            <div class="awa-copilot-messages" id="awa-copilot-messages" role="log" aria-live="polite">
+                <div class="awa-copilot-msg awa-copilot-msg--assistant">
+                    <div class="awa-copilot-msg__bubble">
+                        <?= $escaper->escapeHtml(__('Olá! Sou o Copiloto interno da AWA Motos. Posso consultar vendas, estoque, pedidos, clientes e status B2B — tudo em modo leitura. Como posso ajudar?')) ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="awa-copilot-error" id="awa-copilot-error" role="alert" style="display:none;"></div>
+
+            <form class="awa-copilot-form" id="awa-copilot-form">
+                <label class="admin__field-label" for="awa-copilot-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">
+                    <?= $escaper->escapeHtml(__('Sua pergunta ao copiloto')) ?>
+                </label>
+                <textarea id="awa-copilot-input"
+                          class="admin__control-textarea awa-copilot-input"
+                          rows="2"
+                          maxlength="2000"
+                          placeholder="<?= $escaper->escapeHtmlAttr(__('Pergunta ao copiloto… (Enter para enviar, Shift+Enter para nova linha)')) ?>"></textarea>
+                <button type="submit"
+                        id="awa-copilot-send"
+                        class="action-primary awa-copilot-send">
+                    <?= $escaper->escapeHtml(__('Enviar')) ?>
+                </button>
+            </form>
+        </main>
+    </div>
+</div>
+
+<style>
+.awa-copilot-page {
+    padding: 24px;
+}
+.awa-copilot-layout {
+    display: flex;
+    gap: 24px;
+    height: calc(100vh - 200px);
+    min-height: 500px;
+}
+.awa-copilot-sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.awa-copilot-sidebar__title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #666;
+    margin: 0;
+}
+.awa-copilot-prompts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+.awa-copilot-prompt-btn {
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    color: #333;
+}
+.awa-copilot-prompt-btn:hover {
+    border-color: #b73337;
+    background: #fef2f2;
+    color: #b73337;
+}
+.awa-copilot-sidebar__note {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.5;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 12px;
+}
+.awa-copilot-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+.awa-copilot-messages {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+}
+.awa-copilot-msg {
+    display: flex;
+    max-width: 88%;
+}
+.awa-copilot-msg--user {
+    align-self: flex-end;
+}
+.awa-copilot-msg--user .awa-copilot-msg__bubble {
+    background: #b73337;
+    color: #fff;
+    border-radius: 12px 12px 2px 12px;
+}
+.awa-copilot-msg--assistant {
+    align-self: flex-start;
+}
+.awa-copilot-msg--assistant .awa-copilot-msg__bubble {
+    background: #f5f5f5;
+    color: #333;
+    border-radius: 12px 12px 12px 2px;
+}
+.awa-copilot-msg__bubble {
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+.awa-copilot-msg__bubble a {
+    color: #b73337;
+    text-decoration: underline;
+}
+.awa-copilot-msg--typing .awa-copilot-msg__bubble {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 14px 18px;
+}
+.awa-copilot-msg--typing span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #aaa;
+    animation: awaAdminTyping 1.2s infinite ease-in-out;
+}
+.awa-copilot-msg--typing span:nth-child(2) { animation-delay: .2s; }
+.awa-copilot-msg--typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes awaAdminTyping {
+    0%,60%,100% { transform: scale(1); opacity: .5; }
+    30%         { transform: scale(1.3); opacity: 1; }
+}
+.awa-copilot-error {
+    padding: 10px 14px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 6px;
+    font-size: 13px;
+}
+.awa-copilot-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+.awa-copilot-input {
+    flex: 1;
+    resize: vertical;
+    min-height: 60px;
+    max-height: 140px;
+    font-size: 14px;
+    border-radius: 6px;
+}
+.awa-copilot-send {
+    flex-shrink: 0;
+    height: 44px;
+    padding: 0 20px;
+}
+</style>
+
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var config   = <?= /* @noEscape */ $block->getCopilotConfigJson() ?>;
+    var history  = [];
+    var $messages = $('#awa-copilot-messages');
+    var $input    = $('#awa-copilot-input');
+    var $send     = $('#awa-copilot-send');
+    var $error    = $('#awa-copilot-error');
+
+    function scrollToBottom() {
+        setTimeout(function () {
+            $messages[0].scrollTop = $messages[0].scrollHeight;
+        }, 60);
+    }
+
+    function addMessage(role, content) {
+        var $msg  = $('<div class="awa-copilot-msg awa-copilot-msg--' + role + '"></div>');
+        var $bubble = $('<div class="awa-copilot-msg__bubble"></div>');
+        $bubble.text(content);
+        $msg.append($bubble);
+        $messages.append($msg);
+        scrollToBottom();
+        return $msg;
+    }
+
+    function addTypingIndicator() {
+        var $msg = $('<div class="awa-copilot-msg awa-copilot-msg--assistant awa-copilot-msg--typing"></div>');
+        var $bubble = $('<div class="awa-copilot-msg__bubble"><span></span><span></span><span></span></div>');
+        $msg.append($bubble);
+        $messages.append($msg);
+        scrollToBottom();
+        return $msg;
+    }
+
+    function sendMessage(text) {
+        text = (text || '').trim();
+        if (!text) { return; }
+
+        $error.hide().text('');
+        addMessage('user', text);
+        $input.val('').prop('disabled', true);
+        $send.prop('disabled', true);
+
+        var $typing = addTypingIndicator();
+
+        $.ajax({
+            url:         config.endpoint,
+            type:        'POST',
+            contentType: 'application/json',
+            data:        JSON.stringify({ message: text, history: history, form_key: config.formKey }),
+            dataType:    'json',
+            headers:     { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function (resp) {
+                $typing.remove();
+                $input.prop('disabled', false);
+                $send.prop('disabled', false);
+
+                if (resp && resp.reply) {
+                    addMessage('assistant', resp.reply);
+                    history = resp.history || history;
+                } else if (resp && resp.error) {
+                    $error.text(resp.error).show();
+                }
+            },
+            error: function () {
+                $typing.remove();
+                $input.prop('disabled', false);
+                $send.prop('disabled', false);
+                $error.text('<?= $escaper->escapeJs(__('Erro ao comunicar com o copiloto. Tente novamente.')) ?>').show();
+            }
+        });
+    }
+
+    // Form submit
+    $('#awa-copilot-form').on('submit', function (e) {
+        e.preventDefault();
+        sendMessage($input.val());
+    });
+
+    // Keyboard: Enter sends, Shift+Enter inserts newline
+    $input.on('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage($input.val());
+        }
+    });
+
+    // Prompt suggestions
+    $('#awa-copilot-prompts').on('click', '.awa-copilot-prompt-btn', function () {
+        $input.val($(this).data('prompt')).focus();
+    });
+});
+</script>

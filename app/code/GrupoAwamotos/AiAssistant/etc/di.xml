@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Interface preferences -->
+    <!-- Active LLM: Hermes 3 via OpenRouter (OpenRouterClient + model nousresearch/hermes-3-llama-3.1-70b).
+         Alternativas: GroqClient ou HermesClient (Together AI) — trocar type abaixo. -->
+    <preference for="GrupoAwamotos\AiAssistant\Api\LlmClientInterface"
+                type="GrupoAwamotos\AiAssistant\Model\Llm\OpenRouterClient"/>
+
+    <preference for="GrupoAwamotos\AiAssistant\Api\AssistantOrchestratorInterface"
+                type="GrupoAwamotos\AiAssistant\Model\Orchestrator"/>
+
+    <!-- Dedicated log file -->
+    <virtualType name="GrupoAwamotos\AiAssistant\Logger\Handler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/ai_assistant.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="GrupoAwamotos\AiAssistant\Logger\Logger" type="Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">ai_assistant</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="file" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Wire the dedicated logger into all classes that declare LoggerInterface -->
+    <type name="GrupoAwamotos\AiAssistant\Model\Llm\OpenRouterClient">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="GrupoAwamotos\AiAssistant\Model\Llm\GroqClient">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="GrupoAwamotos\AiAssistant\Model\Orchestrator">
+        <arguments>
+            <argument name="log" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>
+            <!-- Tool registry — all tools injected as a named array.
+                 Adding a new tool means adding one <item> here; nothing else changes. -->
+            <argument name="tools" xsi:type="array">
+                <!-- Available to all channels -->
+                <item name="catalog_search"    xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\CatalogSearchTool</item>
+                <item name="fitment_search"    xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\FitmentSearchTool</item>
+                <item name="product_detail"    xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\ProductDetailTool</item>
+                <item name="order_tracking"    xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\OrderTrackingTool</item>
+                <item name="cart_info"         xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\CartInfoTool</item>
+                <!-- B2B only -->
+                <item name="b2b_quote"         xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\B2BQuoteTool</item>
+                <item name="b2b_reorder"       xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\B2BReorderTool</item>
+                <item name="b2b_status"        xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\B2BStatusTool</item>
+                        <!-- Central de Ajuda — todos os canais autorizados -->
+                        <item name="knowledge_base_search" xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\KnowledgeBaseSearchTool</item>
+                        <!-- Admin only -->
+                        <item name="admin_sales"       xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\AdminSalesTool</item>
+                        <item name="admin_stock"       xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\AdminStockTool</item>
+                        <item name="admin_order"       xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\AdminOrderDetailTool</item>
+                        <item name="admin_top_selling" xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\AdminTopSellingTool</item>
+                        <item name="admin_b2b_score"  xsi:type="object">GrupoAwamotos\AiAssistant\Model\Tool\AdminB2BScoreTool</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="GrupoAwamotos\AiAssistant\Model\ConversationLogger">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="GrupoAwamotos\AiAssistant\Model\RateLimiter">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>
+        </arguments>
+    </type>
+
+</config>

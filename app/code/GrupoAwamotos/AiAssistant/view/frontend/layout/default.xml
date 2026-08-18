@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="GrupoAwamotos_AiAssistant::css/ai-assistant.css" rel="stylesheet" type="text/css"
+             media="all" ifconfig="ai_assistant/storefront/enabled"/>
+    </head>
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="grupoawamotos.ai.chat.widget"
+                   template="GrupoAwamotos_AiAssistant::chat/widget.phtml"
+                   ifconfig="ai_assistant/storefront/enabled">
+                <arguments>
+                    <argument name="ai_chat_view_model" xsi:type="object">
+                        GrupoAwamotos\AiAssistant\ViewModel\ChatWidget
+                    </argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

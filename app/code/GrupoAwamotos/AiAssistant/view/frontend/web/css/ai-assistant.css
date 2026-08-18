@@ -1,0 +1,552 @@
+/**
+ * AWA AI Assistant — Chat widget styles
+ *
+ * Usa somente CSS custom properties runtime (var(--awa-*)) com fallbacks
+ * alinhados ao design system AWA. Não depende de variáveis LESS do tema,
+ * compilando corretamente como asset isolado de módulo.
+ */
+
+#awa-ai-chat-root {
+    position:    fixed;
+    bottom:      24px;
+    right:       24px;
+    z-index:     9999;
+    font-family: inherit;
+    font-size:   14px;
+    line-height: 1.5;
+}
+
+/* ── Bubble de abertura ───────────────────────────────────────────
+   !important pontual: themes/Magento button defaults (padding 8×16,
+   min-height 44px, inline-flex) derrubam o FAB 56×56 sem isso. */
+#awa-ai-chat-root .awa-ai-chat__toggle {
+    display:         flex !important;
+    align-items:     center !important;
+    justify-content: center !important;
+    box-sizing:      border-box !important;
+    width:           56px !important;
+    height:          56px !important;
+    min-width:       56px !important;
+    min-height:      56px !important;
+    max-width:       56px !important;
+    max-height:      56px !important;
+    padding:         0 !important;
+    margin:          0 !important;
+    line-height:     1 !important;
+    border-radius:   var(--awa-radius-full, 9999px) !important;
+    border:          none !important;
+    background:      var(--awa-primary, var(--awa-red, #b73337)) !important;
+    color:           var(--awa-text-inverse, #fff) !important;
+    cursor:          pointer;
+    box-shadow:      var(--awa-shadow-lg, 0 8px 24px rgb(0 0 0 / 12%));
+    transition:      transform 0.2s ease, box-shadow 0.2s ease;
+    position:        relative;
+    z-index:         1;
+    appearance:      none;
+    -webkit-appearance: none;
+}
+#awa-ai-chat-root .awa-ai-chat__toggle:hover {
+    transform:  scale(1.07);
+    box-shadow: var(--awa-shadow-xl, 0 16px 40px rgb(0 0 0 / 15%));
+}
+#awa-ai-chat-root .awa-ai-chat__toggle:focus-visible {
+    outline:        3px solid var(--awa-primary, #b73337);
+    outline-offset: 3px;
+}
+
+.awa-ai-chat__toggle-icon svg {
+    transition: transform 0.2s ease;
+}
+.awa-ai-chat__toggle-icon--open svg {
+    transform: rotate(90deg) scale(.8);
+}
+
+/* ── Painel flutuante ───────────────────────────────────────────── */
+.awa-ai-chat__panel {
+    position:       absolute;
+    bottom:         68px;
+    right:          0;
+    width:          360px;
+    max-width:      calc(100vw - 48px);
+    height:         520px;
+    max-height:     calc(100vh - 120px);
+    background:     var(--awa-surface, var(--awa-bg, #fff));
+    border-radius:  var(--awa-radius-md, 16px);
+    box-shadow:     var(--awa-shadow-xl, 0 16px 40px rgb(0 0 0 / 15%));
+    display:        flex;
+    flex-direction: column;
+    overflow:       hidden;
+    pointer-events: none;
+    opacity:        0;
+    transform:      translateY(12px) scale(.97);
+    transition:     opacity 0.2s ease, transform 0.2s ease;
+}
+.awa-ai-chat__panel--open {
+    pointer-events: auto;
+    opacity:        1;
+    transform:      translateY(0) scale(1);
+}
+
+/* ── Cabeçalho ──────────────────────────────────────────────────── */
+.awa-ai-chat__header {
+    display:         flex;
+    align-items:     center;
+    justify-content: space-between;
+    padding:         12px 16px;
+    background:      var(--awa-primary, var(--awa-red, #b73337));
+    color:           var(--awa-text-inverse, #fff);
+}
+.awa-ai-chat__header-info {
+    display:     flex;
+    align-items: center;
+    gap:         8px;
+}
+.awa-ai-chat__avatar {
+    font-size:   20px;
+    line-height: 1;
+}
+.awa-ai-chat__title {
+    font-weight: 700;
+    font-size:   15px;
+}
+.awa-ai-chat__close {
+    background:    transparent;
+    border:        none;
+    color:         var(--awa-text-inverse, #fff);
+    font-size:     18px;
+    line-height:   1;
+    cursor:        pointer;
+    padding:       4px 12px;
+    border-radius: var(--awa-radius-xs, 4px);
+    transition:    background 0.15s ease;
+}
+.awa-ai-chat__close:hover {
+    background: rgb(255 255 255 / 20%);
+}
+.awa-ai-chat__close:focus-visible {
+    outline:        3px solid var(--awa-text-inverse, #fff);
+    outline-offset: 2px;
+}
+
+/* ── Área de mensagens ──────────────────────────────────────────── */
+.awa-ai-chat__messages {
+    flex:            1;
+    overflow-y:      auto;
+    padding:         16px;
+    display:         flex;
+    flex-direction:  column;
+    gap:             10px;
+    scroll-behavior: smooth;
+}
+
+.awa-ai-chat__msg {
+    display:        flex;
+    flex-direction: column;
+    gap:            8px;
+    max-width:      85%;
+}
+.awa-ai-chat__msg--user {
+    align-self: flex-end;
+}
+.awa-ai-chat__msg--user .awa-ai-chat__products {
+    display: none !important; /* product cards only on assistant turns */
+}
+.awa-ai-chat__msg--user .awa-ai-chat__msg-bubble {
+    background:    var(--awa-primary, var(--awa-red, #b73337));
+    color:         var(--awa-text-inverse, #fff);
+    border-radius: var(--awa-radius-md, 10px) var(--awa-radius-md, 10px) var(--awa-radius-xs, 4px) var(--awa-radius-md, 10px);
+}
+.awa-ai-chat__msg--assistant {
+    align-self: flex-start;
+}
+.awa-ai-chat__msg--assistant .awa-ai-chat__msg-bubble {
+    background:    var(--awa-bg-subtle, #f3f4f6);
+    color:         var(--awa-text, var(--awa-text-primary, #111827));
+    border-radius: var(--awa-radius-md, 10px) var(--awa-radius-md, 10px) var(--awa-radius-md, 10px) var(--awa-radius-xs, 4px);
+}
+.awa-ai-chat__msg--assistant .awa-ai-chat__msg-bubble a {
+    color:           var(--awa-primary, #b73337);
+    text-decoration: underline;
+}
+.awa-ai-chat__msg--assistant .awa-ai-chat__msg-bubble a:hover {
+    color: var(--awa-primary-dark, #8f1e21);
+}
+
+.awa-ai-chat__msg-bubble {
+    padding:     10px 14px;
+    font-size:   14px;
+    line-height: 1.6;
+    word-break:  break-word;
+}
+
+/* ── Indicador de digitação ─────────────────────────────────────── */
+.awa-ai-chat__msg-bubble--typing {
+    display:     flex;
+    gap:         5px;
+    align-items: center;
+    padding:     14px 18px;
+}
+.awa-ai-chat__msg-bubble--typing span {
+    width:         8px;
+    height:        8px;
+    border-radius: var(--awa-radius-full, 9999px);
+    background:    var(--awa-text-muted, var(--awa-text-secondary, #9ca3af));
+    animation:     awaAiTyping 1.2s infinite ease-in-out;
+}
+.awa-ai-chat__msg-bubble--typing span:nth-child(2) { animation-delay: .2s; }
+.awa-ai-chat__msg-bubble--typing span:nth-child(3) { animation-delay: .4s; }
+
+@keyframes awaAiTyping {
+    0%,  60%, 100% { transform: scale(1); opacity: .6; }
+    30%             { transform: scale(1.3); opacity: 1; }
+}
+
+/* ── Mensagem de erro ───────────────────────────────────────────── */
+.awa-ai-chat__error {
+    margin:        0 16px 8px;
+    padding:       8px 12px;
+    background:    var(--awa-error-bg, #fef2f2);
+    color:         var(--awa-error-text, #7f1d1d);
+    border:        1px solid var(--awa-error-border, #fecaca);
+    border-radius: var(--awa-radius-xs, 4px);
+    font-size:     13px;
+}
+
+/* ── Formulário de envio ────────────────────────────────────────── */
+.awa-ai-chat__form {
+    display:     flex;
+    align-items: flex-end;
+    gap:         8px;
+    padding:     12px 16px;
+    border-top:  1px solid var(--awa-border, #e5e7eb);
+    background:  var(--awa-surface, var(--awa-bg, #fff));
+}
+
+.awa-ai-chat__input {
+    flex:          1;
+    resize:        none;
+    border:        1px solid var(--awa-border, #d1d5db);
+    border-radius: var(--awa-radius-full, 9999px);
+    padding:       9px 14px;
+    font-size:     14px;
+    line-height:   1.4;
+    font-family:   inherit;
+    max-height:    80px;
+    overflow-y:    auto;
+    transition:    border-color 0.15s ease;
+}
+.awa-ai-chat__input:focus {
+    outline:      none;
+    border-color: var(--awa-primary, #b73337);
+}
+.awa-ai-chat__input:disabled {
+    background: var(--awa-bg-subtle, #f9fafb);
+    cursor:     not-allowed;
+}
+
+.awa-ai-chat__send {
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    width:           38px;
+    height:          38px;
+    border-radius:   var(--awa-radius-full, 9999px);
+    border:          none;
+    background:      var(--awa-primary, var(--awa-red, #b73337));
+    color:           var(--awa-text-inverse, #fff);
+    cursor:          pointer;
+    flex-shrink:     0;
+    transition:      background 0.15s ease, opacity 0.15s ease;
+}
+.awa-ai-chat__send:hover:not(:disabled) {
+    background: var(--awa-primary-dark, #8f1e21);
+}
+.awa-ai-chat__send:disabled {
+    opacity: .45;
+    cursor:  not-allowed;
+}
+.awa-ai-chat__send:focus-visible {
+    outline:        3px solid var(--awa-primary, #b73337);
+    outline-offset: 2px;
+}
+
+.awa-ai-chat__header-text {
+    display:        flex;
+    flex-direction: column;
+    gap:            1px;
+    min-width:      0;
+}
+.awa-ai-chat__subtitle {
+    font-size:   11px;
+    font-weight: 500;
+    opacity:     .85;
+    line-height: 1.2;
+}
+.awa-ai-chat__avatar {
+    display:         inline-flex;
+    align-items:     center;
+    justify-content: center;
+    width:           32px;
+    height:          32px;
+    border-radius:   var(--awa-radius-full, 9999px);
+    background:      rgb(255 255 255 / 18%);
+    flex-shrink:     0;
+}
+.awa-ai-chat__msg--assistant {
+    max-width: 92%;
+}
+.awa-ai-chat__products {
+    display:        flex;
+    flex-direction: column;
+    gap:            6px;
+    width:          100%;
+}
+.awa-ai-chat__product {
+    display:         flex;
+    flex-direction:  row;
+    align-items:     center;
+    gap:             10px;
+    padding:         10px 12px;
+    border-radius:   var(--awa-radius-sm, 8px);
+    border:          1px solid var(--awa-border, rgb(0 0 0 / 12%));
+    background:      var(--awa-surface, var(--awa-bg, #fff));
+    color:           inherit;
+    text-decoration: none;
+    min-height:      44px;
+    transition:      border-color .15s ease, box-shadow .15s ease;
+}
+.awa-ai-chat__product:hover {
+    border-color: var(--awa-primary, var(--awa-red, #b73337));
+    box-shadow:   var(--awa-shadow-md, 0 4px 14px rgb(0 0 0 / 8%));
+}
+.awa-ai-chat__product-thumb {
+    width:         48px;
+    height:        48px;
+    object-fit:    contain;
+    flex-shrink:   0;
+    border-radius: var(--awa-radius-xs, 4px);
+    background:    var(--awa-bg-subtle, #f3f4f6);
+}
+.awa-ai-chat__product-body {
+    display:        flex;
+    flex-direction: column;
+    gap:            2px;
+    min-width:      0;
+}
+.awa-ai-chat__product-name {
+    font-size:   13px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+.awa-ai-chat__product-meta {
+    display:     flex;
+    gap:         10px;
+    align-items: baseline;
+    font-size:   12px;
+    color:       var(--awa-text-muted, var(--awa-text-secondary, rgb(0 0 0 / 55%)));
+}
+.awa-ai-chat__product-meta strong {
+    color: var(--awa-primary, var(--awa-red, #b73337));
+    font-weight: 700;
+}
+.awa-ai-chat__product-fitment {
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--awa-text-muted, var(--awa-text-secondary, rgb(0 0 0 / 55%)));
+}
+
+/* ── Responsivo: mobile ─────────────────────────────────────────── */
+@media (max-width: 575px) {
+    #awa-ai-chat-root {
+        right:  12px;
+        bottom: 12px;
+    }
+    .awa-ai-chat__panel {
+        width:     calc(100vw - 24px);
+        right:     0;
+        max-width: none;
+    }
+}
+
+/* ── Acessibilidade ─────────────────────────────────────────────── */
+.sr-only {
+    position:  absolute;
+    width:     1px;
+    height:    1px;
+    padding:   0;
+    margin:    -1px;
+    overflow:  hidden;
+    clip:      rect(0, 0, 0, 0);
+    border:    0;
+}
+
+/* ── Guided purchase coach (card above FAB) ─────────────────────── */
+.awa-ai-coach {
+    position: absolute;
+    right: 0;
+    bottom: 72px;
+    width: min(300px, calc(100vw - 32px));
+    padding: 16px 14px 14px;
+    box-sizing: border-box;
+    background: var(--awa-surface, var(--awa-bg, #fff));
+    color: var(--awa-text-primary, #111827);
+    border: 1px solid var(--awa-border, rgb(0 0 0 / 10%));
+    border-radius: var(--awa-radius-md, 14px);
+    box-shadow: var(--awa-shadow-lg, 0 8px 24px rgb(0 0 0 / 12%));
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+    transform-origin: bottom right;
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+}
+.awa-ai-coach--visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    visibility: visible;
+}
+.awa-ai-coach__close {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: var(--awa-radius-full, 9999px);
+    background: transparent;
+    color: var(--awa-text-muted, rgb(0 0 0 / 55%));
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+.awa-ai-coach__close:hover,
+.awa-ai-coach__close:focus-visible {
+    color: var(--awa-text-primary, #111827);
+    background: var(--awa-bg-muted, rgb(0 0 0 / 5%));
+}
+.awa-ai-coach__message {
+    margin: 0 32px 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+}
+.awa-ai-coach__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.awa-ai-coach__btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid var(--awa-border, rgb(0 0 0 / 12%));
+    background: var(--awa-surface, #fff);
+    color: var(--awa-text-primary, #111827);
+    border-radius: var(--awa-radius-sm, 8px);
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    min-height: 40px;
+    text-align: center;
+    box-sizing: border-box;
+}
+.awa-ai-coach__btn:hover,
+.awa-ai-coach__btn:focus-visible {
+    border-color: var(--awa-primary, #b73337);
+    color: var(--awa-primary, #b73337);
+}
+.awa-ai-coach__btn--primary {
+    grid-column: 1 / -1;
+    background: var(--awa-primary, var(--awa-red, #b73337));
+    border-color: var(--awa-primary, var(--awa-red, #b73337));
+    color: var(--awa-text-inverse, #fff);
+}
+.awa-ai-coach__btn--primary:hover,
+.awa-ai-coach__btn--primary:focus-visible {
+    color: var(--awa-text-inverse, #fff);
+    filter: brightness(1.05);
+}
+.awa-ai-coach__btn--link {
+    width: 100%;
+    margin-top: 8px;
+    text-align: center;
+    grid-column: 1 / -1;
+}
+.awa-ai-coach__steps {
+    margin: 0 0 8px;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--awa-text-secondary, rgb(0 0 0 / 72%));
+}
+.awa-ai-coach__steps li + li {
+    margin-top: 4px;
+}
+
+#awa-ai-chat-root .awa-ai-chat__toggle--pulse {
+    animation: awa-ai-coach-pulse 1.6s ease-in-out 2;
+}
+
+@keyframes awa-ai-coach-pulse {
+    0%, 100% { box-shadow: var(--awa-shadow-lg, 0 8px 24px rgb(0 0 0 / 12%)); }
+    50% {
+        box-shadow: 0 0 0 8px color-mix(in srgb, var(--awa-primary, #b73337) 22%, transparent),
+                    var(--awa-shadow-xl, 0 16px 40px rgb(0 0 0 / 15%));
+    }
+}
+
+/* ── Botão de som ──────────────────────────────────────────────── */
+.awa-ai-chat__sound-btn {
+    position: absolute;
+    bottom: 64px;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--awa-radius-full, 9999px);
+    background: var(--awa-surface, var(--awa-bg, #fff));
+    color: var(--awa-text-muted, var(--awa-text-secondary, #9ca3af));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--awa-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+    transition: background .15s, color .15s;
+    padding: 0;
+}
+
+.awa-ai-chat__sound-btn:hover {
+    background: var(--awa-hover-bg, #f3f4f6);
+    color: var(--awa-text, var(--awa-text-primary, #111827));
+}
+
+.awa-ai-chat__sound-btn:focus-visible {
+    outline: 2px solid var(--awa-primary, var(--awa-red, #b73337));
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awa-ai-coach {
+        transition: none;
+        transform: none;
+    }
+    #awa-ai-chat-root .awa-ai-chat__toggle--pulse {
+        animation: none;
+    }
+}
+
+@media (max-width: 575px) {
+    .awa-ai-coach {
+        bottom: 68px;
+        width: min(288px, calc(100vw - 24px));
+        padding: 14px 12px 12px;
+    }
+    .awa-ai-coach__btn {
+        min-height: 44px;
+        font-size: 12px;
+    }
+}

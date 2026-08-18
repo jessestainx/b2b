@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <ai_assistant>
+            <general>
+                <enabled>0</enabled>
+                <groq_api_key/>
+                <model>llama-3.3-70b-versatile</model>
+                <timeout_seconds>20</timeout_seconds>
+                <max_history_messages>10</max_history_messages>
+            </general>
+            <openrouter>
+                <api_key/>
+                <model>nousresearch/hermes-3-llama-3.1-70b</model>
+                <timeout_seconds>45</timeout_seconds>
+            </openrouter>
+            <hermes>
+                <api_key/>
+                <model>NousResearch/Hermes-3-Llama-3.1-70B</model>
+                <timeout_seconds>30</timeout_seconds>
+            </hermes>
+            <storefront>
+                <enabled>0</enabled>
+                <widget_title>Assistente AWA</widget_title>
+                <welcome_message>Olá! Sou a assistente virtual da AWA Motos. Posso ajudar com buscas de peças, rastrear pedidos e muito mais. Como posso te ajudar?</welcome_message>
+                <rate_limit_per_hour>20</rate_limit_per_hour>
+            </storefront>
+            <guided_coach>
+                <enabled>1</enabled>
+                <delay_ms>6000</delay_ms>
+                <auto_dismiss_ms>20000</auto_dismiss_ms>
+                <guest_message>Precisa de ajuda para encontrar a peça certa? Eu te guio em poucos cliques.</guest_message>
+                <auth_message>Precisa de ajuda para encontrar uma peça ou acompanhar seu pedido?</auth_message>
+                <how_to_buy_cms_url>faq</how_to_buy_cms_url>
+            </guided_coach>
+            <admin_copilot>
+                <enabled>0</enabled>
+            </admin_copilot>
+        </ai_assistant>
+    </default>
+</config>

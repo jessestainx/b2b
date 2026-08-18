@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="grupoawamotos" translate="label" sortOrder="200">
+            <label>AWA Motos</label>
+        </tab>
+        <section id="ai_assistant" translate="label" sortOrder="40"
+                 showInDefault="1" showInWebsite="1" showInStore="0">
+            <class>separator-top</class>
+            <label>Assistente de IA</label>
+            <tab>grupoawamotos</tab>
+            <resource>GrupoAwamotos_AiAssistant::config</resource>
+
+            <group id="general" translate="label" type="text" sortOrder="10"
+                   showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Configurações Gerais do LLM</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Habilitar Assistente de IA</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="groq_api_key" translate="label comment" type="obscure" sortOrder="20"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Groq API Key</label>
+                    <comment>Chave de API do Groq (api.groq.com). Independente da chave usada no WhatsApp — recomenda-se uma chave dedicada para isolar rate limit e custo.</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="model" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Modelo Groq</label>
+                    <comment>Ex: llama-3.3-70b-versatile (padrão). Consulte api.groq.com/openai/v1/models para listar modelos disponíveis.</comment>
+                </field>
+                <field id="timeout_seconds" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Timeout da API (segundos)</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="max_history_messages" translate="label comment" type="text" sortOrder="50"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Máximo de Mensagens no Histórico</label>
+                    <comment>Número de turnos (pergunta+resposta) mantidos na sessão para contexto.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+            </group>
+
+            <group id="hermes" translate="label comment" type="text" sortOrder="15"
+                   showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Hermes 3 (NousResearch via Together AI)</label>
+                <comment>Alternativa ao Groq. Hermes 3 é fine-tuned especificamente para function calling — ideal para o assistente AWA. Ative-o trocando a preference no di.xml de GroqClient para HermesClient.</comment>
+                <field id="api_key" translate="label comment" type="obscure" sortOrder="10"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Together AI API Key</label>
+                    <comment>Obtenha em api.together.xyz. Mantém custo e rate limit separados do Groq.</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="model" translate="label comment" type="select" sortOrder="20"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Modelo Hermes</label>
+                    <source_model>GrupoAwamotos\AiAssistant\Model\Config\Source\HermesModel</source_model>
+                    <comment>70B: equilíbrio custo/qualidade. 405B: melhor qualidade, custo mais alto.</comment>
+                </field>
+                <field id="timeout_seconds" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Timeout (segundos)</label>
+                    <comment>Together AI pode ser ligeiramente mais lento que Groq. Recomendado: 30s.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+            </group>
+
+            <group id="openrouter" translate="label comment" type="text" sortOrder="16"
+                   showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>OpenRouter (Recomendado)</label>
+                <comment>Acessa 400+ modelos com uma única chave. Mais econômico e com fallback automático entre providers. openrouter.ai</comment>
+                <field id="api_key" translate="label comment" type="obscure" sortOrder="10"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>OpenRouter API Key</label>
+                    <comment>Obtenha gratuitamente em openrouter.ai. Prefixo: sk-or-v1-…</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="model" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Modelo</label>
+                    <comment>Formato provider/modelo. Recomendados: meta-llama/llama-3.3-70b-instruct · nousresearch/hermes-3-llama-3.1-70b · openai/gpt-4o-mini · anthropic/claude-3.5-haiku · google/gemini-flash-1.5</comment>
+                </field>
+                <field id="timeout_seconds" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Timeout (segundos)</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+            </group>
+
+            <group id="storefront" translate="label" type="text" sortOrder="20"
+                   showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Widget de Chat no Site</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Exibir Widget no Site</label>
+                    <comment>Mostra a bolha de chat com IA em todas as páginas do storefront.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="ai_assistant/general/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="widget_title" translate="label" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Título do Widget</label>
+                    <depends>
+                        <field id="ai_assistant/general/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="welcome_message" translate="label comment" type="textarea" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Mensagem de Boas-vindas</label>
+                    <comment>Primeira mensagem exibida ao abrir o chat.</comment>
+                    <depends>
+                        <field id="ai_assistant/general/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="rate_limit_per_hour" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Máximo de Mensagens por Hora (por IP)</label>
+                    <comment>Proteção de custo. Clientes que excederem recebem mensagem de pausa e link para o LiveChat.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                    <depends>
+                        <field id="ai_assistant/general/enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <group id="guided_coach" translate="label comment" type="text" sortOrder="25"
+                   showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Coach de Compra Guiada</label>
+                <comment>Card proativo ancorado no FAB do chat. Não cria segundo botão flutuante.</comment>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Habilitar Coach Guiado</label>
+                    <comment>Exige Widget de Chat no Site ativo. Uma mensagem por cenário por sessão do navegador.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="ai_assistant/storefront/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="delay_ms" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Delay antes de exibir (ms)</label>
+                    <comment>Padrão 4000. Aguarda idle do browser quando disponível.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="auto_dismiss_ms" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Auto-dismiss (ms)</label>
+                    <comment>Padrão 20000. Fecha o card sem interação.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="guest_message" translate="label" type="textarea" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Mensagem visitante (guest)</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="auth_message" translate="label" type="textarea" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Mensagem pós-login</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="how_to_buy_cms_url" translate="label comment" type="text" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>URL do guia Como comprar (opcional)</label>
+                    <comment>URL absoluta ou caminho Magento. Vazio = só passos inline no card.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <group id="admin_copilot" translate="label" type="text" sortOrder="30"
+                   showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Copiloto Interno (Admin)</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Habilitar Copiloto no Admin</label>
+                    <comment>Exibe a página de Copiloto interno no menu Admin (acesso por ACL).</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="ai_assistant/general/enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

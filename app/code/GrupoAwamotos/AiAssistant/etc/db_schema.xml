@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <table name="grupoawamotos_ai_conversation_log" resource="default" engine="innodb"
+           comment="AI Assistant Conversation Log (auditoria e LGPD)">
+
+        <column xsi:type="int" name="log_id" unsigned="true" nullable="false"
+                identity="true" comment="Log ID"/>
+        <column xsi:type="varchar" name="session_id" length="64" nullable="false"
+                comment="Session identifier (hash, sem dado pessoal)"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true"
+                comment="Magento customer_id (nulo para visitantes)"/>
+        <column xsi:type="varchar" name="channel" length="32" nullable="false"
+                default="storefront" comment="Canal: storefront, b2b, admin"/>
+        <column xsi:type="text" name="user_message" nullable="false"
+                comment="Pergunta do usuário"/>
+        <column xsi:type="mediumtext" name="assistant_response" nullable="true"
+                comment="Resposta gerada pelo LLM"/>
+        <column xsi:type="varchar" name="tools_called" length="512" nullable="true"
+                comment="Ferramentas chamadas neste turno (CSV)"/>
+        <column xsi:type="varchar" name="model_used" length="64" nullable="true"
+                comment="Modelo LLM utilizado"/>
+        <column xsi:type="int" name="tokens_used" unsigned="true" nullable="true"
+                comment="Total de tokens consumidos"/>
+        <column xsi:type="varchar" name="status" length="16" nullable="false"
+                default="ok" comment="ok | error | rate_limited | llm_error"/>
+        <column xsi:type="text" name="error_detail" nullable="true"
+                comment="Detalhe do erro quando status != ok"/>
+        <column xsi:type="varchar" name="ip_hash" length="64" nullable="true"
+                comment="Hash SHA-256 do IP (sem armazenar IP diretamente — LGPD)"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Data/hora do turno"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+
+        <index referenceId="AWA_AI_CONV_LOG_SESSION_ID" indexType="btree">
+            <column name="session_id"/>
+        </index>
+        <index referenceId="AWA_AI_CONV_LOG_CUSTOMER_ID" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="AWA_AI_CONV_LOG_CHANNEL" indexType="btree">
+            <column name="channel"/>
+        </index>
+        <index referenceId="AWA_AI_CONV_LOG_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+        <index referenceId="AWA_AI_CONV_LOG_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <table name="grupoawamotos_ai_rate_limit" resource="default" engine="innodb"
+           comment="AI Assistant Rate Limiting por IP/sessão">
+
+        <column xsi:type="int" name="rate_id" unsigned="true" nullable="false"
+                identity="true" comment="Rate ID"/>
+        <column xsi:type="varchar" name="ip_hash" length="64" nullable="false"
+                comment="Hash SHA-256 do IP"/>
+        <column xsi:type="int" name="requests_count" unsigned="true" nullable="false"
+                default="0" comment="Contador de requisições na janela atual"/>
+        <column xsi:type="timestamp" name="window_start" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Início da janela de 1 hora"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false"
+                default="CURRENT_TIMESTAMP" on_update="true" comment="Última atualização"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="rate_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="AWA_AI_RATE_LIMIT_IP_HASH">
+            <column name="ip_hash"/>
+        </constraint>
+        <index referenceId="AWA_AI_RATE_LIMIT_WINDOW_START" indexType="btree">
+            <column name="window_start"/>
+        </index>
+    </table>
+
+</schema>

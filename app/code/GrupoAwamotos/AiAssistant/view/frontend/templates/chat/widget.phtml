@@ -1,0 +1,256 @@
+<?php
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+/** @var \GrupoAwamotos\AiAssistant\ViewModel\ChatWidget $vm */
+$vm = $block->getData('ai_chat_view_model');
+
+if (!$vm || !$vm->isEnabled()) {
+    return;
+}
+
+$widgetConfig = $vm->getWidgetConfigJson();
+?>
+
+<div id="awa-ai-chat-root" data-bind="scope: 'AwaAiChat'">
+
+    <!-- Guided purchase coach (anchored to FAB — not a second floater) -->
+    <div class="awa-ai-coach"
+         role="dialog"
+         aria-label="<?= $escaper->escapeHtmlAttr(__('Ajuda para comprar')) ?>"
+         data-bind="css: coachCss, attr: { 'aria-hidden': (!coachVisible()).toString() }">
+        <button type="button"
+                class="awa-ai-coach__close"
+                data-bind="click: function () { dismissCoach('close'); }"
+                aria-label="<?= $escaper->escapeHtmlAttr(__('Fechar')) ?>">&#x2715;</button>
+
+        <p class="awa-ai-coach__message" data-bind="text: coachMessage"></p>
+
+        <!-- ko if: coachShowHowTo -->
+        <ol class="awa-ai-coach__steps">
+            <li><?= $escaper->escapeHtml(__('Busque a peça ou a moto no campo de pesquisa.')) ?></li>
+            <li><?= $escaper->escapeHtml(__('Abra o produto e confira compatibilidade.')) ?></li>
+            <li><?= $escaper->escapeHtml(__('Entre ou cadastre-se no B2B para ver preço e comprar.')) ?></li>
+        </ol>
+        <!-- ko if: coachHowToBuyUrl -->
+        <button type="button"
+                class="awa-ai-coach__btn awa-ai-coach__btn--link"
+                data-bind="click: function () { coachAction('how_to_buy_link'); }">
+            <?= $escaper->escapeHtml(__('Ver guia completo')) ?>
+        </button>
+        <!-- /ko -->
+        <!-- /ko -->
+
+        <!-- ko ifnot: coachShowHowTo -->
+        <!-- ko if: isGuestCoach -->
+        <div class="awa-ai-coach__actions">
+            <button type="button" class="awa-ai-coach__btn awa-ai-coach__btn--primary"
+                    data-bind="click: function () { coachAction('search'); }">
+                <?= $escaper->escapeHtml(__('Buscar peça')) ?>
+            </button>
+            <button type="button" class="awa-ai-coach__btn"
+                    data-bind="click: function () { coachAction('how_to_buy'); }">
+                <?= $escaper->escapeHtml(__('Como comprar')) ?>
+            </button>
+            <button type="button" class="awa-ai-coach__btn"
+                    data-bind="click: function () { coachAction('login'); }">
+                <?= $escaper->escapeHtml(__('Fazer login')) ?>
+            </button>
+            <button type="button" class="awa-ai-coach__btn"
+                    data-bind="click: function () { coachAction('register'); }">
+                <?= $escaper->escapeHtml(__('Cadastro B2B')) ?>
+            </button>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: isAuthCoach -->
+        <div class="awa-ai-coach__actions">
+            <button type="button" class="awa-ai-coach__btn awa-ai-coach__btn--primary"
+                    data-bind="click: function () { coachAction('search'); }">
+                <?= $escaper->escapeHtml(__('Buscar peça')) ?>
+            </button>
+            <button type="button" class="awa-ai-coach__btn"
+                    data-bind="click: function () { coachAction('orders'); }">
+                <?= $escaper->escapeHtml(__('Ver pedidos')) ?>
+            </button>
+            <button type="button" class="awa-ai-coach__btn"
+                    data-bind="click: function () { coachAction('reorder'); }">
+                <?= $escaper->escapeHtml(__('Repetir compra')) ?>
+            </button>
+            <button type="button" class="awa-ai-coach__btn"
+                    data-bind="click: function () { coachAction('open_chat'); }">
+                <?= $escaper->escapeHtml(__('Falar no chat')) ?>
+            </button>
+            <button type="button" class="awa-ai-coach__btn"
+                    data-bind="click: function () { coachAction('help_center'); }">
+                <?= $escaper->escapeHtml(__('Central de Ajuda')) ?>
+            </button>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: ko.utils.unwrapObservable(coachScenario) === 'b2b' -->
+        <div class="awa-ai-coach__actions">
+            <button type="button" class="awa-ai-coach__btn awa-ai-coach__btn--primary"
+                    data-bind="click: function () { coachAction('open_chat'); }">
+                <?= $escaper->escapeHtml(__('Tirar dúvida com a IA')) ?>
+            </button>
+            <button type="button" class="awa-ai-coach__btn"
+                    data-bind="click: function () { coachAction('help_center'); }">
+                <?= $escaper->escapeHtml(__('Central de Ajuda B2B')) ?>
+            </button>
+        </div>
+        <!-- /ko -->
+        <!-- /ko -->
+    </div>
+
+    <!-- Sound toggle — visible always, triggers chime only after user click -->
+    <button type="button"
+            class="awa-ai-chat__sound-btn"
+            data-bind="click: toggleSound,
+                       attr: { 'aria-label': soundEnabled() ? 'Silenciar notificações' : 'Ativar som',
+                               'aria-pressed': soundEnabled() ? 'true' : 'false',
+                               title: soundEnabled() ? 'Silenciar' : 'Ativar som' }">
+        <!-- ko ifnot: soundEnabled -->
+        <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" fill="currentColor"/>
+        </svg>
+        <!-- /ko -->
+        <!-- ko if: soundEnabled -->
+        <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/>
+        </svg>
+        <!-- /ko -->
+    </button>
+
+    <!-- Chat toggle bubble -->
+    <button type="button"
+            class="awa-ai-chat__toggle"
+            data-bind="click: toggleChat,
+                       css: fabPulseCss,
+                       attr: { 'aria-expanded': isOpen() ? 'true' : 'false', 'aria-label': isOpen() ? 'Fechar assistente' : 'Abrir assistente AWA' }">
+        <span class="awa-ai-chat__toggle-icon" data-bind="css: { 'awa-ai-chat__toggle-icon--open': isOpen }">
+            <svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="currentColor"/>
+            </svg>
+        </span>
+        <span class="awa-ai-chat__toggle-label" aria-hidden="true"><?= $escaper->escapeHtml(__('Assistente')) ?></span>
+    </button>
+
+    <!-- Chat panel -->
+    <div class="awa-ai-chat__panel"
+         role="dialog"
+         aria-label="Assistente AWA"
+         data-bind="css: { 'awa-ai-chat__panel--open': isOpen }, attr: { 'aria-hidden': (!isOpen()).toString() }">
+
+        <!-- Header -->
+        <div class="awa-ai-chat__header">
+            <div class="awa-ai-chat__header-info">
+                <span class="awa-ai-chat__avatar" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2a7 7 0 0 1 7 7v1.1A5 5 0 0 1 21 15v2a2 2 0 0 1-2 2h-1.2a6.2 6.2 0 0 1-11.6 0H5a2 2 0 0 1-2-2v-2a5 5 0 0 1 2-4V9a7 7 0 0 1 7-7z" fill="currentColor" opacity=".9"/>
+                    </svg>
+                </span>
+                <div class="awa-ai-chat__header-text">
+                    <span class="awa-ai-chat__title" data-bind="text: title"></span>
+                    <span class="awa-ai-chat__subtitle">Peças · pedidos · suporte</span>
+                </div>
+            </div>
+            <button type="button"
+                    class="awa-ai-chat__close"
+                    data-bind="click: toggleChat"
+                    aria-label="Fechar">&#x2715;</button>
+        </div>
+
+        <!-- Messages area -->
+        <div class="awa-ai-chat__messages" role="log" aria-live="polite">
+            <!-- ko foreach: { data: messages, afterRender: function () { $data._scrollToBottom(); } } -->
+            <div class="awa-ai-chat__msg"
+                 data-bind="css: { 'awa-ai-chat__msg--user': role === 'user', 'awa-ai-chat__msg--assistant': role === 'assistant' }">
+                <div class="awa-ai-chat__msg-bubble" data-bind="html: $parent.formatMessage(content)"></div>
+                <div class="awa-ai-chat__products"
+                     data-bind="visible: role === 'assistant' && products && products.length">
+                    <!-- ko foreach: products -->
+                    <a class="awa-ai-chat__product"
+                       data-bind="attr: { href: url }"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        <!-- ko if: image_url -->
+                        <img class="awa-ai-chat__product-thumb"
+                             width="48"
+                             height="48"
+                             loading="lazy"
+                             decoding="async"
+                             alt=""
+                             data-bind="attr: { src: image_url }">
+                        <!-- /ko -->
+                        <span class="awa-ai-chat__product-body">
+                            <span class="awa-ai-chat__product-name" data-bind="text: name"></span>
+                            <span class="awa-ai-chat__product-meta">
+                                <span data-bind="text: sku"></span>
+                                <!-- ko if: price_formatted -->
+                                <strong data-bind="text: price_formatted"></strong>
+                                <!-- /ko -->
+                            </span>
+                            <!-- ko if: fitment -->
+                            <span class="awa-ai-chat__product-meta" data-bind="text: fitment"></span>
+                            <!-- /ko -->
+                        </span>
+                    </a>
+                    <!-- /ko -->
+                </div>
+            </div>
+            <!-- /ko -->
+            <!-- ko if: isLoading -->
+            <div class="awa-ai-chat__msg awa-ai-chat__msg--assistant">
+                <div class="awa-ai-chat__msg-bubble awa-ai-chat__msg-bubble--typing"
+                     aria-label="<?= $escaper->escapeHtmlAttr(__('Digitando…')) ?>">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+            <!-- /ko -->
+        </div>
+
+        <!-- Inline error -->
+        <!-- ko if: errorMsg -->
+        <div class="awa-ai-chat__error" role="alert" data-bind="text: errorMsg"></div>
+        <!-- /ko -->
+
+        <!-- Input form -->
+        <form class="awa-ai-chat__form" data-bind="submit: sendMessage">
+            <label class="sr-only" for="awa-ai-chat-input">
+                <?= $escaper->escapeHtml(__('Sua mensagem')) ?>
+            </label>
+            <textarea id="awa-ai-chat-input"
+                      class="awa-ai-chat__input"
+                      rows="1"
+                      maxlength="1000"
+                      placeholder="<?= $escaper->escapeHtmlAttr(__('Digite sua pergunta…')) ?>"
+                      data-bind="value: inputText,
+                                 event: { keydown: handleKeydown },
+                                 attr: { disabled: isLoading }"></textarea>
+            <button type="submit"
+                    class="awa-ai-chat__send"
+                    data-bind="attr: { disabled: isLoading() || !inputText().trim() }"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Enviar mensagem')) ?>">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_Ui/js/core/app": {
+            "components": {
+                "AwaAiChat": {
+                    "component": "GrupoAwamotos_AiAssistant/js/ai-assistant",
+                    "config": <?= /* @noEscape */ $widgetConfig ?>
+                }
+            }
+        }
+    }
+}
+</script>
