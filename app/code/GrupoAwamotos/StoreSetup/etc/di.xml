@@ -44,4 +44,11 @@
             <argument name="extractors" xsi:type="array" />
         </arguments>
     </type>
+
+    <!-- Adobe graphql/disable_introspection: recusar __schema/__type antes do schema generate() -->
+    <type name="Magento\Framework\GraphQl\Query\Fields">
+        <plugin name="grupoawamotos_storesetup_disable_graphql_introspection"
+                type="GrupoAwamotos\StoreSetup\Plugin\DisableGraphQlIntrospectionPlugin"
+                sortOrder="10"/>
+    </type>
 </config>
