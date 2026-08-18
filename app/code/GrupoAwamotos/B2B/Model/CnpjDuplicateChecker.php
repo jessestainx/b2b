@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Model;
 
+use GrupoAwamotos\B2B\Service\CnpjValidator as CnpjChecksum;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
 
@@ -11,13 +12,16 @@ class CnpjDuplicateChecker
 {
     private CustomerRepositoryInterface $customerRepository;
     private CustomerCollectionFactory $customerCollectionFactory;
+    private CnpjChecksum $cnpjChecksum;
 
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
-        CustomerCollectionFactory $customerCollectionFactory
+        CustomerCollectionFactory $customerCollectionFactory,
+        ?CnpjChecksum $cnpjChecksum = null
     ) {
         $this->customerRepository = $customerRepository;
         $this->customerCollectionFactory = $customerCollectionFactory;
+        $this->cnpjChecksum = $cnpjChecksum ?? new CnpjChecksum();
     }
 
     /**
@@ -41,7 +45,7 @@ class CnpjDuplicateChecker
             return null;
         }
 
-        $formattedCnpj = $this->formatCnpj($cnpjDigits);
+        $formattedCnpj = $this->cnpjChecksum->format($cnpjDigits);
 
         $collection = $this->customerCollectionFactory->create();
         $collection->addAttributeToFilter('b2b_cnpj', ['in' => [$cnpjDigits, $formattedCnpj]]);
@@ -74,16 +78,4 @@ class CnpjDuplicateChecker
         return (string) preg_replace('/\D+/', '', $value);
     }
 
-    private function formatCnpj(string $cnpjDigits): string
-    {
-        if (strlen($cnpjDigits) !== 14) {
-            return $cnpjDigits;
-        }
-
-        return substr($cnpjDigits, 0, 2)
-            . '.' . substr($cnpjDigits, 2, 3)
-            . '.' . substr($cnpjDigits, 5, 3)
-            . '/' . substr($cnpjDigits, 8, 4)
-            . '-' . substr($cnpjDigits, 12, 2);
-    }
 }

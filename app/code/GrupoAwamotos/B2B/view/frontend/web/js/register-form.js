@@ -21,6 +21,84 @@ define([
         warning: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
     };
 
+    function translateMessage(message)
+    {
+        if ($.mage && typeof $.mage.__ === 'function') {
+            return $.mage.__(message);
+        }
+
+        return message;
+    }
+
+    function cleanCnpjDigits(value)
+    {
+        return String(value || '').replace(/\D/g, '');
+    }
+
+    function isValidCnpjChecksum(value)
+    {
+        let cnpj = cleanCnpjDigits(value);
+        let weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+        let weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+        let sum = 0;
+        let remainder;
+        let digit;
+        let i;
+
+        if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) {
+            return false;
+        }
+
+        for (i = 0; i < 12; i++) {
+            sum += parseInt(cnpj.charAt(i), 10) * weights1[i];
+        }
+
+        remainder = sum % 11;
+        digit = remainder < 2 ? 0 : 11 - remainder;
+
+        if (parseInt(cnpj.charAt(12), 10) !== digit) {
+            return false;
+        }
+
+        sum = 0;
+
+        for (i = 0; i < 13; i++) {
+            sum += parseInt(cnpj.charAt(i), 10) * weights2[i];
+        }
+
+        remainder = sum % 11;
+        digit = remainder < 2 ? 0 : 11 - remainder;
+
+        return parseInt(cnpj.charAt(13), 10) === digit;
+    }
+
+    function registerCnpjValidator()
+    {
+        if (!$.validator || typeof $.validator.addMethod !== 'function') {
+            return;
+        }
+
+        if ($.validator.methods['validate-cnpj']) {
+            return;
+        }
+
+        $.validator.addMethod(
+            'validate-cnpj',
+            function (value) {
+                let digits = cleanCnpjDigits(value);
+
+                if (digits.length === 0) {
+                    return true;
+                }
+
+                return isValidCnpjChecksum(digits);
+            },
+            translateMessage('Informe um CNPJ válido com 14 dígitos.')
+        );
+    }
+
+    registerCnpjValidator();
+
     return function (config, element) {
         let options = config || {};
         var $form = $(element);
@@ -241,6 +319,65 @@ define([
             return $form.data('validator') || null;
         }
 
+        function attachCnpjValidationRule()
+        {
+            var $cnpj = $field('#cnpj');
+            var validator;
+
+            registerCnpjValidator();
+
+            if (!$cnpj.length || typeof $cnpj.rules !== 'function') {
+                return;
+            }
+
+            validator = getFormValidator();
+
+            if (!validator) {
+                return;
+            }
+
+            $cnpj.rules('add', {
+                'validate-cnpj': true
+            });
+        }
+
+        function getCnpjRejectionMessage()
+        {
+            let digits = cleanCnpjDigits($field('#cnpj').val());
+
+            if (digits.length === 0) {
+                return 'Preencha CNPJ.';
+            }
+
+            if (digits.length !== 14) {
+                return 'Informe um CNPJ válido com 14 dígitos.';
+            }
+
+            if (!isValidCnpjChecksum(digits)) {
+                return 'CNPJ inválido. Verifique os dígitos.';
+            }
+
+            if (!cnpjValidated) {
+                return 'Aguarde a validação do CNPJ ou verifique o número informado.';
+            }
+
+            return '';
+        }
+
+        function isCnpjAccepted()
+        {
+            return getCnpjRejectionMessage() === '';
+        }
+
+        function markCnpjInvalid(message)
+        {
+            var $cnpj = $field('#cnpj');
+
+            $cnpj.removeClass('valid').addClass('mage-error').attr('aria-invalid', 'true');
+            $cnpj.closest('.field').addClass('_error');
+            setCnpjStatus('error', message);
+        }
+
         function validateStepFields(stepNumber, validationOptions)
         {
             validationOptions = validationOptions || {};
@@ -258,6 +395,8 @@ define([
             $section.find('input, select, textarea').each(function () {
                 var $input = $(this);
                 let name = $input.attr('name') || '';
+                let magentoValid = true;
+                let customMessage;
 
                 if (!$input.is(':visible') || $input.is(':disabled') || name === 'b2b_website') {
                     return;
@@ -265,43 +404,37 @@ define([
 
                 clearInlineFieldError($input);
 
-                if (validator && typeof validator.element === 'function') {
-                    if (!validator.element(this)) {
+                if (name === 'cnpj') {
+                    customMessage = getCnpjRejectionMessage();
+
+                    if (customMessage !== '') {
                         if (!validationOptions.silent) {
-                            ensureInlineFieldError($input, resolveFieldValidationMessage($input));
+                            markCnpjInvalid(customMessage);
                         }
                         valid = false;
                     }
+
                     return;
                 }
 
-                if ($input.prop('required') && $.trim(String($input.val() || '')) === '') {
+                if (validator && typeof validator.element === 'function') {
+                    magentoValid = !!validator.element(this);
+                } else if ($input.prop('required') && $.trim(String($input.val() || '')) === '') {
+                    magentoValid = false;
+                }
+
+                customMessage = resolveFieldValidationMessage($input);
+
+                if (!magentoValid || customMessage !== '') {
                     if (!validationOptions.silent) {
-                        ensureInlineFieldError($input, resolveFieldValidationMessage($input));
+                        ensureInlineFieldError(
+                            $input,
+                            customMessage !== '' ? customMessage : 'Preencha ' + getFieldLabel($input) + '.'
+                        );
                     }
                     valid = false;
-                    return;
-                }
-
-                if (!validationOptions.silent && $.trim(String($input.val() || '')) !== '') {
-                    let customMessage = resolveFieldValidationMessage($input);
-                    if (customMessage !== '') {
-                        ensureInlineFieldError($input, customMessage);
-                        valid = false;
-                    }
                 }
             });
-
-            if (stepIndex === 1) {
-                let cnpjDigits = ($field('#cnpj').val() || '').replace(/\D/g, '');
-
-                if (cnpjDigits.length === 14 && !cnpjValidated) {
-                    if (!validationOptions.silent) {
-                        setCnpjStatus('error', 'Aguarde a validação do CNPJ ou verifique o número informado.');
-                    }
-                    valid = false;
-                }
-            }
 
             if (stepIndex === 4) {
                 let password = String($field('#password').val() || '');
@@ -862,6 +995,7 @@ define([
         {
             var $field = $input.closest('.field');
             $field.removeClass('_error');
+            $input.removeClass('mage-error');
             $field.find('.awa-field-error').remove();
         }
 
@@ -872,7 +1006,7 @@ define([
             var $error = $field.find('.awa-field-error');
 
             $field.addClass('_error');
-            $input.attr('aria-invalid', 'true');
+            $input.removeClass('valid').addClass('mage-error').attr('aria-invalid', 'true');
 
             if (!$error.length) {
                 $error = $('<div/>', {
@@ -896,9 +1030,15 @@ define([
             }
 
             if (name === 'cnpj') {
-                digits = value.replace(/\D/g, '');
-                if (digits.length > 0 && digits.length !== 14) {
+                digits = cleanCnpjDigits(value);
+                if (digits.length === 0) {
+                    return 'Preencha CNPJ.';
+                }
+                if (digits.length !== 14) {
                     return 'Informe um CNPJ válido com 14 dígitos.';
+                }
+                if (!isValidCnpjChecksum(digits)) {
+                    return 'CNPJ inválido. Verifique os dígitos.';
                 }
             }
 
@@ -1083,6 +1223,7 @@ define([
             $feedback.empty();
 
             if (type === 'loading') {
+                $field('#cnpj').removeClass('valid mage-error');
                 $status.html('<span class="cnpj-spinner"></span>');
                 $message = $('<span/>', {
                     class: 'feedback-loading',
@@ -1094,6 +1235,11 @@ define([
             }
 
             if (type === 'success') {
+                $field('#cnpj')
+                    .removeClass('mage-error')
+                    .addClass('valid')
+                    .attr('aria-invalid', 'false');
+                $field('#cnpj').closest('.field').removeClass('_error');
                 $status.html('<span class="cnpj-check">&#10003;</span>');
                 $message = $('<span/>', {
                     class: 'feedback-success',
@@ -1105,6 +1251,11 @@ define([
             }
 
             if (type === 'error') {
+                $field('#cnpj')
+                    .removeClass('valid')
+                    .addClass('mage-error')
+                    .attr('aria-invalid', 'true');
+                $field('#cnpj').closest('.field').addClass('_error');
                 $status.html('<span class="cnpj-x">&#10007;</span>');
                 $message = $('<span/>', {
                     class: 'feedback-error',
@@ -1136,14 +1287,13 @@ define([
         function updateSubmitState()
         {
             var $submit = $form.find('.actions-toolbar .create-b2b-account');
-            let digits = ($field('#cnpj').val() || '').replace(/\D/g, '');
 
             if ($form.data('isSubmitting')) {
                 $submit.prop('disabled', true).addClass('is-loading');
                 return;
             }
 
-            if (digits.length === 14 && !cnpjValidated) {
+            if (!isCnpjAccepted()) {
                 $submit.prop('disabled', true).addClass('cnpj-pending');
                 return;
             }
@@ -1153,6 +1303,10 @@ define([
 
         function resetCnpjStatus()
         {
+            $field('#cnpj')
+                .removeClass('valid mage-error')
+                .attr('aria-invalid', 'false');
+            $field('#cnpj').closest('.field').removeClass('_error');
             $field('#cnpj-status')
                 .removeClass('status-loading status-success status-error')
                 .html('');
@@ -1480,7 +1634,8 @@ define([
             trackLeadStart();
 
             $input.val(maskCnpj($input.val() || ''));
-            digits = ($input.val() || '').replace(/\D/g, '');
+            $input.removeClass('valid');
+            digits = cleanCnpjDigits($input.val());
 
             if (digits.length === 14 && digits !== lastCnpj) {
                 lastCnpj = digits;
@@ -1493,7 +1648,22 @@ define([
 
             if (digits.length < 14) {
                 lastCnpj = '';
+                clearInlineFieldError($input);
+                $input.attr('aria-invalid', 'false');
                 resetCnpjStatus();
+            }
+        });
+
+        $field('#cnpj').on('blur', function () {
+            let digits = cleanCnpjDigits($(this).val());
+
+            if (digits.length === 0) {
+                return;
+            }
+
+            if (digits.length !== 14 || !isValidCnpjChecksum(digits)) {
+                markCnpjInvalid(getCnpjRejectionMessage());
+                refreshFieldAndSectionErrorStates();
             }
         });
 
@@ -1582,6 +1752,10 @@ define([
                 return;
             }
 
+            if (stepNumber > currentProgressStep && !validateStepsBeforeTarget(stepNumber)) {
+                return;
+            }
+
             if (stepNumber) {
                 setActiveProgressStep(stepNumber);
             }
@@ -1666,6 +1840,17 @@ define([
             $form.addClass('is-register-final-step');
             $form.find('.terms-section, .actions-toolbar').removeAttr('hidden');
 
+            if (!isCnpjAccepted()) {
+                event.preventDefault();
+                goToStepSection(1, false);
+                markCnpjInvalid(getCnpjRejectionMessage());
+                window.setTimeout(function () {
+                    refreshFieldAndSectionErrorStates();
+                    focusFirstInvalidField();
+                }, 0);
+                return false;
+            }
+
             if (typeof $form.validation === 'function' && !$form.validation('isValid')) {
                 event.preventDefault();
                 window.setTimeout(function () {
@@ -1730,6 +1915,7 @@ define([
         initRegisterPasswordToggles();
         initPasswordStrengthMeter();
         initIeIsentoToggle();
+        attachCnpjValidationRule();
         initStepNavigation();
         setActiveProgressStep(1);
         syncBenefitsDisclosure();

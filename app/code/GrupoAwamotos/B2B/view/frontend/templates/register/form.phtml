@@ -89,7 +89,7 @@ $privacyPolicyUrl = $block->escapeUrl($block->getUrl('privacy-policy-cookie-rest
                         <label for="cnpj" class="label"><span><?= $block->escapeHtml(__('CNPJ')) ?></span></label>
                         <div class="control cnpj-control">
                             <input type="text" name="cnpj" id="cnpj" title="<?= $block->escapeHtmlAttr(__('CNPJ')) ?>"
-                                   class="input-text" data-validate="{required:true}" required aria-required="true"
+                                   class="input-text" data-validate="{required:true, 'validate-cnpj':true}" required aria-required="true"
                                    placeholder="<?= $block->escapeHtmlAttr(__('00.000.000/0000-00')) ?>" maxlength="18"
                                    inputmode="numeric" spellcheck="false" autocomplete="off"
                                    value="<?= $escaper->escapeHtmlAttr($block->getFormValue('cnpj')) ?>"

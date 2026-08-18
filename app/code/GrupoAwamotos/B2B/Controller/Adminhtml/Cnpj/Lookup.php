@@ -64,28 +64,14 @@ class Lookup extends Action implements HttpPostActionInterface
             ]);
         }
 
-        $cnpj = preg_replace('/\D/', '', (string) $this->getRequest()->getParam('cnpj', ''));
+        $cnpj = (string) preg_replace('/\D/', '', (string) $this->getRequest()->getParam('cnpj', ''));
         $forceRefresh = filter_var(
             $this->getRequest()->getParam('force_refresh', false),
             FILTER_VALIDATE_BOOLEAN
         );
 
-        if (strlen($cnpj) !== 14) {
-            return $result->setData([
-                'success' => false,
-                'message' => 'CNPJ deve ter 14 dígitos.'
-            ]);
-        }
-
-        if (!$this->cnpjValidator->validateLocal($cnpj)) {
-            return $result->setData([
-                'success' => false,
-                'message' => 'CNPJ inválido. Verifique os dígitos.'
-            ]);
-        }
-
         try {
-            $apiData = $this->cnpjValidator->validateApi($cnpj, $forceRefresh);
+            return $result->setData($this->cnpjValidator->lookupHttp($cnpj, $forceRefresh));
         } catch (\Throwable $exception) {
             $this->logger->error(
                 sprintf(
@@ -95,52 +81,11 @@ class Lookup extends Action implements HttpPostActionInterface
                 )
             );
 
-            $apiData = null;
-        }
-
-        if ($apiData === null) {
             return $result->setData([
                 'success' => false,
                 'message' => 'CNPJ não encontrado na Receita Federal.'
             ]);
         }
-
-        if (isset($apiData['valid']) && !$apiData['valid']) {
-            return $result->setData([
-                'success' => false,
-                'message' => (string) ($apiData['message'] ?? 'CNPJ com situação irregular.'),
-                'situacao' => $apiData['data']['situacao'] ?? ''
-            ]);
-        }
-
-        if (isset($apiData['api_error']) && $apiData['api_error']) {
-            return $result->setData([
-                'success' => true,
-                'source' => $apiData['source'] ?? 'fallback',
-                'api_unavailable' => true,
-                'message' => 'API indisponível. CNPJ validado localmente.'
-            ]);
-        }
-
-        return $result->setData([
-            'success' => true,
-            'source' => $apiData['source'] ?? 'api',
-            'razao_social' => $apiData['razao_social'] ?? '',
-            'nome_fantasia' => $apiData['nome_fantasia'] ?? '',
-            'situacao' => $apiData['situacao'] ?? '',
-            'tipo' => $apiData['tipo'] ?? '',
-            'porte' => $apiData['porte'] ?? '',
-            'atividade_principal' => $apiData['atividade_principal'] ?? '',
-            'logradouro' => $apiData['logradouro'] ?? '',
-            'numero' => $apiData['numero'] ?? '',
-            'complemento' => $apiData['complemento'] ?? '',
-            'bairro' => $apiData['bairro'] ?? '',
-            'municipio' => $apiData['municipio'] ?? '',
-            'uf' => $apiData['uf'] ?? '',
-            'cep' => $apiData['cep'] ?? '',
-            'telefone' => $apiData['telefone'] ?? '',
-            'email' => $apiData['email'] ?? ''
-        ]);
     }
 
     protected function _isAllowed(): bool
