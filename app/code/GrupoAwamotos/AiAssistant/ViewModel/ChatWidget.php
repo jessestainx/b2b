@@ -71,6 +71,8 @@ class ChatWidget implements ArgumentInterface
             'isB2B'          => $isB2B,
             'channel'        => $isB2B ? 'b2b' : 'storefront',
             'helpCenterUrl'  => $this->url->getUrl('ajuda'),
+            'privacyPolicyUrl' => $this->getPrivacyPolicyUrl(),
+            'handoffUrl'     => $this->getHandoffUrl(),
             'guidedCoach'    => [
                 'enabled'         => $this->config->isGuidedCoachEnabled(),
                 'delayMs'         => $this->config->getGuidedCoachDelayMs(),
@@ -92,6 +94,22 @@ class ChatWidget implements ArgumentInterface
                 ],
             ],
         ]);
+    }
+
+    public function getPrivacyPolicyUrl(): string
+    {
+        return $this->resolveUrl($this->config->getPrivacyPolicyUrlPath());
+    }
+
+    public function getHandoffUrl(): string
+    {
+        $base = $this->config->getHumanHandoffUrl();
+        $text = rawurlencode('Olá, vim do assistente do site e preciso de atendimento humano.');
+        if (str_contains($base, '?')) {
+            return $base . '&text=' . $text;
+        }
+
+        return $base . '?text=' . $text;
     }
 
     private function resolveUrl(string $pathOrUrl): string

@@ -15,10 +15,14 @@ use Psr\Log\LoggerInterface;
  */
 class ConversationLogger
 {
+    private PiiRedactor $piiRedactor;
+
     public function __construct(
         private readonly ResourceConnection $resource,
-        private readonly LoggerInterface    $logger
+        private readonly LoggerInterface    $logger,
+        ?PiiRedactor $piiRedactor = null
     ) {
+        $this->piiRedactor = $piiRedactor ?? new PiiRedactor();
     }
 
     /**
@@ -44,9 +48,9 @@ class ConversationLogger
                     'session_id'         => $sessionId,
                     'customer_id'        => $customerId,
                     'channel'            => $channel,
-                    'user_message'       => mb_substr($userMessage, 0, 65535),
+                    'user_message'       => mb_substr($this->piiRedactor->redact($userMessage), 0, 65535),
                     'assistant_response' => $assistantResponse !== null
-                        ? mb_substr($assistantResponse, 0, 16777215)
+                        ? mb_substr($this->piiRedactor->redact($assistantResponse), 0, 16777215)
                         : null,
                     'tools_called'       => !empty($toolsCalled)
                         ? mb_substr(implode(',', $toolsCalled), 0, 512)
@@ -55,7 +59,7 @@ class ConversationLogger
                     'tokens_used'        => $tokensUsed > 0 ? $tokensUsed : null,
                     'status'             => $status,
                     'error_detail'       => $errorDetail !== null
-                        ? mb_substr($errorDetail, 0, 65535)
+                        ? mb_substr($this->piiRedactor->redact($errorDetail), 0, 512)
                         : null,
                     'ip_hash'            => $ipAddress !== null ? hash('sha256', $ipAddress) : null,
                 ]

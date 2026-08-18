@@ -37,6 +37,13 @@
             <admin_copilot>
                 <enabled>0</enabled>
             </admin_copilot>
+            <privacy>
+                <retention_guest_days>30</retention_guest_days>
+                <retention_customer_days>90</retention_customer_days>
+                <retention_error_days>14</retention_error_days>
+                <privacy_policy_url>privacy-policy-cookie-restriction-mode</privacy_policy_url>
+                <handoff_url>https://wa.me/5516997367588</handoff_url>
+            </privacy>
         </ai_assistant>
     </default>
 </config>

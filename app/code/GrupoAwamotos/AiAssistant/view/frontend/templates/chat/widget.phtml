@@ -152,7 +152,7 @@ $widgetConfig = $vm->getWidgetConfigJson();
                 </span>
                 <div class="awa-ai-chat__header-text">
                     <span class="awa-ai-chat__title" data-bind="text: title"></span>
-                    <span class="awa-ai-chat__subtitle">Peças · pedidos · suporte</span>
+                    <span class="awa-ai-chat__subtitle"><?= $escaper->escapeHtml(__('Assistente com IA · peças e pedidos')) ?></span>
                 </div>
             </div>
             <button type="button"
@@ -240,18 +240,34 @@ $widgetConfig = $vm->getWidgetConfigJson();
                       rows="1"
                       maxlength="1000"
                       placeholder="<?= $escaper->escapeHtmlAttr(__('Digite sua pergunta…')) ?>"
-                      data-bind="value: inputText,
+                      data-bind="textInput: inputText,
                                  event: { keydown: handleKeydown },
-                                 attr: { disabled: isLoading }"></textarea>
-            <button type="submit"
+                                 disable: isLoading"></textarea>
+            <button type="button"
                     class="awa-ai-chat__send"
-                    data-bind="attr: { disabled: isLoading() || !inputText().trim() }"
+                    data-bind="click: sendMessage,
+                               disable: isLoading() || !(inputText() && inputText().trim())"
                     aria-label="<?= $escaper->escapeHtmlAttr(__('Enviar mensagem')) ?>">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
                 </svg>
             </button>
         </form>
+        <p class="awa-ai-chat__legal">
+            <span><?= $escaper->escapeHtml(__('Respostas geradas por IA. Confira preço e estoque no site.')) ?></span>
+            <a class="awa-ai-chat__legal-link"
+               href="<?= $escaper->escapeUrl($vm->getPrivacyPolicyUrl()) ?>"
+               target="_blank"
+               rel="noopener noreferrer">
+                <?= $escaper->escapeHtml(__('Privacidade')) ?>
+            </a>
+            <a class="awa-ai-chat__legal-link"
+               href="<?= $escaper->escapeUrl($vm->getHandoffUrl()) ?>"
+               target="_blank"
+               rel="noopener noreferrer">
+                <?= $escaper->escapeHtml(__('Falar com atendente')) ?>
+            </a>
+        </p>
     </div>
 </div>
 

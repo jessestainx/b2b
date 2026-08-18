@@ -110,9 +110,10 @@ define([
         },
 
         handleKeydown: function (data, event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
+            if (event && (event.key === 'Enter' || event.keyCode === 13) && !event.shiftKey) {
                 event.preventDefault();
-                this.sendMessage();
+                this.sendMessage(data, event);
+                return false;
             }
             return true;
         },
@@ -172,10 +173,21 @@ define([
             });
         },
 
-        sendMessage: function () {
+        sendMessage: function (data, event) {
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+
             var text = (this.inputText() || '').trim();
+            if (!text) {
+                var el = document.getElementById('awa-ai-chat-input');
+                text = el && el.value ? String(el.value).trim() : '';
+                if (text) {
+                    this.inputText(text);
+                }
+            }
             if (!text || this.isLoading()) {
-                return;
+                return false;
             }
 
             this.errorMsg('');
@@ -199,6 +211,8 @@ define([
                 }
                 self._applyResponse(response);
             });
+
+            return false;
         },
 
         confirmWrite: function (msg) {

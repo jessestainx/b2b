@@ -171,4 +171,45 @@ class Config extends AbstractHelper
     {
         return trim((string) $this->scopeConfig->getValue(self::XML_GUIDED_HOW_TO_BUY, ScopeInterface::SCOPE_STORE));
     }
+
+    public function getRetentionGuestDays(): int
+    {
+        $days = (int) $this->scopeConfig->getValue('ai_assistant/privacy/retention_guest_days');
+
+        return $days > 0 ? $days : 30;
+    }
+
+    public function getRetentionCustomerDays(): int
+    {
+        $days = (int) $this->scopeConfig->getValue('ai_assistant/privacy/retention_customer_days');
+
+        return $days > 0 ? $days : 90;
+    }
+
+    public function getRetentionErrorDays(): int
+    {
+        $days = (int) $this->scopeConfig->getValue('ai_assistant/privacy/retention_error_days');
+
+        return $days > 0 ? $days : 14;
+    }
+
+    public function getPrivacyPolicyUrlPath(): string
+    {
+        $path = trim((string) $this->scopeConfig->getValue(
+            'ai_assistant/privacy/privacy_policy_url',
+            ScopeInterface::SCOPE_STORE
+        ));
+
+        return $path !== '' ? $path : 'privacy-policy-cookie-restriction-mode';
+    }
+
+    public function getHumanHandoffUrl(): string
+    {
+        $url = trim((string) $this->scopeConfig->getValue(
+            'ai_assistant/privacy/handoff_url',
+            ScopeInterface::SCOPE_STORE
+        ));
+
+        return $url !== '' ? $url : 'https://wa.me/5516997367588';
+    }
 }

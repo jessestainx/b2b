@@ -69,6 +69,16 @@
             <argument name="logger" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>
         </arguments>
     </type>
+    <type name="GrupoAwamotos\AiAssistant\Cron\PurgeConversationLog">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="GrupoAwamotos\AiAssistant\Observer\AnonymizeOnCustomerDelete">
+        <arguments>
+            <argument name="logger" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>
+        </arguments>
+    </type>
     <type name="GrupoAwamotos\AiAssistant\Model\RateLimiter">
         <arguments>
             <argument name="logger" xsi:type="object">GrupoAwamotos\AiAssistant\Logger\Logger</argument>

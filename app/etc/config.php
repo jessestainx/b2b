@@ -371,6 +371,7 @@ return [
         'GrupoAwamotos_CarrierSelect' => 1,
         'GrupoAwamotos_B2B' => 1,
         'GrupoAwamotos_HelpCenter' => 1,
+        'GrupoAwamotos_AiAssistant' => 1,
         'GrupoAwamotos_CookieConsent' => 1,
         'GrupoAwamotos_CspFix' => 1,
         'Rokanthemes_BestsellerProduct' => 1,

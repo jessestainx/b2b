@@ -26,6 +26,8 @@ class Orchestrator implements AssistantOrchestratorInterface
 
     private const CATALOG_TOOLS = ['catalog_search', 'fitment_search'];
 
+    private PiiRedactor $piiRedactor;
+
     private const SYSTEM_PROMPTS = [
         self::CHANNEL_STOREFRONT => <<<'PROMPT'
 Você é a assistente virtual da AWA Motos, uma distribuidora de peças para motos em Araraquara, SP, Brasil.
@@ -69,8 +71,10 @@ PROMPT,
         private readonly ConversationLogger  $logger,
         private readonly Config              $config,
         private readonly LoggerInterface     $log,
-        private array $tools = []
+        private array $tools = [],
+        ?PiiRedactor $piiRedactor = null
     ) {
+        $this->piiRedactor = $piiRedactor ?? new PiiRedactor();
     }
 
     public function handle(
@@ -86,8 +90,38 @@ PROMPT,
         $toolSchemas   = $this->buildToolSchemas($channelTools);
         $parser        = new ProductQueryParser();
         $intent        = $parser->parse($userMessage);
+        $safeHistory   = $this->redactHistory($history);
+        $safeMessage   = $this->piiRedactor->redact($userMessage);
 
-        $messages      = $this->buildMessages($systemPrompt, $history, $userMessage);
+        if ($this->piiRedactor->containsSecret($userMessage)) {
+            $reply = 'Por segurança, não envie senha, dados de cartão ou tokens neste chat. '
+                . 'Fale com um atendente pelo WhatsApp se precisar de ajuda com a conta.';
+            $this->logger->log(
+                sessionId: $sessionId,
+                channel: $channel,
+                userMessage: $safeMessage,
+                assistantResponse: $reply,
+                toolsCalled: [],
+                model: 'none',
+                tokensUsed: 0,
+                status: 'blocked',
+                errorDetail: 'secret_payload',
+                customerId: isset($context['customer_id']) ? (int) $context['customer_id'] : null,
+                ipAddress: $context['ip_address'] ?? null
+            );
+
+            return [
+                'reply' => $reply,
+                'history' => array_merge($safeHistory, [
+                    ['role' => 'user', 'content' => $safeMessage],
+                    ['role' => 'assistant', 'content' => $reply],
+                ]),
+                'products' => [],
+                'deferred_write' => null,
+            ];
+        }
+
+        $messages      = $this->buildMessages($systemPrompt, $safeHistory, $safeMessage);
 
         $reply         = '';
         $toolsCalled   = [];
@@ -203,13 +237,13 @@ PROMPT,
         } catch (LlmException $e) {
             $reply       = 'No momento o assistente está temporariamente indisponível. Por favor, use nosso chat ao vivo ou entre em contato pelo WhatsApp.';
             $status      = 'llm_error';
-            $errorDetail = $e->getMessage();
-            $this->log->error('[AiAssistant] LlmException: ' . $e->getMessage());
+            $errorDetail = 'llm_exception';
+            $this->log->error('[AiAssistant] LlmException: ' . $this->piiRedactor->redact($e->getMessage()));
         } catch (\Exception $e) {
             $reply       = 'Ocorreu um erro inesperado. Por favor, tente novamente.';
             $status      = 'error';
-            $errorDetail = $e->getMessage();
-            $this->log->error('[AiAssistant] Unexpected error: ' . $e->getMessage());
+            $errorDetail = $e::class;
+            $this->log->error('[AiAssistant] Unexpected error: ' . $this->piiRedactor->redact($e->getMessage()));
         }
 
         if ($productsOut !== []) {
@@ -228,7 +262,7 @@ PROMPT,
         $this->logger->log(
             sessionId: $sessionId,
             channel: $channel,
-            userMessage: $userMessage,
+            userMessage: $safeMessage,
             assistantResponse: $reply,
             toolsCalled: $toolsCalled,
             model: $modelUsed,
@@ -468,6 +502,19 @@ PROMPT,
      * @param array<int, array{role: string, content: string}> $history
      * @return array<int, array{role: string, content: string}>
      */
+    private function redactHistory(array $history): array
+    {
+        $out = [];
+        foreach ($history as $turn) {
+            $out[] = [
+                'role' => (string) ($turn['role'] ?? 'user'),
+                'content' => $this->piiRedactor->redact((string) ($turn['content'] ?? '')),
+            ];
+        }
+
+        return $out;
+    }
+
     private function buildMessages(string $systemPrompt, array $history, string $userMessage): array
     {
         $messages = [['role' => 'system', 'content' => $systemPrompt]];

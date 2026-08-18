@@ -196,6 +196,39 @@
                     </depends>
                 </field>
             </group>
+
+            <group id="privacy" translate="label comment" type="text" sortOrder="40"
+                   showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Privacidade e retenção (LGPD)</label>
+                <comment>Redação de PII é sempre aplicada. Estes campos controlam retenção e links do widget.</comment>
+                <field id="retention_guest_days" translate="label comment" type="text" sortOrder="10"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Retenção visitante (dias)</label>
+                    <comment>Turnos sem customer_id são apagados após este prazo. Padrão 30.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="retention_customer_days" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Retenção cliente (dias)</label>
+                    <comment>Mensagens de clientes logados são anonimizadas após este prazo. Padrão 90.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="retention_error_days" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Retenção de error_detail (dias)</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="privacy_policy_url" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>URL da política de privacidade</label>
+                    <comment>Caminho Magento ou URL absoluta.</comment>
+                </field>
+                <field id="handoff_url" translate="label comment" type="text" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>URL de atendimento humano</label>
+                    <comment>WhatsApp ou chat ao vivo. O widget adiciona o texto de contexto.</comment>
+                </field>
+            </group>
         </section>
     </system>
 </config>
