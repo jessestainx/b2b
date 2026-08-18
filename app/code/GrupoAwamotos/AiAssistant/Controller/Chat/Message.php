@@ -15,6 +15,7 @@ use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Encryption\Helper\Security;
 use Magento\Framework\Serialize\Serializer\Json;
 use Psr\Log\LoggerInterface;
 
@@ -22,29 +23,26 @@ use Psr\Log\LoggerInterface;
  * POST /aiassistant/chat/message
  *
  * Request JSON body:
- *   { "message": "...", "channel": "storefront"|"b2b", "history": [...] }
- *
- * Response JSON:
- *   { "reply": "...", "history": [...], "error": null }
- *
- * History is owned by the client: the JS widget maintains it in memory and
- * sends it with every request. The server never persists conversation history,
- * which keeps the approach stateless and avoids any session-storage interface
- * mismatch between Magento versions.
+ *   { "message": "...", "history": [...], "confirm_token": "..." }
  */
 class Message implements HttpPostActionInterface, CsrfAwareActionInterface
 {
+    private const SESSION_PENDING_WRITE = 'awa_ai_pending_write';
+    private const MAX_BODY_BYTES = 65536;
+    private const MAX_TURN_CHARS = 2000;
+    private const WRITE_TTL_SECONDS = 600;
+
     public function __construct(
-        private readonly RequestInterface                $request,
-        private readonly JsonFactory                    $jsonFactory,
-        private readonly Json                           $jsonSerializer,
-        private readonly Config                         $config,
+        private readonly RequestInterface $request,
+        private readonly JsonFactory $jsonFactory,
+        private readonly Json $jsonSerializer,
+        private readonly Config $config,
         private readonly AssistantOrchestratorInterface $orchestrator,
-        private readonly RateLimiter                    $rateLimiter,
-        private readonly CustomerSession                $customerSession,
-        private readonly CustomerApproval               $customerApproval,
-        private readonly ResourceConnection             $resource,
-        private readonly LoggerInterface                $logger
+        private readonly RateLimiter $rateLimiter,
+        private readonly CustomerSession $customerSession,
+        private readonly CustomerApproval $customerApproval,
+        private readonly ResourceConnection $resource,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -67,10 +65,27 @@ class Message implements HttpPostActionInterface, CsrfAwareActionInterface
         }
 
         $rawBody = (string) $this->request->getContent();
+        if (strlen($rawBody) > self::MAX_BODY_BYTES) {
+            return $result->setHttpResponseCode(413)->setData([
+                'reply' => null,
+                'history' => [],
+                'error' => 'Requisição inválida.',
+            ]);
+        }
+
         try {
             $body = $this->jsonSerializer->unserialize($rawBody);
         } catch (\Exception $e) {
             return $result->setData(['reply' => null, 'history' => [], 'error' => 'Requisição inválida.']);
+        }
+
+        if (!is_array($body)) {
+            return $result->setData(['reply' => null, 'history' => [], 'error' => 'Requisição inválida.']);
+        }
+
+        $confirmToken = trim((string) ($body['confirm_token'] ?? ''));
+        if ($confirmToken !== '') {
+            return $this->executeConfirmedWrite($result, $confirmToken, $ipAddress);
         }
 
         $userMessage = trim((string) ($body['message'] ?? ''));
@@ -78,8 +93,7 @@ class Message implements HttpPostActionInterface, CsrfAwareActionInterface
             return $result->setData(['reply' => null, 'history' => [], 'error' => 'Mensagem inválida.']);
         }
 
-        // History is provided by the client; validate it is a plain array.
-        $history = is_array($body['history'] ?? null) ? (array) $body['history'] : [];
+        $history = $this->sanitizeHistory(is_array($body['history'] ?? null) ? (array) $body['history'] : []);
 
         $isB2BApproved = false;
         if ($this->customerSession->isLoggedIn()) {
@@ -94,6 +108,7 @@ class Message implements HttpPostActionInterface, CsrfAwareActionInterface
         $context = [
             'ip_address' => $ipAddress,
             'is_b2b'     => $isB2BApproved,
+            'channel'    => $channel,
         ];
 
         if ($this->customerSession->isLoggedIn()) {
@@ -111,16 +126,149 @@ class Message implements HttpPostActionInterface, CsrfAwareActionInterface
                 context: $context
             );
 
+            $confirmation = $this->issueWriteConfirmation($handled['deferred_write'] ?? null);
+
             return $result->setData([
                 'reply' => $handled['reply'] ?? null,
                 'history' => $handled['history'] ?? [],
                 'products' => $handled['products'] ?? [],
+                'confirmation' => $confirmation,
                 'error' => null,
             ]);
         } catch (\Exception $e) {
             $this->logger->error('[AiAssistant] Controller error: ' . $e->getMessage());
             return $result->setData(['reply' => null, 'history' => $history, 'error' => 'Erro interno. Tente novamente.']);
         }
+    }
+
+    /**
+     * @param array<string, mixed>|null $deferred
+     * @return array<string, string>|null
+     */
+    private function issueWriteConfirmation(?array $deferred): ?array
+    {
+        if ($deferred === null || $deferred === []) {
+            return null;
+        }
+        if (!$this->customerSession->isLoggedIn()) {
+            return null;
+        }
+
+        $token = bin2hex(random_bytes(16));
+        $this->customerSession->setData(self::SESSION_PENDING_WRITE, [
+            'token'       => $token,
+            'customer_id' => (int) $this->customerSession->getCustomerId(),
+            'tool'        => (string) ($deferred['tool'] ?? ''),
+            'action'      => (string) ($deferred['action'] ?? ''),
+            'payload'     => is_array($deferred['payload'] ?? null) ? $deferred['payload'] : [],
+            'expires'     => time() + self::WRITE_TTL_SECONDS,
+        ]);
+
+        return [
+            'token'        => $token,
+            'summary'      => (string) ($deferred['summary'] ?? 'Confirmar esta ação no site.'),
+            'action_label' => (string) ($deferred['action'] ?? 'confirm'),
+        ];
+    }
+
+    private function executeConfirmedWrite(
+        \Magento\Framework\Controller\Result\Json $result,
+        string $token,
+        string $ipAddress
+    ): \Magento\Framework\Controller\Result\Json {
+        $pending = $this->customerSession->getData(self::SESSION_PENDING_WRITE);
+        $this->customerSession->unsetData(self::SESSION_PENDING_WRITE);
+
+        if (!is_array($pending)
+            || empty($pending['token'])
+            || !Security::compareStrings((string) $pending['token'], $token)
+            || (int) ($pending['expires'] ?? 0) < time()
+            || !$this->customerSession->isLoggedIn()
+            || (int) ($pending['customer_id'] ?? 0) !== (int) $this->customerSession->getCustomerId()
+        ) {
+            return $result->setHttpResponseCode(403)->setData([
+                'reply' => null,
+                'history' => [],
+                'error' => 'Confirmação inválida ou expirada. Tente novamente.',
+            ]);
+        }
+
+        $customerId = (int) $this->customerSession->getCustomerId();
+        if (!$this->customerApproval->isApproved($customerId)) {
+            return $result->setHttpResponseCode(403)->setData([
+                'reply' => null,
+                'history' => [],
+                'error' => 'Ação disponível apenas para clientes B2B aprovados.',
+            ]);
+        }
+
+        $context = [
+            'ip_address'      => $ipAddress,
+            'is_b2b'          => true,
+            'channel'         => AssistantOrchestratorInterface::CHANNEL_B2B,
+            'customer_id'     => $customerId,
+            'customer_phone'  => $this->getCustomerPhone($customerId),
+            'write_confirmed' => true,
+        ];
+
+        $arguments = is_array($pending['payload'] ?? null) ? $pending['payload'] : [];
+        $arguments['action'] = (string) ($pending['action'] ?? '');
+
+        try {
+            $handled = $this->orchestrator->executeConfirmedWrite(
+                (string) ($pending['tool'] ?? ''),
+                $arguments,
+                $context
+            );
+
+            return $result->setData([
+                'reply' => $handled['reply'] ?? 'Ação concluída.',
+                'history' => $handled['history'] ?? [],
+                'products' => $handled['products'] ?? [],
+                'confirmation' => null,
+                'error' => null,
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('[AiAssistant] Confirmed write error: ' . $e->getMessage());
+            return $result->setData([
+                'reply' => null,
+                'history' => [],
+                'error' => 'Não foi possível concluir a ação. Tente pelo painel B2B.',
+            ]);
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $raw
+     * @return array<int, array{role: string, content: string}>
+     */
+    private function sanitizeHistory(array $raw): array
+    {
+        $maxTurns = max(2, $this->config->getMaxHistoryMessages() * 2);
+        $out = [];
+
+        foreach ($raw as $turn) {
+            if (!is_array($turn)) {
+                continue;
+            }
+            $role = (string) ($turn['role'] ?? '');
+            if ($role !== 'user' && $role !== 'assistant') {
+                continue;
+            }
+            $content = trim((string) ($turn['content'] ?? ''));
+            if ($content === '') {
+                continue;
+            }
+            if (mb_strlen($content) > self::MAX_TURN_CHARS) {
+                $content = mb_substr($content, 0, self::MAX_TURN_CHARS);
+            }
+            $out[] = ['role' => $role, 'content' => $content];
+            if (count($out) >= $maxTurns) {
+                break;
+            }
+        }
+
+        return $out;
     }
 
     private function buildSessionId(string $ipAddress): string
@@ -149,11 +297,28 @@ class Message implements HttpPostActionInterface, CsrfAwareActionInterface
 
     public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
     {
-        return null;
+        $result = $this->jsonFactory->create();
+        $result->setHttpResponseCode(403);
+        $result->setData([
+            'reply' => null,
+            'history' => [],
+            'error' => 'Sessão expirada. Recarregue a página e tente de novo.',
+        ]);
+
+        return new InvalidRequestException($result);
     }
 
     public function validateForCsrf(RequestInterface $request): ?bool
     {
-        return true;
+        $provided = trim((string) $request->getHeader('X-Magento-Form-Key'));
+        if ($provided === '') {
+            $provided = trim((string) $request->getParam('form_key', ''));
+        }
+        $cookieKey = trim((string) $request->getCookie('form_key', ''));
+        if ($provided === '' || $cookieKey === '') {
+            return false;
+        }
+
+        return Security::compareStrings($provided, $cookieKey);
     }
 }

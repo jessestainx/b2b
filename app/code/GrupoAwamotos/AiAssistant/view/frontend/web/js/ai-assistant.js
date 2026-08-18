@@ -6,8 +6,9 @@ define([
     'ko',
     'uiComponent',
     'jquery',
+    'mage/cookies',
     'GrupoAwamotos_AiAssistant/js/guided-coach'
-], function (ko, Component, $, guidedCoach) {
+], function (ko, Component, $, mageCookies, guidedCoach) {
     'use strict';
 
     return Component.extend({
@@ -43,7 +44,12 @@ define([
             this._history = [];
 
             if (this.welcomeMessage) {
-                this.messages.push({ role: 'assistant', content: this.welcomeMessage, products: [] });
+                this.messages.push({
+                    role: 'assistant',
+                    content: this.welcomeMessage,
+                    products: [],
+                    confirmation: null
+                });
             }
 
             var self = this;
@@ -111,6 +117,61 @@ define([
             return true;
         },
 
+        _formKey: function () {
+            var fromInput = $('input[name="form_key"]').first().val() || '';
+            var fromCookie = '';
+            if ($.mage && $.mage.cookies && typeof $.mage.cookies.get === 'function') {
+                fromCookie = $.mage.cookies.get('form_key') || '';
+            } else if (mageCookies && typeof mageCookies.get === 'function') {
+                fromCookie = mageCookies.get('form_key') || '';
+            }
+            return fromInput || fromCookie || '';
+        },
+
+        _clearConfirmation: function (msg) {
+            var list = this.messages();
+            var idx = list.indexOf(msg);
+            if (idx === -1) {
+                return;
+            }
+            this.messages.splice(idx, 1, {
+                role: msg.role,
+                content: msg.content,
+                products: msg.products || [],
+                confirmation: null
+            });
+        },
+
+        _postJson: function (payload, onDone) {
+            var key = this._formKey();
+            var url = this.endpoint || '';
+            if (key) {
+                url += (url.indexOf('?') === -1 ? '?' : '&') + 'form_key=' + encodeURIComponent(key);
+            }
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                dataType: 'json',
+                timeout: 60000,
+                headers: {
+                    'X-Magento-Form-Key': key
+                },
+                success: function (response) {
+                    onDone(null, response);
+                },
+                error: function (xhr) {
+                    var msg = 'Não foi possível conectar ao assistente. Tente novamente.';
+                    if (xhr && xhr.status === 403) {
+                        msg = 'Sessão expirada. Recarregue a página e tente de novo.';
+                    }
+                    onDone(msg, xhr && xhr.responseJSON ? xhr.responseJSON : null);
+                }
+            });
+        },
+
         sendMessage: function () {
             var text = (this.inputText() || '').trim();
             if (!text || this.isLoading()) {
@@ -118,51 +179,85 @@ define([
             }
 
             this.errorMsg('');
-            this.messages.push({ role: 'user', content: text, products: [] });
+            this.messages.push({ role: 'user', content: text, products: [], confirmation: null });
             this.inputText('');
             this.isLoading(true);
             this._scrollToBottom();
 
-            var self    = this;
-            var payload = JSON.stringify({
+            var self = this;
+            this._postJson({
                 message: text,
                 channel: this.channel,
                 history: this._history
-            });
-
-            $.ajax({
-                url:         this.endpoint,
-                type:        'POST',
-                contentType: 'application/json',
-                data:        payload,
-                dataType:    'json',
-                timeout:     60000,
-                success: function (response) {
-                    self.isLoading(false);
-                    if (response && response.history) {
-                        self._history = response.history;
-                    }
-                    if (response && response.reply) {
-                        var products = self._normalizeProducts(response.products);
-                        self.messages.push({
-                            role: 'assistant',
-                            content: response.reply,
-                            products: products
-                        });
-                    } else if (response && response.error) {
-                        self.errorMsg(response.error);
-                        self.messages.push({ role: 'assistant', content: response.error, products: [] });
-                    }
+            }, function (err, response) {
+                self.isLoading(false);
+                if (err) {
+                    self.errorMsg(err);
+                    self.messages.push({ role: 'assistant', content: err, products: [], confirmation: null });
                     self._scrollToBottom();
-                },
-                error: function () {
-                    self.isLoading(false);
-                    var msg = 'Não foi possível conectar ao assistente. Tente novamente.';
-                    self.errorMsg(msg);
-                    self.messages.push({ role: 'assistant', content: msg, products: [] });
-                    self._scrollToBottom();
+                    return;
                 }
+                self._applyResponse(response);
             });
+        },
+
+        confirmWrite: function (msg) {
+            var token = msg && msg.confirmation ? msg.confirmation.token : '';
+            if (!token || this.isLoading()) {
+                return;
+            }
+            this._clearConfirmation(msg);
+            this.isLoading(true);
+            this._scrollToBottom();
+
+            var self = this;
+            this._postJson({
+                confirm_token: token,
+                history: this._history
+            }, function (err, response) {
+                self.isLoading(false);
+                if (err) {
+                    self.errorMsg(err);
+                    self.messages.push({ role: 'assistant', content: err, products: [], confirmation: null });
+                    self._scrollToBottom();
+                    return;
+                }
+                self._applyResponse(response);
+            });
+        },
+
+        cancelWrite: function (msg) {
+            this._clearConfirmation(msg);
+            this.messages.push({
+                role: 'assistant',
+                content: 'Ação cancelada. Nada foi alterado.',
+                products: [],
+                confirmation: null
+            });
+            this._scrollToBottom();
+        },
+
+        _applyResponse: function (response) {
+            if (response && response.history) {
+                this._history = response.history;
+            }
+            if (response && response.reply) {
+                this.messages.push({
+                    role: 'assistant',
+                    content: response.reply,
+                    products: this._normalizeProducts(response.products),
+                    confirmation: response.confirmation || null
+                });
+            } else if (response && response.error) {
+                this.errorMsg(response.error);
+                this.messages.push({
+                    role: 'assistant',
+                    content: response.error,
+                    products: [],
+                    confirmation: null
+                });
+            }
+            this._scrollToBottom();
         },
 
         /**

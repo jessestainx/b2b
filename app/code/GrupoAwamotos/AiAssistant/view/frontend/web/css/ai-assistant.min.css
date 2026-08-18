@@ -354,6 +354,25 @@
     line-height: 1.35;
     color: var(--awa-text-muted, var(--awa-text-secondary, rgb(0 0 0 / 55%)));
 }
+.awa-ai-chat__confirm {
+    display:        flex;
+    flex-wrap:      wrap;
+    gap:            8px;
+    align-items:    center;
+    width:          100%;
+    margin-top:     8px;
+    padding:        10px 12px;
+    border-radius:  var(--awa-radius-sm, 8px);
+    border:         1px solid var(--awa-border, rgb(0 0 0 / 12%));
+    background:     var(--awa-bg-subtle, var(--awa-surface, #fff));
+}
+.awa-ai-chat__confirm-summary {
+    flex:        1 1 100%;
+    margin:      0;
+    font-size:   13px;
+    line-height: 1.4;
+    color:       var(--awa-text, inherit);
+}
 
 /* ── Responsivo: mobile ─────────────────────────────────────────── */
 @media (max-width: 575px) {

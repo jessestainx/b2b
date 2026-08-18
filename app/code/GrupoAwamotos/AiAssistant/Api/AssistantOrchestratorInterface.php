@@ -27,4 +27,13 @@ interface AssistantOrchestratorInterface
         array $history = [],
         array $context = []
     ): array;
+
+    /**
+     * Execute a previously deferred B2B write after server-side confirmation.
+     *
+     * @param array<string, mixed> $arguments
+     * @param array<string, mixed> $context
+     * @return array{reply: string, history: array<int, array{role: string, content: string}>, products: array}
+     */
+    public function executeConfirmedWrite(string $toolName, array $arguments, array $context): array;
 }

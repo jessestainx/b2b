@@ -198,6 +198,21 @@ $widgetConfig = $vm->getWidgetConfigJson();
                     </a>
                     <!-- /ko -->
                 </div>
+                <!-- ko if: confirmation && confirmation.token -->
+                <div class="awa-ai-chat__confirm">
+                    <p class="awa-ai-chat__confirm-summary" data-bind="text: confirmation.summary"></p>
+                    <button type="button"
+                            class="awa-ai-coach__btn awa-ai-coach__btn--primary"
+                            data-bind="click: function () { $parent.confirmWrite($data); }">
+                        <?= $escaper->escapeHtml(__('Confirmar')) ?>
+                    </button>
+                    <button type="button"
+                            class="awa-ai-coach__btn"
+                            data-bind="click: function () { $parent.cancelWrite($data); }">
+                        <?= $escaper->escapeHtml(__('Cancelar')) ?>
+                    </button>
+                </div>
+                <!-- /ko -->
             </div>
             <!-- /ko -->
             <!-- ko if: isLoading -->

@@ -80,6 +80,7 @@ PROMPT,
         array $history = [],
         array $context = []
     ): array {
+        $context['channel'] = $channel;
         $systemPrompt  = self::SYSTEM_PROMPTS[$channel] ?? self::SYSTEM_PROMPTS[self::CHANNEL_STOREFRONT];
         $channelTools  = $this->getToolsForChannel($channel);
         $toolSchemas   = $this->buildToolSchemas($channelTools);
@@ -97,6 +98,7 @@ PROMPT,
         $errorDetail   = null;
         $forcedSearchRetry = false;
         $catalogPrefetched = false;
+        $deferredWrite = null;
 
         $prefetch = $this->prefetchCatalog($intent, $channelTools, $context);
         if ($prefetch['ran']) {
@@ -169,11 +171,26 @@ PROMPT,
                         );
                     }
 
+                    $llmToolResult = $toolResult;
+                    if (!empty($toolResult['deferred_write'])) {
+                        $deferredWrite = [
+                            'tool'    => $toolName,
+                            'action'  => (string) ($toolResult['action'] ?? ''),
+                            'payload' => is_array($toolResult['payload'] ?? null) ? $toolResult['payload'] : [],
+                            'summary' => (string) ($toolResult['summary'] ?? ''),
+                        ];
+                        $llmToolResult = [
+                            'status'  => 'pending_confirmation',
+                            'message' => 'Aguardando o cliente confirmar no botão da interface. '
+                                . 'Não chame esta ferramenta de escrita novamente neste turno.',
+                        ];
+                    }
+
                     $messages[] = [
                         'role'         => 'tool',
                         'tool_call_id' => $tc['id'],
                         'name'         => $toolName,
-                        'content'      => json_encode($toolResult, JSON_UNESCAPED_UNICODE),
+                        'content'      => json_encode($llmToolResult, JSON_UNESCAPED_UNICODE),
                     ];
                 }
             }
@@ -231,7 +248,55 @@ PROMPT,
             $newHistory = array_slice($newHistory, -($maxHistory * 2));
         }
 
-        return ['reply' => $reply, 'history' => $newHistory, 'products' => $productsOut];
+        return [
+            'reply' => $reply,
+            'history' => $newHistory,
+            'products' => $productsOut,
+            'deferred_write' => $deferredWrite,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $arguments
+     * @param array<string, mixed> $context
+     * @return array{reply: string, history: array<int, array{role: string, content: string}>, products: array}
+     */
+    public function executeConfirmedWrite(string $toolName, array $arguments, array $context): array
+    {
+        $channel = AssistantOrchestratorInterface::CHANNEL_B2B;
+        $context['write_confirmed'] = true;
+        $context['is_b2b'] = true;
+        $channelTools = $this->getToolsForChannel($channel);
+        $toolResult = $this->executeTool($toolName, $arguments, $context, $channelTools);
+
+        $reply = (string) ($toolResult['message'] ?? $toolResult['error'] ?? 'Ação concluída.');
+        if (!empty($toolResult['error'])) {
+            $reply = (string) $toolResult['error'];
+        } elseif (isset($toolResult['checkout_url']) || isset($toolResult['quote_id']) || isset($toolResult['success'])) {
+            $reply = 'Pronto. A ação foi concluída com a sua confirmação.';
+        }
+
+        $this->logger->log(
+            sessionId: hash('sha256', 'confirmed-write-' . ($context['customer_id'] ?? '0')),
+            channel: $channel,
+            userMessage: '[confirm] ' . $toolName,
+            assistantResponse: $reply,
+            toolsCalled: [$toolName],
+            model: 'none',
+            tokensUsed: 0,
+            status: empty($toolResult['error']) ? 'ok' : 'error',
+            errorDetail: isset($toolResult['error']) ? (string) $toolResult['error'] : null,
+            customerId: isset($context['customer_id']) ? (int) $context['customer_id'] : null,
+            ipAddress: $context['ip_address'] ?? null
+        );
+
+        return [
+            'reply' => $reply,
+            'history' => [
+                ['role' => 'assistant', 'content' => $reply],
+            ],
+            'products' => [],
+        ];
     }
 
     /**
@@ -443,14 +508,25 @@ PROMPT,
         array $context,
         array $channelTools
     ): array {
+        $channel = (string) ($context['channel'] ?? '');
         foreach ($channelTools as $tool) {
-            if ($tool->getName() === $toolName) {
-                try {
-                    return $tool->execute($arguments, $context);
-                } catch (\Exception $e) {
-                    $this->log->warning('[AiAssistant] Tool ' . $toolName . ' error: ' . $e->getMessage());
-                    return ['error' => 'Ferramenta temporariamente indisponível.'];
-                }
+            if ($tool->getName() !== $toolName) {
+                continue;
+            }
+            $allowed = $tool->getAllowedChannels();
+            if ($channel !== '' && !in_array($channel, $allowed, true)) {
+                return ['error' => 'Ferramenta não disponível neste canal.'];
+            }
+            if ($allowed === [AssistantOrchestratorInterface::CHANNEL_ADMIN]
+                && empty($context['is_admin'])
+            ) {
+                return ['error' => 'Ferramenta não disponível neste canal.'];
+            }
+            try {
+                return $tool->execute($arguments, $context);
+            } catch (\Exception $e) {
+                $this->log->warning('[AiAssistant] Tool ' . $toolName . ' error: ' . $e->getMessage());
+                return ['error' => 'Ferramenta temporariamente indisponível.'];
             }
         }
         return ['error' => 'Ferramenta desconhecida: ' . $toolName];

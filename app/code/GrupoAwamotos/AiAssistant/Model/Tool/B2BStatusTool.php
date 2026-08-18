@@ -49,8 +49,15 @@ class B2BStatusTool implements ToolInterface
     public function execute(array $arguments, array $context = []): array
     {
         $identifier = trim((string) ($arguments['identifier'] ?? ''));
+        $isAdmin = !empty($context['is_admin']);
 
-        if ($identifier === '') {
+        if (!$isAdmin) {
+            $own = preg_replace('/\D/', '', (string) ($context['customer_phone'] ?? '')) ?? '';
+            if ($own === '') {
+                return ['error' => 'Não foi possível identificar seu cadastro B2B.'];
+            }
+            $identifier = $own;
+        } elseif ($identifier === '') {
             $identifier = (string) ($context['customer_phone'] ?? '');
         }
 

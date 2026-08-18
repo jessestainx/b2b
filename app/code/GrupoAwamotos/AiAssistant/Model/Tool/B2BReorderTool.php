@@ -28,8 +28,8 @@ class B2BReorderTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Lista pedidos B2B anteriores disponíveis para reposição e, após confirmação explícita do cliente, inicia a reposição criando um carrinho com link de checkout. '
-            . 'IMPORTANTE: sempre liste os pedidos primeiro e peça confirmação antes de criar o carrinho.';
+        return 'Lista pedidos B2B reordenáveis. Criar o carrinho exige confirmação '
+            . 'na interface; texto do cliente não autoriza a escrita.';
     }
 
     public function getParametersSchema(): array
@@ -53,6 +53,10 @@ class B2BReorderTool implements ToolInterface
 
     public function execute(array $arguments, array $context = []): array
     {
+        if (empty($context['is_b2b'])) {
+            return ['error' => 'Disponível apenas para clientes B2B aprovados.'];
+        }
+
         $phone = (string) ($context['customer_phone'] ?? '');
         if ($phone === '') {
             return ['error' => 'Telefone não disponível. Verifique seu cadastro B2B.'];
@@ -66,9 +70,19 @@ class B2BReorderTool implements ToolInterface
 
         if ($action === 'reorder') {
             $orderId = trim((string) ($arguments['order_id'] ?? ''));
-            if ($orderId === '') {
+            if ($orderId === '' || mb_strlen($orderId) > 32) {
                 return ['error' => 'Informe o número do pedido para repetir.'];
             }
+
+            if (empty($context['write_confirmed'])) {
+                return [
+                    'deferred_write' => true,
+                    'action'         => 'reorder',
+                    'payload'        => ['order_id' => $orderId],
+                    'summary'        => 'Repetir o pedido ' . $orderId . ' e criar um carrinho.',
+                ];
+            }
+
             return $this->b2bReorder->reorderByOrderId($phone, $orderId);
         }
 

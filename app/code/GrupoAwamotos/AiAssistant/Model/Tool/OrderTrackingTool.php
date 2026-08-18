@@ -10,13 +10,15 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
 /**
- * Tool: rastreia pedidos do cliente logado ou por número de pedido.
- *
- * Para clientes logados, busca pelos últimos pedidos (customer_id do contexto).
- * Para visitantes, retorna orientação para verificar o e-mail de confirmação.
+ * Rastreia pedidos somente do cliente autenticado.
+ * Visitantes nunca recebem dados de pedido (anti-enumeração / IDOR).
  */
 class OrderTrackingTool implements ToolInterface
 {
+    private const NOT_FOUND = 'Pedido não encontrado.';
+    private const LOGIN_REQUIRED = 'Para consultar pedidos, entre na sua conta. '
+        . 'O assistente não informa dados de pedido a visitantes.';
+
     public function __construct(
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly SearchCriteriaBuilder    $searchCriteriaBuilder
@@ -30,8 +32,8 @@ class OrderTrackingTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Consulta os pedidos do cliente logado, ou busca um pedido específico pelo número. '
-            . 'Retorna status, itens e data estimada de entrega.';
+        return 'Consulta os pedidos do cliente autenticado. '
+            . 'Nunca use para visitantes. Não invente status, itens ou valores.';
     }
 
     public function getParametersSchema(): array
@@ -41,7 +43,7 @@ class OrderTrackingTool implements ToolInterface
             'properties' => [
                 'order_number' => [
                     'type'        => 'string',
-                    'description' => 'Número do pedido (ex: 100012345). Opcional para clientes logados.',
+                    'description' => 'Número do pedido. Opcional para clientes logados (lista os mais recentes).',
                 ],
             ],
             'required' => [],
@@ -50,45 +52,39 @@ class OrderTrackingTool implements ToolInterface
 
     public function execute(array $arguments, array $context = []): array
     {
-        $orderNumber = trim((string) ($arguments['order_number'] ?? ''));
-        $customerId  = isset($context['customer_id']) ? (int) $context['customer_id'] : null;
+        $customerId = isset($context['customer_id']) ? (int) $context['customer_id'] : 0;
+        if ($customerId <= 0) {
+            return ['message' => self::LOGIN_REQUIRED];
+        }
 
+        $orderNumber = trim((string) ($arguments['order_number'] ?? ''));
         if ($orderNumber !== '') {
             return $this->getByIncrementId($orderNumber, $customerId);
         }
 
-        if ($customerId !== null && $customerId > 0) {
-            return $this->getCustomerOrders($customerId);
-        }
-
-        return [
-            'message' => 'Por favor informe o número do pedido. Você encontra esse número no e-mail de confirmação que recebeu ao finalizar a compra.',
-        ];
+        return $this->getCustomerOrders($customerId);
     }
 
-    private function getByIncrementId(string $incrementId, ?int $customerId): array
+    private function getByIncrementId(string $incrementId, int $customerId): array
     {
         try {
             $criteria = $this->searchCriteriaBuilder
                 ->addFilter('increment_id', $incrementId)
+                ->addFilter('customer_id', $customerId)
                 ->create();
 
             $result = $this->orderRepository->getList($criteria);
             $orders = $result->getItems();
 
             if (empty($orders)) {
-                return ['error' => 'Pedido ' . $incrementId . ' não encontrado.'];
+                return ['error' => self::NOT_FOUND];
             }
 
             $order = reset($orders);
 
-            if ($customerId !== null && (int) $order->getCustomerId() !== $customerId) {
-                return ['error' => 'Pedido não encontrado para este cliente.'];
-            }
-
             return $this->formatOrder($order);
         } catch (\Exception $e) {
-            return ['error' => 'Erro ao consultar pedido: ' . $e->getMessage()];
+            return ['error' => self::NOT_FOUND];
         }
     }
 
@@ -112,9 +108,9 @@ class OrderTrackingTool implements ToolInterface
                 $formatted[] = $this->formatOrder($order);
             }
 
-            return ['orders' => $formatted, 'total' => $result->getTotalCount()];
+            return ['orders' => $formatted, 'total' => count($formatted)];
         } catch (\Exception $e) {
-            return ['error' => 'Erro ao consultar pedidos: ' . $e->getMessage()];
+            return ['error' => self::NOT_FOUND];
         }
     }
 

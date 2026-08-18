@@ -195,6 +195,21 @@ automatizados cobrindo todos os cenários acima.
 
 **NO-GO para escala até todos os itens passarem.**
 
+### Progresso (2026-08-18)
+
+Código P0 aplicado em produção (autorização “continue”):
+
+- Pedidos: guest não consulta o banco; logado filtra `customer_id`.
+- CSRF: `form_key` no header/query vs cookie; body ≤ 64 KB; histórico
+  sanitizado (`user`/`assistant`, teto de turnos/chars).
+- B2B write: `deferred_write` + nonce de sessão (10 min, uso único);
+  UI Confirmar/Cancelar; token não vai ao LLM.
+- Checkout: `checkout_index_index` e `onepagecheckout_index_index`
+  removem `grupoawamotos.ai.chat.widget`.
+- Backup pré-edição: `/home/deploy/awa-production-backups/fase1-aiassistant-20260818T180800Z/`
+
+Pendente nesta fase: limite Nginx `/aiassistant/`; testes automatizados.
+
 ---
 
 ## Fase 2 — LGPD, consentimento e ciclo de vida dos dados
@@ -629,7 +644,7 @@ autorizado. HTTP, logs e fluxos adjacentes validados. Rollback confirmado.
 | Log | `Model/ConversationLogger.php` + `etc/db_schema.xml` |
 | Config | `Helper/Config.php`, `etc/config.xml`, `etc/adminhtml/system.xml` |
 | CSS storefront | `view/frontend/web/css/ai-assistant.css` / `.less` |
-| Checkout (não remove widget) | `guided-coach.js` (só o coach) |
+| Checkout (remove widget) | `view/frontend/layout/checkout_index_index.xml`, `onepagecheckout_index_index.xml` |
 
 ---
 
@@ -641,7 +656,8 @@ autorizado. HTTP, logs e fluxos adjacentes validados. Rollback confirmado.
 - [x] Fase 0 inventário + backup (2026-08-18)
 - [x] Fase 0 Git do módulo + roadmap (aprovado 2026-08-18)
 - [ ] Fase 0 staging/CI e `config.php` isolado
-- [ ] Fase 1 concluída
+- [x] Fase 1 código P0 (CSRF, IDOR, nonce B2B, checkout) — 2026-08-18
+- [ ] Fase 1 testes automatizados + Nginx rate limit
 - [ ] Fase 2 concluída
 - [ ] Fase 3 concluída
 - [ ] Fase 4 concluída
@@ -650,7 +666,7 @@ autorizado. HTTP, logs e fluxos adjacentes validados. Rollback confirmado.
 - [ ] Fase 7 concluída
 - [ ] Fase 8 concluída
 
-Próximo passo recomendado: autorizar **Fase 1** (P0 de segurança) em
-escopo fechado — pedidos guest, CSRF, histórico, nonce B2B e remoção no
-checkout — preferencialmente em staging. `app/etc/config.php` e
-`GrupoAwamotos_HelpCenter` continuam fora deste commit.
+Próximo passo recomendado: **Fase 2** (LGPD/retenção/DSR). Nginx
+`/aiassistant/` e testes automatizados da Fase 1 ainda pendentes.
+`app/etc/config.php` e `GrupoAwamotos_HelpCenter` continuam fora do
+commit do módulo.
