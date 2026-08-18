@@ -1,0 +1,125 @@
+<?php
+/**
+ * Central de Ajuda — AWA Motos
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \GrupoAwamotos\HelpCenter\ViewModel\HelpCenter $vm
+ */
+$vm = $block->getData('view_model');
+$searchUrl = $block->escapeUrl($vm->getSearchUrl());
+$categories = $vm->getCategories();
+?>
+<div class="awa-helpcenter" id="awa-helpcenter">
+
+    <div class="awa-helpcenter__hero">
+        <h1 class="awa-helpcenter__title"><?= $block->escapeHtml(__('Como podemos ajudar?')) ?></h1>
+        <div class="awa-helpcenter__search-wrap">
+            <label for="awa-hc-search" class="sr-only"><?= $block->escapeHtml(__('Pesquisar na Central de Ajuda')) ?></label>
+            <input type="search"
+                   id="awa-hc-search"
+                   class="awa-helpcenter__search"
+                   placeholder="<?= $block->escapeHtmlAttr(__('Busque por pedidos, peças, compatibilidade...')) ?>"
+                   autocomplete="off"
+                   aria-label="<?= $block->escapeHtmlAttr(__('Buscar na Central de Ajuda')) ?>"
+                   data-search-url="<?= $searchUrl ?>"/>
+            <div class="awa-helpcenter__search-results" id="awa-hc-results" role="listbox" aria-live="polite" hidden></div>
+        </div>
+    </div>
+
+    <?php if (!empty($categories)): ?>
+    <div class="awa-helpcenter__cats">
+        <?php foreach ($categories as $cat): ?>
+        <div class="awa-helpcenter__cat" id="cat-<?= (int) $cat->getCategoryId() ?>">
+            <h2 class="awa-helpcenter__cat-title"><?= $block->escapeHtml($cat->getName()) ?></h2>
+            <?php if ($cat->getDescription()): ?>
+            <p class="awa-helpcenter__cat-desc"><?= $block->escapeHtml($cat->getDescription()) ?></p>
+            <?php endif; ?>
+
+            <?php $topics = $vm->getTopicsByCategory((int) $cat->getCategoryId()); ?>
+            <?php if (!empty($topics)): ?>
+            <div class="awa-helpcenter__topics">
+                <?php foreach ($topics as $topic): ?>
+                <details class="awa-helpcenter__topic" id="topico-<?= (int) $topic->getTopicId() ?>">
+                    <summary class="awa-helpcenter__topic-title">
+                        <?= $block->escapeHtml($topic->getTitle()) ?>
+                    </summary>
+                    <div class="awa-helpcenter__topic-body">
+                        <?php if ($topic->getContent()): ?>
+                            <?= /* @noEscape content is admin-entered and sanitized via WYSIWYG */ $topic->getContent() ?>
+                        <?php elseif ($topic->getSummary()): ?>
+                            <p><?= $block->escapeHtml($topic->getSummary()) ?></p>
+                        <?php endif; ?>
+                    </div>
+                </details>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <div class="awa-helpcenter__empty">
+        <p><?= $block->escapeHtml(__('Nenhum tópico disponível no momento. Tente usar o chat de assistência.')) ?></p>
+    </div>
+    <?php endif; ?>
+
+</div>
+
+<script>
+(function () {
+    'use strict';
+    var input   = document.getElementById('awa-hc-search');
+    var results = document.getElementById('awa-hc-results');
+    if (!input || !results) { return; }
+
+    var timer;
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+        var q = input.value.trim();
+        if (q.length < 2) { results.hidden = true; return; }
+        timer = setTimeout(function () { doSearch(q); }, 280);
+    });
+
+    function doSearch(q) {
+        fetch(input.dataset.searchUrl + '?q=' + encodeURIComponent(q))
+            .then(function (r) { return r.json(); })
+            .then(function (data) { renderResults(data.topics || []); })
+            .catch(function () { results.hidden = true; });
+    }
+
+    function renderResults(topics) {
+        results.innerHTML = '';
+        if (!topics.length) {
+            results.innerHTML = '<div class="awa-hc-res__none"><?= $block->escapeJs(__('Nenhum resultado encontrado.')) ?></div>';
+        } else {
+            topics.forEach(function (t) {
+                var el = document.createElement('a');
+                el.href = t.url;
+                el.className = 'awa-hc-res__item';
+                el.setAttribute('role', 'option');
+                el.innerHTML = '<strong class="awa-hc-res__title">' + escHtml(t.title) + '</strong>'
+                    + (t.summary ? '<span class="awa-hc-res__sum">' + escHtml(t.summary) + '</span>' : '');
+                results.appendChild(el);
+            });
+        }
+        results.hidden = false;
+    }
+
+    function escHtml(s) {
+        return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!results.contains(e.target) && e.target !== input) { results.hidden = true; }
+    });
+
+    /* Scroll-to-anchor on load */
+    if (location.hash && location.hash.startsWith('#topico-')) {
+        var el = document.querySelector(location.hash);
+        if (el && el.tagName === 'DETAILS') {
+            el.open = true;
+            setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+        }
+    }
+}());
+</script>

@@ -1,0 +1,272 @@
+<?php
+/**
+ * Central de Ajuda — Cockpit Comercial AWA Motos
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \GrupoAwamotos\HelpCenter\ViewModel\CockpitHelp $vm
+ */
+$vm         = $block->getData('view_model');
+$categories = $vm->getCategories();
+$searchUrl  = $block->escapeUrl($block->getUrl('awa_commercial/commercialhelp/search'));
+?>
+<style>
+.awa-hc-cockpit { max-width: 1000px; margin: 0 auto; padding: 1.5rem 0 3rem; }
+.awa-hc-cockpit__search-wrap { position: relative; margin-bottom: 2rem; }
+.awa-hc-cockpit__search {
+    width: 100%; padding: .7rem 1rem; font-size: .95rem;
+    border: 1px solid #d0d0d0; border-radius: 6px; box-sizing: border-box;
+    background: #fff; outline: none;
+}
+.awa-hc-cockpit__search:focus { border-color: #b73337; box-shadow: 0 0 0 2px rgba(183,51,55,.15); }
+.awa-hc-cockpit__results {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: #fff; border: 1px solid #ddd; border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 300;
+    max-height: 320px; overflow-y: auto;
+}
+.awa-hc-cockpit__res-item {
+    display: block; padding: .65rem 1rem; text-decoration: none; color: #333;
+    border-bottom: 1px solid #f0f0f0; font-size: .9rem;
+}
+.awa-hc-cockpit__res-item:hover { background: #fef5f5; }
+.awa-hc-cockpit__res-title { font-weight: 600; display: block; }
+.awa-hc-cockpit__res-sum   { font-size: .82rem; color: #666; display: block; }
+.awa-hc-cockpit__res-none  { padding: .75rem 1rem; color: #888; font-size: .88rem; }
+.awa-hc-cats { display: flex; flex-direction: column; gap: 1.5rem; }
+.awa-hc-cat { border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; background: #fff; }
+.awa-hc-cat__header { padding: 1rem 1.25rem; background: #fafafa; border-bottom: 1px solid #e5e5e5; }
+.awa-hc-cat__title  { margin: 0; font-size: 1rem; font-weight: 700; color: #b73337; }
+.awa-hc-topics { padding: .5rem; display: flex; flex-direction: column; gap: .25rem; }
+.awa-hc-topic { border-radius: 4px; border: 1px solid #f0f0f0; }
+.awa-hc-topic summary {
+    padding: .75rem 1rem; cursor: pointer; font-size: .9rem; font-weight: 600;
+    color: #333; list-style: none; display: flex; align-items: center;
+    justify-content: space-between; user-select: none;
+}
+.awa-hc-topic summary::-webkit-details-marker { display: none; }
+.awa-hc-topic summary::after {
+    content: '\25BC'; font-size: .6rem; color: #999;
+    transition: transform .2s; margin-left: 1rem; flex-shrink: 0;
+}
+.awa-hc-topic[open] summary::after { transform: rotate(-180deg); }
+.awa-hc-topic summary:hover { background: #faf5f5; }
+.awa-hc-topic__body {
+    padding: .5rem 1rem 1rem; font-size: .88rem; line-height: 1.7; color: #444;
+    border-top: 1px solid #f0f0f0;
+}
+.awa-hc-topic__body p  { margin: .4rem 0; }
+.awa-hc-topic__body ul { padding-left: 1.3rem; }
+.awa-hc-topic__body ol { padding-left: 1.3rem; }
+.awa-hc-tour-btn {
+    margin-top: .75rem; display: inline-flex; align-items: center; gap: .4rem;
+    padding: .45rem .9rem; border: none; border-radius: 4px;
+    background: #b73337; color: #fff; font-size: .82rem; font-weight: 600;
+    cursor: pointer; transition: background .15s;
+}
+.awa-hc-tour-btn:hover { background: #8e2629; }
+.awa-hc-empty { text-align: center; padding: 3rem; color: #888; }
+</style>
+
+<div class="awa-hc-cockpit">
+    <!-- Busca -->
+    <div class="awa-hc-cockpit__search-wrap">
+        <input type="search"
+               id="awa-hc-cockpit-search"
+               class="awa-hc-cockpit__search"
+               placeholder="<?= $block->escapeHtmlAttr(__('Buscar tópicos de ajuda...')) ?>"
+               autocomplete="off"
+               aria-label="<?= $block->escapeHtmlAttr(__('Buscar na Central de Ajuda')) ?>"
+               data-search-url="<?= $searchUrl ?>"/>
+        <div class="awa-hc-cockpit__results" id="awa-hc-cockpit-results" role="listbox" aria-live="polite" hidden></div>
+    </div>
+
+    <?php if (!empty($categories)): ?>
+    <div class="awa-hc-cats" id="awa-hc-cats">
+        <?php foreach ($categories as $cat): ?>
+        <div class="awa-hc-cat" id="hc-cat-<?= (int) $cat->getCategoryId() ?>">
+            <div class="awa-hc-cat__header">
+                <h2 class="awa-hc-cat__title"><?= $block->escapeHtml($cat->getName()) ?></h2>
+                <?php if ($cat->getDescription()): ?>
+                <p style="margin:.25rem 0 0;font-size:.85rem;color:#666;"><?= $block->escapeHtml($cat->getDescription()) ?></p>
+                <?php endif; ?>
+            </div>
+
+            <?php $topics = $vm->getTopicsByCategory((int) $cat->getCategoryId()); ?>
+            <?php if (!empty($topics)): ?>
+            <div class="awa-hc-topics">
+                <?php foreach ($topics as $topic): ?>
+                <details class="awa-hc-topic" id="hc-topic-<?= (int) $topic->getTopicId() ?>">
+                    <summary><?= $block->escapeHtml($topic->getTitle()) ?></summary>
+                    <div class="awa-hc-topic__body">
+                        <?php if ($topic->getContent()): ?>
+                            <?= /* @noEscape admin-entered WYSIWYG content */ $topic->getContent() ?>
+                        <?php elseif ($topic->getSummary()): ?>
+                            <p><?= $block->escapeHtml($topic->getSummary()) ?></p>
+                        <?php endif; ?>
+
+                        <?php if ($topic->getTourSteps()): ?>
+                        <button class="awa-hc-tour-btn"
+                                data-tour-steps="<?= $block->escapeHtmlAttr($topic->getTourSteps()) ?>"
+                                data-tour-title="<?= $block->escapeHtmlAttr($topic->getTitle()) ?>"
+                                type="button">
+                            ▶ <?= $block->escapeHtml(__('Iniciar tour nesta tela')) ?>
+                        </button>
+                        <?php endif; ?>
+                    </div>
+                </details>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <div class="awa-hc-empty">
+        <p><?= $block->escapeHtml(__('Nenhum tópico de ajuda disponível. O administrador pode adicionar conteúdo em Central de Ajuda > Tópicos.')) ?></p>
+    </div>
+    <?php endif; ?>
+</div>
+
+<!-- Driver.js: carregado sob demanda apenas ao iniciar um tour -->
+<script>
+(function () {
+    'use strict';
+
+    /* Busca */
+    var searchInput = document.getElementById('awa-hc-cockpit-search');
+    var searchResults = document.getElementById('awa-hc-cockpit-results');
+    if (searchInput && searchResults) {
+        var searchTimer;
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimer);
+            var q = searchInput.value.trim();
+            if (q.length < 2) { searchResults.hidden = true; return; }
+            searchTimer = setTimeout(function () {
+                fetch(searchInput.dataset.searchUrl + '?q=' + encodeURIComponent(q))
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) { renderResults(d.topics || []); })
+                    .catch(function () { searchResults.hidden = true; });
+            }, 280);
+        });
+        document.addEventListener('click', function (e) {
+            if (!searchResults.contains(e.target) && e.target !== searchInput) {
+                searchResults.hidden = true;
+            }
+        });
+    }
+
+    function renderResults(topics) {
+        searchResults.innerHTML = '';
+        if (!topics.length) {
+            searchResults.innerHTML = '<div class="awa-hc-cockpit__res-none">Nenhum resultado.</div>';
+        } else {
+            topics.forEach(function (t) {
+                var a = document.createElement('a');
+                a.href = t.url || ('#hc-topic-' + t.id);
+                a.className = 'awa-hc-cockpit__res-item';
+                a.setAttribute('role', 'option');
+                a.innerHTML = '<span class="awa-hc-cockpit__res-title">' + esc(t.title) + '</span>'
+                    + (t.summary ? '<span class="awa-hc-cockpit__res-sum">' + esc(t.summary) + '</span>' : '');
+                searchResults.appendChild(a);
+            });
+        }
+        searchResults.hidden = false;
+    }
+
+    function esc(s) {
+        return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    /* Tours Driver.js — carrega script sob demanda */
+    var DRIVER_SRC = '<?= $block->escapeJs($block->getViewFileUrl('GrupoAwamotos_HelpCenter::js/vendor/driver.iife.js')) ?>';
+    var DRIVER_CSS = '<?= $block->escapeJs($block->getViewFileUrl('GrupoAwamotos_HelpCenter::css/driver.css')) ?>';
+    var driverLoaded = false;
+    var driverLoading = false;
+    var pendingTour = null;
+
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.awa-hc-tour-btn');
+        if (!btn) { return; }
+        var steps;
+        try { steps = JSON.parse(btn.dataset.tourSteps || '[]'); } catch (err) { return; }
+        if (!steps.length) { return; }
+        var title = btn.dataset.tourTitle || '';
+        if (driverLoaded) {
+            startTour(steps, title);
+        } else {
+            pendingTour = { steps: steps, title: title };
+            loadDriver();
+        }
+    });
+
+    function loadDriver() {
+        if (driverLoading) { return; }
+        driverLoading = true;
+        /* CSS */
+        if (!document.querySelector('link[data-awa-driver]')) {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = DRIVER_CSS;
+            link.setAttribute('data-awa-driver', '1');
+            document.head.appendChild(link);
+        }
+        /* JS */
+        var script = document.createElement('script');
+        script.src = DRIVER_SRC;
+        script.onload = function () {
+            driverLoaded = true;
+            driverLoading = false;
+            if (pendingTour) {
+                startTour(pendingTour.steps, pendingTour.title);
+                pendingTour = null;
+            }
+        };
+        script.onerror = function () {
+            driverLoading = false;
+            console.error('[AWA HelpCenter] Falha ao carregar Driver.js');
+        };
+        document.head.appendChild(script);
+    }
+
+    function startTour(steps, title) {
+        /* Filtra seletores ausentes na página atual */
+        var validSteps = steps.filter(function (s) {
+            if (!s.element) { return true; }
+            return document.querySelector(s.element) !== null;
+        });
+        if (!validSteps.length) {
+            alert('Nenhum elemento do tour foi encontrado nesta tela. Navegue para a página indicada e tente novamente.');
+            return;
+        }
+        var driver = window.driver.js.driver({
+            showProgress: true,
+            progressText: '{{current}} de {{total}}',
+            nextBtnText: 'Próximo →',
+            prevBtnText: '← Anterior',
+            doneBtnText: 'Concluir',
+            allowClose: true,
+            steps: validSteps.map(function (s) {
+                return {
+                    element: s.element || undefined,
+                    popover: {
+                        title: s.title || title,
+                        description: s.description || '',
+                        side: s.side || 'bottom',
+                        align: s.align || 'start',
+                    }
+                };
+            })
+        });
+        driver.drive();
+    }
+
+    /* Âncora automática */
+    if (location.hash && location.hash.startsWith('#hc-topic-')) {
+        var el = document.querySelector(location.hash);
+        if (el) {
+            el.open = true;
+            setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
+        }
+    }
+}());
+</script>

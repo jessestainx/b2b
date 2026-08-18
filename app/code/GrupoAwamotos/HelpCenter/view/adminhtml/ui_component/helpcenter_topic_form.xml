@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">helpcenter_topic_form.helpcenter_topic_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Tópico de Ajuda</item>
+    </argument>
+
+    <settings>
+        <buttons>
+            <button name="back">
+                <url path="*/*/index"/>
+                <class>back</class>
+                <label translate="true">Voltar</label>
+            </button>
+            <button name="delete" class="GrupoAwamotos\HelpCenter\Block\Adminhtml\Topic\Edit\DeleteButton"/>
+            <button name="save_and_continue">
+                <class>save</class>
+                <label translate="true">Salvar e continuar</label>
+                <param name="back">edit</param>
+                <dataAttribute name="mage-init">{"button": {"event": "saveAndContinueEdit"}}</dataAttribute>
+            </button>
+            <button name="save">
+                <url path="*/*/save"/>
+                <class>save primary</class>
+                <label translate="true">Salvar</label>
+            </button>
+        </buttons>
+        <namespace>helpcenter_topic_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>helpcenter_topic_form.helpcenter_topic_form_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="helpcenter_topic_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="grupoawamotos_helpcenter/topic/save"/>
+        </settings>
+        <dataProvider class="GrupoAwamotos\HelpCenter\Ui\DataProvider\Topic\FormDataProvider"
+                      name="helpcenter_topic_form_data_source">
+            <settings>
+                <requestFieldName>topic_id</requestFieldName>
+                <primaryFieldName>topic_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <fieldset name="general">
+        <settings>
+            <label translate="true">Informações do Tópico</label>
+        </settings>
+
+        <field name="topic_id" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <visible>false</visible>
+            </settings>
+        </field>
+
+        <field name="title" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Título</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="summary" formElement="textarea">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Resumo curto</label>
+                <notice translate="true">Texto exibido nos resultados de busca e na listagem do cockpit.</notice>
+            </settings>
+        </field>
+
+        <field name="content" formElement="wysiwyg">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Conteúdo completo</label>
+            </settings>
+            <formElements>
+                <wysiwyg>
+                    <settings>
+                        <wysiwygConfigData>
+                            <item name="height" xsi:type="string">300px</item>
+                        </wysiwygConfigData>
+                    </settings>
+                </wysiwyg>
+            </formElements>
+        </field>
+
+        <field name="keywords" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Palavras-chave</label>
+                <notice translate="true">Separadas por vírgula. Ex: pedido, rastrear, entrega</notice>
+            </settings>
+        </field>
+
+        <field name="audience" formElement="select">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Público-alvo</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="GrupoAwamotos\HelpCenter\Model\Config\Source\Audience"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="route_pattern" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Padrão de rota (ajuda contextual)</label>
+                <notice translate="true">Deixe vazio para exibir em qualquer rota. Ex: awa_commercial_* para cockpit, awa_commercial_portfolio_* para carteira.</notice>
+            </settings>
+        </field>
+
+        <field name="sort_order" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Ordem de exibição</label>
+            </settings>
+        </field>
+
+        <field name="status" formElement="select">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Status</label>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="GrupoAwamotos\HelpCenter\Model\Config\Source\Status"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+
+    <fieldset name="tour">
+        <settings>
+            <label translate="true">Tour Driver.js (opcional)</label>
+            <collapsible>true</collapsible>
+            <opened>false</opened>
+        </settings>
+
+        <field name="tour_steps" formElement="textarea">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Passos do tour (JSON)</label>
+                <notice translate="true">Array JSON de passos. Ex: [{"element": ".some-selector", "title": "Painel", "description": "Este é o painel..."}]</notice>
+            </settings>
+        </field>
+    </fieldset>
+</form>

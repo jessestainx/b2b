@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <!-- Rota própria para gestão de categorias/tópicos no admin -->
+        <route id="grupoawamotos_helpcenter" frontName="grupoawamotos_helpcenter">
+            <module name="GrupoAwamotos_HelpCenter"/>
+        </route>
+        <!-- Participa da rota do cockpit para servir awa_commercial/commercialhelp/* -->
+        <route id="awa_commercial" frontName="awa_commercial">
+            <module name="GrupoAwamotos_HelpCenter" after="GrupoAwamotos_B2B"/>
+        </route>
+    </router>
+</config>

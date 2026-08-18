@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="GrupoAwamotos_HelpCenter::helpcenter"
+             title="Central de Ajuda"
+             translate="title"
+             module="GrupoAwamotos_HelpCenter"
+             parent="GrupoAwamotos_ERPIntegration::grupo_awamotos"
+             sortOrder="55"
+             resource="GrupoAwamotos_HelpCenter::helpcenter"/>
+
+        <add id="GrupoAwamotos_HelpCenter::helpcenter_categories"
+             title="Categorias"
+             translate="title"
+             module="GrupoAwamotos_HelpCenter"
+             parent="GrupoAwamotos_HelpCenter::helpcenter"
+             sortOrder="10"
+             action="grupoawamotos_helpcenter/category/index"
+             resource="GrupoAwamotos_HelpCenter::helpcenter_manage"/>
+
+        <add id="GrupoAwamotos_HelpCenter::helpcenter_topics"
+             title="Tópicos"
+             translate="title"
+             module="GrupoAwamotos_HelpCenter"
+             parent="GrupoAwamotos_HelpCenter::helpcenter"
+             sortOrder="20"
+             action="grupoawamotos_helpcenter/topic/index"
+             resource="GrupoAwamotos_HelpCenter::helpcenter_manage"/>
+    </menu>
+</config>

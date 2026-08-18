@@ -1,0 +1,182 @@
+/* AWA Help Center — Storefront styles */
+/* Usa exclusivamente tokens var(--awa-*); sem fallbacks literais */
+
+.awa-helpcenter {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+}
+
+.awa-helpcenter__hero {
+    text-align: center;
+    padding: 2.5rem 1rem 2rem;
+    margin-bottom: 2rem;
+    background: var(--awa-primary);
+    border-radius: var(--awa-radius-lg);
+    color: var(--awa-text-inverse);
+}
+
+.awa-helpcenter__title {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 700;
+    margin: 0 0 1.5rem;
+    color: var(--awa-text-inverse);
+    line-height: 1.2;
+}
+
+.awa-helpcenter__search-wrap {
+    position: relative;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.awa-helpcenter__search {
+    width: 100%;
+    padding: .85rem 1.25rem;
+    border: none;
+    border-radius: var(--awa-radius-md);
+    font-size: 1rem;
+    box-shadow: var(--awa-shadow-md);
+    outline: none;
+    box-sizing: border-box;
+    background: var(--awa-surface);
+    color: var(--awa-text);
+}
+
+.awa-helpcenter__search:focus {
+    box-shadow: var(--awa-shadow-lg);
+    outline: 3px solid var(--awa-text-inverse);
+    outline-offset: 2px;
+}
+
+.awa-helpcenter__search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--awa-surface);
+    border-radius: var(--awa-radius-md);
+    box-shadow: var(--awa-shadow-xl);
+    z-index: 200;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.awa-hc-res__item {
+    display: block;
+    padding: .75rem 1rem;
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid var(--awa-border);
+    transition: background .15s;
+}
+
+.awa-hc-res__item:hover,
+.awa-hc-res__item:focus {
+    background: var(--awa-hover-bg);
+    outline: none;
+}
+
+.awa-hc-res__title { display: block; font-size: .95rem; color: var(--awa-text); }
+.awa-hc-res__sum   { display: block; font-size: .82rem; color: var(--awa-text-muted); margin-top: .2rem; }
+.awa-hc-res__none  { padding: 1rem; color: var(--awa-text-muted); font-size: .9rem; text-align: center; }
+
+.awa-helpcenter__cats {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.awa-helpcenter__cat {
+    border: 1px solid var(--awa-border);
+    border-radius: var(--awa-radius-lg);
+    padding: 1.5rem;
+    background: var(--awa-surface);
+}
+
+.awa-helpcenter__cat-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--awa-primary);
+    margin: 0 0 .4rem;
+    padding-bottom: .6rem;
+    border-bottom: 2px solid var(--awa-border);
+}
+
+.awa-helpcenter__cat-desc {
+    font-size: .9rem;
+    color: var(--awa-text-muted);
+    margin: 0 0 1rem;
+}
+
+.awa-helpcenter__topics {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.awa-helpcenter__topic {
+    border-radius: var(--awa-radius-sm);
+    border: 1px solid var(--awa-border);
+    overflow: hidden;
+}
+
+.awa-helpcenter__topic-title {
+    padding: .9rem 1rem;
+    cursor: pointer;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--awa-text);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    transition: background .15s;
+}
+
+.awa-helpcenter__topic-title::after {
+    content: "\25BC";
+    font-size: .65rem;
+    color: var(--awa-text-muted);
+    transition: transform .2s;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.awa-helpcenter__topic[open] .awa-helpcenter__topic-title::after {
+    transform: rotate(-180deg);
+}
+
+.awa-helpcenter__topic-title:hover { background: var(--awa-hover-bg); }
+.awa-helpcenter__topic-title::-webkit-details-marker { display: none; }
+
+.awa-helpcenter__topic-body {
+    padding: .5rem 1rem 1rem;
+    font-size: .93rem;
+    line-height: 1.7;
+    color: var(--awa-text);
+    border-top: 1px solid var(--awa-border);
+}
+
+.awa-helpcenter__topic-body p  { margin: .5rem 0; }
+.awa-helpcenter__topic-body ul { padding-left: 1.4rem; }
+.awa-helpcenter__topic-body ol { padding-left: 1.4rem; }
+
+.awa-helpcenter__empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--awa-text-muted);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0);
+    white-space: nowrap; border: 0;
+}
+
+@media (max-width: 600px) {
+    .awa-helpcenter { padding: 1rem .5rem 3rem; }
+    .awa-helpcenter__cat { padding: 1rem; }
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="GrupoAwamotos_HelpCenter::helpcenter" title="Central de Ajuda" sortOrder="55">
+                    <resource id="GrupoAwamotos_HelpCenter::helpcenter_manage"
+                              title="Gerenciar Categorias e Tópicos" sortOrder="10"/>
+                    <resource id="GrupoAwamotos_HelpCenter::helpcenter_view"
+                              title="Visualizar Central de Ajuda (Cockpit)" sortOrder="20"/>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

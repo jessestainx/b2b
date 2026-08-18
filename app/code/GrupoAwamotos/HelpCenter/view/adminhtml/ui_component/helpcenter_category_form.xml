@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">helpcenter_category_form.helpcenter_category_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Categoria de Ajuda</item>
+        <item name="reverseMetaMerge" xsi:type="boolean">true</item>
+    </argument>
+
+    <settings>
+        <buttons>
+            <button name="back">
+                <url path="*/*/index"/>
+                <class>back</class>
+                <label translate="true">Voltar</label>
+            </button>
+            <button name="delete" class="GrupoAwamotos\HelpCenter\Block\Adminhtml\Category\Edit\DeleteButton"/>
+            <button name="save_and_continue">
+                <class>save</class>
+                <label translate="true">Salvar e continuar</label>
+                <param name="back">edit</param>
+                <dataAttribute name="mage-init">{"button": {"event": "saveAndContinueEdit"}}</dataAttribute>
+            </button>
+            <button name="save">
+                <url path="*/*/save"/>
+                <class>save primary</class>
+                <label translate="true">Salvar</label>
+            </button>
+        </buttons>
+        <namespace>helpcenter_category_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>helpcenter_category_form.helpcenter_category_form_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="helpcenter_category_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="grupoawamotos_helpcenter/category/save"/>
+        </settings>
+        <dataProvider class="GrupoAwamotos\HelpCenter\Ui\DataProvider\Category\FormDataProvider"
+                      name="helpcenter_category_form_data_source">
+            <settings>
+                <requestFieldName>category_id</requestFieldName>
+                <primaryFieldName>category_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <fieldset name="general">
+        <settings>
+            <label translate="true">Informações Gerais</label>
+        </settings>
+
+        <field name="category_id" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <visible>false</visible>
+            </settings>
+        </field>
+
+        <field name="name" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Nome da Categoria</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="description" formElement="textarea">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Descrição</label>
+            </settings>
+        </field>
+
+        <field name="audience" formElement="select">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Público-alvo</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="GrupoAwamotos\HelpCenter\Model\Config\Source\Audience"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="sort_order" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Ordem de exibição</label>
+            </settings>
+        </field>
+
+        <field name="status" formElement="select">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Status</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="GrupoAwamotos\HelpCenter\Model\Config\Source\Status"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+</form>

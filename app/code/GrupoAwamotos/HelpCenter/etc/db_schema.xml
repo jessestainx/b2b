@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <table name="grupoawamotos_help_category" resource="default" engine="innodb"
+           comment="AWA Help Center — Categorias">
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="false"
+                identity="true" comment="Category ID"/>
+        <column xsi:type="varchar" name="name" length="255" nullable="false" comment="Nome"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Descrição"/>
+        <column xsi:type="smallint" name="sort_order" unsigned="true" nullable="false"
+                default="0" comment="Ordem"/>
+        <column xsi:type="varchar" name="audience" length="64" nullable="false"
+                default="all" comment="Público-alvo: all|customer|b2b|seller|supervisor|admin"/>
+        <column xsi:type="smallint" name="status" nullable="false"
+                default="1" comment="Status: 1=ativo, 0=inativo"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Criado em"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false"
+                default="CURRENT_TIMESTAMP" on_update="true" comment="Atualizado em"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="category_id"/>
+        </constraint>
+        <index referenceId="AWA_HELP_CAT_AUDIENCE_STATUS" indexType="btree">
+            <column name="audience"/>
+            <column name="status"/>
+        </index>
+    </table>
+
+    <table name="grupoawamotos_help_topic" resource="default" engine="innodb"
+           comment="AWA Help Center — Tópicos">
+        <column xsi:type="int" name="topic_id" unsigned="true" nullable="false"
+                identity="true" comment="Topic ID"/>
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="true"
+                comment="Category ID"/>
+        <column xsi:type="varchar" name="title" length="255" nullable="false" comment="Título"/>
+        <column xsi:type="text" name="summary" nullable="true" comment="Resumo curto"/>
+        <column xsi:type="mediumtext" name="content" nullable="true" comment="Conteúdo completo (HTML)"/>
+        <column xsi:type="varchar" name="keywords" length="512" nullable="true"
+                comment="Palavras-chave de busca (separadas por vírgula)"/>
+        <column xsi:type="varchar" name="audience" length="64" nullable="false"
+                default="all" comment="Público-alvo"/>
+        <column xsi:type="varchar" name="route_pattern" length="255" nullable="true"
+                comment="Padrão de rota admin para ajuda contextual (ex: awa_commercial_*)"/>
+        <column xsi:type="smallint" name="sort_order" unsigned="true" nullable="false"
+                default="0" comment="Ordem"/>
+        <column xsi:type="smallint" name="status" nullable="false"
+                default="1" comment="Status: 1=ativo, 0=inativo"/>
+        <column xsi:type="mediumtext" name="tour_steps" nullable="true"
+                comment="Passos do tour Driver.js em JSON"/>
+        <column xsi:type="int" name="views" unsigned="true" nullable="false"
+                default="0" comment="Visualizações"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Criado em"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false"
+                default="CURRENT_TIMESTAMP" on_update="true" comment="Atualizado em"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="topic_id"/>
+        </constraint>
+        <index referenceId="AWA_HELP_TOPIC_CATEGORY_ID" indexType="btree">
+            <column name="category_id"/>
+        </index>
+        <index referenceId="AWA_HELP_TOPIC_AUDIENCE_STATUS" indexType="btree">
+            <column name="audience"/>
+            <column name="status"/>
+        </index>
+        <index referenceId="AWA_HELP_TOPIC_ROUTE_PATTERN" indexType="btree">
+            <column name="route_pattern"/>
+        </index>
+        <index referenceId="AWA_HELP_TOPIC_FT" indexType="fulltext">
+            <column name="title"/>
+            <column name="keywords"/>
+            <column name="summary"/>
+        </index>
+    </table>
+
+</schema>
