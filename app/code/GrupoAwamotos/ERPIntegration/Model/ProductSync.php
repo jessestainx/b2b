@@ -33,6 +33,42 @@ class ProductSync implements ProductSyncInterface
      * Memory limit warning threshold (80% of limit)
      */
     private const MEMORY_WARNING_THRESHOLD = 0.8;
+    private const FITMENT_ATTR_BRAND = 'marca_moto';
+    private const FITMENT_ATTR_MODEL = 'modelo_moto';
+    private const FITMENT_ATTR_YEAR = 'ano_moto';
+
+    /**
+     * @var array<string, string>
+     */
+    private const FITMENT_MODEL_TO_BRAND = [
+        'biz' => 'Honda',
+        'cg' => 'Honda',
+        'titan' => 'Honda',
+        'bros' => 'Honda',
+        'fan' => 'Honda',
+        'xre' => 'Honda',
+        'cb' => 'Honda',
+        'fazer' => 'Yamaha',
+        'factor' => 'Yamaha',
+        'ybr' => 'Yamaha',
+        'ninja' => 'Kawasaki',
+    ];
+
+    /**
+     * @var array<string, string>
+     */
+    private const FITMENT_BRAND_NEEDLES = [
+        'royal enfield' => 'Royal Enfield',
+        'harley' => 'Harley-Davidson',
+        'kawasaki' => 'Kawasaki',
+        'yamaha' => 'Yamaha',
+        'suzuki' => 'Suzuki',
+        'honda' => 'Honda',
+        'triumph' => 'Triumph',
+        'ducati' => 'Ducati',
+        'bmw' => 'BMW',
+        'dafra' => 'Dafra',
+    ];
 
     private ConnectionInterface $connection;
     private Helper $helper;
@@ -350,8 +386,14 @@ class ProductSync implements ProductSyncInterface
             ? $validationResult->getField('is_active', ($erpProduct['CCKATIVO'] ?? 'N') === 'S')
             : ($erpProduct['CCKATIVO'] ?? 'N') === 'S';
 
-        // Check if data has changed using hash
-        $dataHash = hash('xxh128', json_encode($erpProduct));
+        $fitmentSource = trim((string) ($erpProduct['DESCRICAO'] ?? '') . ' ' . (string) ($erpProduct['COMPLEMENTO'] ?? ''));
+        $fitmentData = $this->extractFitmentFromText($fitmentSource);
+
+        // Check if data has changed using hash.
+        // Include fitment derivado para forçar atualização quando a regra de parsing evoluir.
+        $dataHashPayload = $erpProduct;
+        $dataHashPayload['__fitment_auto'] = $fitmentData;
+        $dataHash = hash('xxh128', json_encode($dataHashPayload));
         $existingHash = $this->syncLogResource->getEntityMapHash('product', $sku);
 
         if ($existingHash === $dataHash && $this->canSkipUnchangedProduct($sku, $isActive)) {
@@ -381,6 +423,8 @@ class ProductSync implements ProductSyncInterface
         if (!empty($erpProduct['COMPLEMENTO'])) {
             $product->setShortDescription(trim($erpProduct['COMPLEMENTO']));
         }
+
+        $this->applyFitmentAttributes($product, $fitmentData);
 
         // Use validated price if available
         $price = $validationResult
@@ -567,6 +611,146 @@ class ProductSync implements ProductSyncInterface
         ];
 
         return strtr($string, $transliterations);
+    }
+
+    /**
+     * @return array{brand:string,model:string,year:string}
+     */
+    private function extractFitmentFromText(string $source): array
+    {
+        $source = trim($source);
+        if ($source === '') {
+            return ['brand' => '', 'model' => '', 'year' => ''];
+        }
+
+        $brand = $this->detectFitmentBrand($source);
+        $modelData = $this->detectFitmentModel($source);
+        $modelToken = $modelData['token'];
+        $model = $modelData['label'];
+
+        if ($brand === '' && $modelToken !== '' && isset(self::FITMENT_MODEL_TO_BRAND[$modelToken])) {
+            $brand = self::FITMENT_MODEL_TO_BRAND[$modelToken];
+        }
+
+        return [
+            'brand' => $brand,
+            'model' => $model,
+            'year' => $this->detectFitmentYear($source),
+        ];
+    }
+
+    private function detectFitmentBrand(string $source): string
+    {
+        $normalized = mb_strtolower($this->transliterate($source));
+        foreach (self::FITMENT_BRAND_NEEDLES as $needle => $label) {
+            if (str_contains($normalized, $needle)) {
+                return $label;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * @return array{token:string,label:string}
+     */
+    private function detectFitmentModel(string $source): array
+    {
+        if (preg_match('/\b(fazer|factor|ybr|ninja|biz|bros|fan|xre|cg|titan|cb|pcx|xj6|mt|xtz|lander|crosser|burgman|intruder|yes|neo|crypton)(?:[\s\-\/]*(\d{2,4}))?\b/i', $source, $match) !== 1) {
+            return ['token' => '', 'label' => ''];
+        }
+
+        $token = mb_strtolower((string) ($match[1] ?? ''));
+        return [
+            'token' => $token,
+            'label' => $this->formatFitmentModelLabel($token, (string) ($match[2] ?? '')),
+        ];
+    }
+
+    private function detectFitmentYear(string $source): string
+    {
+        if (preg_match('/\b((?:19|20)?\d{2})\s*(?:\/|-)\s*((?:19|20)?\d{2})\b/', $source, $yearRange) === 1) {
+            $startYear = $this->normalizeFitmentYear((string) ($yearRange[1] ?? ''));
+            $endYear = $this->normalizeFitmentYear((string) ($yearRange[2] ?? ''));
+            if ($startYear !== '' && $endYear !== '') {
+                return $startYear === $endYear ? $startYear : $startYear . '-' . $endYear;
+            }
+        }
+
+        if (preg_match('/\b(19|20)\d{2}\b/', $source, $singleYear) === 1) {
+            return (string) ($singleYear[0] ?? '');
+        }
+
+        return '';
+    }
+
+    private function formatFitmentModelLabel(string $token, string $suffix): string
+    {
+        $token = mb_strtolower(trim($token));
+        if ($token === '') {
+            return '';
+        }
+
+        $labelMap = [
+            'cg' => 'CG',
+            'cb' => 'CB',
+            'xre' => 'XRE',
+            'xj6' => 'XJ6',
+            'mt' => 'MT',
+            'xtz' => 'XTZ',
+            'pcx' => 'PCX',
+            'ybr' => 'YBR',
+        ];
+
+        $base = $labelMap[$token] ?? ucfirst($token);
+        $suffix = trim($suffix);
+
+        return $suffix !== '' ? $base . ' ' . $suffix : $base;
+    }
+
+    private function normalizeFitmentYear(string $year): string
+    {
+        $digits = preg_replace('/\D+/', '', $year) ?? '';
+        if ($digits === '') {
+            return '';
+        }
+
+        if (strlen($digits) === 4) {
+            return $digits;
+        }
+
+        if (strlen($digits) === 2) {
+            $value = (int) $digits;
+            return ($value <= 30 ? '20' : '19') . $digits;
+        }
+
+        return '';
+    }
+
+    /**
+     * @param array{brand:string,model:string,year:string} $fitmentData
+     */
+    private function applyFitmentAttributes($product, array $fitmentData): void
+    {
+        $attributeMap = [
+            self::FITMENT_ATTR_BRAND => 'brand',
+            self::FITMENT_ATTR_MODEL => 'model',
+            self::FITMENT_ATTR_YEAR => 'year',
+        ];
+
+        foreach ($attributeMap as $attributeCode => $fitmentKey) {
+            $newValue = trim((string) ($fitmentData[$fitmentKey] ?? ''));
+            if ($newValue === '') {
+                continue;
+            }
+
+            $currentValue = trim((string) $product->getData($attributeCode));
+            if ($currentValue === $newValue) {
+                continue;
+            }
+
+            $product->setCustomAttribute($attributeCode, $newValue);
+        }
     }
 
     /**
