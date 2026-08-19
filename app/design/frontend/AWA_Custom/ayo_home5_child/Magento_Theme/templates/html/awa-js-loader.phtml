@@ -1,0 +1,39 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Override do tema pai (ayo_home5): o loader original injeta awa-master-fix.js
+ * sem minify em todas as rotas.
+ *
+ * Política Magento/AWA (OptimizeHeadStylesPlugin heavyLegacyScripts):
+ * não carregar este bundle em home, catálogo, CMS, 404, checkout, conta
+ * Magento e B2B — o script satura o thread principal (Chromium hang).
+ * Nas demais rotas, servir a fonte .js (Magento getViewFileUrl; o .min.js
+ * correspondente não existe no tema).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$request = $block->getRequest();
+$fullActionName = $request ? (string) $request->getFullActionName() : '';
+$skipRoutes = [
+    'cms_index_index',
+    'cms_page_view',
+    'cms_noroute_index',
+    'catalog_category_view',
+    'catalog_product_view',
+    'catalogsearch_result_index',
+    'checkout_cart_index',
+    'checkout_index_index',
+    'onepagecheckout_index_index',
+    'b2b_marketing_landing',
+];
+if (in_array($fullActionName, $skipRoutes, true)
+    || str_starts_with($fullActionName, 'multishipping_')
+    || str_starts_with($fullActionName, 'customer_')
+    || str_starts_with($fullActionName, 'b2b_')
+) {
+    return;
+}
+$staticUrl = $block->getViewFileUrl('js/awa-master-fix.js') . '?v=20260815-hygiene-r1';
+?>
+<script src="<?= $block->escapeUrl($staticUrl) ?>" defer></script>
