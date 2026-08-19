@@ -36,6 +36,8 @@
         <referenceBlock name="awa.vertical.menu.harden" remove="true"/>
         <referenceBlock name="awa.vertical.menu.harden.js" remove="true"/>
         <referenceBlock name="awa.vertical.menu.flyout.fix" remove="true"/>
+        <!-- Experimentos A/B sem CSS/variantes ativas: só mutavam class no body (recalc/CLS). -->
+        <referenceBlock name="awa.ab.testing" remove="true"/>
         <!-- NAV-FIX: nav.fixed-bottom renderizado FORA do <footer> para evitar bug Chrome -->
         <!-- position:fixed dentro de footer com scrollHeight > clientHeight = posicionamento errado -->
         <referenceContainer name="before.body.end">
@@ -140,17 +142,11 @@
                    template="Magento_Theme::html/awa-critical-inline.phtml"
                    after="awa.cls.nav.fix"/>
 
-            <!-- Bloqueia fetch/sendBeacon para localhost:7631/ingest (CSP + console limpo em produção) -->
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.impeccable.loopback.guard.global"
-                   template="Magento_Theme::html/awa-impeccable-loopback-guard-v2.phtml"
-                   after="awa.critical.inline.css"/>
-
             <!-- HeroPreload lê slides do banco — conteúdo estático, seguro no FPC. -->
             <block class="GrupoAwamotos\Theme\Block\Html\HeroPreload"
                    name="awa.head.preload"
                    template="Magento_Theme::html/awa-head-preload.phtml"
-                   after="awa.impeccable.loopback.guard.global"/>
+                   after="awa.critical.inline.css"/>
 
             <!-- awa.deferred.interaction.css e awa.deferred.cosmetic.css removidos:
                  $deferredFiles = [] em ambos — zero output (Fase 4 Jun/24) -->
@@ -198,6 +194,12 @@
                    name="awa.cookie.consent.fix.css"
                    template="Magento_Theme::html/awa-cookie-consent-fix-css.phtml"
                    after="awa.shelf.carousel"/>
+
+            <!-- Minicart open-terminal: <style>/<script> via layout Magento (não regex no </body>). -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="awa.minicart.open.terminal"
+                   template="Magento_Theme::html/awa-minicart-open-terminal.phtml"
+                   after="awa.cookie.consent.fix.css"/>
         </referenceBlock>
     </body>
 </page>
