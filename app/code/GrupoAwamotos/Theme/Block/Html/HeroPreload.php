@@ -9,6 +9,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Bloco de head: injeta <link rel="preload" as="image" fetchpriority="high">
@@ -27,18 +28,40 @@ class HeroPreload extends Template
     private ResourceConnection $resource;
     private StoreManagerInterface $storeManager;
     private HeroResponsiveImage $heroResponsiveImage;
+    private LoggerInterface $logger;
+
+    /** @var array<string, bool> Dedupe por request — um aviso por arquivo ausente. */
+    private array $missingCssLogged = [];
 
     public function __construct(
         Context $context,
         ResourceConnection $resource,
         StoreManagerInterface $storeManager,
         HeroResponsiveImage $heroResponsiveImage,
+        LoggerInterface $logger,
         array $data = []
     ) {
         $this->resource = $resource;
         $this->storeManager = $storeManager;
         $this->heroResponsiveImage = $heroResponsiveImage;
+        $this->logger = $logger;
         parent::__construct($context, $data);
+    }
+
+    /**
+     * Registra aviso quando um CSS referenciado pelo head-preload não existe
+     * em disco (rename/mova silencioso). Antes deste log o link era omitido
+     * sem nenhum rastro — ver scripts/check-awa-css-refs.sh.
+     */
+    public function logMissingDeferredCss(string $url): void
+    {
+        if (isset($this->missingCssLogged[$url])) {
+            return;
+        }
+        $this->missingCssLogged[$url] = true;
+        $this->logger->warning(
+            'AWA CSS ausente — link omitido do head (arquivo não encontrado em web/css nem pub/static): ' . $url
+        );
     }
 
     /**

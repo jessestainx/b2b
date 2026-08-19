@@ -12,8 +12,9 @@ use Magento\Framework\View\Page\Config\Renderer;
  * 1. Google Fonts Rubik -> async (herdado do tema pai ayo_default).
  * 2. CSS de interacao (calendar, uppy, chosen, fancybox, quickview, loader, brand)
  *    -> removidos (conteudo consolidado em awa-super-global.css via CSS gate).
- * 3. styles-l.css duplicata -> removida a instancia extra (awa-styles-l-last.phtml
- *    carrega a versao definitiva por ultimo para garantir cascata correta).
+ * 3. styles-l.css duplicata -> remove a instancia sem media (tema pai ayo_default)
+ *    e mantem so a de min-width:768px (awa-head-preload). Casa .css e .min.css.
+ * 4. CSS de polish / FAB (visual-fixes, ai-assistant) -> print/onload para o LCP.
  *
  * O mecanismo <remove> do layout XML nao remove assets declarados com <link src>
  * por modulos de terceiros (Rokanthemes). Este plugin opera diretamente no HTML
@@ -38,7 +39,19 @@ class HeadAssetRendererPlugin
         'Rokanthemes_RokanBase/css/jquery.fancybox.css',
         'Rokanthemes_Themeoption/css/loader.css',
         'Rokanthemes_Brand/css/styles.css',
-        'css/styles-l.css',
+        /* styles-l.css / .min.css: nao listar aqui. removeBlockingCss apagaria tambem
+           a copia correta com media="screen and (min-width: 768px)". Ver removeStylesLDuplicate(). */
+    ];
+
+    /**
+     * CSS abaixo da dobra ou de polish tardio — media=print + onload (não bloqueia LCP).
+     * design-system permanece bloqueante (SSOT / tokens de 1º paint).
+     *
+     * @var string[]
+     */
+    private const BLOCKING_CSS_TO_ASYNC = [
+        'GrupoAwamotos_AiAssistant/css/ai-assistant',
+        'css/awa-visual-fixes-2026-06-29-final',
     ];
 
     /**
@@ -53,6 +66,7 @@ class HeadAssetRendererPlugin
         $result = $this->removeBlockingCss($result);
         $result = $this->removeStylesLDuplicate($result);
         $result = $this->convertRubikToAsync($result);
+        $result = $this->convertBlockingCssToAsync($result);
         return $result;
     }
 
@@ -88,33 +102,71 @@ class HeadAssetRendererPlugin
     }
 
     /**
-     * Remove a instancia duplicada de styles-l.css declarada pelo modulo/tema pai.
-     * awa-styles-l-last.phtml adiciona a versao final corretamente posicionada.
-     * Se houver 2+ instancias blocking de styles-l.css, mantem apenas a ultima.
+     * Remove styles-l ativo sem min-width:768px (pai ayo_default: media=all).
+     * Nao toca fallbacks dentro de <noscript>. Casa .css e .min.css.
      *
      * @param string $html
      * @return string
      */
     private function removeStylesLDuplicate(string $html): string
     {
-        $pattern = '/<link\s[^>]*href=["\'][^"\']*\/css\/styles-l\.css[^"\']*["\'][^>]*>/i';
-        preg_match_all($pattern, $html, $matches);
+        $htmlWithoutNoscript = preg_replace('/<noscript>.*?<\/noscript>/is', '', $html) ?? $html;
+        $pattern = '/<link\s[^>]*href=["\'][^"\']*\/css\/styles-l(?:\.min)?\.css[^"\']*["\'][^>]*>/i';
+        $count = preg_match_all($pattern, $htmlWithoutNoscript, $matches);
+        if ($count === false || $count === 0) {
+            return $html;
+        }
 
-        $blockingMatches = array_values(array_filter($matches[0], static function (string $tag): bool {
-            return strpos($tag, 'media="print"') === false
-                && strpos($tag, "media='print'") === false
-                && strpos($tag, 'onload') === false
-                && strpos($tag, 'data-awa-gate') === false;
-        }));
+        $keptDesktopStylesheet = false;
+        $keptDesktopPreload = false;
 
-        if (count($blockingMatches) > 1) {
-            $toRemove = array_slice($blockingMatches, 0, -1);
-            foreach ($toRemove as $tag) {
-                $html = str_replace($tag, '', $html);
+        foreach (array_reverse($matches[0]) as $tag) {
+            if (
+                str_contains($tag, 'media="print"')
+                || str_contains($tag, "media='print'")
+                || str_contains($tag, 'onload')
+                || str_contains($tag, 'data-awa-gate')
+            ) {
+                continue;
             }
+
+            $isDesktopMedia = (bool) preg_match('/min-width:\s*768px/i', $tag);
+            $isPreload = (bool) preg_match('/\brel=["\']preload["\']/i', $tag);
+
+            if ($isDesktopMedia && $isPreload && !$keptDesktopPreload) {
+                $keptDesktopPreload = true;
+                continue;
+            }
+
+            if ($isDesktopMedia && !$isPreload && !$keptDesktopStylesheet) {
+                $keptDesktopStylesheet = true;
+                continue;
+            }
+
+            $html = $this->replaceStylesLTagOutsideNoscript($html, $tag);
         }
 
         return $html;
+    }
+
+    /**
+     * str_replace global apagaria o fallback identico dentro de <noscript>.
+     */
+    private function replaceStylesLTagOutsideNoscript(string $html, string $tag): string
+    {
+        $parts = preg_split('/(<noscript>.*?<\/noscript>)/is', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($parts === false) {
+            return $html;
+        }
+
+        foreach ($parts as $i => $part) {
+            if (str_starts_with(strtolower($part), '<noscript')) {
+                continue;
+            }
+            $parts[$i] = str_replace($tag, '', $part);
+        }
+
+        return implode('', $parts);
     }
 
     /**
@@ -157,6 +209,51 @@ class HeadAssetRendererPlugin
             },
             $html
         ) ?? $html;
+
+        return $html;
+    }
+
+    /**
+     * Converte CSS render-blocking listado em print/onload + noscript.
+     *
+     * @param string $html
+     * @return string
+     */
+    private function convertBlockingCssToAsync(string $html): string
+    {
+        foreach (self::BLOCKING_CSS_TO_ASYNC as $fragment) {
+            if (!str_contains($html, $fragment)) {
+                continue;
+            }
+
+            $pattern = '/<link\s[^>]*href=["\'][^"\']*'
+                . preg_quote($fragment, '/')
+                . '[^"\']*["\'][^>]*>/i';
+
+            $html = preg_replace_callback($pattern, static function (array $matches): string {
+                $original = $matches[0];
+
+                if (
+                    str_contains($original, 'media="print"')
+                    || str_contains($original, "media='print'")
+                    || str_contains($original, 'onload')
+                ) {
+                    return $original;
+                }
+
+                if (!preg_match('/href=["\']([^"\']+)["\']/', $original, $hrefMatch)) {
+                    return $original;
+                }
+
+                $href = htmlspecialchars($hrefMatch[1], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+                return '<link rel="stylesheet" type="text/css"'
+                    . ' media="print" onload="this.media=\'all\'"'
+                    . ' href="' . $href . '" data-awa-async="1"/>'
+                    . '<noscript><link rel="stylesheet" type="text/css" media="all" href="'
+                    . $href . '"/></noscript>';
+            }, $html) ?? $html;
+        }
 
         return $html;
     }
