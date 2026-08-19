@@ -60,6 +60,7 @@ define([
             var coachCfg = this.guidedCoach || cfg.guidedCoach || {};
             guidedCoach.attach(this, coachCfg);
             this._bindGlobalA11yHandlers();
+            this._bindHelpCenterAsk();
 
             return this;
         },
@@ -107,6 +108,61 @@ define([
             };
 
             document.addEventListener('keydown', this._onDocumentKeydown);
+        },
+
+        /**
+         * Central de Ajuda dispara `awa:helpcenter:ask` com detail.query.
+         */
+        _bindHelpCenterAsk: function () {
+            var self = this;
+            if (this._onHelpCenterAsk) {
+                return;
+            }
+
+            this._onHelpCenterAsk = function (event) {
+                var query = event && event.detail ? String(event.detail.query || '').trim() : '';
+                window.__awaAiAskPending = '';
+                if (!query) {
+                    return;
+                }
+                self.openWithQuery(query);
+            };
+
+            document.addEventListener('awa:helpcenter:ask', this._onHelpCenterAsk);
+
+            if (window.__awaAiAskPending) {
+                var pending = String(window.__awaAiAskPending);
+                window.__awaAiAskPending = '';
+                this.openWithQuery(pending);
+            }
+        },
+
+        /**
+         * Abre o painel e envia a pergunta (mesmo fluxo do input).
+         * @param {string} text
+         */
+        openWithQuery: function (text) {
+            var query = String(text || '').trim();
+            if (!query) {
+                return;
+            }
+
+            if (this.isLoading()) {
+                this.inputText(query);
+                return;
+            }
+
+            if (typeof this.coachVisible === 'function' && this.coachVisible()
+                && typeof this.dismissCoach === 'function') {
+                this.dismissCoach('helpcenter_ask');
+            }
+
+            if (!this.isOpen()) {
+                this.toggleChat();
+            }
+
+            this.inputText(query);
+            this.sendMessage();
         },
 
         handleKeydown: function (data, event) {

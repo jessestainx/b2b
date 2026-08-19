@@ -29,11 +29,84 @@ class HelpCenter implements ArgumentInterface
     }
 
     /**
+     * Categorias visíveis no storefront (união das audiências do visitante).
+     *
      * @return CategoryInterface[]
      */
     public function getCategories(): array
     {
-        return $this->categoryRepository->getByAudience($this->getPrimaryAudience());
+        $byId = [];
+        foreach ($this->getAudiences() as $audience) {
+            foreach ($this->categoryRepository->getByAudience($audience) as $category) {
+                $id = (int) $category->getCategoryId();
+                if ($id > 0) {
+                    $byId[$id] = $category;
+                }
+            }
+        }
+        uasort(
+            $byId,
+            static fn (CategoryInterface $a, CategoryInterface $b): int => $a->getSortOrder() <=> $b->getSortOrder()
+        );
+
+        return array_values($byId);
+    }
+
+    /**
+     * Chave de ícone allowlist (nunca SVG do admin).
+     */
+    public function getCategoryIconKey(CategoryInterface $category): string
+    {
+        $name = mb_strtolower($category->getName());
+        if (str_contains($name, 'devol') || str_contains($name, 'troca') || str_contains($name, 'garantia')) {
+            return 'returns';
+        }
+        if (str_contains($name, 'cadastro') || str_contains($name, 'conta') || str_contains($name, 'b2b') || str_contains($name, 'cnpj')) {
+            return 'account';
+        }
+        if (str_contains($name, 'entrega') || str_contains($name, 'frete')) {
+            return 'shipping';
+        }
+        if (str_contains($name, 'pagamento')) {
+            return 'payment';
+        }
+        if (str_contains($name, 'pedido')) {
+            return 'orders';
+        }
+        if (str_contains($name, 'produto') || str_contains($name, 'peca') || str_contains($name, 'peça')) {
+            return 'catalog';
+        }
+
+        return 'help';
+    }
+
+    /**
+     * Texto enviado ao assistente ao clicar “Perguntar à assistente”.
+     */
+    public function getAskQuery(CategoryInterface $category): string
+    {
+        $topic = trim((string) ($category->getDescription() ?? ''));
+        if ($topic === '') {
+            $topic = $category->getName();
+        }
+
+        return $this->wrapHelpQuery($topic);
+    }
+
+    /**
+     * Prefixo estável para o orchestrator não tratar como busca de catálogo.
+     */
+    public function wrapHelpQuery(string $question): string
+    {
+        $question = trim($question);
+        if ($question === '') {
+            return (string) __('Central de Ajuda — preciso de orientação da loja.');
+        }
+        if (stripos($question, 'Central de Ajuda') !== false) {
+            return $question;
+        }
+
+        return (string) __('Central de Ajuda — %1', $question);
     }
 
     /**
@@ -78,16 +151,5 @@ class HelpCenter implements ArgumentInterface
             }
         }
         return $base;
-    }
-
-    private function getPrimaryAudience(): string
-    {
-        if ($this->isB2B()) {
-            return CategoryInterface::AUDIENCE_B2B;
-        }
-        if ($this->customerSession->isLoggedIn()) {
-            return CategoryInterface::AUDIENCE_CUSTOMER;
-        }
-        return CategoryInterface::AUDIENCE_ALL;
     }
 }

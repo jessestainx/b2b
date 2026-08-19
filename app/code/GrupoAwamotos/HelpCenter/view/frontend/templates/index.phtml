@@ -2,12 +2,41 @@
 /**
  * Central de Ajuda — AWA Motos
  *
+ * THESIS: hub por tema (cards) + perguntas no mesmo registro; recusa FAQ CMS solto.
+ * OWN-WORLD: tokens AWA, ícone allowlist, superfície clara, ação vermelha.
+ * STORY: escolhe o tema, lê as perguntas ou pergunta à assistente.
+ * FIRST VIEWPORT: busca; grade de temas; accordion de tópicos abaixo.
+ *
  * @var \Magento\Framework\View\Element\Template $block
  * @var \GrupoAwamotos\HelpCenter\ViewModel\HelpCenter $vm
  */
 $vm = $block->getData('view_model');
 $searchUrl = $block->escapeUrl($vm->getSearchUrl());
 $categories = $vm->getCategories();
+
+$iconSvg = static function (string $key): string {
+    $icons = [
+        'catalog' => '<svg class="awa-helpcenter__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 8l-9-4-9 4 9 4 9-4z"/><path d="M3 8v8l9 4 9-4V8"/><path d="M12 12v8"/></svg>',
+        'orders' => '<svg class="awa-helpcenter__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>',
+        'payment' => '<svg class="awa-helpcenter__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>',
+        'shipping' => '<svg class="awa-helpcenter__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
+        'account' => '<svg class="awa-helpcenter__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1"/><circle cx="10" cy="8" r="3"/><path d="M18 8h4M20 6v4"/></svg>',
+        'returns' => '<svg class="awa-helpcenter__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 10H4V5"/><path d="M4 10a8 8 0 1 0 2.3-5.7L4 10"/></svg>',
+        'help' => '<svg class="awa-helpcenter__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.2 2.4c-.8.3-1.2.8-1.2 1.6V14"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg>',
+    ];
+
+    return $icons[$key] ?? $icons['help'];
+};
+
+$hub = [];
+foreach ($categories as $cat) {
+    $hub[] = [
+        'cat' => $cat,
+        'topics' => $vm->getTopicsByCategory((int) $cat->getCategoryId()),
+        'icon' => $vm->getCategoryIconKey($cat),
+        'ask' => $vm->getAskQuery($cat),
+    ];
+}
 ?>
 <div class="awa-helpcenter" id="awa-helpcenter">
 
@@ -24,18 +53,61 @@ $categories = $vm->getCategories();
                    data-search-url="<?= $searchUrl ?>"/>
             <div class="awa-helpcenter__search-results" id="awa-hc-results" role="listbox" aria-live="polite" hidden></div>
         </div>
+        <button type="button"
+                class="awa-helpcenter__hero-ask"
+                data-awa-ai-ask="<?= $block->escapeHtmlAttr($vm->wrapHelpQuery((string) __('preciso de orientação na loja.'))) ?>">
+            <?= $block->escapeHtml(__('Perguntar à assistente')) ?>
+        </button>
     </div>
 
-    <?php if (!empty($categories)): ?>
+    <?php if (!empty($hub)): ?>
+    <section class="awa-helpcenter__hub" aria-labelledby="awa-hc-hub-title">
+        <h2 class="awa-helpcenter__hub-title" id="awa-hc-hub-title">
+            <?= $block->escapeHtml(__('Esclareça suas dúvidas por temas')) ?>
+        </h2>
+        <div class="awa-helpcenter__grid">
+            <?php foreach ($hub as $item): ?>
+                <?php
+                $cat = $item['cat'];
+                $catId = (int) $cat->getCategoryId();
+                $topicCount = count($item['topics']);
+                ?>
+            <article class="awa-helpcenter__card">
+                <div class="awa-helpcenter__card-icon" aria-hidden="true">
+                    <?= /* @noEscape allowlist SVG */ $iconSvg($item['icon']) ?>
+                </div>
+                <h3 class="awa-helpcenter__card-title"><?= $block->escapeHtml($cat->getName()) ?></h3>
+                <?php if ($cat->getDescription()): ?>
+                <p class="awa-helpcenter__card-desc"><?= $block->escapeHtml($cat->getDescription()) ?></p>
+                <?php endif; ?>
+                <div class="awa-helpcenter__card-actions">
+                    <?php if ($topicCount > 0): ?>
+                    <a class="awa-helpcenter__card-link"
+                       href="#cat-<?= $catId ?>">
+                        <?= $block->escapeHtml(__('Ver perguntas')) ?>
+                    </a>
+                    <?php endif; ?>
+                    <button type="button"
+                            class="awa-helpcenter__card-ask"
+                            data-awa-ai-ask="<?= $block->escapeHtmlAttr($item['ask']) ?>">
+                        <?= $block->escapeHtml(__('Perguntar à assistente')) ?>
+                    </button>
+                </div>
+            </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
     <div class="awa-helpcenter__cats">
-        <?php foreach ($categories as $cat): ?>
+        <?php foreach ($hub as $item): ?>
+            <?php $cat = $item['cat']; ?>
         <div class="awa-helpcenter__cat" id="cat-<?= (int) $cat->getCategoryId() ?>">
             <h2 class="awa-helpcenter__cat-title"><?= $block->escapeHtml($cat->getName()) ?></h2>
             <?php if ($cat->getDescription()): ?>
             <p class="awa-helpcenter__cat-desc"><?= $block->escapeHtml($cat->getDescription()) ?></p>
             <?php endif; ?>
 
-            <?php $topics = $vm->getTopicsByCategory((int) $cat->getCategoryId()); ?>
+            <?php $topics = $item['topics']; ?>
             <?php if (!empty($topics)): ?>
             <div class="awa-helpcenter__topics">
                 <?php foreach ($topics as $topic): ?>
@@ -49,6 +121,13 @@ $categories = $vm->getCategories();
                         <?php elseif ($topic->getSummary()): ?>
                             <p><?= $block->escapeHtml($topic->getSummary()) ?></p>
                         <?php endif; ?>
+                        <p class="awa-helpcenter__topic-ask">
+                            <button type="button"
+                                    class="awa-helpcenter__topic-ask-btn"
+                                    data-awa-ai-ask="<?= $block->escapeHtmlAttr($vm->wrapHelpQuery((string) $topic->getTitle())) ?>">
+                                <?= $block->escapeHtml(__('Perguntar à assistente sobre isto')) ?>
+                            </button>
+                        </p>
                     </div>
                 </details>
                 <?php endforeach; ?>
@@ -59,7 +138,12 @@ $categories = $vm->getCategories();
     </div>
     <?php else: ?>
     <div class="awa-helpcenter__empty">
-        <p><?= $block->escapeHtml(__('Nenhum tópico disponível no momento. Tente usar o chat de assistência.')) ?></p>
+        <p><?= $block->escapeHtml(__('Nenhum tópico disponível no momento.')) ?></p>
+        <button type="button"
+                class="awa-helpcenter__card-ask"
+                data-awa-ai-ask="<?= $block->escapeHtmlAttr($vm->wrapHelpQuery((string) __('Preciso de ajuda na loja AWA Motos.'))) ?>">
+            <?= $block->escapeHtml(__('Falar com a assistente')) ?>
+        </button>
     </div>
     <?php endif; ?>
 
@@ -70,15 +154,40 @@ $categories = $vm->getCategories();
     'use strict';
     var input   = document.getElementById('awa-hc-search');
     var results = document.getElementById('awa-hc-results');
-    if (!input || !results) { return; }
+    var root    = document.getElementById('awa-helpcenter');
 
-    var timer;
-    input.addEventListener('input', function () {
-        clearTimeout(timer);
-        var q = input.value.trim();
-        if (q.length < 2) { results.hidden = true; return; }
-        timer = setTimeout(function () { doSearch(q); }, 280);
-    });
+    function askAssistant(query) {
+        var q = String(query || '').trim();
+        if (!q) { return; }
+        window.__awaAiAskPending = q;
+        document.dispatchEvent(new CustomEvent('awa:helpcenter:ask', {
+            bubbles: true,
+            detail: { query: q }
+        }));
+        if (!document.getElementById('awa-ai-chat-root') && input) {
+            input.value = q;
+            input.focus();
+        }
+    }
+
+    if (root) {
+        root.addEventListener('click', function (event) {
+            var btn = event.target.closest('[data-awa-ai-ask]');
+            if (!btn || !root.contains(btn)) { return; }
+            event.preventDefault();
+            askAssistant(btn.getAttribute('data-awa-ai-ask'));
+        });
+    }
+
+    if (input && results) {
+        var timer;
+        input.addEventListener('input', function () {
+            clearTimeout(timer);
+            var q = input.value.trim();
+            if (q.length < 2) { results.hidden = true; return; }
+            timer = setTimeout(function () { doSearch(q); }, 280);
+        });
+    }
 
     function doSearch(q) {
         fetch(input.dataset.searchUrl + '?q=' + encodeURIComponent(q))
@@ -109,17 +218,25 @@ $categories = $vm->getCategories();
         return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    document.addEventListener('click', function (e) {
-        if (!results.contains(e.target) && e.target !== input) { results.hidden = true; }
-    });
-
-    /* Scroll-to-anchor on load */
-    if (location.hash && location.hash.startsWith('#topico-')) {
-        var el = document.querySelector(location.hash);
-        if (el && el.tagName === 'DETAILS') {
-            el.open = true;
-            setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
-        }
+    if (results && input) {
+        document.addEventListener('click', function (e) {
+            if (!results.contains(e.target) && e.target !== input) { results.hidden = true; }
+        });
     }
+
+    function openHashTarget() {
+        if (!location.hash) { return; }
+        var el = document.querySelector(location.hash);
+        if (!el) { return; }
+        if (el.tagName === 'DETAILS') {
+            el.open = true;
+        }
+        window.setTimeout(function () {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 160);
+    }
+
+    openHashTarget();
+    window.addEventListener('hashchange', openHashTarget);
 }());
 </script>

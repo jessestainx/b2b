@@ -33,6 +33,7 @@ class Orchestrator implements AssistantOrchestratorInterface
 Você é a assistente virtual da AWA Motos, uma distribuidora de peças para motos em Araraquara, SP, Brasil.
 Você é simpática, objetiva e especialista em peças de moto.
 Ajude o cliente a encontrar produtos no catálogo, conferir compatibilidade com a moto, rastrear pedidos e tirar dúvidas gerais.
+Para procedimentos da loja (cadastro, pagamento, entrega, troca, B2B), chame knowledge_base_search antes de responder e cite a URL do tópico.
 Sempre responda em português brasileiro.
 Não invente preços, prazos, estoque, SKU, URL ou compatibilidade — use somente dados das ferramentas ou do bloco CATÁLOGO JÁ CONSULTADO.
 Quando o bloco CATÁLOGO JÁ CONSULTADO estiver presente, liste só esses itens (até 5). Não chame catalog_search nem fitment_search de novo. Não invente produto fora da lista.
@@ -47,6 +48,7 @@ PROMPT,
 Você é a assistente comercial B2B da AWA Motos.
 Você atende revendedores e empresas com CNPJ cadastrado na plataforma.
 Auxilie com: busca de produtos, compatibilidade peça × moto, cotações, reposição de pedidos anteriores e consulta de status de cadastro CNPJ.
+Para políticas e procedimentos (cadastro CNPJ, crédito, pedidos, entrega), chame knowledge_base_search e cite a URL do tópico.
 Quando o bloco CATÁLOGO JÁ CONSULTADO estiver presente, use SOMENTE esses produtos. Não invente SKU, preço ou URL.
 Você NUNCA aprova ou reprova crédito — apenas informa o status calculado pelo sistema.
 Decisões de aprovação são sempre da equipe comercial humana.
@@ -134,7 +136,10 @@ PROMPT,
         $catalogPrefetched = false;
         $deferredWrite = null;
 
-        $prefetch = $this->prefetchCatalog($intent, $channelTools, $context);
+        $isHelpCenterQuestion = $this->isHelpCenterQuestion($safeMessage);
+        $prefetch = $isHelpCenterQuestion
+            ? ['ran' => false, 'tool' => '', 'products' => [], 'result' => []]
+            : $this->prefetchCatalog($intent, $channelTools, $context);
         if ($prefetch['ran']) {
             $catalogPrefetched = true;
             $toolsCalled[] = $prefetch['tool'];
@@ -158,6 +163,7 @@ PROMPT,
                     if (
                         !$forcedSearchRetry
                         && !$catalogPrefetched
+                        && !$isHelpCenterQuestion
                         && $round < self::MAX_TOOL_ROUNDS - 1
                         && $this->shouldForceCatalogTool($intent, $reply, $productsOut, $toolsCalled)
                     ) {
@@ -331,6 +337,13 @@ PROMPT,
             ],
             'products' => [],
         ];
+    }
+
+    private function isHelpCenterQuestion(string $message): bool
+    {
+        $normalized = mb_strtolower($message);
+
+        return str_contains($normalized, 'central de ajuda');
     }
 
     /**

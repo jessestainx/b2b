@@ -6,6 +6,7 @@
         <css src="GrupoAwamotos_HelpCenter::css/helpcenter.css"/>
     </head>
     <body>
+        <referenceBlock name="page.main.title" remove="true"/>
         <referenceContainer name="content">
             <block class="Magento\Framework\View\Element\Template"
                    name="grupoawamotos.helpcenter.index"
