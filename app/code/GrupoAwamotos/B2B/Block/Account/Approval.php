@@ -12,6 +12,7 @@ use GrupoAwamotos\B2B\Model\CompanyService;
 use GrupoAwamotos\B2B\Model\Company;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 
 class Approval extends Template
 {
@@ -20,6 +21,7 @@ class Approval extends Template
     private CompanyService $companyService;
     private OrderRepositoryInterface $orderRepository;
     private PriceCurrencyInterface $priceCurrency;
+    private TimezoneInterface $timezone;
 
     public function __construct(
         Template\Context $context,
@@ -28,7 +30,8 @@ class Approval extends Template
         CompanyService $companyService,
         OrderRepositoryInterface $orderRepository,
         PriceCurrencyInterface $priceCurrency,
-        array $data = []
+        array $data = [],
+        ?TimezoneInterface $timezone = null
     ) {
         parent::__construct($context, $data);
         $this->customerSession = $customerSession;
@@ -36,6 +39,8 @@ class Approval extends Template
         $this->companyService = $companyService;
         $this->orderRepository = $orderRepository;
         $this->priceCurrency = $priceCurrency;
+        // Optional after $data: compiled Interceptor omits TimezoneInterface.
+        $this->timezone = $timezone ?? $context->getLocaleDate();
     }
 
     public function getPendingApprovals()
@@ -94,6 +99,20 @@ class Approval extends Template
     public function getActionUrl(): string
     {
         return $this->getUrl('b2b/approval/action');
+    }
+
+
+    public function formatDateTime(?string $dateTime): string
+    {
+        if ($dateTime === null || $dateTime === '') {
+            return '-';
+        }
+
+        try {
+            return $this->timezone->date(new \DateTime($dateTime))->format('d/m/Y H:i');
+        } catch (\Exception) {
+            return substr($dateTime, 0, 16);
+        }
     }
 
     private function roleToLevel(?string $role): int

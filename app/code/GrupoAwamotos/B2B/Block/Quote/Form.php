@@ -13,6 +13,7 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
@@ -39,6 +40,11 @@ class Form extends Template
     private $customerRepository;
 
     /**
+     * @var PriceCurrencyInterface
+     */
+    private $priceCurrency;
+
+    /**
      * @var CustomerInterface|null|false
      */
     private $customerDataCache = false;
@@ -49,12 +55,14 @@ class Form extends Template
         CheckoutSession $checkoutSession,
         Config $config,
         CustomerRepositoryInterface $customerRepository,
+        PriceCurrencyInterface $priceCurrency,
         array $data = []
     ) {
         $this->customerSession = $customerSession;
         $this->checkoutSession = $checkoutSession;
         $this->config = $config;
         $this->customerRepository = $customerRepository;
+        $this->priceCurrency = $priceCurrency;
         parent::__construct($context, $data);
     }
 
@@ -231,5 +239,10 @@ class Form extends Template
     public function getExpiryDays(): int
     {
         return $this->config->getQuoteExpiryDays();
+    }
+
+    public function formatPrice(float $price): string
+    {
+        return $this->priceCurrency->format($price, false);
     }
 }

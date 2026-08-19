@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace GrupoAwamotos\B2B\Block\Account;
 
 use Magento\Customer\Model\Session;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
@@ -17,6 +19,8 @@ class Orders extends Template
         Context $context,
         private readonly Session $customerSession,
         private readonly OrderCollectionFactory $orderCollectionFactory,
+        private readonly PriceCurrencyInterface $priceCurrency,
+        private readonly TimezoneInterface $timezone,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -75,4 +79,23 @@ class Orders extends Template
     {
         return $this->getUrl('b2b/account');
     }
+
+    public function formatPrice(float $price): string
+    {
+        return $this->priceCurrency->format($price, false);
+    }
+
+    public function formatDateTime(?string $date): string
+    {
+        if ($date === null || $date === '') {
+            return '-';
+        }
+
+        try {
+            return $this->timezone->date(new \DateTime($date))->format('d/m/Y H:i');
+        } catch (\Exception) {
+            return substr($date, 0, 16);
+        }
+    }
+
 }

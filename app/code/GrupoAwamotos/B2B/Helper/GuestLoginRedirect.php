@@ -23,9 +23,8 @@ class GuestLoginRedirect
 
     public function create(string $returnRoutePath, array $returnParams = []): Redirect
     {
-        $this->customerSession->setBeforeAuthUrl(
-            $this->urlBuilder->getUrl($returnRoutePath, $returnParams)
-        );
+        $beforeAuthUrl = $this->urlBuilder->getUrl($returnRoutePath, $returnParams);
+        $this->customerSession->setBeforeAuthUrl($beforeAuthUrl);
 
         return $this->redirectFactory->create()->setPath('b2b/account/login');
     }

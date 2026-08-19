@@ -6,6 +6,7 @@ namespace GrupoAwamotos\B2B\Block\Account;
 
 use GrupoAwamotos\B2B\Model\Account\ErpCustomerContext;
 use GrupoAwamotos\ERPIntegration\Model\PurchaseHistory;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
@@ -17,6 +18,7 @@ class ErpOrders extends Template
         Context $context,
         private readonly ErpCustomerContext $erpCustomerContext,
         private readonly PurchaseHistory $purchaseHistory,
+        private readonly PriceCurrencyInterface $priceCurrency,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -85,7 +87,7 @@ class ErpOrders extends Template
 
     public function formatPrice(float $value): string
     {
-        return 'R$ ' . number_format($value, 2, ',', '.');
+        return $this->priceCurrency->format($value, false);
     }
 
     public function formatErpDate(?string $date): string

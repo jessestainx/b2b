@@ -6,6 +6,8 @@ namespace GrupoAwamotos\B2B\Block\Cart;
 
 use GrupoAwamotos\B2B\Helper\Config;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\Locale\ResolverInterface;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\View\Element\Template;
 
 class MinOrderProgress extends Template
@@ -14,6 +16,8 @@ class MinOrderProgress extends Template
         Template\Context $context,
         private readonly Config $config,
         private readonly CheckoutSession $checkoutSession,
+        private readonly PriceCurrencyInterface $priceCurrency,
+        private readonly ResolverInterface $localeResolver,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -73,11 +77,11 @@ class MinOrderProgress extends Template
         $remaining = $this->formatCurrency($this->getRemainingAmount());
         $minimum = $this->formatCurrency($this->getMinOrderAmount());
 
-        $template = (string) __(
-            'Faltam %1 para atingir o pedido mínimo de %2.'
+        return (string) __(
+            'Faltam %1 para atingir o pedido mínimo de %2.',
+            $remaining,
+            $minimum
         );
-
-        return (string) __($template, $remaining, $minimum);
     }
 
     public function getConfigMessage(): string
@@ -87,7 +91,11 @@ class MinOrderProgress extends Template
 
     public function formatCurrency(float $amount): string
     {
-        return 'R$ ' . number_format($amount, 2, ',', '.');
+        try {
+            return $this->priceCurrency->format($amount, false);
+        } catch (\Exception) {
+            return 'R$ ' . number_format($amount, 2, ',', '.');
+        }
     }
 
     /**
@@ -95,6 +103,8 @@ class MinOrderProgress extends Template
      */
     public function getClientConfig(): array
     {
+        $locale = str_replace('_', '-', (string) $this->localeResolver->getLocale());
+
         return [
             'enabled' => $this->isEnabled(),
             'minAmount' => $this->getMinOrderAmount(),
@@ -103,6 +113,8 @@ class MinOrderProgress extends Template
             'percent' => $this->getProgressPercent(),
             'message' => $this->getProgressMessage(),
             'configMessage' => $this->getConfigMessage(),
+            'currencyCode' => (string) $this->_storeManager->getStore()->getCurrentCurrencyCode(),
+            'locale' => $locale !== '' ? $locale : 'pt-BR',
         ];
     }
 }

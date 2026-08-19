@@ -14,6 +14,7 @@ use GrupoAwamotos\B2B\Model\ResourceModel\QuoteRequest as QuoteRequestResource;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
@@ -24,6 +25,7 @@ class View extends Template
     private QuoteRequestResource $quoteRequestResource;
     private RequestInterface $httpRequest;
     private PricingHelper $pricingHelper;
+    private TimezoneInterface $timezone;
     private ?QuoteRequest $quoteRequest = null;
 
     public function __construct(
@@ -33,13 +35,15 @@ class View extends Template
         QuoteRequestResource $quoteRequestResource,
         RequestInterface $httpRequest,
         PricingHelper $pricingHelper,
-        array $data = []
+        array $data = [],
+        ?TimezoneInterface $timezone = null
     ) {
         $this->customerSession = $customerSession;
         $this->quoteRequestFactory = $quoteRequestFactory;
         $this->quoteRequestResource = $quoteRequestResource;
         $this->httpRequest = $httpRequest;
         $this->pricingHelper = $pricingHelper;
+        $this->timezone = $timezone ?? $context->getLocaleDate();
         parent::__construct($context, $data);
     }
 
@@ -71,10 +75,15 @@ class View extends Template
 
     public function formatQuoteDate(?string $date): string
     {
-        if (!$date) {
+        if ($date === null || $date === '') {
             return '-';
         }
-        return date('d/m/Y H:i', strtotime($date));
+
+        try {
+            return $this->timezone->date(new \DateTime($date))->format('d/m/Y H:i');
+        } catch (\Exception) {
+            return substr($date, 0, 16);
+        }
     }
 
     public function getStatusClass(string $status): string
@@ -122,4 +131,8 @@ class View extends Template
         return $quote->getStatus() === \GrupoAwamotos\B2B\Api\Data\QuoteRequestInterface::STATUS_QUOTED
             && !$quote->isExpired();
     }
+
+    /**
+     * Runtime probe for duplicate heading validation.
+     */
 }

@@ -16,6 +16,7 @@ use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Model\AccountManagement;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 
 class ClaimPost implements HttpPostActionInterface
@@ -68,10 +69,10 @@ class ClaimPost implements HttpPostActionInterface
             if ($email) {
                 $this->accountManagement->initiatePasswordReset(
                     $email,
-                    AccountManagementInterface::EMAIL_RESET
+                    AccountManagement::EMAIL_RESET
                 );
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Silencia erros para não revelar se a conta existe
         }
 

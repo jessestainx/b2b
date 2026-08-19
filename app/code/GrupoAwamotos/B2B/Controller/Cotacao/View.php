@@ -35,12 +35,13 @@ class View implements HttpGetActionInterface
 
     public function execute(): ResultInterface
     {
+
+        $id = (int) $this->request->getParam('id');
+
         if (!$this->customerSession->isLoggedIn()) {
-            $id = (int) $this->request->getParam('id');
             return $this->guestLoginRedirect->create('b2b/cotacao/view', $id > 0 ? ['id' => $id] : []);
         }
 
-        $id = (int) $this->request->getParam('id');
         $cotacao = $this->cotacaoFactory->create();
         $this->cotacaoResource->load($cotacao, $id);
 

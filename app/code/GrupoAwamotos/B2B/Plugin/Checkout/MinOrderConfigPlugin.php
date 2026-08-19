@@ -6,11 +6,15 @@ namespace GrupoAwamotos\B2B\Plugin\Checkout;
 
 use GrupoAwamotos\B2B\Helper\Config;
 use Magento\Checkout\Model\DefaultConfigProvider;
+use Magento\Framework\Locale\ResolverInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class MinOrderConfigPlugin
 {
     public function __construct(
-        private readonly Config $config
+        private readonly Config $config,
+        private readonly ?ResolverInterface $localeResolver = null,
+        private readonly ?StoreManagerInterface $storeManager = null
     ) {
     }
 
@@ -36,6 +40,12 @@ class MinOrderConfigPlugin
             'enabled' => true,
             'minAmount' => $minAmount,
             'message' => $this->config->getMinOrderMessage(),
+            'locale' => $this->localeResolver
+                ? str_replace('_', '-', (string) $this->localeResolver->getLocale())
+                : 'pt-BR',
+            'currencyCode' => $this->storeManager
+                ? (string) $this->storeManager->getStore()->getCurrentCurrencyCode()
+                : 'BRL',
         ];
 
         return $result;

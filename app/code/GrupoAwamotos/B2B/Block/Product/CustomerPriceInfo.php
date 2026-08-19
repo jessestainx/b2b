@@ -8,6 +8,7 @@ use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\ERPIntegration\Model\CustomerPriceProvider;
 use GrupoAwamotos\ERPIntegration\Model\ResourceModel\SyncLog as SyncLogResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Element\Template;
@@ -30,6 +31,7 @@ class CustomerPriceInfo extends Template
     private CustomerPriceProvider $customerPriceProvider;
     private CustomerRepositoryInterface $customerRepository;
     private Registry $registry;
+    private PriceCurrencyInterface $priceCurrency;
 
     private ?array $priceData = null;
     private bool $resolved = false;
@@ -42,6 +44,7 @@ class CustomerPriceInfo extends Template
         CustomerPriceProvider $customerPriceProvider,
         CustomerRepositoryInterface $customerRepository,
         Registry $registry,
+        PriceCurrencyInterface $priceCurrency,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -50,6 +53,7 @@ class CustomerPriceInfo extends Template
         $this->syncLogResource = $syncLogResource;
         $this->customerPriceProvider = $customerPriceProvider;
         $this->customerRepository = $customerRepository;
+        $this->priceCurrency = $priceCurrency;
         $this->registry = $registry;
     }
 
@@ -188,6 +192,6 @@ class CustomerPriceInfo extends Template
      */
     public function formatPrice(float $price): string
     {
-        return 'R$ ' . number_format($price, 2, ',', '.');
+        return $this->priceCurrency->format($price, false);
     }
 }

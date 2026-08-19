@@ -44,13 +44,15 @@ class View implements HttpGetActionInterface
 
     public function execute()
     {
+
+        $requestId = (int) $this->request->getParam('id');
+
         if (!$this->customerSession->isLoggedIn()) {
             $this->messageManager->addNoticeMessage(__('Faça login para ver suas cotações.'));
             $redirect = $this->redirectFactory->create();
             return $redirect->setPath('b2b/account/login');
         }
 
-        $requestId = (int) $this->request->getParam('id');
         if (!$requestId) {
             $this->messageManager->addErrorMessage(__('Cotação não encontrada.'));
             $redirect = $this->redirectFactory->create();

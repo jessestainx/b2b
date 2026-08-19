@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace GrupoAwamotos\B2B\Controller\Account;
 
-use GrupoAwamotos\B2B\Helper\Config;
 use GrupoAwamotos\B2B\Helper\GuestLoginRedirect;
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\Action\HttpGetActionInterface;

@@ -29,11 +29,14 @@ class Index implements HttpGetActionInterface
 
     public function execute(): \Magento\Framework\Controller\ResultInterface
     {
-        if (!$this->config->isEnabled()) {
+        $isEnabled = $this->config->isEnabled();
+        $isLoggedIn = $this->customerSession->isLoggedIn();
+
+        if (!$isEnabled) {
             return $this->redirectFactory->create()->setPath('/');
         }
 
-        if (!$this->customerSession->isLoggedIn()) {
+        if (!$isLoggedIn) {
             return $this->guestLoginRedirect->create('b2b/account');
         }
 
@@ -43,4 +46,5 @@ class Index implements HttpGetActionInterface
 
         return $page;
     }
+
 }

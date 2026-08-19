@@ -8,24 +8,28 @@ use Magento\Framework\View\Element\Template;
 use Magento\Customer\Model\Session;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 
 class Reorder extends Template
 {
     private Session $customerSession;
     private CollectionFactory $orderCollectionFactory;
     private PriceCurrencyInterface $priceCurrency;
+    private TimezoneInterface $timezone;
 
     public function __construct(
         Template\Context $context,
         Session $customerSession,
         CollectionFactory $orderCollectionFactory,
         PriceCurrencyInterface $priceCurrency,
-        array $data = []
+        array $data = [],
+        ?TimezoneInterface $timezone = null
     ) {
         parent::__construct($context, $data);
         $this->customerSession = $customerSession;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->priceCurrency = $priceCurrency;
+        $this->timezone = $timezone ?? $context->getLocaleDate();
     }
 
     public function getRecentOrders(int $limit = 10)
@@ -73,5 +77,33 @@ class Reorder extends Template
             'pricesUrl' => $this->getPricesUrl(),
             'addUrl' => $this->getAddUrl(),
         ];
+    }
+
+    /**
+     * @param string|\DateTimeInterface|null $date
+     * @param int $format
+     * @param bool $showTime
+     * @param string|null $timezone
+     */
+    public function formatDate(
+        $date = null,
+        $format = \IntlDateFormatter::SHORT,
+        $showTime = false,
+        $timezone = null
+    ): string {
+        if (func_num_args() <= 1) {
+            if ($date === null || $date === '') {
+                return '-';
+            }
+
+            $raw = $date instanceof \DateTimeInterface ? $date->format('c') : (string) $date;
+            try {
+                return $this->timezone->date(new \DateTime($raw))->format('d/m/Y');
+            } catch (\Exception) {
+                return substr($raw, 0, 10);
+            }
+        }
+
+        return (string) parent::formatDate($date, $format, $showTime, $timezone);
     }
 }

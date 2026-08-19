@@ -90,4 +90,8 @@ class BoletoList extends Template
     {
         return self::VALID_TABS;
     }
+
+    /**
+     * Runtime probe for finance template render and empty-state standardization.
+     */
 }

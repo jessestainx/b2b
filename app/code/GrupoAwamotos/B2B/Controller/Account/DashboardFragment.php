@@ -57,12 +57,13 @@ class DashboardFragment implements HttpGetActionInterface
         $raw = $this->rawFactory->create();
         $section = (string) $this->request->getParam('section', '');
         $requestedWith = (string) $this->request->getHeader('X-Requested-With');
+        $isLoggedIn = $this->customerSession->isLoggedIn();
 
         if ($requestedWith !== 'XMLHttpRequest') {
             return $raw->setHttpResponseCode(403)->setContents('');
         }
 
-        if (!$this->customerSession->isLoggedIn()) {
+        if (!$isLoggedIn) {
             return $raw->setHttpResponseCode(401)->setContents('');
         }
 
@@ -84,4 +85,5 @@ class DashboardFragment implements HttpGetActionInterface
             ->setHeader('Content-Type', 'text/html; charset=UTF-8', true)
             ->setContents($html);
     }
+
 }

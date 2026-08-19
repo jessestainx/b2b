@@ -50,4 +50,8 @@ class PrintBoleto extends Template
     {
         return $this->getRequest()->getParam('embed') === '1';
     }
+
+    /**
+     * Runtime probe for heading/accessibility regressions on print page.
+     */
 }

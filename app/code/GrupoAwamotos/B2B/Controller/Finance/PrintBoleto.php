@@ -44,13 +44,16 @@ class PrintBoleto extends AbstractAccount implements HttpGetActionInterface
      */
     public function execute()
     {
+
         $receberCodigo = (int) $this->getRequest()->getParam('receber');
+        $customerId = (int) $this->customerSession->getCustomerId();
 
         if ($receberCodigo <= 0) {
+            $this->messageManager->addErrorMessage(
+                __('Não foi possível localizar o boleto solicitado.')
+            );
             return $this->resultRedirectFactory->create()->setPath('b2b/finance/index');
         }
-
-        $customerId = (int) $this->customerSession->getCustomerId();
 
         $rateLimit = $this->rateLimiter->consume('customer_' . $customerId);
         if (!$rateLimit['allowed']) {
@@ -68,6 +71,9 @@ class PrintBoleto extends AbstractAccount implements HttpGetActionInterface
         $boleto = $this->customerFinanceData->getBoletoImprimivel($receberCodigo);
 
         if ($boleto === null) {
+            $this->messageManager->addErrorMessage(
+                __('O boleto solicitado não está disponível para a sua conta.')
+            );
             // Log de auditoria de acesso negado/nao encontrado -- sem dados sensiveis (CPF/CNPJ).
             $this->logger->info('[B2B-Finance] Tentativa de impressao de titulo nao encontrado/nao pertencente ao cliente', [
                 'receber' => $receberCodigo,

@@ -23,6 +23,7 @@ use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCo
 use Magento\Catalog\Helper\Image as ImageHelper;
 use GrupoAwamotos\B2B\Model\ResourceModel\ShoppingList\CollectionFactory as ShoppingListCollectionFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Framework\DB\Sql\Expression;
 
@@ -95,6 +96,7 @@ class Dashboard extends Template
      */
     private $shoppingListCollectionFactory;
     private ScopeConfigInterface $scopeConfig;
+    private TimezoneInterface $timezone;
     private ?\Magento\Sales\Model\ResourceModel\Order\Collection $cachedRecentOrders = null;
 
     public function __construct(
@@ -112,7 +114,8 @@ class Dashboard extends Template
         ImageHelper $imageHelper,
         ShoppingListCollectionFactory $shoppingListCollectionFactory,
         ScopeConfigInterface|array|null $scopeConfig = null,
-        array $data = []
+        array $data = [],
+        ?TimezoneInterface $timezone = null
     ) {
         if (is_array($scopeConfig) && $data === []) {
             // Backward compatibility: stale generated metadata may pass $data in this position.
@@ -132,6 +135,7 @@ class Dashboard extends Template
         $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->imageHelper = $imageHelper;
         $this->shoppingListCollectionFactory = $shoppingListCollectionFactory;
+        $this->timezone = $timezone ?? $context->getLocaleDate();
         $this->scopeConfig = $scopeConfig instanceof ScopeConfigInterface
             ? $scopeConfig
             : $context->getScopeConfig();
@@ -299,7 +303,7 @@ class Dashboard extends Template
             return 0.0;
         }
 
-        $thirtyDaysAgo = date('Y-m-d H:i:s', strtotime('-30 days'));
+        $thirtyDaysAgo = $this->timezone->date()->modify('-30 days')->format('Y-m-d H:i:s');
         $collection = $this->orderCollectionFactory->create();
         $collection->addFieldToFilter('customer_id', $customerId)
             ->addFieldToFilter('created_at', ['from' => $thirtyDaysAgo])
@@ -855,8 +859,9 @@ class Dashboard extends Template
     {
         $customer = $this->getCustomer();
         if ($customer && $customer->getCreatedAt()) {
-            return date('d/m/Y', strtotime($customer->getCreatedAt()));
+            return $this->formatDate((string) $customer->getCreatedAt());
         }
+
         return '';
     }
 
@@ -868,12 +873,18 @@ class Dashboard extends Template
     public function isNewCustomer(): bool
     {
         $customer = $this->getCustomer();
-        if ($customer && $customer->getCreatedAt()) {
-            $registrationDate = strtotime($customer->getCreatedAt());
-            $thirtyDaysAgo = strtotime('-30 days');
-            return $registrationDate > $thirtyDaysAgo;
+        if (!$customer || !$customer->getCreatedAt()) {
+            return false;
         }
-        return false;
+
+        try {
+            $registrationDate = $this->timezone->date(new \DateTime((string) $customer->getCreatedAt()));
+            $thirtyDaysAgo = $this->timezone->date()->modify('-30 days');
+            return $registrationDate > $thirtyDaysAgo;
+        } catch (\Exception) {
+            // Se a data vier inválida, evita classificar incorretamente como cliente novo.
+            return false;
+        }
     }
 
     /**
@@ -885,4 +896,48 @@ class Dashboard extends Template
     {
         return $this->getUrl('b2b/quickorder');
     }
+
+    /**
+     * Formata data no padrão B2B (d/m/Y) preservando assinatura compatível com AbstractBlock.
+     *
+     * @param string|\DateTimeInterface|null $date
+     * @param int $format
+     * @param bool $showTime
+     * @param string|null $timezone
+     */
+    public function formatDate(
+        $date = null,
+        $format = \IntlDateFormatter::SHORT,
+        $showTime = false,
+        $timezone = null
+    ): string {
+        if (func_num_args() === 1 || (func_num_args() === 0)) {
+            if ($date === null || $date === '') {
+                return '-';
+            }
+
+            $raw = $date instanceof \DateTimeInterface ? $date->format('c') : (string) $date;
+            try {
+                return $this->timezone->date(new \DateTime($raw))->format('d/m/Y');
+            } catch (\Exception) {
+                return substr($raw, 0, 10);
+            }
+        }
+
+        return (string) parent::formatDate($date, $format, $showTime, $timezone);
+    }
+
+    public function formatDateTime(?string $date): string
+    {
+        if ($date === null || $date === '') {
+            return '-';
+        }
+
+        try {
+            return $this->timezone->date(new \DateTime($date))->format('d/m/Y H:i');
+        } catch (\Exception) {
+            return substr($date, 0, 16);
+        }
+    }
+
 }

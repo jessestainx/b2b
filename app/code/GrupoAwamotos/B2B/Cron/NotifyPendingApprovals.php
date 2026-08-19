@@ -60,33 +60,32 @@ class NotifyPendingApprovals
         }
 
         try {
-            // Ensure area code is set for TransportBuilder
-            try {
-                $this->appState->setAreaCode(Area::AREA_ADMINHTML);
-            } catch (\Magento\Framework\Exception\LocalizedException $e) {
-                // Area already set — ignore
-            }
-
             $store = $this->storeManager->getStore();
+            $oldestDays = $this->getOldestDays($pending);
 
-            $transport = $this->transportBuilder
-                ->setTemplateIdentifier(self::TEMPLATE_ID)
-                ->setTemplateOptions([
-                    'area'  => Area::AREA_ADMINHTML,
-                    'store' => $store->getId(),
-                ])
-                ->setTemplateVars([
-                    'pending_count'   => $count,
-                    'hours_threshold' => self::HOURS_THRESHOLD,
-                    'oldest_days'     => $this->getOldestDays($pending),
-                    'store_name'      => $store->getName(),
-                    'approval_url'    => $store->getBaseUrl() . 'admin/customer/index',
-                ])
-                ->setFromByScope('general')
-                ->addTo($adminEmail)
-                ->getTransport();
+            $this->appState->emulateAreaCode(
+                Area::AREA_FRONTEND,
+                function () use ($store, $count, $oldestDays, $adminEmail): void {
+                    $transport = $this->transportBuilder
+                        ->setTemplateIdentifier(self::TEMPLATE_ID)
+                        ->setTemplateOptions([
+                            'area'  => Area::AREA_FRONTEND,
+                            'store' => (int) $store->getId(),
+                        ])
+                        ->setTemplateVars([
+                            'pending_count'   => $count,
+                            'hours_threshold' => self::HOURS_THRESHOLD,
+                            'oldest_days'     => $oldestDays,
+                            'store_name'      => $store->getName(),
+                            'approval_url'    => $store->getBaseUrl() . 'admin/customer/index',
+                        ])
+                        ->setFromByScope('general')
+                        ->addTo($adminEmail)
+                        ->getTransport();
 
-            $transport->sendMessage();
+                    $transport->sendMessage();
+                }
+            );
 
             $this->saveLastSentCount($count);
 
