@@ -13,7 +13,7 @@ namespace GrupoAwamotos\Theme\Model\Generated;
  */
 final class CascadeAssetVersionConsts
 {
-    public const ALIGN_GRID = '?v=20260809-onda6b2-align';
+    public const ALIGN_GRID = '?v=20260817-footer-pills-contrast';
     public const FOOTER = '?v=d72a7f033192';
     public const HOME_CRITICAL_STACK = '?v=958aa478f8b6';
     public const HOME_DEFERRED_STACK = '?v=20260809-onda6b2-stack';

@@ -41,6 +41,8 @@ final class HeaderImpeccableCascadeLockCss
 
     public const DISTILL_MOBILE_GRID_SCRIPT_ID = 'awa-header-distill-mobile-grid-20260616c';
 
+    public const HEADER_NAV_AXIS_LOCK_SCRIPT_ID = 'awa-header-nav-axis-lock-v1';
+
     public const HEADER_TERMINAL_VERSION = '25-visual-bugs-r1';
 
     /** Subset leve (~6KB) — home/PLP/carrinho onde o cascade-lock completo é omitido. */
@@ -56,7 +58,7 @@ final class HeaderImpeccableCascadeLockCss
      * 2026-07-20: alinha o shell externo do footer-bottom ao container de 1280px.
      * O padding interno preserva a largura útil de 1248px sem recuo duplo.
      */
-    public const GATE_SCRIPT_QUERY = '20260805-hygiene-r71';
+    public const GATE_SCRIPT_QUERY = '20260814-footer-axis-r3';
 
     /**
      * Cache-busting para awa-visual-fixes-2026-06-29-final.min.css, aplicado
@@ -82,13 +84,13 @@ final class HeaderImpeccableCascadeLockCss
     // 2026-08-02 H-pager-rwd: bust — pager padronizado mobile/tablet/desktop.
     // 2026-08-02 H-badge-clip: bust — hot-onsale max-width 50px → texto legível.
     // 2026-08-02 H-badge-clip2: bust + cascade-lock inline (vence CSS imutável em cache).
-    public const VISUAL_FIXES_CSS_QUERY = '20260804-cart-empty-r10';
+    public const VISUAL_FIXES_CSS_QUERY = '20260818-home-shelf-opt-r1';
 
     /**
      * Cache-busting para awa-master-fix.js após tornar o init não bloqueante
      * para DOMContentLoaded em PLP/PDP.
      */
-    public const MASTER_FIX_JS_QUERY = '20260702-masterfix-dcl-nonblocking';
+    public const MASTER_FIX_JS_QUERY = '20260815-hygiene-r1';
 
     public const HARDEN_TERMINAL_ID = 'awa-header-harden-terminal-20260616';
 
@@ -196,6 +198,10 @@ final class HeaderImpeccableCascadeLockCss
         'b2b_quickorder_index',
         'b2b_subscription_index',
         'b2b_approval_index',
+        'b2b_finance_index',
+        'b2b_catalog_index',
+        'sales_order_history',
+        'sales_order_view',
         'erpintegration_customer_suggestedcart',
         'erpintegration_customer_suggestions',
     ];
@@ -479,8 +485,8 @@ final class HeaderImpeccableCascadeLockCss
             /* r41 CLS: shell promo = 44px (alinha critical + r40c; evita shift 32→44) */
             . 'box-sizing:border-box!important;min-height:44px!important;max-height:44px!important;'
             . 'height:44px!important;'
-            . 'padding:0 clamp(12px,2vw,16px)!important;'
-            . 'padding-block:0!important;padding-inline:clamp(12px,2vw,16px)!important;'
+            . 'padding:0!important;'
+            . 'padding-block:0!important;padding-inline:0!important;'
             . 'overflow:hidden!important;position:relative!important;'
             . 'display:flex!important;align-items:center!important;'
             . 'flex:1 1 100%!important;min-width:0!important;width:100%!important;max-width:100%!important;'
@@ -500,23 +506,24 @@ final class HeaderImpeccableCascadeLockCss
             . 'min-height:44px!important;max-height:44px!important}'
             . $wrap . ' :is('
             . '.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout'
-            . '){width:100%!important;max-width:var(--awa-container-catalog,var(--awa-container-max,1440px))!important;'
+            . '){width:100%!important;max-width:var(--awa-container-catalog,var(--awa-container-max,1280px))!important;'
             . 'margin-inline:auto!important;justify-content:center!important;'
             . 'align-items:center!important;display:flex!important;'
             . 'border:0!important;box-shadow:none!important;background:transparent!important;'
             . 'border-radius:0!important;overflow:hidden!important;'
-            . 'padding:0!important;padding-block:0!important;padding-inline:0!important;box-sizing:border-box!important;'
+            . 'padding:0 52px 0 24px!important;padding-block:0!important;padding-inline:24px 52px!important;box-sizing:border-box!important;'
             . 'min-height:44px!important;max-height:44px!important;height:44px!important}'
             . $wrap . ' :is(#awa-b2b-promo-bar,.awa-b2b-promo-bar) .awa-b2b-promo-close,'
             . $wrap . ' button.awa-b2b-promo-close{'
-            . 'position:absolute!important;inset-block-start:50%!important;inset-inline-end:clamp(8px,1.5vw,12px)!important;'
-            . 'transform:translateY(-50%)!important;'
+            . 'position:absolute!important;inset-block:0!important;inset-inline-end:0!important;'
+            . 'transform:none!important;'
             . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
             . 'inline-size:44px!important;block-size:44px!important;min-width:44px!important;min-height:44px!important;'
             . 'max-width:44px!important;max-height:44px!important;width:44px!important;height:44px!important;'
-            . 'box-sizing:border-box!important;padding:0!important;margin:0!important;border-radius:999px!important;'
-            . 'border:1px solid color-mix(in srgb,var(--awa-text-inverse,oklch(99% .002 20)) 24%,transparent)!important;'
-            . 'background:color-mix(in srgb,var(--awa-text-inverse,oklch(99% .002 20)) 10%,transparent)!important;'
+            . 'box-sizing:border-box!important;padding:0!important;margin:0!important;border-radius:0!important;'
+            . 'border:0!important;'
+            . 'border-inline-start:1px solid color-mix(in srgb,var(--awa-text-inverse,oklch(99% .002 20)) 28%,transparent)!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
             . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important;opacity:.92!important}'
             . $wrap . ' :is('
             . '.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__tail'
@@ -771,7 +778,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'html body#html-body .page-wrapper .page_footer .awa-footer-atendimento__store-address{'
             . 'color:oklch(22% .01 20)!important}'
             . '@media (min-width:768px){html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5) .page-wrapper .header-wrapper-sticky{padding-block:0!important;padding:0!important}}'
-            . 'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5) .page-wrapper .header_main.awa-main-header-inner-wrap{padding-inline:8px!important}'
+            . 'html body#html-body:not(.cms-index-index):not(.cms-home):not(.cms-homepage_ayo_home5) .page-wrapper .header_main.awa-main-header-inner-wrap{padding-inline:0!important}'
             . 'html body#html-body .page-wrapper .awa-b2b-min-order-progress--minicart{padding-top:8px!important}'
             . 'html body#html-body .page-wrapper .header-control.header-nav.awa-nav-bar{'
             . 'overflow:visible!important}'
@@ -840,10 +847,11 @@ final class HeaderImpeccableCascadeLockCss
             . '.content-top-home{padding-inline:0!important;box-sizing:border-box!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
             . ':is(.home-main,.awa-hero-b2b-cta){'
-            . 'padding-inline:clamp(16px,3vw,48px)!important;box-sizing:border-box!important}'
+            . 'max-width:min(100%,1280px)!important;margin-inline:auto!important;'
+            . 'padding-inline:clamp(16px,3vw,24px)!important;box-sizing:border-box!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
             . '.content-top-home .ayo-home5-wrapper--template-driven>.awa-carousel-section:not(.top-home-content--above-fold){'
-            . 'padding-inline:clamp(16px,3vw,48px)!important;box-sizing:border-box!important}'
+            . 'padding-inline:0!important;box-sizing:border-box!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
             . ':is(.awa-footer-business-contact__copy,.awa-newsletter-desc,#b2b-login-desc,.awa-hero-b2b-cta__lead){'
             . 'max-width:min(72ch,100%)!important;overflow-wrap:anywhere!important}'
@@ -869,7 +877,8 @@ final class HeaderImpeccableCascadeLockCss
             . '.page-wrapper .awa-site-header form#search_mini_form .control{overflow:visible!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
             . ':is(.page-footer,.page_footer) .footer-bottom,html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) '
-            . '.page-wrapper .footer-bottom{padding:12px clamp(16px,3vw,48px)!important;box-sizing:border-box!important}'
+            . '.page-wrapper .footer-bottom{max-width:min(100%,1280px)!important;margin-inline:auto!important;'
+            . 'padding:12px clamp(16px,3vw,24px)!important;box-sizing:border-box!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5) .page-wrapper '
             . ':is(.page-footer,.page_footer) :is(.footer-container,#footer){'
             . 'padding-block:16px!important;box-sizing:border-box!important}'
@@ -993,7 +1002,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'overflow:visible!important}'
             . 'html body#html-body .page-wrapper .page_footer.awa-footer-exp-control{'
             . 'padding-block:clamp(16px,2vw,24px)!important;'
-            . 'padding-inline:clamp(16px,3vw,48px)!important;box-sizing:border-box!important}'
+            . 'padding-inline:clamp(16px,3vw,24px)!important;box-sizing:border-box!important}'
             . 'html body#html-body .page-wrapper .page_footer.awa-footer-exp-control>:is('
             . 'section,.container,.footer-container,#footer,.footer-bottom){'
             . 'padding-inline:clamp(8px,1.5vw,16px)!important;box-sizing:border-box!important}'
@@ -1797,7 +1806,7 @@ final class HeaderImpeccableCascadeLockCss
             . 'background-color:var(--awa-primary,oklch(48% .14 20))!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5):not(.checkout-index-index) '
             . '.page-wrapper .awa-site-header .header-control.awa-nav-bar > .container{'
-            . 'width:100%!important;max-width:var(--awa-container-catalog,var(--awa-container-max,1440px))!important;'
+            . 'width:100%!important;max-width:var(--awa-container-catalog,var(--awa-container-max,1280px))!important;'
             . 'margin-inline:auto!important;padding-inline:clamp(16px,3vw,24px)!important;'
             . 'background:transparent!important;border:0!important;overflow:visible!important}'
             . 'html body#html-body:is(.cms-index-index,.cms-home,.cms-homepage_ayo_home5):not(.checkout-index-index) '
@@ -1847,12 +1856,12 @@ final class HeaderImpeccableCascadeLockCss
             . '@media (min-width:992px){'
             . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
             . '.page-wrapper .awa-site-header .header_main.awa-main-header-inner-wrap .container{'
-            . 'max-width:var(--awa-container-catalog,var(--awa-container-max,1440px))!important;'
+            . 'max-width:var(--awa-container-catalog,var(--awa-container-max,1280px))!important;'
             . 'width:100%!important;margin-inline:auto!important;'
             . 'padding-inline:clamp(16px,3vw,24px)!important;box-sizing:border-box!important}'
             . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
             . '.page-wrapper .awa-site-header :is(.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row]){'
-            . 'max-width:var(--awa-container-catalog,var(--awa-container-max,1440px))!important;'
+            . 'max-width:var(--awa-container-catalog,var(--awa-container-max,1280px))!important;'
             . 'width:100%!important;margin-inline:auto!important;'
             . 'padding-inline:clamp(16px,3vw,24px)!important;box-sizing:border-box!important}'
             . 'html body#html-body:not(.checkout-index-index):not(.onepagecheckout-index-index) '
@@ -3000,20 +3009,21 @@ final class HeaderImpeccableCascadeLockCss
     }
 
     /**
-     * r40c: desktop B2B promo shell — 44px soft white FULL-BLEED.
-     * r40b fixed height/contrast but visual-audit-fixes locked
-     * .header-content/.top-header to min(100%,1280px)+margin:auto → 160px cream
-     * gutters on each side at 1610px. Force bar + shell to 100% width.
-     * Mobile ≤767 unchanged (r27).
+     * r40c: desktop B2B promo shell — 44px primary FULL-BLEED.
+     * 2026-08-14: mata o legado "soft white" + CTA chip (padding 4×12, radius 999)
+     * que ganhava o kill-card por ordem (mesmo 11 IDs, injetado no </body>).
+     * Eixo: barra padding 0; inner 1280 + 24px/52px (alinha logo, reserva o fechar).
+     * Mobile ≤767 permanece em r27 (barra clara). 2026-08-17: o chrome de pílula
+     * (DS 5a radius 999 + visual-fixes 6px/borda) vazava em ≤767 porque o reset
+     * de CTA do r40 era só ≥768. SSOT align-grid: link textual, não chip.
      */
     public static function b2bPromoShellR40Rules(): string
     {
         $root = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
             . '#html-body#html-body#html-body#html-body';
         $site = $root . ' .page-wrapper .awa-site-header';
-        $header = $site . ' #header.header-container';
         $bar = $site . ' :is(#awa-b2b-promo-bar,.awa-b2b-promo-bar,.top-header.awa-b2b-promo-bar)';
-        $inner = $bar . ' .awa-b2b-promo-bar__inner';
+        $inner = $bar . ' :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout)';
         $text = $bar . ' :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,'
             . '.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__tail,'
             . '.awa-b2b-promo-bar__separator,span,p)';
@@ -3021,6 +3031,8 @@ final class HeaderImpeccableCascadeLockCss
         $ctaText = $bar . ' :is(.awa-b2b-promo-bar__cta strong,.awa-b2b-promo-bar__cta-long,'
             . '.awa-b2b-promo-bar__cta-short)';
         $close = $bar . ' :is(.awa-b2b-promo-close,#awa-b2b-promo-close)';
+        $fill = 'var(--awa-primary,oklch(48% .14 20))';
+        $ink = 'var(--awa-text-inverse,oklch(99% .002 20))';
 
         /* BUG-SHELL-PROMO-TOKEN-CLOSED-001: tokens 44/160 só com promo aberta.
          * Antes: forçava --awa-header-promo-h:44 e stack 160 mesmo com aria-hidden=true. */
@@ -3033,29 +3045,28 @@ final class HeaderImpeccableCascadeLockCss
             . '--awa-header-stack-h:calc(44px + var(--awa-header-sticky-h,116px))!important}'
             . $site . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])) ' . '#header.header-container{'
             . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
-            . 'width:100%!important;max-width:none!important;margin:0!important;'
-            . 'overflow:hidden!important;background:#fff!important;background-color:#fff!important}'
+            . 'width:100%!important;max-width:none!important;margin:0!important;padding:0!important;'
+            . 'overflow:hidden!important;background:' . $fill . '!important;background-color:' . $fill . '!important}'
             . $site . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])) '
             . '#header.header-container .header-content{'
             . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'width:100%!important;max-width:none!important;margin:0!important;'
             . 'padding:0!important;align-items:center!important;overflow:hidden!important;'
-            . 'background:#fff!important;background-color:#fff!important}'
+            . 'background:transparent!important;background-color:transparent!important}'
             . $bar . '{'
             . 'position:relative!important;'
-            . 'display:block!important;'
+            . 'display:flex!important;align-items:center!important;justify-content:center!important;'
             . 'height:var(--awa-header-promo-h,0px)!important;'
             . 'min-height:var(--awa-header-promo-h,0px)!important;'
             . 'max-height:var(--awa-header-promo-h,0px)!important;'
             . 'width:100%!important;max-width:none!important;min-width:100%!important;'
             . 'margin:0!important;margin-inline:0!important;margin-left:0!important;margin-right:0!important;'
             . 'left:auto!important;right:auto!important;inset-inline:auto!important;'
-            . 'padding:0 52px 0 16px!important;box-sizing:border-box!important;'
-            . 'background:#fff!important;background-color:#fff!important;background-image:none!important;'
-            . 'color:var(--awa-text-primary,#111827)!important;'
-            . 'border:0!important;'
-            . 'border-bottom:1px solid var(--awa-border-subtle,var(--awa-border,#e5e7eb))!important;'
-            . 'line-height:1.25!important;overflow:hidden!important}'
+            . 'padding:0!important;padding-inline:0!important;box-sizing:border-box!important;'
+            . 'background:' . $fill . '!important;background-color:' . $fill . '!important;background-image:none!important;'
+            . 'color:' . $ink . '!important;'
+            . 'border:0!important;border-bottom:0!important;'
+            . 'line-height:1.2!important;overflow:hidden!important}'
             . $site . ':has(#awa-b2b-promo-bar[aria-hidden="true"]) ' . '#header.header-container,'
             . $site . ':has(#awa-b2b-promo-bar[aria-hidden="true"]) '
             . '#header.header-container .header-content{'
@@ -3065,46 +3076,65 @@ final class HeaderImpeccableCascadeLockCss
             . 'height:var(--awa-header-promo-h,0px)!important;'
             . 'min-height:var(--awa-header-promo-h,0px)!important;'
             . 'max-height:var(--awa-header-promo-h,0px)!important;'
-            . 'width:100%!important;max-width:min(100%,1280px)!important;'
-            . 'margin:0 auto!important;'
+            . 'width:min(100%,1280px)!important;max-width:1280px!important;'
+            . 'margin:0 auto!important;margin-inline:auto!important;'
             . 'display:flex!important;align-items:center!important;justify-content:center!important;'
-            . 'padding:0!important;box-sizing:border-box!important;'
+            . 'padding:0 52px 0 24px!important;padding-inline:24px 52px!important;box-sizing:border-box!important;'
             . 'background:transparent!important;color:inherit!important}'
             . $text . '{'
-            . 'color:var(--awa-text-primary,#111827)!important;opacity:1!important;'
-            . 'line-height:1.25!important;font-size:13px!important}'
-            /* UX 2026-08-04: CTA chip (não underline) — conversão B2B; vence refine/r40c antigo */
+            . 'color:' . $ink . '!important;opacity:1!important;'
+            . 'line-height:1.2!important;font-size:13px!important;'
+            . 'padding:0!important;max-width:none!important;width:100%!important}'
             . $ctaLink . '{'
             . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
-            . 'color:var(--awa-primary,#b73337)!important;font-weight:700!important;font-size:12px!important;'
-            . 'text-decoration:none!important;text-decoration-line:none!important;text-underline-offset:0!important;'
-            . 'height:auto!important;min-height:28px!important;max-height:none!important;'
-            . 'padding:4px 12px!important;padding-block:4px!important;padding-inline:12px!important;'
-            . 'border:1px solid var(--awa-primary,#b73337)!important;border-radius:999px!important;'
-            . 'background:color-mix(in srgb,var(--awa-primary,#b73337) 12%,#fff)!important;'
-            . 'background-color:color-mix(in srgb,var(--awa-primary,#b73337) 12%,#fff)!important;'
+            . 'color:' . $ink . '!important;font-weight:700!important;font-size:13px!important;'
+            . 'text-decoration:underline!important;text-underline-offset:2px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'padding:0 12px!important;border:0!important;border-radius:0!important;'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'box-shadow:none!important;max-width:none!important;'
             . 'box-sizing:border-box!important;white-space:nowrap!important;line-height:1.2!important}'
             . $ctaLink . ':hover,' . $ctaLink . ':focus-visible{'
-            . 'background:var(--awa-primary,#b73337)!important;'
-            . 'background-color:var(--awa-primary,#b73337)!important;'
-            . 'color:var(--awa-on-primary,#fff)!important;'
-            . 'text-decoration:none!important;text-decoration-line:none!important}'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'color:' . $ink . '!important;text-decoration:underline!important}'
             . $ctaText . '{'
-            . 'color:inherit!important;text-decoration:none!important;text-decoration-line:none!important;'
+            . 'color:inherit!important;text-decoration:inherit!important;'
             . 'background:transparent!important;border:0!important;padding:0!important;'
             . 'font-weight:700!important}'
             . $close . '{'
-            . 'position:absolute!important;top:0!important;inset-block-start:0!important;'
-            . 'right:var(--awa-container-pad,16px)!important;'
-            . 'inset-inline-end:var(--awa-container-pad,16px)!important;'
+            . 'position:absolute!important;top:0!important;inset-block:0!important;'
+            . 'right:0!important;inset-inline-end:0!important;transform:none!important;'
             . 'width:44px!important;min-width:44px!important;max-width:44px!important;'
             . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'box-sizing:border-box!important;display:inline-flex!important;'
             . 'align-items:center!important;justify-content:center!important;'
-            . 'border:0!important;border-radius:0!important;background:transparent!important;'
-            . 'color:var(--awa-text-secondary,#475569)!important;font-size:16px!important;'
-            . 'font-weight:600!important;line-height:1!important;transform:none!important;'
-            . 'padding:0!important}'
+            . 'border:0!important;border-radius:0!important;'
+            . 'border-inline-start:1px solid color-mix(in srgb,' . $ink . ' 28%,transparent)!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'color:' . $ink . '!important;font-size:16px!important;'
+            . 'font-weight:600!important;line-height:1!important;padding:0!important;margin:0!important}'
+            . '}'
+            . '@media (max-width:767px){'
+            /* P2-PROMO-CTA-PILL: r40 chrome (radius 0) era ≥768. Mobile herdava DS 5a
+             * pill + visual-fixes chip. 11 IDs vencem DS/inline/css-gate (7 IDs).
+             * Não copiar height 44 / ink inverso — barra mobile é clara (r27). */
+            . $ctaLink . '{'
+            . 'display:inline!important;align-items:unset!important;justify-content:unset!important;'
+            . 'height:auto!important;min-height:0!important;max-height:none!important;'
+            . 'padding:0!important;margin:0!important;line-height:1.25!important;'
+            . 'border:0!important;border-radius:0!important;box-shadow:none!important;'
+            . 'background-color:transparent!important;background-image:none!important;'
+            . 'color:var(--awa-primary,#b73337)!important;font-weight:700!important;'
+            . 'text-decoration:underline!important;text-underline-offset:2px!important;'
+            . 'white-space:nowrap!important}'
+            . $ctaLink . ':hover,' . $ctaLink . ':focus-visible{'
+            . 'background-color:transparent!important;background-image:none!important;'
+            . 'border:0!important;border-radius:0!important;'
+            . 'color:var(--awa-primary,#b73337)!important;'
+            . 'text-decoration:underline!important}'
+            . $ctaText . '{'
+            . 'background-color:transparent!important;border:0!important;border-radius:0!important;'
+            . 'padding:0!important;color:inherit!important}'
             . '}';
 
         return '/*§b2b-promo-shell-r40c-inline*/'
@@ -3192,8 +3222,10 @@ final class HeaderImpeccableCascadeLockCss
     }
 
     /**
-     * r30: stack back-to-top above WhatsApp on mobile — both were at ~80–84px right
-     * and overlapped (~1600px²). WA stays closest to bottom nav; back-to-top sits +62px up.
+     * r30: stack back-to-top above chat FAB on mobile. WA slot is now #awa-ai-chat-root
+     * (56) + sound (44). Chat INTOCAVEL — BTT sits nav+12+56+12+44+12. z-index 998 < chat 9999.
+     * PDP/PLP load super-global @layer awa-fixes; layered !important beats unlayered
+     * !important (CSS Cascade 5). Same-layer awa-fixes block at body-end wins 140px lock.
      */
     public static function mobileFabStackR30Rules(): string
     {
@@ -3217,20 +3249,21 @@ final class HeaderImpeccableCascadeLockCss
             . 'z-index:10002!important}'
             . $top . '{'
             . 'position:fixed!important;right:16px!important;left:auto!important;'
-            . 'bottom:calc(' . $nav . ' + 12px + 50px + 12px + ' . $safe . ')!important;'
-            . 'inset-block-end:calc(' . $nav . ' + 12px + 50px + 12px + ' . $safe . ')!important;'
+            . 'bottom:calc(' . $nav . ' + 12px + 56px + 12px + 44px + 12px + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(' . $nav . ' + 12px + 56px + 12px + 44px + 12px + ' . $safe . ')!important;'
             . 'width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;'
             . 'max-width:44px!important;max-height:44px!important;padding:0!important;'
-            . 'box-sizing:border-box!important;z-index:10001!important}'
+            . 'box-sizing:border-box!important;z-index:998!important}'
             . $cookieRoot . ' :is(a.awa-whatsapp-float,.awa-whatsapp-float){'
             . 'bottom:calc(' . $nav . ' + 12px + ' . $cookie . ' + ' . $safe . ')!important;'
             . 'inset-block-end:calc(' . $nav . ' + 12px + ' . $cookie . ' + ' . $safe . ')!important}'
             . $cookieRoot . ' :is(#awa-back-to-top,.awa-back-to-top).is-visible:not([hidden]){'
-            . 'bottom:calc(' . $nav . ' + 12px + 50px + 12px + ' . $cookie . ' + ' . $safe . ')!important;'
-            . 'inset-block-end:calc(' . $nav . ' + 12px + 50px + 12px + ' . $cookie . ' + ' . $safe . ')!important}'
+            . 'bottom:calc(' . $nav . ' + 12px + 56px + 12px + 44px + 12px + ' . $cookie . ' + ' . $safe . ')!important;'
+            . 'inset-block-end:calc(' . $nav . ' + 12px + 56px + 12px + 44px + 12px + ' . $cookie . ' + ' . $safe . ')!important}'
             . '}';
 
         return '/*§mobile-fab-stack-r30-inline*/'
+            . '@layer awa-fixes{' . $rules . '}'
             . '@layer awa-visual-priority{' . $rules . '}'
             . '/*§mobile-fab-stack-r30-unlayered*/' . $rules;
     }
@@ -3701,6 +3734,49 @@ final class HeaderImpeccableCascadeLockCss
      * usam a geometria final desde o primeiro layout e vencem o content-visibility tardio,
      * evitando logos 0x0, grids flex provisórios e categorias ilegíveis.
      */
+    /**
+     * Home: só geometria/CLS do footer (~3KB). A folha terminal (8KB gzip)
+     * carrega print→all imediato e traz o restante.
+     */
+    public static function footerCriticalStabilityRulesHome(): string
+    {
+        $footerRoot = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
+            . '.page-wrapper footer.page-footer';
+        $scope = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body .page-wrapper '
+            . 'footer.page-footer > .page_footer';
+
+        return self::footerCrossPageSurfaceRules()
+            . $footerRoot . '{'
+            . 'padding:0!important;padding-block:0!important;'
+            . 'min-height:0!important;height:auto!important;max-height:none!important}'
+            . $scope . '{'
+            . 'margin-top:16px!important;margin-bottom:0!important;'
+            . 'padding:0!important;padding-block:0!important;'
+            . 'min-height:0!important;height:auto!important;max-height:none!important}'
+            . $scope . ' :is(.footer-bottom,.awa-footer-devby,section.awa-footer-categories-expand){'
+            . 'content-visibility:visible!important;contain:none!important;'
+            . 'contain-intrinsic-size:unset!important;box-sizing:border-box!important}'
+            . $scope . ' :is(.awa-footer-bottom__logo-img,.awa-footer-devby__logo,'
+            . '.awa-footer-pay-logos img,.awa-footer-sec-seals img){'
+            . 'content-visibility:visible!important;contain:none!important}'
+            . $scope . ' .awa-footer-pay-logos{'
+            . 'min-height:34px!important;height:34px!important}'
+            . $scope . ' .awa-footer-pay-logos img{'
+            . 'display:block!important;width:46px!important;height:28px!important;'
+            . 'max-width:46px!important;max-height:28px!important;object-fit:contain!important}'
+            . $scope . ' .awa-footer-bottom__logo-img{'
+            . 'display:block!important;width:auto!important;height:44px!important;'
+            . 'max-width:142px!important;max-height:44px!important;'
+            . 'opacity:1!important}'
+            . $scope . ' .awa-footer-devby{'
+            . 'display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'min-height:56px!important}'
+            . $scope . ' .awa-footer-devby__logo{'
+            . 'display:block!important;width:57px!important;height:30px!important;'
+            . 'min-width:57px!important;max-width:57px!important;max-height:30px!important;'
+            . 'object-fit:contain!important;opacity:1!important;visibility:visible!important}';
+    }
+
     public static function footerCriticalStabilityRules(): string
     {
         $footerRoot = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body '
@@ -4275,13 +4351,35 @@ final class HeaderImpeccableCascadeLockCss
         });
     }
 
+    var scheduled = false;
+    var lastModeKey = '';
     function schedule() {
-        if (isFooterMobile()) {
-            clearFooterDesktopInlineState();
-            syncFooterCategoriesShell();
+        if (scheduled) {
             return;
         }
-        applyFooterCategoriesDesktopState();
+        scheduled = true;
+        var run = function () {
+            scheduled = false;
+            var mobile = isFooterMobile();
+            var modeKey = (mobile ? 'm' : 'd')
+                + '|'
+                + d.querySelectorAll('.awa-footer-categories-expand__inner').length;
+            if (modeKey === lastModeKey) {
+                return;
+            }
+            lastModeKey = modeKey;
+            if (mobile) {
+                clearFooterDesktopInlineState();
+                syncFooterCategoriesShell();
+                return;
+            }
+            applyFooterCategoriesDesktopState();
+        };
+        if (w.requestAnimationFrame) {
+            w.requestAnimationFrame(run);
+            return;
+        }
+        w.setTimeout(run, 0);
     }
 
     if (d.readyState === 'loading') {
@@ -5068,14 +5166,23 @@ JS;
             . 'overflow:hidden!important;background:transparent!important}'
             . $header . ' #header.header-container .header-content{height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'padding:0!important;align-items:center!important;overflow:hidden!important;background:transparent!important}'
+            /* BUG 2026-08-10: após dismiss da promo, #header só tinha a barra — CSS 44px
+               deixava vão vazio. Colapsa o shell sem aria-hidden no container. */
+            . 'html.awa-b2b-promo-dismissed' . substr($header, 4) . ' #header.header-container,'
+            . 'html.awa-b2b-promo-dismissed' . substr($header, 4) . ' #header.header-container.awa-b2b-promo-shell--collapsed,'
+            . 'html.awa-b2b-promo-dismissed' . substr($header, 4) . ' #header.header-container .header-content,'
+            . $header . ' #header.header-container:has(#awa-b2b-promo-bar[aria-hidden="true"]),'
+            . $header . ' #header.header-container:has(#awa-b2b-promo-bar[aria-hidden="true"]) .header-content{'
+            . 'height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;'
+            . 'border:0!important;overflow:hidden!important;line-height:0!important}'
             . $header . ' #awa-b2b-promo-bar{position:relative!important;height:44px!important;min-height:44px!important;'
-            . 'max-height:44px!important;padding:0 52px 0 16px!important;border:0!important;'
+            . 'max-height:44px!important;padding:0!important;padding-inline:0!important;border:0!important;'
             . 'background:var(--awa-primary,oklch(48% .14 20))!important;'
             . 'background-color:var(--awa-primary,oklch(48% .14 20))!important;'
-            . 'color:var(--awa-text-inverse,#fff)!important;line-height:1.25!important;'
+            . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important;line-height:1.2!important;'
             . 'box-sizing:border-box!important}'
-            . $header . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__inner{position:static!important;width:100%!important;'
-            . 'max-width:1280px!important;margin:0 auto!important;padding:0!important;height:44px!important;min-height:44px!important;'
+            . $header . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__inner{position:static!important;width:min(100%,1280px)!important;'
+            . 'max-width:1280px!important;margin:0 auto!important;padding:0 52px 0 24px!important;height:44px!important;min-height:44px!important;'
             . 'max-height:44px!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important}'
             . $header . ' #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__text,.awa-b2b-promo-bar__lead,'
             . '.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__tail,.awa-b2b-promo-bar__separator,'
@@ -5084,8 +5191,8 @@ JS;
             . $header . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__cta{'
             . 'font-weight:700!important;color:inherit!important;text-decoration:underline!important;text-underline-offset:2px!important}'
             . $header . ' #awa-b2b-promo-bar .awa-b2b-promo-close{'
-            . 'position:absolute!important;top:0!important;right:var(--awa-container-pad,16px)!important;inset-block-start:0!important;'
-            . 'inset-inline-end:var(--awa-container-pad,16px)!important;'
+            . 'position:absolute!important;top:0!important;right:0!important;inset-block-start:0!important;'
+            . 'inset-inline-end:0!important;'
             . 'width:44px!important;min-width:44px!important;max-width:44px!important;'
             . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;'
@@ -5130,11 +5237,9 @@ JS;
             . 'height:56px!important;min-height:0!important;max-height:56px!important;display:flex!important;align-items:center!important;'
             . 'gap:10px!important}'
             . $header . ' .awa-header-account-prompt{height:44px!important;min-height:44px!important;max-height:44px!important;'
-            . 'padding:0 10px!important;align-items:center!important;grid-template-columns:20px minmax(0,1fr)!important;'
-            . 'gap:8px!important;border-radius:8px!important;'
-            . 'background:var(--awa-bg-surface,var(--awa-bg,Canvas))!important;'
-            . 'border:1px solid var(--awa-border-subtle,var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas)))!important;'
-            . 'box-shadow:none!important}'
+            . 'padding:0!important;align-items:center!important;gap:8px!important;border-radius:0!important;'
+            . 'background:transparent!important;border:0!important;box-shadow:none!important;'
+            . 'width:max-content!important;min-width:0!important;max-width:none!important}'
             . $header . ' .awa-header-account-prompt__icon{width:20px!important;min-width:20px!important;'
             . 'padding:0!important;color:var(--awa-text-muted,var(--awa-text-secondary,CanvasText))!important}'
             . $header . ' .awa-header-account-prompt__guest{gap:2px!important;line-height:1.1!important}'
@@ -5146,16 +5251,18 @@ JS;
             . 'padding:0 2px!important;color:var(--awa-text,CanvasText)!important;background:transparent!important}'
             . $header . ' .awa-header-account-prompt__separator{font-size:10px!important;font-weight:500!important;'
             . 'padding-inline:1px!important;color:var(--awa-text-muted,var(--awa-text-secondary,CanvasText))!important}'
-            /* r72: CTA cadastre-se = pill conversão (não texto transparente). */
+            /* 2026-08-12: cadastre-se = link textual igual a Entrar (sem pílula). */
             . $header . ' .awa-header-account-prompt__link--register{font-size:12px!important;font-weight:700!important;'
-            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
-            . 'min-height:28px!important;height:auto!important;max-height:none!important;'
-            . 'padding:4px 12px!important;border-radius:999px!important;'
-            . 'background:var(--awa-primary,#b73337)!important;background-color:var(--awa-primary,#b73337)!important;'
-            . 'color:var(--awa-on-primary,#fff)!important;border:1px solid var(--awa-primary,#b73337)!important;'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;'
+            . 'min-height:0!important;height:auto!important;max-height:none!important;'
+            . 'padding:0 2px!important;border-radius:0!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'color:var(--awa-text,CanvasText)!important;border:0!important;'
             . 'text-decoration:none!important;box-sizing:border-box!important}'
-            . $header . ' .awa-header-account-prompt__line2{overflow:visible!important;min-height:28px!important;'
-            . 'align-items:center!important;gap:4px!important}'
+            . $header . ' .awa-header-account-prompt{border:0!important;border-radius:0!important;background:transparent!important;'
+            . 'padding:0!important;box-shadow:none!important;min-height:44px!important;height:44px!important}'
+            . $header . ' .awa-header-account-prompt__line2{overflow:visible!important;min-height:0!important;'
+            . 'align-items:center!important;gap:6px!important}'
             . $header . ' .minicart-wrapper:not(.active):not(.show):not(.is-open),'
             . $header . ' .awa-header-minicart:not(:has(.minicart-wrapper.active)):not(:has(.minicart-wrapper.show)):not(:has(.minicart-wrapper.is-open)),'
             . $header . ' .minicart-wrapper:not(.active):not(.show):not(.is-open) .action.showcart{height:44px!important;min-height:44px!important;'
@@ -5275,25 +5382,26 @@ JS;
     }
 
     /**
-     * Desktop/tablet — prompt de conta + CTA Cadastrar em pill (conversão B2B).
-     * UX 2026-08-04: não equalizar register a texto plano (evidência CDP session 19da9f).
+     * Desktop/tablet — prompt de conta: Entrar e cadastre-se como links textuais.
      */
     public static function headerVisFixTerminalRules(): string
     {
         return '@media (min-width:992px){'
             . 'html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-account-prompt{'
-            . 'max-width:none!important;overflow:visible!important;flex-shrink:1!important}'
+            . 'max-width:none!important;overflow:visible!important;flex-shrink:1!important;'
+            . 'border:0!important;background:transparent!important;padding:0!important;box-shadow:none!important;'
+            . 'min-height:44px!important;height:44px!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
             . ' .page-wrapper .awa-site-header .awa-header-account-prompt__link--register{'
-            . 'display:inline-flex!important;align-items:center!important;justify-content:center!important;'
-            . 'background:var(--awa-primary,#b73337)!important;background-color:var(--awa-primary,#b73337)!important;'
-            . 'color:var(--awa-on-primary,#fff)!important;border:1px solid var(--awa-primary,#b73337)!important;'
-            . 'border-radius:999px!important;padding:4px 12px!important;min-height:28px!important;height:auto!important;'
+            . 'display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'color:var(--awa-text,CanvasText)!important;border:0!important;'
+            . 'border-radius:0!important;padding:0 2px!important;min-height:0!important;height:auto!important;'
             . 'max-height:none!important;min-width:0!important;font-size:12px!important;font-weight:700!important;'
             . 'line-height:1.2!important;text-decoration:none!important;box-sizing:border-box!important}'
             . 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
             . ' .page-wrapper .awa-site-header .awa-header-account-prompt__line2{'
-            . 'overflow:visible!important;min-height:28px!important;align-items:center!important}'
+            . 'overflow:visible!important;min-height:0!important;align-items:center!important;gap:6px!important}'
             . 'html body#html-body#html-body .page-wrapper .awa-site-header .awa-header-minicart{flex-shrink:0!important}'
             . '}'
             . '@media (min-width:768px) and (max-width:991px){'
@@ -5311,41 +5419,185 @@ JS;
     }
 
     /**
-     * Carrinho único + links de conta sem pill residual (vence _header-main/body-end async).
+     * Carrinho único no header — Magento minicart (`Magento_Checkout::cart/minicart.phtml`)
+     * é o único CTA. O fallback LCP e o `.awa-header-cart-link` legado não podem
+     * participar do flex/grid: 6×#html-body vence align-grid (5×) que reabre
+     * `display:inline-flex` e empurra `.action.showcart` para fora do inner 1280.
      */
     public static function headerCartDedupeRules(): string
     {
-        $legacyCart = 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header '
-            . '.header-wrapper-sticky .header .header_main .wp-header[data-awa-header-row] '
-            . '>.awa-header-primary-row>.awa-header-cart-link,'
-            . 'html body#html-body#html-body#html-body .page-wrapper .awa-site-header '
-            . '.header .header_main .wp-header[data-awa-header-row] '
-            . '>.awa-header-primary-row>.awa-header-cart-link';
+        $root = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper .awa-site-header';
 
-        $fallbackHide = 'html body#html-body#html-body .page-wrapper .awa-site-header '
-            . '.awa-header-minicart:has(.minicart-wrapper .showcart) '
-            . ':is(.awa-header-cart-fallback,.awa-header-cart-fallback__icon)';
+        $legacyCart = $root . ' .awa-header-primary-row>.awa-header-cart-link,'
+            . $root . ' a.awa-header-cart-link';
 
-        $registerReset = 'html body#html-body#html-body .page-wrapper .awa-site-header '
-            . '.awa-header-account-prompt :is(.awa-header-account-prompt__link--register,'
+        $fallbackHide = $root . ' .awa-header-minicart:has(.minicart-wrapper .action.showcart)'
+            . '>.awa-header-cart-fallback,'
+            . $root . ' .awa-header-minicart:has(.minicart-wrapper .action.showcart)'
+            . '>.awa-header-cart-fallback .awa-header-cart-fallback__icon';
+
+        $shell = $root . ' .awa-header-minicart';
+        $slot = $shell . '>.mini-carts,' . $shell . ' .minicart-wrapper';
+        $showcart = $shell . ' .minicart-wrapper'
+            . ' :is(.action.showcart,a.showcart.header-mini-cart)';
+
+        $registerReset = $root . ' .awa-header-account-prompt :is(.awa-header-account-prompt__link--register,'
             . '.awa-header-account-prompt__line2 .awa-header-account-prompt__link)';
 
-        return $fallbackHide . '{'
-            . 'display:none!important;visibility:hidden!important;width:0!important;height:0!important;'
+        $hide = 'display:none!important;visibility:hidden!important;width:0!important;height:0!important;'
             . 'min-width:0!important;min-height:0!important;overflow:hidden!important;'
-            . 'pointer-events:none!important;position:absolute!important;clip:rect(0,0,0,0)!important}'
+            . 'pointer-events:none!important;position:absolute!important;'
+            . 'clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;margin:0!important;padding:0!important';
+
+        return $legacyCart . '{' . $hide . '}'
+            . $fallbackHide . '{' . $hide . '}'
+            . $shell . '{'
+            . 'position:relative!important;display:flex!important;align-items:center!important;'
+            . 'justify-content:center!important;width:44px!important;min-width:44px!important;'
+            . 'max-width:44px!important;height:44px!important;min-height:44px!important;'
+            . 'max-height:44px!important;overflow:visible!important;flex:0 0 44px!important}'
+            . $slot . '{'
+            . 'position:relative!important;display:flex!important;align-items:center!important;'
+            . 'justify-content:center!important;width:44px!important;min-width:44px!important;'
+            . 'max-width:44px!important;height:44px!important;min-height:44px!important;'
+            . 'margin:0!important;flex:0 0 44px!important}'
+            . $showcart . '{'
+            . 'position:relative!important;inset:auto!important;left:auto!important;right:auto!important;'
+            . 'top:auto!important;bottom:auto!important;float:none!important;'
+            . 'width:44px!important;min-width:44px!important;max-width:44px!important;'
+            . 'height:44px!important;min-height:44px!important;margin:0!important}'
             . '@media (max-width:991px){'
-            . $legacyCart . '{'
-            . 'display:none!important;visibility:hidden!important;width:0!important;height:0!important;'
-            . 'overflow:hidden!important;pointer-events:none!important;position:absolute!important;'
-            . 'clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;margin:0!important;padding:0!important}'
-            . $fallbackHide . '{'
-            . 'display:none!important;visibility:hidden!important;width:0!important;height:0!important;'
-            . 'min-width:0!important;min-height:0!important;overflow:hidden!important;'
-            . 'pointer-events:none!important;position:absolute!important;clip:rect(0,0,0,0)!important}'
             . $registerReset . '{'
             . 'background:transparent!important;background-color:transparent!important;'
             . 'border:none!important;border-radius:0!important;padding:0!important;min-height:0!important}'
+            . '}'
+            . self::headerTabletShellRestoreRules();
+    }
+
+    /**
+     * Tablet 768–991 — themes.min.css esconde a nav (visibility:hidden / display:none)
+     * e o lock da conta (13× #html-body, width:max-content) deixa um buraco invisível
+     * de ~264px entre busca e carrinho. Sem Departamentos não há menu de categorias.
+     * 13× #html-body vence o prompt-lock e o themes (1–2×).
+     */
+    public static function headerTabletShellRestoreRules(): string
+    {
+        $root = 'html body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . ' .page-wrapper .awa-site-header';
+        $hide = 'display:none!important;visibility:hidden!important;opacity:0!important;'
+            . 'width:0!important;height:0!important;min-width:0!important;min-height:0!important;'
+            . 'overflow:hidden!important;pointer-events:none!important;margin:0!important;padding:0!important';
+        $paint = 'visibility:visible!important;opacity:1!important;pointer-events:auto!important;'
+            . 'clip:auto!important;clip-path:none!important';
+
+        return '@media (min-width:768px) and (max-width:991px){'
+            . $root . ' .header-control.header-nav.awa-nav-bar,'
+            . $root . ' .header-control.awa-nav-bar,'
+            . $root . ' .header-control.header-nav.awa-nav-bar>.container,'
+            . $root . ' .awa-nav-bar__inner{'
+            . 'display:flex!important;' . $paint
+            . ';height:48px!important;min-height:48px!important;max-height:48px!important;'
+            . 'overflow:visible!important;align-items:center!important;'
+            . 'width:min(100%,1280px)!important;max-width:1280px!important;'
+            . 'margin-inline:auto!important;box-sizing:border-box!important}'
+            . $root . ' .header-control.header-nav .menu_left_home1,'
+            . $root . ' .awa-header-categories.menu_left_home1{'
+            . 'display:flex!important;' . $paint
+            . ';width:auto!important;max-width:206px!important;height:44px!important;'
+            . 'min-height:44px!important;flex:0 0 auto!important;overflow:visible!important;'
+            . 'position:relative!important}'
+            . $root . ' .awa-header-categories.menu_left_home1 :is('
+            . '.awa-nav-categories,.sections.nav-sections.category-dropdown,'
+            . '.section-items.nav-sections.category-dropdown-items,'
+            . '#awa-category-navigation,#awa-category-navigation.awa-header-primary-nav,'
+            . '#menu\\.vertical,.section-item-content.nav-sections.category-dropdown-item-content,'
+            . '.navigation.verticalmenu.side-verticalmenu){'
+            . 'display:contents!important;position:static!important;transform:none!important;'
+            . 'translate:none!important;left:auto!important;top:auto!important;right:auto!important;'
+            . 'inset:auto!important;width:auto!important;max-width:none!important;min-width:0!important;'
+            . 'height:auto!important;max-height:none!important;overflow:visible!important;'
+            . 'background:transparent!important;box-shadow:none!important;z-index:auto!important}'
+            . $root . ' .awa-header-categories.menu_left_home1 ul.togge-menu.list-category-dropdown,'
+            . $root . ' .awa-header-categories.menu_left_home1 [data-role="awa-vertical-menu-panel"]{'
+            . 'display:none!important;position:absolute!important;top:44px!important;left:0!important;'
+            . 'right:auto!important;bottom:auto!important;transform:none!important;translate:none!important;'
+            . 'width:min(304px,calc(100vw - 32px))!important;max-width:min(304px,calc(100vw - 32px))!important;'
+            . 'height:auto!important;max-height:min(70vh,560px)!important;overflow-x:hidden!important;'
+            . 'overflow-y:auto!important;z-index:100150!important;'
+            . 'background:var(--awa-bg,Canvas)!important;box-shadow:0 8px 24px rgb(15 23 42 / 12%)!important}'
+            . $root . ' .awa-header-categories.menu_left_home1 ul.togge-menu.list-category-dropdown'
+            . ':is(.menu-open,.vmm-open,[aria-hidden="false"]),'
+            . $root . ' .awa-header-categories.menu_left_home1 [data-role="awa-vertical-menu-panel"]'
+            . ':is(.menu-open,.vmm-open,[aria-hidden="false"],[data-awa-menu-state="open"]){'
+            . 'display:flex!important;flex-direction:column!important;' . $paint
+            . ';position:absolute!important;transform:none!important;top:44px!important;left:0!important;'
+            . 'height:auto!important;max-height:min(70vh,560px)!important;overflow-y:auto!important}'
+            . $root . ' button.our_categories.title-category-dropdown,'
+            . $root . ' button.our_categories,'
+            . $root . ' .awa-header-categories.menu_left_home1 button.our_categories{'
+            . 'display:inline-flex!important;' . $paint
+            . ';position:static!important;transform:none!important;translate:none!important;'
+            . 'width:auto!important;min-width:0!important;max-width:206px!important;'
+            . 'height:44px!important;min-height:44px!important;align-items:center!important}'
+            . $root . ' .awa-nav-quick-links,'
+            . $root . ' .awa-nav-quick-links__list{'
+            . 'display:flex!important;' . $paint
+            . ';position:static!important;max-width:none!important;min-width:0!important;'
+            . 'width:auto!important;flex-direction:row!important;align-items:center!important;'
+            . 'flex:1 1 auto!important;height:44px!important;max-height:44px!important;'
+            . 'gap:8px!important;overflow:hidden!important}'
+            . $root . ' .awa-nav-quick-links__link{'
+            . 'display:inline-flex!important;' . $paint
+            . ';height:44px!important;align-items:center!important;padding-inline:10px!important;'
+            . 'white-space:nowrap!important}'
+            . $root . ' .awa-header-account-prompt,'
+            . $root . ' .awa-header-contact-links.awa-header-account-prompt,'
+            . $root . ' .awa-header-account-prompt[data-awa-auth-state="guest"]{'
+            . 'display:inline-flex!important;' . $paint
+            . ';width:44px!important;min-width:44px!important;max-width:44px!important;'
+            . 'height:44px!important;min-height:44px!important;overflow:hidden!important;'
+            . 'flex:0 0 44px!important;position:relative!important}'
+            . $root . ' .awa-header-account-prompt :is('
+            . '.awa-header-account-prompt__icon,.awa-header-account-prompt__text,'
+            . '.awa-header-account-prompt__guest,.awa-header-account-prompt__customer,'
+            . '.awa-header-account-prompt__live,.awa-header-account-prompt__copy){'
+            . $hide . '}'
+            . $root . ' .awa-header-account-prompt__mobile-link{'
+            . 'display:inline-flex!important;' . $paint
+            . ';align-items:center!important;justify-content:center!important;'
+            . 'width:44px!important;min-width:44px!important;height:44px!important;'
+            . 'min-height:44px!important;position:relative!important;'
+            . 'color:var(--awa-primary)!important}'
+            . $root . ' .header-wrapper-sticky :is('
+            . '.awa-main-header__inner.wp-header,.awa-main-header__inner[data-awa-header-row="brand-search"]){'
+            . 'grid-template-columns:minmax(112px,148px) minmax(0,1fr) 98px!important;'
+            . 'column-gap:16px!important}'
+            . $root . ' .header-wrapper-sticky .awa-header-right-col{'
+            . 'display:flex!important;width:98px!important;min-width:98px!important;'
+            . 'max-width:98px!important;gap:10px!important;justify-content:flex-end!important;'
+            . 'overflow:visible!important}'
+            . '}'
+            . '@media (min-width:992px) and (max-width:1023px){'
+            . $root . ' .header-control.header-nav .menu_left_home1,'
+            . $root . ' .awa-header-categories.menu_left_home1{'
+            . 'display:flex!important;' . $paint
+            . ';width:auto!important;max-width:206px!important;height:44px!important;'
+            . 'overflow:visible!important;position:relative!important}'
+            . $root . ' .awa-header-categories.menu_left_home1 :is('
+            . '.awa-nav-categories,.sections.nav-sections.category-dropdown,'
+            . '.section-items.nav-sections.category-dropdown-items,'
+            . '#awa-category-navigation,#awa-category-navigation.awa-header-primary-nav,'
+            . '#menu\\.vertical,.section-item-content.nav-sections.category-dropdown-item-content,'
+            . '.navigation.verticalmenu.side-verticalmenu){'
+            . 'display:contents!important;position:static!important;transform:none!important;'
+            . 'translate:none!important;inset:auto!important;width:auto!important}'
+            . $root . ' button.our_categories.title-category-dropdown,'
+            . $root . ' button.our_categories{'
+            . 'display:inline-flex!important;' . $paint
+            . ';position:static!important;transform:none!important;'
+            . 'height:44px!important;min-height:44px!important}'
             . '}';
     }
 
@@ -5555,6 +5807,10 @@ JS;
             . 'var reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;'
             . 'function hidePromo(){if(!bar){return;}'
             . 'bar.style.display="none";bar.setAttribute("aria-hidden","true");'
+            . 'document.documentElement.classList.add("awa-b2b-promo-dismissed");'
+            . 'var shell=bar.closest("#header.header-container");'
+            . 'if(shell){shell.classList.add("awa-b2b-promo-shell--collapsed");'
+            . 'shell.style.removeProperty("display");shell.removeAttribute("aria-hidden");shell.removeAttribute("inert");}'
             . 'try{localStorage.setItem("awa_b2b_promo_dismissed","1");}catch(e){}}'
             . 'try{if(localStorage.getItem("awa_b2b_promo_dismissed")==="1"){hidePromo();}}catch(e){}'
             . 'if(bar&&btn&&!window.__awaPromoDismissInit){'
@@ -5805,7 +6061,8 @@ JS;
             . self::headerMinicartGhostTerminalRules()
             . self::headerAccountVtexCleanTerminalRules()
             . self::headerSimplifyUiTerminalRules()
-            . self::headerVisualBugsFixRules();
+            . self::headerVisualBugsFixRules()
+            . self::headerGuestChromeKillCardRules();
 
         return $css;
     }
@@ -5912,7 +6169,7 @@ JS;
             . $shell . ' .awa-nav-quick-links__link:hover{color:var(--awa-primary,CanvasText)!important}'
             . $shell . ' form#search_mini_form{box-shadow:none!important;'
             . 'border:1px solid var(--awa-border-subtle,var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas)))!important;'
-            . 'background:var(--awa-bg-subtle,color-mix(in srgb,Canvas 96%,CanvasText 4%))!important}'
+            . 'background:var(--awa-bg,var(--awa-white,Canvas))!important}'
             . $shell . ' form#search_mini_form:focus-within{background:var(--awa-bg,Canvas)!important;'
             . 'border-color:var(--awa-primary,CanvasText)!important}'
             . $shell . ' form#search_mini_form button.action.search{background:transparent!important;'
@@ -5973,6 +6230,131 @@ JS;
     }
 
     /**
+     * 2026-08-14: mata card/pílula do guest e a linha dupla do main header.
+     * 11× #html-body vence o css-gate.min.js antigo em pub/static (6 IDs + pílula 1 ID).
+     */
+    public static function headerGuestChromeKillCardRules(): string
+    {
+        $root = 'html body#html-body#html-body#html-body#html-body#html-body#html-body#html-body'
+            . '#html-body#html-body#html-body#html-body .page-wrapper .awa-site-header';
+
+        return '/* awa-header-guest-chrome-kill-20260814 */'
+            . '@media(min-width:992px){'
+            . $root . ' :is(.awa-header-contact-links.awa-header-account-prompt,.awa-header-account-prompt){'
+            . 'border:0!important;border-radius:0!important;outline:0!important;'
+            . 'background:transparent!important;background-image:none!important;box-shadow:none!important;'
+            . 'padding:0!important;min-width:0!important;max-width:none!important;width:max-content!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;overflow:visible!important}'
+            . $root . ' a.awa-header-account-prompt__link--register,'
+            . $root . ' .awa-header-account-prompt a.awa-header-account-prompt__link--register{'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'color:var(--awa-text,CanvasText)!important;border:0!important;border-radius:0!important;'
+            . 'padding:0 2px!important;min-height:0!important;height:auto!important;max-height:none!important;'
+            . 'box-shadow:none!important;font-size:12px!important;font-weight:700!important;'
+            . 'line-height:1.2!important;text-decoration:none!important}'
+            . $root . '{border-bottom:0!important;box-shadow:none!important}'
+            . $root . ' .header-wrapper-sticky{border-bottom:0!important;box-shadow:none!important}'
+            . $root . ' .header.awa-main-header{border-bottom:0!important;box-shadow:none!important}'
+            . $root . ' :is(.header-control.awa-nav-bar,.header-control.header-nav.awa-nav-bar){'
+            . 'border-block-start:1px solid var(--awa-border-subtle,var(--awa-border,color-mix(in srgb,CanvasText 10%,Canvas)))!important;'
+            . 'border-block-end:0!important;border-inline:0!important;box-shadow:none!important}'
+            /* Promo B2B: casco + barra + texto = 44px (mata lock 32px do css-gate/vtex-clean). */
+            . $root . ' :is(#header.header-container,#header.header-container>.header-content,#awa-b2b-promo-bar){'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
+            . 'margin:0!important;box-sizing:border-box!important;'
+            . 'width:100%!important;max-width:none!important;'
+            . 'border:0!important;border-bottom:0!important;overflow:hidden!important}'
+            . $root . '{--awa-header-promo-h:44px!important;--awa-header-stack-h:160px!important}'
+            . $root . ':has(#awa-b2b-promo-bar:not([aria-hidden="true"])){'
+            . 'height:160px!important;min-height:160px!important;max-height:160px!important}'
+            . 'html.awa-b2b-promo-dismissed' . substr($root, 4) . ','
+            . $root . ':has(#awa-b2b-promo-bar[aria-hidden="true"]){'
+            . 'height:116px!important;min-height:116px!important;max-height:116px!important;'
+            . '--awa-header-promo-h:0px!important;--awa-header-stack-h:116px!important}'
+            . $root . ':has(.b2b-status-panel){'
+            . 'height:auto!important;min-height:0!important;max-height:none!important;'
+            . '--awa-header-promo-h:0px!important;--awa-header-stack-h:auto!important}'
+            . $root . ' :is(#header.header-container,#awa-b2b-promo-bar){'
+            . 'background:var(--awa-primary,oklch(48% .14 20))!important;'
+            . 'background-color:var(--awa-primary,oklch(48% .14 20))!important;'
+            . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important}'
+            . $root . ' #header.header-container>.header-content{background:transparent!important;'
+            . 'width:100%!important;max-width:none!important;display:flex!important;align-items:center!important}'
+            . $root . ' #awa-b2b-promo-bar:not([aria-hidden="true"]){display:flex!important;align-items:center!important;'
+            . 'justify-content:center!important;width:100%!important;max-width:none!important;padding:0!important}'
+            . $root . ' #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout){'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'display:flex!important;align-items:center!important;justify-content:center!important;'
+            . 'width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important;'
+            . 'padding:0 52px 0 24px!important;box-sizing:border-box!important;line-height:1.2!important}'
+            . $root . ' #awa-b2b-promo-bar .awa-b2b-promo-bar__text{'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;align-items:center!important;'
+            . 'width:100%!important;max-width:none!important;margin:0!important;padding:0!important;'
+            . 'box-sizing:border-box!important;line-height:1.2!important}'
+            . $root . ' #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__inner,.awa-b2b-promo-bar__layout,.awa-b2b-promo-bar__text,'
+            . '.awa-b2b-promo-bar__lead,.awa-b2b-promo-bar__lead-long,.awa-b2b-promo-bar__lead-short,'
+            . '.awa-b2b-promo-bar__tail,.awa-b2b-promo-bar__separator,span,p){'
+            . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important}'
+            . $root . ' #awa-b2b-promo-bar :is(.awa-b2b-promo-bar__cta,.awa-b2b-promo-bar__cta strong){'
+            . 'background:transparent!important;background-color:transparent!important;background-image:none!important;'
+            . 'box-shadow:none!important;border:0!important;border-radius:0!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'padding:0 12px!important;max-width:none!important;'
+            . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important}'
+            . $root . ' #awa-b2b-promo-bar .awa-b2b-promo-close{'
+            . 'position:absolute!important;inset-block:0!important;inset-inline-end:0!important;'
+            . 'top:0!important;right:0!important;transform:none!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'width:44px!important;min-width:44px!important;max-width:44px!important;'
+            . 'padding:0!important;margin:0!important;border-radius:0!important;'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'border:0!important;'
+            . 'border-inline-start:1px solid color-mix(in srgb,var(--awa-text-inverse,oklch(99% .002 20)) 28%,transparent)!important;'
+            . 'color:var(--awa-text-inverse,oklch(99% .002 20))!important}'
+            . 'html.awa-b2b-promo-dismissed' . substr($root, 4)
+            . ' :is(#header.header-container,#header.header-container>.header-content,#awa-b2b-promo-bar),'
+            . $root . ' #header.header-container.awa-b2b-promo-shell--collapsed,'
+            . $root . ' #header.header-container.awa-b2b-promo-shell--collapsed .header-content,'
+            . $root . ' #header.header-container:has(#awa-b2b-promo-bar[aria-hidden="true"]),'
+            . $root . ' #header.header-container:has(#awa-b2b-promo-bar[aria-hidden="true"]) .header-content{'
+            . 'height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;'
+            . 'border:0!important;overflow:hidden!important;line-height:0!important}'
+            /* Magento 2 search = 1 chrome no form (Luma). !important: vence refine 2px+sombra e .input-text. */
+            . $root . ','
+            . $root . ' :is(.header-wrapper-sticky,.header.awa-main-header,'
+            . '.header-control.awa-nav-bar,.header-control.header-nav.awa-nav-bar){'
+            . 'background:var(--awa-bg,var(--awa-white,Canvas))!important;'
+            . 'background-color:var(--awa-bg,var(--awa-white,Canvas))!important}'
+            . $root . ' form#search_mini_form{'
+            . 'align-items:stretch!important;'
+            . 'border:1px solid var(--awa-border,color-mix(in srgb,CanvasText 12%,Canvas))!important;'
+            . 'box-shadow:none!important;box-sizing:border-box!important;'
+            . 'background:var(--awa-bg,var(--awa-white,Canvas))!important;'
+            . 'background-color:var(--awa-bg,var(--awa-white,Canvas))!important;'
+            . 'overflow:visible!important}'
+            . $root . ' form#search_mini_form:focus-within{'
+            . 'border-color:var(--awa-primary,oklch(48% .14 20))!important;'
+            . 'box-shadow:0 0 0 3px color-mix(in srgb,var(--awa-primary,oklch(48% .14 20)) 18%,transparent)!important}'
+            . $root . ' form#search_mini_form :is(.field.search,.field.search .control,.actions,'
+            . 'input#search,input#search.input-text,button.action.search){'
+            . 'border:0!important;box-shadow:none!important;border-radius:0!important;'
+            . 'height:auto!important;min-height:0!important;max-height:none!important;'
+            . 'align-self:stretch!important;box-sizing:border-box!important}'
+            . $root . ' form#search_mini_form :is(input#search,input#search.input-text){'
+            . 'background:transparent!important;background-color:transparent!important;'
+            . 'padding-block:0!important;line-height:normal!important}'
+            . $root . ' form#search_mini_form .field.search .control{'
+            . 'overflow-x:hidden!important;overflow-y:visible!important}'
+            . $root . ' :is(button.our_categories,button.title-category-dropdown.our_categories,'
+            . '.our_categories.title-category-dropdown){'
+            . 'border:0!important;border-color:transparent!important;box-shadow:none!important}'
+            . $root . ' :is(.minicart-wrapper,.mini-carts){'
+            . 'border-radius:0!important;background:transparent!important;box-shadow:none!important}'
+            . '}';
+    }
+
+    /**
      * Conta B2B compacta — última camada do distill para remover card alto do header desktop.
      */
     public static function headerAccountVtexCleanTerminalRules(): string
@@ -5986,17 +6368,20 @@ JS;
             . $shell . ' .awa-header-right-col{align-items:center!important;height:44px!important;max-height:44px!important;'
             . 'overflow:visible!important;position:relative!important;z-index:100270!important}'
             . $account . '{align-items:center!important;background:transparent!important;border:0!important;box-shadow:none!important;'
-            . 'box-sizing:border-box!important;display:inline-flex!important;flex:1 1 auto!important;gap:6px!important;'
-            . 'height:44px!important;min-height:44px!important;max-height:44px!important;max-width:232px!important;'
+            . 'box-sizing:border-box!important;display:inline-flex!important;flex:0 0 auto!important;gap:6px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;max-width:none!important;'
             . 'min-width:0!important;overflow:visible!important;padding:0!important;position:relative!important;'
-            . 'width:auto!important;z-index:100260!important}'
+            . 'width:max-content!important;z-index:100260!important}'
             . $shell . ' .awa-header-account-prompt__icon{align-items:center!important;display:flex!important;flex:0 0 44px!important;'
             . 'height:44px!important;justify-content:center!important;max-height:44px!important;max-width:44px!important;'
             . 'min-height:44px!important;min-width:44px!important;padding:0!important;width:44px!important}'
-            . $text . '{box-sizing:border-box!important;display:flex!important;flex:1 1 auto!important;flex-direction:column!important;'
+            . $text . '{box-sizing:border-box!important;display:flex!important;flex:0 0 auto!important;flex-direction:column!important;'
             . 'height:44px!important;justify-content:center!important;line-height:1.1!important;max-height:44px!important;'
-            . 'max-width:180px!important;min-height:44px!important;min-width:0!important;overflow:visible!important;width:auto!important;'
+            . 'max-width:none!important;min-height:44px!important;min-width:0!important;overflow:visible!important;width:max-content!important;'
             . 'gap:1px!important}'
+            . $account . '[data-awa-auth-state="customer"]{flex:1 1 auto!important;width:auto!important;max-width:232px!important;min-width:0!important}'
+            . $account . '[data-awa-auth-state="customer"] :is(.awa-header-account-prompt__text,.awa-header-account-prompt__customer){'
+            . 'flex:1 1 auto!important;width:auto!important;max-width:180px!important;min-width:0!important}'
             // FOUC 2026-07-30: nunca forçar .customer flex no estado guest (vence [hidden]).
             . $shell . ' .awa-header-account-prompt .awa-header-account-prompt__customer,'
             . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__customer{'
@@ -6030,13 +6415,13 @@ JS;
             . 'white-space:nowrap!important;font-size:12px!important;font-weight:700!important;'
             . 'justify-content:flex-start!important}'
             . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] '
-            . '.awa-header-account-prompt__link--register{align-items:center!important;justify-content:center!important;'
+            . '.awa-header-account-prompt__link--register{align-items:center!important;justify-content:flex-start!important;'
             . 'box-sizing:border-box!important;display:inline-flex!important;height:auto!important;line-height:1.2!important;'
-            . 'min-height:28px!important;max-height:none!important;min-width:0!important;width:auto!important;'
-            . 'padding:4px 12px!important;white-space:nowrap!important;font-size:12px!important;font-weight:700!important;'
-            . 'border-radius:999px!important;background:var(--awa-primary,#b73337)!important;'
-            . 'background-color:var(--awa-primary,#b73337)!important;color:var(--awa-on-primary,#fff)!important;'
-            . 'border:1px solid var(--awa-primary,#b73337)!important;text-decoration:none!important}'
+            . 'min-height:0!important;max-height:none!important;min-width:0!important;width:auto!important;'
+            . 'padding:0 2px!important;white-space:nowrap!important;font-size:12px!important;font-weight:700!important;'
+            . 'border-radius:0!important;background:transparent!important;'
+            . 'background-color:transparent!important;color:var(--awa-text,CanvasText)!important;'
+            . 'border:0!important;text-decoration:none!important}'
             . $shell . ' .awa-header-account-prompt[data-awa-auth-state="guest"] .awa-header-account-prompt__separator{'
             . 'height:auto!important;line-height:1.2!important;margin:0 2px!important;padding-inline:0!important;'
             . 'display:inline-flex!important;align-items:center!important;min-width:0!important;width:auto!important}'
@@ -6227,8 +6612,10 @@ JS;
             . 'box-sizing:border-box!important}'
             . $promo . '{padding:8px!important;box-sizing:border-box!important}'
             . $promoInner . '{padding:8px!important;box-sizing:border-box!important}'
-            . $navBar . '{padding:8px!important;box-sizing:border-box!important}'
-            . $navContainer . '{padding:8px!important;box-sizing:border-box!important}'
+            . $navBar . '{padding:0!important;padding-inline:0!important;box-sizing:border-box!important;'
+            . 'width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important}'
+            . $navContainer . '{padding:0!important;padding-inline:0!important;box-sizing:border-box!important;'
+            . 'width:100%!important;max-width:100%!important;margin-inline:0!important}'
             . $navItem . '{padding:8px!important;box-sizing:border-box!important}'
             . $mainHeader . '{padding:8px!important;box-sizing:border-box!important}'
             . '@media(min-width:768px){' . $mainRow . '{padding:12px 8px!important;padding-block:12px!important;box-sizing:border-box!important}}'
@@ -6242,22 +6629,22 @@ JS;
             . 'background:var(--awa-bg-muted,#f3f4f6)!important;'
             . 'border:1px solid var(--awa-border,#e5e7eb)!important}'
             . $cartHeaderShell . '{'
-            . 'height:40px!important;min-height:40px!important;max-height:40px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
             . 'margin:0!important;box-sizing:border-box!important;overflow:visible!important}'
             . $cartHeaderContent . '{'
-            . 'height:40px!important;min-height:40px!important;max-height:40px!important;'
-            . 'padding:0 16px!important;box-sizing:border-box!important}'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'padding:0!important;box-sizing:border-box!important}'
             . $cartPromo . '{'
-            . 'height:40px!important;min-height:40px!important;max-height:40px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
             . 'margin:0!important;box-sizing:border-box!important}'
             . $cartPromoInner . '{'
-            . 'height:40px!important;min-height:40px!important;max-height:40px!important;'
-            . 'padding:0 52px 0 16px!important;box-sizing:border-box!important}'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
+            . 'padding:0 52px 0 24px!important;box-sizing:border-box!important}'
             . $cartPromoClose . '{'
             . 'top:0!important;right:0!important;bottom:0!important;left:auto!important;'
-            . 'height:40px!important;min-height:40px!important;max-height:40px!important;'
+            . 'height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'padding:0!important;margin:0!important;transform:none!important;box-sizing:border-box!important}'
             . $cartSticky . '{'
             . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
@@ -6265,8 +6652,10 @@ JS;
             . $cartStickyInner . '{'
             . 'padding:8px 0!important;padding-block:8px!important;padding-inline:0!important;'
             . 'box-sizing:border-box!important}'
-            . $cartNav . '{padding:0!important;padding-block:0!important;padding-inline:0!important;box-sizing:border-box!important}'
-            . $cartNavContainer . '{padding:0 16px!important;box-sizing:border-box!important}'
+            . $cartNav . '{padding:0!important;padding-block:0!important;padding-inline:0!important;box-sizing:border-box!important;'
+            . 'width:min(100%,1280px)!important;max-width:1280px!important;margin-inline:auto!important}'
+            . $cartNavContainer . '{padding:0!important;padding-inline:0!important;box-sizing:border-box!important;'
+            . 'width:100%!important;max-width:100%!important;margin-inline:0!important}'
             . $cartNavInner . '{padding:0!important;box-sizing:border-box!important}'
             . $cartStrongSticky . '{'
             . 'padding:0!important;padding-block:0!important;padding-inline:0!important;'
@@ -6864,8 +7253,17 @@ JS;
             . 'line-height:1.3!important;letter-spacing:-.01em!important;color:var(--awa-text)!important;'
             . 'text-wrap:balance!important;margin:0!important;margin-block:0!important;padding:0!important;'
             . 'hyphens:none!important;-webkit-hyphens:none!important;border-block-end:0!important}'
+            . '@media(min-width:992px){'
             . $wrap . ' .main-detail>.row>.col-md-6:first-child{'
-            . 'min-width:0!important;overflow:hidden!important}'
+            . 'min-width:0!important;overflow:hidden!important}}'
+            . '@media(max-width:991px){'
+            /* P2-PDP-STACK: overflow:hidden + min-height:0 no flex item colapsa a coluna
+             * (~1px) e clipa a galeria. Clip fica em .product.media. */
+            . $wrap . ' .main-detail>.row{height:auto!important;min-height:0!important}'
+            . $wrap . ' .main-detail>.row>:is(.col-md-6,.col-sm-6){'
+            . 'flex:none!important;flex-basis:auto!important;width:100%!important;max-width:100%!important;'
+            . 'height:auto!important;min-height:auto!important;overflow:visible!important;float:none!important}'
+            . $wrap . ' .main-detail>.row>.col-md-6:first-child{overflow:visible!important}}'
             . $wrap . ' .gallery-placeholder{'
             . 'padding:8px!important;box-shadow:none!important;overflow:hidden!important;'
             . 'border:1px solid var(--awa-border,#e5e7eb)!important;'
@@ -6921,7 +7319,11 @@ JS;
             . '.fotorama__nav-wrap,.fotorama__nav,.fotorama__nav__shaft,.fotorama__nav__frame){'
             . 'overflow:hidden!important}'
             . $wrap . ' .gallery-placeholder{overflow:hidden!important}'
-            . $wrap . ' .main-detail>.row>.col-md-6:first-child{overflow:hidden!important}';
+            . '@media(min-width:992px){'
+            . $wrap . ' .main-detail>.row>.col-md-6:first-child{overflow:hidden!important}}'
+            . '@media(max-width:991px){'
+            . $wrap . ' .main-detail>.row>.col-md-6:first-child{'
+            . 'overflow:visible!important;height:auto!important;min-height:auto!important}}';
 
         $fotoramaAnim = $wrap . ' :is(.fotorama__stage__shaft,.fotorama__nav__shaft,.fotorama__thumb-border){'
             . 'transition-property:opacity,transform!important}';
@@ -7551,6 +7953,7 @@ JS;
             . self::footerCategoriesDesktopLayoutRules()
             . self::pixelQaFooterAxisTerminalRules()
             . self::mobileCondensedOneRowTerminalRules()
+            . self::headerGuestChromeKillCardRules()
             . '</style>';
     }
 
@@ -7851,19 +8254,29 @@ JS;
             . 'if(prompt&&window.innerWidth>=992){'
             . 'prompt.style.removeProperty("max-width");prompt.style.removeProperty("overflow");'
             . 'if(!prompt.getAttribute("style"))prompt.removeAttribute("style");'
+            . 'prompt.style.setProperty("border","0","important");'
+            . 'prompt.style.setProperty("border-radius","0","important");'
+            . 'prompt.style.setProperty("background","transparent","important");'
+            . 'prompt.style.setProperty("padding","0","important");'
+            . 'prompt.style.setProperty("box-shadow","none","important");'
             . 'var reg=prompt.querySelector(".awa-header-account-prompt__link--register");'
-            . 'if(reg){reg.style.removeProperty("background");reg.style.removeProperty("background-color");'
-            . 'reg.style.removeProperty("color");reg.style.removeProperty("border-radius");reg.style.removeProperty("padding");'
-            . 'if(!reg.getAttribute("style"))reg.removeAttribute("style");}}'
+            . 'if(reg){reg.style.setProperty("background","transparent","important");'
+            . 'reg.style.setProperty("background-color","transparent","important");'
+            . 'reg.style.setProperty("color","var(--awa-text, CanvasText)","important");'
+            . 'reg.style.setProperty("border","0","important");'
+            . 'reg.style.setProperty("border-radius","0","important");'
+            . 'reg.style.setProperty("padding","0 2px","important");}}'
             . 'if(window.innerWidth>=768&&window.innerWidth<=991&&prompt){'
             . 'prompt.querySelectorAll(".awa-header-account-prompt__icon,.awa-header-account-prompt__text,.awa-header-account-prompt__guest")'
             . '.forEach(function(el){el.style.setProperty("display","none","important");});'
             . 'var ml=prompt.querySelector(".awa-header-account-prompt__mobile-link");'
             . 'if(ml){ml.style.setProperty("display","inline-flex","important");ml.style.setProperty("visibility","visible","important");}}'
-            . 'var legacyCart=document.querySelector(".awa-header-primary-row>.awa-header-cart-link");'
-            . 'if(legacyCart&&window.innerWidth<=991){legacyCart.style.removeProperty("display");'
-            . 'legacyCart.style.removeProperty("visibility");legacyCart.style.removeProperty("pointer-events");'
-            . 'if(!legacyCart.getAttribute("style"))legacyCart.removeAttribute("style");}'
+            . 'else if(prompt){'
+            . 'prompt.querySelectorAll(".awa-header-account-prompt__icon,.awa-header-account-prompt__text,.awa-header-account-prompt__guest")'
+            . '.forEach(function(el){el.style.removeProperty("display");el.style.removeProperty("visibility");});'
+            . 'var mlClear=prompt.querySelector(".awa-header-account-prompt__mobile-link");'
+            . 'if(mlClear){mlClear.style.removeProperty("display");mlClear.style.removeProperty("visibility");'
+            . 'if(!mlClear.getAttribute("style"))mlClear.removeAttribute("style");}}'
             . 'var fallback=document.querySelector(".awa-header-minicart .awa-header-cart-fallback");'
             . 'var hasShowcart=document.querySelector(".awa-header-minicart .minicart-wrapper .showcart");'
             . 'if(fallback&&hasShowcart){fallback.style.removeProperty("display");'
@@ -7913,19 +8326,29 @@ JS;
             . 'if(prompt&&window.innerWidth>=992){'
             . 'prompt.style.removeProperty("max-width");prompt.style.removeProperty("overflow");'
             . 'if(!prompt.getAttribute("style"))prompt.removeAttribute("style");'
+            . 'prompt.style.setProperty("border","0","important");'
+            . 'prompt.style.setProperty("border-radius","0","important");'
+            . 'prompt.style.setProperty("background","transparent","important");'
+            . 'prompt.style.setProperty("padding","0","important");'
+            . 'prompt.style.setProperty("box-shadow","none","important");'
             . 'var reg=prompt.querySelector(".awa-header-account-prompt__link--register");'
-            . 'if(reg){reg.style.removeProperty("background");reg.style.removeProperty("background-color");'
-            . 'reg.style.removeProperty("color");reg.style.removeProperty("border-radius");reg.style.removeProperty("padding");'
-            . 'if(!reg.getAttribute("style"))reg.removeAttribute("style");}}'
+            . 'if(reg){reg.style.setProperty("background","transparent","important");'
+            . 'reg.style.setProperty("background-color","transparent","important");'
+            . 'reg.style.setProperty("color","var(--awa-text, CanvasText)","important");'
+            . 'reg.style.setProperty("border","0","important");'
+            . 'reg.style.setProperty("border-radius","0","important");'
+            . 'reg.style.setProperty("padding","0 2px","important");}}'
             . 'if(window.innerWidth>=768&&window.innerWidth<=991&&prompt){'
             . 'prompt.querySelectorAll(".awa-header-account-prompt__icon,.awa-header-account-prompt__text,.awa-header-account-prompt__guest")'
             . '.forEach(function(el){el.style.setProperty("display","none","important");});'
             . 'var ml=prompt.querySelector(".awa-header-account-prompt__mobile-link");'
             . 'if(ml){ml.style.setProperty("display","inline-flex","important");ml.style.setProperty("visibility","visible","important");}}'
-            . 'var legacyCart=document.querySelector(".awa-header-primary-row>.awa-header-cart-link");'
-            . 'if(legacyCart&&window.innerWidth<=991){legacyCart.style.removeProperty("display");'
-            . 'legacyCart.style.removeProperty("visibility");legacyCart.style.removeProperty("pointer-events");'
-            . 'if(!legacyCart.getAttribute("style"))legacyCart.removeAttribute("style");}'
+            . 'else if(prompt){'
+            . 'prompt.querySelectorAll(".awa-header-account-prompt__icon,.awa-header-account-prompt__text,.awa-header-account-prompt__guest")'
+            . '.forEach(function(el){el.style.removeProperty("display");el.style.removeProperty("visibility");});'
+            . 'var mlClear=prompt.querySelector(".awa-header-account-prompt__mobile-link");'
+            . 'if(mlClear){mlClear.style.removeProperty("display");mlClear.style.removeProperty("visibility");'
+            . 'if(!mlClear.getAttribute("style"))mlClear.removeAttribute("style");}}'
             . 'var fallback=document.querySelector(".awa-header-minicart .awa-header-cart-fallback");'
             . 'var hasShowcart=document.querySelector(".awa-header-minicart .minicart-wrapper .showcart");'
             . 'if(fallback&&hasShowcart){fallback.style.removeProperty("display");'
@@ -7997,7 +8420,13 @@ JS;
 
     public static function footerInjection(): string
     {
-        return self::styleTag() . "\n" . self::guardScriptTag() . "\n" . self::catalogRootHeightScriptTag();
+        return self::styleTag()
+            . "\n"
+            . self::guardScriptTag()
+            . "\n"
+            . self::catalogRootHeightScriptTag()
+            . "\n"
+            . self::headerNavAxisLockScriptTag();
     }
 
     private static function catalogRootHeightScriptTag(): string
@@ -8014,6 +8443,37 @@ JS;
             . '}'
             . 'apply();'
             . 'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",apply,{once:true});}'
+            . 'window.addEventListener("load",apply,{once:true,passive:true});'
+            . 'window.addEventListener("resize",apply,{passive:true});'
+            . '})();</script>';
+    }
+
+    private static function headerNavAxisLockScriptTag(): string
+    {
+        return '<script id="' . self::HEADER_NAV_AXIS_LOCK_SCRIPT_ID . '">(function(){'
+            . 'var d=document,b=d.body;'
+            . 'if(!b||!b.matches||!b.matches(".catalog-category-view,.catalogsearch-result-index,.catalog-product-view,.checkout-cart-index")){return;}'
+            . 'function set(el,p,v){if(el&&el.style){el.style.setProperty(p,v,"important");}}'
+            . 'function apply(){'
+            . 'if(window.matchMedia&&!window.matchMedia("(min-width: 992px)").matches){return;}'
+            . 'd.querySelectorAll(".page-wrapper .awa-site-header .header-wrapper-sticky > .header-control.awa-nav-bar,.page-wrapper .awa-site-header .header-wrapper-sticky > .header-control.header-nav.awa-nav-bar,.page-wrapper .awa-site-header .header-control.awa-nav-bar,.page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar").forEach(function(el){'
+            . 'set(el,"width","min(100%, 1280px)");set(el,"max-width","1280px");'
+            . 'set(el,"margin-left","auto");set(el,"margin-right","auto");set(el,"margin-inline","auto");'
+            . 'set(el,"padding-left","0");set(el,"padding-right","0");set(el,"padding-inline","0");set(el,"box-sizing","border-box");'
+            . '});'
+            . 'd.querySelectorAll(".page-wrapper .awa-site-header .header-control.awa-nav-bar > .container,.page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar > .container").forEach(function(el){'
+            . 'set(el,"width","100%");set(el,"max-width","100%");'
+            . 'set(el,"margin-left","0");set(el,"margin-right","0");set(el,"margin-inline","0");'
+            . 'set(el,"padding-left","0");set(el,"padding-right","0");set(el,"padding-inline","0");set(el,"box-sizing","border-box");'
+            . '});'
+            . 'd.querySelectorAll(".page-wrapper .awa-site-header .header-control.awa-nav-bar .awa-nav-bar__inner,.page-wrapper .awa-site-header .header-control.header-nav.awa-nav-bar .awa-nav-bar__inner").forEach(function(el){'
+            . 'set(el,"width","100%");set(el,"max-width","100%");'
+            . 'set(el,"margin-left","0");set(el,"margin-right","0");set(el,"margin-inline","0");'
+            . 'set(el,"padding-left","24px");set(el,"padding-right","24px");set(el,"padding-inline","24px");set(el,"box-sizing","border-box");'
+            . '});'
+            . '}'
+            . 'apply();'
+            . 'if(d.readyState==="loading"){d.addEventListener("DOMContentLoaded",apply,{once:true});}'
             . 'window.addEventListener("load",apply,{once:true,passive:true});'
             . 'window.addEventListener("resize",apply,{passive:true});'
             . '})();</script>';
@@ -8043,6 +8503,7 @@ JS;
             . self::shelfViewAllMobileHideR18Rules()
             . self::shelfCarouselMobileChromeHideR19Rules()
             . self::footerImpeccablePolishR66Rules()
+            . self::headerGuestChromeKillCardRules()
             . '</style>';
     }
 
@@ -8211,6 +8672,11 @@ JS;
             . $h . ' .awa-shelf--carousel{padding-inline:0!important}'
             . $h . ' .awa-shelf--carousel :is(.awa-carousel__viewport,.owl-wrapper-outer){'
             . 'margin-inline:0!important;padding-inline:0!important;width:100%!important}'
+            /* Mais Vendidos desktop: setas overlay 44px — gutter no track (não no viewport). */
+            . '@media(min-width:768px){'
+            . $h . ' .content-top-home .awa-carousel-section--featured .awa-shelf--carousel .awa-carousel__track{'
+            . 'box-sizing:content-box!important;'
+            . 'padding-inline:calc(var(--awa-touch-target,44px) + 8px)!important}}'
             . $h . ' .content-top-home .awa-hero-b2b-cta{padding-block:12px!important;padding-inline:0!important}'
             . $h . ' .content-top-home .ayo-home5-wrapper--template-driven{'
             . 'gap:var(--awa-home-section-gap,12px)!important;row-gap:var(--awa-home-section-gap,12px)!important}'
@@ -8429,13 +8895,20 @@ JS;
             . 'padding-block:0!important;margin:0!important}'
             . $header . ' #header.header-container .header-content{height:44px!important;min-height:44px!important;max-height:44px!important;'
             . 'padding-block:0!important;margin:0 auto!important}'
+            . 'html.awa-b2b-promo-dismissed' . substr($header, 4) . ' #header.header-container,'
+            . 'html.awa-b2b-promo-dismissed' . substr($header, 4) . ' #header.header-container.awa-b2b-promo-shell--collapsed,'
+            . 'html.awa-b2b-promo-dismissed' . substr($header, 4) . ' #header.header-container .header-content,'
+            . $header . ' #header.header-container:has(#awa-b2b-promo-bar[aria-hidden="true"]),'
+            . $header . ' #header.header-container:has(#awa-b2b-promo-bar[aria-hidden="true"]) .header-content{'
+            . 'height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;'
+            . 'border:0!important;overflow:hidden!important;line-height:0!important}'
             . $header . ' .header-wrapper-sticky{display:flex!important;flex-direction:column!important;'
             . 'height:auto!important;min-height:118px!important;max-height:none!important;'
             . 'padding-block:0!important;margin:0!important}'
             . $header . ' .header.awa-main-header{'
             . 'height:var(--awa-header-main-row-h,68px)!important;min-height:var(--awa-header-main-row-h,68px)!important;'
             . 'max-height:var(--awa-header-main-row-h,68px)!important;'
-            . 'padding-block:0!important;width:min(1280px,calc(100% - 32px))!important;max-width:1280px!important;'
+            . 'padding-block:0!important;width:min(100%,1280px)!important;max-width:1280px!important;'
             . 'margin:0 auto!important;padding-inline:0!important}'
             . $header . ' :is(.header_main.awa-main-header-inner-wrap,.header-main,.header-main>.container){'
             . 'height:var(--awa-header-main-row-h,68px)!important;'
@@ -8489,15 +8962,15 @@ JS;
             . 'height:var(--awa-header-nav-h,48px)!important;'
             . 'min-height:var(--awa-header-nav-h,48px)!important;'
             . 'max-height:var(--awa-header-nav-h,48px)!important;'
-            . 'display:block!important;width:100vw!important;max-width:100vw!important;'
-            . 'margin-inline:calc(50% - 50vw)!important;margin-block:6px 0!important;padding-inline:0!important;box-sizing:border-box!important}'
+            . 'display:block!important;width:min(100%,1280px)!important;max-width:1280px!important;'
+            . 'margin-inline:auto!important;margin-block:6px 0!important;padding-inline:0!important;box-sizing:border-box!important}'
             // Nav inner: contido em 1280 centralizado, alinhado ao rail do header.
             . $header . ' :is(.header-control.awa-nav-bar > .container,.header-control.header-nav.awa-nav-bar > .container,.header-control.awa-nav-bar .awa-nav-bar__inner,.header-control.header-nav.awa-nav-bar .awa-nav-bar__inner){'
             . 'height:var(--awa-header-nav-h,48px)!important;'
             . 'min-height:var(--awa-header-nav-h,48px)!important;'
             . 'max-height:var(--awa-header-nav-h,48px)!important;'
-            . 'width:min(1280px,calc(100% - 32px))!important;max-width:1280px!important;'
-            . 'margin-inline:auto!important;padding-inline:0!important;box-sizing:border-box!important}'
+            . 'width:100%!important;max-width:100%!important;'
+            . 'margin-inline:0!important;padding-inline:0!important;box-sizing:border-box!important}'
             // Busca: esconder label/lupa default do Magento (evita lupa duplicada à esquerda do placeholder).
             . $header . ' .awa-header-search-col :is(.block-search .label,.block-search .block-title,.nested,label.search,label[for="search"]){'
             . 'display:none!important;visibility:hidden!important;width:0!important;height:0!important;max-height:0!important;'
@@ -8541,6 +9014,11 @@ JS;
         ) ?? $html;
         $html = preg_replace(
             '/<script\\s+id="awa-catalog-root-height-lock"[^>]*>.*?<\\/script>\\s*/is',
+            '',
+            $html
+        ) ?? $html;
+        $html = preg_replace(
+            '/<script\\s+id="' . preg_quote(self::HEADER_NAV_AXIS_LOCK_SCRIPT_ID, '/') . '"[^>]*>.*?<\\/script>\\s*/is',
             '',
             $html
         ) ?? $html;
