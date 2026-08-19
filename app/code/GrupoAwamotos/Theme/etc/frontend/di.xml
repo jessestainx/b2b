@@ -45,6 +45,12 @@
                 sortOrder="15"/>
     </type>
 
+    <type name="Magento\Framework\App\FrontControllerInterface">
+        <plugin name="grupoawamotos_theme_legacy_route_redirect"
+                type="GrupoAwamotos\Theme\Plugin\App\FrontController\LegacyRouteRedirectPlugin"
+                sortOrder="1"/>
+    </type>
+
     <type name="Mirasvit\SearchAutocomplete\Model\Result">
         <plugin name="grupoawamotos_theme_searchautocomplete_result_text_all"
                 type="GrupoAwamotos\Theme\Plugin\Mirasvit\SearchAutocompleteResultPlugin"
