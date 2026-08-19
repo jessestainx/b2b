@@ -74,4 +74,24 @@ class PdpGate implements ArgumentInterface
     {
         return (string) __('Entrar para Comprar');
     }
+
+    public function canViewPrices(): bool
+    {
+        return $this->b2bHelper->canViewPrices();
+    }
+
+    public function getPriceGateBannerDescription(): string
+    {
+        return $this->b2bHelper->getPriceGateBannerDescription();
+    }
+
+    public function getPriceGateCardMessage(): string
+    {
+        return $this->b2bHelper->getPriceGateCardMessage();
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->isActive() && $this->b2bHelper->isEnabled();
+    }
 }

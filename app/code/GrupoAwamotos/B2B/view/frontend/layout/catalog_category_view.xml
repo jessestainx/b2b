@@ -9,6 +9,11 @@
         <css src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
     </head>
     <body>
+        <referenceBlock name="category.products.list">
+            <arguments>
+                <argument name="b2b_gate" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</argument>
+            </arguments>
+        </referenceBlock>
         <referenceContainer name="before.body.end">
             <block class="GrupoAwamotos\B2B\Block\LoginToCart"
                    name="b2b.login.to.cart.category"

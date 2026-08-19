@@ -17,26 +17,47 @@ $nonce = CspService::getNonce();
 ?>
 <?php
 $_productCollection = $block->getLoadedProductCollection();
-$_helper = $this->helper('Magento\Catalog\Helper\Output');
-$_b2bActive = \Magento\Framework\App\ObjectManager::getInstance()
-    ->get(\Magento\Framework\Module\Manager::class)
-    ->isEnabled('GrupoAwamotos_B2B');
+/** @var \Magento\Catalog\Helper\Output $_helper */
+$_helper = $block->getData('outputHelper');
+if (!$_helper instanceof \Magento\Catalog\Helper\Output) {
+    $_helper = $this->helper(\Magento\Catalog\Helper\Output::class);
+}
+/** @var \GrupoAwamotos\B2B\ViewModel\PdpGate|null $b2bGate */
+$b2bGate = $block->getData('b2b_gate');
+if (!$b2bGate instanceof \GrupoAwamotos\B2B\ViewModel\PdpGate) {
+    $b2bGate = $this->helper(\GrupoAwamotos\B2B\Helper\Data::class);
+}
+/** @var \GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel|null $cardVm */
+$cardVm = $block->getData('bestseller_card_view_model');
+$hasCardVm = $cardVm instanceof \GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel;
+$formatPriceHtml = function (string $html) use ($hasCardVm, $cardVm): string {
+    if ($hasCardVm) {
+        return $cardVm->priceDisplayHtml($html);
+    }
+
+    return (string) $this->helper(\Rokanthemes\Themeoption\Helper\Data::class)->getPriceDisplayCustom($html);
+};
+/** @var \GrupoAwamotos\Theme\ViewModel\ProductLabels|null $productLabels */
+$productLabels = $block->getData('product_labels');
+$hasProductLabels = $productLabels instanceof \GrupoAwamotos\Theme\ViewModel\ProductLabels;
+$_b2bActive = $b2bGate instanceof \GrupoAwamotos\B2B\ViewModel\PdpGate
+    ? $b2bGate->isActive()
+    : (bool) $b2bGate->isEnabled();
 if ($_b2bActive) {
-    $b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
-    $b2bCanAddToCart = $b2bHelper->canAddToCart();
-    $b2bCanViewPrices = $b2bHelper->canViewPrices();
-    $b2bGateState = $block->escapeHtmlAttr($b2bHelper->getPriceGateState());
-    $b2bGateHeadline = $block->escapeHtml($b2bHelper->getPriceGateHeadline());
+    $b2bCanAddToCart = $b2bGate->canAddToCart();
+    $b2bCanViewPrices = $b2bGate->canViewPrices();
+    $b2bGateState = $block->escapeHtmlAttr($b2bGate->getPriceGateState());
+    $b2bGateHeadline = $block->escapeHtml($b2bGate->getPriceGateHeadline());
     // Banner institucional (topo da PLP/busca): texto completo.
-    $b2bGateDescription = $block->escapeHtml($b2bHelper->getPriceGateBannerDescription());
+    $b2bGateDescription = $block->escapeHtml($b2bGate->getPriceGateBannerDescription());
     // Badge dentro do card do produto: mensagem curta (espaço reduzido, repetida N vezes na grade).
-    $b2bGateCardMessage = $block->escapeHtml($b2bHelper->getPriceGateCardMessage());
-	$b2bPrimaryUrl = $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl());
-	$b2bPrimaryLabel = $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel());
-	$b2bSecondaryUrl = $block->escapeUrl($b2bHelper->getPriceGateSecondaryUrl());
-	$b2bSecondaryLabel = $block->escapeHtml($b2bHelper->getPriceGateSecondaryLabel());
+    $b2bGateCardMessage = $block->escapeHtml($b2bGate->getPriceGateCardMessage());
+	$b2bPrimaryUrl = $block->escapeUrl($b2bGate->getPriceGatePrimaryUrl());
+	$b2bPrimaryLabel = $block->escapeHtml($b2bGate->getPriceGatePrimaryLabel());
+	$b2bSecondaryUrl = $block->escapeUrl($b2bGate->getPriceGateSecondaryUrl());
+	$b2bSecondaryLabel = $block->escapeHtml($b2bGate->getPriceGateSecondaryLabel());
 } else {
-    $b2bHelper = null; $b2bCanAddToCart = true; $b2bCanViewPrices = true; $b2bGateState = '';
+    $b2bCanAddToCart = true; $b2bCanViewPrices = true; $b2bGateState = '';
     $b2bGateHeadline = ''; $b2bGateDescription = ''; $b2bGateCardMessage = '';
 	$b2bPrimaryUrl = ''; $b2bPrimaryLabel = '';
 	$b2bSecondaryUrl = ''; $b2bSecondaryLabel = '';
@@ -148,7 +169,7 @@ if ($_b2bActive) {
 	                    $srcset = $block->escapeUrl($productImageSm->getImageUrl()) . ' 500w, '
 	                            . $block->escapeUrl($productImageMd->getImageUrl()) . ' 600w, '
 	                            . $block->escapeUrl($productImage->getImageUrl()) . ' 1000w';
-	                    $sizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw';
+	                    $sizes = '(max-width: 767px) 50vw, (max-width: 1024px) 33vw, 25vw';
 	                    $imgOnError = "this.onerror=null;this.classList.add('awa-img-fallback','awa-loaded');this.removeAttribute('srcset');if(!this.dataset.fallbackApplied){this.dataset.fallbackApplied='1';this.src='"
                         . $block->escapeJs($block->getViewFileUrl('images/product/placeholder/image.jpg'))
                         . "';}else{this.closest('li.item-product')?.remove();}";
@@ -180,12 +201,16 @@ if ($_b2bActive) {
 							<?php if ( $_product->getFinalPrice() < $_product->getPrice() ): ?>
 									<span class="onsale">
 									<span class="sale-bg"></span>
-									<span class="sale-text"><?php /* @noEscape */ echo $this->helper('Rokanthemes\RokanBase\Helper\Data')->showLableSalePrice($_product); ?>
+									<span class="sale-text"><?php /* @noEscape */ echo $hasProductLabels
+                                        ? $productLabels->saleLabel($_product)
+                                        : $this->helper('Rokanthemes\RokanBase\Helper\Data')->showLableSalePrice($_product); ?>
 									</span>
 									</span>
 							<?php endif; ?>
-							<?php $helper = $this->helper('Rokanthemes\RokanBase\Helper\Newlabel'); ?>
-								<?php if($helper->isProductNew($_product)): ?>
+							<?php $helperIsNew = $hasProductLabels
+                                ? $productLabels->isNew($_product)
+                                : $this->helper('Rokanthemes\RokanBase\Helper\Newlabel')->isProductNew($_product); ?>
+								<?php if($helperIsNew): ?>
 								<?php
 								    /** Short label fits Ayo .hot-onsale max-width:50px; full meaning in title. */
 								    $awaNewBadgeTitle = (string) __('Lançamento Distribuidora');
@@ -223,7 +248,7 @@ if ($_b2bActive) {
 						<?php endif; ?>
 						<div class="info-price" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
                         <?php if ($b2bCanViewPrices): ?>
-                            <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                            <?php /* @noEscape */ echo $formatPriceHtml((string) $block->getProductPrice($_product)); ?>
                         <?php else: ?>
                             <div class="b2b-login-to-see-price price-box">
                                 <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bGateHeadline) ?></span>
@@ -297,7 +322,9 @@ if ($_b2bActive) {
 							<div class="hot-onsale">
 								<span class="onsale">
 								<span class="sale-bg"></span>
-								<span class="sale-text"><?php /* @noEscape */ echo $this->helper('Rokanthemes\RokanBase\Helper\Data')->showLableSalePrice($_product); ?>
+								<span class="sale-text"><?php /* @noEscape */ echo $hasProductLabels
+                                    ? $productLabels->saleLabel($_product)
+                                    : $this->helper('Rokanthemes\RokanBase\Helper\Data')->showLableSalePrice($_product); ?>
 								</span>
 								</span>
 							</div>
@@ -322,7 +349,7 @@ if ($_b2bActive) {
 						<?php endif; ?>
 						<div class="info-price" data-product-id="<?php echo $block->escapeHtmlAttr($_product->getId()); ?>">
                         <?php if ($b2bCanViewPrices): ?>
-                            <?php /* @noEscape */ echo $this->helper('Rokanthemes\Themeoption\Helper\Data')->getPriceDisplayCustom($block->getProductPrice($_product)); ?>
+                            <?php /* @noEscape */ echo $formatPriceHtml((string) $block->getProductPrice($_product)); ?>
                         <?php else: ?>
                             <div class="b2b-login-to-see-price price-box">
                                 <span class="b2b-login-to-see-price__title"><?= $block->escapeHtml($b2bGateHeadline) ?></span>

@@ -7,18 +7,28 @@
 declare(strict_types=1);
 
 $_product = $block->getProduct();
-$_wishlistSubmitParams = $this->helper('Magento\Wishlist\Helper\Data')->getAddParams($_product);
-
-// Issue #24 — Hide wishlist for guests when B2B gate hides prices
-$_b2bCanViewPrices = true;
-try {
-    $_b2bCanViewPrices = $this->helper('GrupoAwamotos\B2B\Helper\Data')->canViewPrices();
-} catch (\Exception $e) {
-    // B2B module not active — show wishlist by default
+/** @var \GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel|null $addtoViewModel */
+$addtoViewModel = $block->getData('addto_view_model');
+$_wishlistAllowed = false;
+$_wishlistSubmitParams = '';
+if ($addtoViewModel instanceof \GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel) {
+    $_wishlistAllowed = $addtoViewModel->isWishlistAllowed();
+    $_wishlistSubmitParams = $addtoViewModel->getWishlistAddParams($_product);
+} else {
+    /** @var \Magento\Wishlist\Helper\Data $wishlistHelper */
+    $wishlistHelper = $this->helper(\Magento\Wishlist\Helper\Data::class);
+    $_wishlistAllowed = $wishlistHelper->isAllow();
+    $_wishlistSubmitParams = $wishlistHelper->getAddParams($_product);
 }
+
+/** @var \GrupoAwamotos\B2B\ViewModel\PdpGate|null $b2bGate */
+$b2bGate = $block->getData('b2b_gate');
+$_b2bCanViewPrices = $b2bGate instanceof \GrupoAwamotos\B2B\ViewModel\PdpGate
+    ? $b2bGate->canViewPrices()
+    : true;
 ?>
 
-<?php if ($_b2bCanViewPrices && $this->helper('Magento\Wishlist\Helper\Data')->isAllow()) : ?>
+<?php if ($_b2bCanViewPrices && $_wishlistAllowed) : ?>
         <a href="#" title="<?= $this->escapeHtmlAttr(__('Add To Wishlist')) ?>"
                 class="action towishlist wishlist-link"
                 data-post='<?= $this->escapeHtmlAttr($_wishlistSubmitParams) ?>'
@@ -29,7 +39,7 @@ try {
 <script type="text/x-magento-init">
     {
         "body": {
-            "addToWishlist": <?= /* @noEscape */ $this->helper('Magento\Framework\Json\Helper\Data')->jsonEncode($block->getWishlistOptions()) ?>
+            "addToWishlist": <?= /* @noEscape */ json_encode($block->getWishlistOptions()) ?>
         }
     }
 </script>

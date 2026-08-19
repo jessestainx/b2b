@@ -15,11 +15,20 @@
         -->
         <remove src="css/awa-round3-pdp-conversion.css"/>
         <remove src="css/awa-pdp-final-polish.css"/>
+        <!--
+            Fase 6 fatia 4 — paridade catalogStripImpeccable ↔ PageConfig.
+            Não remover gallery / distill / ui-simplify (PDP precisa).
+            OptimizeHeadStylesPlugin permanece safety-net.
+        -->
+        <remove src="css/awa-impeccable-audit-2026-05-28.min.css"/>
+        <remove src="css/awa-impeccable-audit-2026-05-28.css"/>
+        <remove src="css/awa-commerce-impeccable-refine.min.css"/>
         <!-- AWA vfix scope: PDP only -->
         <css src="css/awa-vfix-pdp.css"/>
         <!-- awa-pdp-shell-final.css: arquivo movido para _deprecated/ em Jun-2026; referência removida (404 ativo). Estilos cobertos por awa-pdp-premium.css + critical inline. -->
     </head>
     <body>
+        <attribute name="class" value="awa-pdp-page-contract"/>
         <!-- Rokanthemes PriceCountdown declara cacheable="false" na PDP — remove para FPC/Varnish -->
         <referenceBlock name="product.info.pricecountdown.product.page" remove="true"/>
         <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
@@ -37,7 +46,46 @@
             Magento "product.info.social" (class "product-social-links").
         -->
         <referenceBlock name="awa.product.info.addto" remove="true"/>
+        <referenceBlock name="product.info.addto">
+            <arguments>
+                <argument name="b2b_gate" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</argument>
+                <argument name="addto_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="catalog.product.related">
+            <arguments>
+                <argument name="bestseller_card_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="product.info.upsell">
+            <arguments>
+                <argument name="bestseller_card_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="product.attributes">
+            <arguments>
+                <argument name="product_output" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductOutput</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="product.info.overview">
+            <arguments>
+                <argument name="product_output" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductOutput</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="product.info.description">
+            <arguments>
+                <argument name="product_output" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductOutput</argument>
+            </arguments>
+        </referenceBlock>
         <referenceBlock name="awa.product.info.mailto" remove="true"/>
+
+        <!--
+            Magento layout: ações terciárias (Imprimir/Compartilhar) no fim do buy-box.
+            product.info.social é o container nativo (htmlClass product-social-links).
+            after="-" no product.info.main alinha DOM à hierarquia de conversão
+            (título → preço/CTA → add-to-cart → social), em vez de depender só de flex order.
+        -->
+        <move element="product.info.social" destination="product.info.main" after="-"/>
 
         <!--
             MELHORIA-01: Bloco de compatibilidade inline (Marca/Modelo/Ano) acima do add-to-cart.
@@ -68,7 +116,11 @@
                    name="awa.product.info.cep.estimator"
                    template="Magento_Catalog::product/view/awa-pdp-cep-estimator.phtml"
                    after="awa.product.info.compatibility"
-                   before="product.info.addtocart"/>
+                   before="product.info.addtocart">
+                <arguments>
+                    <argument name="auth" xsi:type="object">Magento\Customer\ViewModel\Customer\Auth</argument>
+                </arguments>
+            </block>
         </referenceContainer>
         <referenceBlock name="awa.product.info.cep.estimator" remove="true"/>
 

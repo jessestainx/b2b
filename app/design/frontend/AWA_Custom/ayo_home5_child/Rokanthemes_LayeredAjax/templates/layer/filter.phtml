@@ -8,6 +8,9 @@
 declare(strict_types=1);
 
 $request = $block->getRequest();
+/** @var \GrupoAwamotos\Theme\ViewModel\LayeredNav|null $layeredNav */
+$layeredNav = $block->getData('layered_nav');
+$hasLayeredNav = $layeredNav instanceof \GrupoAwamotos\Theme\ViewModel\LayeredNav;
 
 $normalizeCsvValue = static function ($value, ?string $key = null): string {
     $chunks = is_array($value) ? $value : explode(',', (string) $value);
@@ -194,16 +197,13 @@ $normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue):
         ?>
         <li class="item">
             <?php
-            $layeredAjaxHelper = $this->helper(\Rokanthemes\LayeredAjax\Helper\Data::class);
+            $layeredAjaxEnabled = $hasLayeredNav
+                ? $layeredNav->isPriceRangeSliderEnabled()
+                : $this->helper(\Rokanthemes\LayeredAjax\Helper\Data::class)->isEnabledPriceRangeSliders();
             ?>
-            <?php if ($layeredAjaxHelper->isEnabledPriceRangeSliders() && $attributeModel && $attributeModel->getFrontendInput() === 'price'): ?>
+            <?php if ($layeredAjaxEnabled && $attributeModel && $attributeModel->getFrontendInput() === 'price'): ?>
                 <?php
-                $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-                $storeManager = $objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
-                $currency = $objectManager->create(\Magento\Directory\Model\CurrencyFactory::class)
-                    ->create()
-                    ->load($storeManager->getStore()->getCurrentCurrencyCode());
-                $currencySymbol = $currency->getCurrencySymbol();
+                $currencySymbol = (string) $block->getStore()->getCurrentCurrencySymbol();
                 $productCollection = $filter->getLayer()->getProductCollection();
                 $collectionMin = (float) $productCollection->getMinPrice();
                 $collectionMax = (float) $productCollection->getMaxPrice();
@@ -212,7 +212,9 @@ $normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue):
                     : '';
                 [$from, $to] = $currentPriceRange !== '' ? explode('-', $currentPriceRange, 2) : [$collectionMin, $collectionMax];
                 [$min, $max] = $currentPriceRange !== '' ? explode('-', $currentPriceRange, 2) : [$collectionMin, $collectionMax];
-                $priceFormat = $this->helper(\Magento\Tax\Helper\Data::class)->getPriceFormat($block->getStore());
+                $priceFormat = $hasLayeredNav
+                    ? $layeredNav->getPriceFormat($block->getStore())
+                    : $this->helper(\Magento\Tax\Helper\Data::class)->getPriceFormat($block->getStore());
                 $normalizedAjaxUrl = $normalizeFilterUrl((string) $filterItem->getUrl());
                 ?>
                 <div id="layered_ajax_price_attribute" class="awa-price-filter">
@@ -231,9 +233,9 @@ $normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue):
                             "Rokanthemes_LayeredAjax/js/price/layeredajaxslider": {
                                 "selectedFrom": <?= /* @noEscape */ (float) $from ?>,
                                 "selectedTo": <?= /* @noEscape */ (float) $to ?>,
-                                "currency": <?= /* @noEscape */ $this->helper(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($currencySymbol) ?>,
+                                "currency": <?= /* @noEscape */ json_encode($currencySymbol) ?>,
                                 "priceFormat": <?= /* @noEscape */ $priceFormat ?>,
-                                "ajaxUrl": <?= /* @noEscape */ $this->helper(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($normalizedAjaxUrl) ?>
+                                "ajaxUrl": <?= /* @noEscape */ json_encode($normalizedAjaxUrl) ?>
                             }
                         }
                     }
@@ -282,7 +284,7 @@ $normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue):
                                 echo $block->escapeHtml((string) $filterItem->getLabel());
                             }
                         } ?>
-                        <?php if ($this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
+                        <?php if ($hasLayeredNav ? $layeredNav->shouldDisplayProductCount() : $this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
                             <span class="count"><?= (int) $filterItem->getCount() ?><span class="filter-count-label">
                                 <?= $filterItem->getCount() == 1 ? $block->escapeHtml(__('item')) : $block->escapeHtml(__('items')) ?></span></span>
                         <?php endif; ?>
@@ -301,7 +303,7 @@ $normalizeFilterUrl = static function (string $rawUrl) use ($normalizeCsvValue):
                     <?php else: ?>
                         <?= $block->escapeHtml((string) $filterItem->getLabel()) ?>
                     <?php endif; ?>
-                    <?php if ($this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
+                    <?php if ($hasLayeredNav ? $layeredNav->shouldDisplayProductCount() : $this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
                         <span class="count"><?= (int) $filterItem->getCount() ?><span class="filter-count-label">
                             <?= $filterItem->getCount() == 1 ? $block->escapeHtml(__('item')) : $block->escapeHtml(__('items')) ?></span></span>
                     <?php endif; ?>

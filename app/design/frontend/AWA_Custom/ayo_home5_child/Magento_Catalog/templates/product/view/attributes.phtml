@@ -13,7 +13,11 @@
  */
 ?>
 <?php
-    $_helper = $this->helper(Magento\Catalog\Helper\Output::class);
+    /** @var \GrupoAwamotos\Theme\ViewModel\ProductOutput|null $productOutput */
+    $productOutput = $block->getData('product_output');
+    $_helper = $productOutput instanceof \GrupoAwamotos\Theme\ViewModel\ProductOutput
+        ? $productOutput
+        : $this->helper(Magento\Catalog\Helper\Output::class);
     $_product = $block->getProduct();
 ?>
 <?php if ($_additional = $block->getAdditionalData()) :?>

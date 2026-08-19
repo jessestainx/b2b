@@ -16,7 +16,12 @@
         <!-- SEO: página transacional — fora do índice (crawl budget) -->
         <meta name="robots" content="NOINDEX,NOFOLLOW"/>
         <remove src="css/awa-checkout-home5.css"/>
-        <remove src="css/awa-header-stack-2026-05-28.min.css"/>
+        <!-- Fase 6 fatia 5 — cartStrip ↔ PageConfig. Manter awa-cart-stack.min.css. -->
+        <remove src="css/awa-ui-promax-bundle.min.css"/>
+        <remove src="css/awa-commerce-impeccable-refine.min.css"/>
+        <remove src="css/awa-focus-visible.min.css"/>
+        <remove src="css/awa-focus-visible.css"/>
+        <!-- header-stack migrado para _awa-header-stack.less (43.01) — remove órfão retirado 2026-08-11 -->
         <!-- Stack único: polish + layout-terminal (~70KB, 1 request bloqueante) -->
         <css src="css/awa-cart-stack.min.css"/>
         <!-- Repõe apenas os estados ocultos do header omitidos pelo bundle global. -->
@@ -25,6 +30,7 @@
         <!-- refine: carregado async via awa-checkout-polish-async.phtml (evita duplicata síncrona) -->
     </head>
     <body>
+        <attribute name="class" value="awa-cart-page-contract"/>
         <!-- Performance: promax bundle (~119KB) não é necessário no carrinho (terminal + refine no head) -->
         <referenceBlock name="awa.head.preload">
             <action method="setData">
@@ -80,6 +86,7 @@
 
         <!-- Shelf carousel not used on the cart page — removes 25 KB blocking CSS -->
         <referenceBlock name="awa.shelf.carousel" remove="true"/>
+        <referenceBlock name="awa.minicart.open.terminal" remove="true"/>
 
         <!-- Bloco "Pedidos Feitos Recentemente" — removido do carrinho a pedido 2026-05-27 -->
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
@@ -87,6 +94,11 @@
         <referenceBlock name="checkout.cart.empty" template="Magento_Checkout::cart/noItems-clean.phtml">
             <arguments>
                 <argument name="view_model" xsi:type="object">GrupoAwamotos\B2B\ViewModel\Cart\EmptyCartContext</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="checkout.cart.form">
+            <arguments>
+                <argument name="cart_tax" xsi:type="object">GrupoAwamotos\Theme\ViewModel\CartTax</argument>
             </arguments>
         </referenceBlock>
 

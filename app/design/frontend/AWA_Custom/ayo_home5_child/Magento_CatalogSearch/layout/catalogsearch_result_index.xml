@@ -12,6 +12,26 @@
         <meta name="robots" content="NOINDEX,FOLLOW"/>
         <remove src="css/awa-plp-final-polish.css"/>
         <remove src="css/awa-visual-qa-category.css"/>
+        <!--
+            Fase 6 fatia 3 (2026-08-18) — paridade catalogStrip* ↔ PageConfig na busca.
+            Espelha CatalogPlpCssParity::LAYOUT_REMOVE_SRCS (gallery incluso aqui:
+            Magento_Theme/catalog_category_view.xml não se aplica a este handle).
+            Também remove CSS home/checkout que o handle de categoria já corta.
+            OptimizeHeadStylesPlugin permanece safety-net.
+        -->
+        <remove src="css/awa-impeccable-audit-2026-05-28.min.css"/>
+        <remove src="css/awa-impeccable-audit-2026-05-28.css"/>
+        <remove src="css/awa-commerce-impeccable-refine.min.css"/>
+        <remove src="css/awa-ui-simplify-terminal.min.css"/>
+        <remove src="css/awa-head-tail-bundle.min.css"/>
+        <remove src="css/awa-bundle-async-distill-lock.min.css"/>
+        <remove src="css/awa-plp-distill.min.css"/>
+        <remove src="css/awa-plp-distill.css"/>
+        <remove src="mage/gallery/gallery.css"/>
+        <remove src="css/awa-home-corporate-density-grid-2026-06.css"/>
+        <remove src="css/awa-home-density-grid-20260611.min.css"/>
+        <remove src="css/awa-home-shell-final.css"/>
+        <remove src="css/awa-page-b2b-cart-checkout-premium.css"/>
         <!-- AWA vfix scope: search results only -->
         <css src="css/awa-vfix-plp-search.css"/>
         <!-- Reabilitado: arquivo existe em pub/static; trava altura #mst_categorySearch em 44px. -->
@@ -20,7 +40,9 @@
         <css src="GrupoAwamotos_B2B::css/product/login-to-cart.css"/>
     </head>
     <body>
+        <attribute name="class" value="awa-plp-page-contract"/>
         <referenceBlock name="awa.header.impeccable.critical.global" remove="true"/>
+        <referenceBlock name="awa.shelf.carousel" remove="true"/>
         <!-- Performance: stack busca = PLP (plp-promax + §89/91/93) -->
         <referenceBlock name="awa.head.preload">
             <arguments>
@@ -34,11 +56,26 @@
                 <argument name="load_home_category_compat_js" xsi:type="boolean">true</argument>
             </arguments>
         </referenceBlock>
-        <referenceBlock name="head.additional">
-            <block class="Magento\Framework\View\Element\Template"
-                   name="awa.impeccable.category.critical.fixes"
-                   template="Magento_Theme::html/awa-impeccable-category-critical-fixes-v4.phtml"
-                   before="-"/>
+        <referenceBlock name="search_result_list">
+            <arguments>
+                <argument name="bestseller_card_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\BestsellerCardViewModel</argument>
+                <argument name="product_labels" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ProductLabels</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="catalogsearch.leftnav">
+            <arguments>
+                <argument name="layered_nav" xsi:type="object">GrupoAwamotos\Theme\ViewModel\LayeredNav</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="catalog.navigation.renderer">
+            <arguments>
+                <argument name="layered_nav" xsi:type="object">GrupoAwamotos\Theme\ViewModel\LayeredNav</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="catalogsearch.navigation.renderer">
+            <arguments>
+                <argument name="layered_nav" xsi:type="object">GrupoAwamotos\Theme\ViewModel\LayeredNav</argument>
+            </arguments>
         </referenceBlock>
         <referenceContainer name="before.body.end">
             <block class="GrupoAwamotos\B2B\Block\LoginToCart"

@@ -16,6 +16,11 @@ if ($block->canShowBlock()): ?>
             $wrapOptions = false;
             $activeKey = 0;
             $activeArray = [];
+            /** @var \GrupoAwamotos\Theme\ViewModel\LayeredNav|null $layeredNav */
+            $layeredNav = $block->getData('layered_nav');
+            $openAllTabs = $layeredNav instanceof \GrupoAwamotos\Theme\ViewModel\LayeredNav
+                ? $layeredNav->isOpenAllTab()
+                : (bool) $this->helper('Rokanthemes\LayeredAjax\Helper\Data')->isOpenAllTab();
             ?>
             <div class="block-title filter-title">
                 <strong data-role="title"><?= $block->escapeHtml(__('Comprar por')) ?></strong>
@@ -31,7 +36,7 @@ if ($block->canShowBlock()): ?>
                         <div data-role="content" class="filter-options-content"><?= /* @noEscape */ $block->getChildBlock('renderer')->render($filter) ?></div>
                     </div>
                     <?php
-                    if ($this->helper('Rokanthemes\LayeredAjax\Helper\Data')->isOpenAllTab()) {
+                    if ($openAllTabs) {
                         $activeArray[] = $activeKey;
                     }
                     $activeKey++;
@@ -46,7 +51,7 @@ if ($block->canShowBlock()): ?>
                             "accordion": {
                                 "openedState": "active",
                                 "collapsible": true,
-                                "active": <?= /* @noEscape */ $this->helper('Magento\Framework\Json\Helper\Data')->jsonEncode($activeArray) ?>,
+                                "active": <?= /* @noEscape */ json_encode($activeArray) ?>,
                                 "multipleCollapsible": true
                             },
                             "Rokanthemes_LayeredAjax/js/layeredajax": {}

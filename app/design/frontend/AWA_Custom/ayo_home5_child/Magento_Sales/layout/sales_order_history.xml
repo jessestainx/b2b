@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <update handle="b2b_checkout_erp_gate"/>
     <body>
-        <referenceBlock name="search_result_list">
+        <referenceBlock name="sales.order.history">
             <arguments>
-                <argument name="b2b_gate" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</argument>
+                <argument name="order_history" xsi:type="object">GrupoAwamotos\Theme\ViewModel\OrderHistory</argument>
             </arguments>
         </referenceBlock>
     </body>

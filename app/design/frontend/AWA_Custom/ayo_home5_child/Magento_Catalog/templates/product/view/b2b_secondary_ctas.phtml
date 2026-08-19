@@ -5,10 +5,13 @@
  */
 /** @var \Magento\Catalog\Block\Product\View $block */
 $_product = $block->getProduct();
-if (!\Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Framework\Module\Manager::class)->isEnabled('GrupoAwamotos_B2B')) { return; }
-$b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
-if ($b2bHelper->getPriceGateState() === 'guest') { return; }
-$b2bCanAddToCart = $b2bHelper->canAddToCart();
+/** @var \GrupoAwamotos\B2B\ViewModel\PdpGate|null $b2bGate */
+$b2bGate = $block->getData('b2b_gate');
+if (!$b2bGate instanceof \GrupoAwamotos\B2B\ViewModel\PdpGate || !$b2bGate->isActive()) {
+    return;
+}
+if ($b2bGate->getPriceGateState() === 'guest') { return; }
+$b2bCanAddToCart = $b2bGate->canAddToCart();
 $addToListUrl = $block->getUrl('b2b/shoppinglist/additem');
 $quoteUrl = $block->getUrl('b2b/quote', ['product_id' => $_product->getId()]);
 $whatsappMsg = rawurlencode(sprintf(
@@ -23,8 +26,8 @@ $whatsappUrl = 'https://wa.me/5516997367588?text=' . $whatsappMsg;
 <div class="awa-b2b-secondary-ctas awa-b2b-secondary-ctas--gated">
     <p class="awa-b2b-secondary-ctas__note"><?= $block->escapeHtml(__('Após a aprovação da sua conta, sua empresa terá acesso a preços, compra recorrente e condições comerciais negociadas.')) ?></p>
     <div class="awa-b2b-gate-card__actions">
-        <a href="<?= $block->escapeUrl($b2bHelper->getPriceGatePrimaryUrl()) ?>" class="awa-b2b-gate-card__action">
-            <?= $block->escapeHtml($b2bHelper->getPriceGatePrimaryLabel()) ?>
+        <a href="<?= $block->escapeUrl($b2bGate->getPriceGatePrimaryUrl()) ?>" class="awa-b2b-gate-card__action">
+            <?= $block->escapeHtml($b2bGate->getPriceGatePrimaryLabel()) ?>
         </a>
         <a href="<?= $block->escapeUrl($whatsappUrl) ?>" class="awa-b2b-gate-card__action awa-b2b-gate-card__action--secondary" target="_blank" rel="noopener">
             <?= $block->escapeHtml(__('Falar com consultor')) ?>

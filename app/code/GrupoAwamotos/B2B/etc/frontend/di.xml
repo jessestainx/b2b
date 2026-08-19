@@ -419,4 +419,34 @@
         </arguments>
     </type>
 
+    <!-- Magento 2 ViewModel: PdpGate available on catalog blocks (no ObjectManager in PHTML). -->
+    <type name="Magento\Catalog\Block\Product\ListProduct">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="b2b_gate" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Catalog\Block\Product\ProductList\Related">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="b2b_gate" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Catalog\Block\Product\ProductList\Upsell">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="b2b_gate" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Catalog\Block\Product\View">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="b2b_gate" xsi:type="object">GrupoAwamotos\B2B\ViewModel\PdpGate</item>
+            </argument>
+        </arguments>
+    </type>
+
 </config>

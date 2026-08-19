@@ -9,6 +9,7 @@ use GrupoAwamotos\B2B\Model\Checkout\OrderSuccessPresenter;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Checkout\Model\Session\SuccessValidator;
 use Magento\Framework\App\Request\Http as HttpRequest;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
 use Magento\Framework\Stdlib\Cookie\PhpCookieManager;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
@@ -24,6 +25,7 @@ class EmptyCartContext implements ArgumentInterface
     public const COOKIE_KEY_EXPRESS_REDIRECT = 'awa_express_checkout_redirect';
 
     private const ORDER_SUCCESS_WINDOW_HOURS = 6;
+    private ?PriceCurrencyInterface $priceCurrency;
 
     /**
      * @var list<array{label: \Magento\Framework\Phrase, url: string}>
@@ -45,8 +47,10 @@ class EmptyCartContext implements ArgumentInterface
         private readonly OrderCollectionFactory $orderCollectionFactory,
         private readonly TimezoneInterface $timezone,
         private readonly SuccessValidator $successValidator,
-        private readonly OrderSuccessPresenter $orderSuccessPresenter
+        private readonly OrderSuccessPresenter $orderSuccessPresenter,
+        ?PriceCurrencyInterface $priceCurrency = null
     ) {
+        $this->priceCurrency = $priceCurrency;
     }
 
     public function getCatalogUrl(): string
@@ -94,7 +98,11 @@ class EmptyCartContext implements ArgumentInterface
 
     public function getMinOrderAmountFormatted(): string
     {
-        return 'R$ ' . number_format($this->getMinOrderAmount(), 2, ',', '.');
+        if ($this->priceCurrency === null) {
+            return 'R$ ' . number_format($this->getMinOrderAmount(), 2, ',', '.');
+        }
+
+        return $this->priceCurrency->format($this->getMinOrderAmount(), false);
     }
 
     public function getMinOrderHint(): string

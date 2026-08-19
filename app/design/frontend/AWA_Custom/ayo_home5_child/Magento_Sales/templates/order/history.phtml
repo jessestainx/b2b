@@ -6,11 +6,17 @@
  */
 ?>
 <?php $_orders = $block->getOrders(); ?>
+<?php
+/** @var \GrupoAwamotos\Theme\ViewModel\OrderHistory|null $orderHistory */
+$orderHistory = $block->getData('order_history');
+?>
+<div class="b2b-page-shell b2b-sales-history">
 <?= $block->getChildHtml('info') ?>
 <?php if ($_orders && count($_orders)) : ?>
     <div class="table-wrapper orders-history">
-        <table class="data table table-order-items history" id="my-orders-table">
-            <caption class="table-caption"><?= $block->escapeHtml(__('Orders')) ?></caption>
+        <table class="data table table-order-items history" id="my-orders-table"
+               aria-label="<?= $block->escapeHtmlAttr(__('Orders')) ?>">
+            <caption class="table-caption sr-only"><?= $block->escapeHtml(__('Orders')) ?></caption>
             <thead>
                 <tr>
                     <th scope="col" class="col id"><?= $block->escapeHtml(__('Order #')) ?></th>
@@ -33,15 +39,25 @@
                         <?php endif; ?>
                         <td data-th="<?= $block->escapeHtmlAttr(__('Order Total')) ?>" class="col total"><?= /* @noEscape */ $_order->formatPrice($_order->getGrandTotal()) ?></td>
                         <td data-th="<?= $block->escapeHtmlAttr(__('Status')) ?>" class="col status"><?= $block->escapeHtml($_order->getStatusLabel()) ?></td>
-                        <td data-th="<?= $block->escapeHtmlAttr(__('Actions')) ?>" class="col actions">
-                            <a href="<?= $block->escapeUrl($block->getViewUrl($_order)) ?>" class="action view">
+                        <td data-th="<?= $block->escapeHtmlAttr(__('Action')) ?>" class="col actions">
+                            <a href="<?= $block->escapeUrl($block->getViewUrl($_order)) ?>"
+                               class="action secondary view"
+                               aria-label="<?= $block->escapeHtmlAttr(__('View Order')) ?> #<?= $block->escapeHtmlAttr($_order->getRealOrderId()) ?>">
                                 <span><?= $block->escapeHtml(__('View Order')) ?></span>
                             </a>
-                            <?php if ($this->helper(\Magento\Sales\Helper\Reorder::class)->canReorder($_order->getEntityId())) : ?>
+                            <?php
+                            $canReorder = $orderHistory instanceof \GrupoAwamotos\Theme\ViewModel\OrderHistory
+                                ? $orderHistory->canReorder((int) $_order->getEntityId())
+                                : $this->helper(\Magento\Sales\Helper\Reorder::class)->canReorder($_order->getEntityId());
+                            ?>
+                            <?php if ($canReorder) : ?>
                                 <a href="#" data-post='<?= /* @noEscape */
-                                $this->helper(\Magento\Framework\Data\Helper\PostHelper::class)
+                                $orderHistory instanceof \GrupoAwamotos\Theme\ViewModel\OrderHistory
+                                    ? $orderHistory->getReorderPostData($block->getReorderUrl($_order))
+                                    : $this->helper(\Magento\Framework\Data\Helper\PostHelper::class)
                                     ->getPostData($block->getReorderUrl($_order))
-                                ?>' class="action order">
+                                ?>' class="action secondary order"
+                                   aria-label="<?= $block->escapeHtmlAttr(__('Reorder')) ?> #<?= $block->escapeHtmlAttr($_order->getRealOrderId()) ?>">
                                     <span><?= $block->escapeHtml(__('Reorder')) ?></span>
                                 </a>
                             <?php endif ?>
@@ -55,16 +71,17 @@
         <div class="order-products-toolbar toolbar bottom"><?= $block->getPagerHtml() ?></div>
     <?php endif ?>
 <?php else : ?>
-    <div class="awa-empty-state" role="status">
+    <div class="awa-empty-state" role="status" aria-live="polite">
         <p class="awa-empty-state__title"><?= $block->escapeHtml(__('Nenhum pedido ainda')) ?></p>
         <p class="awa-empty-state__hint"><?= $block->escapeHtml(__('Assim que você concluir uma compra, o histórico completo com status e totais aparecerá aqui.')) ?></p>
         <div class="awa-empty-state__actions">
             <a class="action primary" href="<?= $block->escapeUrl($block->getUrl('')) ?>">
                 <?= $block->escapeHtml(__('Ir ao catálogo')) ?>
             </a>
-            <a class="action secondary" href="<?= $block->escapeUrl($block->getUrl('b2b/account/dashboard')) ?>">
+            <a class="action secondary" href="<?= $block->escapeUrl($block->getUrl('b2b/account')) ?>">
                 <?= $block->escapeHtml(__('Abrir painel B2B')) ?>
             </a>
         </div>
     </div>
 <?php endif ?>
+</div>

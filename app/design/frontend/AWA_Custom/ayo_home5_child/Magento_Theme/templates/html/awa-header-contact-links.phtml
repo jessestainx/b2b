@@ -8,10 +8,20 @@ declare(strict_types=1);
  * @var \Magento\Framework\View\Element\Template $block
  */
 
-/** @var \GrupoAwamotos\B2B\Helper\Config $b2bConfig */
-$b2bConfig = $this->helper(\GrupoAwamotos\B2B\Helper\Config::class);
-$isB2bEnabled = $b2bConfig->isEnabled();
-$isStrictB2b  = $isB2bEnabled && $b2bConfig->isStrictB2B();
+/** @var \GrupoAwamotos\Theme\ViewModel\HeaderAccountPrompt|null $accountPrompt */
+$accountPrompt = $block->getData('account_prompt_view_model');
+if (!$accountPrompt instanceof \GrupoAwamotos\Theme\ViewModel\HeaderAccountPrompt) {
+    $accountPrompt = null;
+}
+if ($accountPrompt) {
+    $isB2bEnabled = $accountPrompt->isB2bEnabled();
+    $isStrictB2b  = $accountPrompt->isStrictB2B();
+} else {
+    /** @var \GrupoAwamotos\B2B\Helper\Config $b2bConfig */
+    $b2bConfig = $this->helper(\GrupoAwamotos\B2B\Helper\Config::class);
+    $isB2bEnabled = $b2bConfig->isEnabled();
+    $isStrictB2b  = $isB2bEnabled && $b2bConfig->isStrictB2B();
+}
 $layoutHandles = $block->getLayout() ? $block->getLayout()->getUpdate()->getHandles() : [];
 $isCartPageOnly = in_array('checkout_cart_index', $layoutHandles, true);
 $accountPromptJsUrl = $block->getViewFileUrl('js/awa-header-account-prompt.min.js');
@@ -51,20 +61,14 @@ $isAccountSurface = (str_starts_with($fullActionName, 'customer_account_')
         'customer_account_createpassword',
     ], true);
 
-/** @var \Magento\Customer\Model\Session $customerSession */
-$customerSession = \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Customer\Model\Session::class);
-$serverCustomerId = (int) $customerSession->getCustomerId();
-$serverIsLoggedIn = $serverCustomerId > 0;
+$serverCustomerId = $accountPrompt ? $accountPrompt->getCustomerId() : 0;
+$serverIsLoggedIn = $accountPrompt ? $accountPrompt->isLoggedIn() : false;
 $serverFirstname = '';
 $serverFullname = '';
 
-if ($serverIsLoggedIn) {
-    $customer = $customerSession->getCustomer();
-    if ($customer) {
-        $serverFirstname = trim((string) $customer->getFirstname());
-        $serverLastname = trim((string) $customer->getLastname());
-        $serverFullname = trim($serverFirstname . ' ' . $serverLastname);
-    }
+if ($serverIsLoggedIn && $accountPrompt) {
+    $serverFirstname = $accountPrompt->getFirstname();
+    $serverFullname = $accountPrompt->getFullname();
 }
 
 // B2B logado: o status-panel é a UI primária, mas o prompt continua no DOM como

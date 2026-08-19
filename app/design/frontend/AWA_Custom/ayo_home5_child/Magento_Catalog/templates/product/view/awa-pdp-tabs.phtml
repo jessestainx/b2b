@@ -16,7 +16,11 @@ if (!$_product) {
     return;
 }
 
-$_helper = $this->helper(\Magento\Catalog\Helper\Output::class);
+/** @var \GrupoAwamotos\Theme\ViewModel\ProductOutput|null $productOutput */
+$productOutput = $block->getData('product_output');
+$_helper = $productOutput instanceof \GrupoAwamotos\Theme\ViewModel\ProductOutput
+    ? $productOutput
+    : $this->helper(\Magento\Catalog\Helper\Output::class);
 $description = $_helper->productAttribute($_product, $_product->getDescription(), 'description');
 $shortDescription = $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description');
 

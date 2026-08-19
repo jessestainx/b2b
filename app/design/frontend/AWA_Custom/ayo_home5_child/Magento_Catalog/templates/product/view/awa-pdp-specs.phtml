@@ -15,7 +15,11 @@ if (empty($_additional)) {
 }
 
 $_product    = $block->getProduct();
-$_helper     = $this->helper(\Magento\Catalog\Helper\Output::class);
+/** @var \GrupoAwamotos\Theme\ViewModel\ProductOutput|null $productOutput */
+$productOutput = $block->getData('product_output');
+$_helper     = $productOutput instanceof \GrupoAwamotos\Theme\ViewModel\ProductOutput
+    ? $productOutput
+    : $this->helper(\Magento\Catalog\Helper\Output::class);
 
 // Separa PDF dos demais; descarta atributos sem valor real
 $pdfUrl    = '';

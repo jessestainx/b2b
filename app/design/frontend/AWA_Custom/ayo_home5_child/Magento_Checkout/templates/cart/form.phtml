@@ -8,7 +8,14 @@ declare(strict_types=1);
 
 // phpcs:disable Magento2.Templates.ThisInTemplate
 
-$mergedCells = ($this->helper(Magento\Tax\Helper\Data::class)->displayCartBothPrices() ? 2 : 1);
+$mergedCells = 1;
+/** @var \GrupoAwamotos\Theme\ViewModel\CartTax|null $cartTax */
+$cartTax = $block->getData('cart_tax');
+if ($cartTax instanceof \GrupoAwamotos\Theme\ViewModel\CartTax) {
+    $mergedCells = $cartTax->displayCartBothPrices() ? 2 : 1;
+} else {
+    $mergedCells = ($this->helper(Magento\Tax\Helper\Data::class)->displayCartBothPrices() ? 2 : 1);
+}
 $cartItems = $block->getItems();
 ?>
 <?= $block->getChildHtml('form_before') ?>

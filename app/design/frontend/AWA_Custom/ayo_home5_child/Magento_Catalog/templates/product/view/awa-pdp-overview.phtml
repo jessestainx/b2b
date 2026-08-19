@@ -6,12 +6,17 @@
  */
 declare(strict_types=1);
 
-$_helper = $this->helper(\Magento\Catalog\Helper\Output::class);
 $_product = $block->getProduct();
 
 if (!$_product instanceof \Magento\Catalog\Model\Product) {
     return;
 }
+
+/** @var \GrupoAwamotos\Theme\ViewModel\ProductOutput|null $productOutput */
+$productOutput = $block->getData('product_output');
+$_helper = $productOutput instanceof \GrupoAwamotos\Theme\ViewModel\ProductOutput
+    ? $productOutput
+    : $this->helper(\Magento\Catalog\Helper\Output::class);
 
 $_value = $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description');
 if (!$_value || trim(strip_tags((string) $_value)) === '') {

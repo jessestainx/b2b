@@ -18,11 +18,10 @@ $_productId = (int) $_product->getId();
 $_isInStock = $_product->isAvailable();
 $_qty = (int) ($_product->getExtensionAttributes()->getStockItem()->getQty() ?? 0);
 $_isB2bEnabled = false;
-try {
-    $_b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
-    $_isB2bEnabled = $_b2bHelper->isEnabled();
-} catch (\Throwable $e) {
-    // B2B module not active
+/** @var \GrupoAwamotos\B2B\ViewModel\PdpGate|null $b2bGate */
+$b2bGate = $block->getData('b2b_gate');
+if ($b2bGate instanceof \GrupoAwamotos\B2B\ViewModel\PdpGate) {
+    $_isB2bEnabled = $b2bGate->isEnabled();
 }
 
 // Configs (em producao real, viriam de admin)

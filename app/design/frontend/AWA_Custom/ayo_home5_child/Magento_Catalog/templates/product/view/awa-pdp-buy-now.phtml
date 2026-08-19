@@ -11,11 +11,10 @@ $_isSaleable = $_product->isSaleable();
 $_hasRequiredOptions = $_product->getTypeInstance()->hasRequiredOptions($_product);
 $_checkoutUrl = $block->getUrl('awamotos_b2b/checkout/onepage', ['product_id' => $_productId]);
 $_isB2bEnabled = false;
-try {
-    $_b2bHelper = $this->helper('GrupoAwamotos\B2B\Helper\Data');
-    $_isB2bEnabled = $_b2bHelper->isEnabled();
-} catch (\Throwable $e) {
-    // B2B module not active
+/** @var \GrupoAwamotos\B2B\ViewModel\PdpGate|null $b2bGate */
+$b2bGate = $block->getData('b2b_gate');
+if ($b2bGate instanceof \GrupoAwamotos\B2B\ViewModel\PdpGate) {
+    $_isB2bEnabled = $b2bGate->isEnabled();
 }
 ?>
 <?php if ($_isSaleable): ?>

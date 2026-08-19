@@ -23,6 +23,7 @@
                 <arguments>
                     <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HeaderData</argument>
                     <argument name="contact_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ContactInfo</argument>
+                    <argument name="header_experiment" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HeaderExperiment</argument>
                 </arguments>
                 <block class="Magento\Cms\Block\Block" name="top-contact">
                     <arguments>
@@ -46,6 +47,7 @@
                        cacheable="true">
                     <arguments>
                         <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\ContactInfo</argument>
+                        <argument name="account_prompt_view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\HeaderAccountPrompt</argument>
                     </arguments>
                 </block>
                 <block class="Magento\Framework\View\Element\Template" name="awa.top.search" as="topSearch" template="Magento_Search::form.mini.phtml">
@@ -153,6 +155,7 @@
                        template="Rokanthemes_Themeoption::html/footer/footer-static5.phtml">
                     <arguments>
                         <argument name="view_model" xsi:type="object">GrupoAwamotos\Theme\ViewModel\FooterData</argument>
+                        <argument name="b2b_register_bar" xsi:type="object">GrupoAwamotos\B2B\ViewModel\RegisterBar</argument>
                     </arguments>
                     <block class="Magento\Newsletter\Block\Subscribe"
                            name="awa_footer_newsletter"
