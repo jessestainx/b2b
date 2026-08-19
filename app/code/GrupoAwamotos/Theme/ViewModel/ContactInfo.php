@@ -19,6 +19,7 @@ class ContactInfo implements ArgumentInterface
     private const XML_PATH_QUOTE_FAB_ENABLED = 'grupoawamotos_theme/contact/quote_fab_enabled';
     private const XML_PATH_PHONE = 'grupoawamotos_theme/contact/phone';
     private const XML_PATH_EMAIL = 'grupoawamotos_theme/contact/email';
+    private const XML_PATH_HOURS = 'general/store_information/hours';
 
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
@@ -138,6 +139,21 @@ class ContactInfo implements ArgumentInterface
         $email = trim($this->getEmail());
 
         return $email !== '' ? 'mailto:' . $email : '';
+    }
+
+    public function getWhatsAppDisplay(): string
+    {
+        $raw = $this->getWhatsAppNumber();
+
+        return $raw !== '' ? $this->formatPhoneForDisplay($raw) : '';
+    }
+
+    public function getHours(): string
+    {
+        return trim((string) $this->scopeConfig->getValue(
+            self::XML_PATH_HOURS,
+            ScopeInterface::SCOPE_STORE
+        ));
     }
 
     public function hasAnyContact(): bool

@@ -16,6 +16,7 @@ class FooterData implements ArgumentInterface
     private const XML_PATH_CONTACT_WHATSAPP = 'grupoawamotos_theme/contact/whatsapp_number';
     private const XML_PATH_STORE_PHONE = 'general/store_information/phone';
     private const XML_PATH_STORE_NAME = 'general/store_information/name';
+    private const XML_PATH_STORE_CNPJ = 'general/store_information/merchant_vat_number';
 
     private const XML_PATH_STORE_STREET = 'general/store_information/street_line1';
     private const XML_PATH_STORE_CITY = 'general/store_information/city';
@@ -58,6 +59,8 @@ class FooterData implements ArgumentInterface
     private ?string $storeName = null;
 
     private ?string $phone = null;
+
+    private ?string $merchantVatNumber = null;
 
     private ?string $phoneRaw = null;
 
@@ -142,6 +145,17 @@ class FooterData implements ArgumentInterface
         $this->phone = $storePhone !== '' ? $this->formatPhoneForDisplay($storePhone) : self::DEFAULT_PHONE;
 
         return $this->phone;
+    }
+
+    public function getMerchantVatNumber(): string
+    {
+        if ($this->merchantVatNumber !== null) {
+            return $this->merchantVatNumber;
+        }
+
+        $this->merchantVatNumber = $this->getConfigValue(self::XML_PATH_STORE_CNPJ, '');
+
+        return $this->merchantVatNumber;
     }
 
     public function getPhoneUrl(): string

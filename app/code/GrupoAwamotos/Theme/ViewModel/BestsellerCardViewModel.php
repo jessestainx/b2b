@@ -44,6 +44,11 @@ class BestsellerCardViewModel implements ArgumentInterface
         return $this->wishlistHelper->isAllow();
     }
 
+    public function getWishlistAddParams(Product $product): string
+    {
+        return (string) $this->wishlistHelper->getAddParams($product);
+    }
+
     public function comparePostData(Product $product): string
     {
         return (string) $this->compareHelper->getPostDataParams($product);
