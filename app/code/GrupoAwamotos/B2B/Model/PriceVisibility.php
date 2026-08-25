@@ -117,11 +117,11 @@ class PriceVisibility implements PriceVisibilityInterface
             // Usar repository para garantir que custom attributes EAV sejam carregados
             $approvalStatus = $this->getCustomerApprovalStatus();
 
-            // Se não há status definido, considerar como aprovado (compatibilidade)
+            // Fail-closed: cliente logado sem status B2B explícito não vê tabela.
             if (empty($approvalStatus)) {
-                $this->canViewPricesCache = true;
-                $this->logDebug('canViewPrices', 'allowed_logged_in_without_status');
-                return true;
+                $this->canViewPricesCache = false;
+                $this->logDebug('canViewPrices', 'blocked_logged_in_without_status');
+                return false;
             }
 
             // Cliente aprovado, mas ainda sem código ERP vinculado — tabela de preços

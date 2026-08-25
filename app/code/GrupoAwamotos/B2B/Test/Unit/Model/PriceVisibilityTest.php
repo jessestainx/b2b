@@ -134,13 +134,13 @@ class PriceVisibilityTest extends TestCase
     // canViewPrices — logado
     // ====================================================================
 
-    public function testCanViewPricesLoggedInNoStatusReturnsTrue(): void
+    public function testCanViewPricesLoggedInNoStatusReturnsFalse(): void
     {
         $this->config->method('isEnabled')->willReturn(true);
         $this->mockLoggedInCustomer(null);
 
         $service = $this->createService();
-        $this->assertTrue($service->canViewPrices());
+        $this->assertFalse($service->canViewPrices());
     }
 
     public function testCanViewPricesLoggedInApprovedWithErpCodeReturnsTrue(): void

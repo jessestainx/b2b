@@ -45,13 +45,15 @@ class HideFinalPricePluginTest extends TestCase
         $this->assertStringContainsString('Faça login para ver os preços', $result);
     }
 
-    public function testAroundToHtmlFailsOpenOnVisibilityException(): void
+    public function testAroundToHtmlFailsClosedOnVisibilityException(): void
     {
         $plugin = new HideFinalPricePlugin($this->priceVisibility);
         $subject = $this->createMock(FinalPriceBox::class);
 
         $this->priceVisibility->method('canViewPrices')
             ->willThrowException(new \RuntimeException('Erro de sessão'));
+        $this->priceVisibility->method('getPriceReplacementMessage')
+            ->willReturn('Entre para ver os preços');
 
         $proceedCalled = 0;
         $result = $plugin->aroundToHtml(
@@ -62,7 +64,8 @@ class HideFinalPricePluginTest extends TestCase
             }
         );
 
-        $this->assertSame(1, $proceedCalled);
-        $this->assertSame('<span class="price">R$ 10,00</span>', $result);
+        $this->assertSame(0, $proceedCalled);
+        $this->assertStringContainsString('b2b-login-to-see-price', $result);
+        $this->assertStringNotContainsString('R$ 10,00', $result);
     }
 }

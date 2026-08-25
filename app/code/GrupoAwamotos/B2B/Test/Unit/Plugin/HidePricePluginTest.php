@@ -45,16 +45,19 @@ class HidePricePluginTest extends TestCase
         $this->assertStringContainsString('Faça login para ver os preços', $result);
     }
 
-    public function testAfterGetProductPriceFailsOpenOnVisibilityException(): void
+    public function testAfterGetProductPriceFailsClosedOnVisibilityException(): void
     {
         $plugin = new HidePricePlugin($this->priceVisibility);
         $subject = $this->createMock(AbstractProduct::class);
 
         $this->priceVisibility->method('canViewPrices')
             ->willThrowException(new \RuntimeException('Erro de sessão'));
+        $this->priceVisibility->method('getPriceReplacementMessage')
+            ->willReturn('Entre para ver os preços');
 
         $result = $plugin->afterGetProductPrice($subject, '<span class="price">R$ 10,00</span>');
 
-        $this->assertSame('<span class="price">R$ 10,00</span>', $result);
+        $this->assertStringContainsString('b2b-login-to-see-price', $result);
+        $this->assertStringNotContainsString('R$ 10,00', $result);
     }
 }
