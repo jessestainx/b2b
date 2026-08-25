@@ -17,6 +17,13 @@
 
             <h1 class="success-title b2b-login-title"><?= $block->escapeHtml(__('Sua jornada B2B começa aqui!')) ?></h1>
             <p class="success-subtitle b2b-login-subtitle"><?= $block->escapeHtml(__('Recebemos sua solicitação de cadastro com sucesso.')) ?></p>
+            <?php $protocol = $block instanceof \GrupoAwamotos\B2B\Block\Register\Success ? $block->getProtocol() : ''; ?>
+            <?php if ($protocol !== ''): ?>
+                <p class="b2b-register-protocol">
+                    <?= $block->escapeHtml(__('Protocolo:')) ?>
+                    <strong><?= $block->escapeHtml($protocol) ?></strong>
+                </p>
+            <?php endif; ?>
 
             <div class="success-steps">
                 <div class="step-item completed">

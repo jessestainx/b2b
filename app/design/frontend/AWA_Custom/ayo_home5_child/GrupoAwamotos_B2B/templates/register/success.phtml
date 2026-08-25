@@ -31,6 +31,13 @@ declare(strict_types=1);
                 <p class="success-subtitle b2b-login-subtitle">
                     <?= $escaper->escapeHtml(__('Recebemos sua solicitação de cadastro com sucesso.')) ?>
                 </p>
+                <?php $protocol = $block instanceof \GrupoAwamotos\B2B\Block\Register\Success ? $block->getProtocol() : ''; ?>
+                <?php if ($protocol !== ''): ?>
+                    <p class="b2b-register-protocol" data-awa-register-protocol="1">
+                        <?= $escaper->escapeHtml(__('Protocolo:')) ?>
+                        <strong><?= $escaper->escapeHtml($protocol) ?></strong>
+                    </p>
+                <?php endif; ?>
             </header>
 
             <ol class="success-steps" aria-label="<?= $escaper->escapeHtmlAttr(__('Próximos passos do cadastro B2B')) ?>">

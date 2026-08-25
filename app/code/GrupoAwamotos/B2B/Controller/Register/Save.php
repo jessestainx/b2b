@@ -269,6 +269,17 @@ class Save implements HttpPostActionInterface
                 return $resultRedirect->setPath('*/*/');
             }
 
+            if ($this->isConsumedRegistration($data)) {
+                return $resultRedirect->setPath('b2b/register/success');
+            }
+
+            if (!$this->isIdempotencyTokenValid()) {
+                $this->messageManager->addErrorMessage(
+                    __('Sessão do formulário expirada. Recarregue a página e envie o cadastro novamente.')
+                );
+                return $this->redirectWithPersistedForm($resultRedirect);
+            }
+
             // Validar CNPJ
             if (!$this->cnpjValidator->validateLocal($data['cnpj'])) {
                 $this->messageManager->addErrorMessage(__('CNPJ inválido. Por favor, verifique e tente novamente.'));
@@ -340,6 +351,7 @@ class Save implements HttpPostActionInterface
             $customer->setCustomAttribute('b2b_approval_status', 'pending');
             $customer->setCustomAttribute('b2b_person_type', 'pj');
             $customer->setCustomAttribute('b2b_phone', $data['phone'] ?? '');
+            $this->assignRegistrationOriginAttributes($customer, $data);
 
             // Salvar cliente
             $savedCustomer = $this->customerRepository->save($customer);
@@ -355,6 +367,10 @@ class Save implements HttpPostActionInterface
             // Enviar email de confirmação ao cliente
             $this->sendConfirmationEmail($savedCustomer, $data);
 
+            $protocol = $this->buildRegistrationProtocol((int) $savedCustomer->getId());
+            $this->customerSession->setData('b2b_register_protocol', $protocol);
+            $this->markRegistrationConsumed($data, $protocol);
+
             // Evento técnico para tracking de aquisição B2B (consumido por módulos de analytics)
             $this->eventManager->dispatch('grupoawamotos_b2b_registration_submitted', [
                 'customer' => $savedCustomer,
@@ -364,7 +380,10 @@ class Save implements HttpPostActionInterface
                     'approval_status' => 'pending',
                     'customer_group_id' => (int) $savedCustomer->getGroupId(),
                     'cnpj_validated' => true,
-                    'register_channel' => 'b2b_register_form'
+                    'register_channel' => 'b2b_register_form',
+                    'protocol' => $protocol,
+                    'whatsapp_consent' => !empty($data['whatsapp_consent']),
+                    'privacy_consent' => true,
                 ]
             ]);
 
@@ -427,6 +446,8 @@ class Save implements HttpPostActionInterface
             'lastname' => trim((string) $this->request->getParam('lastname', '')),
             'email' => trim((string) $this->request->getParam('email', '')),
             'terms' => (string) (int) $this->request->getParam('terms', 0),
+            'privacy' => (string) (int) $this->request->getParam('privacy', 0),
+            'whatsapp_consent' => (string) (int) $this->request->getParam('whatsapp_consent', 0),
             'ie_isento' => (string) (int) $this->request->getParam('ie_isento', 0),
         ]);
     }
@@ -462,6 +483,9 @@ class Save implements HttpPostActionInterface
         $municipio = trim((string) $this->request->getParam('municipio', ''));
         $uf = strtoupper(trim((string) $this->request->getParam('uf', '')));
         $termsAccepted = (int) $this->request->getParam('terms', 0);
+        $privacyAccepted = (int) $this->request->getParam('privacy', 0);
+        $whatsappConsent = (int) $this->request->getParam('whatsapp_consent', 0) === 1;
+        $ieIsento = (int) $this->request->getParam('ie_isento', 0) === 1;
 
         $errors = [];
 
@@ -529,7 +553,19 @@ class Save implements HttpPostActionInterface
         }
 
         if ($termsAccepted !== 1) {
-            $errors[] = __('Você deve aceitar os Termos de Uso e a Política de Privacidade.');
+            $errors[] = __('Você deve aceitar os Termos de Uso.');
+        }
+
+        if ($privacyAccepted !== 1) {
+            $errors[] = __('Você deve aceitar a Política de Privacidade.');
+        }
+
+        if (!$ieIsento && $inscricaoEstadual === '') {
+            $errors[] = __('Informe a inscrição estadual ou marque a opção de isento.');
+        }
+
+        if ($ieIsento) {
+            $inscricaoEstadual = 'ISENTO';
         }
 
         if (!empty($errors)) {
@@ -556,7 +592,8 @@ class Save implements HttpPostActionInterface
             'complemento' => $complemento,
             'bairro' => $bairro,
             'municipio' => $municipio,
-            'uf' => $uf
+            'uf' => $uf,
+            'whatsapp_consent' => $whatsappConsent,
         ];
     }
 
@@ -706,5 +743,89 @@ class Save implements HttpPostActionInterface
         }
 
         return $classes >= 3;
+    }
+
+    private function isIdempotencyTokenValid(): bool
+    {
+        $token = (string) $this->request->getParam('b2b_idempotency', '');
+        $sessionToken = (string) $this->customerSession->getData('b2b_register_idempotency_token');
+
+        return $token !== '' && $sessionToken !== '' && hash_equals($sessionToken, $token);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function isConsumedRegistration(array $data): bool
+    {
+        $consumed = $this->customerSession->getData('b2b_register_idempotency_consumed');
+        if (!is_array($consumed)) {
+            return false;
+        }
+
+        $fingerprint = $this->registrationFingerprint($data);
+        if (($consumed['fp'] ?? '') !== $fingerprint) {
+            return false;
+        }
+
+        $consumedAt = (int) ($consumed['at'] ?? 0);
+        return $consumedAt > 0 && (time() - $consumedAt) < 3600;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function markRegistrationConsumed(array $data, string $protocol): void
+    {
+        $this->customerSession->setData('b2b_register_idempotency_consumed', [
+            'fp' => $this->registrationFingerprint($data),
+            'protocol' => $protocol,
+            'at' => time(),
+        ]);
+        $this->customerSession->unsetData('b2b_register_idempotency_token');
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function registrationFingerprint(array $data): string
+    {
+        $cnpj = preg_replace('/\D/', '', (string) ($data['cnpj'] ?? ''));
+        $email = strtolower(trim((string) ($data['email'] ?? '')));
+
+        return hash('sha256', $cnpj . '|' . $email);
+    }
+
+    private function buildRegistrationProtocol(int $customerId): string
+    {
+        return sprintf('AWA-%s-%05d', gmdate('Ymd'), $customerId);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function assignRegistrationOriginAttributes(
+        \Magento\Customer\Api\Data\CustomerInterface $customer,
+        array $data
+    ): void {
+        $host = trim((string) $this->request->getServer('HTTP_HOST', ''));
+        if ($host !== '') {
+            $customer->setCustomAttribute('b2b_origin_host', substr($host, 0, 255));
+        }
+
+        $landing = trim((string) $this->customerSession->getData('b2b_entry_url'));
+        if ($landing === '') {
+            $landing = trim((string) $this->request->getServer('HTTP_REFERER', ''));
+        }
+        if ($landing !== '') {
+            $customer->setCustomAttribute('b2b_registration_landing', substr($landing, 0, 255));
+        }
+
+        if (!empty($data['whatsapp_consent'])) {
+            $notesAttr = $customer->getCustomAttribute('b2b_admin_notes');
+            $existingNotes = $notesAttr ? trim((string) $notesAttr->getValue()) : '';
+            $note = trim($existingNotes . "\n" . 'whatsapp_consent=1');
+            $customer->setCustomAttribute('b2b_admin_notes', $note);
+        }
     }
 }

@@ -199,6 +199,19 @@ class Form extends Template
         );
     }
 
+    public function getIdempotencyToken(): string
+    {
+        $existing = trim((string) $this->customerSession->getData('b2b_register_idempotency_token'));
+        if ($existing !== '') {
+            return $existing;
+        }
+
+        $token = bin2hex(random_bytes(16));
+        $this->customerSession->setData('b2b_register_idempotency_token', $token);
+
+        return $token;
+    }
+
     /**
      * @return array<string, string>
      */
