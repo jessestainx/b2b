@@ -15,6 +15,7 @@ jobs:
       # Produção NÃO é o alvo padrão (Fase 4). Defina vars.E2E_BASE_URL (staging/HML).
       PLAYWRIGHT_BASE_URL: ${{ vars.E2E_BASE_URL }}
       ALLOW_PRODUCTION_VALIDATION: ${{ vars.ALLOW_PRODUCTION_VALIDATION || 'false' }}
+      TARGET_ENV: ${{ vars.TARGET_ENV || 'production_readonly' }}
       TEST_USER: ${{ secrets.B2B_TEST_USER }}
       TEST_PASS: ${{ secrets.B2B_TEST_PASS }}
       TEST_PENDING_USER: ${{ secrets.B2B_TEST_PENDING_USER }}

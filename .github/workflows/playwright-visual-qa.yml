@@ -109,6 +109,7 @@ jobs:
       PLAYWRIGHT_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
       BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
       ALLOW_PRODUCTION_VALIDATION: ${{ needs.resolve-url.outputs.allow_production }}
+      TARGET_ENV: ${{ vars.TARGET_ENV || 'production_readonly' }}
       PLAYWRIGHT_BLOCK_THIRD_PARTY: "1"
       PLAYWRIGHT_HTML_OPEN: never
     steps:

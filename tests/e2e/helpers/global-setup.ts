@@ -1,15 +1,13 @@
 import { execSync } from 'child_process';
+import { resolveTargetEnv, resolveBaseUrl } from './resolve-base-url';
 
 /**
- * Global setup — roda antes de todos os testes Playwright.
- * Mata processos de browsers órfãos de execuções anteriores para evitar
- * instabilidade causada por processos zombie consumindo memória.
- *
- * IMPORTANTE: usa -x (match exato no NOME do processo) em vez de -f (match no
- * command line completo), para não matar o próprio processo Playwright quando
- * invocado com --project firefox-mobile-390 (que contém "firefox" nos args).
+ * Global setup — valida TARGET_ENV e mata browsers órfãos.
  */
 export default async function globalSetup(): Promise<void> {
+  resolveTargetEnv('global-setup');
+  resolveBaseUrl('global-setup');
+
   try {
     execSync(
       'pkill -9 -x "chrome-headless-shell" 2>/dev/null || true; '
@@ -22,7 +20,6 @@ export default async function globalSetup(): Promise<void> {
       + 'pkill -9 -f "Web Content" 2>/dev/null || true',
       { shell: '/bin/bash', stdio: 'ignore' },
     );
-    // Small delay to let OS reclaim resources from killed processes
     await new Promise(resolve => setTimeout(resolve, 500));
   } catch {
     // Ignore — no leftover processes is fine

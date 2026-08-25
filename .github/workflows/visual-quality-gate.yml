@@ -123,6 +123,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
           BASE_URL: ${{ needs.resolve-url.outputs.base_url }}
           ALLOW_PRODUCTION_VALIDATION: ${{ inputs.allow_production_validation || 'false' }}
+          TARGET_ENV: ${{ vars.TARGET_ENV || 'production_readonly' }}
         run: |
           npx playwright test \
             --config="${{ env.PLAYWRIGHT_CONFIG }}" \

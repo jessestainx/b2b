@@ -15,6 +15,7 @@ jobs:
     env:
       PLAYWRIGHT_BASE_URL: https://awamotos.com
       ALLOW_PRODUCTION_VALIDATION: "true"
+      TARGET_ENV: ${{ vars.TARGET_ENV || 'production_readonly' }}
       AWA_B2B_EMAIL: ${{ secrets.B2B_TEST_USER }}
       AWA_B2B_PASSWORD: ${{ secrets.B2B_TEST_PASS }}
 
@@ -95,6 +96,7 @@ jobs:
     env:
       PLAYWRIGHT_BASE_URL: https://awamotos.com
       ALLOW_PRODUCTION_VALIDATION: "true"
+      TARGET_ENV: ${{ vars.TARGET_ENV || 'production_readonly' }}
 
     steps:
       - name: Checkout
