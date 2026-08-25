@@ -293,7 +293,28 @@ class CustomerApprovalTest extends TestCase
         $this->customerRepository->method('getById')
             ->willThrowException(new \Exception('Error'));
 
-        $this->assertFalse($this->approval->suspendCustomer(999));
+            $this->assertFalse($this->approval->suspendCustomer(999));
+    }
+
+    public function testRequestDataReviewSetsDataReviewStatus(): void
+    {
+        $customer = $this->createCustomerMock(ApprovalStatus::STATUS_PENDING);
+
+        $this->customerRepository->method('getById')->willReturn($customer);
+        $this->customerRepository->expects($this->once())->method('save');
+        $this->eventManager->expects($this->once())
+            ->method('dispatch')
+            ->with('grupoawamotos_b2b_customer_data_review_requested', $this->arrayHasKey('customer_id'));
+
+        $this->assertTrue($this->approval->requestDataReview(42, 1, 'Envie o contrato social'));
+    }
+
+    public function testRequestDataReviewReturnsFalseOnException(): void
+    {
+        $this->customerRepository->method('getById')
+            ->willThrowException(new \Exception('Error'));
+
+        $this->assertFalse($this->approval->requestDataReview(999, 1, 'x'));
     }
 
     // ====================================================================
